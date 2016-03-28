@@ -26,7 +26,7 @@ class PGGuiApp( Frame ):
 		self.__op = o_pg_operation
 		Frame.__init__( self, master )
 		self.pack()
-		self.createWidgets()
+		self.__createWidgets()
 	#end init
 
 	def __createWidgets( self ):
