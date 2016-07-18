@@ -8,6 +8,7 @@ __date__ = "20160124"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 from Tkinter import *
+from ttk import *
 
 class PGGuiApp( Frame ):
 	'''
@@ -19,37 +20,34 @@ class PGGuiApp( Frame ):
 	app = Application(master=root)
 	app.mainloop()
 	root.destroy()
+
+	Adds member attribute "master" (ref to the master Tk() object).
+	This class is to be subclassed by specific PGGui* classes that
+	perform specific PG operations (ex: class PGGuiSimuPop).
 	'''
 
-
-	def __init__( self, master=None, o_pg_operation=None ):
-		self.__op = o_pg_operation
-		Frame.__init__( self, master )
-		self.pack()
-		self.__createWidgets()
+	def __init__( self,  s_name,  master=None  ):
+		Frame.__init__( self, master, name=s_name )
+		self.__master=master
+		return
 	#end init
 
-	def __createWidgets( self ):
-		pass
-		return
-	#end def __createWidgets	
-
 	@property
-	def op( self ):
-		"""object that performs a pop gen operation by implementing abstract class PGOperation"""
-		return self.__op
-	#end op getter
+	def master(self):
+		"""master, tk.TK() object"""
+		return self.__master
+	#end menu getter
 
-	@op.setter
-	def op( self, o_op ):
-		self.__op=o_op
-	#end op setter
+	@master.setter
+	def master( self, i_value ):
+		raise Exception( "in PGGuiApp object, " \
+		+ "there is no setter for the master object. " )
+	#end master setter
 
-
-	@op.deleter
-	def op( self ):
-		del self.__op
-	#end op deleter
+	@master.deleter
+	def master(self):
+		del self.__master
+	#end master deleter
 
 #end class
 

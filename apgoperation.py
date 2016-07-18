@@ -22,28 +22,60 @@ class APGOperation( object ):
 
 	__metaclass__ = ABCMeta
 
-	def __init__(self):
-		pass
+	def __init__( self, o_input, o_output ):
+		self.__input=o_input
+		self.__output=o_output
 		return
 	#end __init__
 
 	@abstractmethod
 	def prepareOp( self ):
-		pass
 		return
 	#end prepareOp
 
 	@abstractmethod
 	def doOp( self ):
-		pass
 		return
 	#end doOp
 
 	@abstractmethod
 	def deliverResults( self ):
-		pass
 		return
 	#end deliverResults
+
+	@property
+	def input( self ):
+		return self.__input
+	#end input
+
+	@input.setter
+	def input( self, o_input_object ):
+		self.__input=o_input_object
+		return
+	#end setter
+
+	@input.deleter
+	def input( self ):
+		del self.__input
+		return
+	#end delete
+
+	@property
+	def output( self ):
+		return self.__output
+	#end output
+
+	@output.setter
+	def output( self, o_output_object ):
+		self.__output=o_output_object
+		return
+	#end setter
+
+	@output.deleter
+	def output( self ):
+		del self.__output
+		return
+	#end delete
 
 #end class PGOperation
 

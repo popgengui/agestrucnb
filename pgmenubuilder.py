@@ -8,6 +8,7 @@ __filename__ = "pgmenubuilder.py"
 __date__ = "20160123"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
+import sys
 import ConfigParser as modCP
 from Tkinter import Menu
 
@@ -17,7 +18,7 @@ class PGMenuBuilder(object):
 	as given by __init__ param, and populates it by reading a list of menu items and 
 	parameters from a configuration file, also an __init__ param. The menus get their 
 	command callback defs, as named in the configuration file, in the class object 
-	passed as init param o_pg_operation.
+	passed as init param o_pg_gui_app.
 
 	The configuration file key=value entries inside each [section] are of two classes:
 
@@ -60,31 +61,40 @@ class PGMenuBuilder(object):
 	command=[ "undo", None, "showopts" ]  
     '''
 
-	CONFIG_OPTIONS_NON_COMMAND_ARGS=[ "parent", "menu_underline" ]
+	CONFIG_OPTIONS_NON_COMMAND_ARGS=[ "parent", "menu_underline", "menu_accelerator" ]
 
-	def __init__( self, s_config_file, o_parent, o_pg_operation, i_tearoff=0 ):
-       	'''
+	def __init__( self, s_config_file, o_pg_gui_app,  o_tk_master, i_tearoff=0 ):
+		'''
 		param s_config_file gives menu attribute values (see module documentation)
-		param o_parent is the Tk widget parent of the menu this object builds
-		param o_pg_operation is a class object that has the definitions
+		param o_pg_gui_app is a class object that has the definitions
 				that match the command names to be bound to the menus ('command' 
-				option values in the config file)
+				option values in the config file). It also has a member Tk()
+				root window object that the menu builder assigns to member "parent"
 		param i_tearoff tells the gui whether the menu items can be dragged off of 
 			the parent menubar (tearoff=1) or not (tearoff=0)
 		'''
-
 		self.__menubar = None
-		self.__pg_operation = o_pg_operation
+		self.__pg_gui_app = o_pg_gui_app
 		self.__tearoff = i_tearoff
-		self.__parent=o_parent
+		self.__parent=o_tk_master
 		o_config = self.__get_menu_info( s_config_file )
 		self.__build_menu( o_config )
 		return
 	#end init
 
+
+
 	def __get_menu_info( self, s_config_file ):
 		o_config = modCP.ConfigParser()
-		o_config.read( s_config_file )
+		try:
+			o_file=open( s_config_file, 'r' )
+			o_config.readfp( o_file )
+
+		except IOError as ioe:
+			sys.stderr.write( "PGMenuBuilder Instance is unable to read file, " \
+				+ s_config_file  + "\n" )
+			raise ioe
+		#end try . . . except
 		return o_config
 	#end __get_menu_info
 
@@ -118,7 +128,6 @@ class PGMenuBuilder(object):
 		settings for calls to menu.add_command.  We skip the config key=value for keys
 		that are not part of the params needed for add_command. 
 		'''
-
 		l_keyword_menu_params = o_config.options( s_menu_label )	
 
 		#how many items on this menu should equal number of labels:
@@ -138,7 +147,7 @@ class PGMenuBuilder(object):
 				if len( l_vals ) != i_num_items:
 					raise Exception( "in pgmenubuilder, config entry should have " \
 							+ "one item for each label, but the option with keyname, " \
-							+ s_keyword + "does not." )
+							+ s_keyword + " does not." )
 				#end if wrong number values
 				
 				#if this is the list of command values (callback defs) 
@@ -148,7 +157,7 @@ class PGMenuBuilder(object):
 				#note: if "sep" is the label, we set other param values 
 				#to None, but they are ignored (see for loop below)
 				if s_keyword =="command":
-					l_vals = [ getattr( self.__pg_operation, thisval ) \
+					l_vals = [ getattr( self.__pg_gui_app, thisval ) \
 							if thisval is not None \
 							else None for thisval in l_vals ]
 				#end if command list
@@ -158,6 +167,7 @@ class PGMenuBuilder(object):
 				#end for each item
 			#end if not a param keyword for add_command
 		#end for each keyword
+
 		return ld_args
     #end def get_add_command_params_and_args
 
@@ -174,33 +184,35 @@ class PGMenuBuilder(object):
 		#end if non-None for parent
 
 		i_underline=eval( o_config.get( s_menu_label, "menu_underline" ) )
+		s_accelerator=eval( o_config.get( s_menu_label, "menu_accelerator" ) )
 
-		return { "parent":v_parent_value, "underline":i_underline }
+		return { "parent":v_parent_value, "underline":i_underline, "accelerator":s_accelerator }
 	#end __get_menu_values
 
 	def __add_menu_item( self, o_config, s_menu_label ):
 
-	#this will be the menu labeled s_menu_label (ex: "File" menu)
-	#and the command items (like "Open" or "Save""Save") are then added
-	#to this item using the o_config objects options:
-	o_this_menu = Menu( self.__menubar, tearoff = self.__tearoff ) 
+		#this will be the menu labeled s_menu_label (ex: "File" menu)
+		#and the command items (like "Open" or "Save""Save") are then added
+		#to this item using the o_config objects options:
+		o_this_menu = Menu( self.__menubar, tearoff = self.__tearoff ) 
 
-	ld_args = self.get_add_command_params_and_args(  o_config, s_menu_label )
+		ld_args = self.get_add_command_params_and_args(  o_config, s_menu_label )
 
-	for d_args in ld_args:
-		if d_args[ "label" ] == "sep":
-			o_this_menu.add_separator()
-		else:
-			o_this_menu.add_command( **d_args )
-		#end if seperator, else sub menu
-	#end for each set of args
+		for d_args in ld_args:
+			if d_args[ "label" ] == "sep":
+				o_this_menu.add_separator()
+			else:
+				o_this_menu.add_command( **d_args )
+			#end if seperator, else sub menu
+		#end for each set of args
 
-	dv_menu_values = self.__get_menu_values( o_config, s_menu_label )
+		dv_menu_values = self.__get_menu_values( o_config, s_menu_label )
 
-	self.__menubar.add_cascade( label = s_menu_label, 
-		menu = o_this_menu, 
-		underline=dv_menu_values[ "underline" ] )
-	return
+		self.__menubar.add_cascade( label = s_menu_label, 
+			menu = o_this_menu, 
+			underline=dv_menu_values[ "underline" ],
+			accelerator=dv_menu_values[ "accelerator" ] ) 
+		return
 
 	#end __add_menu_item
 
