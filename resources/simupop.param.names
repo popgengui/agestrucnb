@@ -1,0 +1,33 @@
+N0	N0	Population;2
+Nb	Nb	Population;2
+NbVar	NbVar	Population;2
+ages	Ages	Population;2
+config_file	Configuration File	Configuration Info;1
+life_table_glob	Life Table File(s)	Configuration Info;1
+dataDir	Data Directory	suppress
+doNegBinom	Use Negative Binomial	Simulation;4
+fecundityFemale	Female Fecundity	Population;2
+fecundityMale	Male Fecundity	Population;2
+forceSkip	Force Skip	Population;2
+gens	Generations	Population;2
+isMonog	Monogamous	Population;2
+lbd	lbd	Population;2
+litter	Litter	Population;2
+maleProb	Probability Male Birth	Population;2
+model_name	Model	Configuration Info;1
+mutFreq	Mutation Frequency	Genome;3
+numMSats	Number of Microsatellites	Genome;3
+numSNPs	Number of SNPs	Genome;3
+param_names	param names object	suppress
+popSize	Population Size	Population;2
+reps	Replicates	Simulation;4
+skip	Skip	Simulation;4
+startAlleles	Starting Allele Total	Genome;3
+startLambda	Starting Lambda	Simulation;4
+startSave	Starting Save	Simulation;4
+survivalFemale	Female Survival	Population;2
+survivalMale	Male Survival	Population;2
+gammaAFemale	Female Gamma A	Population;2	
+gammaBFemale	Female Gamma B	Population;2	
+gammaAMale	Male Gamma A	Population;2
+gammaBMale	Male Gamma B	Population;2

@@ -1,0 +1,24 @@
+
+#Add menu
+[New]
+parent=None
+#which character to underline on the menu label
+menu_underline=0
+#which accelorator key for the menu:
+menu_accelerator="Ctrl+N"
+#which character to underline on the item
+label=[ "Add new simulation", "Add new Ne estimation"]
+underline=[ 0, 3 ]
+accelerator=[ "Ctrl+S", "Ctrl+N", ]
+command=[ "addPGGuiSimupop", "addPGGuiNeEstimation" ]
+
+#Close menu
+[Close]
+parent=None
+menu_underline=0
+menu_accelerator="Ctrl+C"
+label = [ "Close current tab", "Close all tabs", "Close all and exit" ]
+underline=[ 0, 6, 1 ]
+accelerator=[ "Ctrl+C", "Ctrl+A", "Ctrl+X" ]
+command=[ "removeCurrentTab", "removeAllTabs", "exitNotebook" ]
+

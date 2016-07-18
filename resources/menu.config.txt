@@ -1,0 +1,25 @@
+
+#file menu
+[File]
+parent=None
+#which character to underline on the menu label
+menu_underline=0
+#which accelorator key for the menu:
+menu_accelerator="Ctrl+F"
+#which character to underline on the item
+label=[ "load config file", "select ouptut file directory" ]
+underline=[ 0, 0 ]
+accelerator=[ "Ctrl+L", "Ctrl+S" ]
+command=[ "load_config_file", "select_output_directory" ]
+
+#edit menu
+[Run]
+parent=None
+menu_underline=0
+menu_accelerator="Ctrl+R"
+label=[ "Run" ]
+underline=[ 0 ]
+accelerator=["Ctrl+R"]
+command=[ "runSimulation" ]  
+
+
