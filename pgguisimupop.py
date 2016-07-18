@@ -573,7 +573,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		state of each and adds new processes as available (see class 
 		pgutilityclasses.independantProcessGroup).		
 		'''	
-
 		i_total_replicates=self.__input.reps
 		i_max_processes_to_use=self.__total_processes_for_sims
 
@@ -588,12 +587,12 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				self.__input.getDictParamValuesByAttributeName()
 
 		i_total_replicates_started=0
-		i_total_living_processes=0
+		i_current_total_living_processes=0
 
 		o_process_manager=independantProcessGroup()
 
 		while i_total_replicates_started < i_total_replicates:
-
+			
 			i_current_total_living_processes=o_process_manager.getTotalAlive()
 
 			#considered using at time.sleep() command inside this while loop,
@@ -602,25 +601,24 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#gui, I assume it can simply get tied up in the while without huring 
 			#overall performance:
 
-			while i_total_living_processes == i_max_processes_to_use:
+			while i_current_total_living_processes == i_max_processes_to_use:
 				i_current_total_living_processes=o_process_manager.getTotalAlive()
 			#end while all avail processes in use, recheck
 
 			i_num_processes_avail=i_max_processes_to_use-i_current_total_living_processes
 
-			for idx in range( i_num_processes_avail ):
-				seq_args=( self.__config_file.get(),
-								dv_current_param_values_by_attribute_name,
-								self.__life_table_files,
-								self.__param_names_file,
-								self.__output.basename,
-								i_total_replicates_started )
+			seq_args=( self.__config_file.get(),
+							dv_current_param_values_by_attribute_name,
+							self.__life_table_files,
+							self.__param_names_file,
+							self.__output.basename,
+							i_total_replicates_started )
 
-				o_new_process=multiprocessing.Process(  target=def_target, args=seq_args)
-				o_new_process.start()
-				o_process_manager.addProcess( o_new_process )
-				i_total_replicates_started += 1
-			#end for each index in range of total available indices
+			o_new_process=multiprocessing.Process(  target=def_target, args=seq_args)
+			o_new_process.start()
+			o_process_manager.addProcess( o_new_process )
+			i_total_replicates_started += 1
+		#end while process started < total reps requested
 		return
 	#end __do_operation
 
