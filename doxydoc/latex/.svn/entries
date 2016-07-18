@@ -1,0 +1,469 @@
+10
+
+dir
+0
+svn+ssh://ted@kubu1800.dyndns.org/media/wd1_5t/svn/repos_source_code/python/negui/doxydoc/latex
+svn+ssh://ted@kubu1800.dyndns.org/media/wd1_5t/svn/repos_source_code
+add
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8c425113-646e-4c1f-b1fe-de60203b589d
+
+classpgguisimupop_1_1PGGuiSimuPop.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgguisimupop_1_1PGGuiSimuPop.tex
+file
+
+
+
+add
+
+doxygen.sty
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgguiapp_1_1PGGuiApp.tex
+file
+
+
+
+add
+
+classpgguiapp_1_1PGGuiApp.tex
+file
+
+
+
+add
+
+namespacepgopsimupop.tex
+file
+
+
+
+add
+
+namespacegui__frontend__popgen__program_1_1pgopsimupop.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgguisimupop_1_1PGGuiSimuPop.pdf
+file
+
+
+
+add
+
+classpgguisimupop_1_1PGGuiSimuPop.pdf
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1testop_1_1TestOp.tex
+file
+
+
+
+add
+
+namespacegui__frontend__popgen__program_1_1pgguisimupop.tex
+file
+
+
+
+add
+
+namespacepgguisimupop.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgguiapp_1_1PGGuiApp.pdf
+file
+
+
+
+add
+
+classpgguiapp_1_1PGGuiApp.pdf
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgopsimupop_1_1PGOpSimuPop.tex
+file
+
+
+
+add
+
+classpgopsimupop_1_1PGOpSimuPop.tex
+file
+
+
+
+add
+
+classpgmenubuilder_1_1PGMenuBuilder.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgmenubuilder_1_1PGMenuBuilder.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1testop_1_1TestOp.pdf
+file
+
+
+
+add
+
+annotated.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pginputsimupop_1_1PGInputSimuPop.tex
+file
+
+
+
+add
+
+classpginputsimupop_1_1PGInputSimuPop.tex
+file
+
+
+
+add
+
+Makefile
+file
+
+
+
+add
+
+classpgguisimupop_1_1PGGuiSimuPop.eps
+file
+
+
+
+add
+
+hierarchy.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgguisimupop_1_1PGGuiSimuPop.eps
+file
+
+
+
+add
+
+namespacepgmenubuilder.tex
+file
+
+
+
+add
+
+namespacegui__frontend__popgen__program_1_1pgmenubuilder.tex
+file
+
+
+
+add
+
+namespacepginputsimupop.tex
+file
+
+
+
+add
+
+namespacegui__frontend__popgen__program_1_1pginputsimupop.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgopsimupop_1_1PGOpSimuPop.pdf
+file
+
+
+
+add
+
+classpgopsimupop_1_1PGOpSimuPop.pdf
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+classpgmenubuilder_1_1PGMenuBuilder.pdf
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgmenubuilder_1_1PGMenuBuilder.pdf
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+classpgguiapp_1_1PGGuiApp.eps
+file
+
+
+
+add
+
+classpginputsimupop_1_1PGInputSimuPop.pdf
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pginputsimupop_1_1PGInputSimuPop.pdf
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+classgui__frontend__popgen__program_1_1pgguiapp_1_1PGGuiApp.eps
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1apgoperation_1_1APGOperation.tex
+file
+
+
+
+add
+
+classapgoperation_1_1APGOperation.tex
+file
+
+
+
+add
+
+namespacepgguiapp.tex
+file
+
+
+
+add
+
+namespacegui__frontend__popgen__program_1_1pgguiapp.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1testop_1_1TestOp.eps
+file
+
+
+
+add
+
+namespacegui__frontend__popgen__program_1_1testop.tex
+file
+
+
+
+add
+
+classapgoperation_1_1APGOperation.pdf
+file
+
+
+
+add
+
+
+
+
+
+has-props
+has-prop-mods
+
+classgui__frontend__popgen__program_1_1apgoperation_1_1APGOperation.pdf
+file
+
+
+
+add
+
+classpgmenubuilder_1_1PGMenuBuilder.eps
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgmenubuilder_1_1PGMenuBuilder.eps
+file
+
+
+
+add
+
+namespacegui__frontend__popgen__program_1_1mymod.tex
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pgopsimupop_1_1PGOpSimuPop.eps
+file
+
+
+
+add
+
+classpgopsimupop_1_1PGOpSimuPop.eps
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1pginputsimupop_1_1PGInputSimuPop.eps
+file
+
+
+
+add
+
+classpginputsimupop_1_1PGInputSimuPop.eps
+file
+
+
+
+add
+
+namespaceapgoperation.tex
+file
+
+
+
+add
+
+namespacegui__frontend__popgen__program_1_1apgoperation.tex
+file
+
+
+
+add
+
+refman.tex
+file
+
+
+
+add
+
+classapgoperation_1_1APGOperation.eps
+file
+
+
+
+add
+
+classgui__frontend__popgen__program_1_1apgoperation_1_1APGOperation.eps
+file
+
+
+
+add
+
+namespaces.tex
+file
+
+
+
+add
+

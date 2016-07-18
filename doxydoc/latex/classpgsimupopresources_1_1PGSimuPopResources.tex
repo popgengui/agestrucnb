@@ -1,0 +1,142 @@
+\hypertarget{classpgsimupopresources_1_1PGSimuPopResources}{}\section{pgsimupopresources.\+P\+G\+Simu\+Pop\+Resources Class Reference}
+\label{classpgsimupopresources_1_1PGSimuPopResources}\index{pgsimupopresources.\+P\+G\+Simu\+Pop\+Resources@{pgsimupopresources.\+P\+G\+Simu\+Pop\+Resources}}
+Inheritance diagram for pgsimupopresources.\+P\+G\+Simu\+Pop\+Resources\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classpgsimupopresources_1_1PGSimuPopResources}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classpgsimupopresources_1_1PGSimuPopResources_a74bd1c4974b23f6d8ed44a14568714ff}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, ls\+\_\+life\+\_\+table\+\_\+files, b\+\_\+write\+\_\+warnings=False)
+\item 
+def \hyperlink{classpgsimupopresources_1_1PGSimuPopResources_ace3ec1ee66c54bfb806a7dfa80755105}{get\+Life\+Table\+Value} (self, s\+\_\+model\+\_\+name, s\+\_\+section, s\+\_\+option)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}\end{DoxyVerb}
+ 
+
+Definition at line 26 of file pgsimupopresources.\+py.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{pgsimupopresources\+::\+P\+G\+Simu\+Pop\+Resources@{pgsimupopresources\+::\+P\+G\+Simu\+Pop\+Resources}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!pgsimupopresources\+::\+P\+G\+Simu\+Pop\+Resources@{pgsimupopresources\+::\+P\+G\+Simu\+Pop\+Resources}}
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, ls\+\_\+life\+\_\+table\+\_\+files, b\+\_\+write\+\_\+warnings=\+False)}{__init__(self, ls_life_table_files, b_write_warnings=False)}}]{\setlength{\rightskip}{0pt plus 5cm}def pgsimupopresources.\+P\+G\+Simu\+Pop\+Resources.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{ls\+\_\+life\+\_\+table\+\_\+files, }
+\item[{}]{b\+\_\+write\+\_\+warnings = {\ttfamily False}}
+\end{DoxyParamCaption}
+)}\hypertarget{classpgsimupopresources_1_1PGSimuPopResources_a74bd1c4974b23f6d8ed44a14568714ff}{}\label{classpgsimupopresources_1_1PGSimuPopResources_a74bd1c4974b23f6d8ed44a14568714ff}
+\begin{DoxyVerb}Param ls_life_table_files is a list of configuration file names,
+    with table info, such as survivial and fecundity rates,
+    gamma values, and ages.
+Param b_write_warnings is a flag. If true warnigs are written to stderr.\end{DoxyVerb}
+ 
+
+Definition at line 30 of file pgsimupopresources.\+py.
+
+
+\begin{DoxyCode}
+30     \textcolor{keyword}{def }\hyperlink{classpgsimupopresources_1_1PGSimuPopResources_a74bd1c4974b23f6d8ed44a14568714ff}{\_\_init\_\_}( self, ls\_life\_table\_files, b\_write\_warnings=False ):
+31         \textcolor{stringliteral}{'''}
+32 \textcolor{stringliteral}{        Param ls\_life\_table\_files is a list of configuration file names,}
+33 \textcolor{stringliteral}{            with table info, such as survivial and fecundity rates,}
+34 \textcolor{stringliteral}{            gamma values, and ages.}
+35 \textcolor{stringliteral}{        Param b\_write\_warnings is a flag. If true warnigs are written to stderr.}
+36 \textcolor{stringliteral}{        }
+37 \textcolor{stringliteral}{        '''}
+38 
+39         self.\hyperlink{classpgsimupopresources_1_1PGSimuPopResources_a83b612b64b7f053995e157b36c86d985}{\_\_write\_warnings}=b\_write\_warnings
+40         self.\hyperlink{classpgsimupopresources_1_1PGSimuPopResources_ad9daf54de0324dec1e84763924226f49}{\_\_lifetables}=\{\}
+41 
+42         self.\hyperlink{classpgsimupopresources_1_1PGSimuPopResources_abb7ce129f6e404e1f216c2da8d3c911c}{\_\_get\_life\_tables}( ls\_life\_table\_files )
+43 
+44         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+\subsection{Member Function Documentation}
+\index{pgsimupopresources\+::\+P\+G\+Simu\+Pop\+Resources@{pgsimupopresources\+::\+P\+G\+Simu\+Pop\+Resources}!get\+Life\+Table\+Value@{get\+Life\+Table\+Value}}
+\index{get\+Life\+Table\+Value@{get\+Life\+Table\+Value}!pgsimupopresources\+::\+P\+G\+Simu\+Pop\+Resources@{pgsimupopresources\+::\+P\+G\+Simu\+Pop\+Resources}}
+\subsubsection[{\texorpdfstring{get\+Life\+Table\+Value(self, s\+\_\+model\+\_\+name, s\+\_\+section, s\+\_\+option)}{getLifeTableValue(self, s_model_name, s_section, s_option)}}]{\setlength{\rightskip}{0pt plus 5cm}def pgsimupopresources.\+P\+G\+Simu\+Pop\+Resources.\+get\+Life\+Table\+Value (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{s\+\_\+model\+\_\+name, }
+\item[{}]{s\+\_\+section, }
+\item[{}]{s\+\_\+option}
+\end{DoxyParamCaption}
+)}\hypertarget{classpgsimupopresources_1_1PGSimuPopResources_ace3ec1ee66c54bfb806a7dfa80755105}{}\label{classpgsimupopresources_1_1PGSimuPopResources_ace3ec1ee66c54bfb806a7dfa80755105}
+\begin{DoxyVerb}Tries to fetch the value, 
+Returns a None instance if any of 
+the parameter values are not found.
+
+On fail also records the first level
+that was not found, and
+if flag self.__write_warnings
+is true, reports the failure to
+stderr.
+\end{DoxyVerb}
+ 
+
+Definition at line 79 of file pgsimupopresources.\+py.
+
+
+\begin{DoxyCode}
+79     \textcolor{keyword}{def }\hyperlink{classpgsimupopresources_1_1PGSimuPopResources_ace3ec1ee66c54bfb806a7dfa80755105}{getLifeTableValue}( self, s\_model\_name, s\_section, s\_option ):
+80         \textcolor{stringliteral}{"""}
+81 \textcolor{stringliteral}{        Tries to fetch the value, }
+82 \textcolor{stringliteral}{        Returns a None instance if any of }
+83 \textcolor{stringliteral}{        the parameter values are not found.}
+84 \textcolor{stringliteral}{}
+85 \textcolor{stringliteral}{        On fail also records the first level}
+86 \textcolor{stringliteral}{        that was not found, and}
+87 \textcolor{stringliteral}{        if flag self.\_\_write\_warnings}
+88 \textcolor{stringliteral}{        is true, reports the failure to}
+89 \textcolor{stringliteral}{        stderr.}
+90 \textcolor{stringliteral}{        """}
+91 
+92         v\_value=\textcolor{keywordtype}{None}
+93         s\_warning=\textcolor{keywordtype}{None}
+94 
+95         \textcolor{keywordflow}{try}:
+96             o\_parser=self.\hyperlink{classpgsimupopresources_1_1PGSimuPopResources_ad9daf54de0324dec1e84763924226f49}{\_\_lifetables}[ s\_model\_name ]
+97             v\_value=o\_parser.get( s\_section, s\_option )
+98         \textcolor{keywordflow}{except} KeyError \textcolor{keyword}{as} ke:
+99 
+100             s\_warnings= \textcolor{stringliteral}{"Warning: In PGSimuPopResources instance, def getLifeTableValue, "} \(\backslash\)
+101                     + \textcolor{stringliteral}{"no life table found for model: "}  \(\backslash\)
+102                     + s\_model\_name + \textcolor{stringliteral}{"\(\backslash\)n"} 
+103 
+104         \textcolor{keywordflow}{except} NoSectionError \textcolor{keyword}{as} nse:
+105 
+106             s\_warning=\textcolor{stringliteral}{"Warning: In PGSimuPopResources instance, def getLifeTableValue, "} \(\backslash\)
+107                     + \textcolor{stringliteral}{"no section in life table for model: "}  \(\backslash\)
+108                     + s\_model\_name + \textcolor{stringliteral}{"section: "} + s\_section + \textcolor{stringliteral}{"\(\backslash\)n"} 
+109 
+110         \textcolor{keywordflow}{except} NoOptionError \textcolor{keyword}{as} noe:
+111 
+112             s\_warning= \textcolor{stringliteral}{"Warning: In PGSimuPopResources instance, def getLifeTableValue, "} \(\backslash\)
+113                     + \textcolor{stringliteral}{"no option in life table for model: "}  \(\backslash\)
+114                     + s\_model\_name + \textcolor{stringliteral}{"section: "} + s\_section + \textcolor{stringliteral}{"option: "} \(\backslash\)
+115                     + s\_option + \textcolor{stringliteral}{"\(\backslash\)n"} 
+116         \textcolor{comment}{#end try, except, except, except}
+117 
+118         \textcolor{keywordflow}{if} self.\hyperlink{classpgsimupopresources_1_1PGSimuPopResources_a83b612b64b7f053995e157b36c86d985}{\_\_write\_warnings} \textcolor{keywordflow}{and} s\_warning \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+119             sys.stderr.write( s\_warning )
+120         \textcolor{comment}{#end if write warnings }
+121 
+122         \textcolor{comment}{#eval will throw a type error if v\_value is None}
+123         \textcolor{keywordflow}{return} eval( v\_value ) \textcolor{keywordflow}{if} v\_value \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} \textcolor{keywordtype}{None}
+124 
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgsimupopresources.\+py\end{DoxyCompactItemize}

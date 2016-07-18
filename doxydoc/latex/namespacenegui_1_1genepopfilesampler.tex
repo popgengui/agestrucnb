@@ -1,0 +1,170 @@
+\hypertarget{namespacenegui_1_1genepopfilesampler}{}\section{negui.\+genepopfilesampler Namespace Reference}
+\label{namespacenegui_1_1genepopfilesampler}\index{negui.\+genepopfilesampler@{negui.\+genepopfilesampler}}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams}{Genepop\+File\+Sample\+Params}
+\item 
+class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsProportion}{Genepop\+File\+Sample\+Params\+Proportion}
+\item 
+class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsRemoval}{Genepop\+File\+Sample\+Params\+Removal}
+\item 
+class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampler}{Genepop\+File\+Sampler}
+\item 
+class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion}{Genepop\+File\+Sampler\+Individuals\+By\+Proportion}
+\item 
+class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByRemoval}{Genepop\+File\+Sampler\+Individuals\+By\+Removal}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries make\+\_\+subsample\+\_\+tag} (i\+\_\+value, i\+\_\+replicate\+\_\+number, s\+\_\+scheme)\hypertarget{namespacenegui_1_1genepopfilesampler_ae96e15d7e71d700d02ca3ee3609595a4}{}\label{namespacenegui_1_1genepopfilesampler_ae96e15d7e71d700d02ca3ee3609595a4}
+
+\item 
+def {\bfseries get\+\_\+sample\+\_\+value\+\_\+and\+\_\+replicate\+\_\+number\+\_\+from\+\_\+sample\+\_\+tag} (s\+\_\+sample\+\_\+tag, s\+\_\+scheme)\hypertarget{namespacenegui_1_1genepopfilesampler_add6542ca0344658bb772d671ef34d761}{}\label{namespacenegui_1_1genepopfilesampler_add6542ca0344658bb772d671ef34d761}
+
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+string {\bfseries T\+A\+G\+\_\+\+D\+E\+L\+I\+M\+I\+T\+ER} = \char`\"{}\+\_\+\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_a218e2f958da027b600c72bb577a3ff39}{}\label{namespacenegui_1_1genepopfilesampler_a218e2f958da027b600c72bb577a3ff39}
+
+\item 
+string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+P\+R\+O\+P\+O\+R\+T\+I\+ON} = \char`\"{}proportion\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_a08d38d14135ba2b092e3090b0e1e74b1}{}\label{namespacenegui_1_1genepopfilesampler_a08d38d14135ba2b092e3090b0e1e74b1}
+
+\item 
+string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+R\+E\+M\+O\+V\+AL} = \char`\"{}remove\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_a0257c159f203d90380dfed2404ccc3a1}{}\label{namespacenegui_1_1genepopfilesampler_a0257c159f203d90380dfed2404ccc3a1}
+
+\item 
+list {\bfseries ls\+\_\+args} = \mbox{[} \char`\"{}genepop file\char`\"{} \mbox{]}\hypertarget{namespacenegui_1_1genepopfilesampler_af0949cf58ac4626034b74cc9feaf35de}{}\label{namespacenegui_1_1genepopfilesampler_af0949cf58ac4626034b74cc9feaf35de}
+
+\item 
+{\bfseries s\+\_\+usage} = modut.\+do\+\_\+usage\+\_\+check( sys.\+argv, ls\+\_\+args )\hypertarget{namespacenegui_1_1genepopfilesampler_a50569ca2f7b58beeb1163ff3e3578bc6}{}\label{namespacenegui_1_1genepopfilesampler_a50569ca2f7b58beeb1163ff3e3578bc6}
+
+\item 
+{\bfseries s\+\_\+genepopfile} = sys.\+argv\mbox{[} 1 \mbox{]}\hypertarget{namespacenegui_1_1genepopfilesampler_a950ccfdc83d7493167c08843392ce46c}{}\label{namespacenegui_1_1genepopfilesampler_a950ccfdc83d7493167c08843392ce46c}
+
+\item 
+{\bfseries o\+\_\+gpmanager\+\_\+proportion} = gpf.\+Genepop\+File\+Manager( s\+\_\+genepopfile )\hypertarget{namespacenegui_1_1genepopfilesampler_abc45a860ba1927aae2c8329de7ca1099}{}\label{namespacenegui_1_1genepopfilesampler_abc45a860ba1927aae2c8329de7ca1099}
+
+\item 
+{\bfseries o\+\_\+gpmanager\+\_\+removal} = gpf.\+Genepop\+File\+Manager( s\+\_\+genepopfile )\hypertarget{namespacenegui_1_1genepopfilesampler_a3aa57a11f569457b2f749182fbe28dca}{}\label{namespacenegui_1_1genepopfilesampler_a3aa57a11f569457b2f749182fbe28dca}
+
+\item 
+{\bfseries i\+\_\+numpops} = o\+\_\+gpmanager\+\_\+proportion.\+pop\+\_\+total\hypertarget{namespacenegui_1_1genepopfilesampler_ab6d663a8c7e6a8cb1b164f785b27a512}{}\label{namespacenegui_1_1genepopfilesampler_ab6d663a8c7e6a8cb1b164f785b27a512}
+
+\item 
+{\bfseries li\+\_\+poplist} = range( 1, i\+\_\+numpops + 1 )\hypertarget{namespacenegui_1_1genepopfilesampler_afed5a5353ce42556452ed992c591f30d}{}\label{namespacenegui_1_1genepopfilesampler_afed5a5353ce42556452ed992c591f30d}
+
+\item 
+string {\bfseries s\+\_\+popsamptag\+\_\+proportions} = \char`\"{}sample\+\_\+prop\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_a54e108a8adc7df4d4d19ac8597f6129a}{}\label{namespacenegui_1_1genepopfilesampler_a54e108a8adc7df4d4d19ac8597f6129a}
+
+\item 
+list {\bfseries lf\+\_\+proportions} = \mbox{[} 0.\+01, 0.\+1, 0.\+2, 1.\+0 \mbox{]}\hypertarget{namespacenegui_1_1genepopfilesampler_a1ea52d1f17a0e0d5e09e8e9a2aa40cb2}{}\label{namespacenegui_1_1genepopfilesampler_a1ea52d1f17a0e0d5e09e8e9a2aa40cb2}
+
+\item 
+int {\bfseries i\+\_\+replicate\+\_\+total} = 1\hypertarget{namespacenegui_1_1genepopfilesampler_a95c5c4e65f66491edbb23083ab48bf70}{}\label{namespacenegui_1_1genepopfilesampler_a95c5c4e65f66491edbb23083ab48bf70}
+
+\item 
+string {\bfseries s\+\_\+popsamptag\+\_\+removal} = \char`\"{}remove\+\_\+n\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_aa7191fe2bed86b9b52bac7ae7c224688}{}\label{namespacenegui_1_1genepopfilesampler_aa7191fe2bed86b9b52bac7ae7c224688}
+
+\item 
+list {\bfseries li\+\_\+n\+\_\+remove} = \mbox{[} 3,4,5,6,7 \mbox{]}\hypertarget{namespacenegui_1_1genepopfilesampler_a3bb85be4ed96fe659c32a15fd54c9e91}{}\label{namespacenegui_1_1genepopfilesampler_a3bb85be4ed96fe659c32a15fd54c9e91}
+
+\item 
+int {\bfseries i\+\_\+removal\+\_\+replicate\+\_\+total} = 3\hypertarget{namespacenegui_1_1genepopfilesampler_af723f313525f06454616675e7875a54d}{}\label{namespacenegui_1_1genepopfilesampler_af723f313525f06454616675e7875a54d}
+
+\item 
+{\bfseries o\+\_\+sampleparams\+\_\+proportion}
+\item 
+{\bfseries o\+\_\+sampleparams\+\_\+remove}
+\item 
+{\bfseries o\+\_\+sampler\+\_\+proportion} = \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion}{Genepop\+File\+Sampler\+Individuals\+By\+Proportion}( o\+\_\+gpmanager\+\_\+proportion, o\+\_\+sampleparams\+\_\+proportion )\hypertarget{namespacenegui_1_1genepopfilesampler_adea79648343141b6b058b5f8d540b13f}{}\label{namespacenegui_1_1genepopfilesampler_adea79648343141b6b058b5f8d540b13f}
+
+\item 
+{\bfseries o\+\_\+sampler\+\_\+removal} = \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByRemoval}{Genepop\+File\+Sampler\+Individuals\+By\+Removal}( o\+\_\+gpmanager\+\_\+removal, o\+\_\+sampleparams\+\_\+remove )\hypertarget{namespacenegui_1_1genepopfilesampler_ada52eabb224c1ef29331d394fc63ca7b}{}\label{namespacenegui_1_1genepopfilesampler_ada52eabb224c1ef29331d394fc63ca7b}
+
+\item 
+{\bfseries ls\+\_\+indiv\+\_\+subsamplenames\+\_\+proportions} = o\+\_\+gpmanager\+\_\+proportion.\+indiv\+\_\+subsample\+\_\+tags\hypertarget{namespacenegui_1_1genepopfilesampler_a23b5c9bd1eb574f409fd08f2df543d37}{}\label{namespacenegui_1_1genepopfilesampler_a23b5c9bd1eb574f409fd08f2df543d37}
+
+\item 
+{\bfseries ls\+\_\+indiv\+\_\+subsamplenames\+\_\+removal} = o\+\_\+gpmanager\+\_\+removal.\+indiv\+\_\+subsample\+\_\+tags\hypertarget{namespacenegui_1_1genepopfilesampler_aebfcea437386d84f1d520ecd19661282}{}\label{namespacenegui_1_1genepopfilesampler_aebfcea437386d84f1d520ecd19661282}
+
+\item 
+{\bfseries ls\+\_\+indiv\+\_\+subsamplenames} = o\+\_\+sampler.\+filemanager.\+indiv\+\_\+subsample\+\_\+tags\hypertarget{namespacenegui_1_1genepopfilesampler_a4c10016e82c552ee45f26c2d939cf994}{}\label{namespacenegui_1_1genepopfilesampler_a4c10016e82c552ee45f26c2d939cf994}
+
+\item 
+{\bfseries s\+\_\+pop\+\_\+subsample\+\_\+name} = o\+\_\+sampler.\+filemanager.\+population\+\_\+subsample\+\_\+tags\mbox{[} 0 \mbox{]}\hypertarget{namespacenegui_1_1genepopfilesampler_ac829492b1237d48a4882e05b2915a6bd}{}\label{namespacenegui_1_1genepopfilesampler_ac829492b1237d48a4882e05b2915a6bd}
+
+\item 
+{\bfseries li\+\_\+empty\+\_\+pops}
+\item 
+string {\bfseries s\+\_\+filename} = \char`\"{}.\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_ac878373e2ffb8844daca12c3fe2ecba1}{}\label{namespacenegui_1_1genepopfilesampler_ac878373e2ffb8844daca12c3fe2ecba1}
+
+\item 
+{\bfseries s\+\_\+newfilename}\hypertarget{namespacenegui_1_1genepopfilesampler_a9f2406bd6f38ea68d2dc42fde6d4efd5}{}\label{namespacenegui_1_1genepopfilesampler_a9f2406bd6f38ea68d2dc42fde6d4efd5}
+
+\item 
+{\bfseries s\+\_\+pop\+\_\+subsample\+\_\+tag}\hypertarget{namespacenegui_1_1genepopfilesampler_a8bcc23e7769ceeabf1cf6baf653d1d4f}{}\label{namespacenegui_1_1genepopfilesampler_a8bcc23e7769ceeabf1cf6baf653d1d4f}
+
+\item 
+{\bfseries s\+\_\+indiv\+\_\+subsample\+\_\+tag}\hypertarget{namespacenegui_1_1genepopfilesampler_af1d202b041ee1091ede5768649f30ad0}{}\label{namespacenegui_1_1genepopfilesampler_af1d202b041ee1091ede5768649f30ad0}
+
+\item 
+{\bfseries i\+\_\+min\+\_\+pop\+\_\+size}\hypertarget{namespacenegui_1_1genepopfilesampler_a8b592ce22a43016c91eccfa209d01ab1}{}\label{namespacenegui_1_1genepopfilesampler_a8b592ce22a43016c91eccfa209d01ab1}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Description
+Class GenepopFileSampler instances operate on GenepopFileManager objects,
+adding subsamples to the GenepopFileManager's subsample collections according,
+to one of mulitple sampling schemes.  Class GenepopFileSampleParams give 
+values used in sampling.
+\end{DoxyVerb}
+ 
+
+\subsection{Variable Documentation}
+\index{negui\+::genepopfilesampler@{negui\+::genepopfilesampler}!li\+\_\+empty\+\_\+pops@{li\+\_\+empty\+\_\+pops}}
+\index{li\+\_\+empty\+\_\+pops@{li\+\_\+empty\+\_\+pops}!negui\+::genepopfilesampler@{negui\+::genepopfilesampler}}
+\subsubsection[{\texorpdfstring{li\+\_\+empty\+\_\+pops}{li_empty_pops}}]{\setlength{\rightskip}{0pt plus 5cm}negui.\+genepopfilesampler.\+li\+\_\+empty\+\_\+pops}\hypertarget{namespacenegui_1_1genepopfilesampler_af70a635bca21bb916306ca5d5da4087c}{}\label{namespacenegui_1_1genepopfilesampler_af70a635bca21bb916306ca5d5da4087c}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+1 = o\_sampler.filemanager.getListEmptyPopulationNumbers( 
+2                     s\_pop\_subsample\_tag=s\_pop\_subsample\_name,
+3                     s\_indiv\_subsample\_tag=s\_indiv\_sub  )
+\end{DoxyCode}
+
+
+Definition at line 379 of file genepopfilesampler.\+py.
+
+\index{negui\+::genepopfilesampler@{negui\+::genepopfilesampler}!o\+\_\+sampleparams\+\_\+proportion@{o\+\_\+sampleparams\+\_\+proportion}}
+\index{o\+\_\+sampleparams\+\_\+proportion@{o\+\_\+sampleparams\+\_\+proportion}!negui\+::genepopfilesampler@{negui\+::genepopfilesampler}}
+\subsubsection[{\texorpdfstring{o\+\_\+sampleparams\+\_\+proportion}{o_sampleparams_proportion}}]{\setlength{\rightskip}{0pt plus 5cm}negui.\+genepopfilesampler.\+o\+\_\+sampleparams\+\_\+proportion}\hypertarget{namespacenegui_1_1genepopfilesampler_af2cbb81667dbf55631cb13ca9c97211c}{}\label{namespacenegui_1_1genepopfilesampler_af2cbb81667dbf55631cb13ca9c97211c}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+1 = \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsProportion}{GenepopFileSampleParamsProportion}( li\_poplist, 
+2                             lf\_proportions, 
+3                             i\_replicate\_total, 
+4                             s\_population\_subsample\_name=s\_popsamptag\_proportions )
+\end{DoxyCode}
+
+
+Definition at line 350 of file genepopfilesampler.\+py.
+
+\index{negui\+::genepopfilesampler@{negui\+::genepopfilesampler}!o\+\_\+sampleparams\+\_\+remove@{o\+\_\+sampleparams\+\_\+remove}}
+\index{o\+\_\+sampleparams\+\_\+remove@{o\+\_\+sampleparams\+\_\+remove}!negui\+::genepopfilesampler@{negui\+::genepopfilesampler}}
+\subsubsection[{\texorpdfstring{o\+\_\+sampleparams\+\_\+remove}{o_sampleparams_remove}}]{\setlength{\rightskip}{0pt plus 5cm}negui.\+genepopfilesampler.\+o\+\_\+sampleparams\+\_\+remove}\hypertarget{namespacenegui_1_1genepopfilesampler_ad3b275384232539ab49244138306a4ff}{}\label{namespacenegui_1_1genepopfilesampler_ad3b275384232539ab49244138306a4ff}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+1 = \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsRemoval}{GenepopFileSampleParamsRemoval}( li\_poplist,
+2                                                             li\_n\_remove,
+3                                                             i\_removal\_replicate\_total,
+4                                                             s\_population\_subsample\_name=
+      s\_popsamptag\_removal )
+\end{DoxyCode}
+
+
+Definition at line 355 of file genepopfilesampler.\+py.
+

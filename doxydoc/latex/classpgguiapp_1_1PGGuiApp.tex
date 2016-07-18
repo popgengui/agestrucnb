@@ -1,0 +1,68 @@
+\hypertarget{classpgguiapp_1_1PGGuiApp}{}\section{pgguiapp.\+P\+G\+Gui\+App Class Reference}
+\label{classpgguiapp_1_1PGGuiApp}\index{pgguiapp.\+P\+G\+Gui\+App@{pgguiapp.\+P\+G\+Gui\+App}}
+Inheritance diagram for pgguiapp.\+P\+G\+Gui\+App\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classpgguiapp_1_1PGGuiApp}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+name, \hyperlink{classpgguiapp_1_1PGGuiApp_abac82293710b7553c50772ac5b106754}{master}=None)\hypertarget{classpgguiapp_1_1PGGuiApp_ab4c3a5193c5b05b29a63b84e2ea5e219}{}\label{classpgguiapp_1_1PGGuiApp_ab4c3a5193c5b05b29a63b84e2ea5e219}
+
+\item 
+def \hyperlink{classpgguiapp_1_1PGGuiApp_abac82293710b7553c50772ac5b106754}{master} (self)
+\item 
+def {\bfseries master} (self, i\+\_\+value)\hypertarget{classpgguiapp_1_1PGGuiApp_a401a2ae1ac7590008a003497256bddb7}{}\label{classpgguiapp_1_1PGGuiApp_a401a2ae1ac7590008a003497256bddb7}
+
+\item 
+def {\bfseries master} (self)\hypertarget{classpgguiapp_1_1PGGuiApp_abac82293710b7553c50772ac5b106754}{}\label{classpgguiapp_1_1PGGuiApp_abac82293710b7553c50772ac5b106754}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}The standard way to deploy tkinter with application object that inherits Frame
+(see example at https://docs.python.org/2/library/tkinter.html#Tkinter.Tk)
+this app instantiated by driver code like, 
+
+root = Tk()
+app = Application(master=root)
+app.mainloop()
+root.destroy()
+
+Adds member attribute "master" (ref to the master Tk() object).
+This class is to be subclassed by specific PGGui* classes that
+perform specific PG operations (ex: class PGGuiSimuPop).
+\end{DoxyVerb}
+ 
+
+Definition at line 13 of file pgguiapp.\+py.
+
+
+
+\subsection{Member Function Documentation}
+\index{pgguiapp\+::\+P\+G\+Gui\+App@{pgguiapp\+::\+P\+G\+Gui\+App}!master@{master}}
+\index{master@{master}!pgguiapp\+::\+P\+G\+Gui\+App@{pgguiapp\+::\+P\+G\+Gui\+App}}
+\subsubsection[{\texorpdfstring{master(self)}{master(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def pgguiapp.\+P\+G\+Gui\+App.\+master (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classpgguiapp_1_1PGGuiApp_abac82293710b7553c50772ac5b106754}{}\label{classpgguiapp_1_1PGGuiApp_abac82293710b7553c50772ac5b106754}
+\begin{DoxyVerb}master, tk.TK() object\end{DoxyVerb}
+ 
+
+Definition at line 36 of file pgguiapp.\+py.
+
+
+\begin{DoxyCode}
+36     \textcolor{keyword}{def }\hyperlink{classpgguiapp_1_1PGGuiApp_abac82293710b7553c50772ac5b106754}{master}(self):
+37         \textcolor{stringliteral}{"""master, tk.TK() object"""}
+38         \textcolor{keywordflow}{return} self.\hyperlink{classpgguiapp_1_1PGGuiApp_a147387fa0459f91d539308b929010b29}{\_\_master}
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgguiapp.\+py\end{DoxyCompactItemize}

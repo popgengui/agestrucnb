@@ -1,0 +1,106 @@
+\hypertarget{classpgguisimupop_1_1PGGuiSimuPop}{}\section{pgguisimupop.\+P\+G\+Gui\+Simu\+Pop Class Reference}
+\label{classpgguisimupop_1_1PGGuiSimuPop}\index{pgguisimupop.\+P\+G\+Gui\+Simu\+Pop@{pgguisimupop.\+P\+G\+Gui\+Simu\+Pop}}
+Inheritance diagram for pgguisimupop.\+P\+G\+Gui\+Simu\+Pop\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classpgguisimupop_1_1PGGuiSimuPop}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classpgguisimupop_1_1PGGuiSimuPop_a1e7961c0727c5085f0e592a6d82a4282}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+parent, ls\+\_\+resource\+\_\+files=None, s\+\_\+name=\char`\"{}main\+\_\+frame\char`\"{})
+\item 
+def {\bfseries load\+\_\+config\+\_\+file} (self, event=None)\hypertarget{classpgguisimupop_1_1PGGuiSimuPop_a0e36a8e411f21c52c8ff13c4a99dfb69}{}\label{classpgguisimupop_1_1PGGuiSimuPop_a0e36a8e411f21c52c8ff13c4a99dfb69}
+
+\item 
+def {\bfseries select\+\_\+output\+\_\+directory} (self, event=None)\hypertarget{classpgguisimupop_1_1PGGuiSimuPop_ac8a7696f7ce4ca6b65fc49e0ff3009e6}{}\label{classpgguisimupop_1_1PGGuiSimuPop_ac8a7696f7ce4ca6b65fc49e0ff3009e6}
+
+\item 
+def {\bfseries run\+Simulation} (self)\hypertarget{classpgguisimupop_1_1PGGuiSimuPop_aaf77383083383447a93b2b4b2ba678b2}{}\label{classpgguisimupop_1_1PGGuiSimuPop_aaf77383083383447a93b2b4b2ba678b2}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Subclass of PGGuiApp builds a gui and uses its member object "op", which
+implements PGOperaion to enable a  simuPop simulation. Each instance (like this)
+of the PGGuiApp child classes creates its own pgop member internally
+\end{DoxyVerb}
+ 
+
+Definition at line 31 of file pgguisimupop.\+py.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop@{pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop@{pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop}}
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, o\+\_\+parent, ls\+\_\+resource\+\_\+files=\+None, s\+\_\+name=""main\+\_\+frame"")}{__init__(self, o_parent, ls_resource_files=None, s_name="main_frame")}}]{\setlength{\rightskip}{0pt plus 5cm}def pgguisimupop.\+P\+G\+Gui\+Simu\+Pop.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{o\+\_\+parent, }
+\item[{}]{ls\+\_\+resource\+\_\+files = {\ttfamily None}, }
+\item[{}]{s\+\_\+name = {\ttfamily \char`\"{}main\+\_\+frame\char`\"{}}}
+\end{DoxyParamCaption}
+)}\hypertarget{classpgguisimupop_1_1PGGuiSimuPop_a1e7961c0727c5085f0e592a6d82a4282}{}\label{classpgguisimupop_1_1PGGuiSimuPop_a1e7961c0727c5085f0e592a6d82a4282}
+\begin{DoxyVerb}param ls_resources_dir is the location of resource files,
+such as the files that give the fecundity and reproduction
+rates for each model.  
+\end{DoxyVerb}
+ 
+
+Definition at line 38 of file pgguisimupop.\+py.
+
+
+\begin{DoxyCode}
+38     \textcolor{keyword}{def }\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_a1e7961c0727c5085f0e592a6d82a4282}{\_\_init\_\_}( self,  o\_parent, ls\_resource\_files=None, s\_name="main\_frame" ):
+39         \textcolor{stringliteral}{'''}
+40 \textcolor{stringliteral}{        param ls\_resources\_dir is the location of resource files,}
+41 \textcolor{stringliteral}{        such as the files that give the fecundity and reproduction}
+42 \textcolor{stringliteral}{        rates for each model.  }
+43 \textcolor{stringliteral}{        '''}
+44 
+45         \textcolor{comment}{#note this call to super does not work -- a look as stackoverflow}
+46         \textcolor{comment}{#chatter about this indicates that because PGGUIApp inherits Frame,}
+47         \textcolor{comment}{#that Frame must be an "old-style" class (does not inherit from "object")}
+48         \textcolor{comment}{#--rem out super( PGGuiSimuPop, self ).\_\_init\_\_( o\_parent )}
+49         \textcolor{comment}{#instead of call to "super":}
+50         pgg.PGGuiApp.\_\_init\_\_( self, s\_name, o\_parent )
+51 
+52         self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_a3163881d6fafdda55c38f26de3c4d006}{\_\_config\_file}=StringVar()
+53 
+54         self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_a34fa159417c243f57c084d43ccb1b17c}{\_\_output\_directory}=StringVar()
+55         \textcolor{comment}{#we use the tkinter traceable variable}
+56         \textcolor{comment}{#so that, when loaded into an entry box}
+57         \textcolor{comment}{#we can auto update the value as it is }
+58         \textcolor{comment}{#user-edited:}
+59         self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_a8c48e064be333b43a15b1a7e52946642}{\_\_output\_base\_name}=self.
+      \hyperlink{classpgguisimupop_1_1PGGuiSimuPop_af83fda46956ca2f6cd8f20f8f965c167}{\_\_get\_default\_ouput\_base\_name}() 
+60         self.\_\_output\_directory.set( self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_a02ba9eadfa674bc7c177e30fc0ae6e00}{\_\_get\_default\_output\_directory}() )
+61 
+62         \textcolor{comment}{#the PGOpSimuPop object:}
+63         self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_aa4ac11b6f725cd08e2d0c2896035cd80}{\_\_operation}=\textcolor{keywordtype}{None}
+64 
+65         \textcolor{comment}{#file list used to make a PGModelResources }
+66         \textcolor{comment}{#object that fetches param values whose names}
+67         \textcolor{comment}{#are values in the input object's config file}
+68         \textcolor{comment}{#may be assigned None if all param values}
+69         \textcolor{comment}{#are in the configuration file}
+70         self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_a29e5325264dcb90dc66e13ec0bcf41c4}{\_\_resources\_files}=ls\_resource\_files
+71 
+72         \textcolor{comment}{#input object used to make the}
+73         \textcolor{comment}{#operation object type PGOpSimuPop}
+74         self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_aa26382890f391ad36221f7e9140160ad}{\_\_input}=\textcolor{keywordtype}{None}
+75         self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_a5828c39c80729dd98c741fefe328b2dc}{\_\_output}=\textcolor{keywordtype}{None}
+76 
+77         self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_aedcf7bad6db37ff4101cae47f03c8207}{\_\_setup\_output}()
+78         self.\hyperlink{classpgguisimupop_1_1PGGuiSimuPop_ad04f5a8506b5ba111ff2a4ad4925566c}{\_\_init\_interface}()
+79         
+80         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgguisimupop.\+py\end{DoxyCompactItemize}

@@ -1,0 +1,132 @@
+\hypertarget{classpgguiutilities_1_1KeyValFrame}{}\section{pgguiutilities.\+Key\+Val\+Frame Class Reference}
+\label{classpgguiutilities_1_1KeyValFrame}\index{pgguiutilities.\+Key\+Val\+Frame@{pgguiutilities.\+Key\+Val\+Frame}}
+Inheritance diagram for pgguiutilities.\+Key\+Val\+Frame\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classpgguiutilities_1_1KeyValFrame}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classpgguiutilities_1_1KeyValFrame_a7788f433f2bd227c289c16dffee3da71}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+name, v\+\_\+value, o\+\_\+master=None, s\+\_\+parent\+\_\+attribute=None, i\+\_\+entrywidth=7, i\+\_\+labelwidth=15, b\+\_\+is\+\_\+enabled=True, s\+\_\+label\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+entry\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+button\+\_\+text=\textquotesingle{}Cmd\textquotesingle{}, def\+\_\+button\+\_\+command=None)
+\item 
+def {\bfseries val} (self)\hypertarget{classpgguiutilities_1_1KeyValFrame_a4860eae118c334c1a788f8fa4393d02b}{}\label{classpgguiutilities_1_1KeyValFrame_a4860eae118c334c1a788f8fa4393d02b}
+
+\item 
+def {\bfseries val} (self, v\+\_\+value)\hypertarget{classpgguiutilities_1_1KeyValFrame_ad353c861c2c463ae8bd22c3aa19c4703}{}\label{classpgguiutilities_1_1KeyValFrame_ad353c861c2c463ae8bd22c3aa19c4703}
+
+\item 
+def {\bfseries val} (self)\hypertarget{classpgguiutilities_1_1KeyValFrame_a4860eae118c334c1a788f8fa4393d02b}{}\label{classpgguiutilities_1_1KeyValFrame_a4860eae118c334c1a788f8fa4393d02b}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Description
+
+Tkinter frame object that creates,
+from left to right, a label, then 
+one or more entry boxes, one entry box 
+if the type is not "list", otherwise one 
+entry box for each list item.
+
+the instance stores changes in the value(s)
+via callback on enter key.  The current
+key/value state is delivered via a getValue
+
+
+Optionally also updates a an attribute
+in its master object, by name (using getattr)
+whenever the entry box value is updated.
+
+Optionally also places a button to the right
+of the entry box or boxes, and calls a user-supplied
+def whenever a box is updated.\end{DoxyVerb}
+ 
+
+Definition at line 17 of file pgguiutilities.\+py.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{pgguiutilities\+::\+Key\+Val\+Frame@{pgguiutilities\+::\+Key\+Val\+Frame}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!pgguiutilities\+::\+Key\+Val\+Frame@{pgguiutilities\+::\+Key\+Val\+Frame}}
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, s\+\_\+name, v\+\_\+value, o\+\_\+master=\+None, s\+\_\+parent\+\_\+attribute=\+None, i\+\_\+entrywidth=7, i\+\_\+labelwidth=15, b\+\_\+is\+\_\+enabled=\+True, s\+\_\+label\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+entry\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+button\+\_\+text=\textquotesingle{}\+Cmd\textquotesingle{}, def\+\_\+button\+\_\+command=\+None)}{__init__(self, s_name, v_value, o_master=None, s_parent_attribute=None, i_entrywidth=7, i_labelwidth=15, b_is_enabled=True, s_label_justify='right', s_entry_justify='right', s_button_text='Cmd', def_button_command=None)}}]{\setlength{\rightskip}{0pt plus 5cm}def pgguiutilities.\+Key\+Val\+Frame.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{s\+\_\+name, }
+\item[{}]{v\+\_\+value, }
+\item[{}]{o\+\_\+master = {\ttfamily None}, }
+\item[{}]{s\+\_\+parent\+\_\+attribute = {\ttfamily None}, }
+\item[{}]{i\+\_\+entrywidth = {\ttfamily 7}, }
+\item[{}]{i\+\_\+labelwidth = {\ttfamily 15}, }
+\item[{}]{b\+\_\+is\+\_\+enabled = {\ttfamily True}, }
+\item[{}]{s\+\_\+label\+\_\+justify = {\ttfamily \textquotesingle{}right\textquotesingle{}}, }
+\item[{}]{s\+\_\+entry\+\_\+justify = {\ttfamily \textquotesingle{}right\textquotesingle{}}, }
+\item[{}]{s\+\_\+button\+\_\+text = {\ttfamily \textquotesingle{}Cmd\textquotesingle{}}, }
+\item[{}]{def\+\_\+button\+\_\+command = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}\hypertarget{classpgguiutilities_1_1KeyValFrame_a7788f433f2bd227c289c16dffee3da71}{}\label{classpgguiutilities_1_1KeyValFrame_a7788f433f2bd227c289c16dffee3da71}
+\begin{DoxyVerb}Param s_name provides the label text.
+Param o_master is the parent Tkinter object.
+Param s_parent_attribute is the name of 
+    attribute instance that can be accessed
+    using "getattr", and that will be
+    updated when the value is updated.
+Param i_entrywidth gives the width of Entry widget(s).
+Param i_labelwidth gives the width the the Label widget.
+Param s_label_justify gives Label widget "justify" value.
+Param s_entry_justify gives Entry Widget text "justify" value.
+Param s_butten_text gives the Button Widget's text value.
+Param def_button_command gives the def to set to the Button's "command" param.
+\end{DoxyVerb}
+ 
+
+Definition at line 51 of file pgguiutilities.\+py.
+
+
+\begin{DoxyCode}
+51             def\_button\_command = \textcolor{keywordtype}{None} ):
+52         
+53         \textcolor{stringliteral}{"""}
+54 \textcolor{stringliteral}{        Param s\_name provides the label text.}
+55 \textcolor{stringliteral}{        Param o\_master is the parent Tkinter object.}
+56 \textcolor{stringliteral}{        Param s\_parent\_attribute is the name of }
+57 \textcolor{stringliteral}{            attribute instance that can be accessed}
+58 \textcolor{stringliteral}{            using "getattr", and that will be}
+59 \textcolor{stringliteral}{            updated when the value is updated.}
+60 \textcolor{stringliteral}{        Param i\_entrywidth gives the width of Entry widget(s).}
+61 \textcolor{stringliteral}{        Param i\_labelwidth gives the width the the Label widget.}
+62 \textcolor{stringliteral}{        Param s\_label\_justify gives Label widget "justify" value.}
+63 \textcolor{stringliteral}{        Param s\_entry\_justify gives Entry Widget text "justify" value.}
+64 \textcolor{stringliteral}{        Param s\_butten\_text gives the Button Widget's text value.}
+65 \textcolor{stringliteral}{        Param def\_button\_command gives the def to set to the Button's "command" param.}
+66 \textcolor{stringliteral}{        """}
+67         \textcolor{comment}{#TCL won't allow uppercase names for windows}
+68         \textcolor{comment}{#(note that we save the name, case in-tact, in}
+69         \textcolor{comment}{#member \_\_name:}
+70         Frame.\_\_init\_\_( self, o\_master, name=s\_name.lower() )
+71 
+72         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a9ed6687b83a04cd14ece90f98a31db9e}{\_\_master}=o\_master
+73         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_af59a4bb0d9e69cd30aaa7a9451f9d5f5}{\_\_name}=s\_name
+74         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a7dfeedb4c2b5ba27b08b56f3b6c230f0}{\_\_value}=v\_value
+75         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a33c188d7ffcd4a62b10587230ad74e02}{\_\_valuetype}=type( v\_value )
+76         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a0a9f8527e8d3f2b4cf0224daca2d08df}{\_\_entrywidth}=i\_entrywidth
+77         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_ab16516c2a13dfa41130bdea111732142}{\_\_lablewidth}=i\_labelwidth
+78         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a9b4ff58e864b4976d1f1762d7b29bf49}{\_\_labeljustify}=s\_label\_justify
+79         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a0a464ba7eab597a5dd1c92a6e230a315}{\_\_entryjustify}=s\_entry\_justify
+80         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_ada8967e6781fa12b1762743d9067e60e}{\_\_isenabled}=b\_is\_enabled
+81         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_aaa6647cd1f0ac3507b17af60dfd027c0}{\_\_parent\_attribute}=s\_parent\_attribute
+82         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a5b328146665db32e26842f431e41675c}{\_\_button\_text}=s\_button\_text
+83         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a233f2b774ddee5410e5f4bf9379fa122}{\_\_button\_command}=def\_button\_command
+84         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a6edcea179fa3078c6e6a17c5f0b21b08}{\_\_item\_types}=[]
+85         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_a9445a556b65b9744be3000e25b805133}{\_\_entryvals}=[]
+86         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_ab095337005038fe84f406485537a31dd}{\_\_subframe}=\textcolor{keywordtype}{None}
+87         self.\hyperlink{classpgguiutilities_1_1KeyValFrame_af6a8538c51d0cf64b46e60ac48a37fdc}{\_\_setup}()
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgguiutilities.\+py\end{DoxyCompactItemize}
