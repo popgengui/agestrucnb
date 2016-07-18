@@ -27,7 +27,10 @@ class PGHostNotebook( Notebook ):
 	Interface that uses tabbed windows to implement interfaces, one or more PGGuiSimupop and/or PGGuiNeEstimator
 	objects.
 	'''
-	def __init__( self, o_parent, s_menu_config, s_param_names_file_for_simulation, s_glob_life_tables=None, i_max_process_total=1 ):
+	def __init__( self, o_parent, s_menu_config, 
+					s_param_names_file_for_simulation, 
+					s_glob_life_tables=None, i_max_process_total=1, 
+					i_container_padding=10 ):
 		'''
 		params 
 		o_parent, parent ttk.Frame object
@@ -49,7 +52,7 @@ class PGHostNotebook( Notebook ):
 		self.__tab_children=[]
 		self.__glob_life_tables=s_glob_life_tables
 		self.__max_process_total=i_max_process_total
-
+		self.__container_padding=i_container_padding
 		return
 	#end __init__
 
@@ -57,7 +60,7 @@ class PGHostNotebook( Notebook ):
 		'''
 		Add a tabbed frame that offers a PGGuiSimuPop interface
 		'''
-		o_container=Frame( self, padding=CONTAINER_PADDING )
+		o_container=Frame( self, padding=self.__container_padding )
 		o_canvas=Canvas( o_container )
 
 		o_pgg=pggs.PGGuiSimuPop( o_container, 

@@ -8,7 +8,7 @@ __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 
-VERBOSE_CONSOLE=True
+VERBOSE_CONSOLE=False
 VERY_VERBOSE_CONSOLE=False
 #if True, then invokes ncurses debugger
 DO_PUDB=False
