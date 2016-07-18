@@ -1,0 +1,24 @@
+[model]
+name=mcrab
+[pop]
+popSize=4000
+ages=20
+N0=1000
+#newborns always survive
+#olds always die
+survival.male=18*[0.68]
+survival.female=18*[0.74]
+#newborns are not fecund
+fecundity.male=[0, 0, 0, 0, 0, 0, 0, 0, 2.772, 3.463, 4.012, 6.918, 8.694, 10.926, 13.734, 15.996, 15.996, 15.996, 18.628]
+fecundity.female=[0, 0, 0, 0, 0, 0, 0, 0, 2.772, 3.463, 4.012, 6.918, 8.694, 10.926, 13.734, 15.996, 15.996, 15.996, 18.628]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+#mutFreq=1.01E-4
+[sim]
+gens=100
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

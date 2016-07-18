@@ -1,0 +1,24 @@
+[model]
+name=bottlenose
+[pop]
+popSize=10635
+ages=ages["bottlenose"]
+N0=1000
+#newborns always survive
+#olds always die
+survival.male=survivalMale["bottlenose"]
+survival.female=survivalFemale["bottlenose"]
+#newborns are not fecund
+fecundity.male=fecMale["bottlenose"]
+fecundity.female=fecFemale["bottlenose"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+#mutFreq=1.01E-4
+[sim]
+gens=100
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

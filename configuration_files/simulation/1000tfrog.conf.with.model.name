@@ -1,0 +1,24 @@
+[model]
+name=
+[pop]
+popSize=2540
+ages=7
+N0=1000
+#newborns always survive
+#olds always die
+survival.male=[0.690, 0.449, 0.213, 0.213, 0.213]
+survival.female=[0.364, 0.350, 0.286, 0.286, 0.286]
+#newborns are not fecund
+fecundity.male=[0.0, 0.0, 48.7, 52.5, 54.7,56]
+fecundity.female=[0.0, 0.0, 64.1, 58.9, 61.6, 63.1]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+#mutFreq=1.01E-4
+[sim]
+gens=100
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp
