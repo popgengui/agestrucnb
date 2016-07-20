@@ -89,6 +89,7 @@ class PGHostNotebook( Notebook ):
 
 	def removeCurrentTab( self ):
 		self.forget(  "current" )
+		return
 	#end __close_current_tab
 
 	def removeTab( self, i_tab_index ):

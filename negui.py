@@ -12,7 +12,9 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 from Tkinter import *
 from ttk import *
+import sys
 import pghostnotebook as pgn
+import pgutilities as pgu
 
 
 if __name__ == "__main__":
@@ -20,11 +22,21 @@ if __name__ == "__main__":
 	WINDOW_MARGIN=0.20
 	CONTAINER_PADDING=10
 
-	DEFAULT_LIFE_TABLES="resources/*life.table.info"
-	s_progdir="/home/ted/documents/source_code/python/negui"
-	s_menu_config=s_progdir + "/resources/menu_main_interface.txt" 
-	s_param_name_file="resources/simupop.param.names"
-	i_use_this_many_procs=10
+	ls_args=[ "location of resources directory", "number of processes to use for replicate simulations" ]
+
+	s_usage=pgu.do_usage_check( sys.argv, ls_args )
+
+	if s_usage:
+		print( s_usage )
+		sys.exit()
+	#end if usage
+
+	s_resource_directory=sys.argv[1]
+	i_total_simultaneous_processes=int( sys.argv[2] )
+
+	s_default_life_tables=s_resource_directory + "/*life.table.info"
+	s_menu_config=s_resource_directory + "/menu_main_interface.txt" 
+	s_param_name_file=s_resource_directory + "/simupop.param.names"
 
 	o_master=Tk()
 
@@ -38,8 +50,8 @@ if __name__ == "__main__":
 	o_host=pgn.PGHostNotebook( o_master, 
 			s_menu_config, 
 			s_param_name_file, 
-			s_glob_life_tables=DEFAULT_LIFE_TABLES,
-			i_max_process_total=i_use_this_many_procs )
+			s_glob_life_tables=s_default_life_tables,
+			i_max_process_total=i_total_simultaneous_processes )
 
 	o_host.grid( row=0 )
 	o_host.grid_rowconfigure( 0, weight=1 )
@@ -51,7 +63,6 @@ if __name__ == "__main__":
 	o_master.grid_rowconfigure( 0, weight=1 )
 	o_master.grid_columnconfigure( 0, weight=1 )
 	o_master.mainloop()
-
 
 	o_host.addPGGuiSimupop( i_container_padding=CONTAINER_PADDING )
 

@@ -8,6 +8,9 @@ __filename__ = "pginputsimupop.py"
 __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
+START_LAMBDA_IGNORE=99999
+LAMBDA_IGNORE=1.0
+
 import os
 from ConfigParser import ConfigParser
 from ConfigParser import NoSectionError
@@ -228,9 +231,9 @@ class PGInputSimuPop( object ):
 			self.lbd = config.getfloat("pop", "lambda")
 			#self.lbd = mp.mpf(config.get("pop", "lambda"))
 		else:
-			self.startLambda = 99999
+			self.startLambda = START_LAMBDA_IGNORE
 			#self.lbd = mp.mpf(1.0)
-			self.lbd = 1.0
+			self.lbd = LAMBDA_IGNORE
 		#end if startLambda, else not
 		self.__update_attribute_config_file_info( "startLambda", "pop", "startLambda" )
 		self.__update_attribute_config_file_info( "lbd", "pop", "lambda" )

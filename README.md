@@ -43,9 +43,10 @@ Current limitations
 
 Running the programs
 
-	1. Simulation GUI interface.  We aimed to make the GUI interface self-explanatory, and so simply from the terminal typing 
-		"python negui.py"
-	   should get you the program's running state. Loading a new simulation from the "New" menu, then a configuration file (using the interface button) from the provided set, in the downloaded "configuration/simulation" subdirectory will then populate the GUI with the parameters that will be used in the simulation.  You can edit these values.  The current set of values will be written to a new configuration file with the "Out files base name" that you accept or input yourself in the text box so labelled.
+	1. Simulation GUI interface.  We aimed to make the GUI interface self-explanatory. The interface is invoked with:
+		"python negui.py <location of the resources directory> <maximum processors to use for computing replicates>"
+	   
+	    Currently you add a new simulation session from the "New" menu, then a configuration file (using the interface button) from the provided set, in the downloaded "configuration/simulation" subdirectory will then populate the GUI with the parameters that will be used in the simulation.  You can edit these values.  The current set of values will be written to a new configuration file with the "Out files base name" that you accept or input yourself in the text box so labelled.
 	2. Ne Estimation from your terminal.  Providing that the python modules are in your PYTHONPATH variable, or that you are invoking the program from the directory containing them, then you can invoke the program with:
 
 		"python pgdriveneestimator.py <"glob expression"> <"percent" or "remove"> <comma-separated list of integers, percentages, or N's for remove-N sampling> <integer, minimum population size> <float, minimum allele frequency (NeEstimator "critical" value)> <integer, number of replicates to run> <optional, integer, total processes to use (default is 1), required if the "debug" parameter is used> <optional, "debug1" to add to the output a table listing, for each indiv. in each file, which replicate Ne estimates include the indiv, or, "debug2" to run without parallelized processes,to produce the table, and to save all subsample genepop files and NeEstimator output files.>

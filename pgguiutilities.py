@@ -6,16 +6,36 @@ helper objects, with no PG specific function.
 '''
 __filename__ = "pgguiutilities.py"
 __date__ = "20160427"
-__author__ = "Ted Cosart<ted.cosart@umontana.edu>"
+__author__ = "Ted Cosart<ted.cosart@umontana.edu and " \
+				+ "Fredrik Lundh for the Autoscrollbar class (see below)"
 
 
 from Tkinter import *
 from ttk import *
-import autoscrollbar as asb
 import createtooltip as ctt
 import sys
 
 import tkMessageBox
+
+'''
+Fred Lundh's code from
+http://effbot.org/zone/tkinter-autoscrollbar.htm
+'''
+class FredLundhsAutoScrollbar(Scrollbar):
+    # a scrollbar that hides itself if it's not needed.  only
+    # works if you use the grid geometry manager.
+    def set(self, lo, hi):
+        if float(lo) <= 0.0 and float(hi) >= 1.0:
+            # grid_remove is currently missing from Tkinter!
+            self.tk.call("grid", "remove", self)
+        else:
+            self.grid()
+        Scrollbar.set(self, lo, hi)
+    def pack(self, **kw):
+        raise TclError, "cannot use pack with this widget"
+    def place(self, **kw):
+        raise TclError, "cannot use place with this widget"
+#end class FredLundhsAutoScrollbar
 
 class KeyValFrame( Frame ):
 
@@ -210,7 +230,7 @@ class KeyValFrame( Frame ):
 
 	def __setup_subwidgets( self ):
 
-		o_horiz_scroll=asb.AutoScrollbar( self, orient=HORIZONTAL )
+		o_horiz_scroll=FredLundhsAutoScrollbar( self, orient=HORIZONTAL )
 		self.__canvas=Canvas( self, xscrollcommand=o_horiz_scroll.set )
 		self.__subframe=Frame( self.__canvas, padding=self.__subframe_padding )
 
@@ -523,7 +543,7 @@ class KeyCategoricalValueFrame( Frame ):
 
 	def __setup_subwidgets( self ):
 
-		o_horiz_scroll=asb.AutoScrollbar( self, orient=HORIZONTAL )
+		o_horiz_scroll=FredLundhsAutoScrollbar( self, orient=HORIZONTAL )
 		self.__canvas=Canvas( self, xscrollcommand=o_horiz_scroll.set )
 		self.__subframe=Frame( self.__canvas )
 
@@ -701,13 +721,13 @@ class FrameContainerScrolled( object ):
 		self.__child_id=self.__canvas.create_window( 0,0,anchor=NW, window=self.__child_frame )
 
 		if self.__scroll_direction==FrameContainerScrolled.SCROLLVERTICAL:
-			o_scroll=asb.AutoScrollbar( self.__parent_frame, orient=VERTICAL )
+			o_scroll=FredLundhsAutoScrollbar( self.__parent_frame, orient=VERTICAL )
 			self.__canvas.config( yscrollcommand=o_scroll.set )
 			o_scroll.config( command=self.__canvas.yview )
 			o_scroll.grid( row=0, column=2, sticky=( N, S ) )
 
 		elif self.__scroll_direction==FrameContainerScrolled.SCROLLHORIZONTAL:
-			o_scroll=asb.AutoScrollbar( self.__parent_frame, orient=HORIZONTAL )
+			o_scroll=FredLundhsAutoScrollbar( self.__parent_frame, orient=HORIZONTAL )
 			self.__canvas.config( xscrollcommand=o_scroll.set )
 			o_scroll.config( command=self.__canvas.xview )
 			o_scroll.grid( row=2, column=0, sticky=( W, E ) )
@@ -803,7 +823,7 @@ class FrameContainerVScroll( object ):
 
 		self.__child_id=self.__canvas.create_window( 0,0,anchor=NW, window=self.__child_frame )
 
-		o_scroll=asb.AutoScrollbar( self.__parent_frame, orient=VERTICAL )
+		o_scroll=FredLundhsAutoScrollbar( self.__parent_frame, orient=VERTICAL )
 
 		self.__canvas.config( yscrollcommand=o_scroll.set )
 

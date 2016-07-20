@@ -19,7 +19,8 @@ if DO_PUDB:
 
 import apgoperation as modop
 import pgutilities as pgut
-
+#for the lambda-ignore constant:
+import pginputsimupop as pgin
 from simuOpt import simuOptions
 simuOptions["Quiet"] = True
 import simuPOP as sp
@@ -82,9 +83,9 @@ class PGOpSimuPop( modop.APGOperation ):
 		
 		s_basename_without_replicate_number=self.output.basename	
 		
-		##### temp
-		print( "resetting output basename with tag: " + s_tag_out )
-		#####
+		if VERY_VERBOSE_CONSOLE==True:
+			print( "resetting output basename with tag: " + s_tag_out )
+		#end if VERY_VERBOSE_CONSOLE
 
 		self.output.basename=s_basename_without_replicate_number + s_tag_out
 
@@ -208,12 +209,12 @@ class PGOpSimuPop( modop.APGOperation ):
 		startLambda=self.input.startLambda
 		lbd=self.input.lbd
 		initOps = [sp.InitSex(maleFreq=self.input.maleProb)]
-		if startLambda < 99999:
+		if startLambda < pgin.START_LAMBDA_IGNORE:
 			preOps = [sp.ResizeSubPops(proportions=(float(lbd), ),
 								begin=startLambda)]
 		else:
 			preOps = []
-		#end if lambda < 99999
+		#end if lambda < VALUE_NO_LAMBA
 
 		postOps = []
 
