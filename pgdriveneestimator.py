@@ -28,6 +28,14 @@ import sys
 import os
 from multiprocessing import Pool
 
+#in order to properly name the subsampled
+#files with replicate number, sample parameter
+#value, and population number, and not to subsequently
+#violate the NeEstimators limit of writing file names
+#to 31 characters, we impose this limit on the input
+#genepop files:
+MAX_GENEPOP_FILE_NAME_LENGTH=31
+
 #read genepop file, and 
 #sample its pop, and store
 #results:
@@ -48,8 +56,33 @@ SAMPLE_BY_PERCENTAGES="percent"
 SAMPLE_BY_REMOVAL="remove"
 
 OUTPUT_DELIMITER="\t"
+ENDLINE_SEQ="\n"
 OUTPUT_ENDLINE="\n"
 REPLICATE_DELIMITER=","
+
+#case number will be the populatiuon number
+#based on the subsampled file sent to the
+#Ne Estimator, but we will be using pop numbers
+#always based on the original geepop file --
+#and the current case ( Mon Jul 25 19:49:56 MDT 2016)
+#is that before doing Ne Estimation, we split 
+#up the original so that each population in it
+#is run via a (temporary) separate genepop file,
+#hence this field is always 0:
+NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=[ "case_number" ]
+
+
+def set_indices_ne_estimator_output_fields_to_skip():
+
+	IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=[]
+
+	for s_field_name in NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP:
+		i_idx=pgout.PGOutputNeEstimator.OUTPUT_FIELDS.index( s_field_name )
+		IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP.append( i_idx )
+	#end for each ne est output field name
+
+	return IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP
+#end set_indices_ne_estimator_output_fields_to_skip
 
 
 class DebugMode( object ):
@@ -95,7 +128,8 @@ class DebugMode( object ):
 					+ DebugMode.KEEP_ESTIMATOR_FILES \
 					+ DebugMode.MAKE_INDIV_TABLE  \
 					+ DebugMode.KEEP_NODAT_FILES \
-					+ DebugMode.KEEP_NEXTP_FILES
+					+ DebugMode.KEEP_NEXTP_FILES \
+					+ DebugMode.PRINT_REPLICATE_SELECTIONS
 		elif self.__mode==DebugMode.TEST_SERIAL:
 			self.__modeval=DebugMode.KEEP_REPLICATE_GENEPOP_FILES \
 					+ DebugMode.KEEP_ESTIMATOR_FILES \
@@ -155,6 +189,30 @@ def set_debug_mode( s_arg ):
 
 #end set_debug_mode
 
+def get_invalid_file_names( ls_file_names ):
+	'''
+	Currently only check is for file name
+	length (see comments above declaration of const 
+	MAX_GENEPOP_FILE_NAME_LENGTH.
+	'''
+	MSG_FILE_TOO_LONG="File name longer than " \
+			+ str( MAX_GENEPOP_FILE_NAME_LENGTH ) \
+			+ " characters."
+
+	ls_invalid_file_names_and_messages=[]
+	
+	for s_file_name in ls_file_names:
+		s_file_name_no_path=os.path.basename( s_file_name )
+		i_len_file_name=len( s_file_name_no_path )
+		if i_len_file_name > MAX_GENEPOP_FILE_NAME_LENGTH:
+			ls_invalid_file_names_and_messages.append( \
+					", ".join( [ s_file_name, MSG_FILE_TOO_LONG ] ) )
+		#and if file name too long
+	#end for each file name
+
+	return ls_invalid_file_names_and_messages
+#end get_invalid_file_names
+
 def parse_args( *args ):
 
 	IDX_FILE_GLOB=0
@@ -167,8 +225,23 @@ def parse_args( *args ):
 	IDX_DEBUG_MODE=7
 
 	s_glob	=  args[ IDX_FILE_GLOB ]
+
 	ls_files=glob.glob( s_glob )
+	ls_invalid_file_names_and_messages=get_invalid_file_names( ls_files )
+
+	if len( ls_invalid_file_names_and_messages ) > 1:
+		s_details="\n".join( ls_invalid_file_names_and_messages )
+		s_msg="In pgdriveneestimator.py, def parse_args, " \
+				+ "the following files can't be processed for " \
+				+ "the reasons noted:\n" 
+		s_msg += s_details
+
+		raise Exception( s_msg )
+
+	#end if invalid file names, exception
+
 	s_sample_scheme=args[ IDX_SAMPLE_SCHEME ]
+
 	#if percentages,  convert to proportions
 	#for the sampler
 	if s_sample_scheme == SAMPLE_BY_PERCENTAGES:
@@ -177,7 +250,7 @@ def parse_args( *args ):
 		lv_sample_values=[ int( s_val ) for s_val in args[ IDX_SAMPLE_VALUE_LIST ].split( "," ) ]
 	else:
 		s_msg = "In pgdriveneestimator.py, def parse_args, unknown sample scheme: " \
-							+ s_sample_scheme + "."
+						+ s_sample_scheme + "."
 		raise Exception( s_msg  )
 	#end if sample percent, else removal, else error
 
@@ -192,7 +265,6 @@ def parse_args( *args ):
 	return( ls_files, s_sample_scheme, lv_sample_values, 
 								i_min_pop_size, f_min_allele_freq, 
 								i_total_replicates, i_total_processes, o_debug_mode )
-
 #end parse_args
 
 def get_sample_val_and_rep_number_from_sample_name( s_sample_name, s_sample_scheme ):
@@ -227,7 +299,7 @@ def raise_exception_if_non_single_pop_file( o_genepopfile ):
 			s_msg+="Current implementation of drive accepts genepop " \
 				+ "files with only a single pop."
 		#end if lt 1 else more
-		raise Exceptioni( s_msg )
+		raise Exception( s_msg )
 	#end if non-single pop file
 
 	return
@@ -237,16 +309,11 @@ def get_pops_in_file_too_small_to_run( o_genepopfile, f_proportion, i_min_pop_si
 
 	'''
 	checks size of every pop in the file
-	but as of Tue May 17 20:09:17 MDT 2016
-	we still only accept genepop files
-	with a single pop.  However, likely
-	we'll want to implement in the future
-	skipping some pops and accepting others,
-	all from the same file, hence the returned
-	list of indexes into pop sizes
+	in case we need to skip some pops and 
+	accept others.
 	'''
 
-	li_popsizes=o_genepopfile.indiv_count_per_pop
+	li_popsizes=o_genepopfile.getIndividualCounts()
 
 	li_pops_too_small = []
 	for idx_pop in range( len ( li_popsizes ) ):
@@ -260,35 +327,54 @@ def get_pops_in_file_too_small_to_run( o_genepopfile, f_proportion, i_min_pop_si
 
 def do_estimate( ( o_genepopfile, o_ne_estimator, 
 				f_proportion, f_min_allele_freq, 
-				s_subsample_tag, i_replicate_number, 
-				o_debug_mode ) ):
+				s_subsample_tag, s_pop_subsample_tag,
+				i_replicate_number, 
+				o_debug_mode,
+				IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP) ):
 
 	s_genepop_file_subsample=o_ne_estimator.input.genepop_file
 
 	o_genepopfile.writeGenePopFile( s_genepop_file_subsample, 
-					s_indiv_subsample_tag=s_subsample_tag ) 
+					s_indiv_subsample_tag=s_subsample_tag,
+					s_pop_subsample_tag=s_pop_subsample_tag ) 
 
 	o_ne_estimator.doOp()
 
-	s_output=o_ne_estimator.deliverResults()
+	llv_output=o_ne_estimator.deliverResults()
 
-	li_sample_indiv_count=o_genepopfile.getIndivCountPerSubsample( s_subsample_tag )
+	li_sample_indiv_count=o_genepopfile.getIndividualCounts( s_indiv_subsample_tag = s_subsample_tag, 
+			s_pop_subsample_tag = s_pop_subsample_tag )
 
-	#as of Fri May 20 2016 we assume the file has only one pop, 
-	#but in case a non-single-pop file gets through earlier test:
-	if len( li_sample_indiv_count ) != 1:
-		s_msg="In pgdriveneestimator, do_estimate(), found GenepopFileManager object " \
-				+ "instance with more than one pop.  Original file: " \
-				+ o_genepopfile.original_file_name 
-		raise Exception ( s_msg )
-	#end if non-single-pop file
+	s_sample_indiv_count = str( li_sample_indiv_count[ 0 ] )
 
-	s_sample_indiv_count=str( li_sample_indiv_count[ 0 ] )
+	ls_runinfo=[ o_genepopfile.original_file_name, 
+			s_pop_subsample_tag, 
+			s_sample_indiv_count, 
+			str( f_proportion ), 
+			str( i_replicate_number), 
+			str( f_min_allele_freq ) ]
+	
+	ls_stdout=[]
 
-	ls_runinfo=[ o_genepopfile.original_file_name, s_sample_indiv_count, 
-			str( f_proportion ), str( i_replicate_number), str( f_min_allele_freq ) ]
+	for lv_output in llv_output:
+		ls_fields_to_report=[]	
+		ls_output_vals_as_strings=[ str( v_val ) for v_val in lv_output ]
 
-	s_stdout=OUTPUT_DELIMITER.join(  ls_runinfo + [ s_output ] ) 
+		for idx in range( len( ls_output_vals_as_strings ) ):
+			if idx not in IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP:
+				ls_fields_to_report.append( ls_output_vals_as_strings[ idx ] )
+			#end if idx is not for a field we're skipping
+		#end for each field's index
+
+		ls_stdout.append( OUTPUT_DELIMITER.join(  ls_runinfo + ls_fields_to_report )  )
+
+	#end for each line of parsed NeEstimator Output
+	
+	#Make one long string, endline-delimited, for the stdout.
+	#Note:  if the inpout genepop file had only one
+	#population, this should be a single line of text.
+
+	s_stdout=ENDLINE_SEQ.join( ls_stdout )
 
 	s_stderr=None
 
@@ -307,10 +393,8 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 	#end if nodat file is not none
 
 	if o_debug_mode.isSet( DebugMode.MAKE_INDIV_TABLE ):
-		#as of Mon May 23 14:43:26 MDT 2016
-		#we only process single-pop genepop files,
-		#and so the pop number is always 1
-		ls_indiv_list = o_genepopfile.getListIndividuals( i_pop_number=1, 
+		ls_indiv_list = o_genepopfile.getListIndividuals( 
+				i_pop_number=int( s_pop_subsample_tag ), 
 				s_indiv_subsample_tag = s_subsample_tag )	
 	#end if return list indiv
 	
@@ -345,12 +429,13 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 					else { "file" : o_genepopfile.original_file_name, 
 						"proportion": f_proportion,
 						"rep" : i_replicate_number,
-						"list" : ls_indiv_list } }
+						"list" : ls_indiv_list,
+						"pop" : s_pop_subsample_tag } }
 
 #end do_estimate
 
 def write_results( ds_results ):
-	sys.stdout.write( ds_results[ "for_stdout" ] )
+	sys.stdout.write( ds_results[ "for_stdout" ] + "\n" )
 	if ds_results[ "for_stderr" ] is not None:
 		sys.stderr.write( ds_results [ "for_stderr" ] )
 	#end if we have stderr results
@@ -359,6 +444,7 @@ def write_results( ds_results ):
 def update_indiv_list( dddli_indiv_list, dv_indiv_info_for_replicate, lf_proportions ):
 
 	s_orig_file=dv_indiv_info_for_replicate[ "file" ]
+	s_population_number=dv_indiv_info_for_replicate[ "pop" ]
 	f_this_proportion= dv_indiv_info_for_replicate[ "proportion" ]  
 	i_replicate= dv_indiv_info_for_replicate[ "rep" ] 
 	ls_individuals=dv_indiv_info_for_replicate[ "list" ]
@@ -367,22 +453,25 @@ def update_indiv_list( dddli_indiv_list, dv_indiv_info_for_replicate, lf_proport
 		dddli_indiv_list[ s_orig_file ] = {}
 	#end if file new to list
 
+	if s_population_number not in dddli_indiv_list[ s_orig_file ]:
+		dddli_indiv_list[ s_orig_file ] [ s_population_number ]={}
+	#end if pop name new 
+
 	for s_indiv in ls_individuals:
-		if s_indiv not in dddli_indiv_list[ s_orig_file ]:
-			dddli_indiv_list[ s_orig_file ][ s_indiv ] = {} 
+		if s_indiv not in dddli_indiv_list[ s_orig_file ][ s_population_number ]:
+			dddli_indiv_list[ s_orig_file ][ s_population_number ] [ s_indiv ] = {} 
 		#end if new indiv
 
 		#we create an empty list for each proportion at once.
 		#hence if a give proportionn is missing from the current dddli_indiv_list
 		#for this file/indiv combo, we know we need to add all proportions:
-		if f_this_proportion not in dddli_indiv_list[ s_orig_file ][ s_indiv ]:
+		if f_this_proportion not in dddli_indiv_list[ s_orig_file ][ s_population_number][ s_indiv ]:
 			for f_proportion in lf_proportions:
-				dddli_indiv_list[ s_orig_file ][ s_indiv ][ f_proportion ] = []
+				dddli_indiv_list[ s_orig_file ][ s_population_number ][ s_indiv ][ f_proportion ] = []
 			#end for each proportion
 		#end if new proportion
 
-		dddli_indiv_list[ s_orig_file ][ s_indiv ][ f_this_proportion ].append( i_replicate )
-
+		dddli_indiv_list[ s_orig_file ][s_population_number][ s_indiv ][ f_this_proportion ].append( i_replicate )
 	#end for each individual
 
 	return
@@ -395,7 +484,7 @@ def make_indiv_table_name():
 #end make_indiv_table_name
 
 def get_indiv_table_header(  lf_proportions ):
-	s_header="original_file\tindividual"
+	s_header="original_file\tpop_number\tindividual"
 	s_header=OUTPUT_DELIMITER.join( [ s_header ] + \
 			[ str( f_proportion )  for f_proportion in lf_proportions ]   )
 	return s_header
@@ -419,23 +508,24 @@ def write_indiv_table( dddli_indiv_list, s_file_name, lf_proportions ):
 	o_indiv_table.write( s_header + "\n" )
 
 	for s_file in dddli_indiv_list:
-		for s_indiv in dddli_indiv_list[ s_file ]:
-			s_reps_by_proportion=""
-			#sort proportions to sync up with header:
-			lf_proportion_keys_sorted=(dddli_indiv_list[ s_file ][ s_indiv ]).keys()
-			lf_proportion_keys_sorted.sort()
-			for f_proportion in lf_proportion_keys_sorted:
-				ls_replist=dddli_indiv_list[ s_file ] [ s_indiv ][ f_proportion ]
-				s_reps=REPLICATE_DELIMITER.join( [ str( i_rep ) for i_rep in ls_replist ] )
-				#may be an empty list of replicates, if this indiv
-				#did not get sampled at this proportion:
-				s_reps="NA" if s_reps == "" else s_reps
-				s_reps_by_proportion+=OUTPUT_DELIMITER + s_reps 
-			#end for each proportion
+		for s_pop_number in dddli_indiv_list[ s_file ]:
+			for s_indiv in dddli_indiv_list[ s_file ][s_pop_number]:
+				s_reps_by_proportion=""
+				#sort proportions to sync up with header:
+				lf_proportion_keys_sorted=(dddli_indiv_list[ s_file ][s_pop_number][ s_indiv ]).keys()
+				lf_proportion_keys_sorted.sort()
+				for f_proportion in lf_proportion_keys_sorted:
+					ls_replist=dddli_indiv_list[ s_file ][s_pop_number] [ s_indiv ][ f_proportion ]
+					s_reps=REPLICATE_DELIMITER.join( [ str( i_rep ) for i_rep in ls_replist ] )
+					#may be an empty list of replicates, if this indiv
+					#did not get sampled at this proportion:
+					s_reps="NA" if s_reps == "" else s_reps
+					s_reps_by_proportion+=OUTPUT_DELIMITER + s_reps 
+				#end for each proportion
 
-			s_entry = OUTPUT_DELIMITER.join( [ s_file, s_indiv ] )
-			s_entry += s_reps_by_proportion
-			o_indiv_table.write( s_entry + "\n" )
+				s_entry = OUTPUT_DELIMITER.join( [ s_file, s_pop_number, s_indiv ] )
+				s_entry += s_reps_by_proportion
+				o_indiv_table.write( s_entry + "\n" )
 
 		#end for each indiv
 	#end for each file
@@ -443,33 +533,29 @@ def write_indiv_table( dddli_indiv_list, s_file_name, lf_proportions ):
 	return
 #end write_indiv_table
 
-def print_test_list_replicate_selection_indices( o_genepopfile,  s_subsample_tag ):
+def print_test_list_replicate_selection_indices( o_genepopfile,  
+													s_sample_scheme, 
+													s_indiv_subsample_tag,
+													s_population_subsample_tag ):
 
-	s_population_subsample_tag=o_genepopfile.population_subsample_tags[0]
-
-	s_sample_scheme=s_population_subsample_tag
-
-	li_pop_numbers=o_genepopfile.getListPopulationNumbers( s_population_subsample_tag )
-
-	i_sample_value, i_replicate_number=get_sample_val_and_rep_number_from_sample_name( s_subsample_tag, 
+	i_sample_value, i_replicate_number = \
+			get_sample_val_and_rep_number_from_sample_name( s_indiv_subsample_tag, 
 			s_sample_scheme )
 
-	for i_pop_number in li_pop_numbers:
+	li_selected_indices=o_genepopfile.getListIndividualNumbers( \
+						i_pop_number = int( s_population_subsample_tag ), 
+						s_indiv_subsample_tag=s_indiv_subsample_tag )
 
-		li_selected_indices=o_genepopfile.getListIndividualNumbers( \
-							i_pop_number = i_pop_number, 
-							s_indiv_subsample_tag=s_subsample_tag )
+	s_indiv_indices= ",".join( [ str(i) for i in li_selected_indices ] ) 
 
-		s_indiv_indices= ",".join( [ str(i) for i in li_selected_indices ] ) 
+	ls_values_to_print=	[ o_genepopfile.original_file_name, 
+								s_population_subsample_tag,
+								str( i_sample_value ), 
+								str( i_replicate_number ), 
+								s_indiv_indices ] 
 
-		ls_values_to_print=[ str( i_pop_number), 
-									o_genepopfile.original_file_name, 
-									str( i_sample_value ), 
-									str( i_replicate_number ), 
-									s_indiv_indices ] 
-
-		s_values_to_print="\t".join( ls_values_to_print )
-		sys.stderr.write( s_values_to_print + "\n" )
+	s_values_to_print="\t".join( ls_values_to_print )
+	sys.stderr.write( s_values_to_print + "\n" )
 	#end for each pop number, print the selected indices
 	return
 #end get_test_list_replicate_selection_indices
@@ -519,34 +605,34 @@ def do_sample( o_genepopfile, s_sample_scheme, lv_sample_values, i_replicates ):
 
 def add_to_set_of_calls_to_do_estimate( o_genepopfile, 
 						f_min_allele_freq, 
+						i_min_pop_size,
 						o_debug_mode,
-						llv_args_each_process ):
+						llv_args_each_process,
+						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP ):
 	'''		
 	creates ne-estimator caller object and adds it to list of args for a single call
 	to do estimate.  This call is then appended to llv_args_each_process
 	'''
 
 	#all these GenepopFileManager objects should now have
-	#a single population sample name (also the sampling schemt type):
+	#a single population sample name (and which also names the 
+	#sampling scheme type):
 	s_population_sample_name=o_genepopfile.population_subsample_tags[ 0 ]
 	s_sample_scheme=s_population_sample_name
 
 	ls_indiv_sample_names=o_genepopfile.indiv_subsample_tags
 
 	li_population_numbers=o_genepopfile.getListPopulationNumbers( s_population_sample_name )
-
-	df_samples_with_zero_individuals={}
-
+	#for each sample (i.e. for each replicate of a sampling with a given set of params:
 	for s_indiv_sample in ls_indiv_sample_names:
-		i_total_indiv_all_pops_this_subsample=0
-		for i_population_number in li_population_numbers:
-			i_total_indiv_all_pops_this_subsample+= \
-					o_genepopfile.getIndivCountPerSubsampleForPop( s_indiv_sample, i_population_number )
-		#end for each population number
 
-		if i_total_indiv_all_pops_this_subsample == 0:
+		#we also check that at least one pop has at least one individual
+		#listed for this subsample
+		li_indiv_counts_for_this_sample=o_genepopfile.getIndividualCounts( s_indiv_subsample_tag=s_indiv_sample )
+	
+		if sum( li_indiv_counts_for_this_sample ) == 0:
 			v_sample_value, i_replicate_count=get_sample_val_and_rep_number_from_sample_name( \
-										s_indiv_sample, s_sample_scheme )
+											s_indiv_sample, s_sample_scheme )
 			#we only want to report the first replicate
 			#(by inference of course all replicates will be skipped:
 			if i_replicate_count == 0:
@@ -554,17 +640,48 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 						+ o_genepopfile.original_file_name \
 						+ ".  In pgdriveneestimator.py, all populations " \
 						+ "have zero individuals when sampled using " \
-						+ "scheme: " + s_population_sample_name  \
+						+ "scheme: " + s_sample_scheme \
 						+ ", and with sample parameter, " + str( v_sample_value ) + "."
 				sys.stderr.write( s_msg + "\n" )
 			#end if first replicate, report
-		else:
+			continue
+		#end skip this subsample if no pops have any individuals
+
+		#we skip populations if their (original, un-subsampled size is under 
+		#min_pop_size -- so moved this call above the subsampling
+		#loop, and revised to check the population size(s) in the
+		#original file #make sure the population(s) meet the min size criteria:
+		li_too_small_pops=get_pops_in_file_too_small_to_run( o_genepopfile, 1.0, i_min_pop_size )
+
+		#to most-efficiently use multi-processes, that is, to assign to a process a single
+		#file with many populations, we sample each pop in the file separately, and divvy
+		#the pops up among processes:
+		for i_population_number in li_population_numbers:
+
+			if i_population_number in li_too_small_pops:
+				s_msg=( "In pgdriveneestimator.py, def drive_estimator, " \
+								+ " in file, "  + s_filename \
+								+ ", skipping pop number, "  + str( i_pop_number ) \
+								+ ".  It has fewer than " + str( i_min_pop_size ) \
+								+ " individuals." )
+				sys.stderr.write( s_msg + "\n" )
+				continue
+			#end if i_population_number is
+
+			#we make population subsample list consisting of only this populations number:
+			s_this_pop_sample_name=str( i_population_number ) 
+
+			o_genepopfile.subsamplePopulationsByList( [ i_population_number ], s_this_pop_sample_name )
 
 			if o_debug_mode.isSet( DebugMode.PRINT_REPLICATE_SELECTIONS ):
-				print_test_list_replicate_selection_indices( o_genepopfile, s_indiv_sample )
-			#end if we're testing
+				print_test_list_replicate_selection_indices( o_genepopfile, 
+										s_sample_scheme,	
+										s_indiv_sample, 
+										s_population_subsample_tag=s_this_pop_sample_name )
+			#end if we're testing, print 
 				
-			s_genepop_file_subsample=o_genepopfile.original_file_name + "_" +  s_indiv_sample
+			s_genepop_file_subsample=o_genepopfile.original_file_name + "_" +  s_indiv_sample \
+											+ "_g_" + s_this_pop_sample_name
 
 			i_sample_value, i_replicate_number= \
 						get_sample_val_and_rep_number_from_sample_name( s_indiv_sample, s_sample_scheme )
@@ -606,12 +723,18 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 			v_sample_value, i_replicate_number = \
 					get_sample_val_and_rep_number_from_sample_name( s_indiv_sample, s_sample_scheme )
 
-			lv_these_args = [ o_genepopfile,  o_ne_estimator, v_sample_value, 
-								f_min_allele_freq, s_indiv_sample, 
-								i_replicate_number, o_debug_mode ]
+			lv_these_args = [ o_genepopfile,  
+								o_ne_estimator, 
+								v_sample_value, 
+								f_min_allele_freq, 
+								s_indiv_sample, 
+								s_this_pop_sample_name, 
+								i_replicate_number, 
+								o_debug_mode,
+								IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP ]
 
 			llv_args_each_process.append( lv_these_args )
-		#end if this subsample has no indiv, else has
+		#end for each population
 	#end for each sample name
 	return
 #end add_to_set_of_calls_to_do_estimate
@@ -663,6 +786,26 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 	return lds_results
 #end execute_ne_for_each_sample
 
+def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP ):
+
+	#write header -- field names for the main output table
+
+	ls_estimator_fields=pgout.PGOutputNeEstimator.OUTPUT_FIELDS
+
+	ls_reported_fields=[]
+
+	for s_field in ls_estimator_fields:
+		if s_field not in NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP:
+			ls_reported_fields.append( s_field )
+		#end if field in estimatorfields
+	#end for each estimator fields
+
+	ls_run_fields=[ "original_file", "pop", "indiv_count", "sample_value", "replicate_number", 
+						"min_allele_freq" ] 
+
+	sys.stdout.write( OUTPUT_DELIMITER.join( ls_run_fields + ls_reported_fields  ) + OUTPUT_ENDLINE )
+#end write_header_main_table
+
 def drive_estimator( *args ):
 
 	( ls_files, s_sample_scheme, lv_sample_values, 
@@ -670,6 +813,9 @@ def drive_estimator( *args ):
 				i_total_processes, o_debug_mode ) =  parse_args( *args )
 
 	o_process_pool=None
+
+	IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP = \
+			set_indices_ne_estimator_output_fields_to_skip()
 
 	if o_debug_mode.isSet( DebugMode.ALLOW_MULTI_PROCESSES ):
 		o_process_pool=Pool( i_total_processes )
@@ -690,46 +836,22 @@ def drive_estimator( *args ):
 	#the counters will total
 	#this on the first call to estimator:
 	FIRST_RUN=3
-	#write header -- field names for the main output table
-	ls_estimator_fields=pgout.PGOutputNeEstimator.OUTPUT_FIELDS
 
-	ls_run_fields=[ "original_file", "indiv_count", "sample_value", "replicate_number", 
-						"min_allele_freq" ]
-
-	sys.stdout.write( OUTPUT_DELIMITER.join( ls_run_fields + ls_estimator_fields  ) + OUTPUT_ENDLINE )
-
+	write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP )
+	
 	for s_filename in ls_files:
 
 		o_genepopfile=gpf.GenepopFileManager( s_filename )
 
-		#as of Tue May 10 2016 -- not yet sure how to
-		#handle multi-pop genepop files
-		raise_exception_if_non_single_pop_file( o_genepopfile,  )
-
-		#revised on Tue May 17 -- I had implemented the wrong
-		#rule for min pop size.  Per Brian, we want to skip
-		#the subsampling only if the whole population is under 
-		#min_pop_size -- so moved this call above the subsampling
-		#loop, and revised to check the population size(s) in the
-		#original file
-		#make sure the population(s) meet the min size criteria:
-		li_too_small_pops=get_pops_in_file_too_small_to_run( o_genepopfile, 1.0, i_min_pop_size )
-
-		if len( li_too_small_pops ) > 0:
-			sys.stderr.write( "Skipping file: " + s_filename + ".  " \
-					+ "In pgdriveneestimator.py, one or more pops in file, " \
-					+ s_filename + ", has fewer than " + str( i_min_pop_size ) \
-					+ " individuals.\n" )
-			continue
-		#end if pop subsample is too small, skip this file
-
-		
+		i_total_populations=o_genepopfile.pop_total
 		do_sample( o_genepopfile, s_sample_scheme, lv_sample_values, i_total_replicates )
-
+			
 		add_to_set_of_calls_to_do_estimate( o_genepopfile, 
-											f_min_allele_freq, 
-											o_debug_mode,
-											llv_args_each_process )
+												f_min_allele_freq, 
+												i_min_pop_size,
+												o_debug_mode,
+												llv_args_each_process,
+												IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP )
 		
 	#end for each genepop file, sample, add an ne-estimator object, and setup call to estimator 
 
@@ -769,28 +891,28 @@ if __name__ == "__main__":
 		sys.exit()
 	#end if usage
     
-        #make sure the neestimator is in the user's PATH:
-        NEEST_EXEC_LINUX="Ne2L"
-        NEEST_EXEC_WIN="Ne2.ext"
+	#make sure the neestimator is in the user's PATH:
+	NEEST_EXEC_LINUX="Ne2L"
+	NEEST_EXEC_WIN="Ne2.ext"
 
-        s_neestimator_exec=None
+	s_neestimator_exec=None
 
-        if os.name == "posix":
-            s_neestimator_exec=NEEST_EXEC_LINUX
-        elif os.name == "nt":
-            s_neestimator_exec="Ne2.exe"
-        else:
-            s_msg="For this OS: %s, don't know the name of the appropriate NeEstimator executable." \
-                    % os.name 
-            raise Exception(  s_msg )
-        #end if os posix else nt else error
+	if os.name == "posix":
+		s_neestimator_exec=NEEST_EXEC_LINUX
+	elif os.name == "nt":
+		s_neestimator_exec="Ne2.exe"
+	else:
+		s_msg="For this OS: %s, don't know the name of the appropriate NeEstimator executable." \
+		% os.name 
+		raise Exception(  s_msg )
+	#end if os posix else nt else error
 
-        b_neestimator_found=pgut.confirm_executable_is_in_path( s_neestimator_exec )
+	b_neestimator_found=pgut.confirm_executable_is_in_path( s_neestimator_exec )
 
-        if not( b_neestimator_found ):
-            s_msg="Can't find NeEstimator excecutable, %s." % s_neestimator_exec
-            raise Exception( s_msg )
-        #end if no neest exec
+	if not( b_neestimator_found ):
+		s_msg="Can't find NeEstimator excecutable, %s." % s_neestimator_exec
+		raise Exception( s_msg )
+	#end if no neest exec
 
 	i_total_args_passed=len( sys.argv ) - 1
 
