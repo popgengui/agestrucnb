@@ -9,9 +9,10 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 from os import path
 from genomics.popgen import ne2
+
 class PGOutputNeEstimator( object ):
 
-	OUTPUT_FIELDS = [ "est_ne","95ci_low","95ci_high","overall_rsquared",
+	OUTPUT_FIELDS = [ "est_type", "case_number", "est_ne","95ci_low","95ci_high","overall_rsquared",
 					"expected_rsquared","indep_comparisons","harmon_mean_samp_size" ]
 
 	NODAT_FIELDS = [ "Individual", "Locus", "Genotype", "NumberLociMissingData" ]
@@ -64,46 +65,132 @@ class PGOutputNeEstimator( object ):
 		#end if no output file
 
 		o_file=open( self.__run_output_file, 'r' )
-		dv_results=ne2.parse( o_file )
-		return dv_results
+		o_record=ne2.parse( o_file )
+
+		ddv_results=self.__ne2_record_object_to_dictionary( o_record )
+
+		return ddv_results
 	#end __get_parsed_output_data
 
 	def parseOutput( self ):
 		'''
+		Fri Jul 22 18:07:53 MDT 2016 -- See 
+		def __ne2_record_object_to_dictionary for details on the
+		ddv_results fetched below to unwrap the parsed results,
+		and the current limitation to estimation type LD
+
 		We assume that for the estimated ne value,
 		and its associated CI values, that a value of None in
 		the dict returned by ne2.parse def (see above 
 		__get_parsed_output_data, reflects
 		an "Infinite" value in the origina Ne estimator output
-		and so convert it to "Inf,"  as R uses Inf for Infinity
+		and so convert it to "Inf,"  convenient for use in R,
+		for example, as R uses Inf for Infinity
 		'''
 
 		MISSING_DATA_ENTRY="NA"
 		INFINITE_VALUE="Inf"
 
-		dv_results=self.__get_parsed_output_data()
+		ddv_results=self.__get_parsed_output_data()
 
 		self.__parsed_output=[]
-		
-		for fcases in dv_results.ld:
-		    case = fcases[0] 
-		    ne = case['EstNe']  if case[ 'EstNe' ] is not None else INFINITE_VALUE
-		    or2 = case['OvRSquare'] 
-		    sr2 = case['ExpRSquareSample'] 
-		    indep = case['IndepComp'] 
-		    hmean = case['HMean'] 
-		    ne05, ne975 = tuple(case['ParaNe']) 
-		    #check the indivicual values of the CI's:
-		    ne05=ne05 if ne05 is not None else INFINITE_VALUE 
-		    ne975=ne975 if ne975 is not None else INFINITE_VALUE
 
-		    lv_rawvals=[ ne, ne05, ne975, or2, sr2, indep, hmean  ] 
-		    lv_vals=[ v_val if v_val is not None else MISSING_DATA_ENTRY for v_val in lv_rawvals ]
-		    self.__parsed_output.append(  lv_vals  )
-		#end for each case
+		for s_estimation_type in ddv_results:
+			i_estimate_count=0
+			for fcases in ddv_results[ s_estimation_type ]:
+				esttype=s_estimation_type
+				estnum=str( i_estimate_count )
+				case = fcases[0] 
+				ne = case['EstNe']  if case[ 'EstNe' ] is not None else INFINITE_VALUE
+				or2 = case['OvRSquare'] 
+				sr2 = case['ExpRSquareSample'] 
+				indep = case['IndepComp'] 
+				hmean = case['HMean'] 
+				ne05, ne975 = tuple(case['ParaNe']) 
+				#check the indivicual values of the CI's:
+				ne05=ne05 if ne05 is not None else INFINITE_VALUE 
+				ne975=ne975 if ne975 is not None else INFINITE_VALUE
+
+				lv_rawvals=[ esttype, estnum, ne, ne05, ne975, or2, sr2, indep, hmean  ] 
+				lv_vals=[ v_val if v_val is not None else MISSING_DATA_ENTRY for v_val in lv_rawvals ]
+				self.__parsed_output.append(  lv_vals  )
+
+				i_estimate_count+=1
+			#end for each case
+		#end for each estimation type
 		    
 		return
 	#end parseOutput
+
+	def __ne2_record_object_to_dictionary( self, o_record_obj ):
+		'''
+		Want to isolate the particulars of the Record objects
+		whose attribures each collect for one estimation type, 
+		
+		We make an iterable out of it so that writing a table 
+		of parsed results does not preknowledge of field names 
+		for each type.  Hopefully this def can be the sole 
+		target of change if the pygenomics, genomics.popgen.ne2 
+		parsing code get revised
+'''
+
+	#as of Fri Jul 22 17:50:22 MDT 2016 -- these are the attributes that
+	#store NeEstimator output via the pygenomics modules (c.f. __init__.py)
+	#genomics.popgen.ne2.  So far we only accept results of type "ld" (because
+	#each estimation type has its unique fields, and as such need to be
+	#known to be selected for inclusion in this objects output tabular strings.)
+	#Here are the Record object attributes used to store NeEstimator output data, 
+	#from __init__.py: #	self.freqs_used = []
+	#   self.ld = []
+	#   self.het = []
+	#   self.coanc = []
+	#   self.temporal = []
+	#note that for now we require "freqs.used" attribute have a single value, 
+	#as this is currently the use case for LD NeEstimation, that we parse only for one
+	#Ne estimate per population, corresponding to a single minimum allele frequency.
+
+
+		
+		MAX_ALLOWABLE_NUMBER_FREQS_USED=1
+		PARSABLE_ESTIMATION_TYPES=[ "ld" ]
+		ds_record_attribute_names=[ "ld", "het", "coanc", "temporal" ]
+
+		#self.freqs_used is in the Record object as a list of floats,
+		#and not, as for the other attribures, a list of interables 
+		#i.e. in this case would be sensibly a  list of lists of floats,
+		#but I think Tiago must be inferring that number of freqs is always
+		#constant across all estimates for a given NeEstimator run, hence:
+		i_total_number_of_allele_freq_vals_used=len( o_record_obj.freqs_used )
+
+		if i_total_number_of_allele_freq_vals_used > MAX_ALLOWABLE_NUMBER_FREQS_USED:
+			s_msg="In PGOutputNeEstimator instance, found estimation results of type, " \
+						+ s_record_attribute_name \
+						+ ".  Current output parsing limits Estimation to using at most " \
+						+ str( MAX_ALLOWABLE_NUMBER_FREQS_USED ) \
+						+ ", but  ne2 Record object shows that " \
+						+ str( i_total_number_of_allele_freq_vals_used ) \
+						+ " were used."
+			raise Exception ( s_msg )
+		#end if non-single number of (minimum) allele 
+		#frequencies were used in the run
+
+		ddv_results={}
+		for	s_record_attribute_name in ds_record_attribute_names:
+			lv_results=getattr( o_record_obj, s_record_attribute_name )
+			i_num_results=len( lv_results )
+			if i_num_results > 0 and s_record_attribute_name not in PARSABLE_ESTIMATION_TYPES:
+				s_msg = "In PGOutputNeEstimator instance, found estimation results of type, " \
+						+ s_record_attribute_name \
+						+ ".  Currently the following are the only estimate types " \
+						+ "that this object can parse: " + str( PARSABLE_ESTIMATION_TYPES ) \
+						+ "."
+				raise Exception( s_msg )
+			#end if non-parsable  estimation type
+			ddv_results[ s_record_attribute_name ] = lv_results
+		#end for each record attribute giving an estimation type
+
+		return ddv_results
+	#end def __ne2_record_object_to_dictionary
 
 	def __get_name_nodat_file( self ):
 		'''
@@ -222,8 +309,19 @@ class PGOutputNeEstimator( object ):
 		file formats as used by Tiago in his original ne2.py
 		one file has just the ne vals and CI's, and another
 		has means Rsquareds, etc
+
+
+		As of Fri Jul 22 18:30:50 MDT 2016, this code is very
+		close to a simple copy of code from Tiago's code, and
+		is meant to parse and write LD estimation only.  This
+		limitaion is also applied to def
+		__write_parsed_data_lines_as_string.  See def 
+		__ne2_record_object_to_dictionary for deatils
+		on the conversion of the ne2.Record object's conversion
+		to the ddv_results dictionary, and current limitations
+		for parsing NeEstimator output.
 		'''
-		dv_results=self.__get_parsed_output_data()
+		ddv_results=self.__get_parsed_output_data()
 
 		mNes = []
 		mOr2s = []
@@ -232,22 +330,23 @@ class PGOutputNeEstimator( object ):
 		mNesCI = []
 		mIndep = []
 		mHMean = []
-
-		for fcases in dv_results.ld:
-		    case = fcases[0]
-		    ne = case['EstNe']
-		    or2 = case['OvRSquare']
-		    sr2 = case['ExpRSquareSample']
-		    indep = case['IndepComp']
-		    hmean = case['HMean']
-		    ne05, ne975 = tuple(case['ParaNe'])
-		    mNes.append(ne)
-		    mOr2s.append(or2)
-		    mSmpr2s.append(sr2)
-		    mNesCI.append((ne975, ne05))
-		    mIndep.append(indep)
-		    mHMean.append(hmean)
-		#end for each item 
+		for s_estimation_type in ddv_results:
+			for fcases in dv_results.ld:
+				case = fcases[0]
+				ne = case['EstNe']
+				or2 = case['OvRSquare']
+				sr2 = case['ExpRSquareSample']
+				indep = case['IndepComp']
+				hmean = case['HMean']
+				ne05, ne975 = tuple(case['ParaNe'])
+				mNes.append(ne)
+				mOr2s.append(or2)
+				mSmpr2s.append(sr2)
+				mNesCI.append((ne975, ne05))
+				mIndep.append(indep)
+				mHMean.append(hmean)
+			#end for each item 
+		#end for each estimation type
 
 		if b_append==True:
 			s_open_flag='a'
@@ -287,14 +386,17 @@ class PGOutputNeEstimator( object ):
 
 	@property
 	def parsed_output( self ):
-		s_parsed_out=None
+		llv_parsed_output=None
 
 		if self.__parsed_output is not None:
-			s_parsed_out = self.__write_parsed_data_lines_as_string( \
-					self.__parsed_output )
+			#remmed out in favor of delivering
+			#the original output of def parsedOutput
+			#s_parsed_out = self.__write_parsed_data_lines_as_string( \
+			#								self.__parsed_output )
+			llv_parsed_output=self.__parsed_output	
 		#end if no parsed output
 
-		return s_parsed_out
+		return llv_parsed_output
 	#end parsed_output
 
 	@property

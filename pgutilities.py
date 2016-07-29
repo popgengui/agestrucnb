@@ -16,6 +16,7 @@ import pginputsimupop as pgin
 import pgoutputsimupop as pgout
 import pgparamset as pgpar
 import copy
+import subprocess
 
 PROCESS_QUEUE_STOP_SIGN='STOP'
 
@@ -132,8 +133,26 @@ def manage_process_queue( o_queue_with_target_calls, o_queue_to_hold_results=Non
 	return
 #end manage_process_queue
 
+def do_sim_replicate_on_separate_os_process( s_configuration_file,
+													s_life_table_files,
+													s_param_name_file,
+													s_outfile_basename,
+													s_replicate_number ):
+	
+	s_target_script="do_sim_replicate.py"
+	
+
+	subprocess.call( [ "python", s_target_script, 
+						s_configuration_file,
+						s_life_table_files, 
+						s_param_name_file, 
+						s_outfile_basename, 
+						s_replicate_number ] )
+	return
+#end do_sim_replicate_on_separate_os_process
+
+
 def do_pgopsimupop_replicate_from_files(  s_configuration_file, 
-												dv_input_parm_values_by_attribute, 
 												ls_life_table_files, 
 												s_param_name_file, 
 												s_outfile_basename, 
@@ -147,6 +166,15 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	reg_copy -- but I'm not confident in state of regcopy of imported simuPop code,
 	and so  I think is the safer solution, though it
 	does create a depandancy of the pgguisimupop object on this outside def.  
+
+	Note that this def runs a simupop operation using all the param values as
+	given in the config file arg, except for the "reps" attribute, with is reset to 1,
+	whatever the value in the configuration file.
+
+	Tue Jul 26 22:01:07 MDT 2016
+	updated to be called by a driver that creates a new OS process, then calls this def to do the replicate.  No longer
+	uses the dv_input_parm_values_by_attribute, but instead relies on reading a complete and up-to-date (i.e. all values
+	as changed or edited on the gui interface)
 	'''
 
 	s_tag_out=""
@@ -160,15 +188,7 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	o_input=pgin.PGInputSimuPop( s_configuration_file, o_resources, o_paramset ) 
 	o_input.makeInputConfig()
 
-	#this updates the input's attributes
-	#to reflect any changes in the param values,
-	#that occured since the (source input object,
-	#of which this is a copy) config file was read in: 	
-	for s_attribute_name in dv_input_parm_values_by_attribute:
-		setattr( o_input, s_attribute_name, 
-				dv_input_parm_values_by_attribute[ s_attribute_name ] )
-	#end for each attribute name
-
+	
 	#reset reps to 1
 	#as we are executing only one
 	#replicate.  We assume this def
@@ -187,7 +207,32 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 
 	return
 #end do_pgopsimupop_replicate_from_files
+def get_listdir( s_parent_dir ):
+	ls_dir_contents=os.listdir( s_parent_dir )
+	return ls_dir_contents
+#end get_listdir
 
+def get_list_subdirectories( s_parent_dir ):
+	ls_subdirs=[]
+	ls_dir_contents=get_listdir( s_parent_dir )
+
+	for s_item in ls_dir_contents:
+		if os.path.isdir( s_item ):
+			ls_subdirs.append( s_item )
+		#end if is directory, add to list
+	return ls_subdirs
+#end get_list_subdirectories
+
+def get_list_file_objects( s_parent_dir ):
+	ls_files=[]
+	ls_dir_contents=get_listdir( s_parent_dir )
+	for s_item in ls_dir_contents:
+		if os.path.isfile( s_item ):
+			ls_files.append( s_item )
+		#end if item is file, add to list
+	#end for each item
+	return ls_files
+#end get_list_file_objects
 
 if __name__ == "__main__":
 

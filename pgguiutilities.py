@@ -903,6 +903,5 @@ class PGGUIMessageAndActionOnCancel( object ):
 		return
 	#end __init__
 
-
 #end class PGGUIInfoMessage
 

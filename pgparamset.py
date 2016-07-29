@@ -24,6 +24,9 @@ class PGParamSet( object ):
 	that allows users to set the parameters.
 	'''
 
+	DELIMITER_TAG_FIELDS=";"
+	IDX_CONFIG_SECTION_TAG_FIELDS=0
+
 	def __init__( self, s_file_with_param_names = None ):
 
 		'''
@@ -66,6 +69,27 @@ class PGParamSet( object ):
 		o_file.close()
 		return
 	#end __init_from_file
+
+	def getConfigSectionNameFromParamTag( self, s_name ):
+		s_tag=None
+		s_section_name=None
+		if s_name in self.__params_by_shortname:
+			s_tag = self.__tags_by_shortname[ s_name ]
+		elif s_name in self.__params_by_longname:
+			s_tag = self.__tags_by_longname[ s_name ]
+		else:
+			s_msg="In PGParamSet instance, def getSectionName, "  \
+					+ "no param name match  (short or long) for: "  \
+					+ s_name + "."
+			raise Exception( s_msg )
+		#end if name in shortnames, else longnames, else error
+
+		ls_tag_values=s_tag.split( PGParamSet.DELIMITER_TAG_FIELDS )
+
+		s_section_name=ls_tag_values[ PGParamSet.IDX_CONFIG_SECTION_TAG_FIELDS ].lower()
+
+		return s_section_name
+	#end getConfigSectionNameFromParamTag
 
 	def longname( self, s_shortname ):
 		s_val=None

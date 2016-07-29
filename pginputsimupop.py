@@ -347,8 +347,19 @@ class PGInputSimuPop( object ):
 		ls_attribute_names=self.param_names.shortnames
 
 		for s_attribute in ls_attribute_names:
-			if hasattr( self, s_attribute ) \
-						and s_attribute in self.__config_file_section_name_by_attribute_name:
+			if hasattr( self, s_attribute ): 
+				#if this attribute was not in the original config file,
+				#but was set in the GUI, we rely on the param_names
+				#object (listing attribute names, their corresponding lable text,
+				#and their section names (as part of the parma_names.tags), to provide
+				#the section name, with which we update this input object:
+				if s_attribute not in self.__config_file_section_name_by_attribute_name:
+					s_new_entry_section=self.param_names.getConfigSectionNameFromParamTag( s_attribute )
+					#for this attribute we assume that the code from Tiago uses the same name
+					#for the config file as is used in his original cfg object, now our self input object:
+					self.__update_attribute_config_file_info( s_attribute, s_new_entry_section, s_attribute )
+				#end if attribute was not registered in section dict (i.e. was not listed in the original
+				#config file read in in def __get_config
 
 				s_section_name=self.__config_file_section_name_by_attribute_name[ s_attribute ]
 				s_option_name=self.__config_file_option_name_by_attribute_name[ s_attribute ]

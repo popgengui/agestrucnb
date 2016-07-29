@@ -22,7 +22,8 @@ if __name__ == "__main__":
 	WINDOW_MARGIN=0.20
 	CONTAINER_PADDING=10
 
-	ls_args=[ "location of resources directory", "number of processes to use for replicate simulations" ]
+	ls_args=[ "path to directory containing life table files (*life.table.info)", 
+			"number of processes to use for replicate simulations" ]
 
 	s_usage=pgu.do_usage_check( sys.argv, ls_args )
 
@@ -45,7 +46,6 @@ if __name__ == "__main__":
 
 	i_geo_width=int( ( i_width/2 ) * ( 1 - WINDOW_MARGIN ) )
 	i_geo_height=int( ( i_height/2 ) * ( 1 - WINDOW_MARGIN ) )
-
 
 	o_host=pgn.PGHostNotebook( o_master, 
 			s_menu_config, 

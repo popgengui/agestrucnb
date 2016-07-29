@@ -7,7 +7,9 @@ __date__ = "20160124"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 VERBOSE_CONSOLE=True
+VERY_VERBOSE_CONSOLE=True
 DO_PUDB=False
+INIT_ENTRY_CONFIG_FILE=()
 
 if DO_PUDB:
 	from pudb import set_trace; set_trace()
@@ -15,11 +17,11 @@ if DO_PUDB:
 
 import pgmenubuilder as pgmb
 import pgguiapp as pgg
-import pgopsimupop as pgop
 import pgsimupopresources as pgsr
 import pginputsimupop as pgin
 import pgparamset as pgps
 import pgoutputsimupop as pgout
+
 from pgguiutilities import KeyValFrame
 from pgguiutilities import KeyCategoricalValueFrame
 from pgguiutilities import PGGUIInfoMessage
@@ -39,6 +41,10 @@ import glob
 #by inspecting the input object:
 import inspect
 
+#to make a temp input config file,
+#passed to the sub processes that will
+#create and execute the sim objects:
+import uuid
 
 from Tkinter import *
 #since we import all names from Tkinter,
@@ -49,10 +55,37 @@ from ttk import *
 
 import tkFileDialog as tkfd
 class PGGuiSimuPop( pgg.PGGuiApp ):
+
 	'''
-	Subclass of PGGuiApp builds a gui and uses its member object "op", which
-	implements PGOperaion to enable a  simuPop simulation. Each instance (like this)
-	of the PGGuiApp child classes creates its own pgop member internally
+	Subclass of PGGuiApp builds a gui,
+	creates PGInputSimuPop and PGOutputSimuPop
+	objects, then on user command runs a simulation 
+	(one or more replicates) based on the parameters 
+	supplied by the Input object, and to output files 
+	as named by the basename in the PGOutputSimuPop object.  
+
+	Note that for this class I abandoned my intended original 
+	organization of the functionality for all  PGGuiApp objects.
+	All subclasses of PGGUIApp objects were to contain an 
+	AGPOperation object, in this case aPGOpSimuPop object, 
+	which contains the code that actually uses Tiago Antao's 
+	code to setup and run a SimuPOP session.  However, in 
+	implenting replicate runs I encountered errors when
+	trying to target a class method when spawning python
+	multiprocessing.process objects from this object.  Further,
+	I found non-independant instantiation of simupop populations 
+	even when instantiating new PGOpSimuPop objects constructed
+	in separate python multiprocessing.process instances.	
+	Thus, parallel processing of simulation replicates required 
+	the use of separate python instances for each replicate. 
+	Thus currently (Wed Jul 27 18:35:05 MDT 2016),
+	instead of manipulating its own PGOpSimuPop instances,
+	this class depends on code in the pgutilities.py
+	module, which has a def that makes a system call to 
+	instantiate a new python interpreter, and call a script,
+	do_sim_replicate.py, which then calls another def in 
+	pgutilities.py, which builds and runs a PGOpSimuPop object.
+	
 	'''
 
 	#possible states of the gui:
@@ -100,6 +133,16 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#name and create the simulation
 		#output files
 		self.__output=None
+
+		#when commanded to run the simulation(s)
+		#a temporary configuration file
+		#is created and used by each process
+		#that is simulating.  We then want to
+		#delete the file when the gui had 
+		#ascertained that the sim is or sims
+		#are done, so we need instance-level
+		#access to the file name
+		self.__temp_config_file_for_running_replicates=None
 
 		#simulations performed on separate
 		#process -- this ref to it will
@@ -443,9 +486,21 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end __load_values_into_interface
 
 	def load_config_file( self, event=None ):
+		s_current_value=self.__config_file.get()
 		s_config_file=tkfd.askopenfilename(  title='Load a configuration file' )
 		self.__config_file.set(s_config_file)
-		self.__setup_input()
+		try:
+			self.__setup_input()
+		except Exception as oe:
+			if s_config_file != INIT_ENTRY_CONFIG_FILE: 
+				s_msg="Problem loading configuration.\n" \
+						+ "File: " + str( s_config_file ) + "\n\n" \
+						+ "Details:\n\n" \
+						+ "Exception: " + str( oe ) + "."
+				o_diag=PGGUIInfoMessage( self, s_msg )
+			#end if entry not None
+			return
+		#end try ... except
 		self.__init_interface()
 		self.__load_values_into_interface()
 		self.__set_controls_by_run_state( self.__get_run_state() )
@@ -536,26 +591,49 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		if self.__op_process is not None:
 			if self.__op_process.is_alive():
-				##### temp
-				print ( "checking and process found alive" )
-				#####
+				if VERY_VERBOSE_CONSOLE:
+					print ( "checking and process found alive" )
+				#endif very verbose, pring
+
 				self.__simulation_is_in_progress = True
 				self.after( 500, self.__check_progress_operation_process )
 			else:
-				##### temp
-				print( "checking and process not None but not alive" )
-				#####
+				if VERY_VERBOSE_CONSOLE:
+					print( "checking and process not None but not alive" )
+					print( "value of temp config file attribute: " \
+								+ self.__temp_config_file_for_running_replicates )
+				#end if very verbose, print
 				self.__simulation_is_in_progress = False
+				if self.__temp_config_file_for_running_replicates is not None:
+					if VERY_VERBOSE_CONSOLE:
+						print( "temp config file value is not None" )
+					if os.path.exists( self.__temp_config_file_for_running_replicates ):
+						if VERY_VERBOSE_CONSOLE:
+							print ( "removing temporary config file" )
+						#end if very verbose
+						os.remove( self.__temp_config_file_for_running_replicates )
+						self.__temp_config_file_for_running_replicates = None
+					else:
+						s_msg="In PGGuiSimuPop instance, def " \
+							+ "__check_progress_operation_process, attribute: " \
+							+ "__temp_config_file_for_running_replicates " \
+							+ " is not None but does not name an existing file."
+
+						sys.stderr.write( "Warning: " +  s_msg + "\n" )
+					#if path exists else warn
+				#end if attribute for temp config file is not None
 			#end if process alive else not
 
 			self.__set_controls_by_run_state( self.__get_run_state() )
 
 		else:
-				##### temp
+			if VERY_VERBOSE_CONSOLE:	
 				print( "process found to be None" )
-				#####
-				self.__simulation_is_in_progress = False
-				self.__set_controls_by_run_state( self.__get_run_state() )
+			#endif very verbose, pring
+
+			self.__simulation_is_in_progress = False
+			self.__set_controls_by_run_state( self.__get_run_state() )
+
 		#end if process not None else None
 
 		return
@@ -568,23 +646,33 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		consistently failing to run independant simulations,
 		and succeeding when I used individual multiprocessing.Process
 		instances, also noting that using multiprocessing.Queues to manage
-		multiprocessing.Processes also failed to produce independant sims,
-		I resort to managing them using a class that simply checks for living
-		state of each and adds new processes as available (see class 
+		multiprocessing.Processes also failed to produce independant sims.
+
+		My ultimate solution involved creating new python instances inside
+		subprocess.call calls.  However, to manage the blocked process
+		that results from each use of subprocess.call(), I'm  managing these
+		with python multiprocess.process instances, according to a max-process
+		paramter, by using a class that simply checks for living state of 
+		each and adds new processes as available (see class 
 		pgutilityclasses.independantProcessGroup).		
+
+		This def assumes that attrbute self.__temp_config_file_for_running_replicates
+		has a value suitable for naming a new temp config file (see def runSimulation).
 		'''	
 		i_total_replicates=self.__input.reps
 		i_max_processes_to_use=self.__total_processes_for_sims
 
-		def_target=pgut.do_pgopsimupop_replicate_from_files
+		#despite the fact that ultimately the sims are done in
+		#new OS processes, using new python instances, we still
+		#use python.multiprocess.process instances to wrap 
+		#the OS processes, since we have more convenient control over
+		#their management.  This def, itself the target for multi 
+		#python.multiprocessing.processes, itself spawns an OS system
+		#process:
+		def_target=pgut.do_sim_replicate_on_separate_os_process
 
-		#so the target def can recreate (for each replicate)
-		#the current #set of values in its copy of the 
-		#input object.  This is done in case the user changed 
-		#values via the GUI, we sent this dict along with the config file
-		#and other init info:
-		dv_current_param_values_by_attribute_name = \
-				self.__input.getDictParamValuesByAttributeName()
+		self.__input.writeInputParamsAsConfigFile( \
+				self.__temp_config_file_for_running_replicates )
 
 		i_total_replicates_started=0
 		i_current_total_living_processes=0
@@ -607,18 +695,18 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 			i_num_processes_avail=i_max_processes_to_use-i_current_total_living_processes
 
-			seq_args=( self.__config_file.get(),
-							dv_current_param_values_by_attribute_name,
-							self.__life_table_files,
-							self.__param_names_file,
-							self.__output.basename,
-							i_total_replicates_started )
+			seq_args=( self.__temp_config_file_for_running_replicates,
+						",".join( self.__life_table_files ),
+						self.__param_names_file,
+						self.__output.basename,
+						str( i_total_replicates_started ) )
 
 			o_new_process=multiprocessing.Process(  target=def_target, args=seq_args)
 			o_new_process.start()
 			o_process_manager.addProcess( o_new_process )
 			i_total_replicates_started += 1
-		#end while process started < total reps requested
+		#end while process started < total replicates requested
+
 		return
 	#end __do_operation
 
@@ -694,6 +782,15 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			sys.stderr.write( s_msg + "\n" )
 		#end if output or input is None
 		self.__setup_op()
+
+		#input file to reaplace the orig config file
+		#as well as the attr/value dict originally passed to each 
+		#process.  We need to set this temp file name attribute
+		#in this instance before spawning a multiprocessing.process
+		#in do_operation, else it will not appear during call backs
+		#to __check_progress_operation_process, in which we delete
+		#the temp file when sim processes are finished
+		self.__temp_config_file_for_running_replicates=str( uuid.uuid4() ) 
 
 		self.__op_process=multiprocessing.Process( target=self.__do_operation )
 		self.__op_process.start()

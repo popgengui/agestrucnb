@@ -325,7 +325,10 @@ class GenepopFileManager( object ):
 	def __get_count_indiv_per_pop( self, s_indiv_subsample_tag=None, s_pop_subsample_tag=None ):
 
 		li_counts=[]
+		li_popnumbers=None
 		iter_pops_with_indiv_lists=None
+
+		li_pop_numbers=self.__get_pop_list( s_pop_subsample_tag ) 
 
 		if s_indiv_subsample_tag is None:
 			iter_pops_with_indiv_lists=self.__pop_byte_addresses
@@ -333,7 +336,7 @@ class GenepopFileManager( object ):
 			iter_pops_with_indiv_lists=self.__indiv_subsamples[ s_indiv_subsample_tag ] 
 		#end if we're counting all or a subsample
 
-		for i_pop_number in iter_pops_with_indiv_lists:
+		for i_pop_number in li_pop_numbers:
 			i_tot_this_pop=self.__get_count_indiv( iter_pops_with_indiv_lists[ i_pop_number ] )
 			li_counts.append( i_tot_this_pop )
 		#end for each pop number
@@ -438,10 +441,14 @@ class GenepopFileManager( object ):
 
 		return ls_individuals 
 	#end getListIndividuals
+
 	def getListPopulationNumbers( self, s_pop_subsample_tag=None ):
+
+
 		li_pop_numbers=self.__get_pop_list( s_pop_subsample_tag )
-		#because the list is poteneially the one copy in this instance,
-		#return a copy of the list, not the list itself
+
+		#to secure the list,
+		#return a copy of 		
 		return [ i_num for i_num in li_pop_numbers ]
 	#end getListPopulationNumbers
 
@@ -586,7 +593,6 @@ class GenepopFileManager( object ):
 			raise Exception ( s_msg )
 		#end if n out of bounds
 		
-			
 		li_indiv_list_copy.remove( i_n )
 		
 		#to any sample we always add the zeroth
@@ -612,9 +618,9 @@ class GenepopFileManager( object ):
 			self.__pop_subsamples[ s_subsample_tag ] = [ idx for idx in li_pop_numbers ]
 		else:
 			s_msg="In GenepopFileManager instance, def subsamplePopulationsByList, " \
-					+ "genepop file has " + str( i_total_pops ) + " populations " \
+					+ "genepop file has " + str( i_total_pops ) + " populations.  " \
 					+ "sample list ranges out of bounds, with min: " + str( i_min_sampnum ) \
-					+ "and max: " + str( i_max_sampnum )
+					+ ", and max: " + str( i_max_sampnum )
 
 			raise Exception( s_msg )
 		#end if all pop numbers in range, else error
@@ -622,44 +628,57 @@ class GenepopFileManager( object ):
 		return
 	#end subsamplePopulationsByList
 
-	def getIndivCountPerSubsampleForPop( self, s_indiv_subsample_tag, i_popnumber ):
+	def getIndividualCounts( self, s_pop_subsample_tag=None, s_indiv_subsample_tag=None ):
+
+		'''
+		Returns a list of individual counts (total individuals) for each of N populations
+		numbered 1,2,3,...N, representing the "pop" entries in order in the genepop file
+		to which this GenepopFileManager instance corresponds.
+
+		If s_pop_subsample_tag is not None, then the list will contain counts for each
+		population in some subset of the original N, as listed by population nunber 
+		list associated with the population subsample tag.
+
+		If s_indiv_subsample_tag is not None, then the counts will be for the individuals
+		in each pop as subsampled.
+		'''
+		li_counts=None
+
+		li_counts=self.__get_count_indiv_per_pop( s_indiv_subsample_tag, s_pop_subsample_tag )	
+
+		return li_counts
+
+	#end getIndividualCounts
+
+	def getIndividualCount( self, i_pop_number, s_indiv_subsample_tag=None ):
+		'''
+		Expects 1-based population number.
+		Returns the individual count for the ith of N populations, i=1,2,3...N
+		If s_indiv_subsample_tag is supplied, then the counts will
+		reflect those of the individuals in the ith population after
+		the sampling named by the tag.
+		'''
+
+		i_total_pops_in_file=self.__get_count_populations()	
+
+		if i_pop_number < 1 or i_pop_number > i_total_pops_in_file:
+
+			s_msg="In GenepopFileManager instance, def getIndividualCount, " \
+					+ "invalid population number for file with total populations, " \
+					+ str( i_total_pops_in_file ) \
+					+ ".  Pop number requested: " + str( i_pop_number ) + "."
+
+			raise Exception( s_msg )
+
+		#end if  invalid population number
+
+		li_counts=None
+
 		li_counts=self.__get_count_indiv_per_pop( s_indiv_subsample_tag )
-		return li_counts[ i_popnumber - 1 ]
-	#end getIndivCountPerSubsampleForPop
+		#end if we get counts from subsample
 
-	def getIndivCountPerSubsample( self, s_indiv_subsample_tag, s_pop_subsample_tag=None ):
-
-		li_results=None
-
-		li_counts_for_all_pops=self.__get_count_indiv_per_pop( s_indiv_subsample_tag )	
-		
-		#if caller wants a subset of pops:
-		if s_pop_subsample_tag is not None:
-			li_results=[]
-			li_pop_numbers=self.__pop_subsamples[ s_pop_subsample_tag ]
-			for i_pop_number in li_pop_numbers:
-				li_results.append( li_counts_for_all_pops[ i_pop_number - 1 ] )
-			#end for each pop_num
-		else:
-			li_results = [ i_count for i_count in li_counts_for_all_pops ]
-		return li_results
-	#end getIndivCountPerSubsample
-
-	def getIndivCountForPop( self, i_pop_number ):
-		'''
-		Expects pop number to be 1-based
-		'''
-
-		li_indiv_counts=self.__get_count_indiv_per_pop()
-
-		return li_indiv_counts[ i_pop_number - 1 ]
-	#end getIndivCountForPop
-
-	@property
-	def indiv_count_per_pop( self ):
-		li_res=self.__get_count_indiv_per_pop()	
-		return li_res
-	#end getIndivCountPerPop
+		return li_counts[ i_pop_number - 1 ]
+	#end getIndividualCount
 
 	@property 
 	def pop_total( self ):

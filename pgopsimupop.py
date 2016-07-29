@@ -7,7 +7,6 @@ __filename__ = "pgopsimupop.py"
 __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-
 VERBOSE_CONSOLE=False
 VERY_VERBOSE_CONSOLE=False
 #if True, then invokes ncurses debugger
@@ -50,7 +49,6 @@ class PGOpSimuPop( modop.APGOperation ):
 	his AgeStructureNe project -- his mod-level variables simply assigned to self.
 	'''
 
-
 	INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS="numMSats"
 	INPUT_ATTRIBUTE_NUMBER_OF_SNPS="numSNPs"
 
@@ -71,7 +69,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		#for each "process:"
 		numpy.random.seed()
 		
-
 		return
 	#end __init__
 
@@ -97,7 +94,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__createSim()
 		self.__is_prepared=True
 
-		
 		return
 	#end prepareOp
 
@@ -318,7 +314,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		return v_return_value
 	#end __getRandomPos
 
-
 	def __litterSkipGenerator( self, pop, subPop ):
 
 		fecms = self.input.fecundityMale
@@ -422,7 +417,6 @@ class PGOpSimuPop( modop.APGOperation ):
 					#end if nLitter is not nonem elif litter
 				#end if len( femalsage . . . 
 			#end while not female
-	
 
 			male = None
 
@@ -751,7 +745,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		return True
 	#end __outputMega
 
-
 	def __setAge( self, pop ):
 
 		probMale = [1.0]
@@ -845,7 +838,6 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __createAge
 	
 #end class PGOpSimuPop
-
 
 if __name__ == "__main__":
 
