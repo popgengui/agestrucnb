@@ -1,0 +1,25 @@
+[model]
+name=bullt2
+[pop]
+popSize=6000
+ages=ages["bullt2"]
+N0=2433
+#newborns always survive
+#olds always die
+survival.male=survivalMale["bullt2"]
+survival.female=survivalFemale["bullt2"]
+#newborns are not fecund
+fecundity.male=fecFemale["bullt2"]
+fecundity.female=fecFemale["bullt2"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+#mutFreq=1.01E-4
+numSNPs=400
+[sim]
+gens=1000
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp
