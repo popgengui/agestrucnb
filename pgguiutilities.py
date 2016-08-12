@@ -196,7 +196,8 @@ class KeyValFrame( Frame ):
 
 		except ValueError as ve:
 
-			s_msg= "KeyValFrame instance, trying to update values: " \
+			s_msg= "KeyValFrame instance, trying to update value(s) " \
+				+ " for key/value associated with " + s_name + ": " \
 				+ "current entry value is \"" + o_entryval.get() \
 				+ "\" original value type is: " + o_type.__name__ + "\n"
 			sys.stderr.write( s_msg + "\n" )
@@ -364,6 +365,9 @@ class KeyValFrame( Frame ):
 			#default object whose attribute is to be 
 			#updated is the master to this keyvalframe object
 			if self.__associated_attribute_object is None:
+				##### temp
+				print ( "for master: " + str( self.__master) +" updating attribute: " + str( self.__associated_attribute  ) + " to value: " + str( v_attr_val ) )
+				#####
 				setattr( self.__master, self.__associated_attribute, v_attr_val )
 			else:
 				setattr( self.__associated_attribute_object, self.__associated_attribute, v_attr_val )
@@ -902,6 +906,15 @@ class PGGUIMessageAndActionOnCancel( object ):
 		o_msgbox=tkMessageBox.showinfo( parent=o_parent, title="Info", message=s_message, icon=tkMessageBox.INFO )
 		return
 	#end __init__
-
 #end class PGGUIInfoMessage
+
+class PGGUIYesNoMessage( object ):
+	def __init__( self, o_parent, s_message ):
+		o_msgbox=tkMessageBox.askyesno( parent=o_parent, title="Info", message=s_message, icon=tkMessageBox.INFO )
+		self.value=o_msgbox
+		return
+	#end __init__
+#end class PGGUIInfoMessage
+
+
 

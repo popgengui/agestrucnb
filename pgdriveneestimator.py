@@ -28,6 +28,42 @@ import sys
 import os
 from multiprocessing import Pool
 
+#arguments passed either at command line
+#or from python using def mymain, having
+#imported this module
+
+LS_ARGS=[ "glob pattern to match genepop files, enclosed in quotes. (Example: \"mydir/*txt\")", 
+		"\"percent\" or \"remove\", indicating whether to sample by percentages or removing N individuals randomly",
+		"list of integers, percentages or N's (for removing N individuals),  (Examples: 10,70,90 or 1,3,5)", 
+		"minimum pop size (single integer)",
+		"float, minimum allele frequency for NeEstimator's Crit value",
+		"integer, total replicates to run (Note: when removing one individual in a pop of N, all N combinations will be run)" ]
+
+LS_OPTIONAL_ARGS=[ "total processes to use (single integer) Default is 1 process.  " \
+		+ "This arg is required if the final debug optional arg is added",
+		"\"debug1\" to add to the output a table listing, for each indiv. in each file, " \
+				+ "which replicate Ne estimates include the indiv, or,\n \"debug2\" " \
+				+ "to run without parallelized processes," \
+				+ "to produce the table, and to save all subsample " \
+				+ "genepop files and NeEstimator output files." ]
+
+
+#these args are used by callers who import this mod
+#and call mymain directly -- users of the console
+#don't use these, and resultsa are to stdout for the main outpu,
+#and stderr for the secondary output.  THis is just a 
+#bit of stand-in code in case usage ever implements hidden
+HIDDEN_ARGS=[ "file_object_main", "file_object_secondary" ]
+
+#if caller from console or to mymain
+#does not include opetionals,
+#these are the defaults (see mymain,
+#which is either invoked by python importing
+#this mod, or is invoked by this mods
+#code when python calls it as __main__:
+DEFAULT_NUM_PROCESSES="1"
+DEFAULT_DEBUG_MODE="no_debug"
+
 #in order to properly name the subsampled
 #files with replicate number, sample parameter
 #value, and population number, and not to subsequently
@@ -70,6 +106,11 @@ REPLICATE_DELIMITER=","
 #is run via a (temporary) separate genepop file,
 #hence this field is always 0:
 NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=[ "case_number" ]
+
+
+#For pgguineestimator.py to import and use to delete
+#any files left after user has cancelled a run:
+NE_ESTIMATOR_OUTPUT_FILE_TAGS=[ "NoDat.txt", "xTp.txt", "ne_run.txt" ]
 
 
 def set_indices_ne_estimator_output_fields_to_skip():
@@ -200,10 +241,11 @@ def get_invalid_file_names( ls_file_names ):
 			+ " characters."
 
 	ls_invalid_file_names_and_messages=[]
-	
+
 	for s_file_name in ls_file_names:
 		s_file_name_no_path=os.path.basename( s_file_name )
 		i_len_file_name=len( s_file_name_no_path )
+
 		if i_len_file_name > MAX_GENEPOP_FILE_NAME_LENGTH:
 			ls_invalid_file_names_and_messages.append( \
 					", ".join( [ s_file_name, MSG_FILE_TOO_LONG ] ) )
@@ -213,9 +255,77 @@ def get_invalid_file_names( ls_file_names ):
 	return ls_invalid_file_names_and_messages
 #end get_invalid_file_names
 
+def file_name_list_is_all_strings( ls_files ):
+
+	b_all_strings=True
+
+	lo_types=[ type( s_file ) for s_file in  ls_files ]
+	set_types=set( lo_types )
+	i_num_types=len( set_types )
+
+	if set_types.pop() != str or i_num_types != 1:
+		b_all_strings=False
+	#end if type not str or >1 type
+
+	return b_all_strings
+
+#end file_name_list_is_all_strings
+
+
+	
+def get_genepop_file_list( s_genepop_files_arg ):
+	'''
+	if invoked from the console the arg is a glob expression
+	if invoked from the gui interface in pgguineestimator.py,
+	the arg is a list, such that eval will genreate a python
+	list of strings.
+
+	This def assumes that no user will invoke this mod from 
+	the command line with a glob expression, includeing a file name,
+	that can be evaluated as a python list (i.e. "[ \"item\", \"item\" ... ]
+	
+	'''
+
+	ls_files=None
+
+	try:
+
+		ls_files=eval( s_genepop_files_arg )
+
+		if type( ls_files ) != list:
+			#still could be a glob expression, for example,
+			#of a file name that python can eval as an int or float,
+			#so we'll just glob the orig:
+
+			ls_files=glob.glob( s_genepop_files_arg )
+		else:
+			#make sure it's a list of strings
+			if not( file_name_list_is_all_strings( ls_files ) ):
+				s_msg="In pgdriveneestimator.py, def get_genepop_file_list, " \
+						+ "genepop file arg evaluated as a list, but, not composed " \
+						+ "of strings: " + str( list ) + "."
+				raise Exception( s_msg )
+			#end if not all strings in list
+	except ( NameError, SyntaxError ) as evalfail:
+
+		'''
+		this is caught if the eval fails due to 
+		the arg being a string.  Further, a syntax
+		error results if the arg begins/ends in a wildcard
+		"*" char -- as will happen often with a glob.
+
+		So for these eval failures we assume the arg 
+		is a glob expression
+		'''
+		ls_files=glob.glob( s_genepop_files_arg )
+	#end try eval, except name error
+
+	return ls_files
+#end get_genepop_file_list
+
 def parse_args( *args ):
 
-	IDX_FILE_GLOB=0
+	IDX_GENEPOP_FILES=0
 	IDX_SAMPLE_SCHEME=1
 	IDX_SAMPLE_VALUE_LIST=2
 	IDX_MIN_POP_SIZE=3
@@ -223,13 +333,15 @@ def parse_args( *args ):
 	IDX_REPLICATES=5
 	IDX_PROCESSES=6
 	IDX_DEBUG_MODE=7
+	IDX_MAIN_OUTFILE=8
+	IDX_SECONDARY_OUTFILE=9
 
-	s_glob	=  args[ IDX_FILE_GLOB ]
+	ls_files=get_genepop_file_list( args[ IDX_GENEPOP_FILES ] )
 
-	ls_files=glob.glob( s_glob )
 	ls_invalid_file_names_and_messages=get_invalid_file_names( ls_files )
 
-	if len( ls_invalid_file_names_and_messages ) > 1:
+	if len( ls_invalid_file_names_and_messages ) > 0:
+
 		s_details="\n".join( ls_invalid_file_names_and_messages )
 		s_msg="In pgdriveneestimator.py, def parse_args, " \
 				+ "the following files can't be processed for " \
@@ -254,20 +366,25 @@ def parse_args( *args ):
 		raise Exception( s_msg  )
 	#end if sample percent, else removal, else error
 
-	#sort the valuesproportions, in case we need to make an individual/replicate table:
+	#sort the sample param values, in case we need to make an individual/replicate table:
 	lv_sample_values.sort()
+
 	i_min_pop_size=int( args[ IDX_MIN_POP_SIZE ] )
 	f_min_allele_freq = float( args[ IDX_MIN_ALLELE_FREQ ] )
 	i_total_replicates=int( args[ IDX_REPLICATES ] )
 	i_total_processes=int( args[ IDX_PROCESSES ] )
 	o_debug_mode=set_debug_mode ( args[ IDX_DEBUG_MODE ] )
+	o_main_outfile=args[ IDX_MAIN_OUTFILE ]
+	o_secondary_outfile=args[ IDX_SECONDARY_OUTFILE ]
 
 	return( ls_files, s_sample_scheme, lv_sample_values, 
 								i_min_pop_size, f_min_allele_freq, 
-								i_total_replicates, i_total_processes, o_debug_mode )
+								i_total_replicates, i_total_processes, o_debug_mode, 
+								o_main_outfile, o_secondary_outfile )
 #end parse_args
 
 def get_sample_val_and_rep_number_from_sample_name( s_sample_name, s_sample_scheme ):
+
 	i_sample_value=0
 	i_replicate_number=0
 
@@ -288,6 +405,10 @@ def get_sample_val_and_rep_number_from_sample_name( s_sample_name, s_sample_sche
 #end get
 
 def raise_exception_if_non_single_pop_file( o_genepopfile ):
+	'''
+	Not currently in use ( 2016_08_10 ) -- was used when
+	genepop files with >1 population were not accepted.
+	'''
 	i_total_pops=o_genepopfile.pop_total
 
 	if ( i_total_pops != 1 ):
@@ -306,7 +427,6 @@ def raise_exception_if_non_single_pop_file( o_genepopfile ):
 #end raise_exception_non_single_pop_file
 
 def get_pops_in_file_too_small_to_run( o_genepopfile, f_proportion, i_min_pop_size ):
-
 	'''
 	checks size of every pop in the file
 	in case we need to skip some pops and 
@@ -434,10 +554,10 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 
 #end do_estimate
 
-def write_results( ds_results ):
-	sys.stdout.write( ds_results[ "for_stdout" ] + "\n" )
+def write_results( ds_results, o_main_outfile, o_secondary_outfile ):
+	o_main_outfile.write( ds_results[ "for_stdout" ] + "\n" )
 	if ds_results[ "for_stderr" ] is not None:
-		sys.stderr.write( ds_results [ "for_stderr" ] )
+		o_secondary_outfile.write( ds_results [ "for_stderr" ] )
 	#end if we have stderr results
 #end write_results
 
@@ -462,9 +582,10 @@ def update_indiv_list( dddli_indiv_list, dv_indiv_info_for_replicate, lf_proport
 			dddli_indiv_list[ s_orig_file ][ s_population_number ] [ s_indiv ] = {} 
 		#end if new indiv
 
-		#we create an empty list for each proportion at once.
-		#hence if a give proportionn is missing from the current dddli_indiv_list
-		#for this file/indiv combo, we know we need to add all proportions:
+		#we create an empty lists for all proportions at once.
+		#So, if a give proportionn is missing from the current dddli_indiv_list
+		#for this file/indiv combo, we know that all are missing, so we need to add 
+		#all proportions:
 		if f_this_proportion not in dddli_indiv_list[ s_orig_file ][ s_population_number][ s_indiv ]:
 			for f_proportion in lf_proportions:
 				dddli_indiv_list[ s_orig_file ][ s_population_number ][ s_indiv ][ f_proportion ] = []
@@ -536,6 +657,7 @@ def write_indiv_table( dddli_indiv_list, s_file_name, lf_proportions ):
 def print_test_list_replicate_selection_indices( o_genepopfile,  
 													s_sample_scheme, 
 													s_indiv_subsample_tag,
+													o_secondary_outfile,
 													s_population_subsample_tag ):
 
 	i_sample_value, i_replicate_number = \
@@ -555,18 +677,22 @@ def print_test_list_replicate_selection_indices( o_genepopfile,
 								s_indiv_indices ] 
 
 	s_values_to_print="\t".join( ls_values_to_print )
-	sys.stderr.write( s_values_to_print + "\n" )
+	o_secondary_outfile.write( s_values_to_print + "\n" )
 	#end for each pop number, print the selected indices
 	return
 #end get_test_list_replicate_selection_indices
 
 
 def do_sample( o_genepopfile, s_sample_scheme, lv_sample_values, i_replicates ):
-
+	'''
+	do_sample adds subsample info to the o_genepopfile GenepopFileManager object,
+	and so changes it in place, returns no value.  The o_genepopfile can then
+	be accessed to write a new genepop file that contains the subsampled data.
+	'''
 	i_total_pops_in_file=o_genepopfile.pop_total
 
 	#sampler requires a population list (in case we want to sample fewer than
-	#all the pops in the file, but we default to lising all:
+	#all the pops in the file). We default to lising all:
 	#GenepopFileManager instance o_genepopfile lists populations as 1,2,3...
 	li_population_list=list( range( 1, i_total_pops_in_file + 1 ) )
 
@@ -608,7 +734,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 						i_min_pop_size,
 						o_debug_mode,
 						llv_args_each_process,
-						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP ):
+						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+						o_secondary_outfile ):
 	'''		
 	creates ne-estimator caller object and adds it to list of args for a single call
 	to do estimate.  This call is then appended to llv_args_each_process
@@ -642,7 +769,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 						+ "have zero individuals when sampled using " \
 						+ "scheme: " + s_sample_scheme \
 						+ ", and with sample parameter, " + str( v_sample_value ) + "."
-				sys.stderr.write( s_msg + "\n" )
+				o_secondary_outfile.write( s_msg + "\n" )
 			#end if first replicate, report
 			continue
 		#end skip this subsample if no pops have any individuals
@@ -664,7 +791,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 								+ ", skipping pop number, "  + str( i_pop_number ) \
 								+ ".  It has fewer than " + str( i_min_pop_size ) \
 								+ " individuals." )
-				sys.stderr.write( s_msg + "\n" )
+				o_secondary_outfile.write( s_msg + "\n" )
 				continue
 			#end if i_population_number is
 
@@ -677,6 +804,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 				print_test_list_replicate_selection_indices( o_genepopfile, 
 										s_sample_scheme,	
 										s_indiv_sample, 
+										o_secondary_outfile, 
 										s_population_subsample_tag=s_this_pop_sample_name )
 			#end if we're testing, print 
 				
@@ -739,7 +867,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 	return
 #end add_to_set_of_calls_to_do_estimate
 
-def write_result_sets( lds_results, lv_sample_values, o_debug_mode ):
+def write_result_sets( lds_results, lv_sample_values, o_debug_mode, o_main_outfile, o_secondary_outfile ):
 
 	dddli_indiv_list=None
 
@@ -748,7 +876,7 @@ def write_result_sets( lds_results, lv_sample_values, o_debug_mode ):
 	#end if debug mode, init indiv list
 
 	for ds_result in lds_results:
-			write_results( ds_result )
+			write_results( ds_result, o_main_outfile, o_secondary_outfile )
 			if o_debug_mode.isSet( DebugMode.MAKE_INDIV_TABLE ):
 				update_indiv_list( dddli_indiv_list, 
 						ds_result[ "for_indiv_table" ], 
@@ -786,7 +914,7 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 	return lds_results
 #end execute_ne_for_each_sample
 
-def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP ):
+def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outfile ):
 
 	#write header -- field names for the main output table
 
@@ -803,14 +931,14 @@ def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP ):
 	ls_run_fields=[ "original_file", "pop", "indiv_count", "sample_value", "replicate_number", 
 						"min_allele_freq" ] 
 
-	sys.stdout.write( OUTPUT_DELIMITER.join( ls_run_fields + ls_reported_fields  ) + OUTPUT_ENDLINE )
+	o_main_outfile.write( OUTPUT_DELIMITER.join( ls_run_fields + ls_reported_fields  ) + OUTPUT_ENDLINE )
 #end write_header_main_table
 
 def drive_estimator( *args ):
 
 	( ls_files, s_sample_scheme, lv_sample_values, 
 				i_min_pop_size, f_min_allele_freq, i_total_replicates, 
-				i_total_processes, o_debug_mode ) =  parse_args( *args )
+				i_total_processes, o_debug_mode, o_main_outfile, o_secondary_outfile ) = parse_args( *args )
 
 	o_process_pool=None
 
@@ -837,8 +965,8 @@ def drive_estimator( *args ):
 	#this on the first call to estimator:
 	FIRST_RUN=3
 
-	write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP )
-	
+	write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outfile )
+
 	for s_filename in ls_files:
 
 		o_genepopfile=gpf.GenepopFileManager( s_filename )
@@ -851,54 +979,41 @@ def drive_estimator( *args ):
 												i_min_pop_size,
 												o_debug_mode,
 												llv_args_each_process,
-												IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP )
+												IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+												o_secondary_outfile )
 		
 	#end for each genepop file, sample, add an ne-estimator object, and setup call to estimator 
 
 	lds_results=execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_mode )
 
-	write_result_sets( lds_results, lv_sample_values, o_debug_mode )
+	write_result_sets( lds_results, lv_sample_values, o_debug_mode, o_main_outfile, o_secondary_outfile )
 
 	return
 #end drive_estimator
 
-if __name__ == "__main__":
-
-	DEFAULT_NUM_PROCESSES="1"
-	DEFAULT_DEBUG_MODE="no_debug"
-
-	ls_args=[ "glob pattern to match genepop files, enclosed in quotes. (Example: \"mydir/*txt\")", 
-			"\"percent\" or \"remove\", indicating whether to sample by percentages or removing N individuals randomly",
-			"list of integers, percentages or N's (for removing N individuals),  (Examples: 10,70,90 or 1,3,5)", 
-			"minimum pop size (single integer)",
-			"float, minimum allele frequency for NeEstimator's Crit value",
-			"integer, total replicates to run (Note: when removing one individual in a pop of N, all N combinations will be run)" ]
-
-	ls_optionals=[ "total processes to use (single integer) Default is 1 process.  " \
-			+ "This arg is required if the final debug optional arg is added",
-			"\"debug1\" to add to the output a table listing, for each indiv. in each file, " \
-					+ "which replicate Ne estimates include the indiv, or,\n \"debug2\" " \
-					+ "to run without parallelized processes," \
-					+ "to produce the table, and to save all subsample " \
-					+ "genepop files and NeEstimator output files." ]
-
-	s_usage = pgut.do_usage_check( sys.argv, ls_args, 
-			ls_optional_arg_descriptions=ls_optionals,
-			b_multi_line_msg=True )
-
-	if s_usage:
-		print( s_usage )
-		sys.exit()
-	#end if usage
-    
+def did_find_ne_estimator_executable():
+	b_found=False
+ 
 	#make sure the neestimator is in the user's PATH:
 	NEEST_EXEC_LINUX="Ne2L"
 	NEEST_EXEC_WIN="Ne2.ext"
+	NEEST_EXEC_MAC="Ne2M"
 
 	s_neestimator_exec=None
 
 	if os.name == "posix":
-		s_neestimator_exec=NEEST_EXEC_LINUX
+		if sys.platform.lower().startswith( "linux" ):
+			s_neestimator_exec=NEEST_EXEC_LINUX
+		elif sys.platform.lower() == "darwin" :
+			s_neestimator_exec=NEEST_EXEC_MAC
+		else:
+			s_msg="in pgdriveneestimator.py, " \
+					+ "looking for appropriate NeEstimator executable, " \
+					+ "found os name \"posix\" " \
+					+ "but unknown platform: " \
+					+ sys.platform + "."
+			raise Exception( s_msg )
+		#end if linux else mac else error
 	elif os.name == "nt":
 		s_neestimator_exec="Ne2.exe"
 	else:
@@ -909,26 +1024,70 @@ if __name__ == "__main__":
 
 	b_neestimator_found=pgut.confirm_executable_is_in_path( s_neestimator_exec )
 
-	if not( b_neestimator_found ):
-		s_msg="Can't find NeEstimator excecutable, %s." % s_neestimator_exec
-		raise Exception( s_msg )
-	#end if no neest exec
+	if b_neestimator_found:
+		b_found=True
+	#end if we found the executable
 
-	i_total_args_passed=len( sys.argv ) - 1
+	return b_found
+#end did_find_ne_estimator_executable
 
-	i_total_nonopt=len( ls_args )
+def mymain( *q_args ):
+	'''
+	This code was at mod level under if __name__=="__main__",
+	but moved inside this def so this mod can be imported
+	and run inside python with a set of args identical to
+	those required on the command line.
+
+	This was an adaptation to enable PGGuiNeEstimator objects
+	to import this mod, then call this def after they load 
+	params (args for this driver) from their interface
+	'''
+
+	b_exec_found=did_find_ne_estimator_executable()
+
+	if not did_find_ne_estimator_executable():
+		raise Exception( "in pgdriveneestimator.py, def mymain(), did not find NeEstimator executable." )
+	#end if can't find executable
+
+	drive_estimator(  *( q_args ) )
+
+	return
+#end mymain
+
+if __name__ == "__main__":
+	s_usage = pgut.do_usage_check( sys.argv, LS_ARGS, 
+			ls_optional_arg_descriptions=LS_OPTIONAL_ARGS,
+			b_multi_line_msg=True )
+
+	if s_usage:
+		print( s_usage )
+		sys.exit()
+	#end if usage
+
+	#add the hidden file object args, 
+	#that are explicitely passed by
+	#users who import this module and call mymain()
+
+	ls_args_passed=sys.argv[ 1: ] 
+
+	i_total_args_passed=len( ls_args_passed )
+	i_total_nonopt=len( LS_ARGS )
+
 	i_total_with_process_opt=i_total_nonopt + 1
 	i_total_with_debug=i_total_nonopt + 2
 
 	#if args given at command line don't include
 	#the optionals, add the defaults
 	if i_total_args_passed == i_total_nonopt:
-		sys.argv += [ DEFAULT_NUM_PROCESSES , DEFAULT_DEBUG_MODE ]
+		ls_args_passed += [ DEFAULT_NUM_PROCESSES , DEFAULT_DEBUG_MODE ]
 	elif i_total_args_passed==i_total_with_process_opt:
-		sys.argv += [ DEFAULT_DEBUG_MODE ]
+		ls_args_passed += [ DEFAULT_DEBUG_MODE ]
 	#end if optional args supplied else use default
 
-	drive_estimator( *( sys.argv[ 1: ] ) )
+	#now we add the default file objects, args hidden from console user:
+	ls_args_passed+=[ sys.stdout, sys.stderr ]
+
+	mymain( *( ls_args_passed ) )
 
 #end if main
 

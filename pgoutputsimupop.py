@@ -12,12 +12,15 @@ import os
 import shutil
 import bz2
 
+#want to write genepop files
+#to a temp name, then rename
+#after writing is done:
+import uuid
+
 FILE_DOES_NOT_EXIST=0
 FILE_EXISTS_UNCOMPRESSED=1
 FILE_EXISTS_AS_BZ2=2
 FILE_EXISTS_AS_BOTH_UNCOMPRESSED_AND_BZ2=3
-
-GENEPOP_FILE_EXTENSION="genepop"
 
 class PGOutputSimuPop( object ):
 	'''
@@ -29,6 +32,14 @@ class PGOutputSimuPop( object ):
 	defs in this input object, in order to, for example, show or allow
 	changes in parameter values for users before they run the simulation.
 	'''
+	
+	DICT_OUTPUT_FILE_EXTENSIONS={ "simfile":"sim",
+									"genfile":"gen",
+									"dbfile":"db",
+									"conffile":"conf",
+									"genepop":"genepop" }
+
+	COMPRESSION_FILE_EXTENSION="bz2"
 
 	def __init__( self, s_output_files_prefix ):
 
@@ -48,10 +59,15 @@ class PGOutputSimuPop( object ):
 
 		s_output_files_prefix=self.__basename
 
-		self.__outname=s_output_files_prefix + ".sim"
-		self.__errname=s_output_files_prefix + ".gen"
-		self.__megadbname=s_output_files_prefix + ".db"
-		self.__confname=s_output_files_prefix + ".conf"
+		self.__outname=s_output_files_prefix + "." \
+				+ PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "simfile" ]
+		self.__errname=s_output_files_prefix + "." \
+				+ PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "genfile" ]
+		self.__megadbname=s_output_files_prefix + "." \
+				+ PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "dbfile" ]
+		self.__confname=s_output_files_prefix + "." \
+				+ PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "conffile" ]
+
 		self.__genfile=self.__errname
 		self.__simfile=self.__outname
 		self.__dbfile=self.__megadbname
@@ -172,6 +188,9 @@ class PGOutputSimuPop( object ):
 						except Exception,  e:
 							raise e
 						#end try except
+
+						#required by windows only, else error can't remove:
+						o_input.close()
 						os.remove( s_myfile )	
 					#end with bzfile for writing
 				#end with current file for reading
@@ -208,8 +227,14 @@ class PGOutputSimuPop( object ):
 		'''
 
 		o_genfile=None
+
 		o_genepopfile=None
-		s_genepop_filename=self.__genfile + "." + GENEPOP_FILE_EXTENSION 
+		
+		s_temp_file_name=str( uuid.uuid4() ) 
+	
+		s_genepop_filename=self.__basename + "."  \
+				+  PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "genepop" ]		
+
 		i_num_loci=(idx_allele_stop-idx_allele_start) + 1
 
 		IDX_GEN_INDIV=0
@@ -242,9 +267,9 @@ class PGOutputSimuPop( object ):
 		#end if uncompressed only or uncomp. and compressed, else compressed only, else no file
 		
 		if b_do_compress == True:
-			o_genepopfile=bz2.BZ2File( s_genepop_filename + '.bz2', 'wb', compresslevel=9 ) 
+			o_genepopfile=bz2.BZ2File( s_temp_file_name + '.bz2', 'wb', compresslevel=9 ) 
 		else:
-			o_genepopfile=open( s_genepop_filename, 'w' )
+			o_genepopfile=open( s_temp_file_name, 'w' )
 		#end if compress else don't
 
 		#write header and loci list:
@@ -281,6 +306,9 @@ class PGOutputSimuPop( object ):
 
 		o_genfile.close()
 		o_genepopfile.close()
+
+		s_final_name=s_temp_file_name.replace( s_temp_file_name, s_genepop_filename )
+		os.rename( o_genepopfile.name, s_final_name )
 
 		return
 	#end gen2Popgene

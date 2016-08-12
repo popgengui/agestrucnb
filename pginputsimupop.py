@@ -354,7 +354,10 @@ class PGInputSimuPop( object ):
 				#and their section names (as part of the parma_names.tags), to provide
 				#the section name, with which we update this input object:
 				if s_attribute not in self.__config_file_section_name_by_attribute_name:
-					s_new_entry_section=self.param_names.getConfigSectionNameFromParamTag( s_attribute )
+					s_new_entry_section=self.param_names.getConfigSectionNameForParam( s_attribute )
+					#for config file sections, this will be all lower case:
+					s_new_entry_section=s_new_entry_section.lower()
+
 					#for this attribute we assume that the code from Tiago uses the same name
 					#for the config file as is used in his original cfg object, now our self input object:
 					self.__update_attribute_config_file_info( s_attribute, s_new_entry_section, s_attribute )

@@ -6,8 +6,8 @@ __filename__ = "pgsimupopper.py"
 __date__ = "20160124"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-VERBOSE_CONSOLE=True
-VERY_VERBOSE_CONSOLE=True
+VERBOSE_CONSOLE=False
+VERY_VERBOSE_CONSOLE=False
 DO_PUDB=False
 INIT_ENTRY_CONFIG_FILE=()
 
@@ -25,17 +25,13 @@ import pgoutputsimupop as pgout
 from pgguiutilities import KeyValFrame
 from pgguiutilities import KeyCategoricalValueFrame
 from pgguiutilities import PGGUIInfoMessage
+from pgguiutilities import PGGUIYesNoMessage
+from pgutilityclasses import IndependantSubprocessGroup
 import pgutilities as pgut
-
-#to help manage one process per replicate operation:
-#(see def do_operation)
-from pgutilityclasses import independantProcessGroup
 
 import os
 import multiprocessing
-#to fetch all of the life tables
-#for the pgsimupop:
-import glob
+import subprocess
 
 #to help dynamically load input parameters
 #by inspecting the input object:
@@ -95,7 +91,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 	def __init__( self,  o_parent,  s_param_names_file=None, 
 							s_life_table_file_glob="resources/*life.table.info",
-							s_name="main_frame",
+							s_name="simupop_gui",
 							i_total_processes_for_sims=1 ):
 		'''
 		param s_param_names_file is the file that contains short and long param
@@ -123,7 +119,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.output_base_name=self.__get_default_output_base_name() 
 
 		#the PGOpSimuPop object:
-		self.__operation=None
 		self.__param_names_file=s_param_names_file
 
 		#input object used to make the
@@ -149,26 +144,27 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#enable checking whether in progress
 		#or finished.  See def runSimulation:
 		self.__op_process=None
+		#we set this before spawning __op_process,
+		#so that on cancel-sim, we can
+		#notify op_process and it can 
+		#clean up its subprocesses and 
+		#output:
+		self.__sim_multi_process_event=None
 
 		#we have a default output name,
 		#so we can init the output
 		#immediately
 		self.__setup_output()
 
-		#process in which simulation 
-		#operation is running, assigned
-		#after input and output params
-		#have been created, and the 
-		#PGOpSimuPop has been created
-		#and prepared:
-#		self.__operation_process=None
 		self.__simulation_is_in_progress=False
+
 		self.__total_processes_for_sims=i_total_processes_for_sims
 
 		#we hold references to all subframes
 		#except the run-button subframe,
 		#so that we can enable/disable
-		#according to the simulation-run state:
+		#according to the simulation-run state
+		#(not yet implemented, 2016_08_05
 
 		self.__category_frames=None
 
@@ -362,8 +358,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		#make frames, one for each category of parameter
 		#(currently, "population", "configuration", "genome", "simulation"
-		self.__category_frames=self.__make_category_subframes( set( ls_tags ) )	
-
+		self.__category_frames=self.__make_category_subframes( \
+				set( ls_tags ) )	
 
 		for s_param in ls_input_params:
 			
@@ -373,7 +369,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			s_longname=None
 			s_nametag=None
 			i_len_labelname=None
-
 
 			o_def_to_run_on_value_change=None
 
@@ -487,7 +482,13 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 	def load_config_file( self, event=None ):
 		s_current_value=self.__config_file.get()
-		s_config_file=tkfd.askopenfilename(  title='Load a configuration file' )
+		s_config_file=tkfd.askopenfilename(  \
+				title='Load a configuration file' )
+
+		if pgut.dialog_returns_nothing( s_config_file ):
+			return
+		#end if no file selected, return
+
 		self.__config_file.set(s_config_file)
 		try:
 			self.__setup_input()
@@ -508,12 +509,20 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end load_config_file
 
 	def __get_life_table_file_list( self, s_glob_expression ):
-		self.__life_table_files=glob.glob( s_glob_expression )
+		self.__life_table_files = \
+			pgut.get_list_files_and_dirs_from_glob( s_glob_expression )
 		return
 	#end def __get_life_table_file_list
 
 	def select_output_directory( self, event=None ):
-		s_outputdir=tkfd.askdirectory( title='Select a directory for file output' )
+
+		s_outputdir=tkfd.askdirectory( \
+				title='Select a directory for file output' )
+		
+		if pgut.dialog_returns_nothing( s_outputdir ):
+			return
+		#end if no directory selected, return
+
 		self.__output_directory.set( s_outputdir )
 		self.__init_interface()
 		self.__set_controls_by_run_state( self.__get_run_state() )
@@ -578,22 +587,27 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end __make_op
 
 	def __get_default_output_base_name( self ):
-		import time
-		s_mytime=time.strftime( '%Y.%m.%d.%H.%M.%S' )
-		return "sim.output." + s_mytime
+		'''
+		Compacting default name, as of 2016_08_11,
+		need to make sure the output base name is
+		as small as possble, to keep the resulting
+		genepop file name under 31 chars, as NeEstimation
+		currently can't handle input file names >31 chars.
+		'''
+		s_mytime=pgut.get_date_time_string_dotted()	
+		return "sim." + s_mytime.replace( ".", "" )
 	#end __get_default_output_base_name
 
 	def __get_default_output_directory( self ):
-		return os.getcwd()
+		return pgut.get_current_working_directory()
 	#end __get_default_output_directory
 
 	def __check_progress_operation_process( self ):
-
 		if self.__op_process is not None:
 			if self.__op_process.is_alive():
 				if VERY_VERBOSE_CONSOLE:
 					print ( "checking and process found alive" )
-				#endif very verbose, pring
+				#endif very verbose, print
 
 				self.__simulation_is_in_progress = True
 				self.after( 500, self.__check_progress_operation_process )
@@ -601,27 +615,29 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				if VERY_VERBOSE_CONSOLE:
 					print( "checking and process not None but not alive" )
 					print( "value of temp config file attribute: " \
-								+ self.__temp_config_file_for_running_replicates )
+								+ str( self.__temp_config_file_for_running_replicates ) )
 				#end if very verbose, print
-				self.__simulation_is_in_progress = False
-				if self.__temp_config_file_for_running_replicates is not None:
-					if VERY_VERBOSE_CONSOLE:
-						print( "temp config file value is not None" )
-					if os.path.exists( self.__temp_config_file_for_running_replicates ):
-						if VERY_VERBOSE_CONSOLE:
-							print ( "removing temporary config file" )
-						#end if very verbose
-						os.remove( self.__temp_config_file_for_running_replicates )
-						self.__temp_config_file_for_running_replicates = None
-					else:
-						s_msg="In PGGuiSimuPop instance, def " \
-							+ "__check_progress_operation_process, attribute: " \
-							+ "__temp_config_file_for_running_replicates " \
-							+ " is not None but does not name an existing file."
 
-						sys.stderr.write( "Warning: " +  s_msg + "\n" )
-					#if path exists else warn
-				#end if attribute for temp config file is not None
+				self.__simulation_is_in_progress = False
+
+				#found in the neestimator gui that the op_process 
+				#as object will persist long past finishing the estimation.  
+				#In this case if the user closes the whole gui or the tab 
+				#for this instance, then the cleanup will read the 
+				#op_process as alive, and will remove output files, even 
+				#though the process has finished.  While I did not see this
+				#problem here, for the PGGuiSimuPop.op_process, 
+				#I'm nonetheless setting the "dead"
+				#process and its corresponding event to None:
+				self.__op_process=None
+				self.__sim_multi_process_event=None
+
+				if VERY_VERBOSE_CONSOLE:
+					print ( "removing temporary config file" )
+				#end if very verbose
+
+				self.__remove_temporary_config_file()
+
 			#end if process alive else not
 
 			self.__set_controls_by_run_state( self.__get_run_state() )
@@ -639,86 +655,50 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		return
 	#end __check_progress_operation_process
 
-	def __do_operation( self ):
+	def __remove_temporary_config_file( self ):
+			if self.__temp_config_file_for_running_replicates is not None:
+				if os.path.exists( self.__temp_config_file_for_running_replicates ):
+					os.remove( self.__temp_config_file_for_running_replicates )
+					self.__temp_config_file_for_running_replicates = None
+				else:
+					s_msg = "In PGGuiSimuPop instance, def __remove_temporary_config_file, " \
+							+ "attribued __temp_config_file_for_running_replicates is not None, " \
+							+ "but is not a valid, existing file. Current value: " \
+							+ str( self.__temp_config_file_for_running_replicates ) + "." 
+					raise Exception( s_msg )
+				#end if path exits
+			#end if config file attr is not none
+	#end __remove_temporary_config_file
 
-		'''
-		After much trial and error, with multiprocessing.Pool
-		consistently failing to run independant simulations,
-		and succeeding when I used individual multiprocessing.Process
-		instances, also noting that using multiprocessing.Queues to manage
-		multiprocessing.Processes also failed to produce independant sims.
-
-		My ultimate solution involved creating new python instances inside
-		subprocess.call calls.  However, to manage the blocked process
-		that results from each use of subprocess.call(), I'm  managing these
-		with python multiprocess.process instances, according to a max-process
-		paramter, by using a class that simply checks for living state of 
-		each and adds new processes as available (see class 
-		pgutilityclasses.independantProcessGroup).		
-
-		This def assumes that attrbute self.__temp_config_file_for_running_replicates
-		has a value suitable for naming a new temp config file (see def runSimulation).
-		'''	
-		i_total_replicates=self.__input.reps
-		i_max_processes_to_use=self.__total_processes_for_sims
-
-		#despite the fact that ultimately the sims are done in
-		#new OS processes, using new python instances, we still
-		#use python.multiprocess.process instances to wrap 
-		#the OS processes, since we have more convenient control over
-		#their management.  This def, itself the target for multi 
-		#python.multiprocessing.processes, itself spawns an OS system
-		#process:
-		def_target=pgut.do_sim_replicate_on_separate_os_process
-
-		self.__input.writeInputParamsAsConfigFile( \
-				self.__temp_config_file_for_running_replicates )
-
-		i_total_replicates_started=0
-		i_current_total_living_processes=0
-
-		o_process_manager=independantProcessGroup()
-
-		while i_total_replicates_started < i_total_replicates:
-			
-			i_current_total_living_processes=o_process_manager.getTotalAlive()
-
-			#considered using at time.sleep() command inside this while loop,
-			#but, because the process calling this def has only this code as its
-			#province, and so is not blocking the main
-			#gui, I assume it can simply get tied up in the while without huring 
-			#overall performance:
-
-			while i_current_total_living_processes == i_max_processes_to_use:
-				i_current_total_living_processes=o_process_manager.getTotalAlive()
-			#end while all avail processes in use, recheck
-
-			i_num_processes_avail=i_max_processes_to_use-i_current_total_living_processes
-
-			seq_args=( self.__temp_config_file_for_running_replicates,
-						",".join( self.__life_table_files ),
-						self.__param_names_file,
-						self.__output.basename,
-						str( i_total_replicates_started ) )
-
-			o_new_process=multiprocessing.Process(  target=def_target, args=seq_args)
-			o_new_process.start()
-			o_process_manager.addProcess( o_new_process )
-			i_total_replicates_started += 1
-		#end while process started < total replicates requested
-
-		return
-	#end __do_operation
 
 	def __cancel_simulation( self ):
-		self.__simulation_is_in_progress=False
-		self.__set_controls_by_run_state( self.__get_run_state() )
+		if self.__op_process is not None:
+			if self.__sim_multi_process_event is not None:
+				#signal op_process that we want to kill all the sim subprocesses:
+				#(see def __do_operation)
+				self.__sim_multi_process_event.set()
+			else:
+				self.__op_process.terminate()
+		else:
+			s_msg="Could not cancel the simulation.  " \
+					+ "The simulation process and/or its communication event was not found." 
+			sys.stderr.write( "Warning: " + s_msg + "\n" )
+		#end if op_process is not None
+		
 		return
 	#end __cancel_simulation
 
 	def __on_click_run_or_cancel_simulation_button( self, event=None ):
 		if self.__simulation_is_in_progress:
-			self.__cancel_simulation()
+			o_mbox=PGGUIYesNoMessage( self , "Are you sure you want to cancel " \
+					+ "the simulation and remove all output files?" )
+			b_answer = o_mbox.value
+			if b_answer:
+				self.__cancel_simulation()
+				self.__simulation_is_in_progress=False
+				self.__set_controls_by_run_state( self.__get_run_state() )
+
+			#end if yes
 		else:
 			self.runSimulation()
 		#end if sim in progress else not
@@ -757,7 +737,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	def __set_controls_by_run_state( self, i_run_state ):
 
 		if i_run_state==PGGuiSimuPop.RUN_NOT_READY:
-			self.__run_button.config( text="Run Simulatin", state="disabled" ) 
+			self.__run_button.config( text="Run Simulation", state="disabled" ) 
 			self.__enable_or_disable_category_frames( b_do_enable=False )
 		elif i_run_state==PGGuiSimuPop.RUN_READY:
 			self.__run_button.config( text="Run Simulation", state="enabled" )
@@ -774,14 +754,52 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		return
 	#end def __set_controls_by_run_state
 
+	def __output_files_exist_with_current_output_basename(self):
+		b_files_exist=False
+		ls_files=pgut.get_list_files_and_dirs_from_glob( self.__output.basename + "*" )
+		if len( ls_files ) != 0:
+			b_files_exist=True
+		#end if len not zero
+		return b_files_exist
+	#end __output_files_exist_with_current_output_basename
+
 	def runSimulation( self ):
 		if self.__output is None \
 			or self.__input is None:
 			s_msg="Simulation not ready to run.  Input or Output parameters " \
 					+ "have not been set" 
 			sys.stderr.write( s_msg + "\n" )
+			PGGUIInfoMessage( self, s_msg )
+			return	
 		#end if output or input is None
+
 		self.__setup_op()
+
+		'''
+		this check was added in case a user completed a simulation,
+		then accidentally hit "run simulation" button again without
+		changing anything in the interface, and then (very quickly) 
+		hit the "cancel simulation" button -- initiating a file removal
+		before the program has reached the point at which which the
+		PGOutputSimuPop object could abort the run by throwing an 
+		exception that the output files already exist.
+		The following check is meant to halt the sim before any
+		separate processes are even started (and so no multiprocessing
+		event will cause cancel prompt and cleanup on "yes" ).
+		'''
+		if self.__output_files_exist_with_current_output_basename():
+			s_msg="The program can't start the simulation. Output files " \
+					+ "already exist with current " \
+					+ "path and basename: " + self.__output.basename + ".  " \
+					+ "\nTo start a new simulation please do one of the following:\n" \
+					+ "1. Remove or rename the output files.\n" \
+					+ "2. Rename the output files base name or output directory." 
+
+			sys.stderr.write( s_msg + "\n" )
+			
+			PGGUIInfoMessage( self, s_msg )
+			return
+		#end if output files exist	
 
 		#input file to reaplace the orig config file
 		#as well as the attr/value dict originally passed to each 
@@ -791,8 +809,30 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#to __check_progress_operation_process, in which we delete
 		#the temp file when sim processes are finished
 		self.__temp_config_file_for_running_replicates=str( uuid.uuid4() ) 
+		
+		self.__input.writeInputParamsAsConfigFile( \
+			self.__temp_config_file_for_running_replicates )
 
-		self.__op_process=multiprocessing.Process( target=self.__do_operation )
+		#we pass a ref to this object to the target (def in pgutilities, do_operation_outside) 
+		#for op_process, #Then, from this object instance can call "set()" on the event, 
+		#after, for example #an __on_click_run_or_cancel_simulation_button->__cancel_simulation()
+		#sequence, so that the event will to pass True and then the ref in
+		#op_process will return True when the op_process interrog 
+		#o_event.is_set()  and it can accordingly clean
+		#up its collection of subprocess.Popen processes 
+		self.__sim_multi_process_event=multiprocessing.Event()
+
+		#our sim run(s) should not block the main gui, so we
+		#run it(them) in a new python.multiprocessing.process:
+		self.__op_process=multiprocessing.Process( target=pgut.do_operation_outside, 
+					 args=( self.__sim_multi_process_event, 
+						self.__input.reps, 
+						self.__total_processes_for_sims,
+						self.__temp_config_file_for_running_replicates,
+						self.__life_table_files,
+						self.__param_names_file,
+						self.__output.basename ) ) 
+
 		self.__op_process.start()
 
 		self.__simulation_is_in_progress=True
@@ -818,4 +858,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		return
 	#end show_input_config
+
+	def cleanup( self ):
+		self.__cancel_simulation()
+		self.__remove_temporary_config_file()
 #end class PGGuiSimuPop

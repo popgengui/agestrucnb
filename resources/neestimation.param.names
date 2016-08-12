@@ -1,0 +1,7 @@
+sampscheme	Subsampling scheme	Parameters;1;"percent"
+sampparam	Subsampling parameter values	Parameters;1;[100]
+minpopsize	Minimum Population Size	Parameters;1;1
+minallelefreq	Minimum Allele Frequency	Parameters;1;0.01
+replicates	Replicates	Parameters;1;1
+processes	Number of Processes	Parameters;1;1
+runmode	Run Mode	Parameters;1;"default"

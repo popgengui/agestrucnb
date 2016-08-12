@@ -142,8 +142,11 @@ class PGOpSimuPop( modop.APGOperation ):
 					% type( self ).__name__ 
 			sys.stderr.write( s_msg + "\n" )
 		else:
-			#writes all loci values, compresses with
-			self.output.gen2Genepop( 1, i_total_loci, b_pop_per_gen=True )
+			#writes all loci values 
+			self.output.gen2Genepop( 1, 
+					i_total_loci, 
+					b_pop_per_gen=True,
+					b_do_compress=False )
 		#end if no loci reported
 	#end __write_genepop_file
 

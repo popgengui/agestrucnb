@@ -25,7 +25,17 @@ class PGParamSet( object ):
 	'''
 
 	DELIMITER_TAG_FIELDS=";"
-	IDX_CONFIG_SECTION_TAG_FIELDS=0
+	IDX_PARAM_SHORTNAME=0
+	IDX_PARAM_LONGNAME=1
+	IDX_PARAM_TAG=2
+
+	PARAM_FIELDS_TOTAL=3
+
+	IDX_TAG_FIELD_CONFIG_SECTION=0
+	IDX_TAG_FIELD_PLACEMENT_ORDER=1
+	IDX_TAG_FIELD_DEFAULT_VALUE=2
+
+	COMMENT_CHAR="#"
 
 	def __init__( self, s_file_with_param_names = None ):
 
@@ -52,13 +62,18 @@ class PGParamSet( object ):
 		o_file=open( s_file_with_param_names )
 
 		for s_line in o_file:
+			if s_line.startswith( PGParamSet.COMMENT_CHAR ):
+				continue
+			#end if comment
+
 			s_tag=None
 			ls_vals= s_line.strip().split( "\t" )
-			s_shortname=ls_vals[ 0 ]
-			s_longname=ls_vals[ 1 ]
+			s_shortname=ls_vals[ PGParamSet.IDX_PARAM_SHORTNAME ]
+			s_longname=ls_vals[ PGParamSet.IDX_PARAM_LONGNAME ]
+
 			self.__set_parameter( s_shortname, s_longname )
-			if len( ls_vals )>=3:
-				s_tag=ls_vals[ 2 ] if ls_vals[ 2 ] != "None" else None
+			if len( ls_vals )>=PGParamSet.PARAM_FIELDS_TOTAL:
+				s_tag=ls_vals[ PGParamSet.IDX_PARAM_TAG ] if ls_vals[ 2 ] != "None" else None
 			#end if we have a 3rd string 
 				
 			self.__tags_by_shortname[ s_shortname ] = s_tag
@@ -70,26 +85,62 @@ class PGParamSet( object ):
 		return
 	#end __init_from_file
 
-	def getConfigSectionNameFromParamTag( self, s_name ):
-		s_tag=None
-		s_section_name=None
-		if s_name in self.__params_by_shortname:
-			s_tag = self.__tags_by_shortname[ s_name ]
-		elif s_name in self.__params_by_longname:
-			s_tag = self.__tags_by_longname[ s_name ]
-		else:
-			s_msg="In PGParamSet instance, def getSectionName, "  \
-					+ "no param name match  (short or long) for: "  \
-					+ s_name + "."
-			raise Exception( s_msg )
-		#end if name in shortnames, else longnames, else error
+	def __get_tag_field( self, s_tag, i_idx ):
 
 		ls_tag_values=s_tag.split( PGParamSet.DELIMITER_TAG_FIELDS )
 
-		s_section_name=ls_tag_values[ PGParamSet.IDX_CONFIG_SECTION_TAG_FIELDS ].lower()
+		if len( ls_tag_values ) <= i_idx:
+			s_msg="In PGParamSet instance, def get_tag_field, "  \
+					+ "tag, " + s_tag \
+					+ " has too few fields to retrieve index number: " \
+					+ str( i_idx ) + "."			
+			raise Exception( s_msg )
+		#end if field list is too short
 
+		s_field_val=ls_tag_values[ i_idx ]
+
+		return s_field_val
+
+	#end __get_tag_field
+
+	def getConfigSectionNameFromTag( self, s_tag ):
+		s_section_name = self.__get_tag_field( s_tag, 
+									PGParamSet.IDX_TAG_FIELD_CONFIG_SECTION ) 
 		return s_section_name
-	#end getConfigSectionNameFromParamTag
+	#end getConfigSectionNameForParam
+
+	def getDefaultValueFromTag( self, s_tag ):
+		s_default_val_as_string=self.__get_tag_field( s_tag, 
+									PGParamSet.IDX_TAG_FIELD_DEFAULT_VALUE )
+		return s_default_val_as_string
+	#end getDefaultValueFromParamTag
+
+	def getSectionOrderFromTag( self, s_tag ):
+		s_section_order_as_string=self.__get_tag_field( s_tag, 
+									PGParamSet.IDX_TAG_FIELD_PLACEMENT_ORDER )
+		return s_section_order_as_string
+	#end getSectionOrderFromParamTag
+
+
+	def getConfigSectionNameForParam( self, s_name ):
+		s_tag=self.tag( s_name )
+		s_section_name = self.__get_tag_field( s_tag, 
+								PGParamSet.IDX_TAG_FIELD_CONFIG_SECTION ) 
+		return s_section_name
+	#end getConfigSectionNameForParam
+
+	def getDefaultValueForParam( self, s_name ):
+		s_tag=self.tag( s_name )
+		s_default_val_as_string=self.__get_tag_field( s_tag, 
+									PGParamSet.IDX_TAG_FIELD_DEFAULT_VALUE )
+		return s_default_val_as_string
+	#end getDefaultValueFromParamTag
+
+	def getSectionOrderForParam( self, s_name ):
+		s_section_order_as_string=self.__get_tag_field( s_tag, 
+									PGParamSet.IDX_TAG_FIELD_PLACEMENT_ORDER )
+		return s_section_order_as_string
+	#end getSectionOrderFromParamTag
 
 	def longname( self, s_shortname ):
 		s_val=None
@@ -115,7 +166,7 @@ class PGParamSet( object ):
 		param s_name can be either among the 
 		short or long names (or both). Shortnames
 		are checked first.  First instance of name
-		provides its tag as the retur value.
+		provides its tag as the return value.
 		'''
 		s_val=None
 
@@ -123,6 +174,11 @@ class PGParamSet( object ):
 			s_val = self.__tags_by_shortname[ s_name ]
 		elif s_name in self.__tags_by_longname:
 			s_val = self.__tags_by_longname[ s_name ]
+		else:
+			s_msg="In PGParamSet instance, def tag(), no tag " \
+					+ "associated with " \
+					+ "param name, " + s_name + "."
+			raise Exception ( s_msg )
 		#end if tag in short else if tag in long
 
 		return s_val
