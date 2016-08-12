@@ -34,7 +34,10 @@ Current dependencies
 		The SimuPOP modules should be installed using setup.py (or pip), so that they can be accessed by your python interpreter. 
 	3.  NeEstimator, http://www.molecularfisherieslaboratory.com.au/neestimator-software.  Our program will look for the executable Ne2L (Linux) Ne2.exe (Windows), Ne2M (Mac OSX) in your PATH variable.
 
-Installation.  While future versions may include setup.py installation into default python library directories, as of now:
+Installation.  
+------------
+
+While future versions may include setup.py installation into default python library directories, as of now:
 
 	1. Clone the repository or download the files from https://github.com/popgengui/negui
 	2. Add the location of the python modules to your PYTHONPATH variable, and add negui.py to your PATH:
@@ -46,6 +49,7 @@ Installation.  While future versions may include setup.py installation into defa
 				export PYTHONPATH
 				export PATH
 		Windows (note above, that we are not yet ready to include Windows as tested and ready )  Note: see windows help for setting and editing environmental variables (Advanced system settings).  You can add the PYTHONPATH, and edit the PATH 
+
 
 Current Functionality
 ---------------------
