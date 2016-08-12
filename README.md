@@ -16,6 +16,8 @@ Current python version
 
 
 OS-specific notes
+-----------------
+
 	1. The program is not yet Windows-ready.  The program has been run on Linux.  It will soon have a trial on OSX.  Windows 10 runs revealed a few bugs, one of which in the pygenomics code, which will requrire a patch not yet implemented.  Please see the "BUGS" file for the windows-specifics.
 Running the programs
 	2. INstallation of SimuPOP on Win10 did not work without installing the Microsoft VC++ Redistributable 2008 library, as noted in the SimuPOP installation web page.  I found, however, that their link to the Microsoft installation page took me to the library is the 32-bit libarry (unless I missed an option).  Most of us will actually need the x64 verion at https://www.microsoft.com/en-us/download/details.aspx?id=15336
@@ -46,6 +48,7 @@ Installation.  While future versions may include setup.py installation into defa
 		Windows (note above, that we are not yet ready to include Windows as tested and ready )  Note: see windows help for setting and editing environmental variables (Advanced system settings).  You can add the PYTHONPATH, and edit the PATH 
 
 Current Functionality
+---------------------
 
 	1. The GUI interface is invoked using the command "python negui.py" or, if negui.py is modified to be executable, then simply "negui.py" (providing it's location is in your PATH. Optionally you can add an integer argument that gives the number or processes to use when doin simulation replicates.  This number should practically not exceed the number of CPU's on your machine.  It defaults to "1" when no such argument is given.  Note that multiple processes are only useful for the simulations when more than one replicate is performed (multiplexing in simulations currently is done per-replcate). These are the current interfaces:
 		a. Simupop simulation:  clicking on the "New" main menu option, then "Add new simulation" creates a tab window allowing AgeStructureNe-based simuPop simulations when supplied with configuration files.  Currently, life tables are preloaded from the resources directory.  Thus, if you need to use your own, please open an example or examples in resources, and modify as needed, remembering to use a model name that will match that in the configuration file you'll load to run the simulation.  Also, currently, you'll need to name your customized life table table file so that it ends in ".life.table.info."
