@@ -725,15 +725,18 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		'''
 		for debugging
 		'''
-		ls_input_params=self.__param_set.shortnames		
 
-		for s_param in ls_input_params:
-			s_attrname=ATTRIBUTE_DEMANLGER + s_param
-			print ( s_param + "\t" \
-					+ str( getattr( self, s_attrname ) ) )
-		#end for each param
+		if VERBOSE_CONSOLE:
+			ls_input_params=self.__param_set.shortnames		
 
-		print( "output_base_name\t" + self.output_base_name )
+			for s_param in ls_input_params:
+				s_attrname=ATTRIBUTE_DEMANLGER + s_param
+				print ( s_param + "\t" \
+						+ str( getattr( self, s_attrname ) ) )
+			#end for each param
+
+			print( "output_base_name\t" + self.output_base_name )
+		#end if verbose
 
 		return
 	#end __test_value
