@@ -1,0 +1,22 @@
+
+Mon Aug  1 13:52:49 MDT 2016
+
+--add Tiago's sampling schemes to the genepopfilemanager classes
+--gui around ne-estimation
+	done
+--Catch error from Popen call to the simulation, and show msgbox to user
+
+Fri Aug 12 13:34:01 MDT 2016
+
+ -- currently the warning about killing current analyses and deleting their output is given on any click to close.  should only come up when the  program knows there's a current run, but right now i'm not satisfied that the life/death of the op_process attribute that, on both gui interfaces (simupop and neestimator), performs the sim/ldne operation, whether the alive() or notaliveness of that process is a precise flag enougth flag for the  -     correct removal only of output files.
+TODO:  currently on window:
+---1. neither sim or ne gui's can remove output files when sim/ne op is cancelleed in progress -- get "WindowsError: [Error32] The process cannot access the file because it is being used by another process."
+---2. the windows man menu does not load properly -- it displays the text that in the unix OS's givs the accelerator keys "Ctrl+N" and "Ctrl+C", whereas in the unix-based OS's we get the correct display of underlined N and C in "New" and "Close"
+TODO:  
+---1. pgguisimupop runs output a *conf configuration file that has an  entry under section [configuration info], entry configuration_file, which currently gives the temp file name used to run the sim -- not sure this is at all helpful -- and can't really use the original conf file name, since the user may have changed any param since loading it
+---2.  disable all controls while sim/neest in progress.    
+
+
+
+
+

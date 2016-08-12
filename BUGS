@@ -2,6 +2,22 @@
 
 Fri Jul 29 15:49:24 MDT 2016
 
-
 B1.  Running 9 simulations, 2 of them much more computationally intensive (CI) than the others, resulted  in one of the CI sims to hang.  I was able to recreate the problem on two computers (Linux) when I used the same 9 config files and started them in the same order.  On one comuter, closing the gui seems to have left the hanging process (running do_sim_replicate.py) running.  On the 2nd computer, closing the GUI killed all subprocesses still running sims. 
+
 B2.  Related to B1, clicking the "Cancel Simulatin" button during a long simulation did not kill the process.
+	--testing shows fixed as of Fri Aug 12 13:34:50 MDT 2016
+
+Fri Aug 12 13:35:10 MDT 2016
+
+B3.  Cancelling an ne-estmation in the gui has seconds of delay before Ne2 executable stops.  Then process dies with error in the multiprocessing mod -- need a cleaner exit
+
+B4. Windows -- pygenomics Controller.py uses a system command includeing "/dev/null", which directory windows lacks.  A patch using python's x-platform definition for null locations needs to be incorporated.
+
+B5.  Windows -- mangled names in main menu.
+
+B6.  Windows -- cancelling a simulation or ne-estimation process in the gui results in windows error, "WindowsError: [Error32] The process cannot access the file because it is being used by another process."  File locking conflict does not occur in Linux (Nor, I think, in OSX, but will need to test).
+
+B7.  Loading a config file in the simulation interface -- cliking the select button then cancelling rarely results in an update that sets the config file to emtpy -- hard ro reproduce, as I'm not sure of the necessary conditions.
+
+B8.  -- it's currently possible to load a genepop file that's been written as file but not yet filled iwth data, as the sim is not yet done -- but then running ne-estimator on the empty or parial genepop file.  However, since the genepop file is written to a tempname first (named using python uuid), this condition is only possible if an "os.move()" command is interrupted after ther user has chosen the (unlikely) temp name as input, or if  such that there's a final *genepop name but no data yet in the file.
+
