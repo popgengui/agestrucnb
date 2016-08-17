@@ -11,7 +11,7 @@ fecundityMale	Male Fecundity	Population;2
 forceSkip	Force Skip	Population;2
 gens	Generations	Population;2
 isMonog	Monogamous	Population;2
-lbd	lbd	Population;2
+lbd	lambda	Simulation;4
 litter	Litter	Population;2
 maleProb	Probability Male Birth	Population;2
 model_name	Model	Configuration Info;1
