@@ -3,7 +3,7 @@
 Overview
 --------
 
-	Our goal is a front end for ease of use, that incorporates the population
+	Our goal is a front end that incorporates the population
 	genetics functions provided by Tiago Antao's python program at
 	https://github.com/tiagoantao/AgeStructureNe.git.  
 
@@ -25,25 +25,16 @@ Current python version
 	python 2.7
 
 
-OS-specific notes
+OS-comaptibility
 -----------------
+	1. Linux. The program has been run on Linux (Ubuntu 16.04).
 
-	1. The program is not yet Windows-ready.  The program has been run on
-	Linux.  It will soon have a trial on OSX.  Windows 10 runs revealed a
-	few bugs, one of which prevents usability, which will require a patch to the
-	pygenomics code, and is not yet integrated into the distribution.  Please see
-	the "BUGS" file for this and other windows-specific issues.
-	Running the programs
+	2. OSX. The program has been run on OSX (version unknown).
 
-	2. Installation of SimuPOP on Win10 did not work without installing the
-	Microsoft VC++ Redistributable 2008 library, as noted in the SimuPOP
-	installation web page.  I found, however, that their link to the Microsoft
-	installation page took me to the 32-bit libary download-page (unless I missed an
-	option).  Most of us will actually need the x64 verion at
-	https://www.microsoft.com/en-us/download/details.aspx?id=15336
-
-		
-
+	3. Windows 10 (64-bit) and Windows 7 (32-bit) shows successful runs.  
+	   One persistent problem is the inability to remove files for
+	   some cleanup operations when processes are user cancelled. See
+	   the "BUGS" file for this and other windows-specific issues.
 
 Current dependencies
 --------------------
@@ -51,14 +42,28 @@ Current dependencies
 	pygenomics python modules should be installed using the supplied
 	setup.py, so that they can be imported by your python interpereter.
 
-	2.  Before python will install simuPOP you'll need the SWIG tool at
-	http://www.swig.org/download.html. (This tool makes C and C++ code
-	in simuPOP python compatible). You can try to install simuPOP first, and install
-	SWIG if you get a message that SWIG is missing.
-
-	3.  SimuPOP, http://simupop.sourceforge.net The SimuPOP modules should
+	
+	2.  SimuPOP, http://simupop.sourceforge.net The SimuPOP modules should
 	be installed using setup.py (or pip), so that they can be accessed
 	by your python interpreter. 
+
+		i. VC++ Library, 2008 (Windows only).  Installation of SimuPOP
+		on Windows (10 and 7) did not work without installing the Microsoft VC++
+		Redistributable 2008 library, as noted in the SimuPOP installation web page.
+		Note that the link on the Simupop installation web page points to the Microsoft
+		to the 32-bit libary download-page (unless I missed an option).  Most of us will
+		actually need the x64 verion at
+		https://www.microsoft.com/en-us/download/details.aspx?id=15336
+
+		ii.  SWIG.  Before python will install simuPOP you'll need the SWIG
+		tool at http://www.swig.org/download.html. (This tool makes C and C++ code in
+		simuPOP python compatible). You can try to install simuPOP first, and install
+		SWIG if you get a message that SWIG is missing.
+
+		iii. Python compiler for Windows. Windows users
+		may also need to install the windows python compiler.  Simupop, if it's
+		installation fails for lack of this compiler, will give you the correct web
+		address from which to download and intall it.
 
 	4.  NeEstimator,
 	http://www.molecularfisherieslaboratory.com.au/neestimator-software.
@@ -76,27 +81,32 @@ library directories, as of now:
 
 	2. Add the location of the python modules to your PYTHONPATH variable,
 	and add negui.py to your PATH: 
-		i. Linux: example:  If you downloaded the
+		i. Linux/OSX: If you downloaded the
 	python files into /home/myname/mydir/negui-master, you can either: 
 
 			a. On starting a new terminal you can make python aware of the
-			modules, and add the negui.py to your command path, with these two lines: 
+			modules, and add the negui.py to your command path, by typing these two lines: 
 
 				PATH=${PATH}:/path/to/the/negui/modules
 				PYTHONPATH=${PYTHONPATH}:/path/to/the/negui/modules 
 
-			b. If your Linux has the typical configuration, then you can
-			automate the change by adding the above line to the .bashrc file in your home
-			directory, adding an export line for each of the variables: 
+			b. If your Linux or OSX installation has the typical configuration, then you
+			can also automate the change by adding the above lines to the .bashrc file, or
+			on OSX, the .bash_profile file, in your home directory. After these lines you
+			should then and add an export line for each of the variables: 
 
 				export PYTHONPATH 
 				export PATH Windows 
 
-		ii. Windows: Note above, that we are not yet ready to include
-		Windows as a working platform.  However, we anticipate soon having a Windows
-		running.  You learn how to add a PYTHONPATH environmental variable, and add a
-		path to your PATH variable by searching your windows help for "environmental
-		variables".
+		ii. Windows: Windows provides a gui interface that allows you to
+		add new environmental variables.  In most distributions you can find it by
+		opening the file explorer and right clicking on the "Computer" icon (Win7), or
+		"ThisPC" (Win10).  On the Menu,  select properties->advanced system settings
+		(list on right-hand side) -> Environment Varibles.  Under the "system variables"
+		window (the bottom window) you can click "New..." to add new variables, as
+		likely you'll need to for PYTHONPATH.  To add the path to your negui modules to
+		the PATH varable, select "Edit...".  See the existing variables for examples of
+		path formatting in Windows.
 
 
 Current Functionality

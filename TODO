@@ -1,22 +1,59 @@
 
 Mon Aug  1 13:52:49 MDT 2016
 
---add Tiago's sampling schemes to the genepopfilemanager classes
---gui around ne-estimation
-	done
---Catch error from Popen call to the simulation, and show msgbox to user
+1. add Tiago's sampling schemes to the genepopfilemanager classes
 
-Fri Aug 12 13:34:01 MDT 2016
+2. Done, gui around ne-estimation
 
- -- currently the warning about killing current analyses and deleting their output is given on any click to close.  should only come up when the  program knows there's a current run, but right now i'm not satisfied that the life/death of the op_process attribute that, on both gui interfaces (simupop and neestimator), performs the sim/ldne operation, whether the alive() or notaliveness of that process is a precise flag enougth flag for the  -     correct removal only of output files.
-TODO:  currently on window:
----1. neither sim or ne gui's can remove output files when sim/ne op is cancelleed in progress -- get "WindowsError: [Error32] The process cannot access the file because it is being used by another process."
----2. the windows man menu does not load properly -- it displays the text that in the unix OS's givs the accelerator keys "Ctrl+N" and "Ctrl+C", whereas in the unix-based OS's we get the correct display of underlined N and C in "New" and "Close"
-TODO:  
----1. pgguisimupop runs output a *conf configuration file that has an  entry under section [configuration info], entry configuration_file, which currently gives the temp file name used to run the sim -- not sure this is at all helpful -- and can't really use the original conf file name, since the user may have changed any param since loading it
----2.  disable all controls while sim/neest in progress.    
+3. Catch error from Popen call to the simulation, and show msgbox to user
+	Not done but ameliorated by param checks done before Ne estimation
 
+Fri Aug 12 13:34:01 MDT 2016 
 
+0. currently the warning about killing current
+analyses and deleting their output is given on any click to close.  should only
+come up when the  program knows there's a current run, but right now i'm not
+satisfied that the life/death of the op_process attribute that, on both gui
+interfaces (simupop and neestimator), performs the sim/ldne operation, whether
+the isalive()  a precise flag enougth test for
+the correct removal only of output files.  
 
+1. on Windows neither sim or ne gui's can remove output files when sim/ne op is
+cancelleed in progress -- get "WindowsError: [Error32] The process cannot access
+the file because it is being used by another process." 
 
+2. Done. the windows main menu does not load properly -- it displays the text
+that in the unix OS's givs the accelerator keys "Ctrl+N" and "Ctrl+C", whereas
+in the unix-based OS's we get the correct display of underlined N and C in "New"
+and "Close" 
+
+3.  pgguisimupop sessions output a *conf configuration file that has an entry under
+section [configuration info], entry configuration_file, which currently gives
+the temp file name used to run the sim -- not sure this is at all helpful -- and
+can't really use the original conf file name, since the user may have changed
+any param since loading it 
+
+4.  disable all controls while sim/neest in progress.    
+
+Mon Aug 15 19:17:24 MDT 2016 
+
+1. default to "No" button as the active one on
+program exit yes/no dialogs 
+
+2. right-click tabs to offer close -- as many of
+those fx's typical to tabbed interface while doable in tkinter
+
+3. User needs to be able to edit whole ranges in the lists in the simulation configuration file
+interface
+
+Thu Aug 18 21:28:00 MDT 2016
+1. When cancelling ne estimation, remove temporary directories.
+
+Mon Aug 22 15:24:42 MDT 2016
+1. use try/except when starting an ne-estimation -- to catch error when
+	intermediate file exists.
+2. get rid of any residual tmp* directories -- probably involves keeping
+	a list of these as they are created
+3. skip writing a *.msgs file as part of ne estimation output
+4. ne estimation output *tsv file should be sorted by file/gen
 
