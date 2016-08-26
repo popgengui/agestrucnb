@@ -120,7 +120,13 @@ if __name__=="__main__":
 
 	lsargs=[ "gen file", "genepop file" ]
 
-	s_usage=pgut.do_usage_check
+	s_usage=pgut.do_usage_check ( sys.argv, lsargs )
+
+	if s_usage:
+		print( s_usage )
+		sys.exit()
+	#end if usage
+
 	s_genfile=sys.argv[1]
 	s_popfile=sys.argv[2]
 
