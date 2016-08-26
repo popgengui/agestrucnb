@@ -33,7 +33,13 @@ class PGParamSet( object ):
 
 	IDX_TAG_FIELD_CONFIG_SECTION=0
 	IDX_TAG_FIELD_PLACEMENT_ORDER=1
-	IDX_TAG_FIELD_DEFAULT_VALUE=2
+	IDX_TAG_FIELD_COLUMN_NUMBER=2
+	IDX_TAG_FIELD_PARAM_ORDER=3
+	IDX_TAG_FIELD_DEFAULT_VALUE=4
+	IDX_TAG_FIELD_PARAM_TYPE=5
+	IDX_TAG_FIELD_MIN_VALUE=6
+	IDX_TAG_FIELD_MAX_VALUE=7
+	IDX_TAG_FIELD_TOOL_TIP=8
 
 	COMMENT_CHAR="#"
 
@@ -103,6 +109,8 @@ class PGParamSet( object ):
 
 	#end __get_tag_field
 
+	#defs that fetch tag info given a tag string:
+
 	def getConfigSectionNameFromTag( self, s_tag ):
 		s_section_name = self.__get_tag_field( s_tag, 
 									PGParamSet.IDX_TAG_FIELD_CONFIG_SECTION ) 
@@ -121,6 +129,43 @@ class PGParamSet( object ):
 		return s_section_order_as_string
 	#end getSectionOrderFromParamTag
 
+	def getSectionColNumFromTag( self, s_tag ):
+		s_section_col_num_as_string=self.__get_tag_field( s_tag,
+									PGParamSet.IDX_TAG_FIELD_COLUMN_NUMBER )
+		return s_section_col_num_as_string
+	#end getSectionColNumFromTag
+
+	def getParamOrderNumberFromTag( self, s_tag ):
+		s_section_param_order_as_string=self.__get_tag_field( s_tag,
+									PGParamSet.IDX_TAG_FIELD_PARAM_ORDER )
+		return s_section_param_order_as_string
+	#end getSectionColNumFromTag
+
+	def getToolTipFromTag( self, s_tag ):
+		s_tool_tip=self.__get_tag_field( s_tag,
+						PGParamSet.IDX_TAG_FIELD_TOOL_TIP )
+		return s_section_param_order_as_string
+	#end getSectionColNumFromTag
+
+	def getParamTypeFromTag( self, s_tag ):
+		s_type_as_string=self.__get_tag_field( s_tag,
+						PGParamSet.IDX_TAG_FIELD_PARAM_TYPE )
+		return s_type_as_string
+	#end getParamTypeFromTag
+
+	def getParamMinFromTag( self, s_tag ):
+		s_min_as_string=self.__get_tag_field( s_tab,
+						PGParamSet.IDX_TAG_FIELD_MIN_VALUE )
+		return s_min_as_string
+	#end getParamMinFromTag
+
+	def getParamMaxFromTag( self, s_tag ):
+		s_max_as_string=self.__get_tag_field( s_tab,
+						PGParamSet.IDX_TAG_FIELD_MAX_VALUE )
+		return s_max_as_string
+	#end getParamMaxFromTag
+
+	#defs that fetch tag info from param name:
 
 	def getConfigSectionNameForParam( self, s_name ):
 		s_tag=self.tag( s_name )
@@ -134,13 +179,56 @@ class PGParamSet( object ):
 		s_default_val_as_string=self.__get_tag_field( s_tag, 
 									PGParamSet.IDX_TAG_FIELD_DEFAULT_VALUE )
 		return s_default_val_as_string
-	#end getDefaultValueFromParamTag
+	#end getDefaultValueForParam
 
 	def getSectionOrderForParam( self, s_name ):
+		s_tag=self.tag( s_name )
 		s_section_order_as_string=self.__get_tag_field( s_tag, 
 									PGParamSet.IDX_TAG_FIELD_PLACEMENT_ORDER )
 		return s_section_order_as_string
-	#end getSectionOrderFromParamTag
+	#end getSectionOrderForParamTag
+
+	def getParamOrderNumberForParam( self, s_name ):
+		s_tag=self.tag( s_name )
+		s_param_order_as_string=self.__get_tag_field( s_tag, 
+									PGParamSet.IDX_TAG_FIELD_PARAM_ORDER )
+		return s_param_order_as_string
+	#end getParamOrderNumberForParam
+
+	def getSectionColNumForParam( self, s_name ):
+		s_tag=self.tag( s_name )	
+		s_section_col_num_as_string=self.__get_tag_field( s_tag,
+									PGParamSet.IDX_TAG_FIELD_COLUMN_NUMBER )
+		return s_section_col_num_as_string
+	#end getSectionColNumForParam
+
+	def getToolTipForParam( self, s_name ):
+		s_tag=self.tag( s_name )
+		s_tool_tip=self.__get_tag_field( s_tag,
+									PGParamSet.IDX_TAG_FIELD_TOOL_TIP )
+		return s_tool_tip	
+	#end getToolTipForParam
+
+	def getParamTypeForParam( self, s_name ):
+		s_tag=self.tag( s_name )
+		s_type_as_string=self.__get_tag_field( s_tag,
+						PGParamSet.IDX_TAG_FIELD_PARAM_TYPE )
+		return s_type_as_string
+	#end getParamTypeForParam
+
+	def getParamMinForParam( self, s_name ):
+		s_tag=self.tag( s_name )
+		s_min_as_string=self.__get_tag_field( s_tab,
+						PGParamSet.IDX_TAG_FIELD_MIN_VALUE )
+		return s_min_as_string
+	#end getParamMinForParam
+
+	def getParamMaxFromTag( self, s_name ):
+		s_tag=self.tag( s_name)
+		s_max_as_string=self.__get_tag_field( s_tab,
+						PGParamSet.IDX_TAG_FIELD_MAX_VALUE )
+		return s_max_as_string
+	#end getParamMaxForParam
 
 	def longname( self, s_shortname ):
 		s_val=None
@@ -208,14 +296,12 @@ class PGParamSet( object ):
 		return self.__file_with_param_names
 	#end param_names_file getter
 
-
 	@property
 	def longnames(self):
 		ls_longnames=self.__params_by_longname.keys()
 		ls_longnames.sort()
 		return ls_longnames
 	#end longnames
-
 			
 	@property
 	def shortnames(self):

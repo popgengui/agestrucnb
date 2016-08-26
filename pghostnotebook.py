@@ -234,8 +234,12 @@ if __name__ == "__main__":
 	i_width=o_master.winfo_screenwidth()
 	i_height=o_master.winfo_screenheight()
 
-	i_geo_width=int( ( i_width/2 ) * ( 1 - WINDOW_MARGIN ) )
-	i_geo_height=int( ( i_height/2 ) * ( 1 - WINDOW_MARGIN ) )
+
+	f_width_proportion=0.75
+	f_height_proportion=0.5
+
+	i_geo_width=int( ( i_width * f_width_proportion ) * ( 1 - WINDOW_MARGIN ) )
+	i_geo_height=int( ( i_height * f_height_proportion ) * ( 1 - WINDOW_MARGIN ) )
 
 
 	o_host=PGHostNotebook( o_master, 

@@ -9,8 +9,8 @@ __filename__ = "pgguineestimator.py"
 __date__ = "20160805"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-VERBOSE_CONSOLE=False
-VERY_VERBOSE_CONSOLE=False
+VERBOSE=False
+VERY_VERBOSE=False
 
 
 ATTRIBUTE_DEMANLGER="_PGGuiNeEstimator__"
@@ -32,7 +32,15 @@ from Tkinter import *
 from ttk import *
 import tkFileDialog as tkfd
 
+#need a seperate, non-blocking
+#process for the neestimations
+#(see def runEstimator)
 import multiprocessing
+
+#killing the neestimation pool
+#takes some signalling and sleeping
+#see def __cancel_neestimation 
+import time
 
 import pgguiapp as pgg
 import pgutilities as pgut
@@ -194,44 +202,214 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	#end __on_click_run_or_cancel_neestimation_button
 
+	def __get_path_to_genepop_files( self ):
+
+		s_genepop_files=self.__genepopfiles.get()
+
+		ls_genepop_files=s_genepopfiles.split( DELIMITER_GENEPOP_FILES )
+
+		ls_paths=[]
+
+		for s_file in ls_genepop_files:
+			s_path_no_filename=pgut.get_dirname_from_filename( s_file )
+
+			ls_paths.append( s_path_no_filename )
+		#end for each genepop file, get path
+
+		set_uniq_paths=set( ls_paths )
+
+		if len( set_uniq_paths ) != 1:
+			s_msg="In PGGuiNeEstimator instance, def pgguineestimator, " \
+					+ "non-uniq path to genepop files.  List of paths: " \
+					+ str( ls_paths ) + "."
+			sys.stderr.write( s_msg + "\n" )
+		#end if nonuniq path
+
+		#we don't abort even in non-uniq paths, but simply return the first:
+		return ls_paths[0]
+	#end __get_path_to_genepop_files
+
+	def __convert_genepop_file_to_neestimator_basename( self, s_genepop_file ):
+
+			'''
+			For intermediate NeEstimator input/output files,
+			pgdriveneestimator replaces dot chars in the file
+			name with underscores (adaptation to the Ne2L
+			programs file-truncation in nameing output files
+			(see pgdriveneestimator)
+			'''
+
+			s_filename_no_path=pgut.get_basename_from_path( s_genepop_file )
+			s_filename_dots_replaced=s_filename_no_path.replace( ".", 
+							pgdn.INPUT_FILE_DOT_CHAR_REPLACEMENT )
+
+			s_dirname_genepop_file = \
+					pgut.get_dirname_from_path( s_genepop_file )
+
+			s_pathsep=pgut.get_separator_character_for_current_os()	
+
+			s_reformatted_genepop_file_base=s_pathsep.join( \
+					[ s_dirname_genepop_file, s_filename_dots_replaced ] )
+
+			return s_reformatted_genepop_file_base
+	#end __convert_genepop_file_to_neestimator_basename
 
 	def __get_output_file_names( self ):
+		s_path_sep=pgut.get_separator_character_for_current_os()
+		s_output_base_with_path=self.__output_directory.get()  \
+				+ s_path_sep \
+				+ self.output_base_name
 
-		ls_output_file_names=[ self.output_base_name + "." \
+		ls_output_file_names=[ s_output_base_with_path + "." \
 				+ pgut.NE_ESTIMATION_MAIN_TABLE_FILE_EXT, 
-				self.output_base_name + "." \
+				s_output_base_with_path + "." \
 				+ pgut.NE_ESTIMATION_SECONDARY_OUTPUT_FILE_EXT ]
 
-		for s_tag in pgdn.NE_ESTIMATOR_OUTPUT_FILE_TAGS:
 
-			#glob basename plus wildcard, ending
-			#with ne-estimator file tag.   (Wildcard
-			#is needed because pgdriveneestimator.py
-			#will have added sample/replicate/popnun fields
-			#to the ouput file basename:
-			ls_nefiles=pgut.get_list_files_and_dirs_from_glob( \
-					self.output_base_name +  "*" \
-					+ s_tag )
-			ls_output_file_names += ls_nefiles
+		s_genepop_files=self.__genepopfiles.get()
 
-		#end for each NeEstimator file tag
+		ls_genepop_files=s_genepop_files.split( DELIMITER_GENEPOP_FILES )
+
+		for s_genepop_file in ls_genepop_files:	
+
+			for s_tag in pgdn.NE_ESTIMATOR_OUTPUT_FILE_TAGS:
+
+				s_reformatted_filename = \
+						self.__convert_genepop_file_to_neestimator_basename ( \
+																	s_genepop_file )	
+
+				#glob basename plus wildcard, ending
+				#with ne-estimator file tag.   (Wildcard
+				#is needed because pgdriveneestimator.py
+				#will have added sample/replicate/popnun fields
+				#to the ouput file basename:
+				s_glob=s_reformatted_filename + "*" + s_tag 
+
+				ls_nefiles=pgut.get_list_files_and_dirs_from_glob( s_glob )
+
+				if VERY_VERBOSE:
+					print ( "with glob: " + s_glob )
+					print ( "got files: " + str( ls_nefiles ) )
+				#end if very verbose
+
+				ls_output_file_names += ls_nefiles
+
+			#end for each NeEstimator file tag
+
+			#to remove the intermediate genepop file names
+			#(note that this glob, if preceeded by the
+			#reformatted genepop filename, would match
+			#all of the intermediate files, but we keep the 
+			#NE_ESTIMATOR_OUTPUT_FILE_TAGS loop in order
+			#to retain that precision, to make it easier
+			#to simply remove this code, to retain the
+			#intermediate genepop files
+			s_glob=s_reformatted_filename + "*" \
+					+ pgdn.GLOB_INTERMEDIATE_GENEPOP_FILE_TAGS
+			ls_intermediate_genepop_files_and_other_matches = \
+					pgut.get_list_files_and_dirs_from_glob( s_glob )
+
+			for s_file in ls_intermediate_genepop_files_and_other_matches:
+				#we only want files not already fetched using the NE_ESTIMATOR_OUTPUT_FILE_TAGS:
+				if s_file not in ls_output_file_names:
+					ls_output_file_names.append( s_file )
+				#end if new intermediate file (we infer it must be 
+				#an intermediate genepop file, if it matches the glob, but was not
+				#already caught using the tags), then add
+			#end for each file matched
+		#end for each genepop file input, make glob for 
+		#ne-estimator intermediate output files
 
 		return ls_output_file_names
 	#end __get_output_file_names
 
 	def __remove_output_files( self, ls_files_to_remove):
+
+		if VERY_VERBOSE:
+			print( "removing files: " + str( ls_files_to_remove ) )
+		#end if very verbose
+
 		pgut.remove_files( ls_files_to_remove )
 		return
 	#end __remove_output_files
 
 	def __cancel_neestimation( self ):
 
-		if self.__op_process is not None:
+		SLEEPTIME_WAITING_FOR_EVENT_CLEAR=0.25
 
-			self.__op_process.terminate()
+		TIMEOUT_WAITING_FOR_EVENT_TO_CLEAR=05
+
+		if self.__op_process is not None:
+			
+			#Process event created in def runEstimator,
+			#passed to pgutitlities.run_driveneestimator_in_new_process,
+			#which then passes into pgdriveneestimator.py -- the latter
+			#will test it while the process.Pool def map_async is running,
+			#and if set will kill the process pool:
+			if self.__neest_multi_process_event is not None:
+				try:
+
+					if VERY_VERBOSE==TRUE:
+						print( "in cancel_neestimation, setting event" )
+					#end if very verbose
+
+					self.__neest_multi_process_event.set()
+				except o_err as Exception:
+					s_msg = "in PGGuiNeEstimator instance in def " \
+							+ "__cancel_neestimation, Exception after " \
+							+ "setting multi process event: " \
+							+ str( o_err ) + "."
+					sys.stderr.write( s_msg + "\n" )
+				#end try, except
+			#end if event is not none
+
+			#after we hear back from op_process via the event being
+			#cleared (after we set it), we can terminate op_process:
+			try:
+				if VERY_VERBOSE:
+					print( "sleeping before terminating proc" )
+				#end if very verbose
+
+				f_starttime=time.time()
+
+				while self.__neest_multi_process_event.is_set() \
+						and time.time() - f_starttime < \
+						TIMEOUT_WAITING_FOR_EVENT_TO_CLEAR:
+
+					if VERY_VERBOSE:
+						print( "in while loop in gui while event is set" )
+					#end if very verbose
+
+					time.sleep( SLEEPTIME_WAITING_FOR_EVENT_CLEAR )
+				#end while
+
+				if VERY_VERBOSE:
+					if self.__neest_multi_process_event.is_set():
+						print( "timed out waiting for event to clear -- even still set. " \
+								+ "Terminating op_process " )
+					else:
+						print( "event now clear. Terminating op_process..." )
+					#end if op_process' eval in pgdriveneestimator did not clear the event, else did
+				#end if very verbose
+
+				self.__op_process.terminate()
+			except o_err as Exception:
+					s_msg = "in PGGuiNeEstimator instance in def " \
+							+ "__cancel_neestimation, Exception after " \
+							+ "terminating the process that starts " \
+							+ " the estimation: "  \
+							+ str( o_err ) + "."
+					sys.stderr.write( s_msg + "\n" )
+			#end try, except
 
 			ls_output_files=self.__get_output_file_names()
+
 			self.__remove_output_files( ls_output_files )
+
+			if VERY_VERBOSE:
+				print ( "removing the following output files: " \
+						+ str( ls_output_files ) )
+			#end if very vergbose
 
 		else:
 			s_msg="Could not cancel the Ne estimation " \
@@ -301,9 +479,14 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		#end if one or more bad file names
 
+		s_seperator=pgut.get_separator_character_for_current_os()
+		s_current_output_dir=self.__output_directory.get()
+
+		s_dir_and_basename=s_seperator.join( [ s_current_output_dir, 
+												self.output_base_name ] )
 
 		ls_existing_outfiles=pgut.get_list_files_and_dirs_from_glob( \
-				self.output_base_name + "*" ) 
+				s_dir_and_basename + "*" ) 
 
 		if len( ls_existing_outfiles ) > 0:
 
@@ -317,19 +500,35 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			b_valid=False
 		#end if outfiles exist
 
+		#If one or more of the loaded genepop files
+		#has existing intermiediate files produced
+		#by a pgdriveneestimator.py run, then we want
+		#to abort, since behavior of the NeEstimator given
+		#existing files can cause errors, and intermediate
+		#genepop files may have been (however unlikely)
+		#truncated or mangled in an interrupted run:
+		ls_existing_intermediate_files=self.__get_output_file_names()
+
+		if len( ls_existing_outfiles ) > 0:
+			ls_invalidity_messages.append( BULLET + "Intermedate files from " \
+					+ "an interrupted run exist:\n" \
+					+ "\n".join( ls_existing_intermediate_files )
+					+ "\nPlease either move/remove the intermediate files " \
+					+ "or load genepop files whose names do not prefix the "
+					+ "intermediate files." )
+		#end if we have existing intermediate files
+
 		if self.__sampscheme not in ( "percent", "remove" ):
 			ls_invalidity_messages.append( BULLET + "Unknown sample scheme value: " \
 					+ self.__sampscheme + "." )
 			b_valid=False
 		#end if bad sample scheme
-
 		
 		if self.__minpopsize < 0:
 			ls_invalidity_messages.append( BULLET + "Minimum population size (must be >= 0). " \
 					+ "Current value: " + str( self.__minpopsize ) + "." )
 			b_valid=False
 		#end if invalid min pop size
-
 
 		if self.__minallelefreq > 1.0 or self.__minallelefreq < 0:
 			ls_invalidity_messages.append( BULLET + "Minimum allele frequence " \
@@ -397,7 +596,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__set_controls_by_run_state( self.__get_run_state() )
 		self.after( 500, self.__check_progress_operation_process )
 
-		if VERY_VERBOSE_CONSOLE:
+		if VERY_VERBOSE:
 			print( "running estimator" )
 		#end if very verbose
 
@@ -635,11 +834,11 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			v_val=eval (  "self." + s_attr_name )
 			s_longname=self.__param_set.longname( s_param )
 
-			if VERY_VERBOSE_CONSOLE:
+			if VERY_VERBOSE:
 				print ( "in test, param name: " + s_param )
 				print ( "in test, param value type: " +	str( type( v_val ) ) )
 				print ( "in test, param value: " +	str(  v_val ) )
-			#end if VERY_VERBOSE_CONSOLE
+			#end if VERY_VERBOSE
 
 			i_width_this_entry= len( v_val ) if type( v_val ) == str \
 					else ENTRY_WIDTH_NON_STRING
@@ -726,7 +925,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		for debugging
 		'''
 
-		if VERBOSE_CONSOLE:
+		if VERBOSE:
 			ls_input_params=self.__param_set.shortnames		
 
 			for s_param in ls_input_params:
@@ -764,7 +963,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__load_param_interface()
 		self.__set_controls_by_run_state( self.__get_run_state() )
 
-		if VERY_VERBOSE_CONSOLE:
+		if VERY_VERBOSE:
 			print ( "new genepop files value: " \
 					+ self.__genepopfiles.get() )
 		#end if very verbose
@@ -827,16 +1026,16 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		if self.__op_process is not None:
 			if self.__op_process.is_alive():
-				if VERY_VERBOSE_CONSOLE:
+				if VERY_VERBOSE:
 					print ( "checking and process found alive" )
 				#endif very verbose, pring
 				self.__estimation_in_progress = True
 				self.after( 500, self.__check_progress_operation_process )
 			else:
-				if VERY_VERBOSE_CONSOLE:
+				if VERY_VERBOSE:
 					print( "checking and process not None but not alive" )
 				#end if very verbose, print
-
+				
 				self.__estimation_in_progress = False
 
 				#found that the process as object will persist
@@ -853,7 +1052,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			self.__set_controls_by_run_state( self.__get_run_state() )
 
 		else:
-			if VERY_VERBOSE_CONSOLE:	
+			if VERY_VERBOSE:	
 				print( "process found to be None" )
 			#endif very verbose, pring
 

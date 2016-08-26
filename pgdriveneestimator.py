@@ -18,6 +18,27 @@ given
 	
 	As of Fri May 13 19:01:06 MDT 2016, still not sure
 	how best to get the results to file or stream.
+
+Mon Aug 15 20:04:00 MDT 2016
+	revised so that now args list includes
+	-->a list of genepop files, 
+	-->one of [percent|remove] (names a subsampling scheme, to be enlarged)
+	-->a list of percentages, for percent samplin, or N-values for removing N
+		from the individuals	
+	--> a number giving a minimum pop size 
+	   after subsampling (fewer than the min count of indiv, and the pop is skipped)
+	-->a minimum allele frequency (single float)
+	--> a number giving the total replicate NeEstimator runs 
+	    to be executed on each file at each subsample percentage 
+	-->optional the number of processes to create in performing the
+		estimates in parallele, on process for each population (as divided up inside a file,
+		or as given by a signle genepop file with only one population listed)
+	
+	Also revised to allow the improtation of this mod, so that the same operations
+	can be intitiated by a call to "mymain".  The importation method allows for 
+	passing in two file objects, open for writing.  The console method, that satisfies
+	"if __name__== "__main__", does not allow the file object args and prints to stdout and stderr.
+
 '''
 __filename__ = "pgdriveneestimator.py"
 __date__ = "20160510"
@@ -27,6 +48,10 @@ import glob
 import sys
 import os
 from multiprocessing import Pool
+import time
+
+VERBOSE=False
+VERY_VERBOSE=False
 
 #arguments passed either at command line
 #or from python using def mymain, having
@@ -72,6 +97,13 @@ DEFAULT_DEBUG_MODE="no_debug"
 #genepop files:
 MAX_GENEPOP_FILE_NAME_LENGTH=31
 
+#when running the estimate calls
+#asynchronously, we test for event
+#set (i.e. user wants to cancel)
+#then wait a bit (see def 
+#execute_ne_for_each_sample)
+SECONDS_TO_SLEEP=1.00
+
 #read genepop file, and 
 #sample its pop, and store
 #results:
@@ -112,6 +144,18 @@ NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=[ "case_number" ]
 #any files left after user has cancelled a run:
 NE_ESTIMATOR_OUTPUT_FILE_TAGS=[ "NoDat.txt", "xTp.txt", "ne_run.txt" ]
 
+#for users, namely instances of PGGuiNeEstimator,
+#to be able to use their genpop file basename,
+#and then locate intermediate genepopfiles
+#created by this mod:
+GLOB_INTERMEDIATE_GENEPOP_FILE_TAGS="*_r_*_g_*"
+
+
+#because Ne2L (Ne2.exe, Ne2M), truncates output files
+#using dot char, to unabiguiously name the subsampled
+#input genepops and the Ne2L output files, we have
+#to replace the dots.  This is the replacement char
+INPUT_FILE_DOT_CHAR_REPLACEMENT="_"
 
 def set_indices_ne_estimator_output_fields_to_skip():
 
@@ -335,6 +379,7 @@ def parse_args( *args ):
 	IDX_DEBUG_MODE=7
 	IDX_MAIN_OUTFILE=8
 	IDX_SECONDARY_OUTFILE=9
+	IDX_MULTIPROCESSING_EVENT=10
 
 	ls_files=get_genepop_file_list( args[ IDX_GENEPOP_FILES ] )
 
@@ -376,11 +421,13 @@ def parse_args( *args ):
 	o_debug_mode=set_debug_mode ( args[ IDX_DEBUG_MODE ] )
 	o_main_outfile=args[ IDX_MAIN_OUTFILE ]
 	o_secondary_outfile=args[ IDX_SECONDARY_OUTFILE ]
+	o_multiprocessing_event=args[ IDX_MULTIPROCESSING_EVENT ]
 
 	return( ls_files, s_sample_scheme, lv_sample_values, 
 								i_min_pop_size, f_min_allele_freq, 
 								i_total_replicates, i_total_processes, o_debug_mode, 
-								o_main_outfile, o_secondary_outfile )
+								o_main_outfile, o_secondary_outfile,
+								o_multiprocessing_event )
 #end parse_args
 
 def get_sample_val_and_rep_number_from_sample_name( s_sample_name, s_sample_scheme ):
@@ -729,6 +776,53 @@ def do_sample( o_genepopfile, s_sample_scheme, lv_sample_values, i_replicates ):
 	return
 #end do_sample
 
+def get_subsample_genepop_file_name( s_original_genepop_file_name, 
+													s_indiv_sample,
+													s_this_pop_sample_name ):
+	'''
+	Was originally simply a matter of replacing, in the original genepop file,
+	dots with underscores, but Windows revealed a case that needed attention 
+	(see "replace" below).
+	'''
+
+	s_genepop_file_subsample=s_original_genepop_file_name \
+								+ INPUT_FILE_DOT_CHAR_REPLACEMENT \
+								+  s_indiv_sample \
+								+ INPUT_FILE_DOT_CHAR_REPLACEMENT \
+								+ "g" + INPUT_FILE_DOT_CHAR_REPLACEMENT \
+								+ s_this_pop_sample_name
+
+
+	#Note: if a period is left in the original file name,
+	#NeEstimator, when naming "*NoDat.txt" file, will replace the right-most
+	#period all text that follows it,  with "NoDat.txt" 
+	#-- this then removes any percent and replicate number text 
+	#I'm using to make files unique, and so creates a 
+	#non-uniq *NoDat.txt file name, which, when one process removes it, 
+	#and another goes looking for it , throws an exception -- (an 
+	#exception from the multiprocessing.Pools async mapping -- file-not-found,
+	#but no trace since it occurs in a different process from the main).
+	#This peculiar mangling of a users input file -- was preventing me in previous versions, 
+	#from deleting NoDat files, and also I think meant that only the 
+	#last process in a given group of replicates (share same genepop file
+	#and proportion sampled) to use the NoDAt file got to write it's NoDat info. 
+	#Removing all periods from the input file to the NeEstimator program, I belive,
+	#completely solves the problems.
+	s_genepop_file_subsample=s_genepop_file_subsample.replace( ".", INPUT_FILE_DOT_CHAR_REPLACEMENT )
+
+	#problem seen in Windows, in which when this mod is invoked as __main__ from a shell
+	#then ".\\" is appended to (at least) one genepop file name.  This then is mangled by
+	#the above replace, so we restore the leading dot char:
+
+	if s_genepop_file_subsample.startswith(  "_" ):
+		s_path_seperator_this_os=os.path.sep
+		s_genepop_file_subsample="." + s_genepop_file_subsample[1:] 
+	#end if path was mangled by replace
+
+
+	return s_genepop_file_subsample
+#end get_subsample_genepop_file_name
+
 def add_to_set_of_calls_to_do_estimate( o_genepopfile, 
 						f_min_allele_freq, 
 						i_min_pop_size,
@@ -807,29 +901,17 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 										o_secondary_outfile, 
 										s_population_subsample_tag=s_this_pop_sample_name )
 			#end if we're testing, print 
-				
-			s_genepop_file_subsample=o_genepopfile.original_file_name + "_" +  s_indiv_sample \
-											+ "_g_" + s_this_pop_sample_name
+			
+
+			#in naming a the genepop file for the subsampled pop,
+			#some processing is needed to avoid NeEstimator file naming errors, and
+			#path mangling, so we made a separate def:
+			s_genepop_file_subsample=get_subsample_genepop_file_name( o_genepopfile.original_file_name, 
+													s_indiv_sample, 
+													s_this_pop_sample_name )
 
 			i_sample_value, i_replicate_number= \
 						get_sample_val_and_rep_number_from_sample_name( s_indiv_sample, s_sample_scheme )
-
-			#Note: if a period is left in the original file name,
-			#NeEstimator, when naming "*NoDat.txt" file, will replace the right-most
-			#period all text that follows it,  with "NoDat.txt" 
-			#-- this then removes any percent and replicate number text 
-			#I'm using to make files unique, and so creates a 
-			#non-uniq *NoDat.txt file name, which, when one process removes it, 
-			#and another goes looking for it , throws an exception -- (an 
-			#exception from the multiprocessing.Pools async mapping -- file-not-found,
-			#but no trace since it occurs in a different process from the main).
-			#This peculiar mangling of a users input file -- was preventing me in previous versions, 
-			#from deleting NoDat files, and also I think meant that only the 
-			#last process in a given group of replicates (share same genepop file
-			#and proportion sampled) to use the NoDAt file got to write it's NoDat info. 
-			#Removing all periods from the input file to the NeEstimator program, I belive,
-			#completely solves the problems.
-			s_genepop_file_subsample=s_genepop_file_subsample.replace( ".", "_" )
 
 			s_run_output_file=s_genepop_file_subsample + "_ne_run.txt"
 
@@ -892,7 +974,12 @@ def write_result_sets( lds_results, lv_sample_values, o_debug_mode, o_main_outfi
 	return
 # write_result_sets		
 
-def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_mode ):
+def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_mode,
+												o_multiprocessing_event ):
+
+	if VERY_VERBOSE:
+		print ( "In pgdriveneestimator.py, def execute_ne." )
+	#end if very verbose
 
 	lds_results=None
 
@@ -900,10 +987,45 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 	#then we're using the mulitprocessor pool,
 	#(even if user only requested a single processor):
 	if  o_debug_mode.isSet( DebugMode.ALLOW_MULTI_PROCESSES ): 
-		lds_results=o_process_pool.map( do_estimate, llv_args_each_process )
+		o_mapresult=o_process_pool.map_async( do_estimate, llv_args_each_process )
+		
+		while not ( o_mapresult.ready() ):
+
+			if VERY_VERBOSE:
+				print ("In pgdriveneestimator, def execute_ne_for_each_sample, looping while results not ready" )
+			#end if very verbose
+
+			if o_multiprocessing_event is not None:
+
+				if VERY_VERBOSE:
+					print ( "In pgdriveneestimator, def execute_ne_for_each_sample, testing wheter even is None.  Event value: " \
+									+ str( o_multiprocessing_event ) )
+				#end if very verbose
+
+				if o_multiprocessing_event.is_set():
+
+					if VERY_VERBOSE:
+						print( "In pgdriveneestimator.py def execute_ne_for_each_sample: terminating pool" )
+					#end if very verbose
+
+					o_process_pool.terminate()
+
+					if VERY_VERBOSE:
+						print( "In pgdriveneestimator.py def execute_ne_for_each_sample: op process clearing event" )
+					#end if very verbose
+
+					o_multiprocessing_event.clear()
+				#end if event is set
+			#end if event is not none
+
+			time.sleep( SECONDS_TO_SLEEP )
+		#end while results not ready
+
 		o_process_pool.close()
 		o_process_pool.join()
 		#end for each result
+
+		lds_results=o_mapresult.get()
 	else:
 		lds_results=[]
 		for lv_these_args in llv_args_each_process:
@@ -938,7 +1060,9 @@ def drive_estimator( *args ):
 
 	( ls_files, s_sample_scheme, lv_sample_values, 
 				i_min_pop_size, f_min_allele_freq, i_total_replicates, 
-				i_total_processes, o_debug_mode, o_main_outfile, o_secondary_outfile ) = parse_args( *args )
+				i_total_processes, o_debug_mode, o_main_outfile, 
+				o_secondary_outfile, 
+				o_multiprocessing_event ) = parse_args( *args )
 
 	o_process_pool=None
 
@@ -955,7 +1079,7 @@ def drive_estimator( *args ):
 	#these used soley
 	#to add header to output before 
 	#computing the first rep
-	#of the first proportion
+	#of the first subsample (if subsampled)
 	#for the first file:
 	i_filecount=0
 	i_proportion_count=0
@@ -984,9 +1108,16 @@ def drive_estimator( *args ):
 		
 	#end for each genepop file, sample, add an ne-estimator object, and setup call to estimator 
 
-	lds_results=execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_mode )
+	lds_results=execute_ne_for_each_sample( llv_args_each_process, 
+												o_process_pool, 
+												o_debug_mode,
+												o_multiprocessing_event )
 
-	write_result_sets( lds_results, lv_sample_values, o_debug_mode, o_main_outfile, o_secondary_outfile )
+	write_result_sets( lds_results, 
+						lv_sample_values, 
+						o_debug_mode, 
+						o_main_outfile, 
+						o_secondary_outfile )
 
 	return
 #end drive_estimator
@@ -1084,8 +1215,10 @@ if __name__ == "__main__":
 		ls_args_passed += [ DEFAULT_DEBUG_MODE ]
 	#end if optional args supplied else use default
 
-	#now we add the default file objects, args hidden from console user:
-	ls_args_passed+=[ sys.stdout, sys.stderr ]
+	#now we add the default output file objects and 
+	#mp event args hidden from console user, set by
+	#users who import this mod and call mymain:
+	ls_args_passed+=[ sys.stdout, sys.stderr, None ]
 
 	mymain( *( ls_args_passed ) )
 

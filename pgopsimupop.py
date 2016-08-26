@@ -7,8 +7,9 @@ __filename__ = "pgopsimupop.py"
 __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-VERBOSE_CONSOLE=False
-VERY_VERBOSE_CONSOLE=False
+VERBOSE=False
+VERY_VERBOSE=False
+
 #if True, then invokes ncurses debugger
 DO_PUDB=False
 
@@ -52,7 +53,31 @@ class PGOpSimuPop( modop.APGOperation ):
 	INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS="numMSats"
 	INPUT_ATTRIBUTE_NUMBER_OF_SNPS="numSNPs"
 
-	def __init__(self, o_input, o_output, b_compress_output=True ):  
+	def __init__(self, o_input, o_output, b_compress_output=True, 
+									b_remove_db_gen_sim_files=False,
+									b_write_input_as_config_file=True):  
+		'''
+			o_input, a PGInputSimuPop object
+			o_output, a PGOutputSimuPop object
+			b_compress_output, if set to True
+				will compress outputfiles using bz2
+			b_remove_db_gen_sim_files, if set to True,
+				will remove the output files with the
+				indicated extensions.  This was added
+				after some testing and noting that
+				users most interested in using the genepop
+				file output suffered from the many additional
+				output files when trying to load genepop files
+				for ne-estimation
+			b_write_input_as_config_file, if set to false, will 
+				skip the step in doOp that writes the current params
+				to config file, via the input objects attributes 
+				and defs. As for the above flag, this was added
+				to prevent writing identical configuration files
+				for replicate runs of the simulation, and thus
+				reduce the number of output files. 
+
+		'''
 
 		super( PGOpSimuPop, self ).__init__( o_input, o_output )
 
@@ -60,6 +85,8 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__reportOps = [ sp.Stat(popSize=True) ]
 		self.__is_prepared=False
 		self.__compress_output=b_compress_output
+		self.__remove_db_gen_sim_files=b_remove_db_gen_sim_files
+		self.__write_input_as_config_file=b_write_input_as_config_file
 
 		#if this object is created in one of multiple
 		#python so-called "Processes" objects from class
@@ -80,16 +107,15 @@ class PGOpSimuPop( modop.APGOperation ):
 		
 		s_basename_without_replicate_number=self.output.basename	
 		
-		if VERY_VERBOSE_CONSOLE==True:
+		if VERY_VERBOSE==True:
 			print( "resetting output basename with tag: " + s_tag_out )
-		#end if VERY_VERBOSE_CONSOLE
+		#end if VERY_VERBOSE
 
 		self.output.basename=s_basename_without_replicate_number + s_tag_out
 
 		self.output.openOut()
 		self.output.openErr()
 		self.output.openMegaDB()
-		self.output.openConf()
 
 		self.__createSim()
 		self.__is_prepared=True
@@ -99,11 +125,18 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def doOp( self ):
 		if self.__is_prepared:
+			
+			#if client has not indicated otherwise,
 			#we write the current param set to
 			#write the configutation file on which
 			#this run is based:
-			self.input.writeInputParamsToFileObject( self.output.conf ) 
-			self.output.conf.close()
+			if self.__write_input_as_config_file:
+				self.output.openConf()
+				self.input.writeInputParamsToFileObject( self.output.conf ) 
+				self.output.conf.close()
+			#end if client wants this run to include
+			#a configuration file (if many replicates,
+			#this may be set to False for all but first)
 
 			#now we do the sim
 			self.__evolveSim()
@@ -111,11 +144,22 @@ class PGOpSimuPop( modop.APGOperation ):
 			self.output.err.close()
 			self.output.megaDB.close()
 
+			#note as of 2016_08_23, we don't compress the config file
 			if self.__compress_output:
-				self.output.bz2CompressAllFiles()
+				s_conf_file=self.output.confname
+				self.output.bz2CompressAllFiles( ls_files_to_skip=[  s_conf_file ] )
 			#end if compress
 
 			self.__write_genepop_file()
+
+			if self.__remove_db_gen_sim_files:
+				#noite that this call removes both compressed
+				#and uncompressed versions of these files
+				#(see PGOutputSimuPop code and comments)
+				for s_extension in [ "sim", "gen", "db" ]:
+					self.output.removeOutputFileByExt( s_extension )
+				#end for output files *sim, *gen, *db
+			#end if we are to remove the non-genepop files (gen, sim, db)
 		else:
 			raise Exception( "PGOpSimuPop object not prepared to operate (see def prepareOp)." )
 		#end  if prepared, do op else exception
@@ -290,7 +334,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		v_return_value = self.input.N0 + curr
 
-		if VERBOSE_CONSOLE:
+		if VERBOSE:
 			print( "in __calcDemo, with args, %s %s %s %s, returning %s "
 					% ( "gen: ", str( gen ), "pop", str( pop ), str( v_return_value ) ) )
 		#end if verbose
@@ -450,7 +494,7 @@ class PGOpSimuPop( modop.APGOperation ):
 				female.mate = male.ind_id
 			#end if is monog
 
-			if VERY_VERBOSE_CONSOLE:
+			if VERY_VERBOSE:
 				print( "in __litterSkipGenerator, yielding with  " \
 						+ "male: %s, female: %s"
 						% ( str( male ), str( female ) ) )
@@ -497,12 +541,12 @@ class PGOpSimuPop( modop.APGOperation ):
 		attempts = 0
 
 
-		if VERY_VERBOSE_CONSOLE:
+		if VERY_VERBOSE:
 
 			print ( "in __restrictedGenerator with " \
 					+ "args, pop: %s, subpop: %s"
 							% ( str( pop ), sr( subPop ) ) )
-		#end if VERBOSE_CONSOLE
+		#end if VERBOSE
 
 		while not nbOK:
 			pair = []
@@ -667,12 +711,12 @@ class PGOpSimuPop( modop.APGOperation ):
 				#end if male and female
 			#end for ind in inds
 
-			if VERY_VERBOSE_CONSOLE:
+			if VERY_VERBOSE:
 				s_msg="yielding from __fitnessGenerator with: " \
 						+ "%s and %s" \
 						% ( str( male ), str( female ) )
 				print ( s_msg )
-			#end if VERBOSE_CONSOLE
+			#end if very verbose
 
 			yield male, female
 		#end while True
@@ -718,15 +762,35 @@ class PGOpSimuPop( modop.APGOperation ):
 			self.output.out.write("%d %d %d %d %d %d %d\n" % (gen, rep, i.ind_id, i.sex(),
 								i.father_id, i.mother_id, i.age))
 
-			if i.age == 1 or gen == 0:
-				self.output.err.write("%d %d " % (i.ind_id, gen))
-				for pos in range(len(i.genotype(0))):
-					a1 = self.__zeroC(i.allele(pos, 0))
-					a2 = self.__zeroC(i.allele(pos, 1))
-					self.output.err.write(a1 + a2 + " ")
-				#end for pos in range
-				self.output.err.write("\n")
+			'''
+			As of 2016_08_24:
+			Change to Tiago's code to facilitate converting the *gen file 
+			(i.e. the file whose handle is output.err), 
+			to a genepop file (see def __write_genepop file, 
+			we simply write indiv ID and alleles for all individuals
+			in this pop to the *gen file, instead of those only for the 
+			newborns -- hence we comment out the if statement, and de-indent 
+			it's body
+			'''
+			#if i.age == 1 or gen == 0:
+
+			self.output.err.write("%d %d " % (i.ind_id, gen))
+
+			for pos in range(len(i.genotype(0))):
+				a1 = self.__zeroC(i.allele(pos, 0))
+				a2 = self.__zeroC(i.allele(pos, 1))
+				self.output.err.write(a1 + a2 + " ")
+			#end for pos in range
+
+			self.output.err.write("\n")
+			
 			#end if age == 1 or gen == 0
+
+			'''
+			End of change to Tiago's code (removing the if statement ).
+			'''
+
+
 		#end for i in pop
 
 		return True

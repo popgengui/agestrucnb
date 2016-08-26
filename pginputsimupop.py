@@ -370,6 +370,7 @@ class PGInputSimuPop( object ):
 				if s_section_name not in o_parser.sections():
 					o_parser.add_section( s_section_name )
 				#end if new section
+
 				o_parser.set( s_section_name, s_option_name, getattr( self, s_attribute ) ) 
 			#end if this instance has this attribute 
 		#end for each attribue

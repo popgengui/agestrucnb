@@ -165,7 +165,7 @@ class PGOutputSimuPop( object ):
 		#end if file exists, else open
 	#end openConf
 
-	def bz2CompressAllFiles(self):
+	def bz2CompressAllFiles(self, ls_files_to_skip=[] ):
 		'''
 		used code and advice in, 
 		http://stackoverflow.com/questions/9518705/big-file-compression-with-python
@@ -175,7 +175,10 @@ class PGOutputSimuPop( object ):
 		whether this applies to the copyfileobj, though my few tests showd all of these were retained.
 		'''
 		for s_myfile in [ self.__outname, self.__errname, self.__megadbname, self.__confname ]:
-			if not self.__file_exists( s_myfile ):
+			
+			if s_myfile in ls_files_to_skip:
+				pass
+			elif not self.__file_exists( s_myfile ):
 				self.__raise_file_not_found_error( s_myfile, "compress file with bz2"  )
 			else:
 				with open( s_myfile, 'rb' ) as o_input:
@@ -313,6 +316,48 @@ class PGOutputSimuPop( object ):
 		return
 	#end gen2Popgene
 
+	def __remove_output_file( self, s_file ):
+		os.remove( s_file )
+		return
+	#end __remove_output_file
+
+	def removeOutputFileByExt( self, s_extension ):
+
+		if s_extension not in PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS.values():
+			s_msg="In PGOutputSimupop instance, def removeOutputFileByExt, " \
+					+ "unknown extension was passed as argument: " \
+					+ s_extension + "." \
+					+ "Valid extensions include, " \
+					+ ", ".join( PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS.values() ) \
+					+ "."
+			raise Exception( s_msg )
+		#end if unknown extension
+	
+		s_outfile_name=self.__basename + "." + s_extension
+
+		i_exists_status_flag=self.__file_exists( s_outfile_name )
+
+		ls_files_to_remove=[]	
+
+		if i_exists_status_flag in [ FILE_EXISTS_UNCOMPRESSED, 
+						FILE_EXISTS_AS_BOTH_UNCOMPRESSED_AND_BZ2 ]:
+			ls_files_to_remove.append( s_outfile_name )
+		#end if uncompressed file exists
+
+		if i_exists_status_flag in [ FILE_EXISTS_AS_BZ2, 
+					FILE_EXISTS_AS_BOTH_UNCOMPRESSED_AND_BZ2 ]:
+			ls_files_to_remove.append( s_outfile_name + "." \
+					+ PGOutputSimuPop.COMPRESSION_FILE_EXTENSION )
+		#end if compressed file exists
+
+
+		for s_file in ls_files_to_remove:
+			self.__remove_output_file( s_file )
+		#end for each file 
+
+		return
+	#end removeOuputFileByExt
+
 	@property
 	def basename( self ):
 		return self.__basename
@@ -328,5 +373,26 @@ class PGOutputSimuPop( object ):
 	def __mytype( self ):
 		return ( type( self ).__name__ )
 	#end __mytype
+
+	@property 
+	def confname( self ):
+		return self.__confname
+	#end property confname
+
+	@property 
+	def simname( self ):
+		return self.__outname
+	#end property genname
+
+	@property 
+	def genname( self ):
+		return self.__errname
+	#end property dbname
+
+	@property 
+	def dbname( self ):
+		return self.__megadbname
+	#end property confname
+
 #end class
 

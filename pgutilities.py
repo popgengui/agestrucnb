@@ -201,8 +201,6 @@ def prep_and_call_do_pgopsimupop_replicate( s_config_file,
 	return
 #end prep_and_call_do_pgopsimupop_replicate
 
-
-
 def do_pgopsimupop_replicate_from_files(  s_configuration_file, 
 												ls_life_table_files, 
 												s_param_name_file, 
@@ -225,10 +223,25 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	Tue Jul 26 22:01:07 MDT 2016
 	updated to be called by a driver that creates a new OS process, then calls this def to do the replicate.  No longer
 	uses the dv_input_parm_values_by_attribute, but instead relies on reading a complete and up-to-date (i.e. all values
-	as changed or edited on the gui interface)
+	as changed or edited on the gui interface) configuration files (that includes the "life table" params).
 	'''
 
 	s_tag_out=""
+
+	NUMBER_FIRST_REPLICATE=1
+
+	'''
+	As of 2016_08_23 the *sim, *gen, *db files
+	are not used, and clutter up the output directories,
+	per other users comments
+	'''
+
+	#whether or not to remove the *sim *gen *db
+	#files (original output from Tiago's code ), 
+	#which leaves only a *conf and *genepop
+	#files as output
+
+	REMOVE_NON_GENEPOP_SIM_OUTPUT_FILES=True
 
 	if i_replicate_number is not None:
 		s_tag_out=SIMULATION_OUTPUT_FILE_REPLICATE_TAG + str( i_replicate_number )
@@ -239,6 +252,13 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	o_paramset=pgpar.PGParamSet( s_param_name_file )
 	o_input=pgin.PGInputSimuPop( s_configuration_file, o_resources, o_paramset ) 
 	o_input.makeInputConfig()
+
+	b_write_conf_file=False
+
+	#we only write the configuraton file if the replicate number is 1:
+	if i_replicate_number == NUMBER_FIRST_REPLICATE:
+		b_write_conf_file=True
+	#end if first replicate number
 
 	#reset reps to 1
 	#as we are executing only one
@@ -252,8 +272,12 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	o_output=pgout.PGOutputSimuPop( s_outfile_basename )
 
 	o_new_pgopsimupop_instance=pgsim.PGOpSimuPop( o_input,
-			o_output )
+			o_output, 
+			b_remove_db_gen_sim_files=REMOVE_NON_GENEPOP_SIM_OUTPUT_FILES,
+			b_write_input_as_config_file=b_write_conf_file )
+
 	o_new_pgopsimupop_instance.prepareOp( s_tag_out  )
+
 	o_new_pgopsimupop_instance.doOp()
 
 	return
@@ -341,6 +365,11 @@ def get_basename_from_path( s_path ):
 	return os.path.basename( s_path )
 #end get_basename_from_path
 
+def get_dirname_from_path( s_path ):
+	return os.path.dirname( s_path )
+#end get_basename_from_path
+
+
 def remove_files( ls_files ):
 	i_total_removed=0
 	for s_file in ls_files:
@@ -351,7 +380,10 @@ def remove_files( ls_files ):
 	#end for each file
 	return i_total_removed
 #end remove files
-			
+def get_separator_character_for_current_os():
+	return os.path.sep
+#end get_separator_character_for_current_os
+
 def is_windows_platform():
 	s_os_plaform_name=platform.system()
 	return ( s_os_plaform_name == "windows" )
@@ -657,6 +689,13 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	o_secondary_output=open( s_secondary_output_filename, 'w' )
 
 	seq_arg_set += ( o_main_output, o_secondary_output )
+	
+	#the driver also takes a final arg, ref to
+	#the multiproc event -- and then checks for 
+	#it being set during map_async when using multiprocesses
+	#(see pgdriveneestimator.py def execute_ne_for_each_sample):
+	seq_arg_set += ( o_multiprocessing_event, )
+
 
 	pgne.mymain( *seq_arg_set )
 
@@ -671,7 +710,6 @@ if __name__ == "__main__":
     s_exec_name=sys.argv[ 1 ]
 
     print( confirm_executable_is_in_path( sys.argv[1] ) )
-
 
 #end if main
 

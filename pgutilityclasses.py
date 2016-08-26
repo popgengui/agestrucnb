@@ -135,6 +135,8 @@ class FloatIntStringParamValidity( object ):
 		self.__value_message=None
 
 		self.__is_valid=False
+		self.__value_valid=False
+		self.__type_valid=False
 	
 		self.__set_validity()
 	#end __init__
@@ -147,21 +149,27 @@ class FloatIntStringParamValidity( object ):
 
 		if b_set_type_valid:
 			self.__type_message="Type, " + str( self.__param_type ) + "is valid."
+			self.__type_valid=True
 		else:
 			self.__type_message="Type, " + str( self.__param_type ) \
 					+ "is not among the valid types, float, int, str."
+			self.__type_valid=False
 		#end if not valid type	
 		
 		if b_type_matches:
 			self.__type_message="Type, " + str( self.__param_type ) + " is valid."
+			self.__type_valid=True
 		else:
 			self.__type_message="Param type is, " + str( self.__param_type ) \
 					+ " but value, " + str( self.__value ) + " is of type, " \
 					+ str( type( self.__value ) ) + "."
+			self.__type_valid=False
+
 		#end if not type match
 
 		if b_value_in_range:
 			self.__value_message= "Value, " + str( self.__value ) + " is valid."
+			self.__value_valid=True
 		else:
 			if type( self.__value ) == str:
 				self.__value_message="Length of string value " + str( self.__value ) \
@@ -173,6 +181,9 @@ class FloatIntStringParamValidity( object ):
 					 		+ " is out of range.  Range is from " \
 							+ str( self.__min_value ) + " to " +  str( self.__max_value ) \
 							+ "."
+			#end if string else otehr
+
+			self.__value_valid=False
 		#end if not b_value_in_range
 	
 		if  b_set_type_valid + b_type_matches + b_value_in_range  == 3:
@@ -240,6 +251,23 @@ class FloatIntStringParamValidity( object ):
 		return s_report
 	#end __report_validity
 
+	def reportInvalidityOnly( self ):
+
+		ls_reports=[]
+		s_report=""
+
+		if not self.__type_valid:
+			ls_reports.append( self.__type_message )
+		#end if invalid type
+		
+		if not self.__value_valid:
+			ls_reports.append( self.__value_message )
+		#end if invalid value
+
+		s_report="\n".join( ls_reports )
+
+		return s_report 
+	#end reportInvalidityOnly
 
 	@property
 	def value( self ):

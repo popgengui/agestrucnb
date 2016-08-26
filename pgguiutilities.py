@@ -63,6 +63,8 @@ class KeyValFrame( Frame ):
 
 	'''
 
+	VERBOSE=False
+
 	def __init__( self, s_name, v_value, 
 			o_master=None, 
 			s_associated_attribute=None,
@@ -77,7 +79,8 @@ class KeyValFrame( Frame ):
 			def_entry_change_command = None,
 			type_replaces_none=float,
 			s_label_name=None,
-			i_subframe_padding=0 ):
+			i_subframe_padding=0,
+			o_validity_tester = None ):
 		
 		"""
 		Param s_name provides the label text.
@@ -97,9 +100,13 @@ class KeyValFrame( Frame ):
 		Param s_entry_justify gives Entry Widget text "justify" value.
 		Param s_butten_text gives the Button Widget's text value.
 		Param def_button_command gives the def to set to the Button's "command" param.
-		Param def_entry_change_command gives a def to call when the value of an entry is changed.		
-			This command executes after the local __value and any parent attribute has been updated.
-		Param type_replaces_none: if a value is initially None, and the value is then updated, this parameter
+		Param def_entry_change_command gives a def to call when the value of an entry is changed. 			  
+			  it should be used when an attribute is asssociated with this object,
+			  and so is automatically updated, after wich some other action is required 
+			  (ex: Parent PGGuiSimuPop object needs to reconstiture the PGOutputSimuPop object 
+			  after this object updates its output basename attribute.
+		Param type_replaces_none: if a value is initially None, and the value is then updated, 
+		      this parameter.
 		      gives the type required for a valid value.
 		Param s_label_name, if supplied, replaces s_name as the text for the label.
 		Param i_subframe_padding gives the padding in pixels of the subframe inside its master frame
@@ -124,12 +131,15 @@ class KeyValFrame( Frame ):
 		self.__entry_change_command=def_entry_change_command
 		self.__type_replaces_none=type_replaces_none
 		self.__subframe_padding=i_subframe_padding
+		self.__validity_tester=o_validity_tester
 		self.__idx_none_values=[]
 		self.__item_types=[]
 		self.__entryvals=[]
-		self.__label_name=self.__name if s_label_name is None else s_label_name
+		self.__label_name=self.__name if s_label_name is None \
+												else s_label_name
 		self.__subframe=None
 		self.__setup()
+
 
 	#end init
 
@@ -179,7 +189,7 @@ class KeyValFrame( Frame ):
 				if o_entryval.get() != "None":
 					v_newval=self.__type_replaces_none( o_entryval.get() )
 					#if the type coersion worked, we now reset the stored
-					#list of types to that this item is now the new type:
+					#list of types so that this item is now the new type:
 					self.__item_types[ idx_val ] = self.__type_replaces_none
 				else: #no change to value or type if None is still in entry as "None"
 					v_newval=None
@@ -190,6 +200,24 @@ class KeyValFrame( Frame ):
 				v_newval=None
 				#return to nonetype:
 				self.__item_types[ idx_val ] = type( None )
+			#if client passed us a validity object,
+			#we use it to vett the new entry:
+			elif self.__validity_tester is not None:
+				v_val_to_test=o_type( o_entryval.get() )
+				self.__validity_tester.value=v_val_to_test			
+
+				if not self.__validity_tester.isValid():
+					#message to user:
+					s_msg=self.__validity_tester.reportInvalidityOnly()
+					PGGUIInfoMessage( self, s_msg )
+
+					#reset the value to the old
+					o_entryval.set( v_currval )
+					#return the old value
+					v_newval=v_currval
+				else:
+					v_newval=v_val_to_test
+				#end if not valid 
 			else:
 				v_newval=o_type( o_entryval.get() )
 			#end if bool and not 0 or 1
@@ -197,11 +225,15 @@ class KeyValFrame( Frame ):
 		except ValueError as ve:
 
 			s_msg= "KeyValFrame instance, trying to update value(s) " \
-				+ " for key/value associated with " + s_name + ": " \
+				+ " for key/value associated with " + self.__name + ": " \
 				+ "current entry value is \"" + o_entryval.get() \
 				+ "\" original value type is: " + o_type.__name__ + "\n"
 			sys.stderr.write( s_msg + "\n" )
-
+			
+			s_usermsg="Can't update to value, " + o_entryval.get() \
+					+ ". Entry must be of type, " + o_type.__name__ + "."
+			PGGUIInfoMessage( self, s_usermsg )	
+	
 			#invalid value in entry box, so reset to current underlying value:
 			o_entryval.set( v_currval )
 			#and we don't use the new value:
@@ -353,21 +385,31 @@ class KeyValFrame( Frame ):
 		if i_len_entryvals == i_len_vals:
 			self.__update_list()
 		else:
-			raise Exception ( "In KeyValFrame instance, current entry values not equal to length of the value list" )
+			raise Exception ( "In KeyValFrame instance, the current entry values " \
+						+ " are not equal to length of the value list" )
 		#end if lengths same else not
+	
+		#Because we store even scalars as list items, we extracnt the 
+		#value for updating the client's attribute or sending to 
+		#client's def -- we returnn a list only if orig was a list, else return scalar
+		v_attr_val=self.__value if self.__orig_value_is_list else self.__value[0]
 
-		#we also re-assign the parent attribute (if the caller gave us a ref to it) from which our key-value was derived
+		#we also re-assign the parent attribute (if the caller gave us a ref to it) 
+		#from which our key-value was derived
 		if self.__associated_attribute is not None:
-			
-			#returnn list only if orig was a list, else return scalar
-			v_attr_val=self.__value if self.__orig_value_is_list else self.__value[0]
+		
 
 			#default object whose attribute is to be 
 			#updated is the master to this keyvalframe object
 			if self.__associated_attribute_object is None:
-				##### temp
-				print ( "for master: " + str( self.__master) +" updating attribute: " + str( self.__associated_attribute  ) + " to value: " + str( v_attr_val ) )
-				#####
+
+				if KeyValFrame.VERBOSE:
+					print ( "for master: " + str( self.__master)  \
+							+ " updating attribute: " \
+							+ str( self.__associated_attribute  ) \
+							+ " to value: " + str( v_attr_val ) )
+				#end if verbose
+
 				setattr( self.__master, self.__associated_attribute, v_attr_val )
 			else:
 				setattr( self.__associated_attribute_object, self.__associated_attribute, v_attr_val )

@@ -733,12 +733,12 @@ class GenepopFileManager( object ):
 
 if __name__ == "__main__":
 	#test the code
-	mydir="/home/ted/documents/source_code/python/negui/temp_data/genepop_from_brian_20160506"
+	mydir=os.path.sep + os.path.join( "home","ted","documents","source_code","python","negui","temp_data","genepop_from_brian_20160506" )
 	restag="py" + str( sys.version_info.major ) + "test"
 	filecount=0
 	for myfile in [ "AlpowaCreekBY2006_14.txt", "AsotinCreekBY2006_104.txt", "BigCreekBY2006_29.txt" ]:
 		filecount+=1
-		mygpfile=mydir + "/" + myfile
+		mygpfile=mydir + os.path.sep + myfile
 	
 		o_gp=GenepopFileManager( mygpfile )
 		lf_props=[ 0.10, 0.20, 0.30 ]	

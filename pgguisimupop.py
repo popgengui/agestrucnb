@@ -6,9 +6,11 @@ __filename__ = "pgsimupopper.py"
 __date__ = "20160124"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-VERBOSE_CONSOLE=False
-VERY_VERBOSE_CONSOLE=False
+VERBOSE=False
+VERY_VERBOSE=False
+
 DO_PUDB=False
+
 INIT_ENTRY_CONFIG_FILE=()
 
 if DO_PUDB:
@@ -27,6 +29,7 @@ from pgguiutilities import KeyCategoricalValueFrame
 from pgguiutilities import PGGUIInfoMessage
 from pgguiutilities import PGGUIYesNoMessage
 from pgutilityclasses import IndependantSubprocessGroup
+from pgutilityclasses import FloatIntStringParamValidity
 import pgutilities as pgut
 
 import os
@@ -88,6 +91,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	RUN_NOT_READY=0
 	RUN_READY=1
 	RUN_IN_PROGRESS=2
+
+	MAX_CHARS_BASENAME=18
 
 	def __init__( self,  o_parent,  s_param_names_file=None, 
 							s_life_table_file_glob="resources/*life.table.info",
@@ -176,13 +181,13 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 			
 	def __init_interface( self ):
-
 		
 		ENTRY_WIDTH=50
 		LABEL_WIDTH=20
 		LOCATIONS_FRAME_PADDING=30
 		LOCATIONS_FRAME_LABEL="Load/Run"
 		LOCATIONS_FRAME_STYLE="groove"
+		
 
 		o_file_locations_subframe=LabelFrame( self,
 				padding=LOCATIONS_FRAME_PADDING,
@@ -229,17 +234,22 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		o_outdir_kv.grid( row= i_row, sticky=( NW ) )
 
 		i_row+=1
+	
+		o_basename_validity_tester=FloatIntStringParamValidity( "output_base", 
+				str, self.output_base_name, 1, 
+				PGGuiSimuPop.MAX_CHARS_BASENAME )
 		
 		self.__outbase_kv=KeyValFrame( s_name="Output files base name: ", 
 					v_value=self.output_base_name, 
 					o_master=o_file_locations_subframe, 
+					o_associated_attribute_object=self,
+					s_associated_attribute="output_base_name",
+					def_entry_change_command=self.__setup_output,
 					i_entrywidth=ENTRY_WIDTH,
 					i_labelwidth=LABEL_WIDTH,
-					s_associated_attribute="output_base_name",
-					o_associated_attribute_object=self,
-					def_entry_change_command=self.__setup_output,
 					s_entry_justify='left',
-					s_label_justify='left' ) 
+					s_label_justify='left',
+					o_validity_tester=o_basename_validity_tester ) 
 
 		self.__outbase_kv.grid( row=i_row, sticky=( NW ) )
 
@@ -306,14 +316,25 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		FIRST_ROW_NUMBER_FOR_CATEGORY_FRAMES=1
 		GRID_SPACE_VERTICAL=10
 	
+		di_order_num_by_section_name={}
+
+		#reduncancy in these assignments
+		#is ignored, we simply reassign
+		#the number each time we encounter
+		#the name -- as the two should always
+		#be identical
+		for s_tag in self.__input.param_names.tags:
+			s_section_name=self.__input.param_names.getConfigSectionNameFromTag( s_tag )
+			s_order_number=self.__input.param_names.getSectionOrderFromTag( s_tag )
+			di_order_num_by_section_name[ s_section_name ]=int( s_order_number )
+		#end for each tag
+		
 		for s_key in do_category_frames:
 			o_frame=do_category_frames[ s_key ]
 			if s_key=="none":
 				i_frame_order_number=len( do_category_frames )
 			else:
-				ls_key_fields=s_key.split( ";" )
-				s_frame_label=ls_key_fields[ 0 ]
-				i_frame_order_number=int( ls_key_fields[ 1 ] )
+				i_frame_order_number=di_order_num_by_section_name[ s_key ]
 			#end if categore is "none" then place in last row
 
 			i_cat_frame_row=FIRST_ROW_NUMBER_FOR_CATEGORY_FRAMES + ( i_frame_order_number - 1 )
@@ -333,7 +354,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		attributes) I found help at:
 		http://stackoverflow.com/questions/9058305/getting-attributes-of-a-class
 		'''
-
 		MAXLABELLEN=200
 		WIDTHSMALL=21
 		WIDTHBIG=21
@@ -353,13 +373,16 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		ls_tags=o_input.param_names.tags
 
+		ls_sections=[  o_input.param_names.getConfigSectionNameFromTag( \
+											s_tag )  for s_tag in ls_tags ]
+
 		#clear existing category frames (if any): 
 		self.__clear_grid_below_row( self, 1 )
 
 		#make frames, one for each category of parameter
 		#(currently, "population", "configuration", "genome", "simulation"
 		self.__category_frames=self.__make_category_subframes( \
-				set( ls_tags ) )	
+				set( ls_sections ) )	
 
 		for s_param in ls_input_params:
 			
@@ -372,9 +395,9 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 			o_def_to_run_on_value_change=None
 
-			if VERBOSE_CONSOLE == True:
+			if VERBOSE == True:
 				o_def_to_run_on_value_change=self.__test_value
-			#end if VERBOSE_CONSOLE
+			#end if VERBOSE
 
 			v_val=getattr( o_input, s_param )
 			
@@ -397,19 +420,21 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#as given by s_param
 				s_longname=o_input.param_names.longname( s_param )
 				s_nametag=o_input.param_names.tag( s_param )
+				s_section_name= \
+						o_input.param_names.getConfigSectionNameFromTag( s_nametag )
 			#end if we have a set of param names
 
 			#if not in the param names file, we don't want to suppress it,
-			#and we also don't suppress as long as this param is not tagged
-			#as "suppress"
-			if s_nametag is None or s_nametag != "suppress":
+			#If it is in the param names we don't suppress as long as the
+			#param is not tagged as "suppress"
+			if s_nametag is None or s_section_name != "suppress":
 
 				o_frame_for_this_param=None
 
-				if s_nametag is None or s_nametag not in self.__category_frames:
-					o_frame_for_this_param=self.__do_cateory_frames[ "none" ]
+				if s_nametag is None or s_section_name not in self.__category_frames:
+					o_frame_for_this_param=self.__category_frames[ "none" ]
 				else:
-					o_frame_for_this_param=self.__category_frames[ s_nametag ]
+					o_frame_for_this_param=self.__category_frames[ s_section_name ]
 				#end if no nametag or name tag not in frame categories
 
 				i_len_labelname=len( s_longname ) if s_longname is not None else len( s_param )
@@ -424,7 +449,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#end if nametag exists
 
 				#we send in the input object to the KeyValFrame (or KeyCategoricalValueFrame 
-				#instance #so it will be the object whose attribute (with name s_param)
+				#instance so it will be the object whose attribute (with name s_param)
 				#is reset when user resets the value in the KeyValFrame:
 				if type( v_val ) != bool:
 
@@ -569,19 +594,38 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		return
 	#end setup_output
 
-	def __test_value( self ):
+	def __validate_output_base_name( self ):
+
+		MAX_CHARS_OUTPUT_FILE_BASENAME=18
+		s_msg=""
+
+		if ( len( self.__basename ) > MAX_CHARS_OUTPUT_FILE_BASENAME ):
+				s_msg="Please limit the output file base name to " \
+						+ str( MAX_CHARS_OUTPUT_FILE_BASENAME ) \
+						+ " characters."
+		#end if length exceeds maximum
+
+		return s_msg	
+	#end __validate_output_base_name
+
+
+	def __test_value( self, v_keyval_frame_value_update=None ):
 		'''
 		for debugging
 		'''
-		ls_input_params=[ s_param for s_param in dir( self.__input ) if not( s_param.startswith( "_" ) )  ]
-		
-		for s_param in ls_input_params:
-			print s_param + "\t" + str( getattr( self.__input, s_param ) )
-		#end for each param
+		if VERY_VERBOSE:
 
+			ls_input_params=[ s_param for s_param in dir( self.__input ) 
+									if not( s_param.startswith( "_" ) )  ]
+			
+			for s_param in ls_input_params:
+				print s_param + "\t" + str( getattr( self.__input, s_param ) )
+			#end for each param
+
+		#end if VERBOSE			
 	#end __test_value
 
-	def __setup_op( self ):
+	def __setup_op( self, v_keyval_frame_value_update=None ):
 		self.__setup_output()
 		return
 	#end __make_op
@@ -605,14 +649,14 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	def __check_progress_operation_process( self ):
 		if self.__op_process is not None:
 			if self.__op_process.is_alive():
-				if VERY_VERBOSE_CONSOLE:
+				if VERY_VERBOSE:
 					print ( "checking and process found alive" )
 				#endif very verbose, print
 
 				self.__simulation_is_in_progress = True
 				self.after( 500, self.__check_progress_operation_process )
 			else:
-				if VERY_VERBOSE_CONSOLE:
+				if VERY_VERBOSE:
 					print( "checking and process not None but not alive" )
 					print( "value of temp config file attribute: " \
 								+ str( self.__temp_config_file_for_running_replicates ) )
@@ -632,7 +676,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				self.__op_process=None
 				self.__sim_multi_process_event=None
 
-				if VERY_VERBOSE_CONSOLE:
+				if VERY_VERBOSE:
 					print ( "removing temporary config file" )
 				#end if very verbose
 
@@ -643,7 +687,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			self.__set_controls_by_run_state( self.__get_run_state() )
 
 		else:
-			if VERY_VERBOSE_CONSOLE:	
+			if VERY_VERBOSE:	
 				print( "process found to be None" )
 			#endif very verbose, pring
 
@@ -669,7 +713,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#end if path exits
 			#end if config file attr is not none
 	#end __remove_temporary_config_file
-
 
 	def __cancel_simulation( self ):
 		if self.__op_process is not None:

@@ -9,6 +9,7 @@ __date__ = "20160123"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import sys
+import os
 import ConfigParser as modCP
 from Tkinter import Menu
 
@@ -184,7 +185,28 @@ class PGMenuBuilder(object):
 		#end if non-None for parent
 
 		i_underline=eval( o_config.get( s_menu_label, "menu_underline" ) )
-		s_accelerator=eval( o_config.get( s_menu_label, "menu_accelerator" ) )
+
+		if o_config.has_option( s_menu_label, "menu_accelerator" ):
+			s_accelerator=eval( o_config.get( s_menu_label, "menu_accelerator" ) )
+
+
+			'''
+			while linux and osx were igoring the accelerator text when
+			labelling the top-level menu, Windows (win10 and 7) were concatenating
+			the label text with the accel text.  Leaving out the accelerator arg
+			when menu building de-activated the underline-char accel. in all
+			platforms.  
+				Adding an empty string by using double quote ("\"\"") for "eval"
+			to the menu config file evals fine in all platforms,
+			but windows concats double-quotes to the main menu labels.			
+			this test and reassignment is the fix:
+			'''
+			if s_accelerator=="\"\"":
+				s_accelerator=""
+			#end if accel is empty string
+		else:
+			s_accelerator=None
+		#end if accelerator, add
 
 		return { "parent":v_parent_value, "underline":i_underline, "accelerator":s_accelerator }
 	#end __get_menu_values
@@ -208,10 +230,12 @@ class PGMenuBuilder(object):
 
 		dv_menu_values = self.__get_menu_values( o_config, s_menu_label )
 
+		s_accel = dv_menu_values[ "accelerator" ] if dv_menu_values[ "accelerator" ] is not None  else None
+
 		self.__menubar.add_cascade( label = s_menu_label, 
 			menu = o_this_menu, 
 			underline=dv_menu_values[ "underline" ],
-			accelerator=dv_menu_values[ "accelerator" ] ) 
+			accelerator=s_accel )
 		return
 
 	#end __add_menu_item
