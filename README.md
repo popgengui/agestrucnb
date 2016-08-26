@@ -13,7 +13,7 @@ Overview
 	 Codewise we have a tkinter-based interface, supported by a class structure,
 	essentially a host ttk notebook that brings up interfaces for various analyses.
 	These interfaces essentially consist of the GUI itself as a class, which then
-	uses non-gui classes that handle the input (as delivered by the interface,
+	uses non-gui classes that handle the input (as delivered by the interface),
 	analysis, and output.   This is seen in the file, preliminary_uml_classes.png (a
 	diagram that is sorely in need up updating).  A better look at the current
 	structure of the program can be seen via descriptions of classes and
@@ -121,13 +121,20 @@ Current Functionality
 		chmod +x negui.py  
 
 	This done, and with the location of negui.py in your PATH variable
-	(see above), you can simply type negui.py at a terminal. Optionally negui also
-	can an integer argument that gives the number or processes to use when doing
-	simulation replicates.  This number should practically not exceed the number of
-	CPU's on your machine.  It defaults to "1" when no such argument is given.  Note
-	that multiple processes are only useful for the simulations when more than one
+	(see above), you can simply type negui.py at a terminal. 
+
+	However you invoke it, optionally negui also can accept an integer argument 
+        that gives the number or processes to use when doing simulation replicates.  
+
+		python /path/to/negui/negui.py 8
+
+	This number should practically not exceed the number of CPU's on your
+	machine.  It defaults to "1" when no such argument is given.  Note that
+	multiple processes are only useful for the simulations when more than one
 	replicate is performed (multiplexing in simulations currently is done
-	per-replicate). These are the current interfaces:
+	per-replicate). 
+
+	These are the current interfaces:
 
 		a. Simupop simulation:  clicking on the "New" main menu option, then
 		"Add new simulation" creates a tab window allowing AgeStructureNe-based simuPop
