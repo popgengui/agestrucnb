@@ -1,33 +1,59 @@
-N0	N0	Population;2
-Nb	Nb	Population;2
-NbVar	NbVar	Population;2
-ages	Ages	Population;2
-config_file	Configuration File	Configuration Info;1
-life_table_glob	Life Table File(s)	Configuration Info;1
-dataDir	Data Directory	suppress
-doNegBinom	Use Negative Binomial	Simulation;4
-fecundityFemale	Female Fecundity	Population;2
-fecundityMale	Male Fecundity	Population;2
-forceSkip	Force Skip	Population;2
-gens	Generations	Population;2
-isMonog	Monogamous	Population;2
-lbd	lambda	Simulation;4
-litter	Litter	Population;2
-maleProb	Probability Male Birth	Population;2
-model_name	Model	Configuration Info;1
-mutFreq	Mutation Frequency	Genome;3
-numMSats	Number of Microsatellites	Genome;3
-numSNPs	Number of SNPs	Genome;3
-param_names	param names object	suppress
-popSize	Population Size	Population;2
-reps	Replicates	Simulation;4
-skip	Skip	Simulation;4
-startAlleles	Starting Allele Total	Genome;3
-startLambda	Starting Lambda	Simulation;4
-startSave	Starting Save	Simulation;4
-survivalFemale	Female Survival	Population;2
-survivalMale	Male Survival	Population;2
-gammaAFemale	Female Gamma A	Population;2	
-gammaBFemale	Female Gamma B	Population;2	
-gammaAMale	Male Gamma A	Population;2
-gammaBMale	Male Gamma B	Population;2
+#This file provides paramater names and other values used to load an interface
+#for the AgeStructureNe GUI tab page that sets up and runs SimuPOP simulations
+#Columns give:
+#	1.  Actual variable name, ususally the original used in Tiago's 
+#	    cfg object (see his sim.py)
+#	2.  Name used for the label in the interface
+#	3.  Formatting and default value fields, semi-colon-delimited
+#	    ( many fields currently (20160820) not used).  Field types:
+#		i.   IDX_TAG_FIELD_CONFIG_SECTION=0
+#		ii.  IDX_TAG_FIELD_PLACEMENT_ORDER=1
+#		iii. IDX_TAG_FIELD_COLUMN_NUMBER=2
+#		iv.  IDX_TAG_FIELD_PARAM_ORDER=3
+#		v.   IDX_TAG_FIELD_DEFAULT_VALUE=4
+#		vi.  IDX_TAG_FIELD_PARAM_TYPE=5
+#		vii. IDX_TAG_FIELD_MIN_VALUE=6
+#		viii.IDX_TAG_FIELD_MAX_VALUE=7
+#		viv. IDX_TAG_FIELD_TOOL_TIP=8
+#Many of these are not yet used by the interface (as of 2016_08_20 ). Note especially 
+#that for the PGInputSimuPop and PGGuiSimuPop objects default values are 
+#not accessed from this file, rather from the config file that is loaded, and, in some 
+#cases from the code itself that reads in the config file and sets the input attribute 
+#values in PGInputSimuPop. Type checks using value ranges are also ignored by using 
+#None;None;None for the type, min, and max fields.
+#
+N0	N1	Population;2;1;1;0;None;None;None;N1
+Nb	Nb	suppress;0;0;1;0;None;None;None;""
+NbVar	NbVar	suppress;0;0;1;0;None;None;None;""
+ages	Ages	Population;2;1;1;0;None;None;None;Ages
+config_file	Configuration File	Configuration Info;1;1;1;"none";None;None;None;Configuration file
+life_table_glob	Life Table File(s)	Configuration Info;1;1;1;"none";None;None;None;Life table files
+dataDir	Data Directory	suppress;0;0;1;0;None;None;None;""
+#suppressing the negative binomial switch as of 2016_08_24, as it is actually
+#a param treated as an internal flag, and depends solely on absense/presence of gamma lists (see below)
+doNegBinom	Use Negative Binomial	suppress;4;1;1;False;Use Negative Binomial
+fecundityFemale	Female Fecundity	Population;2;1;1;[];None;None;None;Female Fecundity
+fecundityMale	Male Fecundity	Population;2;1;1;[];None;None;None;Male Fecundity
+forceSkip	Force Skip	Population;2;1;1;[];None;None;None;Force Skip
+gens	Reproductive Cycles	Population;2;1;1;1;None;None;None;Reproductive Cycles
+isMonog	Monogamous	Population;2;1;1;False;None;None;None;Monogamous
+lbd	Lambda	Simulation;4;1;1;1.0;None;None;None;Lambda
+litter	Litter size probability	Population;2;1;1;0.0;None;None;None;Litter size probability
+maleProb	Probability Male Birth	Population;2;1;1;Probability male birth
+model_name	Model	Configuration Info;1;1;1;none;None;None;None;Model name
+numSNPs	Number of SNPs	Genome;3;1;1;0;None;None;None;Number of SNPs
+mutFreq	Mutation Frequency	Genome;3;1;1;0;None;None;None;Mutation Frequency
+numMSats	Number of Microsatellites	Genome;3;1;1;0;None;None;None;Number of Microsats
+param_names	param names object	suppress;0;0;0;0;None;None;None;""
+popSize	Population Size	Population;2;1;1;0;None;None;None;Populaion Size
+reps	Replicates	Simulation;4;1;1;1;None;None;None;Replicates
+skip	Skip breeding probability	Simulation;4;1;1;[];None;None;None;Skip breeding probability
+startAlleles	Starting Msat Allele Total	Genome;3;1;1;0;None;None;None;Starting microsat allele total
+startLambda	Lambda burn-in	Simulation;5;1;1;99999;None;None;None;Lambda burn-in
+startSave	Starting Save	Simulation;5;1;1;1;None;None;None;Starting Save
+survivalFemale	Female Survival	Population;2;1;1;[];None;None;None;Female Survival
+survivalMale	Male Survival	Population;2;1;1;[];None;None;None;Male Survival
+gammaAFemale	Female Gamma A	Population;2;1;1;None;None;None;None;Female Gamma A	
+gammaBFemale	Female Gamma B	Population;2;1;1;None;None;None;None;Female Gamma B
+gammaAMale	Male Gamma A	Population;2;1;1;None;None;None;None;Male Gamma A
+gammaBMale	Male Gamma B	Population;2;1;1;None;None;None;None;Male Gamma B
