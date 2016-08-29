@@ -8,6 +8,12 @@ class \hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook}{P\+G\+Host\+Not
 \subsection*{Variables}
 \begin{DoxyCompactItemize}
 \item 
+bool {\bfseries N\+E\+\_\+\+G\+U\+I\+\_\+\+I\+S\+\_\+\+I\+M\+P\+L\+E\+M\+E\+N\+T\+ED} = True\hypertarget{namespacenegui_1_1pghostnotebook_a713e3c49323a10efdf84414a10af9f9e}{}\label{namespacenegui_1_1pghostnotebook_a713e3c49323a10efdf84414a10af9f9e}
+
+\item 
+bool {\bfseries V\+E\+R\+B\+O\+SE} = False\hypertarget{namespacenegui_1_1pghostnotebook_a047e31164346351c4093c0192244c081}{}\label{namespacenegui_1_1pghostnotebook_a047e31164346351c4093c0192244c081}
+
+\item 
 float {\bfseries W\+I\+N\+D\+O\+W\+\_\+\+M\+A\+R\+G\+IN} = 0.\+20\hypertarget{namespacenegui_1_1pghostnotebook_a55d2191bb5b0ad01afd889f86f3a40cd}{}\label{namespacenegui_1_1pghostnotebook_a55d2191bb5b0ad01afd889f86f3a40cd}
 
 \item 
@@ -26,9 +32,6 @@ string {\bfseries s\+\_\+menu\+\_\+config} = s\+\_\+progdir+\char`\"{}/resources
 string {\bfseries s\+\_\+param\+\_\+name\+\_\+file} = \char`\"{}resources/simupop.\+param.\+names\char`\"{}\hypertarget{namespacenegui_1_1pghostnotebook_ac50c371dc355daca2be8c0c69bd5a8a1}{}\label{namespacenegui_1_1pghostnotebook_ac50c371dc355daca2be8c0c69bd5a8a1}
 
 \item 
-int {\bfseries i\+\_\+use\+\_\+this\+\_\+many\+\_\+procs} = 10\hypertarget{namespacenegui_1_1pghostnotebook_a441515e865818dcb1e4dad534fd174e8}{}\label{namespacenegui_1_1pghostnotebook_a441515e865818dcb1e4dad534fd174e8}
-
-\item 
 {\bfseries o\+\_\+master} = Tk()\hypertarget{namespacenegui_1_1pghostnotebook_a87f3638cc6a59f9037d9f965f0f37538}{}\label{namespacenegui_1_1pghostnotebook_a87f3638cc6a59f9037d9f965f0f37538}
 
 \item 
@@ -38,10 +41,16 @@ int {\bfseries i\+\_\+use\+\_\+this\+\_\+many\+\_\+procs} = 10\hypertarget{names
 {\bfseries i\+\_\+height} = o\+\_\+master.\+winfo\+\_\+screenheight()\hypertarget{namespacenegui_1_1pghostnotebook_abfedf6f0e0f6f989eba30fd49babff1d}{}\label{namespacenegui_1_1pghostnotebook_abfedf6f0e0f6f989eba30fd49babff1d}
 
 \item 
-{\bfseries i\+\_\+geo\+\_\+width} = int( ( i\+\_\+width/2 ) $\ast$ ( 1 -\/ W\+I\+N\+D\+O\+W\+\_\+\+M\+A\+R\+G\+IN ) )\hypertarget{namespacenegui_1_1pghostnotebook_a999255d83a1b5a0fa4eb9637eed7a597}{}\label{namespacenegui_1_1pghostnotebook_a999255d83a1b5a0fa4eb9637eed7a597}
+float {\bfseries f\+\_\+width\+\_\+proportion} = 0.\+75\hypertarget{namespacenegui_1_1pghostnotebook_a5ab5731364fab355fcdac3a12527a46a}{}\label{namespacenegui_1_1pghostnotebook_a5ab5731364fab355fcdac3a12527a46a}
 
 \item 
-{\bfseries i\+\_\+geo\+\_\+height} = int( ( i\+\_\+height/2 ) $\ast$ ( 1 -\/ W\+I\+N\+D\+O\+W\+\_\+\+M\+A\+R\+G\+IN ) )\hypertarget{namespacenegui_1_1pghostnotebook_a3f20501fe15d8b5209094a4faea61d0c}{}\label{namespacenegui_1_1pghostnotebook_a3f20501fe15d8b5209094a4faea61d0c}
+float {\bfseries f\+\_\+height\+\_\+proportion} = 0.\+5\hypertarget{namespacenegui_1_1pghostnotebook_adee69321e2e8b3e63c9d030880748c79}{}\label{namespacenegui_1_1pghostnotebook_adee69321e2e8b3e63c9d030880748c79}
+
+\item 
+{\bfseries i\+\_\+geo\+\_\+width} = int( ( i\+\_\+width $\ast$ f\+\_\+width\+\_\+proportion ) $\ast$ ( 1 -\/ W\+I\+N\+D\+O\+W\+\_\+\+M\+A\+R\+G\+IN ) )\hypertarget{namespacenegui_1_1pghostnotebook_a999255d83a1b5a0fa4eb9637eed7a597}{}\label{namespacenegui_1_1pghostnotebook_a999255d83a1b5a0fa4eb9637eed7a597}
+
+\item 
+{\bfseries i\+\_\+geo\+\_\+height} = int( ( i\+\_\+height $\ast$ f\+\_\+height\+\_\+proportion ) $\ast$ ( 1 -\/ W\+I\+N\+D\+O\+W\+\_\+\+M\+A\+R\+G\+IN ) )\hypertarget{namespacenegui_1_1pghostnotebook_a3f20501fe15d8b5209094a4faea61d0c}{}\label{namespacenegui_1_1pghostnotebook_a3f20501fe15d8b5209094a4faea61d0c}
 
 \item 
 {\bfseries o\+\_\+host}
@@ -83,5 +92,5 @@ or ne estimations
 \end{DoxyCode}
 
 
-Definition at line 124 of file pghostnotebook.\+py.
+Definition at line 245 of file pghostnotebook.\+py.
 

@@ -27,14 +27,29 @@ def {\bfseries copy\+Me} (self)\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGO
 def {\bfseries open\+Conf} (self)\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_abd8a699e5a3adf2b746bdb778602fe60}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_abd8a699e5a3adf2b746bdb778602fe60}
 
 \item 
-def \hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a19aedb58718296302655581be640f995}{bz2\+Compress\+All\+Files} (self)
+def \hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a3046e1eac1fbd82acf47c0f7c0d06b70}{bz2\+Compress\+All\+Files} (self, ls\+\_\+files\+\_\+to\+\_\+skip=\mbox{[}$\,$\mbox{]})
 \item 
 def \hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_af093f63ef577cb9d9778920ec6589516}{gen2\+Genepop} (self, idx\+\_\+allele\+\_\+start, idx\+\_\+allele\+\_\+stop, b\+\_\+do\+\_\+compress=True, b\+\_\+pop\+\_\+per\+\_\+gen=False)
+\item 
+def {\bfseries remove\+Output\+File\+By\+Ext} (self, s\+\_\+extension)\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a27af4e615fcb17d2343dc27f614c1359}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a27af4e615fcb17d2343dc27f614c1359}
+
 \item 
 def {\bfseries basename} (self)\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_af67ba734fbe5d4240a8cef38e63586d1}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_af67ba734fbe5d4240a8cef38e63586d1}
 
 \item 
 def {\bfseries basename} (self, s\+\_\+basename)\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_aafca25668d51a1beec732306b7973884}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_aafca25668d51a1beec732306b7973884}
+
+\item 
+def {\bfseries confname} (self)\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a67795b5f8245e4e921615ac4cc79a5be}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a67795b5f8245e4e921615ac4cc79a5be}
+
+\item 
+def {\bfseries simname} (self)\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_ac3e82333b61e2c3e9545c9ca8e9cf64c}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_ac3e82333b61e2c3e9545c9ca8e9cf64c}
+
+\item 
+def {\bfseries genname} (self)\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a43b4446563d323091900f8b6bcfd6044}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a43b4446563d323091900f8b6bcfd6044}
+
+\item 
+def {\bfseries dbname} (self)\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a6159d8c414cea2420a3de80ab00222bc}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a6159d8c414cea2420a3de80ab00222bc}
 
 \end{DoxyCompactItemize}
 \subsection*{Public Attributes}
@@ -52,6 +67,14 @@ def {\bfseries basename} (self, s\+\_\+basename)\hypertarget{classnegui_1_1pgout
 {\bfseries conf}\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_ac6e385cca72ff0073251b511eea1103f}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_ac6e385cca72ff0073251b511eea1103f}
 
 \end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+dictionary {\bfseries D\+I\+C\+T\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+L\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+O\+NS}
+\item 
+string {\bfseries C\+O\+M\+P\+R\+E\+S\+S\+I\+O\+N\+\_\+\+F\+I\+L\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+ON} = \char`\"{}bz2\char`\"{}\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_aaf295d98adb01d86781790b5a57c5348}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_aaf295d98adb01d86781790b5a57c5348}
+
+\end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
@@ -65,18 +88,19 @@ changes in parameter values for users before they run the simulation.
 \end{DoxyVerb}
  
 
-Definition at line 22 of file pgoutputsimupop.\+py.
+Definition at line 25 of file pgoutputsimupop.\+py.
 
 
 
 \subsection{Member Function Documentation}
 \index{negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop@{negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop}!bz2\+Compress\+All\+Files@{bz2\+Compress\+All\+Files}}
 \index{bz2\+Compress\+All\+Files@{bz2\+Compress\+All\+Files}!negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop@{negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop}}
-\subsubsection[{\texorpdfstring{bz2\+Compress\+All\+Files(self)}{bz2CompressAllFiles(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgoutputsimupop.\+P\+G\+Output\+Simu\+Pop.\+bz2\+Compress\+All\+Files (
+\subsubsection[{\texorpdfstring{bz2\+Compress\+All\+Files(self, ls\+\_\+files\+\_\+to\+\_\+skip=[])}{bz2CompressAllFiles(self, ls_files_to_skip=[])}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgoutputsimupop.\+P\+G\+Output\+Simu\+Pop.\+bz2\+Compress\+All\+Files (
 \begin{DoxyParamCaption}
-\item[{}]{self}
+\item[{}]{self, }
+\item[{}]{ls\+\_\+files\+\_\+to\+\_\+skip = {\ttfamily \mbox{[}\mbox{]}}}
 \end{DoxyParamCaption}
-)}\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a19aedb58718296302655581be640f995}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a19aedb58718296302655581be640f995}
+)}\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a3046e1eac1fbd82acf47c0f7c0d06b70}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a3046e1eac1fbd82acf47c0f7c0d06b70}
 \begin{DoxyVerb}used code and advice in, 
 http://stackoverflow.com/questions/9518705/big-file-compression-with-python
 
@@ -86,41 +110,47 @@ whether this applies to the copyfileobj, though my few tests showd all of these 
 \end{DoxyVerb}
  
 
-Definition at line 152 of file pgoutputsimupop.\+py.
+Definition at line 168 of file pgoutputsimupop.\+py.
 
 
 \begin{DoxyCode}
-152     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a19aedb58718296302655581be640f995}{bz2CompressAllFiles}(self):
-153         \textcolor{stringliteral}{'''}
-154 \textcolor{stringliteral}{        used code and advice in, }
-155 \textcolor{stringliteral}{        http://stackoverflow.com/questions/9518705/big-file-compression-with-python}
-156 \textcolor{stringliteral}{}
-157 \textcolor{stringliteral}{        Note: checked the shutil documentation at https://docs.python.org/2/library/shutil.html}
-158 \textcolor{stringliteral}{        which warns of loss of meta file info (owner/group ACLs) when using shutil.copy() or
+168     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a3046e1eac1fbd82acf47c0f7c0d06b70}{bz2CompressAllFiles}(self, ls\_files\_to\_skip=[] ):
+169         \textcolor{stringliteral}{'''}
+170 \textcolor{stringliteral}{        used code and advice in, }
+171 \textcolor{stringliteral}{        http://stackoverflow.com/questions/9518705/big-file-compression-with-python}
+172 \textcolor{stringliteral}{}
+173 \textcolor{stringliteral}{        Note: checked the shutil documentation at https://docs.python.org/2/library/shutil.html}
+174 \textcolor{stringliteral}{        which warns of loss of meta file info (owner/group ACLs) when using shutil.copy() or
        shutil.copy2().  Unclear}
-159 \textcolor{stringliteral}{        whether this applies to the copyfileobj, though my few tests showd all of these were retained.}
-160 \textcolor{stringliteral}{        '''}
-161         \textcolor{keywordflow}{for} s\_myfile \textcolor{keywordflow}{in} [ self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a50f64be6bb990a0ac6898a44b4bf6fbc}{\_\_outname}, self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a26363a7bbc4ae53b86585e32f0360e2a}{\_\_errname}, self.
+175 \textcolor{stringliteral}{        whether this applies to the copyfileobj, though my few tests showd all of these were retained.}
+176 \textcolor{stringliteral}{        '''}
+177         \textcolor{keywordflow}{for} s\_myfile \textcolor{keywordflow}{in} [ self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a50f64be6bb990a0ac6898a44b4bf6fbc}{\_\_outname}, self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a26363a7bbc4ae53b86585e32f0360e2a}{\_\_errname}, self.
       \hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_aa89de70104807ce7e26bb17310f74b97}{\_\_megadbname}, self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_af5c9a72247505d2c2bb3d7400cbc09b3}{\_\_confname} ]:
-162             \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a1fdfb988619bd4a9d377a1e20f52839c}{\_\_file\_exists}( s\_myfile ):
-163                 self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_abf6aab4f7982c2b0f9e4544343bf241b}{\_\_raise\_file\_not\_found\_error}( s\_myfile, \textcolor{stringliteral}{"compress file
+178             
+179             \textcolor{keywordflow}{if} s\_myfile \textcolor{keywordflow}{in} ls\_files\_to\_skip:
+180                 \textcolor{keywordflow}{pass}
+181             \textcolor{keywordflow}{elif} \textcolor{keywordflow}{not} self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a1fdfb988619bd4a9d377a1e20f52839c}{\_\_file\_exists}( s\_myfile ):
+182                 self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_abf6aab4f7982c2b0f9e4544343bf241b}{\_\_raise\_file\_not\_found\_error}( s\_myfile, \textcolor{stringliteral}{"compress file
        with bz2"}  )
-164             \textcolor{keywordflow}{else}:
-165                 with open( s\_myfile, \textcolor{stringliteral}{'rb'} ) \textcolor{keyword}{as} o\_input:
-166                     with bz2.BZ2File( s\_myfile + \textcolor{stringliteral}{'.bz2'}, \textcolor{stringliteral}{'wb'}, compresslevel=9 ) \textcolor{keyword}{as} o\_output:
-167                         \textcolor{comment}{#try/except overkill, but want logic to show}
-168                         \textcolor{comment}{#we don't remove the input file}
-169                         \textcolor{comment}{#if the copy op fails:}
-170                         \textcolor{keywordflow}{try}: 
-171                             shutil.copyfileobj( o\_input, o\_output )
-172                         \textcolor{keywordflow}{except} Exception,  e:
-173                             \textcolor{keywordflow}{raise} e
-174                         \textcolor{comment}{#end try except}
-175                         os.remove( s\_myfile )   
-176                     \textcolor{comment}{#end with bzfile for writing}
-177                 \textcolor{comment}{#end with current file for reading}
-178             \textcolor{comment}{#end if file absent, else exists}
-179         \textcolor{comment}{#end for each file}
+183             \textcolor{keywordflow}{else}:
+184                 with open( s\_myfile, \textcolor{stringliteral}{'rb'} ) \textcolor{keyword}{as} o\_input:
+185                     with bz2.BZ2File( s\_myfile + \textcolor{stringliteral}{'.bz2'}, \textcolor{stringliteral}{'wb'}, compresslevel=9 ) \textcolor{keyword}{as} o\_output:
+186                         \textcolor{comment}{#try/except overkill, but want logic to show}
+187                         \textcolor{comment}{#we don't remove the input file}
+188                         \textcolor{comment}{#if the copy op fails:}
+189                         \textcolor{keywordflow}{try}: 
+190                             shutil.copyfileobj( o\_input, o\_output )
+191                         \textcolor{keywordflow}{except} Exception,  e:
+192                             \textcolor{keywordflow}{raise} e
+193                         \textcolor{comment}{#end try except}
+194 
+195                         \textcolor{comment}{#required by windows only, else error can't remove:}
+196                         o\_input.close()
+197                         os.remove( s\_myfile )   
+198                     \textcolor{comment}{#end with bzfile for writing}
+199                 \textcolor{comment}{#end with current file for reading}
+200             \textcolor{comment}{#end if file absent, else exists}
+201         \textcolor{comment}{#end for each file}
 \end{DoxyCode}
 \index{negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop@{negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop}!gen2\+Genepop@{gen2\+Genepop}}
 \index{gen2\+Genepop@{gen2\+Genepop}!negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop@{negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop}}
@@ -156,113 +186,140 @@ generations, as given by the 2nd field in the gen file
 \end{DoxyVerb}
  
 
-Definition at line 185 of file pgoutputsimupop.\+py.
+Definition at line 207 of file pgoutputsimupop.\+py.
 
 
 \begin{DoxyCode}
-185             b\_pop\_per\_gen=\textcolor{keyword}{False} ):
-186 
-187         \textcolor{stringliteral}{'''}
-188 \textcolor{stringliteral}{        reads the *.gen file from the simuPop output}
-189 \textcolor{stringliteral}{        and produces a genepop file based on the gen file}
-190 \textcolor{stringliteral}{}
-191 \textcolor{stringliteral}{        param idx\_allele\_start: int, one-based index giving the}
-192 \textcolor{stringliteral}{        item (loci) number of the first allele entry in the line of gen-file input}
-193 \textcolor{stringliteral}{        Example, if the *gen file has 10 microsates and 40 SNPs, then its first}
-194 \textcolor{stringliteral}{        10 allele entries (that follow the indiv number and the gneration number)}
-195 \textcolor{stringliteral}{        will be the microsats, and the final 40 allele entries will be the SNPs}
-196 \textcolor{stringliteral}{        If we wanted only the Microsats to be included in the gen file, then}
-197 \textcolor{stringliteral}{        this param would be "1", and the idx\_allele\_stop value would be 10. }
-198 \textcolor{stringliteral}{        If we want both msats and snps, we'd give 1 and 50 for these params. }
-199 \textcolor{stringliteral}{        If we want only SNPs, wed enter 11 for start allele and 50 for stop.}
-200 \textcolor{stringliteral}{}
-201 \textcolor{stringliteral}{        param idx\_allele\_stop: int, one-based index giving the}
-202 \textcolor{stringliteral}{        item (loci) number of the last allele entry in the line of gen-file input}
-203 \textcolor{stringliteral}{}
-204 \textcolor{stringliteral}{        param optional b\_do\_compress, if true, will bzip2 the output genepop file}
-205 \textcolor{stringliteral}{}
-206 \textcolor{stringliteral}{        param optional b\_pop\_per\_gen, if true, will insert a "Pop" line between the}
-207 \textcolor{stringliteral}{        generations, as given by the 2nd field in the gen file}
-208 \textcolor{stringliteral}{        '''}
-209 
-210         o\_genfile=\textcolor{keywordtype}{None}
-211         o\_genepopfile=\textcolor{keywordtype}{None}
-212         s\_genepop\_filename=self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile} + \textcolor{stringliteral}{"."} + GENEPOP\_FILE\_EXTENSION 
-213         i\_num\_loci=(idx\_allele\_stop-idx\_allele\_start) + 1
-214 
-215         IDX\_GEN\_INDIV=0
-216         IDX\_GEN\_GENERATION=1
-217         IDX\_FIRST\_ALLELE=2
-218 
-219         i\_genepop\_already\_exists=self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a1fdfb988619bd4a9d377a1e20f52839c}{\_\_file\_exists}( s\_genepop\_filename )
-220 
-221         \textcolor{keywordflow}{if} i\_genepop\_already\_exists != FILE\_DOES\_NOT\_EXIST:
-222 
-223             self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_ad3f4c271b5b800d0137460e2349452e0}{\_\_raise\_file\_exists\_error}( s\_genepop\_filename, 
-224                     \textcolor{stringliteral}{"create genepop file from gen file"} )
-225         \textcolor{comment}{#end if genepop file already exists}
-226 
-227         i\_genfile\_exists=self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a1fdfb988619bd4a9d377a1e20f52839c}{\_\_file\_exists}( self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile} )
-228         
-229         \textcolor{comment}{#if we have the uncompressed version available}
-230         \textcolor{comment}{#we use it:}
-231         \textcolor{keywordflow}{if} i\_genfile\_exists == FILE\_EXISTS\_UNCOMPRESSED \(\backslash\)
-232             \textcolor{keywordflow}{or} i\_genfile\_exists == FILE\_EXISTS\_AS\_BOTH\_UNCOMPRESSED\_AND\_BZ2:
+207             b\_pop\_per\_gen=\textcolor{keyword}{False} ):
+208 
+209         \textcolor{stringliteral}{'''}
+210 \textcolor{stringliteral}{        reads the *.gen file from the simuPop output}
+211 \textcolor{stringliteral}{        and produces a genepop file based on the gen file}
+212 \textcolor{stringliteral}{}
+213 \textcolor{stringliteral}{        param idx\_allele\_start: int, one-based index giving the}
+214 \textcolor{stringliteral}{        item (loci) number of the first allele entry in the line of gen-file input}
+215 \textcolor{stringliteral}{        Example, if the *gen file has 10 microsates and 40 SNPs, then its first}
+216 \textcolor{stringliteral}{        10 allele entries (that follow the indiv number and the gneration number)}
+217 \textcolor{stringliteral}{        will be the microsats, and the final 40 allele entries will be the SNPs}
+218 \textcolor{stringliteral}{        If we wanted only the Microsats to be included in the gen file, then}
+219 \textcolor{stringliteral}{        this param would be "1", and the idx\_allele\_stop value would be 10. }
+220 \textcolor{stringliteral}{        If we want both msats and snps, we'd give 1 and 50 for these params. }
+221 \textcolor{stringliteral}{        If we want only SNPs, wed enter 11 for start allele and 50 for stop.}
+222 \textcolor{stringliteral}{}
+223 \textcolor{stringliteral}{        param idx\_allele\_stop: int, one-based index giving the}
+224 \textcolor{stringliteral}{        item (loci) number of the last allele entry in the line of gen-file input}
+225 \textcolor{stringliteral}{}
+226 \textcolor{stringliteral}{        param optional b\_do\_compress, if true, will bzip2 the output genepop file}
+227 \textcolor{stringliteral}{}
+228 \textcolor{stringliteral}{        param optional b\_pop\_per\_gen, if true, will insert a "Pop" line between the}
+229 \textcolor{stringliteral}{        generations, as given by the 2nd field in the gen file}
+230 \textcolor{stringliteral}{        '''}
+231 
+232         o\_genfile=\textcolor{keywordtype}{None}
 233 
-234             o\_genfile=open( self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile} )
-235 
-236         \textcolor{keywordflow}{elif} i\_genfile\_exists == FILE\_EXISTS\_AS\_BZ2:
-237 
-238             o\_genfile=bz2.BZ2File( self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile} + \textcolor{stringliteral}{".bz2"} )
-239 
-240         \textcolor{keywordflow}{else}:
-241             self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_abf6aab4f7982c2b0f9e4544343bf241b}{\_\_raise\_file\_not\_found\_error}( self.
-      \hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile}, \textcolor{stringliteral}{"convert gen file to genepop"} )
-242         \textcolor{comment}{#end if uncompressed only or uncomp. and compressed, else compressed only, else no file}
-243         
-244         \textcolor{keywordflow}{if} b\_do\_compress == \textcolor{keyword}{True}:
-245             o\_genepopfile=bz2.BZ2File( s\_genepop\_filename + \textcolor{stringliteral}{'.bz2'}, \textcolor{stringliteral}{'wb'}, compresslevel=9 ) 
-246         \textcolor{keywordflow}{else}:
-247             o\_genepopfile=open( s\_genepop\_filename, \textcolor{stringliteral}{'w'} )
-248         \textcolor{comment}{#end if compress else don't}
-249 
-250         \textcolor{comment}{#write header and loci list:}
-251 
-252         o\_genepopfile.write( \textcolor{stringliteral}{"genepop from simupop run data file "} \(\backslash\)
-253                 + self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile} + \textcolor{stringliteral}{"\(\backslash\)n"} )
+234         o\_genepopfile=\textcolor{keywordtype}{None}
+235         
+236         s\_temp\_file\_name=str( uuid.uuid4() ) 
+237     
+238         s\_genepop\_filename=self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_af6ab3be4b2b1d4c7de28b5aa0f8d76da}{\_\_basename} + \textcolor{stringliteral}{"."}  \(\backslash\)
+239                 +  PGOutputSimuPop.DICT\_OUTPUT\_FILE\_EXTENSIONS[ \textcolor{stringliteral}{"genepop"} ]     
+240 
+241         i\_num\_loci=(idx\_allele\_stop-idx\_allele\_start) + 1
+242 
+243         IDX\_GEN\_INDIV=0
+244         IDX\_GEN\_GENERATION=1
+245         IDX\_FIRST\_ALLELE=2
+246 
+247         i\_genepop\_already\_exists=self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a1fdfb988619bd4a9d377a1e20f52839c}{\_\_file\_exists}( s\_genepop\_filename )
+248 
+249         \textcolor{keywordflow}{if} i\_genepop\_already\_exists != FILE\_DOES\_NOT\_EXIST:
+250 
+251             self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_ad3f4c271b5b800d0137460e2349452e0}{\_\_raise\_file\_exists\_error}( s\_genepop\_filename, 
+252                     \textcolor{stringliteral}{"create genepop file from gen file"} )
+253         \textcolor{comment}{#end if genepop file already exists}
 254 
-255         \textcolor{keywordflow}{for} i\_locus \textcolor{keywordflow}{in} range( i\_num\_loci ):
-256             o\_genepopfile.write(\textcolor{stringliteral}{"l"} + str(i\_locus) + \textcolor{stringliteral}{"\(\backslash\)n"} )
-257         \textcolor{comment}{#end for each loci number}
-258 
-259         \textcolor{comment}{#write indiv id and alleles, line by line:}
-260         i\_currgen=\textcolor{keywordtype}{None}
+255         i\_genfile\_exists=self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a1fdfb988619bd4a9d377a1e20f52839c}{\_\_file\_exists}( self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile} )
+256         
+257         \textcolor{comment}{#if we have the uncompressed version available}
+258         \textcolor{comment}{#we use it:}
+259         \textcolor{keywordflow}{if} i\_genfile\_exists == FILE\_EXISTS\_UNCOMPRESSED \(\backslash\)
+260             \textcolor{keywordflow}{or} i\_genfile\_exists == FILE\_EXISTS\_AS\_BOTH\_UNCOMPRESSED\_AND\_BZ2:
 261 
-262         \textcolor{keywordflow}{for} s\_line \textcolor{keywordflow}{in} o\_genfile:
-263             
-264             ls\_line = s\_line.rstrip().split(\textcolor{stringliteral}{" "})
+262             o\_genfile=open( self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile} )
+263 
+264         \textcolor{keywordflow}{elif} i\_genfile\_exists == FILE\_EXISTS\_AS\_BZ2:
 265 
-266             i\_id = int(float(ls\_line[IDX\_GEN\_INDIV]))
-267             i\_gen = int(float(ls\_line[IDX\_GEN\_GENERATION]))
-268             idx\_first\_allele\_in\_line=( idx\_allele\_start + IDX\_FIRST\_ALLELE ) - 1
-269             idx\_last\_allele\_in\_line=( idx\_allele\_stop  + IDX\_FIRST\_ALLELE ) - 1 
-270             ls\_alleles = ls\_line[ idx\_first\_allele\_in\_line : idx\_last\_allele\_in\_line + 1 ]
-271 
-272             \textcolor{keywordflow}{if} i\_currgen \textcolor{keywordflow}{is} \textcolor{keywordtype}{None} \textcolor{keywordflow}{or} ( b\_pop\_per\_gen == \textcolor{keyword}{True} \textcolor{keywordflow}{and} i\_currgen != i\_gen ):
-273                     o\_genepopfile.write( \textcolor{stringliteral}{"pop\(\backslash\)n"} )
-274                     i\_currgen=i\_gen
-275                 \textcolor{comment}{#end if new generation (== new population )}
-276                 \textcolor{comment}{#end if we should make a new population for each generation}
+266             o\_genfile=bz2.BZ2File( self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile} + \textcolor{stringliteral}{".bz2"} )
+267 
+268         \textcolor{keywordflow}{else}:
+269             self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_abf6aab4f7982c2b0f9e4544343bf241b}{\_\_raise\_file\_not\_found\_error}( self.
+      \hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile}, \textcolor{stringliteral}{"convert gen file to genepop"} )
+270         \textcolor{comment}{#end if uncompressed only or uncomp. and compressed, else compressed only, else no file}
+271         
+272         \textcolor{keywordflow}{if} b\_do\_compress == \textcolor{keyword}{True}:
+273             o\_genepopfile=bz2.BZ2File( s\_temp\_file\_name + \textcolor{stringliteral}{'.bz2'}, \textcolor{stringliteral}{'wb'}, compresslevel=9 ) 
+274         \textcolor{keywordflow}{else}:
+275             o\_genepopfile=open( s\_temp\_file\_name, \textcolor{stringliteral}{'w'} )
+276         \textcolor{comment}{#end if compress else don't}
 277 
-278             o\_genepopfile.write( str( i\_id ) + \textcolor{stringliteral}{","} +  \textcolor{stringliteral}{" "}.join( ls\_alleles ) + \textcolor{stringliteral}{"\(\backslash\)n"}  )
+278         \textcolor{comment}{#write header and loci list:}
 279 
-280         \textcolor{comment}{#end for each line in gen file}
-281 
-282         o\_genfile.close()
-283         o\_genepopfile.close()
-284 
-285         \textcolor{keywordflow}{return}
+280         o\_genepopfile.write( \textcolor{stringliteral}{"genepop from simupop run data file "} \(\backslash\)
+281                 + self.\hyperlink{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a30fb6b94af13efad6becfbe6fddc1d95}{\_\_genfile} + \textcolor{stringliteral}{"\(\backslash\)n"} )
+282 
+283         \textcolor{keywordflow}{for} i\_locus \textcolor{keywordflow}{in} range( i\_num\_loci ):
+284             o\_genepopfile.write(\textcolor{stringliteral}{"l"} + str(i\_locus) + \textcolor{stringliteral}{"\(\backslash\)n"} )
+285         \textcolor{comment}{#end for each loci number}
+286 
+287         \textcolor{comment}{#write indiv id and alleles, line by line:}
+288         i\_currgen=\textcolor{keywordtype}{None}
+289 
+290         \textcolor{keywordflow}{for} s\_line \textcolor{keywordflow}{in} o\_genfile:
+291             
+292             ls\_line = s\_line.rstrip().split(\textcolor{stringliteral}{" "})
+293 
+294             i\_id = int(float(ls\_line[IDX\_GEN\_INDIV]))
+295             i\_gen = int(float(ls\_line[IDX\_GEN\_GENERATION]))
+296             idx\_first\_allele\_in\_line=( idx\_allele\_start + IDX\_FIRST\_ALLELE ) - 1
+297             idx\_last\_allele\_in\_line=( idx\_allele\_stop  + IDX\_FIRST\_ALLELE ) - 1 
+298             ls\_alleles = ls\_line[ idx\_first\_allele\_in\_line : idx\_last\_allele\_in\_line + 1 ]
+299 
+300             \textcolor{keywordflow}{if} i\_currgen \textcolor{keywordflow}{is} \textcolor{keywordtype}{None} \textcolor{keywordflow}{or} ( b\_pop\_per\_gen == \textcolor{keyword}{True} \textcolor{keywordflow}{and} i\_currgen != i\_gen ):
+301                     o\_genepopfile.write( \textcolor{stringliteral}{"pop\(\backslash\)n"} )
+302                     i\_currgen=i\_gen
+303                 \textcolor{comment}{#end if new generation (== new population )}
+304                 \textcolor{comment}{#end if we should make a new population for each generation}
+305 
+306             o\_genepopfile.write( str( i\_id ) + \textcolor{stringliteral}{","} +  \textcolor{stringliteral}{" "}.join( ls\_alleles ) + \textcolor{stringliteral}{"\(\backslash\)n"}  )
+307 
+308         \textcolor{comment}{#end for each line in gen file}
+309 
+310         o\_genfile.close()
+311         o\_genepopfile.close()
+312 
+313         s\_final\_name=s\_temp\_file\_name.replace( s\_temp\_file\_name, s\_genepop\_filename )
+314         os.rename( o\_genepopfile.name, s\_final\_name )
+315 
+316         \textcolor{keywordflow}{return}
 \end{DoxyCode}
+
+
+\subsection{Member Data Documentation}
+\index{negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop@{negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop}!D\+I\+C\+T\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+L\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+O\+NS@{D\+I\+C\+T\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+L\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+O\+NS}}
+\index{D\+I\+C\+T\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+L\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+O\+NS@{D\+I\+C\+T\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+L\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+O\+NS}!negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop@{negui\+::pgoutputsimupop\+::\+P\+G\+Output\+Simu\+Pop}}
+\subsubsection[{\texorpdfstring{D\+I\+C\+T\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+L\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+O\+NS}{DICT_OUTPUT_FILE_EXTENSIONS}}]{\setlength{\rightskip}{0pt plus 5cm}dictionary negui.\+pgoutputsimupop.\+P\+G\+Output\+Simu\+Pop.\+D\+I\+C\+T\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+L\+E\+\_\+\+E\+X\+T\+E\+N\+S\+I\+O\+NS\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a9c9afd31cd09eedc7187eaf6a48ef74a}{}\label{classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop_a9c9afd31cd09eedc7187eaf6a48ef74a}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+1 = \{ \textcolor{stringliteral}{"simfile"}:\textcolor{stringliteral}{"sim"},
+2                                     \textcolor{stringliteral}{"genfile"}:\textcolor{stringliteral}{"gen"},
+3                                     \textcolor{stringliteral}{"dbfile"}:\textcolor{stringliteral}{"db"},
+4                                     \textcolor{stringliteral}{"conffile"}:\textcolor{stringliteral}{"conf"},
+5                                     \textcolor{stringliteral}{"genepop"}:\textcolor{stringliteral}{"genepop"} \}
+\end{DoxyCode}
+
+
+Definition at line 36 of file pgoutputsimupop.\+py.
+
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}

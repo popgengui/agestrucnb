@@ -9,12 +9,18 @@ Inheritance diagram for negui.\+pgguiutilities.\+Key\+Val\+Frame\+:\begin{figure
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-def \hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_aa8aa7bbb1c786d74386ed154a635d9f6}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+name, v\+\_\+value, o\+\_\+master=None, s\+\_\+associated\+\_\+attribute=None, o\+\_\+associated\+\_\+attribute\+\_\+object=None, i\+\_\+entrywidth=7, i\+\_\+labelwidth=15, b\+\_\+is\+\_\+enabled=True, s\+\_\+label\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+entry\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+button\+\_\+text=\textquotesingle{}Cmd\textquotesingle{}, def\+\_\+button\+\_\+command=None, def\+\_\+entry\+\_\+change\+\_\+command=None, type\+\_\+replaces\+\_\+none=float, s\+\_\+label\+\_\+name=None, i\+\_\+subframe\+\_\+padding=0)
+def \hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a42badee6f48e787eb50911528d0381aa}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+name, v\+\_\+value, o\+\_\+master=None, s\+\_\+associated\+\_\+attribute=None, o\+\_\+associated\+\_\+attribute\+\_\+object=None, i\+\_\+entrywidth=7, i\+\_\+labelwidth=15, b\+\_\+is\+\_\+enabled=True, s\+\_\+label\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+entry\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+button\+\_\+text=\textquotesingle{}Cmd\textquotesingle{}, def\+\_\+button\+\_\+command=None, def\+\_\+entry\+\_\+change\+\_\+command=None, type\+\_\+replaces\+\_\+none=float, s\+\_\+label\+\_\+name=None, i\+\_\+subframe\+\_\+padding=0, o\+\_\+validity\+\_\+tester=None, b\+\_\+force\+\_\+disable=False, s\+\_\+tooltip=\char`\"{}\char`\"{})
 \item 
 def {\bfseries val} (self)\hypertarget{classnegui_1_1pgguiutilities_1_1KeyValFrame_a735c32759de5e4519d15ec2511da6e4f}{}\label{classnegui_1_1pgguiutilities_1_1KeyValFrame_a735c32759de5e4519d15ec2511da6e4f}
 
 \item 
 def {\bfseries val} (self)\hypertarget{classnegui_1_1pgguiutilities_1_1KeyValFrame_a735c32759de5e4519d15ec2511da6e4f}{}\label{classnegui_1_1pgguiutilities_1_1KeyValFrame_a735c32759de5e4519d15ec2511da6e4f}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries V\+E\+R\+B\+O\+SE} = False\hypertarget{classnegui_1_1pgguiutilities_1_1KeyValFrame_a7ab96ae24edc45cf94f7cf10bc412557}{}\label{classnegui_1_1pgguiutilities_1_1KeyValFrame_a7ab96ae24edc45cf94f7cf10bc412557}
 
 \end{DoxyCompactItemize}
 
@@ -32,7 +38,6 @@ the instance stores changes in the value(s)
 via callback on enter key.  The current
 key/value state is delivered via a getValue
 
-
 Optionally also updates a an attribute
 in its master object, by name (using getattr)
 whenever the entry box value is updated.
@@ -42,14 +47,14 @@ of the entry box or boxes, and calls a user-supplied
 def whenever a box is updated.\end{DoxyVerb}
  
 
-Definition at line 20 of file pgguiutilities.\+py.
+Definition at line 38 of file pgguiutilities.\+py.
 
 
 
 \subsection{Constructor \& Destructor Documentation}
 \index{negui\+::pgguiutilities\+::\+Key\+Val\+Frame@{negui\+::pgguiutilities\+::\+Key\+Val\+Frame}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
 \index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!negui\+::pgguiutilities\+::\+Key\+Val\+Frame@{negui\+::pgguiutilities\+::\+Key\+Val\+Frame}}
-\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, s\+\_\+name, v\+\_\+value, o\+\_\+master=\+None, s\+\_\+associated\+\_\+attribute=\+None, o\+\_\+associated\+\_\+attribute\+\_\+object=\+None, i\+\_\+entrywidth=7, i\+\_\+labelwidth=15, b\+\_\+is\+\_\+enabled=\+True, s\+\_\+label\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+entry\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+button\+\_\+text=\textquotesingle{}\+Cmd\textquotesingle{}, def\+\_\+button\+\_\+command=\+None, def\+\_\+entry\+\_\+change\+\_\+command=\+None, type\+\_\+replaces\+\_\+none=float, s\+\_\+label\+\_\+name=\+None, i\+\_\+subframe\+\_\+padding=0)}{__init__(self, s_name, v_value, o_master=None, s_associated_attribute=None, o_associated_attribute_object=None, i_entrywidth=7, i_labelwidth=15, b_is_enabled=True, s_label_justify='right', s_entry_justify='right', s_button_text='Cmd', def_button_command=None, def_entry_change_command=None, type_replaces_none=float, s_label_name=None, i_subframe_padding=0)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgguiutilities.\+Key\+Val\+Frame.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, s\+\_\+name, v\+\_\+value, o\+\_\+master=\+None, s\+\_\+associated\+\_\+attribute=\+None, o\+\_\+associated\+\_\+attribute\+\_\+object=\+None, i\+\_\+entrywidth=7, i\+\_\+labelwidth=15, b\+\_\+is\+\_\+enabled=\+True, s\+\_\+label\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+entry\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+button\+\_\+text=\textquotesingle{}\+Cmd\textquotesingle{}, def\+\_\+button\+\_\+command=\+None, def\+\_\+entry\+\_\+change\+\_\+command=\+None, type\+\_\+replaces\+\_\+none=float, s\+\_\+label\+\_\+name=\+None, i\+\_\+subframe\+\_\+padding=0, o\+\_\+validity\+\_\+tester=\+None, b\+\_\+force\+\_\+disable=\+False, s\+\_\+tooltip="""")}{__init__(self, s_name, v_value, o_master=None, s_associated_attribute=None, o_associated_attribute_object=None, i_entrywidth=7, i_labelwidth=15, b_is_enabled=True, s_label_justify='right', s_entry_justify='right', s_button_text='Cmd', def_button_command=None, def_entry_change_command=None, type_replaces_none=float, s_label_name=None, i_subframe_padding=0, o_validity_tester=None, b_force_disable=False, s_tooltip="")}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgguiutilities.\+Key\+Val\+Frame.\+\_\+\+\_\+init\+\_\+\+\_\+ (
 \begin{DoxyParamCaption}
 \item[{}]{self, }
 \item[{}]{s\+\_\+name, }
@@ -67,9 +72,12 @@ Definition at line 20 of file pgguiutilities.\+py.
 \item[{}]{def\+\_\+entry\+\_\+change\+\_\+command = {\ttfamily None}, }
 \item[{}]{type\+\_\+replaces\+\_\+none = {\ttfamily float}, }
 \item[{}]{s\+\_\+label\+\_\+name = {\ttfamily None}, }
-\item[{}]{i\+\_\+subframe\+\_\+padding = {\ttfamily 0}}
+\item[{}]{i\+\_\+subframe\+\_\+padding = {\ttfamily 0}, }
+\item[{}]{o\+\_\+validity\+\_\+tester = {\ttfamily None}, }
+\item[{}]{b\+\_\+force\+\_\+disable = {\ttfamily False}, }
+\item[{}]{s\+\_\+tooltip = {\ttfamily \char`\"{}\char`\"{}}}
 \end{DoxyParamCaption}
-)}\hypertarget{classnegui_1_1pgguiutilities_1_1KeyValFrame_aa8aa7bbb1c786d74386ed154a635d9f6}{}\label{classnegui_1_1pgguiutilities_1_1KeyValFrame_aa8aa7bbb1c786d74386ed154a635d9f6}
+)}\hypertarget{classnegui_1_1pgguiutilities_1_1KeyValFrame_a42badee6f48e787eb50911528d0381aa}{}\label{classnegui_1_1pgguiutilities_1_1KeyValFrame_a42badee6f48e787eb50911528d0381aa}
 \begin{DoxyVerb}Param s_name provides the label text.
 Param o_master is the parent Tkinter object.
 Param s_associated_attribute is the name of 
@@ -87,73 +95,98 @@ Param s_label_justify gives Label widget "justify" value.
 Param s_entry_justify gives Entry Widget text "justify" value.
 Param s_butten_text gives the Button Widget's text value.
 Param def_button_command gives the def to set to the Button's "command" param.
-Param def_entry_change_command gives a def to call when the value of an entry is changed.       
-    This command executes after the local __value and any parent attribute has been updated.
-Param type_replaces_none: if a value is initially None, and the value is then updated, this parameter
+Param def_entry_change_command gives a def to call when the value of an entry is changed.             
+      it should be used when an attribute is asssociated with this object,
+      and so is automatically updated, after wich some other action is required 
+      (ex: Parent PGGuiSimuPop object needs to reconstiture the PGOutputSimuPop object 
+      after this object updates its output basename attribute.
+Param type_replaces_none: if a value is initially None, and the value is then updated, 
+      this parameter.
       gives the type required for a valid value.
 Param s_label_name, if supplied, replaces s_name as the text for the label.
-Param i_subframe_padding gives the padding in pixels of the subframe inside its master frame\end{DoxyVerb}
+Param i_subframe_padding gives the padding in pixels of the subframe inside its master frame
+Param b_force_disable, if True, will cause all Entry objects to be disabled 
+      in the def __make_entry\end{DoxyVerb}
  
 
-Definition at line 60 of file pgguiutilities.\+py.
+Definition at line 82 of file pgguiutilities.\+py.
 
 
 \begin{DoxyCode}
-60             i\_subframe\_padding=0 ):
-61         
-62         \textcolor{stringliteral}{"""}
-63 \textcolor{stringliteral}{        Param s\_name provides the label text.}
-64 \textcolor{stringliteral}{        Param o\_master is the parent Tkinter object.}
-65 \textcolor{stringliteral}{        Param s\_associated\_attribute is the name of }
-66 \textcolor{stringliteral}{            attribute instance that can be accessed}
-67 \textcolor{stringliteral}{            using "getattr", and that will be}
-68 \textcolor{stringliteral}{            updated when the value is updated.}
-69 \textcolor{stringliteral}{        Param o\_associated\_attribute\_object is the object whose attribute}
-70 \textcolor{stringliteral}{            is to be unpdated when the value is updated.  If}
-71 \textcolor{stringliteral}{            s\_associated\_attribute is not None, and this parameter}
-72 \textcolor{stringliteral}{            is None, the attribute is presumed to be}
-73 \textcolor{stringliteral}{            owned by the o\_master object.}
-74 \textcolor{stringliteral}{        Param i\_entrywidth gives the width of Entry widget(s).}
-75 \textcolor{stringliteral}{        Param i\_labelwidth gives the width the the Label widget.}
-76 \textcolor{stringliteral}{        Param s\_label\_justify gives Label widget "justify" value.}
-77 \textcolor{stringliteral}{        Param s\_entry\_justify gives Entry Widget text "justify" value.}
-78 \textcolor{stringliteral}{        Param s\_butten\_text gives the Button Widget's text value.}
-79 \textcolor{stringliteral}{        Param def\_button\_command gives the def to set to the Button's "command" param.}
-80 \textcolor{stringliteral}{        Param def\_entry\_change\_command gives a def to call when the value of an entry is changed.       }
-81 \textcolor{stringliteral}{            This command executes after the local \_\_value and any parent attribute has been updated.}
-82 \textcolor{stringliteral}{        Param type\_replaces\_none: if a value is initially None, and the value is then updated, this
-       parameter}
-83 \textcolor{stringliteral}{              gives the type required for a valid value.}
-84 \textcolor{stringliteral}{        Param s\_label\_name, if supplied, replaces s\_name as the text for the label.}
-85 \textcolor{stringliteral}{        Param i\_subframe\_padding gives the padding in pixels of the subframe inside its master frame}
-86 \textcolor{stringliteral}{}
-87 \textcolor{stringliteral}{        """}
-88         \textcolor{comment}{#TCL won't allow uppercase names for windows}
-89         \textcolor{comment}{#(note that we save the name, case in-tact, in}
-90         \textcolor{comment}{#member \_\_name:}
-91         Frame.\_\_init\_\_( self, o\_master, name=s\_name.lower() )
-92         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a59eae02effdbbbb9e3cf3e523639e8a8}{\_\_master}=o\_master
-93         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_abb469e367148bbf7c3fb27a523360016}{\_\_store\_value}( v\_value )
-94         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a08a3969c0310f969954e2b7fdd57a440}{\_\_name}=s\_name
-95         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a3b64ca90cda3d4031e6a637a51c5124e}{\_\_entrywidth}=i\_entrywidth
-96         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a3d346c456ee536a5404a2a9f94a7a341}{\_\_lablewidth}=i\_labelwidth
-97         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a0b4d970d0edce0eb0a7d5fd20c7da5b8}{\_\_labeljustify}=s\_label\_justify
-98         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a4d0dae8b1d43e1804727b3dfe1ba3383}{\_\_entryjustify}=s\_entry\_justify
-99         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a02d9e7225b8a2fb0eda398e68991e0e8}{\_\_isenabled}=b\_is\_enabled
-100         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a27b2ed9e7eeccc56397136ba42ccdaeb}{\_\_associated\_attribute}=s\_associated\_attribute
-101         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a73863067b82206c4f7d307be73ae5cd7}{\_\_associated\_attribute\_object}=o\_associated\_attribute\_object
-102         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_abcbe36760268b6a6f2436527e3b45a77}{\_\_button\_text}=s\_button\_text
-103         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a0a4e9593fba1c3c0defc524ada661261}{\_\_button\_command}=def\_button\_command
-104         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_ab739e0f7c56624637e862d2c1fcf1d7c}{\_\_entry\_change\_command}=def\_entry\_change\_command
-105         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_ad522d9fdeb611fb4854199a952a782d9}{\_\_type\_replaces\_none}=type\_replaces\_none
-106         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a7509de20f07f2afdc2bc5fda8bec6c61}{\_\_subframe\_padding}=i\_subframe\_padding
-107         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_afbe0c687ff602e5d8e9eff5a410e98b4}{\_\_idx\_none\_values}=[]
-108         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a7984dc88ccd5c98089c6b9e13d750f31}{\_\_item\_types}=[]
-109         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a01ff8dc2236ac230d5349d72cc80663e}{\_\_entryvals}=[]
-110         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a712bc54aa2ed3383fc4fe78943ed2ccb}{\_\_label\_name}=self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a08a3969c0310f969954e2b7fdd57a440}{\_\_name} \textcolor{keywordflow}{if} s\_label\_name \textcolor{keywordflow}{is} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} s\_label\_name
-111         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a235e50f36bb184384f5890419a5fbe6b}{\_\_subframe}=\textcolor{keywordtype}{None}
-112         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a9d6430a9f908364c1f00e07b47dcbff5}{\_\_setup}()
-113 
+82             s\_tooltip=\textcolor{stringliteral}{""} ):
+83         
+84         \textcolor{stringliteral}{"""}
+85 \textcolor{stringliteral}{        Param s\_name provides the label text.}
+86 \textcolor{stringliteral}{        Param o\_master is the parent Tkinter object.}
+87 \textcolor{stringliteral}{        Param s\_associated\_attribute is the name of }
+88 \textcolor{stringliteral}{            attribute instance that can be accessed}
+89 \textcolor{stringliteral}{            using "getattr", and that will be}
+90 \textcolor{stringliteral}{            updated when the value is updated.}
+91 \textcolor{stringliteral}{        Param o\_associated\_attribute\_object is the object whose attribute}
+92 \textcolor{stringliteral}{            is to be unpdated when the value is updated.  If}
+93 \textcolor{stringliteral}{            s\_associated\_attribute is not None, and this parameter}
+94 \textcolor{stringliteral}{            is None, the attribute is presumed to be}
+95 \textcolor{stringliteral}{            owned by the o\_master object.}
+96 \textcolor{stringliteral}{        Param i\_entrywidth gives the width of Entry widget(s).}
+97 \textcolor{stringliteral}{        Param i\_labelwidth gives the width the the Label widget.}
+98 \textcolor{stringliteral}{        Param s\_label\_justify gives Label widget "justify" value.}
+99 \textcolor{stringliteral}{        Param s\_entry\_justify gives Entry Widget text "justify" value.}
+100 \textcolor{stringliteral}{        Param s\_butten\_text gives the Button Widget's text value.}
+101 \textcolor{stringliteral}{        Param def\_button\_command gives the def to set to the Button's "command" param.}
+102 \textcolor{stringliteral}{        Param def\_entry\_change\_command gives a def to call when the value of an entry is changed.           
+        }
+103 \textcolor{stringliteral}{              it should be used when an attribute is asssociated with this object,}
+104 \textcolor{stringliteral}{              and so is automatically updated, after wich some other action is required }
+105 \textcolor{stringliteral}{              (ex: Parent PGGuiSimuPop object needs to reconstiture the PGOutputSimuPop object }
+106 \textcolor{stringliteral}{              after this object updates its output basename attribute.}
+107 \textcolor{stringliteral}{        Param type\_replaces\_none: if a value is initially None, and the value is then updated, }
+108 \textcolor{stringliteral}{              this parameter.}
+109 \textcolor{stringliteral}{              gives the type required for a valid value.}
+110 \textcolor{stringliteral}{        Param s\_label\_name, if supplied, replaces s\_name as the text for the label.}
+111 \textcolor{stringliteral}{        Param i\_subframe\_padding gives the padding in pixels of the subframe inside its master frame}
+112 \textcolor{stringliteral}{        Param b\_force\_disable, if True, will cause all Entry objects to be disabled }
+113 \textcolor{stringliteral}{              in the def \_\_make\_entry}
+114 \textcolor{stringliteral}{}
+115 \textcolor{stringliteral}{        """}
+116         \textcolor{comment}{#TCL won't allow uppercase names for windows}
+117         \textcolor{comment}{#(note that we save the name, case in-tact, in}
+118         \textcolor{comment}{#member \_\_name:}
+119         Frame.\_\_init\_\_( self, o\_master, name=s\_name.lower() )
+120         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a59eae02effdbbbb9e3cf3e523639e8a8}{\_\_master}=o\_master
+121         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_abb469e367148bbf7c3fb27a523360016}{\_\_store\_value}( v\_value )
+122         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a08a3969c0310f969954e2b7fdd57a440}{\_\_name}=s\_name
+123         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a3b64ca90cda3d4031e6a637a51c5124e}{\_\_entrywidth}=i\_entrywidth
+124         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a3d346c456ee536a5404a2a9f94a7a341}{\_\_lablewidth}=i\_labelwidth
+125         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a0b4d970d0edce0eb0a7d5fd20c7da5b8}{\_\_labeljustify}=s\_label\_justify
+126         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a4d0dae8b1d43e1804727b3dfe1ba3383}{\_\_entryjustify}=s\_entry\_justify
+127         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a02d9e7225b8a2fb0eda398e68991e0e8}{\_\_isenabled}=b\_is\_enabled
+128         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a27b2ed9e7eeccc56397136ba42ccdaeb}{\_\_associated\_attribute}=s\_associated\_attribute
+129         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a73863067b82206c4f7d307be73ae5cd7}{\_\_associated\_attribute\_object}=o\_associated\_attribute\_object
+130         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_abcbe36760268b6a6f2436527e3b45a77}{\_\_button\_text}=s\_button\_text
+131         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a0a4e9593fba1c3c0defc524ada661261}{\_\_button\_command}=def\_button\_command
+132         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_ab739e0f7c56624637e862d2c1fcf1d7c}{\_\_entry\_change\_command}=def\_entry\_change\_command
+133         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_ad522d9fdeb611fb4854199a952a782d9}{\_\_type\_replaces\_none}=type\_replaces\_none
+134         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a7509de20f07f2afdc2bc5fda8bec6c61}{\_\_subframe\_padding}=i\_subframe\_padding
+135         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a9d31fa82430833c2c2f23e4b28ac95f9}{\_\_validity\_tester}=o\_validity\_tester
+136         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_aecb0c3c8630045b769f6bed4044d658b}{\_\_force\_disable}=b\_force\_disable
+137         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_afbe0c687ff602e5d8e9eff5a410e98b4}{\_\_idx\_none\_values}=[]
+138         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a7984dc88ccd5c98089c6b9e13d750f31}{\_\_item\_types}=[]
+139         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a01ff8dc2236ac230d5349d72cc80663e}{\_\_entryvals}=[]
+140         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a712bc54aa2ed3383fc4fe78943ed2ccb}{\_\_label\_name}=self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a08a3969c0310f969954e2b7fdd57a440}{\_\_name} \textcolor{keywordflow}{if} s\_label\_name \textcolor{keywordflow}{is} \textcolor{keywordtype}{None} \(\backslash\)
+141                                                 \textcolor{keywordflow}{else} s\_label\_name
+142 
+143         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_aec6187c09dbe40b76b4452b25a0a141a}{\_\_tooltip}=self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a712bc54aa2ed3383fc4fe78943ed2ccb}{\_\_label\_name} \textcolor{keywordflow}{if} \(\backslash\)
+144                         s\_tooltip == \textcolor{stringliteral}{""} \textcolor{keywordflow}{else} s\_tooltip
+145 
+146         \textcolor{comment}{#references to the tkinter controls}
+147         \textcolor{comment}{#that may be subject to config}
+148         \textcolor{comment}{#after init:}
+149         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_aca02061228a06555b1089c0f29e76c16}{\_\_entry\_boxes}=[]
+150         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a81a445bf0dde094f7a637862633f326d}{\_\_button\_object}=\textcolor{keywordtype}{None}
+151 
+152         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a235e50f36bb184384f5890419a5fbe6b}{\_\_subframe}=\textcolor{keywordtype}{None}
+153         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a9d6430a9f908364c1f00e07b47dcbff5}{\_\_setup}()
+154 
 \end{DoxyCode}
 
 

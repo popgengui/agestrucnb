@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['tag',['tag',['../classnegui_1_1pgparamset_1_1PGParamSet.html#aef97e7ee992a99258a6bbd7b7bf7c5fe',1,'negui::pgparamset::PGParamSet']]],
-  ['tags',['tags',['../classnegui_1_1pgparamset_1_1PGParamSet.html#a292c23c3d6349027f5c19eec70ea34f8',1,'negui::pgparamset::PGParamSet']]]
+  ['raise_5fexception_5fif_5fnon_5fsingle_5fpop_5ffile',['raise_exception_if_non_single_pop_file',['../namespacenegui_1_1pgdriveneestimator.html#ac98833013f11d6aa3544b0fc60951632',1,'negui::pgdriveneestimator']]],
+  ['remove_5fsimulation_5freplicate_5foutput_5ffiles',['remove_simulation_replicate_output_files',['../namespacenegui_1_1pgutilities.html#aa37c7d125e4eaec2eeea639f53fa140d',1,'negui::pgutilities']]],
+  ['run_5fdriveneestimator_5fin_5fnew_5fprocess',['run_driveneestimator_in_new_process',['../namespacenegui_1_1pgutilities.html#abce749cfc8159cf9aed491a8a1c8dbe3',1,'negui::pgutilities']]],
+  ['runestimator',['runEstimator',['../classnegui_1_1pgguineestimator_1_1PGGuiNeEstimator.html#aa1ee1f0041f2dcce74e3e3ead41c9491',1,'negui::pgguineestimator::PGGuiNeEstimator']]]
 ];

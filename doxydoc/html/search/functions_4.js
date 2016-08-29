@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['gen2genepop',['gen2Genepop',['../classnegui_1_1pgoutputsimupop_1_1PGOutputSimuPop.html#af093f63ef577cb9d9778920ec6589516',1,'negui::pgoutputsimupop::PGOutputSimuPop']]],
-  ['get_5fadd_5fcommand_5fparams_5fand_5fargs',['get_add_command_params_and_args',['../classnegui_1_1pgmenubuilder_1_1PGMenuBuilder.html#a564a7629d3ba8ac1666a6f8a046d82f2',1,'negui::pgmenubuilder::PGMenuBuilder']]],
-  ['get_5fpops_5fin_5ffile_5ftoo_5fsmall_5fto_5frun',['get_pops_in_file_too_small_to_run',['../namespacenegui_1_1pgdriveneestimator.html#a8255cfe046e2bbb517ee9834d626c021',1,'negui::pgdriveneestimator']]],
-  ['get_5fproportion_5fcol_5fnumber',['get_proportion_col_number',['../namespacenegui_1_1indiv.html#ae7fb810142ce304fc6d7c59e8062d1a5',1,'negui::indiv']]],
-  ['getindivcountforpop',['getIndivCountForPop',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#aa32ff63901f23fbbf10bb9f4ddf5898b',1,'negui::genepopfilemanager::GenepopFileManager']]],
-  ['getlifetablevalue',['getLifeTableValue',['../classnegui_1_1pgsimupopresources_1_1PGSimuPopResources.html#a37fa2c7b4da84a2281231943a8e61c6c',1,'negui::pgsimupopresources::PGSimuPopResources']]]
+  ['deliverresults',['deliverResults',['../classnegui_1_1pgopneestimator_1_1PGOpNeEstimator.html#ad20919b3cfce1fae03d64ae2aa19981f',1,'negui::pgopneestimator::PGOpNeEstimator']]],
+  ['dialog_5freturns_5fnothing',['dialog_returns_nothing',['../namespacenegui_1_1pgutilities.html#aa839d4997d2bd2c15016c33cc7fce3b0',1,'negui::pgutilities']]],
+  ['do_5foperation_5foutside',['do_operation_outside',['../namespacenegui_1_1pgutilities.html#afb5f5345fa17095a87638daf969f4ebb',1,'negui::pgutilities']]],
+  ['do_5fpgopsimupop_5freplicate_5ffrom_5ffiles',['do_pgopsimupop_replicate_from_files',['../namespacenegui_1_1pgutilities.html#af3612d8b0b5d45a71109ea49eec4f9b0',1,'negui::pgutilities']]],
+  ['do_5fsample',['do_sample',['../namespacenegui_1_1pgdriveneestimator.html#aa5f7fc02442df628112ba81a98a3691e',1,'negui::pgdriveneestimator']]],
+  ['do_5fusage_5fcheck',['do_usage_check',['../namespacenegui_1_1indiv.html#a8d366fcefa810f96a2cc323b84d6ea75',1,'negui.indiv.do_usage_check()'],['../namespacenegui_1_1pgutilities.html#a20a66168135d35b6713e38b2503f6289',1,'negui.pgutilities.do_usage_check()']]]
 ];

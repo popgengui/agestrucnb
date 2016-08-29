@@ -96,49 +96,91 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:adde18293ea6580b90d1f6c1818ae6ba2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adde18293ea6580b90d1f6c1818ae6ba2"></a>
-def&#160;</td><td class="memItemRight" valign="bottom"><b>mymain</b> (s_glob_for_config_files)</td></tr>
-<tr class="separator:adde18293ea6580b90d1f6c1818ae6ba2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a633f9fe59f5e342abb4e0902629dbfd4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a633f9fe59f5e342abb4e0902629dbfd4"></a>
+def&#160;</td><td class="memItemRight" valign="bottom"><b>cleanup_gui</b> (o_host)</td></tr>
+<tr class="separator:a633f9fe59f5e342abb4e0902629dbfd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2aa2a75db3418b5a53ed437dce9938fb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2aa2a75db3418b5a53ed437dce9938fb"></a>
+def&#160;</td><td class="memItemRight" valign="bottom"><b>ask_before_exit</b> ()</td></tr>
+<tr class="separator:a2aa2a75db3418b5a53ed437dce9938fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a9eeadfc32f46a35f477004db8dfa230d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9eeadfc32f46a35f477004db8dfa230d"></a>
-list&#160;</td><td class="memItemRight" valign="bottom"><b>ls_required_args</b> = []</td></tr>
-<tr class="separator:a9eeadfc32f46a35f477004db8dfa230d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0e9000340ecb28a76174866dbd51c619"><td class="memItemLeft" align="right" valign="top">list&#160;</td><td class="memItemRight" valign="bottom"><b>ls_optional_args</b></td></tr>
+<tr class="memitem:a9b4bed807593f13a45b32cad9ad03302"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9b4bed807593f13a45b32cad9ad03302"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>WINDOW_MARGIN</b> = 0.20</td></tr>
+<tr class="separator:a9b4bed807593f13a45b32cad9ad03302"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a697772153f0161816728f03911a53ed4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a697772153f0161816728f03911a53ed4"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>CONTAINER_PADDING</b> = 10</td></tr>
+<tr class="separator:a697772153f0161816728f03911a53ed4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e9000340ecb28a76174866dbd51c619"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0e9000340ecb28a76174866dbd51c619"></a>
+list&#160;</td><td class="memItemRight" valign="bottom"><b>ls_optional_args</b> = [ &quot;number of processes to use for replicate simulations&quot; ]</td></tr>
 <tr class="separator:a0e9000340ecb28a76174866dbd51c619"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb4e603433342d5dfc482202bc863e62"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adb4e603433342d5dfc482202bc863e62"></a>
-string&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_LIFE_TABLES</b> = &quot;resources/*life.table.info&quot;</td></tr>
-<tr class="separator:adb4e603433342d5dfc482202bc863e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3655412177f9ff140033a529e87bcf06"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3655412177f9ff140033a529e87bcf06"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>s_usage</b> = pgut.do_usage_check( sys.argv, ls_required_args, b_multi_line_msg=True )</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>s_usage</b> = pgut.do_usage_check( sys.argv, [], ls_optional_arg_descriptions=ls_optional_args )</td></tr>
 <tr class="separator:a3655412177f9ff140033a529e87bcf06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e6d18b2d552f77bcd0627b60f3a1c6c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5e6d18b2d552f77bcd0627b60f3a1c6c"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>i_num_args_required</b> = 0</td></tr>
-<tr class="separator:a5e6d18b2d552f77bcd0627b60f3a1c6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62ef721289489002a2d1c1b694beedae"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a62ef721289489002a2d1c1b694beedae"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>i_num_args_optional</b> = 1</td></tr>
-<tr class="separator:a62ef721289489002a2d1c1b694beedae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a375e271f4f4aa817eecda856d62b23b1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a375e271f4f4aa817eecda856d62b23b1"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>s_glob_for_config_files</b> = DEFAULT_LIFE_TABLES</td></tr>
-<tr class="separator:a375e271f4f4aa817eecda856d62b23b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3d503277c8f4b646ff8bc4a88922931"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac3d503277c8f4b646ff8bc4a88922931"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>s_my_mod_path</b> = os.path.abspath( __file__ )</td></tr>
+<tr class="separator:ac3d503277c8f4b646ff8bc4a88922931"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af56cb9927731f0b94f9bf9744ae41e4f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af56cb9927731f0b94f9bf9744ae41e4f"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>s_my_mod_dir</b> = os.path.dirname( s_my_mod_path )</td></tr>
+<tr class="separator:af56cb9927731f0b94f9bf9744ae41e4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab356fd36c69789db2b3bc1a0793d937d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab356fd36c69789db2b3bc1a0793d937d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>i_total_simultaneous_processes</b> = int( sys.argv[1] )</td></tr>
+<tr class="separator:ab356fd36c69789db2b3bc1a0793d937d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebe3cdf18a6fb06977342427f5bdf539"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aebe3cdf18a6fb06977342427f5bdf539"></a>
+string&#160;</td><td class="memItemRight" valign="bottom"><b>s_default_life_tables</b> = s_my_mod_dir+&quot;/resources/*life.table.info&quot;</td></tr>
+<tr class="separator:aebe3cdf18a6fb06977342427f5bdf539"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a633625b34a8aedc24e0f289b5aaeef80"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a633625b34a8aedc24e0f289b5aaeef80"></a>
+string&#160;</td><td class="memItemRight" valign="bottom"><b>s_menu_config</b> = s_my_mod_dir+&quot;/resources/menu_main_interface.txt&quot;</td></tr>
+<tr class="separator:a633625b34a8aedc24e0f289b5aaeef80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41ff694cb0b09aa2ce195c71a5756edf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a41ff694cb0b09aa2ce195c71a5756edf"></a>
+string&#160;</td><td class="memItemRight" valign="bottom"><b>s_param_name_file</b> = s_my_mod_dir+&quot;/resources/simupop.param.names&quot;</td></tr>
+<tr class="separator:a41ff694cb0b09aa2ce195c71a5756edf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c4f72271479ddc1a76da3f12a7b8ae9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2c4f72271479ddc1a76da3f12a7b8ae9"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>o_master</b> = Tk()</td></tr>
+<tr class="separator:a2c4f72271479ddc1a76da3f12a7b8ae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6139fe01ac7f460563e2bf187daf3581"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6139fe01ac7f460563e2bf187daf3581"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>i_width</b> = o_master.winfo_screenwidth()</td></tr>
+<tr class="separator:a6139fe01ac7f460563e2bf187daf3581"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a100009f5c5614a0af046d1fa5198292c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a100009f5c5614a0af046d1fa5198292c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>i_height</b> = o_master.winfo_screenheight()</td></tr>
+<tr class="separator:a100009f5c5614a0af046d1fa5198292c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58c17801bb71fab5e1065a571592b80c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a58c17801bb71fab5e1065a571592b80c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>i_geo_width</b> = int( ( i_width/2 ) * ( 1 - WINDOW_MARGIN ) )</td></tr>
+<tr class="separator:a58c17801bb71fab5e1065a571592b80c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3112d1686c284df2d10c0f77c5dc5cbe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3112d1686c284df2d10c0f77c5dc5cbe"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>i_geo_height</b> = int( ( i_height/2 ) * ( 1 - WINDOW_MARGIN ) )</td></tr>
+<tr class="separator:a3112d1686c284df2d10c0f77c5dc5cbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad01236b6cf0c010c914df1d7ee1c96a1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><b>o_host</b></td></tr>
+<tr class="separator:ad01236b6cf0c010c914df1d7ee1c96a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1891ae87fc34f0a97c0a376c1fd7ab36"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1891ae87fc34f0a97c0a376c1fd7ab36"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>row</b></td></tr>
+<tr class="separator:a1891ae87fc34f0a97c0a376c1fd7ab36"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebca42043260f0b71ddc51fafff5b74d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aebca42043260f0b71ddc51fafff5b74d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>weight</b></td></tr>
+<tr class="separator:aebca42043260f0b71ddc51fafff5b74d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98244dd0790e996e2c692c294289f11d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a98244dd0790e996e2c692c294289f11d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>column</b></td></tr>
+<tr class="separator:a98244dd0790e996e2c692c294289f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ce52a3e7a52079e56727952c374fb22"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1ce52a3e7a52079e56727952c374fb22"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>sticky</b></td></tr>
+<tr class="separator:a1ce52a3e7a52079e56727952c374fb22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">Description
 
 Provisional driver for the negui program
 </pre> </div><h2 class="groupheader">Variable Documentation</h2>
-<a class="anchor" id="a0e9000340ecb28a76174866dbd51c619"></a>
+<a class="anchor" id="ad01236b6cf0c010c914df1d7ee1c96a1"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">list negui.negui.ls_optional_args</td>
+          <td class="memname">negui.negui.o_host</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno"><a class="line" href="namespacenegui_1_1negui.html">    1</a></span>&#160;= [ <span class="stringliteral">&quot;optional, quoted glob expression to fetch life table files &quot;</span> \</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;            + <span class="stringliteral">&quot;associated with your organism(s), &quot;</span> \</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;            + <span class="stringliteral">&quot;Default is \&quot;resources/*life.table.info\&quot;&quot;</span> ]</div></div><!-- fragment -->
-<p>Definition at line <a class="el" href="negui_8py_source.html#l00088">88</a> of file <a class="el" href="negui_8py_source.html">negui.py</a>.</p>
+<b>Initial value:</b><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno"><a class="line" href="namespacenegui_1_1negui.html">    1</a></span>&#160;= pgn.PGHostNotebook( o_master, </div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;            s_menu_config, </div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;            s_param_name_file, </div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;            s_glob_life_tables=s_default_life_tables,</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;            i_max_process_total=i_total_simultaneous_processes )</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="negui_8py_source.html#l00072">72</a> of file <a class="el" href="negui_8py_source.html">negui.py</a>.</p>
 
 </div>
 </div>

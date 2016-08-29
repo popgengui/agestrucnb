@@ -2,12 +2,14 @@ var searchData=
 [
   ['apgoperation',['apgoperation',['../namespacenegui_1_1apgoperation.html',1,'negui']]],
   ['createtooltip',['createtooltip',['../namespacenegui_1_1createtooltip.html',1,'negui']]],
+  ['do_5fsim_5freplicate',['do_sim_replicate',['../namespacenegui_1_1do__sim__replicate.html',1,'negui']]],
   ['genepopfilemanager',['genepopfilemanager',['../namespacenegui_1_1genepopfilemanager.html',1,'negui']]],
   ['genepopfilesampler',['genepopfilesampler',['../namespacenegui_1_1genepopfilesampler.html',1,'negui']]],
   ['indiv',['indiv',['../namespacenegui_1_1indiv.html',1,'negui']]],
   ['negui',['negui',['../namespacenegui_1_1negui.html',1,'negui']]],
   ['pgdriveneestimator',['pgdriveneestimator',['../namespacenegui_1_1pgdriveneestimator.html',1,'negui']]],
   ['pgguiapp',['pgguiapp',['../namespacenegui_1_1pgguiapp.html',1,'negui']]],
+  ['pgguineestimator',['pgguineestimator',['../namespacenegui_1_1pgguineestimator.html',1,'negui']]],
   ['pgguisimupop',['pgguisimupop',['../namespacenegui_1_1pgguisimupop.html',1,'negui']]],
   ['pgguiutilities',['pgguiutilities',['../namespacenegui_1_1pgguiutilities.html',1,'negui']]],
   ['pghostnotebook',['pghostnotebook',['../namespacenegui_1_1pghostnotebook.html',1,'negui']]],
@@ -21,5 +23,6 @@ var searchData=
   ['pgparamset',['pgparamset',['../namespacenegui_1_1pgparamset.html',1,'negui']]],
   ['pgsimupopresources',['pgsimupopresources',['../namespacenegui_1_1pgsimupopresources.html',1,'negui']]],
   ['pgutilities',['pgutilities',['../namespacenegui_1_1pgutilities.html',1,'negui']]],
-  ['pgutilityclasses',['pgutilityclasses',['../namespacenegui_1_1pgutilityclasses.html',1,'negui']]]
+  ['pgutilityclasses',['pgutilityclasses',['../namespacenegui_1_1pgutilityclasses.html',1,'negui']]],
+  ['temp',['temp',['../namespacenegui_1_1temp.html',1,'negui']]]
 ];

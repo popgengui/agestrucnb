@@ -101,6 +101,12 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
+<tr class="memitem:a713e3c49323a10efdf84414a10af9f9e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a713e3c49323a10efdf84414a10af9f9e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>NE_GUI_IS_IMPLEMENTED</b> = True</td></tr>
+<tr class="separator:a713e3c49323a10efdf84414a10af9f9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a047e31164346351c4093c0192244c081"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a047e31164346351c4093c0192244c081"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>VERBOSE</b> = False</td></tr>
+<tr class="separator:a047e31164346351c4093c0192244c081"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55d2191bb5b0ad01afd889f86f3a40cd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a55d2191bb5b0ad01afd889f86f3a40cd"></a>
 float&#160;</td><td class="memItemRight" valign="bottom"><b>WINDOW_MARGIN</b> = 0.20</td></tr>
 <tr class="separator:a55d2191bb5b0ad01afd889f86f3a40cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -119,9 +125,6 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>s_menu_config</b> =
 <tr class="memitem:ac50c371dc355daca2be8c0c69bd5a8a1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac50c371dc355daca2be8c0c69bd5a8a1"></a>
 string&#160;</td><td class="memItemRight" valign="bottom"><b>s_param_name_file</b> = &quot;resources/simupop.param.names&quot;</td></tr>
 <tr class="separator:ac50c371dc355daca2be8c0c69bd5a8a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a441515e865818dcb1e4dad534fd174e8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a441515e865818dcb1e4dad534fd174e8"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>i_use_this_many_procs</b> = 10</td></tr>
-<tr class="separator:a441515e865818dcb1e4dad534fd174e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87f3638cc6a59f9037d9f965f0f37538"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a87f3638cc6a59f9037d9f965f0f37538"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>o_master</b> = Tk()</td></tr>
 <tr class="separator:a87f3638cc6a59f9037d9f965f0f37538"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -131,11 +134,17 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>i_use_this_many_procs<
 <tr class="memitem:abfedf6f0e0f6f989eba30fd49babff1d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abfedf6f0e0f6f989eba30fd49babff1d"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>i_height</b> = o_master.winfo_screenheight()</td></tr>
 <tr class="separator:abfedf6f0e0f6f989eba30fd49babff1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ab5731364fab355fcdac3a12527a46a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5ab5731364fab355fcdac3a12527a46a"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>f_width_proportion</b> = 0.75</td></tr>
+<tr class="separator:a5ab5731364fab355fcdac3a12527a46a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adee69321e2e8b3e63c9d030880748c79"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adee69321e2e8b3e63c9d030880748c79"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>f_height_proportion</b> = 0.5</td></tr>
+<tr class="separator:adee69321e2e8b3e63c9d030880748c79"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a999255d83a1b5a0fa4eb9637eed7a597"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a999255d83a1b5a0fa4eb9637eed7a597"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>i_geo_width</b> = int( ( i_width/2 ) * ( 1 - WINDOW_MARGIN ) )</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>i_geo_width</b> = int( ( i_width * f_width_proportion ) * ( 1 - WINDOW_MARGIN ) )</td></tr>
 <tr class="separator:a999255d83a1b5a0fa4eb9637eed7a597"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f20501fe15d8b5209094a4faea61d0c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3f20501fe15d8b5209094a4faea61d0c"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>i_geo_height</b> = int( ( i_height/2 ) * ( 1 - WINDOW_MARGIN ) )</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>i_geo_height</b> = int( ( i_height * f_height_proportion ) * ( 1 - WINDOW_MARGIN ) )</td></tr>
 <tr class="separator:a3f20501fe15d8b5209094a4faea61d0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90452a51dfebcdcd89ed5eccb9094fe7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><b>o_host</b></td></tr>
 <tr class="separator:a90452a51dfebcdcd89ed5eccb9094fe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,9 +177,9 @@ or ne estimations
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno"><a class="line" href="namespacenegui_1_1pghostnotebook.html">    1</a></span>&#160;= <a class="code" href="classnegui_1_1pghostnotebook_1_1PGHostNotebook.html">PGHostNotebook</a>( o_master, </div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;            s_menu_config, </div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;            s_param_name_file, </div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;            s_glob_life_tables=DEFAULT_LIFE_TABLES,</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;            i_max_process_total=i_use_this_many_procs )</div><div class="ttc" id="classnegui_1_1pghostnotebook_1_1PGHostNotebook_html"><div class="ttname"><a href="classnegui_1_1pghostnotebook_1_1PGHostNotebook.html">negui.pghostnotebook.PGHostNotebook</a></div><div class="ttdef"><b>Definition:</b> <a href="pghostnotebook_8py_source.html#l00025">pghostnotebook.py:25</a></div></div>
+<b>Initial value:</b><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno"><a class="line" href="namespacenegui_1_1pghostnotebook.html">    1</a></span>&#160;= <a class="code" href="classnegui_1_1pghostnotebook_1_1PGHostNotebook.html">PGHostNotebook</a>( o_master, </div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;            s_menu_config, </div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;            s_param_name_file, </div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;            s_glob_life_tables=DEFAULT_LIFE_TABLES,</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;            i_max_process_total=i_use_this_many_procs )</div><div class="ttc" id="classnegui_1_1pghostnotebook_1_1PGHostNotebook_html"><div class="ttname"><a href="classnegui_1_1pghostnotebook_1_1PGHostNotebook.html">negui.pghostnotebook.PGHostNotebook</a></div><div class="ttdef"><b>Definition:</b> <a href="pghostnotebook_8py_source.html#l00035">pghostnotebook.py:35</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="pghostnotebook_8py_source.html#l00124">124</a> of file <a class="el" href="pghostnotebook_8py_source.html">pghostnotebook.py</a>.</p>
+<p>Definition at line <a class="el" href="pghostnotebook_8py_source.html#l00245">245</a> of file <a class="el" href="pghostnotebook_8py_source.html">pghostnotebook.py</a>.</p>
 
 </div>
 </div>

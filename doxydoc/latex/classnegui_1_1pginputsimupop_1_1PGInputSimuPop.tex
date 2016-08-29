@@ -149,7 +149,7 @@ changes in parameter values for users before they run the simulation.
 \end{DoxyVerb}
  
 
-Definition at line 15 of file pginputsimupop.\+py.
+Definition at line 18 of file pginputsimupop.\+py.
 
 
 
@@ -185,50 +185,50 @@ param o_param_names, object ot type PGParamSet,
 \end{DoxyVerb}
  
 
-Definition at line 25 of file pginputsimupop.\+py.
+Definition at line 28 of file pginputsimupop.\+py.
 
 
 \begin{DoxyCode}
-25     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a1452a83a005c9d30e778b34ae67a399f}{\_\_init\_\_}( self, s\_config\_file = None, o\_model\_resources = None, o\_param\_names=None ):
-26         \textcolor{stringliteral}{'''}
-27 \textcolor{stringliteral}{        param s\_config\_file, parseable by ConfigParser, params for }
-28 \textcolor{stringliteral}{            running simuPop, or references into the resources}
-29 \textcolor{stringliteral}{            object.  Note that this config file must have a}
-30 \textcolor{stringliteral}{            section called "model" with a "name" option, which}
-31 \textcolor{stringliteral}{            should match a name key in the PGModelResources objects}
-32 \textcolor{stringliteral}{            dictionary.}
-33 \textcolor{stringliteral}{}
-34 \textcolor{stringliteral}{        param o\_model\_resources, object of type PGModelResources,}
-35 \textcolor{stringliteral}{            whose member dictionary has the sub-dictionaries}
-36 \textcolor{stringliteral}{            that have the param values not given in the config file,}
-37 \textcolor{stringliteral}{            such as fecundity and reproductive values, and exposed}
-38 \textcolor{stringliteral}{            via calls to is getValue def.}
-39 \textcolor{stringliteral}{}
-40 \textcolor{stringliteral}{        param o\_param\_names, object ot type PGParamSet,}
-41 \textcolor{stringliteral}{            that gives a shortname (attribute name)}
-42 \textcolor{stringliteral}{            and a longname (readable text), for each }
-43 \textcolor{stringliteral}{            param in the simpupop configuration attribute }
-44 \textcolor{stringliteral}{            list}
-45 \textcolor{stringliteral}{        '''}
-46 
-47         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af6628ecaa63a594fc96d1b9273fd1fd6}{\_\_config\_parser}=\textcolor{keywordtype}{None}
-48         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a6c00be5e58b61b239273e04c671cd9e8}{\_\_resources}=o\_model\_resources
-49         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0a737393cb4d1c66062f9403296c7f19}{\_\_param\_names}=o\_param\_names
-50 
-51         \textcolor{comment}{#for writing current param values to a new config file,}
-52         \textcolor{comment}{#and updated as attributes are created either by reading}
-53         \textcolor{comment}{#in the orig config file in def get\_config, or by adding the parameter}
-54         \textcolor{comment}{#in def addParameter:}
-55         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a893ab501191e9e1ed89f4f878310d97b}{\_\_config\_file\_option\_name\_by\_attribute\_name}=\{\}      
-56         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_acd9740f17e53a6e471d4e85565962369}{\_\_config\_file\_section\_name\_by\_attribute\_name}=\{\}
-57 
-58         \textcolor{keywordflow}{if} s\_config\_file \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-59             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ad7c3feef55c16989a35f56c3e0d9943e}{\_\_full\_config\_file\_name}=s\_config\_file
-60             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af82bde7e564aee524fc30f2e06fde934}{config\_file}=os.path.basename( s\_config\_file )
-61             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0b34c99730e86de268c5503ed226d15e}{\_\_make\_config\_parser}( s\_config\_file )
-62         \textcolor{comment}{#end if we have a conf file}
-63 
-64         \textcolor{keywordflow}{return}
+28     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a1452a83a005c9d30e778b34ae67a399f}{\_\_init\_\_}( self, s\_config\_file = None, o\_model\_resources = None, o\_param\_names=None ):
+29         \textcolor{stringliteral}{'''}
+30 \textcolor{stringliteral}{        param s\_config\_file, parseable by ConfigParser, params for }
+31 \textcolor{stringliteral}{            running simuPop, or references into the resources}
+32 \textcolor{stringliteral}{            object.  Note that this config file must have a}
+33 \textcolor{stringliteral}{            section called "model" with a "name" option, which}
+34 \textcolor{stringliteral}{            should match a name key in the PGModelResources objects}
+35 \textcolor{stringliteral}{            dictionary.}
+36 \textcolor{stringliteral}{}
+37 \textcolor{stringliteral}{        param o\_model\_resources, object of type PGModelResources,}
+38 \textcolor{stringliteral}{            whose member dictionary has the sub-dictionaries}
+39 \textcolor{stringliteral}{            that have the param values not given in the config file,}
+40 \textcolor{stringliteral}{            such as fecundity and reproductive values, and exposed}
+41 \textcolor{stringliteral}{            via calls to is getValue def.}
+42 \textcolor{stringliteral}{}
+43 \textcolor{stringliteral}{        param o\_param\_names, object ot type PGParamSet,}
+44 \textcolor{stringliteral}{            that gives a shortname (attribute name)}
+45 \textcolor{stringliteral}{            and a longname (readable text), for each }
+46 \textcolor{stringliteral}{            param in the simpupop configuration attribute }
+47 \textcolor{stringliteral}{            list}
+48 \textcolor{stringliteral}{        '''}
+49 
+50         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af6628ecaa63a594fc96d1b9273fd1fd6}{\_\_config\_parser}=\textcolor{keywordtype}{None}
+51         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a6c00be5e58b61b239273e04c671cd9e8}{\_\_resources}=o\_model\_resources
+52         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0a737393cb4d1c66062f9403296c7f19}{\_\_param\_names}=o\_param\_names
+53 
+54         \textcolor{comment}{#for writing current param values to a new config file,}
+55         \textcolor{comment}{#and updated as attributes are created either by reading}
+56         \textcolor{comment}{#in the orig config file in def get\_config, or by adding the parameter}
+57         \textcolor{comment}{#in def addParameter:}
+58         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a893ab501191e9e1ed89f4f878310d97b}{\_\_config\_file\_option\_name\_by\_attribute\_name}=\{\}      
+59         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_acd9740f17e53a6e471d4e85565962369}{\_\_config\_file\_section\_name\_by\_attribute\_name}=\{\}
+60 
+61         \textcolor{keywordflow}{if} s\_config\_file \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+62             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ad7c3feef55c16989a35f56c3e0d9943e}{\_\_full\_config\_file\_name}=s\_config\_file
+63             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af82bde7e564aee524fc30f2e06fde934}{config\_file}=os.path.basename( s\_config\_file )
+64             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0b34c99730e86de268c5503ed226d15e}{\_\_make\_config\_parser}( s\_config\_file )
+65         \textcolor{comment}{#end if we have a conf file}
+66 
+67         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 
@@ -254,25 +254,25 @@ from the option name that gives the value.
 \end{DoxyVerb}
  
 
-Definition at line 311 of file pginputsimupop.\+py.
+Definition at line 314 of file pginputsimupop.\+py.
 
 
 \begin{DoxyCode}
-311             s\_config\_file\_section\_name ):
-312         \textcolor{stringliteral}{'''}
-313 \textcolor{stringliteral}{        If user wants to add a parameter not in the current set of params as read}
-314 \textcolor{stringliteral}{        in from the config file source of this instance, this def will both add the }
-315 \textcolor{stringliteral}{        param and value, plus update the member dictionaries that facilitate}
-316 \textcolor{stringliteral}{        writing a new config file that includes this parameter.  Note that the}
-317 \textcolor{stringliteral}{        arg s\_config\_file\_option\_name is necessitated by Tiago's standards in }
-318 \textcolor{stringliteral}{        his config files, as he often uses an attribute name different}
-319 \textcolor{stringliteral}{        from the option name that gives the value.}
-320 \textcolor{stringliteral}{        '''}
-321         setattr( self, s\_attribute\_name, v\_attribute\_value )
-322         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a27abd811d6b6108a9593372c3b0c7881}{\_\_update\_attribute\_config\_file\_info}( s\_attribute\_name, 
+314             s\_config\_file\_section\_name ):
+315         \textcolor{stringliteral}{'''}
+316 \textcolor{stringliteral}{        If user wants to add a parameter not in the current set of params as read}
+317 \textcolor{stringliteral}{        in from the config file source of this instance, this def will both add the }
+318 \textcolor{stringliteral}{        param and value, plus update the member dictionaries that facilitate}
+319 \textcolor{stringliteral}{        writing a new config file that includes this parameter.  Note that the}
+320 \textcolor{stringliteral}{        arg s\_config\_file\_option\_name is necessitated by Tiago's standards in }
+321 \textcolor{stringliteral}{        his config files, as he often uses an attribute name different}
+322 \textcolor{stringliteral}{        from the option name that gives the value.}
+323 \textcolor{stringliteral}{        '''}
+324         setattr( self, s\_attribute\_name, v\_attribute\_value )
+325         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a27abd811d6b6108a9593372c3b0c7881}{\_\_update\_attribute\_config\_file\_info}( s\_attribute\_name, 
       s\_config\_file\_section\_name, 
-323                 s\_config\_file\_option\_name )
-324         \textcolor{keywordflow}{return}
+326                 s\_config\_file\_option\_name )
+327         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 

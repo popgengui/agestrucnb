@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['original_5ffile_5fname',['original_file_name',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#abec8e261bad014e6488162ec43e63ef7',1,'negui::genepopfilemanager::GenepopFileManager']]]
+  ['master',['master',['../classnegui_1_1pgguiapp_1_1PGGuiApp.html#a0af5ea1a1b6d1565002150d7b53efbdc',1,'negui::pgguiapp::PGGuiApp']]],
+  ['menu',['menu',['../classnegui_1_1pgmenubuilder_1_1PGMenuBuilder.html#ae45f68f11cc8fa8c39d8b93a15238c83',1,'negui::pgmenubuilder::PGMenuBuilder']]],
+  ['mymain',['mymain',['../namespacenegui_1_1pgdriveneestimator.html#a9195d73a2642b87625772820ffff8023',1,'negui::pgdriveneestimator']]]
 ];

@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['tag',['tag',['../classnegui_1_1pgparamset_1_1PGParamSet.html#aef97e7ee992a99258a6bbd7b7bf7c5fe',1,'negui::pgparamset::PGParamSet']]],
-  ['tags',['tags',['../classnegui_1_1pgparamset_1_1PGParamSet.html#a292c23c3d6349027f5c19eec70ea34f8',1,'negui::pgparamset::PGParamSet']]]
+  ['subsampleindividualsleaventhoutfrompop',['subsampleIndividualsLeaveNthOutFromPop',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#afb85a943b15c9a259510cc7f61b085b3',1,'negui::genepopfilemanager::GenepopFileManager']]],
+  ['subsampleindividualsrandomlybyproportion',['subsampleIndividualsRandomlyByProportion',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#a5c85ac4838fd6919be1c408bcd39f54e',1,'negui::genepopfilemanager::GenepopFileManager']]],
+  ['subsamplenindividualsrandomlyfromeachpop',['subsampleNIndividualsRandomlyFromEachPop',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#affaeb9457d84736dc1f289d600808f56',1,'negui::genepopfilemanager::GenepopFileManager']]]
 ];
