@@ -31,15 +31,15 @@ life_table_glob	Life Table File(s)	Configuration Info;1;1;1;"none";None;None;Non
 dataDir	Data Directory	suppress;0;0;1;0;None;None;None;""
 #suppressing the negative binomial switch as of 2016_08_24, as it is actually
 #a param treated as an internal flag, and depends solely on absense/presence of gamma lists (see below)
-doNegBinom	Use Negative Binomial	suppress;4;1;1;False;Use Negative Binomial
+doNegBinom	Use Negative Binomial	suppress;4;1;1;False;None;None;None;Use Negative Binomial
 fecundityFemale	Female Fecundity	Population;2;1;1;[];None;None;None;Female Fecundity
 fecundityMale	Male Fecundity	Population;2;1;1;[];None;None;None;Male Fecundity
 forceSkip	Force Skip	Population;2;1;1;[];None;None;None;Force Skip
 gens	Reproductive Cycles	Population;2;1;1;1;None;None;None;Reproductive Cycles
 isMonog	Monogamous	Population;2;1;1;False;None;None;None;Monogamous
 lbd	Lambda	Simulation;4;1;1;1.0;None;None;None;Lambda
-litter	Litter size probability	Population;2;1;1;0.0;None;None;None;Litter size probability
-maleProb	Probability Male Birth	Population;2;1;1;Probability male birth
+litter	Litter size probability	Population;2;1;1;0.0;Float;None;None;Litter size probability
+maleProb	Probability Male Birth	Population;2;1;1;0.5;Float;0;1;Probability male birth
 model_name	Model	Configuration Info;1;1;1;none;None;None;None;Model name
 numSNPs	Number of SNPs	Genome;3;1;1;0;None;None;None;Number of SNPs
 mutFreq	Mutation Frequency	Genome;3;1;1;0;None;None;None;Mutation Frequency

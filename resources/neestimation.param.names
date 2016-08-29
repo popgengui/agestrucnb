@@ -5,16 +5,21 @@
 #	2.  Name used for the label in the interface
 #	3.  Formatting and default value fields, semi-colon-delimited
 #	    ( many fields currently (20160820) not used).  Field types:
-#		i.  IDX_TAG_FIELD_CONFIG_SECTION=0
-#		ii. IDX_TAG_FIELD_PLACEMENT_ORDER=1
-#		iii.IDX_TAG_FIELD_COLUMN_NUMBER=2
-#		iv. IDX_TAG_FIELD_PARAM_ORDER=3
-#		v.  IDX_TAG_FIELD_DEFAULT_VALUE=4
-#		v1. IDX_TAG_FIELD_TOOL_TIP=4
-sampscheme	Subsampling scheme	Parameters;1;1;1;"percent";None;None;None;Subsampling scheme
+#		i.   IDX_TAG_FIELD_CONFIG_SECTION=0
+#		ii.  IDX_TAG_FIELD_PLACEMENT_ORDER=1
+#		iii. IDX_TAG_FIELD_COLUMN_NUMBER=2
+#		iv.  IDX_TAG_FIELD_PARAM_ORDER=3
+#		v.   IDX_TAG_FIELD_DEFAULT_VALUE=4
+#		vi.  IDX_TAG_FIELD_PARAM_TYPE=5
+#		vii. IDX_TAG_FIELD_MIN_VALUE=6
+#		viii.IDX_TAG_FIELD_MAX_VALUE=7
+#		viv. IDX_TAG_FIELD_TOOL_TIP=8
+sampscheme	Subsampling scheme	suppress;1;1;1;"percent";None;None;None;Subsampling scheme
 sampparam	Subsampling parameter values	Parameters;1;1;1;[100];None;None;None;Subsampling parameter values
 minpopsize	Minimum Population Size	Parameters;1;1;1;1;None;None;None;Minimum population size
 minallelefreq	Minimum Allele Frequency	Parameters;1;1;1;0.01;None;None;None;Minimum allele frequency
-replicates	Replicates	Parameters;1;1;1;1;None;None;None;Replicates
+#for current use, no subsampling is done, therefore no replicate NeEstimator runs
+#would be of use
+replicates	Replicates	suppress;1;1;1;1;None;None;None;Replicates
 processes	Number of Processes	Parameters;1;1;1;1;None;None;None;Processes
-runmode	Run Mode	Parameters;1;1;1;"default";None;None;None;Run mode
+runmode	Run Mode	suppress;1;1;1;"default";None;None;None;Run mode

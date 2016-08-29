@@ -13,6 +13,8 @@ DO_PUDB=False
 
 INIT_ENTRY_CONFIG_FILE=()
 
+SIM_RUNNING_MSG="Simulation in progress"
+
 if DO_PUDB:
 	from pudb import set_trace; set_trace()
 #end if debug
@@ -161,6 +163,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#immediately
 		self.__setup_output()
 
+
+
 		self.__simulation_is_in_progress=False
 
 		self.__total_processes_for_sims=i_total_processes_for_sims
@@ -173,6 +177,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		self.__category_frames=None
 
+		self.__run_state_message=""
 		self.__init_interface()
 		self.__set_controls_by_run_state( self.__get_run_state() )
 	
@@ -180,7 +185,20 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end __init__
 
 			
-	def __init_interface( self ):
+	def __init_interface( self, b_force_disable = False ):
+		'''
+		param b_force_disable, if set to true,
+			will set all the KeyValueFrame text entry
+			boxes do state "disabled."  This is useful
+			to show user when the interface is busy
+			computing a simulation, and keeps user
+			from editing values when the sim is 
+			being run (though, besides any user
+			misperceptions, such editign would not
+			affect the current sim, but rather would
+			be applied to any subsequent run.)
+
+		'''
 		
 		ENTRY_WIDTH=50
 		LABEL_WIDTH=20
@@ -196,9 +214,23 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		i_row=0
 
-		self.__run_button=Button( o_file_locations_subframe, command=self.__on_click_run_or_cancel_simulation_button )
-		
+		o_run_sub_subframe=Frame( o_file_locations_subframe )
+
+
+
+#		self.__run_button=Button( o_file_locations_subframe, command=self.__on_click_run_or_cancel_simulation_button )
+		self.__run_button=Button( o_run_sub_subframe, command=self.__on_click_run_or_cancel_simulation_button )
+#		
+#		self.__run_button.grid( row=i_row, sticky=( NW )	)
 		self.__run_button.grid( row=i_row, sticky=( NW )	)
+#
+#		self.__run_state_label=Label( o_file_locations_subframe, text=self.__run_state_message )
+		self.__run_state_label=Label( o_run_sub_subframe, text=self.__run_state_message )
+#
+#		self.__run_state_label.grid( row=i_row, column=2, sticky=( NW ) )
+		self.__run_state_label.grid( row=i_row, column=2, sticky=( SW ) )
+
+		o_run_sub_subframe.grid( row=i_row, sticky=( NW ) )
 
 		i_row += 1
 		
@@ -215,7 +247,9 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 						s_entry_justify='left',
 						s_label_justify='left',
 						s_button_text="Select",
-						def_button_command=self.load_config_file )
+						def_button_command=self.load_config_file,
+						b_force_disable=b_force_disable )
+
 		o_config_kv.grid( row=i_row, sticky=( NW ) )
 
 		i_row+=1
@@ -229,7 +263,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					s_entry_justify='left',
 					s_label_justify='left', 
 					s_button_text="Select",
-					def_button_command=self.select_output_directory )
+					def_button_command=self.select_output_directory,
+					b_force_disable=b_force_disable )
 
 		o_outdir_kv.grid( row= i_row, sticky=( NW ) )
 
@@ -249,7 +284,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					i_labelwidth=LABEL_WIDTH,
 					s_entry_justify='left',
 					s_label_justify='left',
-					o_validity_tester=o_basename_validity_tester ) 
+					o_validity_tester=o_basename_validity_tester,
+					b_force_disable=b_force_disable ) 
 
 		self.__outbase_kv.grid( row=i_row, sticky=( NW ) )
 
@@ -346,13 +382,18 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end __place_category_frames
 			
 
-	def __load_values_into_interface( self ):
+	def __load_values_into_interface( self, b_force_disable=False ):
 		'''
 		in isolating the attributes
 		that are strictly model params
 		(and not defs or other non-param 
 		attributes) I found help at:
 		http://stackoverflow.com/questions/9058305/getting-attributes-of-a-class
+
+		param b_force_disable, if True, will, for each entry box or radio button
+		created by KeyValFrame or KeyCategoricalValueFrame,  override the defalut 
+		enabled/disabled state (as set by their attribute "isenabled", so that 
+		all are disabled.
 		'''
 		MAXLABELLEN=200
 		WIDTHSMALL=21
@@ -391,6 +432,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			i_row+=1
 			s_longname=None
 			s_nametag=None
+			s_tooltip=""
 			i_len_labelname=None
 
 			o_def_to_run_on_value_change=None
@@ -420,6 +462,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#as given by s_param
 				s_longname=o_input.param_names.longname( s_param )
 				s_nametag=o_input.param_names.tag( s_param )
+				s_tooltip=o_input.param_names.getToolTipForParam( s_param )
 				s_section_name= \
 						o_input.param_names.getConfigSectionNameFromTag( s_nametag )
 			#end if we have a set of param names
@@ -465,7 +508,9 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							s_label_name=s_longname,
 							i_entrywidth = i_entry_width,
 							s_entry_justify=s_entry_justify,
-							b_is_enabled=b_allow_entry_change )
+							b_is_enabled=b_allow_entry_change,
+							b_force_disable=b_force_disable,
+							s_tooltip=s_tooltip )
 						
 				else:
 
@@ -489,7 +534,9 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							i_labelwidth=i_width_labelname,
 							s_label_name=s_longname,
 							b_buttons_in_a_row = True,
-							b_is_enabled=b_allow_entry_change)
+							b_is_enabled=b_allow_entry_change,
+							b_force_disable=b_force_disable,
+							s_tooltip=s_tooltip )
 
 				o_kv.grid( row=i_row, sticky=(NW) )
 			#end if param has non-boolean value else boolean
@@ -608,7 +655,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		return s_msg	
 	#end __validate_output_base_name
 
-
 	def __test_value( self, v_keyval_frame_value_update=None ):
 		'''
 		for debugging
@@ -630,7 +676,28 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		return
 	#end __make_op
 
+	def __update_run_state_message( self ):
+		MAX_DOTS=10
+
+		if self.__run_state_message != "":
+			i_len_msg=len( self.__run_state_message )
+			
+			i_len_dots_stripped=len ( \
+					self.__run_state_message.rstrip( "." ) )
+
+			i_curr_num_dots=i_len_msg - i_len_dots_stripped
+
+			if i_curr_num_dots >= MAX_DOTS:
+				self.__run_state_message = \
+						self.__run_state_message.rstrip( "." ) + "."
+			else:
+				self.__run_state_message += "."
+			#end if max dots reached or exceeded, else not
+		return
+	#end __update_run_state_message
+
 	def __get_default_output_base_name( self ):
+
 		'''
 		Compacting default name, as of 2016_08_11,
 		need to make sure the output base name is
@@ -654,6 +721,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#endif very verbose, print
 
 				self.__simulation_is_in_progress = True
+				self.__update_run_state_message()
+				self.__run_state_label.configure( text=self.__run_state_message  )
 				self.after( 500, self.__check_progress_operation_process )
 			else:
 				if VERY_VERBOSE:
@@ -675,6 +744,9 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#process and its corresponding event to None:
 				self.__op_process=None
 				self.__sim_multi_process_event=None
+				self.__run_state_message=""
+				self.__init_interface( b_force_disable=False )
+				self.__load_values_into_interface( b_force_disable=False )
 
 				if VERY_VERBOSE:
 					print ( "removing temporary config file" )
@@ -692,6 +764,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#endif very verbose, pring
 
 			self.__simulation_is_in_progress = False
+			self.__run_state_message=""
+			self.__init_interface( b_force_disable=False )
+			self.__load_values_into_interface( b_force_disable=False )
+
 			self.__set_controls_by_run_state( self.__get_run_state() )
 
 		#end if process not None else None
@@ -761,33 +837,14 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#end if input and output are not None else one or both 
 	#end __get_run_state
 
-	def __enable_or_disable_category_frames( self, b_do_enable ):
-		'''
-		As of Mon Jun 27 12:22:26 MDT 2016, not implemented.  I
-		think I'll have to go into each subframe, and for each
-		go into each KeyValueFrame child, and finally, disable its
-		entry box(??)
-		'''
-		if self.__category_frames is not None:
-			for o_frame in self.__category_frames.values():
-				#o_frame.config( visible= b_do_enable )
-				pass
-			#end for each frame
-		#end if frames exist
-		return
-	#end __enable_or_disable_category_frames
-
 	def __set_controls_by_run_state( self, i_run_state ):
 
 		if i_run_state==PGGuiSimuPop.RUN_NOT_READY:
 			self.__run_button.config( text="Run Simulation", state="disabled" ) 
-			self.__enable_or_disable_category_frames( b_do_enable=False )
 		elif i_run_state==PGGuiSimuPop.RUN_READY:
 			self.__run_button.config( text="Run Simulation", state="enabled" )
-			self.__enable_or_disable_category_frames( b_do_enable=True )
 		elif i_run_state==PGGuiSimuPop.RUN_IN_PROGRESS:
 			self.__run_button.config( text="Cancel Simulation", state="enabled" )
-			self.__enable_or_disable_category_frames( b_do_enable=False )
 		else:
 			s_msg="In PGGuiSimuPop instance, __set_run_state: " \
 					"unknown run state value: " + str( i_run_state )
@@ -879,7 +936,16 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.__op_process.start()
 
 		self.__simulation_is_in_progress=True
+
+		#Need some padding in front, or
+		#it's too close to the run button:
+		self.__run_state_message="  " + SIM_RUNNING_MSG
+
 		self.__set_controls_by_run_state( self.__get_run_state() )
+
+		self.__init_interface( b_force_disable=True )
+		self.__load_values_into_interface( b_force_disable=True )
+
 		self.after( 500, 
 				self.__check_progress_operation_process )
 

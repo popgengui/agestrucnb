@@ -12,6 +12,7 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 VERBOSE=False
 VERY_VERBOSE=False
 
+ESTIMATION_RUNNING_MSG="Estimation in progress"
 
 ATTRIBUTE_DEMANLGER="_PGGuiNeEstimator__"
 
@@ -21,7 +22,6 @@ ATTRIBUTE_DEMANLGER="_PGGuiNeEstimator__"
 #of files.  Then, to populate the genepop file list box, we can 
 #split on the delimiter:
 DELIMITER_GENEPOP_FILES=","
-
 
 ROW_NUM_FILE_LOCATIONS_FRAME=0
 ROW_NUM_FILE_INFO_FRAME=1
@@ -122,6 +122,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__op_process=None
 
 		self.__estimation_in_progress=False
+		self.__run_state_message=""
 
 		#create interface
 		self.__get_param_set( s_param_names_file )
@@ -129,8 +130,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__set_initial_param_values()
 		self.__init_interface()
 		self.__load_param_interface()
-
-
+		
 		self.__set_controls_by_run_state( self.__get_run_state() )
 		return
 	#end __init__
@@ -594,6 +594,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		self.__op_process.start()
 		self.__set_controls_by_run_state( self.__get_run_state() )
+		self.__init_interface( b_force_disable=True )
+		self.__load_param_interface( b_force_disable=True )
+		self.__run_state_message="  " + ESTIMATION_RUNNING_MSG
 		self.after( 500, self.__check_progress_operation_process )
 
 		if VERY_VERBOSE:
@@ -604,7 +607,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	#end runEstimator
 
-	def __init_file_locations_interface( self ):
+	def __init_file_locations_interface( self, b_force_disable=False ):
 		ENTRY_WIDTH=30
 		LABEL_WIDTH=20
 		LOCATIONS_FRAME_PADDING=30
@@ -618,11 +621,27 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		i_row=0
 
-		self.__run_button=Button( o_file_locations_subframe, 
+		'''
+		To keep the run/cancel button close to
+		a label that is a (primiive) progress message
+		we put themn in a frame that itself, will be
+		inside the file-locations subframe.
+		'''
+		o_run_sub_subframe=Frame( o_file_locations_subframe )
+
+		self.__run_button=Button( o_run_sub_subframe, 
 						command= \
 							self.__on_click_run_or_cancel_neestimation_button )
 		
 		self.__run_button.grid( row=i_row, sticky=( NW )	)
+
+		#this label will have text showing when an estimation
+		#is running:
+		self.__run_state_label=Label( o_run_sub_subframe, text=self.__run_state_message )
+
+		self.__run_state_label.grid( row=i_row, column=2, sticky=( SW ) )
+
+		o_run_sub_subframe.grid( row=i_row, sticky=( NW ) )
 
 		i_row += 1
 		
@@ -637,7 +656,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						s_entry_justify='left',
 						s_label_justify='left',
 						s_button_text="Select",
-						def_button_command=self.__load_genepop_files )
+						def_button_command=self.__load_genepop_files,
+						b_force_disable=b_force_disable )
+
 		o_config_kv.grid( row=i_row, sticky=( NW ) )
 
 		i_row+=1
@@ -651,7 +672,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					s_entry_justify='left',
 					s_label_justify='left', 
 					s_button_text="Select",
-					def_button_command=self.__select_output_directory )
+					def_button_command=self.__select_output_directory,
+					b_force_disable=b_force_disable )
 
 		o_outdir_kv.grid( row= i_row, sticky=( NW ) )
 
@@ -666,7 +688,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					o_associated_attribute_object=self,
 					def_entry_change_command=self.__test_value,
 					s_entry_justify='left',
-					s_label_justify='left' ) 
+					s_label_justify='left',
+					b_force_disable=b_force_disable ) 
 
 		self.__outbase_kv.grid( row=i_row, sticky=( NW ) )
 
@@ -706,6 +729,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				text=LOCATIONS_FRAME_LABEL )
 
 		i_row=0
+
 
 		o_scrollbar_vert=FredLundhsAutoScrollbar( o_file_info_subframe,
 												orient=VERTICAL )
@@ -764,9 +788,19 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	#end __update_genepop_file_listbox
 
-	def __init_interface( self ):
+	def __init_interface( self, b_force_disable=False ):
+		'''
+		Create the controls first needed, 
+		like those to get file locations,
+		and the listbox that diplays the loaded
+		genepop files.
+
+		param b_force_disable, when true, is passed to
+		the file-locations interface controls, which
+		are subsequencly all set to disable.
+		'''
 		
-		self.__init_file_locations_interface()
+		self.__init_file_locations_interface( b_force_disable )
 		self.__init_file_info_interface()	
 
 		self.grid_columnconfigure( 0, weight=1 )
@@ -791,7 +825,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	#end __get_max_longname_length
 
-	def __load_param_interface( self ):
+	def __load_param_interface( self, b_force_disable=False ):
 
 		PARAMETERS_FRAME_PADDING=30
 		PARAMETERS_FRAME_LABEL="Parameters"
@@ -833,6 +867,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			s_attr_name=ATTRIBUTE_DEMANLGER + s_param
 			v_val=eval (  "self." + s_attr_name )
 			s_longname=self.__param_set.longname( s_param )
+			s_tooltip=self.__param_set.getToolTipForParam( s_param )
 
 			if VERY_VERBOSE:
 				print ( "in test, param name: " + s_param )
@@ -855,7 +890,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				i_labelwidth=LABEL_WIDTH,
 				b_is_enabled=True,
 				s_entry_justify=s_this_entry_justify,
-				s_label_justify='left' )
+				s_label_justify='left',
+				s_tooltip=s_tooltip,
+				b_force_disable=b_force_disable )
 
 			o_this_keyval.grid( row=i_row, sticky=( NW ) )
 
@@ -1022,6 +1059,26 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		return
 	#end __set_controls_by_run_state
 
+	def __update_run_state_message( self ):
+		MAX_DOTS=10
+
+		if self.__run_state_message != "":
+			i_len_msg=len( self.__run_state_message )
+			
+			i_len_dots_stripped=len ( \
+					self.__run_state_message.rstrip( "." ) )
+
+			i_curr_num_dots=i_len_msg - i_len_dots_stripped
+
+			if i_curr_num_dots >= MAX_DOTS:
+				self.__run_state_message = \
+						self.__run_state_message.rstrip( "." ) + "."
+			else:
+				self.__run_state_message += "."
+			#end if max dots reached or exceeded, else not
+		return
+	#end __update_run_state_message
+
 	def __check_progress_operation_process( self ):
 
 		if self.__op_process is not None:
@@ -1030,6 +1087,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					print ( "checking and process found alive" )
 				#endif very verbose, pring
 				self.__estimation_in_progress = True
+				self.__update_run_state_message()
+				self.__run_state_label.configure( text=self.__run_state_message )
 				self.after( 500, self.__check_progress_operation_process )
 			else:
 				if VERY_VERBOSE:
@@ -1046,6 +1105,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				#has finished:
 				self.__op_process=None
 				self.__neest_multi_process_event=None
+				self.__run_state_message=""
+				self.__init_interface( b_force_disable = False )
+				self.__load_param_interface( b_force_disable = False )
 
 			#end if process alive else not
 
@@ -1057,6 +1119,11 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			#endif very verbose, pring
 
 			self.__estimation_in_progress_is_in_progress = False
+			self.__run_state_message=""
+			self.__init_interface( b_force_disable = False )
+			self.__load_param_interface( b_force_disable = False )
+
+
 			self.__set_controls_by_run_state( self.__get_run_state() )
 
 		#end if process not None else None

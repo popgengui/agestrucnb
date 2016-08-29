@@ -8,8 +8,6 @@ __filename__ = "pgguiutilities.py"
 __date__ = "20160427"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu and " \
 				+ "Fredrik Lundh for the Autoscrollbar class (see below)"
-
-
 from Tkinter import *
 from ttk import *
 import createtooltip as ctt
@@ -52,7 +50,6 @@ class KeyValFrame( Frame ):
 	via callback on enter key.  The current
 	key/value state is delivered via a getValue
 
-
 	Optionally also updates a an attribute
 	in its master object, by name (using getattr)
 	whenever the entry box value is updated.
@@ -80,7 +77,9 @@ class KeyValFrame( Frame ):
 			type_replaces_none=float,
 			s_label_name=None,
 			i_subframe_padding=0,
-			o_validity_tester = None ):
+			o_validity_tester=None,
+			b_force_disable=False,
+			s_tooltip="" ):
 		
 		"""
 		Param s_name provides the label text.
@@ -110,6 +109,8 @@ class KeyValFrame( Frame ):
 		      gives the type required for a valid value.
 		Param s_label_name, if supplied, replaces s_name as the text for the label.
 		Param i_subframe_padding gives the padding in pixels of the subframe inside its master frame
+		Param b_force_disable, if True, will cause all Entry objects to be disabled 
+			  in the def __make_entry
 
 		"""
 		#TCL won't allow uppercase names for windows
@@ -132,14 +133,24 @@ class KeyValFrame( Frame ):
 		self.__type_replaces_none=type_replaces_none
 		self.__subframe_padding=i_subframe_padding
 		self.__validity_tester=o_validity_tester
+		self.__force_disable=b_force_disable
 		self.__idx_none_values=[]
 		self.__item_types=[]
 		self.__entryvals=[]
 		self.__label_name=self.__name if s_label_name is None \
 												else s_label_name
+
+		self.__tooltip=self.__label_name if \
+						s_tooltip == "" else s_tooltip
+
+		#references to the tkinter controls
+		#that may be subject to config
+		#after init:
+		self.__entry_boxes=[]
+		self.__button_object=None
+
 		self.__subframe=None
 		self.__setup()
-
 
 	#end init
 
@@ -304,9 +315,19 @@ class KeyValFrame( Frame ):
 		if self.__button_command is None:
 			return
 		else:
-			o_button=Button( self.__subframe, text=self.__button_text, command=self.__button_command )
+			s_state="enabled"
+
+			if self.__force_disable==True:
+				s_state="disabled"
+			#end if force disabled
+			
+			o_button=Button( self.__subframe, 
+								text=self.__button_text, 
+								command=self.__button_command,
+								state=s_state )
 			i_num_entries = len( self.__value ) 
 			o_button.grid( row=0, column=i_num_entries+1 )
+			self.__button_object=o_button
 		#end if we don't have a command def
 
 		return
@@ -314,9 +335,10 @@ class KeyValFrame( Frame ):
 
 	def __make_entry( self, o_strvar ):
 		s_enabled="enabled"
-		if self.__isenabled==False:
+		if self.__isenabled==False or self.__force_disable == True:
 			s_enabled="disabled"
 		#end if not enabled
+
 		#we want black foreground, even when disabled:
 		o_entry = Entry( self.__subframe, 
 				textvariable=o_strvar,
@@ -325,6 +347,8 @@ class KeyValFrame( Frame ):
 				foreground="black",
 				justify=self.__entryjustify )
 		o_entry.bind( "<FocusOut>", self.__on_enterkey )
+
+		self.__entry_boxes.append( o_entry )
 
 		return o_entry
 
@@ -340,9 +364,18 @@ class KeyValFrame( Frame ):
 			o_entry=self.__make_entry( o_strvar ) 
 
 			if i_num_vals > 1: 
-				o_tooltip=ctt.CreateToolTip( o_entry, self.__label_name \
-							+ ", item " + str( idx + 1 ) )
-			#end if more than one value, make tool tip
+				s_delimit="\n"
+				s_ttip_text=s_delimit.join( [ self.__tooltip,
+								"Entry " + str( idx + 1 ) ] )
+			
+			else:
+
+				s_ttip_text=self.__tooltip
+
+			#end if more than one value, add item num to tool tip,
+			#else just tooltip
+
+			o_tooltip=ctt.CreateToolTip( o_entry,  s_ttip_text )
 
 			self.__item_types.append( type( self.__value[idx] ) )
 
@@ -375,7 +408,7 @@ class KeyValFrame( Frame ):
 
 	def __on_enterkey( self, event=None ):
 
-		if self.__isenabled == False:
+		if self.__isenabled == False or self.__force_disable == True:
 			return
 		#end
 
@@ -473,7 +506,9 @@ class KeyCategoricalValueFrame( Frame ):
 			s_label_justify='right',
 			s_buttons_justify='right',
 			s_label_name=None,
-			b_buttons_in_a_row=False ):
+			b_buttons_in_a_row=False,
+			b_force_disable=False,
+			s_tooltip = "" ):
 
 		"""
 		
@@ -507,6 +542,8 @@ class KeyCategoricalValueFrame( Frame ):
 		Param s_label_name, if not None, replaces s_name as the text for the label.
 		Param b_buttons_in_a_row, if False (default) all buttons are in a single column, if True,
 				then all buttons side by side in a single row
+		Param b_force_disable, if True, will override the b_is_enabled value and disable all entry 
+			  boxes
 		"""
 
 		#TCL won't allow uppercase names for windows
@@ -527,6 +564,8 @@ class KeyCategoricalValueFrame( Frame ):
 		self.__put_buttons_in_row=b_buttons_in_a_row
 		self.__current_button_value=self.__init_current_button_val( o_value_type )
 		self.__label_name=self.__name if s_label_name is None else s_label_name
+		self.__force_disable=b_force_disable
+		self.__tooltip=self.__label_name if s_tooltip == "" else s_tooltip
 		self.__subframe=None
 		self.__setup()
 	#end init
@@ -629,7 +668,7 @@ class KeyCategoricalValueFrame( Frame ):
 		i_rowcount=0
 
 		s_state="enabled"
-		if self.__isenabled==False:
+		if self.__isenabled==False or self.__force_disable==True:
 			s_state="disabled" 
 		#end if enabled else not
 
@@ -649,6 +688,8 @@ class KeyCategoricalValueFrame( Frame ):
 										value=v_value,
 										command=self.__on_button_change,
 										state=s_state )
+
+			o_tooltip=ctt.CreateToolTip( o_radio_button,  self.__tooltip )
 
 			i_row_val=i_rowcount
 			i_column_val=0
@@ -675,7 +716,7 @@ class KeyCategoricalValueFrame( Frame ):
 
 	def __on_button_change( self, event=None ):
 
-		if self.__isenabled == False:
+		if self.__isenabled == False or self.__force_disable == True:
 			return
 		else:
 			self.__reset_value()
@@ -691,7 +732,6 @@ class KeyCategoricalValueFrame( Frame ):
 			else:
 				setattr( self.__associated_attribute_object, self.__associated_attribute, self.__value )
 			#eend if attribute object is None, then use master, else use object
-
 		#end if caller passed a def 
 
 		#if there is a command associated with a button change, execute:
@@ -713,9 +753,6 @@ class KeyCategoricalValueFrame( Frame ):
 		return
 	#end deleter
 #end class KeyCategoricalValueFrame
-
-
-
 
 class FrameContainerScrolled( object ):
 	'''
@@ -957,6 +994,4 @@ class PGGUIYesNoMessage( object ):
 		return
 	#end __init__
 #end class PGGUIInfoMessage
-
-
 
