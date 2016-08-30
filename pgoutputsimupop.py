@@ -311,7 +311,10 @@ class PGOutputSimuPop( object ):
 		o_genepopfile.close()
 
 		s_final_name=s_temp_file_name.replace( s_temp_file_name, s_genepop_filename )
-		os.rename( o_genepopfile.name, s_final_name )
+
+		#change to shutil.move from os.rename -- threw errors (in docker install) when
+		#renaming across volumes:
+		shutil.move( o_genepopfile.name, s_final_name )
 
 		return
 	#end gen2Popgene
