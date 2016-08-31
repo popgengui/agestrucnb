@@ -772,17 +772,17 @@ class PGOpSimuPop( modop.APGOperation ):
 			newborns -- hence we comment out the if statement, and de-indent 
 			it's body
 			'''
-			#if i.age == 1 or gen == 0:
+			if i.age == 1 or gen == 0:
 
-			self.output.err.write("%d %d " % (i.ind_id, gen))
+				self.output.err.write("%d %d " % (i.ind_id, gen))
 
-			for pos in range(len(i.genotype(0))):
-				a1 = self.__zeroC(i.allele(pos, 0))
-				a2 = self.__zeroC(i.allele(pos, 1))
-				self.output.err.write(a1 + a2 + " ")
-			#end for pos in range
+				for pos in range(len(i.genotype(0))):
+					a1 = self.__zeroC(i.allele(pos, 0))
+					a2 = self.__zeroC(i.allele(pos, 1))
+					self.output.err.write(a1 + a2 + " ")
+				#end for pos in range
 
-			self.output.err.write("\n")
+				self.output.err.write("\n")
 			
 			#end if age == 1 or gen == 0
 
