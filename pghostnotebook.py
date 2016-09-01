@@ -109,7 +109,7 @@ class PGHostNotebook( Notebook ):
 			o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
 			i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
 
-			s_tab_text="Ne Estimation " + str( self.__tab_count )
+			s_tab_text="Nb Estimation " + str( self.__tab_count )
 			self.add( o_container, text=s_tab_text )
 			self.__tab_children.append( o_container )
 			self.__tab_count+=1
@@ -254,7 +254,7 @@ if __name__ == "__main__":
 	o_host.grid( row=0, column=0, sticky=( N,W,S,E ))
 
 	o_master.geometry( str(  i_geo_width ) + "x" + str( i_geo_height ) )
-	o_master.title( "Age Structure Ne" )	
+	o_master.title( "Age Structure Nb" )	
 	o_master.grid_rowconfigure( 0, weight=1 )
 	o_master.grid_columnconfigure( 0, weight=1 )
 	o_master.mainloop()

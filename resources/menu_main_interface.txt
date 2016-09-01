@@ -7,7 +7,7 @@ menu_underline=0
 #which accelorator key for the menu:
 menu_accelerator="\"\""
 #which character to underline on the item
-label=[ "Add new simulation", "Add new Ne estimation"]
+label=[ "Add new simulation", "Add new Nb estimation"]
 underline=[ 8, 8 ]
 accelerator=[ "Ctrl+S", "Ctrl+N", ]
 command=[ "addPGGuiSimupop", "addPGGuiNeEstimation" ]

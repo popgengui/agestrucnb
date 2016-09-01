@@ -145,7 +145,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		
 		INIT_GENEPOP_FILE_NAME="none"
 		INIT_OUTPUT_DIRECTORY=pgut.get_current_working_directory()
-		INIT_OUTPUT_FILES_BASE_NAME="ne.out." \
+		INIT_OUTPUT_FILES_BASE_NAME="nb.out." \
 				+ pgut.get_date_time_string_dotted()
 
 
@@ -1038,15 +1038,15 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 	def __set_controls_by_run_state( self, i_run_state ):
 
 		if i_run_state==PGGuiNeEstimator.RUN_NOT_READY:
-			self.__run_button.config( text="Run Ne Estimation", 
+			self.__run_button.config( text="Run Nb Estimation", 
 													state="disabled" ) 
 			self.__enable_or_disable_frames( b_do_enable=False )
 		elif i_run_state==PGGuiNeEstimator.RUN_READY:
-			self.__run_button.config( text="Run Ne Estimation", 
+			self.__run_button.config( text="Run Nb Estimation", 
 													state="enabled" )
 			self.__enable_or_disable_frames( b_do_enable=True )
 		elif i_run_state==PGGuiNeEstimator.RUN_IN_PROGRESS:
-			self.__run_button.config( text="Cancel Ne Estimation", 
+			self.__run_button.config( text="Cancel Nb Estimation", 
 														state="enabled" )
 			self.__enable_or_disable_frames( b_do_enable=False )
 		else:

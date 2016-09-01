@@ -81,7 +81,7 @@ if __name__ == "__main__":
 	o_host.grid( row=0, column=0, sticky=( N,W,S,E ))
 
 	o_master.geometry( str(  i_geo_width ) + "x" + str( i_geo_height ) )
-	o_master.title( "Age Structure Ne" )	
+	o_master.title( "Age Structure Nb" )	
 	o_master.grid_rowconfigure( 0, weight=1 )
 	o_master.grid_columnconfigure( 0, weight=1 )
 
