@@ -184,6 +184,17 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		return
 	#end __init__
 
+	def __init_run_sub_subframe( self, b_force_disable = False ):
+		'''
+		Setup the run button and the processes text box.
+		As of 2016_08_31, these chores are still done in 
+		def __init_interface.  Need to implement this to
+		simplify def __init_interface,
+		'''
+		pass
+		return
+	#end of __init_run_sub_subframe
+
 			
 	def __init_interface( self, b_force_disable = False ):
 		'''
@@ -205,7 +216,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		LOCATIONS_FRAME_PADDING=30
 		LOCATIONS_FRAME_LABEL="Load/Run"
 		LOCATIONS_FRAME_STYLE="groove"
-		
+		RUNBUTTON_PADDING=07	
 
 		o_file_locations_subframe=LabelFrame( self,
 				padding=LOCATIONS_FRAME_PADDING,
@@ -216,18 +227,36 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		o_run_sub_subframe=Frame( o_file_locations_subframe )
 
-
-
-#		self.__run_button=Button( o_file_locations_subframe, command=self.__on_click_run_or_cancel_simulation_button )
 		self.__run_button=Button( o_run_sub_subframe, command=self.__on_click_run_or_cancel_simulation_button )
-#		
-#		self.__run_button.grid( row=i_row, sticky=( NW )	)
-		self.__run_button.grid( row=i_row, sticky=( NW )	)
-#
-#		self.__run_state_label=Label( o_file_locations_subframe, text=self.__run_state_message )
+		
+		i_tot_procs=pgut.get_cpu_count()
+
+		o_tot_process_validator=FloatIntStringParamValidity( \
+					"proccess total",
+					int, self.__total_processes_for_sims, 
+					1, i_tot_procs )
+
+		o_tot_process_kv=KeyValFrame( "Processes", 
+						self.__total_processes_for_sims,
+						o_run_sub_subframe,
+						o_associated_attribute_object=self,
+						s_associated_attribute="_PGGuiSimuPop" \
+									+ "__total_processes_for_sims",
+						s_entry_justify='left',
+						s_label_justify='left',
+						s_button_text="Select",
+						b_force_disable=b_force_disable,
+						o_validity_tester= o_tot_process_validator,
+						s_tooltip = "Simulation can use one process per replicate, " \
+								+ "but set to no more than the total number " \
+								+ "of processors in your computer." )
+
+		o_tot_process_kv.grid( row=i_row, column=0, sticky=( NW ) )
+
+		self.__run_button.grid( row=i_row, column=1, sticky=( NW ), padx=RUNBUTTON_PADDING )
+
 		self.__run_state_label=Label( o_run_sub_subframe, text=self.__run_state_message )
-#
-#		self.__run_state_label.grid( row=i_row, column=2, sticky=( NW ) )
+
 		self.__run_state_label.grid( row=i_row, column=2, sticky=( SW ) )
 
 		o_run_sub_subframe.grid( row=i_row, sticky=( NW ) )
