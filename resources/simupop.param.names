@@ -22,7 +22,7 @@
 #values in PGInputSimuPop. Type checks using value ranges are also ignored by using 
 #None;None;None for the type, min, and max fields.
 #
-N0	N1	Population;2;1;1;0;None;None;None;N1
+N0	N0 (Newborns)	Population;2;1;1;0;None;None;None;Newborns per cycle (before lambda).
 Nb	Nb	suppress;0;0;1;0;None;None;None;""
 NbVar	NbVar	suppress;0;0;1;0;None;None;None;""
 ages	Ages	Population;2;1;1;0;None;None;None;Ages
@@ -31,29 +31,29 @@ life_table_glob	Life Table File(s)	Configuration Info;1;1;1;"none";None;None;Non
 dataDir	Data Directory	suppress;0;0;1;0;None;None;None;""
 #suppressing the negative binomial switch as of 2016_08_24, as it is actually
 #a param treated as an internal flag, and depends solely on absense/presence of gamma lists (see below)
-doNegBinom	Use Negative Binomial	suppress;4;1;1;False;None;None;None;Use Negative Binomial
-fecundityFemale	Female Fecundity	Population;2;1;1;[];None;None;None;Female Fecundity
-fecundityMale	Male Fecundity	Population;2;1;1;[];None;None;None;Male Fecundity
-forceSkip	Force Skip	Population;2;1;1;[];None;None;None;Force Skip
-gens	Reproductive Cycles	Population;2;1;1;1;None;None;None;Reproductive Cycles
+doNegBinom	Use negative binomial	suppress;4;1;1;False;None;None;None;Use Negative Binomial
+fecundityFemale	Female relative fecundity	Population;2;1;1;[];None;None;None;Female Relative Fecundity
+fecundityMale	Male relative fecundity	Population;2;1;1;[];None;None;None;Male Relative Fecundity
+forceSkip	Force skip	Population;2;1;1;[];None;None;None;Force Skip
+gens	Reproductive cycles	Population;2;1;1;1;None;None;None;Reproductive Cycles
 isMonog	Monogamous	Population;2;1;1;False;None;None;None;Monogamous
-lbd	Lambda	Simulation;4;1;1;1.0;None;None;None;Lambda
+lbd	Lambda (after burn-in)	Simulation;4;1;1;1.0;None;None;None;Lambda after burn in
 litter	Litter size probability	Population;2;1;1;0.0;Float;None;None;Litter size probability
-maleProb	Probability Male Birth	Population;2;1;1;0.5;Float;0;1;Probability male birth
+maleProb	Probability male birth	Population;2;1;1;0.5;Float;0;1;Probability male birth
 model_name	Model	Configuration Info;1;1;1;none;None;None;None;Model name
 numSNPs	Number of SNPs	Genome;3;1;1;0;None;None;None;Number of SNPs
-mutFreq	Mutation Frequency	Genome;3;1;1;0;None;None;None;Mutation Frequency
-numMSats	Number of Microsatellites	Genome;3;1;1;0;None;None;None;Number of Microsats
+mutFreq	Mutation frequency	Genome;3;1;1;0;None;None;None;Mutation Frequency
+numMSats	Number of microsatellites	Genome;3;1;1;0;None;None;None;Number of Microsats
 param_names	param names object	suppress;0;0;0;0;None;None;None;""
-popSize	Population Size	Population;2;1;1;0;None;None;None;Populaion Size
+popSize	Population size	Population;2;1;1;0;None;None;None;Populaion Size
 reps	Replicates	Simulation;4;1;1;1;None;None;None;Replicates
 skip	Skip breeding probability	Simulation;4;1;1;[];None;None;None;Skip breeding probability
-startAlleles	Starting Msat Allele Total	Genome;3;1;1;0;None;None;None;Starting microsat allele total
-startLambda	Lambda burn-in	Simulation;5;1;1;99999;None;None;None;Lambda burn-in
-startSave	Starting Save	Simulation;5;1;1;1;None;None;None;Starting Save
-survivalFemale	Female Survival	Population;2;1;1;[];None;None;None;Female Survival
-survivalMale	Male Survival	Population;2;1;1;[];None;None;None;Male Survival
-gammaAFemale	Female Gamma A	Population;2;1;1;None;None;None;None;Female Gamma A	
-gammaBFemale	Female Gamma B	Population;2;1;1;None;None;None;None;Female Gamma B
-gammaAMale	Male Gamma A	Population;2;1;1;None;None;None;None;Male Gamma A
-gammaBMale	Male Gamma B	Population;2;1;1;None;None;None;None;Male Gamma B
+startAlleles	Starting Msat allele total	Genome;3;1;1;0;None;None;None;Starting microsat allele total
+startLambda	Cycles of burn-in	Simulation;5;1;1;99999;None;None;None;Lambda burn-in (99999 means no burn-in.)
+startSave	Starting save	suppress;5;1;1;1;None;None;None;Starting Starting data save
+survivalFemale	Female survival	Population;2;1;1;[];None;None;None;Female Survival
+survivalMale	Male survival	Population;2;1;1;[];None;None;None;Male Survival
+gammaAFemale	Female gamma A	Population;2;1;1;None;None;None;None;Female Gamma A
+gammaBFemale	Female gamma B	Population;2;1;1;None;None;None;None;Female Gamma B
+gammaAMale	Male gamma A	Population;2;1;1;None;None;None;None;Male Gamma A
+gammaBMale	Male gamma B	Population;2;1;1;None;None;None;None;Male Gamma B
