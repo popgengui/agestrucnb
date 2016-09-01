@@ -2,7 +2,7 @@ import glob
 import os
 import sys
 
-import LineRegress
+import neLineRegress.LineRegress as LineRegress
 
 
 def getFiles(pattern):

@@ -771,6 +771,19 @@ class PGOpSimuPop( modop.APGOperation ):
 			in this pop to the *gen file, instead of those only for the 
 			newborns -- hence we comment out the if statement, and de-indent 
 			it's body
+
+			As of 2016_08_31, reverted to the original code, so that
+			as before the genepop file will be written with newborns
+			only past the first cycle.  This is for the purposes of Congen
+			conference, to do Nb estimates on the newborn cohort. Once
+			genepop subsampling by individal demographics is implemented,
+			we'll once again write the genpop to include all individuals,
+			(then do subsampling on the full genepop) but will also include the 
+			parentage and age (and other?) info as part of the individual 
+			ID (using both the *gen (output.err) and *sim (output.err) files to 
+			create the genepop.  It may be that we'll just keep this original 
+			filter on the gen, and create the genepop using the indiv list to 
+			get the individual ids, and this gen output to lookup genotypes.
 			'''
 			if i.age == 1 or gen == 0:
 

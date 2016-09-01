@@ -178,8 +178,9 @@ class FloatIntStringParamValidity( object ):
 							+ "."
 			else:
 				self.__value_message="Value, " + str( self.__value ) \
-					 		+ " is out of range.  Range is from " \
-							+ str( self.__min_value ) + " to " +  str( self.__max_value ) \
+					 		+ ", is out of range.  Range is from " \
+							+ str( self.__min_value ) + " to " \
+							+  str( self.__max_value ) \
 							+ "."
 			#end if string else otehr
 

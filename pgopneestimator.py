@@ -151,6 +151,11 @@ class PGOpNeEstimator( APGOperation ):
 		#run the estimator in a temporary directory, per Tiago's recommendation:
 		s_temp_dir=self.__change_current_directory_to_temporary_directory_inside_current()
 
+		##### temp
+		print ( "run params: " + str( ( self.input.run_params ) ) )
+		##### end temp
+
+
 		ne2c.run( s_indir, s_infile, s_outdir, s_outfile, **( self.input.run_params  ) )
 
 		#make the current directory the original, before the change to a temporary dir:
