@@ -5,7 +5,7 @@ Min Regression Slope:		-718.120090009
 Mean Regression Slope:		-359.891431143
 Meadian Regression Slope:	-359.891431143
 
-Comparison to a slope of: 0
+Comparison to a slope of: 0  at alpha =  0.05
 Positive Slopes:	0		Neutral Slopes:	1		Negative Slopes:	1
 
 Slope                         Intercept                     Confidence Interval(95.0%)    
