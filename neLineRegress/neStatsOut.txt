@@ -1,13 +1,21 @@
-File:testData.txt
+File:realTest.tsv
 
-Max Regression Slope:		-1.66277227723
-Min Regression Slope:		-718.120090009
-Mean Regression Slope:		-359.891431143
-Meadian Regression Slope:	-359.891431143
+Max Regression Slope:		nan
+Min Regression Slope:		nan
+Mean Regression Slope:		nan
+Meadian Regression Slope:	nan
 
 Comparison to a slope of: 0  at alpha =  0.05
-Positive Slopes:	0		Neutral Slopes:	1		Negative Slopes:	1
+Positive Slopes:	0		Neutral Slopes:	10		Negative Slopes:	0
 
 Slope                         Intercept                     Confidence Interval(95.0%)    
--1.66277227723                574.876                       (-2.219337585768939, -1.106206968686505)
--718.120090009                48816.6165455                 (-1538.9855557369001, 102.74537571889778)
+nan                           nan                           (nan, nan)                    
+-152.85759616                 10631.6566061                 (-326.69339206795701, 20.978199748725189)
+-145.450769877                10120.0398788                 (-311.03444392674578, 20.13290417277031)
+nan                           nan                           (nan, nan)                    
+nan                           nan                           (nan, nan)                    
+nan                           nan                           (nan, nan)                    
+-741.036779478                50220.2903636                 (-1588.7214421241329, 106.6478831682366)
+nan                           nan                           (nan, nan)                    
+nan                           nan                           (nan, nan)                    
+-49.104390039                 3621.71169697                 (-104.36564730934604, 6.1568672313382109)
