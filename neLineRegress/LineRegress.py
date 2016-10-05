@@ -95,7 +95,7 @@ def slopeConfidence(alpha, linePoints):
     #get linear regression for points
     regression = lineRegress(linePoints)
     #get Tscore
-    tScore = stats.t.ppf((alpha/2), len(linePoints)-2)
+    tScore = stats.t.ppf((1-alpha/2), len(linePoints)-2)
 
 
     #get s(b1)  == (MSE)/sum(xi-mean(x))^2)
@@ -405,9 +405,9 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     zeroCount=0
     positiveCount=0
     for cI in confidenceVctr:
-        if cI[1]>significantValue:
+        if cI[0]>significantValue:
             positiveCount+=1
-        elif cI[0]<significantValue:
+        elif cI[1]<significantValue:
             negativeCount+=1
         else:
             zeroCount+=1
