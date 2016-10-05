@@ -9,7 +9,7 @@ import ConfigParser
 from numpy import array, math
 from scipy import stats
 import matplotlib.pyplot as plt
-from numpy import mean, median
+from numpy import mean, median, isnan
 import csv
 import sys
 
@@ -95,7 +95,7 @@ def slopeConfidence(alpha, linePoints):
     #get linear regression for points
     regression = lineRegress(linePoints)
     #get Tscore
-    tScore = stats.t.ppf(1-(alpha/2), len(linePoints)-2)
+    tScore = stats.t.ppf((alpha/2), len(linePoints)-2)
 
 
     #get s(b1)  == (MSE)/sum(xi-mean(x))^2)
@@ -388,11 +388,15 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     slopeVctr = []
     confidenceVctr = []
 
+    Uncountable = 0
     for record in table:
         slope, intercept, confidence  = slopeConfidence(confidenceAlpha,record)
         tableString+=tableFormat.format(slope,intercept,confidence)
-        slopeVctr.append(slope)
-        confidenceVctr.append(confidence)
+        if isnan(slope):
+            Uncountable +=1
+        else:
+            slopeVctr.append(slope) 
+            confidenceVctr.append(confidence)
     maxSlope = max(slopeVctr)
     minSlope = min(slopeVctr)
     meanSlope = mean(slopeVctr)
@@ -401,9 +405,9 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     zeroCount=0
     positiveCount=0
     for cI in confidenceVctr:
-        if cI[0]>significantValue:
+        if cI[1]>significantValue:
             positiveCount+=1
-        elif cI[1]<significantValue:
+        elif cI[0]<significantValue:
             negativeCount+=1
         else:
             zeroCount+=1
@@ -424,7 +428,8 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     outFile.write("Meadian Regression Slope:\t"+str(medSlope)+"\n")
     outFile.write("\n")
     outFile.write("Comparison to a slope of: "+str(significantValue)+"  at alpha =  "+str(confidenceAlpha)+"\n")
-    outFile.write("Positive Slopes:\t"+str(positiveCount)+"\t\tNeutral Slopes:\t"+str(zeroCount)+"\t\tNegative Slopes:\t"+str(negativeCount))
+    outFile.write("Positive Slopes:\t"+str(positiveCount)+"\t\tNeutral Slopes:\t"+str(zeroCount)+"\t\tNegative Slopes:\t"+str(negativeCount)+"\n")
+    outFile.write("Non-Number Slopes:\t"+str(Uncountable))
     outFile.write("\n\n")
     outFile.write(tableString)
     outFile.close()
