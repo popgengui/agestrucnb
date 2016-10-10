@@ -171,11 +171,11 @@ def _getExpectedLineStats(slopes, intercepts, xVctr,expectedSlope = None):
 def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
     #get linear regression stats for all datasets
     LineStats = []
-    for line in dataVctrs:
+    for line in dataVctrs.values():
         data = lineRegress(line)
         LineStats.append(data)
     #flatten the array
-    allpoints = [val for sublist in dataVctrs  for val in sublist]
+    allpoints = [val for sublist in dataVctrs.values()  for val in sublist]
     #unzip to obtain x and y value vectors for all points
     xVals, yVals = zip(*allpoints)
 
@@ -272,8 +272,8 @@ def neFileRead(filename, firstVal = 0):
                 #print popKey
                 replicateVctr.append((popKey,replicateDict[popKey]))
                 individualCountVctr.append((popKey,individualCountDict[popKey]))
-        resultTable[sourceName](replicateVctr)
-        individualCountTable[sourceName](individualCountVctr)
+        resultTable[replicate] = replicateVctr
+        individualCountTable[replicate] = individualCountVctr
     return resultTable,individualCountTable
 
 
@@ -381,9 +381,9 @@ def neGrapher(neFile, configFile):
 #significantValue: value of comparison w/ regards to slope. should be 0 for every test, but can be changed if needed.
 #testFlag: flag that disables file write and prints stats to console instead, used for test functions
 def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,testFlag = False):
-    tableFormat = "{:<30}{:<30}{:<30}{:<30}\n"
+    tableFormat = "{:<30}{:<30}{:<50}{:<80}\n"
     confPercent = (1 - confidenceAlpha)*100
-    tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)")
+    tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)","Source File")
     table, countsTable = neFileRead(neFile,firstVal)
     slopeVctr = []
     confidenceVctr = []
