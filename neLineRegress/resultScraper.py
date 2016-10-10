@@ -57,8 +57,8 @@ def scrapeNe(filename, firstVal):
         dataDict[sourceName][popNum] = (neEst,maxError,minError)
         popDict[sourceName][popNum] = individualCount
     replicateKeys = dataDict.keys()
-    resultTable = []
-    individualCountTable = []
+    resultTable = {}
+    individualCountTable = {}
     for replicate in replicateKeys:
         replicateVctr = []
         individualCountVctr = []
@@ -71,8 +71,8 @@ def scrapeNe(filename, firstVal):
                 # print popKey
                 replicateVctr.append((popKey, replicateDict[popKey]))
                 individualCountVctr.append((popKey, individualCountDict[popKey]))
-        resultTable.append(replicateVctr)
-        individualCountTable.append(individualCountVctr)
+        resultTable[replicate] = replicateVctr
+        individualCountTable[replicate] = individualCountVctr
     return resultTable, individualCountTable
 
 file  = "neStatsOut.txt"
