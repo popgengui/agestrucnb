@@ -258,8 +258,8 @@ def neFileRead(filename, firstVal = 0):
         dataDict[sourceName][popNum] = neEst
         popDict[sourceName][popNum]=individualCount
     replicateKeys = dataDict.keys()
-    resultTable = []
-    individualCountTable = []
+    resultTable = {}
+    individualCountTable = {}
     for replicate in replicateKeys:
         replicateVctr = []
         individualCountVctr = []
@@ -272,8 +272,8 @@ def neFileRead(filename, firstVal = 0):
                 #print popKey
                 replicateVctr.append((popKey,replicateDict[popKey]))
                 individualCountVctr.append((popKey,individualCountDict[popKey]))
-        resultTable.append(replicateVctr)
-        individualCountTable.append(individualCountVctr)
+        resultTable[sourceName](replicateVctr)
+        individualCountTable[sourceName](individualCountVctr)
     return resultTable,individualCountTable
 
 
@@ -381,7 +381,7 @@ def neGrapher(neFile, configFile):
 #significantValue: value of comparison w/ regards to slope. should be 0 for every test, but can be changed if needed.
 #testFlag: flag that disables file write and prints stats to console instead, used for test functions
 def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,testFlag = False):
-    tableFormat = "{:<30}{:<30}{:<30}\n"
+    tableFormat = "{:<30}{:<30}{:<30}{:<30}\n"
     confPercent = (1 - confidenceAlpha)*100
     tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)")
     table, countsTable = neFileRead(neFile,firstVal)
@@ -389,9 +389,10 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     confidenceVctr = []
 
     Uncountable = 0
-    for record in table:
+    for recordKey in table.keys():
+        record = table[recordKey]
         slope, intercept, confidence  = slopeConfidence(confidenceAlpha,record)
-        tableString+=tableFormat.format(slope,intercept,confidence)
+        tableString+=tableFormat.format(slope,intercept,confidence,recordKey)
         if isnan(slope):
             Uncountable +=1
         else:
