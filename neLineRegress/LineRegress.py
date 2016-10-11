@@ -42,44 +42,45 @@ def _pointsToVectors(points):
 #function that implements the matplotlib and creates the graph object, also shows or saves the object to file
 #dest parameter:  if show graph is printed to screen using .show() otherwise expects a filename with extension and saves the file in that format as per .savefig()
 def createGraph(lineArray, title = None, xlab = None, yLab= None, colorVctr = None, styleVctr = None, dest = "show", xLim = None, yLim = None):
-    lineCount = len(lineArray)
-    if colorVctr and len(colorVctr) < lineCount:
-        difference = lineCount-len(colorVctr)
-        for  x in range(difference):
-            colorVctr.append(colorVctr[len(colorVctr)-1])
-    if styleVctr and len(styleVctr) < lineCount:
-        difference = lineCount-len(styleVctr)
-        for  x in range(difference):
-            styleVctr.append(styleVctr[len(styleVctr)-1])
+    if dest != "none":
+        lineCount = len(lineArray)
+        if colorVctr and len(colorVctr) < lineCount:
+            difference = lineCount-len(colorVctr)
+            for  x in range(difference):
+                colorVctr.append(colorVctr[len(colorVctr)-1])
+        if styleVctr and len(styleVctr) < lineCount:
+            difference = lineCount-len(styleVctr)
+            for  x in range(difference):
+                styleVctr.append(styleVctr[len(styleVctr)-1])
 
-    colorFlag = ""
-    styleFlag = ""
-    for yVctrIdx in range(lineCount):
-        if colorVctr:
-            colorFlag = colorVctr[yVctrIdx]
-        if styleVctr:
-            styleFlag = styleVctr[yVctrIdx]
-        argFlag = colorFlag+styleFlag
-        xvctr, yvctr = _pointsToVectors(lineArray[yVctrIdx])
+        colorFlag = ""
+        styleFlag = ""
+        for yVctrIdx in range(lineCount):
+            if colorVctr:
+                colorFlag = colorVctr[yVctrIdx]
+            if styleVctr:
+                styleFlag = styleVctr[yVctrIdx]
+            argFlag = colorFlag+styleFlag
+            xvctr, yvctr = _pointsToVectors(lineArray[yVctrIdx])
 
-        xVctr = array(xvctr)
-        yVctr = array(yvctr)
-        plt.plot(xVctr,yVctr,argFlag)
-    if title:
-        plt.title(title)
-    if xlab:
-        plt.xlabel(xlab)
-    if yLab:
-        plt.ylabel(yLab)
-    if xLim:
-        plt.xlim(xLim)
-    if yLim:
-        plt.ylim(yLim)
+            xVctr = array(xvctr)
+            yVctr = array(yvctr)
+            plt.plot(xVctr,yVctr,argFlag)
+        if title:
+            plt.title(title)
+        if xlab:
+            plt.xlabel(xlab)
+        if yLab:
+            plt.ylabel(yLab)
+        if xLim:
+            plt.xlim(xLim)
+        if yLim:
+            plt.ylim(yLim)
 
-    if dest == "show":
-        plt.show()
-    else:
-        plt.savefig(dest, bbox_inches='tight')
+        if dest == "show":
+            plt.show()
+        else:
+            plt.savefig(dest, bbox_inches='tight')
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -305,7 +306,9 @@ def neConfigRead(filename):
             yLab = config.get("labels", "yLab")
     if config.has_section("destination"):
         destType = config.get("destination","desttype")
-        if destType != "show":
+        if destType=="none":
+            destType = "none"
+        if destType != "show" or "none":
             destination = config.get("destination","destFile")
     if config.has_section("comparison"):
         valueFlag = True
@@ -434,15 +437,16 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     outFile.write("\n\n")
     outFile.write(tableString)
     outFile.close()
+    return outFileName
 
 
 
 def neStats(neFile, configFile = None, testFlag = False):
     if not  configFile:
-        _neStatsHelper(neFile,0.05)
-        return
+        return _neStatsHelper(neFile,0.05)
+
     configVals = neConfigRead(configFile)
-    _neStatsHelper(neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
+    return _neStatsHelper(neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
 
 
 if __name__ == "__main__":
