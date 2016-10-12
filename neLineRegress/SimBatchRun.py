@@ -1,6 +1,7 @@
 import ConfigParser
+import os
 import re
-
+from itertools import product
 import LineRegress
 
 from neLineRegress import resultScraper
@@ -122,11 +123,6 @@ def readconfig(filename):
             paramList = re.split(delimiters.paramTemp)
             simReps = [int(value) for value in paramList]
 
-    if config.has_section("analysis"):
-        if config.has_option("analysis", "types"):
-            paramTemp = config.get("analysis", "types")
-            paramList = re.split(delimiters.paramTemp)
-            simReps = [value for value in paramList]
 
     ##create parameter dictionary for return
     paramDict = {"species":speciesFile,
@@ -141,7 +137,7 @@ def readconfig(filename):
                  "mutationRate":mutationRate,
                  "lociSampling":lociSampling,
                  "popSampling":populationSampling,
-                 "simulationReps":simReps}
+                 "simReps":simReps}
 
 def runSimulation(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate):
     neFile = ""
@@ -173,7 +169,46 @@ def gatherSlopesO(filename):
     slopeData = resultScraper.scrapeSlopes(filename)
     return slopeData
 
-def batch(configFile,operations):
+def run(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig):
+    runFolder = "l"+str(lambdaVal)+"p"+str(startPop)+"N0"+N0+"m"+str(microSats)+"ac"+str(alleleCount)+SNPs+str(SNPs)+"mr"+str(mutationRate)+"ls"+str(locisampling)+"ps"+str(popsampling)
+    print runFolder
+    runFolder = outFolder+runFolder
+    if os.path.isdir(runFolder):
+        return None
+    os.makedirs(runFolder)
+    simFiles = runSimulation(species,runFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate)
+    neFile = runNeEst(simFiles,locisampling,popsampling,regressConfig)
+    return neFile
+
+def runSamplingOnly(,locisampling,popsampling,regressConfig):
+
+
+def batch(configFile,operations,threads = 1):
     configs  = readconfig(configFile)
+    speciesFile = configs["species"]
+    outFolder = configs["outputFolder"]
+    incriment = 1
+    while os.path.isdir(outFolder):
+        outFolder = outFolder+"("+incriment+")"
+        incriment+=1
+    os.mkdirs(outFolder)
+    runParams = product(configs["species"],[outFolder],configs["simReps"],configs["lambdas"],configs["startPops"],configs["N0"],configs["microsats"],configs["alleleCount"],configs["SNPs"],configs["mutationRate"],configs["lociSampling"],configs["popSampling"],configs["regressConfig"])
+
+    if len(configs["simReps"])==1 and len(configs["startPops"])==1 and len(configs["N0"])==1 and len(configs["microsats"])==1 and len(configs["alleleCount"])==1 and len(configs["SNPs"])==1 and len(configs["mutationRate"])==1:
+        if threads == 1:
+            neFiles = []
+            simFiles = runSimulation(runParams[0],runParams[1],runParams[2],runParams[3],runParams[4],runParams[5],runParams[6],runParams[7],runParams[8],runParams[9])
+
+            for paramset in runParams:
+                neFile =
+    else:
+        if threads ==1:
+            neFiles = []
+            for paramset in runParams:
+                neFiles.append(run(*runParams))
+
+
+
+
 
 
