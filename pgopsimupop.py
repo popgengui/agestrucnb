@@ -252,7 +252,8 @@ class PGOpSimuPop( modop.APGOperation ):
 		nLoci=self.input.numMSats + self.input.numSNPs
 		startLambda=self.input.startLambda
 		lbd=self.input.lbd
-		initOps = [sp.InitSex(maleFreq=self.input.maleProb)]
+		##todo !! this is where you select sex proporotion(maleProp) or freqency(maleFreq)
+		initOps = [sp.InitSex(maleProp=self.input.maleProb)]
 		if startLambda < pgin.START_LAMBDA_IGNORE:
 			preOps = [sp.ResizeSubPops(proportions=(float(lbd), ),
 								begin=startLambda)]
