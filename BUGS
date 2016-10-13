@@ -3,16 +3,14 @@
 Fri Jul 29 15:49:24 MDT 2016
 
 B1.  Running 9 simulations -- bug may be solved, but have not yet
-retested ( 2016_08_15 ) -- have added code to kill processes when
-the gui is killed, which at least should not leave haning processes.
-However, the 9-sim hang may persist untill killed -- as noted, 
-2 of them were much more computationally intensive (CI)
-than the others, resulted  in one of the CI sims to hang.  I was able to
-recreate the problem on two computers (Linux) when I used the same 9 config
-files and started them in the same order.  On one comuter, closing the gui
-seems to have left the hanging process (running do_sim_replicate.py) running.
-On the 2nd computer, closing the GUI killed all subprocesses still running
-sims. 
+	retested ( 2016_08_15 ) -- have added code to kill processes when the gui is
+	killed, which at least should not leave haning processes.  However, the 9-sim hang may persist untill killed -- as noted, 2 of them were much more
+	computationally intensive (CI) than the others, resulted  in one of the CI sims
+	to hang.  I was able to recreate the problem on two computers (Linux) when I
+	used the same 9 config files and started them in the same order.  On one
+	comuter, closing the gui seems to have left the hanging process (running
+	do_sim_replicate.py) running.  On the 2nd computer, closing the GUI killed all
+	subprocesses still running sims. 
 
 B2.  Related to B1, clicking the "Cancel Simulatin" button during a long
 simulation did not kill the process.  --testing shows fixed as of Fri Aug 12
@@ -24,9 +22,10 @@ B3.  Cancelling an ne-estmation in the gui has seconds of delay before Ne2
 executable stops.  Then process dies with error in the multiprocessing mod --
 need a cleaner exit
 
-B4. Fixed in pytgenomics latest 20160825.  Windows -- pygenomics Controller.py uses a system command includeing
-"/dev/null", which directory windows lacks.  A patch using python's x-platform
-definition for null locations needs to be incorporated.
+B4. Fixed in pygenomics latest 20160825.  Windows -- pygenomics Controller.py
+	uses a system command includeing "/dev/null", which directory windows lacks.  A
+	patch using python's x-platform definition for null locations needs to be
+	incorporated.
 
 B5. Fixed 2016_08_15 -- mangled names in main menu.
 
@@ -36,48 +35,69 @@ the file because it is being used by another process."  File locking conflict
 does not occur in Linux (Nor, I think, in OSX, but will need to test).
 
 B7.  Loading a config file in the simulation interface -- cliking the select
-button then cancelling rarely results in an update that sets the config file to
-emtpy -- hard ro reproduce, as I'm not sure of the necessary conditions.
+	button then cancelling rarely results in an update that sets the config
+	file to emtpy -- hard ro reproduce, as I'm not sure of the necessary conditions.
 
 B8.  Rare but possible -- it's currently possible to load a genepop file that's been written as
-file but not yet filled iwth data, as the sim is not yet done -- but then
-running ne-estimator on the empty or parial genepop file.  However, since the
-genepop file is written to a tempname first (named using python uuid), this
-condition is only possible if an "os.move()" command is interrupted after ther
-user has chosen the (unlikely) temp name as input, or if  such that there's a
-final *genepop name but no data yet in the file.
+	file but not yet filled iwth data, as the sim is not yet done -- but then
+	running ne-estimator on the empty or parial genepop file.  However, since the
+	genepop file is written to a tempname first (named using python uuid), this
+	condition is only possible if an "os.move()" command is interrupted after ther
+	user has chosen the (unlikely) temp name as input, or if  such that there's a
+	final *genepop name but no data yet in the file.
 
 B9.  Total characters in a genepop file go be used as input into the
-NeEstimator must not exceed 31 characters.  This was a result of my
-intermediate file naming conventions and a limit on the number of characters
-that the NeEstimator executable will use for its own output files.  I don't yet
-have a fix, but I have coded warning dialogs when genepop files for input have
-names that exceed the limit.
+	NeEstimator must not exceed 31 characters, else the auto-truncation that
+	program performes on longer names, makes the output names unrecog.  to my
+	algorithm.  For now I'm enforcing a much smaller basename for genepop file input
+	(18chars), to make room for the rep/generation/subsampleparam fields I'm adding
+	to intermediate NeEstimation files.  I don't yet have a fix, but I have coded
+	warning dialogs when genepop files for input have names that exceed the limit.
 
 Mon Aug 15 15:14:34 MDT 2016
 
-B10 Fixed 20160825 -- Windows -- seems to have resolve after revisions to pgdriveneestimator.py
-as of 2016_08_22 -- may have been change from multiprocessing.pool.map to
-map_async. 32-bit and 64-bit Win 7 (not in 64-bit win10) -- in GUI
-(therefore running using async python.multiprocessing pool), after invoking
-negui.py from powershell, then starting an ne-estimation: "WindowsError:
-[Error3] The system cannot find the path specified:
-'%SystemBoot%\\system32\\WindowsPowerShell\\v1.0]]\*.*'  Alternatively, when
-double-clicking on negui.py, an error message that traces back to
-pgdriveneestimator.py's def "execute_ne_for_each_sample", but ends in pool.py,
-line 567, "in get, raise, self._value, TypeError: object of type 'NoneType' has
-no len()"
+B10 Fixed 20160825 -- Windows -- seems to have resolve after revisions to
+	pgdriveneestimator.py as of 2016_08_22 -- may have been change from
+	multiprocessing.pool.map to map_async. 32-bit and 64-bit Win 7 (not in 64-bit
+	win10) -- in GUI (therefore running using async python.multiprocessing pool),
+	after invoking negui.py from powershell, then starting an ne-estimation:
+	"WindowsError: [Error3] The system cannot find the path specified:
+	'%SystemBoot%\\system32\\WindowsPowerShell\\v1.0]]\*.*'  Alternatively, when
+	double-clicking on negui.py, an error message that traces back to
+	pgdriveneestimator.py's def "execute_ne_for_each_sample", but ends in pool.py,
+	line 567, "in get, raise, self._value, TypeError: object of type 'NoneType' has
+	no len()"
 
 B11 Fixed 2016_08_15, Windows success on win10 -- win10 and win7, when
-running the command line script pgdriveneestimator.py, either using "debug3" to
-run searially, or run async, terminates iwth trace back to writeGenePopFile in
-genepopfilemanager.py, line 360, def wirteGenePopFIle -- havaing been called
-from do_estimate() in pgdriveneestimator.py, line 459.  error: "IOError: [Errno
-2] No such file or directory: "  and then the files path, that begins has the
-form "_\\*filename
--- looks like a bad path formation in the code.
+	running the command line script pgdriveneestimator.py, either using "debug3" to
+	run searially, or run async, terminates iwth trace back to writeGenePopFile in
+	genepopfilemanager.py, line 360, def wirteGenePopFIle -- havaing been called
+	from do_estimate() in pgdriveneestimator.py, line 459.  error: "IOError: [Errno
+	2] No such file or directory: "  and then the files path, that begins has the
+	form "_\\*filename
+	-- looks like a bad path formation in the code.
 
-Thu Aug 25 19:24:42 MDT 2016
-B12 If any genepop file name has one or more comma in it, the Ne Estimation interface can't correctly parse the file name and will generate a file not found message.
-B13 NeEstimator sometimes leaves *xTp*txt files after a run, and they should have a default save or delete.
-B14 In NeEstimator interface -- need to revise the paramater/input files/output files check done before running.  The check for intermediate files will (redundantly complain about the output files existing (need a separate function to check for existing output files versus the intermediate files based on input genepop names.
+Thu Aug 25 19:24:42 MDT 2016 
+	B12 If any genepop file name has one or more comma
+	in it, the Ne Estimation interface can't correctly parse the file name and will
+	generate a file not found message.  B13 NeEstimator sometimes leaves *xTp*txt
+	files after a run, and they should have a default save or delete.  B14 In
+	NeEstimator interface -- need to revise the paramater/input files/output files
+	check done before running.  The check for intermediate files will (redundantly
+	complain about the output files existing (need a separate function to check for
+	existing output files versus the intermediate files based on input genepop
+	names.
+Tue Aug 30 16:07:04 MDT 2016
+	B13 simuPOP thrashes when lambda makes pop size shrink to too small
+	before gens are done.  On OSX, have seen that cancelling the sim leaves the
+	simuPOP python processes orphaned and still working.  tests on linux, invoking
+	the same thrashing show that the processes are killed.  However, Not sure if the
+	OSX problem was a special case that is repeatable on other platforms, since
+	exact actions leading to the instance of orphaned working processes on the OSX problem 
+	are not known.
+Wed Aug 31 12:45:31 MDT 2016
+	B14 If you run a simulation and set "replicates" to >1, then the *conf file that is produced
+	by the run will have its "replicates" param set to 1 (since the replicates are run as single
+	instances, reloading simupop for each replicate).  Using the *conf file, then, to repeat
+	the run with > 1 replicate, currently requires the user to reset the "repicates" param in
+	the interface.
