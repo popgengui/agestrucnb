@@ -9,7 +9,7 @@ import ConfigParser
 from numpy import array, math
 from scipy import stats
 import matplotlib.pyplot as plt
-from numpy import mean, median
+from numpy import mean, median, isnan
 import csv
 import sys
 
@@ -42,44 +42,45 @@ def _pointsToVectors(points):
 #function that implements the matplotlib and creates the graph object, also shows or saves the object to file
 #dest parameter:  if show graph is printed to screen using .show() otherwise expects a filename with extension and saves the file in that format as per .savefig()
 def createGraph(lineArray, title = None, xlab = None, yLab= None, colorVctr = None, styleVctr = None, dest = "show", xLim = None, yLim = None):
-    lineCount = len(lineArray)
-    if colorVctr and len(colorVctr) < lineCount:
-        difference = lineCount-len(colorVctr)
-        for  x in range(difference):
-            colorVctr.append(colorVctr[len(colorVctr)-1])
-    if styleVctr and len(styleVctr) < lineCount:
-        difference = lineCount-len(styleVctr)
-        for  x in range(difference):
-            styleVctr.append(styleVctr[len(styleVctr)-1])
+    if dest != "none":
+        lineCount = len(lineArray)
+        if colorVctr and len(colorVctr) < lineCount:
+            difference = lineCount-len(colorVctr)
+            for  x in range(difference):
+                colorVctr.append(colorVctr[len(colorVctr)-1])
+        if styleVctr and len(styleVctr) < lineCount:
+            difference = lineCount-len(styleVctr)
+            for  x in range(difference):
+                styleVctr.append(styleVctr[len(styleVctr)-1])
 
-    colorFlag = ""
-    styleFlag = ""
-    for yVctrIdx in range(lineCount):
-        if colorVctr:
-            colorFlag = colorVctr[yVctrIdx]
-        if styleVctr:
-            styleFlag = styleVctr[yVctrIdx]
-        argFlag = colorFlag+styleFlag
-        xvctr, yvctr = _pointsToVectors(lineArray[yVctrIdx])
+        colorFlag = ""
+        styleFlag = ""
+        for yVctrIdx in range(lineCount):
+            if colorVctr:
+                colorFlag = colorVctr[yVctrIdx]
+            if styleVctr:
+                styleFlag = styleVctr[yVctrIdx]
+            argFlag = colorFlag+styleFlag
+            xvctr, yvctr = _pointsToVectors(lineArray[yVctrIdx])
 
-        xVctr = array(xvctr)
-        yVctr = array(yvctr)
-        plt.plot(xVctr,yVctr,argFlag)
-    if title:
-        plt.title(title)
-    if xlab:
-        plt.xlabel(xlab)
-    if yLab:
-        plt.ylabel(yLab)
-    if xLim:
-        plt.xlim(xLim)
-    if yLim:
-        plt.ylim(yLim)
+            xVctr = array(xvctr)
+            yVctr = array(yvctr)
+            plt.plot(xVctr,yVctr,argFlag)
+        if title:
+            plt.title(title)
+        if xlab:
+            plt.xlabel(xlab)
+        if yLab:
+            plt.ylabel(yLab)
+        if xLim:
+            plt.xlim(xLim)
+        if yLim:
+            plt.ylim(yLim)
 
-    if dest == "show":
-        plt.show()
-    else:
-        plt.savefig(dest, bbox_inches='tight')
+        if dest == "show":
+            plt.show()
+        else:
+            plt.savefig(dest, bbox_inches='tight')
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -95,7 +96,7 @@ def slopeConfidence(alpha, linePoints):
     #get linear regression for points
     regression = lineRegress(linePoints)
     #get Tscore
-    tScore = stats.t.ppf(1-(alpha/2), len(linePoints)-2)
+    tScore = stats.t.ppf((1-alpha/2), len(linePoints)-2)
 
 
     #get s(b1)  == (MSE)/sum(xi-mean(x))^2)
@@ -171,11 +172,11 @@ def _getExpectedLineStats(slopes, intercepts, xVctr,expectedSlope = None):
 def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
     #get linear regression stats for all datasets
     LineStats = []
-    for line in dataVctrs:
+    for line in dataVctrs.values():
         data = lineRegress(line)
         LineStats.append(data)
     #flatten the array
-    allpoints = [val for sublist in dataVctrs  for val in sublist]
+    allpoints = [val for sublist in dataVctrs.values()  for val in sublist]
     #unzip to obtain x and y value vectors for all points
     xVals, yVals = zip(*allpoints)
 
@@ -258,8 +259,8 @@ def neFileRead(filename, firstVal = 0):
         dataDict[sourceName][popNum] = neEst
         popDict[sourceName][popNum]=individualCount
     replicateKeys = dataDict.keys()
-    resultTable = []
-    individualCountTable = []
+    resultTable = {}
+    individualCountTable = {}
     for replicate in replicateKeys:
         replicateVctr = []
         individualCountVctr = []
@@ -272,8 +273,8 @@ def neFileRead(filename, firstVal = 0):
                 #print popKey
                 replicateVctr.append((popKey,replicateDict[popKey]))
                 individualCountVctr.append((popKey,individualCountDict[popKey]))
-        resultTable.append(replicateVctr)
-        individualCountTable.append(individualCountVctr)
+        resultTable[replicate] = replicateVctr
+        individualCountTable[replicate] = individualCountVctr
     return resultTable,individualCountTable
 
 
@@ -305,7 +306,9 @@ def neConfigRead(filename):
             yLab = config.get("labels", "yLab")
     if config.has_section("destination"):
         destType = config.get("destination","desttype")
-        if destType != "show":
+        if destType=="none":
+            destType = "none"
+        if destType != "show" or "none":
             destination = config.get("destination","destFile")
     if config.has_section("comparison"):
         valueFlag = True
@@ -381,18 +384,23 @@ def neGrapher(neFile, configFile):
 #significantValue: value of comparison w/ regards to slope. should be 0 for every test, but can be changed if needed.
 #testFlag: flag that disables file write and prints stats to console instead, used for test functions
 def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,testFlag = False):
-    tableFormat = "{:<30}{:<30}{:<30}\n"
+    tableFormat = "{:<30}{:<30}{:<50}{:<80}\n"
     confPercent = (1 - confidenceAlpha)*100
-    tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)")
+    tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)","Source File")
     table, countsTable = neFileRead(neFile,firstVal)
     slopeVctr = []
     confidenceVctr = []
 
-    for record in table:
+    Uncountable = 0
+    for recordKey in table.keys():
+        record = table[recordKey]
         slope, intercept, confidence  = slopeConfidence(confidenceAlpha,record)
-        tableString+=tableFormat.format(slope,intercept,confidence)
-        slopeVctr.append(slope)
-        confidenceVctr.append(confidence)
+        tableString+=tableFormat.format(slope,intercept,confidence,recordKey)
+        if isnan(slope):
+            Uncountable +=1
+        else:
+            slopeVctr.append(slope) 
+            confidenceVctr.append(confidence)
     maxSlope = max(slopeVctr)
     minSlope = min(slopeVctr)
     meanSlope = mean(slopeVctr)
@@ -424,19 +432,21 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     outFile.write("Meadian Regression Slope:\t"+str(medSlope)+"\n")
     outFile.write("\n")
     outFile.write("Comparison to a slope of: "+str(significantValue)+"  at alpha =  "+str(confidenceAlpha)+"\n")
-    outFile.write("Positive Slopes:\t"+str(positiveCount)+"\t\tNeutral Slopes:\t"+str(zeroCount)+"\t\tNegative Slopes:\t"+str(negativeCount))
+    outFile.write("Positive Slopes:\t"+str(positiveCount)+"\t\tNeutral Slopes:\t"+str(zeroCount)+"\t\tNegative Slopes:\t"+str(negativeCount)+"\n")
+    outFile.write("Non-Number Slopes:\t"+str(Uncountable))
     outFile.write("\n\n")
     outFile.write(tableString)
     outFile.close()
+    return outFileName
 
 
 
 def neStats(neFile, configFile = None, testFlag = False):
     if not  configFile:
-        _neStatsHelper(neFile,0.05)
-        return
+        return _neStatsHelper(neFile,0.05)
+
     configVals = neConfigRead(configFile)
-    _neStatsHelper(neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
+    return _neStatsHelper(neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
 
 
 if __name__ == "__main__":
