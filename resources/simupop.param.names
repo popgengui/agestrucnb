@@ -15,6 +15,9 @@
 #		vii. IDX_TAG_FIELD_MIN_VALUE=6
 #		viii.IDX_TAG_FIELD_MAX_VALUE=7
 #		viv. IDX_TAG_FIELD_TOOL_TIP=8
+#		x. IDX_TAG_FIELD_GUI_CONTROL=9
+#		xi. IDX_TAG_FIELD_GUI_CONTROL_LIST=10
+#		
 #Many of these are not yet used by the interface (as of 2016_08_20 ). Note especially 
 #that for the PGInputSimuPop and PGGuiSimuPop objects default values are 
 #not accessed from this file, rather from the config file that is loaded, and, in some 
@@ -22,38 +25,38 @@
 #values in PGInputSimuPop. Type checks using value ranges are also ignored by using 
 #None;None;None for the type, min, and max fields.
 #
-N0	N0 (Newborns)	Population;2;1;1;0;None;None;None;Newborns per cycle (before lambda).
-Nb	Nb	suppress;0;0;1;0;None;None;None;""
-NbVar	NbVar	suppress;0;0;1;0;None;None;None;""
-ages	Ages	Population;2;1;1;0;None;None;None;Ages
-config_file	Configuration File	Configuration Info;1;1;1;"none";None;None;None;Configuration file
-life_table_glob	Life Table File(s)	Configuration Info;1;1;1;"none";None;None;None;Life table files
-dataDir	Data Directory	suppress;0;0;1;0;None;None;None;""
+N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle (before lambda).;entry;None
+Nb	Nb;suppress;0;0;1;0;int;None;None;"";entry;None
+NbVar	NbVar;suppress;0;0;1;0;int;None;None;"";entry;None
+ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None
+config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None
+life_table_glob	Life Table File(s);Configuration Info;1;1;1;"none";str;None;None;Life table files;entry;None
+dataDir	Data Directory;suppress;0;0;1;"";str;None;None;"";entry;None
 #suppressing the negative binomial switch as of 2016_08_24, as it is actually
 #a param treated as an internal flag, and depends solely on absense/presence of gamma lists (see below)
-doNegBinom	Use negative binomial	suppress;4;1;1;False;None;None;None;Use Negative Binomial
-fecundityFemale	Female relative fecundity	Population;2;1;1;[];None;None;None;Female Relative Fecundity
-fecundityMale	Male relative fecundity	Population;2;1;1;[];None;None;None;Male Relative Fecundity
-forceSkip	Force skip	Population;2;1;1;[];None;None;None;Force Skip
-gens	Reproductive cycles	Population;2;1;1;1;None;None;None;Reproductive Cycles
-isMonog	Monogamous	Population;2;1;1;False;None;None;None;Monogamous
-lbd	Lambda (after burn-in)	Simulation;4;1;1;1.0;None;None;None;Lambda after burn in
-litter	Litter size probability	Population;2;1;1;0.0;Float;None;None;Litter size probability
-maleProb	Probability male birth	Population;2;1;1;0.5;Float;0;1;Probability male birth
-model_name	Model	Configuration Info;1;1;1;none;None;None;None;Model name
-numSNPs	Number of SNPs	Genome;3;1;1;0;None;None;None;Number of SNPs
-mutFreq	Mutation frequency	Genome;3;1;1;0;None;None;None;Mutation Frequency
-numMSats	Number of microsatellites	Genome;3;1;1;0;None;None;None;Number of Microsats
-param_names	param names object	suppress;0;0;0;0;None;None;None;""
-popSize	Population size	Population;2;1;1;0;None;None;None;Populaion Size
-reps	Replicates	Simulation;4;1;1;1;None;None;None;Replicates
-skip	Skip breeding probability	Simulation;4;1;1;[];None;None;None;Skip breeding probability
-startAlleles	Starting Msat allele total	Genome;3;1;1;0;None;None;None;Starting microsat allele total
-startLambda	Cycles of burn-in	Simulation;5;1;1;99999;None;None;None;Lambda burn-in (99999 means no burn-in.)
-startSave	Starting save	suppress;5;1;1;1;None;None;None;Starting Starting data save
-survivalFemale	Female survival	Population;2;1;1;[];None;None;None;Female Survival
-survivalMale	Male survival	Population;2;1;1;[];None;None;None;Male Survival
-gammaAFemale	Female gamma A	Population;2;1;1;None;None;None;None;Female Gamma A
-gammaBFemale	Female gamma B	Population;2;1;1;None;None;None;None;Female Gamma B
-gammaAMale	Male gamma A	Population;2;1;1;None;None;None;None;Male Gamma A
-gammaBMale	Male gamma B	Population;2;1;1;None;None;None;None;Male Gamma B
+doNegBinom	Use negative binomial;suppress;4;1;1;False;bool;None;None;Use Negative Binomial;entry;None
+fecundityFemale	Female relative fecundity;Population;2;1;1;None;listfloat;None;None;Female Relative Fecundity;entry;None
+fecundityMale	Male relative fecundity;Population;2;1;1;None;listfloat;None;None;Male Relative Fecundity;entry;None
+forceSkip	Force skip;Population;2;1;1;None;int;None;None;Force Skip;entry;None
+gens	Reproductive cycles;Population;2;1;1;1;int;None;None;Reproductive Cycles;entry;None
+isMonog	Monogamous;Population;2;1;1;False;bool;None;None;Monogamous;entry;None
+lbd	Lambda (after burn-in);Simulation;4;1;1;1.0;float;None;None;Lambda after burn in;entry;None
+litter	Litter;Population;2;1;1;None;listint;None;None;Litter;entry;None
+maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth;entry;None
+model_name	Model;Configuration Info;1;1;1;"none";str;None;None;Model name;entry;None;entry;None
+numSNPs	Number of SNPs;Genome;3;1;1;0;int;None;None;Number of SNPs;entry;None
+mutFreq	Mutation frequency;Genome;3;1;1;0;int;None;None;Mutation Frequency;entry;None
+numMSats	Number of microsatellites;Genome;3;1;1;0;int;None;None;Number of Microsats;entry;None
+param_names	param names object;suppress;0;0;0;0;str;None;None;"";entry;None
+popSize	Population size;Population;2;1;1;0;None;None;None;Populaion Size;entry;None
+reps	Replicates;Simulation;4;1;1;1;None;None;None;Replicates;entry;None
+skip	Skip breeding probability;Simulation;4;1;1;None;listfloat;None;None;Skip breeding probability;entry;None
+startAlleles	Starting Msat allele total;Genome;3;1;1;0;None;None;None;Starting microsat allele total;entry;None
+startLambda	Cycles of burn-in;Simulation;5;1;1;99999;None;None;None;Lambda burn-in (99999 means no burn-in.);entry;None
+startSave	Starting save;suppress;5;1;1;1;None;None;None;Starting Starting data save;entry;None
+survivalFemale	Female survival;Population;2;1;1;None;listfloat;None;None;Female Survival;entry;None
+survivalMale	Male survival;Population;2;1;1;None;listfloat;None;None;Male Survival;entry;None
+gammaAFemale	Female gamma A;Population;2;1;1;None;listfloat;None;None;Female Gamma A;entry;None
+gammaBFemale	Female gamma B;Population;2;1;1;None;listfloat;None;None;Female Gamma B;entry;None
+gammaAMale	Male gamma A;Population;2;1;1;None;listfloat;None;None;Male Gamma A;entry;None
+gammaBMale	Male gamma B;Population;2;1;1;None;listfloat;None;None;Male Gamma B;entry;None

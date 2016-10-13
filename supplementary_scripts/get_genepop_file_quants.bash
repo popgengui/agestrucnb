@@ -47,6 +47,9 @@ awk 'BEGIN{
 	     }
      }
      END{ 
+     	#last populaion count is not printed in main loop:
+	print popnum "\t" indiv_count
+
      	print "header: "  myheader > "/dev/stderr"
 	print "total loci: "  loci_count > "/dev/stderr"
      	print "total pops: "  popnum > "/dev/stderr"
