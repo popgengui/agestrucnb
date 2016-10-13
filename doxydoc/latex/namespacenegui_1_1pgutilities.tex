@@ -71,7 +71,7 @@ def \hyperlink{namespacenegui_1_1pgutilities_aa839d4997d2bd2c15016c33cc7fce3b0}{
 \item 
 def \hyperlink{namespacenegui_1_1pgutilities_aed0f15b22462914445ffe1ec2a77cbc8}{convert\+\_\+genepop\+\_\+files\+\_\+string\+\_\+to\+\_\+list\+\_\+format} (s\+\_\+genepop\+\_\+files)
 \item 
-def \hyperlink{namespacenegui_1_1pgutilities_abce749cfc8159cf9aed491a8a1c8dbe3}{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process} (o\+\_\+multiprocessing\+\_\+event, s\+\_\+genepop\+\_\+files, s\+\_\+sample\+\_\+scheme, li\+\_\+sample\+\_\+params, i\+\_\+min\+\_\+pop\+\_\+size, f\+\_\+min\+\_\+allele\+\_\+freq, i\+\_\+replicates, i\+\_\+num\+\_\+processes, s\+\_\+runmode, s\+\_\+outfile\+\_\+basename, s\+\_\+file\+\_\+delimiter=\char`\"{})
+def \hyperlink{namespacenegui_1_1pgutilities_a4e8f98e83b41d19925860876d274beaa}{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process} (o\+\_\+multiprocessing\+\_\+event, s\+\_\+genepop\+\_\+files, qs\+\_\+sample\+\_\+scheme\+\_\+args, f\+\_\+min\+\_\+allele\+\_\+freq, i\+\_\+replicates, s\+\_\+loci\+\_\+sampling\+\_\+scheme, s\+\_\+loci\+\_\+sampling\+\_\+scheme\+\_\+param, i\+\_\+min\+\_\+loci\+\_\+position, i\+\_\+max\+\_\+loci\+\_\+position, i\+\_\+max\+\_\+total\+\_\+loci, i\+\_\+num\+\_\+processes, s\+\_\+runmode, s\+\_\+outfile\+\_\+basename, s\+\_\+file\+\_\+delimiter=\char`\"{})
 \end{DoxyCompactItemize}
 \subsection*{Variables}
 \begin{DoxyCompactItemize}
@@ -689,21 +689,24 @@ Definition at line 286 of file pgutilities.\+py.
 \end{DoxyCode}
 \index{negui\+::pgutilities@{negui\+::pgutilities}!run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process@{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process}}
 \index{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process@{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process}!negui\+::pgutilities@{negui\+::pgutilities}}
-\subsubsection[{\texorpdfstring{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process(o\+\_\+multiprocessing\+\_\+event, s\+\_\+genepop\+\_\+files, s\+\_\+sample\+\_\+scheme, li\+\_\+sample\+\_\+params, i\+\_\+min\+\_\+pop\+\_\+size, f\+\_\+min\+\_\+allele\+\_\+freq, i\+\_\+replicates, i\+\_\+num\+\_\+processes, s\+\_\+runmode, s\+\_\+outfile\+\_\+basename, s\+\_\+file\+\_\+delimiter="")}{run_driveneestimator_in_new_process(o_multiprocessing_event, s_genepop_files, s_sample_scheme, li_sample_params, i_min_pop_size, f_min_allele_freq, i_replicates, i_num_processes, s_runmode, s_outfile_basename, s_file_delimiter=")}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgutilities.\+run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process (
+\subsubsection[{\texorpdfstring{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process(o\+\_\+multiprocessing\+\_\+event, s\+\_\+genepop\+\_\+files, qs\+\_\+sample\+\_\+scheme\+\_\+args, f\+\_\+min\+\_\+allele\+\_\+freq, i\+\_\+replicates, s\+\_\+loci\+\_\+sampling\+\_\+scheme, s\+\_\+loci\+\_\+sampling\+\_\+scheme\+\_\+param, i\+\_\+min\+\_\+loci\+\_\+position, i\+\_\+max\+\_\+loci\+\_\+position, i\+\_\+max\+\_\+total\+\_\+loci, i\+\_\+num\+\_\+processes, s\+\_\+runmode, s\+\_\+outfile\+\_\+basename, s\+\_\+file\+\_\+delimiter="")}{run_driveneestimator_in_new_process(o_multiprocessing_event, s_genepop_files, qs_sample_scheme_args, f_min_allele_freq, i_replicates, s_loci_sampling_scheme, s_loci_sampling_scheme_param, i_min_loci_position, i_max_loci_position, i_max_total_loci, i_num_processes, s_runmode, s_outfile_basename, s_file_delimiter=")}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgutilities.\+run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process (
 \begin{DoxyParamCaption}
 \item[{}]{o\+\_\+multiprocessing\+\_\+event, }
 \item[{}]{s\+\_\+genepop\+\_\+files, }
-\item[{}]{s\+\_\+sample\+\_\+scheme, }
-\item[{}]{li\+\_\+sample\+\_\+params, }
-\item[{}]{i\+\_\+min\+\_\+pop\+\_\+size, }
+\item[{}]{qs\+\_\+sample\+\_\+scheme\+\_\+args, }
 \item[{}]{f\+\_\+min\+\_\+allele\+\_\+freq, }
 \item[{}]{i\+\_\+replicates, }
+\item[{}]{s\+\_\+loci\+\_\+sampling\+\_\+scheme, }
+\item[{}]{s\+\_\+loci\+\_\+sampling\+\_\+scheme\+\_\+param, }
+\item[{}]{i\+\_\+min\+\_\+loci\+\_\+position, }
+\item[{}]{i\+\_\+max\+\_\+loci\+\_\+position, }
+\item[{}]{i\+\_\+max\+\_\+total\+\_\+loci, }
 \item[{}]{i\+\_\+num\+\_\+processes, }
 \item[{}]{s\+\_\+runmode, }
 \item[{}]{s\+\_\+outfile\+\_\+basename, }
 \item[{}]{s\+\_\+file\+\_\+delimiter = {\ttfamily \char`\"{}}}
 \end{DoxyParamCaption}
-)}\hypertarget{namespacenegui_1_1pgutilities_abce749cfc8159cf9aed491a8a1c8dbe3}{}\label{namespacenegui_1_1pgutilities_abce749cfc8159cf9aed491a8a1c8dbe3}
+)}\hypertarget{namespacenegui_1_1pgutilities_a4e8f98e83b41d19925860876d274beaa}{}\label{namespacenegui_1_1pgutilities_a4e8f98e83b41d19925860876d274beaa}
 \begin{DoxyVerb}Similar to def above, "do_operation_outside," this def is called from a
 PGGuiNeEstimator instance, in def runEstimator(), which first spawns
 a python multiprocessing.Process, which targest this def, and provides
@@ -717,93 +720,107 @@ pops per file using python.multiprocessing.Process objects.
 \end{DoxyVerb}
  
 
-Definition at line 624 of file pgutilities.\+py.
+Definition at line 627 of file pgutilities.\+py.
 
 
 \begin{DoxyCode}
-624                                         s\_file\_delimiter=\textcolor{stringliteral}{","} ):
-625     \textcolor{stringliteral}{'''}
-626 \textcolor{stringliteral}{    Similar to def above, "do\_operation\_outside," this def is called from a}
-627 \textcolor{stringliteral}{    PGGuiNeEstimator instance, in def runEstimator(), which first spawns}
-628 \textcolor{stringliteral}{    a python multiprocessing.Process, which targest this def, and provides}
-629 \textcolor{stringliteral}{    it with the multiprocessing.Event that will signal it to abort and cleanup}
-630 \textcolor{stringliteral}{    (see above).}
-631 \textcolor{stringliteral}{}
-632 \textcolor{stringliteral}{    This def is simpler than the do\_operation\_outside def, however, in that it}
-633 \textcolor{stringliteral}{    spawns only a single OS process, that calls python to execute pgdriveneestimator.py,}
-634 \textcolor{stringliteral}{    which itself multiplexes the NeAnlaysis of multiple genepop files and (likely) multiple}
-635 \textcolor{stringliteral}{    pops per file using python.multiprocessing.Process objects.}
-636 \textcolor{stringliteral}{    '''}
-637     s\_os\_plaform\_name=platform.system()
-638     
-639     \textcolor{comment}{#if we're on windows, file}
-640     \textcolor{comment}{#paths may be a mangled mix of unix and }
-641     \textcolor{comment}{#windows separators -- with errors resulting}
-642     \textcolor{comment}{#downstream.  So we standardize:}
-643     \textcolor{keywordflow}{if} s\_os\_plaform\_name == \textcolor{stringliteral}{"windows"}:
-644 
-645         ls\_current\_file\_list=s\_genepop\_files.split( s\_file\_delimiter )
-646         ls\_new\_file\_list=[]
-647         \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_current\_file\_list:
-648             ls\_new\_file\_list.append( fix\_windows\_path( s\_file ) )
-649         \textcolor{comment}{#end for each file}
-650         
-651         \textcolor{comment}{#replace orig arg with new "fixed" file paths}
-652         s\_genepop\_files=\textcolor{stringliteral}{","}.join( ls\_new\_file\_list )
-653 
-654         \textcolor{comment}{#also need to fix outile path:}
-655         s\_outfile\_basename = fix\_windows\_path( s\_outfile\_basename )
-656     \textcolor{comment}{#end if windows, fix file path strings}
+627                                         s\_file\_delimiter=\textcolor{stringliteral}{","} ):
+628     \textcolor{stringliteral}{'''}
+629 \textcolor{stringliteral}{    Similar to def above, "do\_operation\_outside," this def is called from a}
+630 \textcolor{stringliteral}{    PGGuiNeEstimator instance, in def runEstimator(), which first spawns}
+631 \textcolor{stringliteral}{    a python multiprocessing.Process, which targest this def, and provides}
+632 \textcolor{stringliteral}{    it with the multiprocessing.Event that will signal it to abort and cleanup}
+633 \textcolor{stringliteral}{    (see above).}
+634 \textcolor{stringliteral}{}
+635 \textcolor{stringliteral}{    This def is simpler than the do\_operation\_outside def, however, in that it}
+636 \textcolor{stringliteral}{    spawns only a single OS process, that calls python to execute pgdriveneestimator.py,}
+637 \textcolor{stringliteral}{    which itself multiplexes the NeAnlaysis of multiple genepop files and (likely) multiple}
+638 \textcolor{stringliteral}{    pops per file using python.multiprocessing.Process objects.}
+639 \textcolor{stringliteral}{    '''}
+640 
+641     s\_os\_plaform\_name=platform.system()
+642     
+643     \textcolor{comment}{#if we're on windows, file}
+644     \textcolor{comment}{#paths may be a mangled mix of unix and }
+645     \textcolor{comment}{#windows separators -- with errors resulting}
+646     \textcolor{comment}{#downstream.  So we standardize:}
+647     \textcolor{keywordflow}{if} s\_os\_plaform\_name == \textcolor{stringliteral}{"windows"}:
+648 
+649         ls\_current\_file\_list=s\_genepop\_files.split( s\_file\_delimiter )
+650         ls\_new\_file\_list=[]
+651         \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_current\_file\_list:
+652             ls\_new\_file\_list.append( fix\_windows\_path( s\_file ) )
+653         \textcolor{comment}{#end for each file}
+654         
+655         \textcolor{comment}{#replace orig arg with new "fixed" file paths}
+656         s\_genepop\_files=\textcolor{stringliteral}{","}.join( ls\_new\_file\_list )
 657 
-658     \textcolor{comment}{#get the correct format for pgdriveneestimator.py's file name parsing alg:}
-659     s\_genepop\_files\_formatted\_as\_python\_list= \(\backslash\)
-660             \hyperlink{namespacenegui_1_1pgutilities_aed0f15b22462914445ffe1ec2a77cbc8}{convert\_genepop\_files\_string\_to\_list\_format}( 
-      s\_genepop\_files )
+658         \textcolor{comment}{#also need to fix outile path:}
+659         s\_outfile\_basename = fix\_windows\_path( s\_outfile\_basename )
+660     \textcolor{comment}{#end if windows, fix file path strings}
 661 
-662     \textcolor{comment}{#caller, assumed to be a pgguineestimator instance,}
-663     \textcolor{comment}{#will have "default" for the runmode val, }
-664     \textcolor{comment}{#when no extra output is desired, and multiprocessing is also}
-665     \textcolor{comment}{#desired.  We convert to the proper term used by pgdriveneestimator.py}
-666     \textcolor{comment}{#to designate this type of run:}
-667     \textcolor{keywordflow}{if} s\_runmode==\textcolor{stringliteral}{"default"}:
-668         s\_runmode=\textcolor{stringliteral}{"no\_debug"}
-669     \textcolor{comment}{#end if default runmode}
-670 
-671     seq\_arg\_set=( s\_genepop\_files\_formatted\_as\_python\_list,
-672                         s\_sample\_scheme,
-673                         \textcolor{stringliteral}{","}.join( [ str( i\_param) \textcolor{keywordflow}{for} i\_param \textcolor{keywordflow}{in} li\_sample\_params ] ),
-674                         str( i\_min\_pop\_size ),
-675                         str( f\_min\_allele\_freq ),
-676                         str( i\_replicates ),
-677                         str( i\_num\_processes ),
-678                         s\_runmode )
-679 
-680     s\_main\_output\_filename=s\_outfile\_basename + \textcolor{stringliteral}{"."} \(\backslash\)
-681             + NE\_ESTIMATION\_MAIN\_TABLE\_FILE\_EXT
-682 
-683     s\_secondary\_output\_filename=s\_outfile\_basename + \textcolor{stringliteral}{"."} \(\backslash\)
-684             + NE\_ESTIMATION\_SECONDARY\_OUTPUT\_FILE\_EXT
-685 
-686     \textcolor{comment}{#pgdriveneestimator will write stdout and stderr, respectively}
-687     \textcolor{comment}{#to these files:}
-688     o\_main\_output=open( s\_main\_output\_filename, \textcolor{stringliteral}{'w'} )
-689     o\_secondary\_output=open( s\_secondary\_output\_filename, \textcolor{stringliteral}{'w'} )
-690 
-691     seq\_arg\_set += ( o\_main\_output, o\_secondary\_output )
-692     
-693     \textcolor{comment}{#the driver also takes a final arg, ref to}
-694     \textcolor{comment}{#the multiproc event -- and then checks for }
-695     \textcolor{comment}{#it being set during map\_async when using multiprocesses}
-696     \textcolor{comment}{#(see pgdriveneestimator.py def execute\_ne\_for\_each\_sample):}
-697     seq\_arg\_set += ( o\_multiprocessing\_event, )
-698 
+662     \textcolor{comment}{#get the correct format for pgdriveneestimator.py's file name parsing alg:}
+663     s\_genepop\_files\_formatted\_as\_python\_list= \(\backslash\)
+664             \hyperlink{namespacenegui_1_1pgutilities_aed0f15b22462914445ffe1ec2a77cbc8}{convert\_genepop\_files\_string\_to\_list\_format}( 
+      s\_genepop\_files )
+665 
+666     \textcolor{comment}{#caller, assumed to be a pgguineestimator instance,}
+667     \textcolor{comment}{#will have "default" for the runmode val, }
+668     \textcolor{comment}{#when no extra output is desired, and multiprocessing is also}
+669     \textcolor{comment}{#desired.  We convert to the proper term used by pgdriveneestimator.py}
+670     \textcolor{comment}{#to designate this type of run:}
+671     \textcolor{keywordflow}{if} s\_runmode==\textcolor{stringliteral}{"default"}:
+672         s\_runmode=\textcolor{stringliteral}{"no\_debug"}
+673     \textcolor{comment}{#end if default runmode}
+674 
+675     \textcolor{comment}{#Make of a single sequence of strings.}
+676     qs\_files\_args=( s\_genepop\_files\_formatted\_as\_python\_list, ) 
+677 
+678     s\_loci\_range=\textcolor{stringliteral}{"-"}.join( [ str( i\_min\_loci\_position ),
+679                                 str( i\_max\_loci\_position ) ] )
+680 
+681     qs\_terminal\_args=( str( f\_min\_allele\_freq ), 
+682                                 str( i\_replicates ), 
+683                                 s\_loci\_sampling\_scheme,
+684                                 s\_loci\_sampling\_scheme\_param,
+685                                 s\_loci\_range,
+686                                 str( i\_max\_total\_loci ),
+687                                 str( i\_num\_processes ), 
+688                                 s\_runmode )
+689 
+690     seq\_arg\_set=qs\_files\_args \(\backslash\)
+691                     + qs\_sample\_scheme\_args \(\backslash\)
+692                     + qs\_terminal\_args
+693 
+694     s\_main\_output\_filename=s\_outfile\_basename + \textcolor{stringliteral}{"."} \(\backslash\)
+695             + NE\_ESTIMATION\_MAIN\_TABLE\_FILE\_EXT
+696 
+697     s\_secondary\_output\_filename=s\_outfile\_basename + \textcolor{stringliteral}{"."} \(\backslash\)
+698             + NE\_ESTIMATION\_SECONDARY\_OUTPUT\_FILE\_EXT
 699 
-700     pgne.mymain( *seq\_arg\_set )
-701 
-702     o\_main\_output.close()
-703     o\_secondary\_output.close()
+700     \textcolor{comment}{#pgdriveneestimator will write stdout and stderr, respectively}
+701     \textcolor{comment}{#to these files:}
+702     o\_main\_output=open( s\_main\_output\_filename, \textcolor{stringliteral}{'w'} )
+703     o\_secondary\_output=open( s\_secondary\_output\_filename, \textcolor{stringliteral}{'w'} )
 704 
-705     \textcolor{keywordflow}{return}
-706 \textcolor{comment}{#end run\_driveneestimator\_in\_new\_process}
-707 
+705     seq\_arg\_set += ( o\_main\_output, o\_secondary\_output )
+706     
+707     \textcolor{comment}{#the driver also takes a final arg, ref to}
+708     \textcolor{comment}{#the multiproc event -- and then checks for }
+709     \textcolor{comment}{#it being set during map\_async when using multiprocesses}
+710     \textcolor{comment}{#(see pgdriveneestimator.py def execute\_ne\_for\_each\_sample):}
+711     seq\_arg\_set += ( o\_multiprocessing\_event, )
+712 
+713     \textcolor{comment}{##### temp}
+714     print( \textcolor{stringliteral}{"arg set: "} + str( seq\_arg\_set ) )
+715     \textcolor{comment}{#####}
+716 
+717     pgne.mymain( *seq\_arg\_set )
+718 
+719     o\_main\_output.close()
+720     o\_secondary\_output.close()
+721 
+722     \textcolor{keywordflow}{return}
+723 \textcolor{comment}{#end run\_driveneestimator\_in\_new\_process}
+724 
 \end{DoxyCode}

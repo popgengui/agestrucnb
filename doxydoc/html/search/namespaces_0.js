@@ -5,6 +5,7 @@ var searchData=
   ['do_5fsim_5freplicate',['do_sim_replicate',['../namespacenegui_1_1do__sim__replicate.html',1,'negui']]],
   ['genepopfilemanager',['genepopfilemanager',['../namespacenegui_1_1genepopfilemanager.html',1,'negui']]],
   ['genepopfilesampler',['genepopfilesampler',['../namespacenegui_1_1genepopfilesampler.html',1,'negui']]],
+  ['genepopindividualid',['genepopindividualid',['../namespacenegui_1_1genepopindividualid.html',1,'negui']]],
   ['indiv',['indiv',['../namespacenegui_1_1indiv.html',1,'negui']]],
   ['negui',['negui',['../namespacenegui_1_1negui.html',1,'negui']]],
   ['pgdriveneestimator',['pgdriveneestimator',['../namespacenegui_1_1pgdriveneestimator.html',1,'negui']]],

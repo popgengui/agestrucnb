@@ -1,6 +1,7 @@
 var searchData=
 [
   ['p1',['p1',['../namespacenegui_1_1pgutilityclasses.html#af03bb9226272b714c1db572575aa8a71',1,'negui::pgutilityclasses']]],
+  ['parse_5fsampling_5flist_5fthat_5fuses_5findiv_5fid_5ffields',['parse_sampling_list_that_uses_indiv_id_fields',['../namespacenegui_1_1pgdriveneestimator.html#a367b16a89c7ae46ab0bda5b37e68d9af',1,'negui::pgdriveneestimator']]],
   ['parsenodatfile',['parseNoDatFile',['../classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator.html#a4f8192c2aacf6e38b2c4c1d80302b643',1,'negui::pgoutputneestimator::PGOutputNeEstimator']]],
   ['parseoutput',['parseOutput',['../classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator.html#a7b6885cf565cb604ab24d7082858f57b',1,'negui::pgoutputneestimator::PGOutputNeEstimator']]],
   ['pgguiapp',['PGGuiApp',['../classnegui_1_1pgguiapp_1_1PGGuiApp.html',1,'negui::pgguiapp']]],

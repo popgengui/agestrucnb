@@ -19,8 +19,7 @@ def {\bfseries get\+Config\+Parser\+Option} (self, s\+\_\+section\+\_\+name, s\+
 \item 
 def \hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_aa990ef0c582a28a456a355a4eb3af2b9}{add\+Parameter} (self, s\+\_\+attribute\+\_\+name, v\+\_\+attribute\+\_\+value, s\+\_\+config\+\_\+file\+\_\+option\+\_\+name, s\+\_\+config\+\_\+file\+\_\+section\+\_\+name)
 \item 
-def {\bfseries get\+Dict\+Param\+Values\+By\+Attribute\+Name} (self)\hypertarget{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a099e2f01dabe86e713df7519a08fecca}{}\label{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a099e2f01dabe86e713df7519a08fecca}
-
+def \hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a099e2f01dabe86e713df7519a08fecca}{get\+Dict\+Param\+Values\+By\+Attribute\+Name} (self)
 \item 
 def {\bfseries write\+Input\+Params\+To\+File\+Object} (self, o\+\_\+file)\hypertarget{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_affc2fd6bd54b8f1ed84801b2f7f2da4b}{}\label{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_affc2fd6bd54b8f1ed84801b2f7f2da4b}
 
@@ -273,6 +272,49 @@ Definition at line 314 of file pginputsimupop.\+py.
       s\_config\_file\_section\_name, 
 326                 s\_config\_file\_option\_name )
 327         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+\index{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop@{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop}!get\+Dict\+Param\+Values\+By\+Attribute\+Name@{get\+Dict\+Param\+Values\+By\+Attribute\+Name}}
+\index{get\+Dict\+Param\+Values\+By\+Attribute\+Name@{get\+Dict\+Param\+Values\+By\+Attribute\+Name}!negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop@{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop}}
+\subsubsection[{\texorpdfstring{get\+Dict\+Param\+Values\+By\+Attribute\+Name(self)}{getDictParamValuesByAttributeName(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pginputsimupop.\+P\+G\+Input\+Simu\+Pop.\+get\+Dict\+Param\+Values\+By\+Attribute\+Name (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a099e2f01dabe86e713df7519a08fecca}{}\label{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a099e2f01dabe86e713df7519a08fecca}
+\begin{DoxyVerb}Note that this algorithm simply skips
+over paramters with names in the PGParamSet
+object, but without a corresponding attribute
+in this (self) instance.
+\end{DoxyVerb}
+ 
+
+Definition at line 381 of file pginputsimupop.\+py.
+
+
+\begin{DoxyCode}
+381     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a099e2f01dabe86e713df7519a08fecca}{getDictParamValuesByAttributeName}( self ):
+382         \textcolor{stringliteral}{'''}
+383 \textcolor{stringliteral}{        Note that this algorithm simply skips}
+384 \textcolor{stringliteral}{        over paramters with names in the PGParamSet}
+385 \textcolor{stringliteral}{        object, but without a corresponding attribute}
+386 \textcolor{stringliteral}{        in this (self) instance.}
+387 \textcolor{stringliteral}{        '''}
+388         dv\_param\_values\_by\_name=\{\}
+389 
+390         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0a737393cb4d1c66062f9403296c7f19}{\_\_param\_names} \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
+391             s\_msg=\textcolor{stringliteral}{"In PGInputSimuPop instance, can't get dict of param/values"} \(\backslash\)
+392                     + \textcolor{stringliteral}{": missing the required PGParamSet object."}
+393             \textcolor{keywordflow}{raise} Exception( s\_msg )
+394         \textcolor{comment}{#end if no parma set object}
+395 
+396         ls\_attribute\_names=self.param\_names.shortnames
+397 
+398         \textcolor{keywordflow}{for} s\_name \textcolor{keywordflow}{in} ls\_attribute\_names:
+399             \textcolor{keywordflow}{if} hasattr( self, s\_name ):
+400                 dv\_param\_values\_by\_name[ s\_name ]=getattr( self, s\_name )
+401             \textcolor{comment}{#end if hasattr}
+402         \textcolor{comment}{#end for each param name}
+403         
+404         \textcolor{keywordflow}{return} dv\_param\_values\_by\_name
 \end{DoxyCode}
 
 

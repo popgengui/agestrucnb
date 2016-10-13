@@ -12,8 +12,7 @@ Inheritance diagram for negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Ind
 def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+genepopfilemanager, o\+\_\+genepopfilesampleparams)\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_a1bc0babcecf6bbca34259328cae53b97}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_a1bc0babcecf6bbca34259328cae53b97}
 
 \item 
-def {\bfseries do\+Sample} (self)\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_ad8170ea6661afa7bff72d484372209e3}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_ad8170ea6661afa7bff72d484372209e3}
-
+def \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_ad8170ea6661afa7bff72d484372209e3}{do\+Sample} (self)
 \end{DoxyCompactItemize}
 
 
@@ -23,8 +22,75 @@ according one or more proportions (percentages).
 \end{DoxyVerb}
  
 
-Definition at line 214 of file genepopfilesampler.\+py.
+Definition at line 1168 of file genepopfilesampler.\+py.
 
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+By\+Proportion@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+By\+Proportion}!do\+Sample@{do\+Sample}}
+\index{do\+Sample@{do\+Sample}!negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+By\+Proportion@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+By\+Proportion}}
+\subsubsection[{\texorpdfstring{do\+Sample(self)}{doSample(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+By\+Proportion.\+do\+Sample (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_ad8170ea6661afa7bff72d484372209e3}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_ad8170ea6661afa7bff72d484372209e3}
+\begin{DoxyVerb}as of Mon Jul 11 20:17:02 MDT 2016, for simplicity, the GenepopFileManager subsampling
+defs that subsample individuals or loci, do so across all populations,
+so that the subset of populations given by this objects member sampleparams property 
+"population_numbers", will only be applied as a filter when writeGenePopFile (or printGenePopFile)
+is applied to this objects GenepopFileManager object (self.filemanager ). The call
+to the GenepopFileManager.writeGenePopFile, will need to include among its args the 
+population subsample name ( assigned as the GenepopFileSampleParams object's
+member "population_subsample_name") 
+\end{DoxyVerb}
+ 
+
+Definition at line 1178 of file genepopfilesampler.\+py.
+
+
+\begin{DoxyCode}
+1178     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_ad8170ea6661afa7bff72d484372209e3}{doSample}( self ):
+1179         \textcolor{stringliteral}{'''}
+1180 \textcolor{stringliteral}{        as of Mon Jul 11 20:17:02 MDT 2016, for simplicity, the GenepopFileManager subsampling}
+1181 \textcolor{stringliteral}{        defs that subsample individuals or loci, do so across all populations,}
+1182 \textcolor{stringliteral}{        so that the subset of populations given by this objects member sampleparams property }
+1183 \textcolor{stringliteral}{        "population\_numbers", will only be applied as a filter when writeGenePopFile (or printGenePopFile)}
+1184 \textcolor{stringliteral}{        is applied to this objects GenepopFileManager object (self.filemanager ). The call}
+1185 \textcolor{stringliteral}{        to the GenepopFileManager.writeGenePopFile, will need to include among its args the }
+1186 \textcolor{stringliteral}{        population subsample name ( assigned as the GenepopFileSampleParams object's}
+1187 \textcolor{stringliteral}{        member "population\_subsample\_name") }
+1188 \textcolor{stringliteral}{        '''}
+1189 
+1190         self.filemanager.subsamplePopulationsByList( self.sampleparams.population\_numbers, 
+1191                 s\_subsample\_tag=self.sampleparams.population\_subsample\_name )
+1192 
+1193         lf\_proportions=self.sampleparams.proportions
+1194         i\_total\_replicates=self.sampleparams.replicates
+1195 
+1196         \textcolor{keywordflow}{for} f\_proportion \textcolor{keywordflow}{in} lf\_proportions:
+1197             \textcolor{keywordflow}{for} i\_replicate\_number \textcolor{keywordflow}{in} range( i\_total\_replicates ):
+1198 
+1199                 s\_subsampletag=\textcolor{keywordtype}{None}
+1200 
+1201                 \textcolor{keywordflow}{if} self.sampleparams.sample\_tag \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+1202                     s\_subsampletag=self.sampleparams.sample\_tag
+1203                 \textcolor{keywordflow}{else}:
+1204                     \textcolor{comment}{#standardized subsample tag uses the proportion and the rep number:}
+1205                     \textcolor{comment}{#note that the "." char delimiter will need to be replaced by a diff}
+1206                     \textcolor{comment}{#char when using this tag to name input or output file names for}
+1207                     \textcolor{comment}{#NeEstimator (which truncates filenames using pattern .* for some of }
+1208                     \textcolor{comment}{#its output files)}
+1209                     s\_subsampletag=make\_subsample\_tag(  f\_proportion, i\_replicate\_number , 
+      SCHEME\_PROPORTION )
+1210                 \textcolor{comment}{#end if tag exists use it else make one}
+1211 
+1212                 self.filemanager.subsampleIndividualsRandomlyByProportion( f\_proportion, s\_subsampletag ) 
+1213             \textcolor{comment}{#end for each replicate number  }
+1214         \textcolor{comment}{#end for each proportion}
+1215         \textcolor{keywordflow}{return}
+1216 \textcolor{comment}{#end class GenepopFileSamplerIndividualsByProportion}
+1217 
+\end{DoxyCode}
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}

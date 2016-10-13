@@ -27,7 +27,7 @@ substituting a Radiobutton widget
 for the entry box used in KeyValFrame\end{DoxyVerb}
  
 
-Definition at line 485 of file pgguiutilities.\+py.
+Definition at line 653 of file pgguiutilities.\+py.
 
 
 
@@ -90,71 +90,71 @@ Param b_force_disable, if True, will override the b_is_enabled value and disable
 \end{DoxyVerb}
  
 
-Definition at line 511 of file pgguiutilities.\+py.
+Definition at line 679 of file pgguiutilities.\+py.
 
 
 \begin{DoxyCode}
-511             s\_tooltip = \textcolor{stringliteral}{""} ):
-512 
-513         \textcolor{stringliteral}{"""}
-514 \textcolor{stringliteral}{        }
-515 \textcolor{stringliteral}{        Param lq\_modes, list of sequences, each a pair}
-516 \textcolor{stringliteral}{            giving the mode label text, and its associated value}
-517 \textcolor{stringliteral}{            assigned when it is the selected radio button}
-518 \textcolor{stringliteral}{        Param i\_default\_mode\_number gives the ith (one-indexed)}
-519 \textcolor{stringliteral}{            item in modes, that is to be the active button,}
-520 \textcolor{stringliteral}{            and that gives the default value}
-521 \textcolor{stringliteral}{        Param o\_value\_type gives the python type for the values}
-522 \textcolor{stringliteral}{            given in lq\_modes value items.  Currently implemented}
-523 \textcolor{stringliteral}{            for bool, int, float, and string.}
-524 \textcolor{stringliteral}{        Param o\_master is the parent Tkinter object.}
-525 \textcolor{stringliteral}{                Param s\_associated\_attribute is the name of }
-526 \textcolor{stringliteral}{            attribute instance that can be accessed}
-527 \textcolor{stringliteral}{            using "getattr", and that will be}
-528 \textcolor{stringliteral}{            updated when the value is updated.}
-529 \textcolor{stringliteral}{        Param o\_associated\_attribute\_object is the object whose attribute}
-530 \textcolor{stringliteral}{            is to be unpdated when the value is updated.  If}
-531 \textcolor{stringliteral}{            s\_associated\_attribute is not None, and this parameter}
-532 \textcolor{stringliteral}{            is None, the attribute is presumed to be}
-533 \textcolor{stringliteral}{            owned by the o\_master object.}
-534 \textcolor{stringliteral}{        Param def\_on\_button\_change, if not None, execute the def}
-535 \textcolor{stringliteral}{            after updating both the value and the attribute (if any).}
-536 \textcolor{stringliteral}{            This def is to have no passed params.}
-537 \textcolor{stringliteral}{        Param i\_labelwidth gives the width the the Label widget.}
-538 \textcolor{stringliteral}{        Param s\_label\_justify gives Label widget "justify" value.}
-539 \textcolor{stringliteral}{        Param s\_buttons\_justify gives Radiobutten Widget text "justify" value.}
-540 \textcolor{stringliteral}{                currently not implemented (ttk radio button widgets are not}
-541 \textcolor{stringliteral}{                settable for justify and foreground, without using a syle map).}
-542 \textcolor{stringliteral}{        Param s\_label\_name, if not None, replaces s\_name as the text for the label.}
-543 \textcolor{stringliteral}{        Param b\_buttons\_in\_a\_row, if False (default) all buttons are in a single column, if True,}
-544 \textcolor{stringliteral}{                then all buttons side by side in a single row}
-545 \textcolor{stringliteral}{        Param b\_force\_disable, if True, will override the b\_is\_enabled value and disable all entry }
-546 \textcolor{stringliteral}{              boxes}
-547 \textcolor{stringliteral}{        """}
-548 
-549         \textcolor{comment}{#TCL won't allow uppercase names for windows}
-550         \textcolor{comment}{#(note that we save the name, case in-tact, in}
-551         \textcolor{comment}{#member \_\_name:}
-552         Frame.\_\_init\_\_( self, o\_master, name=s\_name.lower() )
-553         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ad0cd6c8b8265cb6b27efa7bbc5e23ae0}{\_\_master}=o\_master
-554         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ae5f2855d8f22b4aa8f533023ac3e7fb4}{\_\_default\_mode\_number}=i\_default\_mode\_number
-555         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_aadb3b6381c9159d303cd150e5a748096}{\_\_modes}=lq\_modes
-556         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a92a1947d6110ada3bd813cc8e84d84ad}{\_\_name}=s\_name
-557         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_adf2c2370358ac051464aef108d75caa3}{\_\_lablewidth}=i\_labelwidth
-558         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a96cbcef967bddfd5035b827c0ae50c05}{\_\_labeljustify}=s\_label\_justify
-559         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a1fa18274aa53997c8b5fe446779b9a9d}{\_\_buttons\_justify}=s\_buttons\_justify
-560         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_afb2be50b6de2bac5c96b9d73d93da416}{\_\_isenabled}=b\_is\_enabled
-561         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_aa9b8f1b85890b51192559ff142d2360f}{\_\_associated\_attribute}=s\_associated\_attribute
-562         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a14174765fdf3479d1f7f09fe1deda5cf}{\_\_associated\_attribute\_object}=o\_associated\_attribute\_object
-563         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a0e462eacf72e4afb9711c917fe1c0d6a}{\_\_def\_on\_button\_change}=def\_on\_button\_change
-564         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a869087c9cc908de0226eec78cb4282bb}{\_\_put\_buttons\_in\_row}=b\_buttons\_in\_a\_row
-565         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_aa1bb987386f2e559c6de976b745f185e}{\_\_current\_button\_value}=self.
+679             s\_tooltip = \textcolor{stringliteral}{""} ):
+680 
+681         \textcolor{stringliteral}{"""}
+682 \textcolor{stringliteral}{        Param lq\_modes, list of sequences, each a pair}
+683 \textcolor{stringliteral}{            giving the mode label text, and its associated value}
+684 \textcolor{stringliteral}{            assigned when it is the selected radio button}
+685 \textcolor{stringliteral}{        Param i\_default\_mode\_number gives the ith (one-indexed)}
+686 \textcolor{stringliteral}{            item in modes, that is to be the active button,}
+687 \textcolor{stringliteral}{            and that gives the default value}
+688 \textcolor{stringliteral}{        Param o\_value\_type gives the python type for the values}
+689 \textcolor{stringliteral}{            given in lq\_modes value items.  Currently implemented}
+690 \textcolor{stringliteral}{            for bool, int, float, and string.}
+691 \textcolor{stringliteral}{        Param o\_master is the parent Tkinter object.}
+692 \textcolor{stringliteral}{                Param s\_associated\_attribute is the name of }
+693 \textcolor{stringliteral}{            attribute instance that can be accessed}
+694 \textcolor{stringliteral}{            using "getattr", and that will be}
+695 \textcolor{stringliteral}{            updated when the value is updated.}
+696 \textcolor{stringliteral}{        Param o\_associated\_attribute\_object is the object whose attribute}
+697 \textcolor{stringliteral}{            is to be unpdated when the value is updated.  If}
+698 \textcolor{stringliteral}{            s\_associated\_attribute is not None, and this parameter}
+699 \textcolor{stringliteral}{            is None, the attribute is presumed to be}
+700 \textcolor{stringliteral}{            owned by the o\_master object.}
+701 \textcolor{stringliteral}{        Param def\_on\_button\_change, if not None, execute the def}
+702 \textcolor{stringliteral}{            after updating both the value and the attribute (if any).}
+703 \textcolor{stringliteral}{            This def is to have no passed params.}
+704 \textcolor{stringliteral}{        Param i\_labelwidth gives the width the the Label widget.}
+705 \textcolor{stringliteral}{        Param s\_label\_justify gives Label widget "justify" value.}
+706 \textcolor{stringliteral}{        Param s\_buttons\_justify gives Radiobutten Widget text "justify" value.}
+707 \textcolor{stringliteral}{                currently not implemented (ttk radio button widgets are not}
+708 \textcolor{stringliteral}{                settable for justify and foreground, without using a syle map).}
+709 \textcolor{stringliteral}{        Param s\_label\_name, if not None, replaces s\_name as the text for the label.}
+710 \textcolor{stringliteral}{        Param b\_buttons\_in\_a\_row, if False (default) all buttons are in a single column, if True,}
+711 \textcolor{stringliteral}{                then all buttons side by side in a single row}
+712 \textcolor{stringliteral}{        Param b\_force\_disable, if True, will override the b\_is\_enabled value and disable all entry }
+713 \textcolor{stringliteral}{              boxes}
+714 \textcolor{stringliteral}{        """}
+715 
+716         \textcolor{comment}{#TCL won't allow uppercase names for windows}
+717         \textcolor{comment}{#(note that we save the name, case in-tact, in}
+718         \textcolor{comment}{#member \_\_name:}
+719         Frame.\_\_init\_\_( self, o\_master, name=s\_name.lower() )
+720         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ad0cd6c8b8265cb6b27efa7bbc5e23ae0}{\_\_master}=o\_master
+721         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ac743c18f66b310548e2dd0e3076b00c7}{\_\_value}=\textcolor{keywordtype}{None}
+722         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ae5f2855d8f22b4aa8f533023ac3e7fb4}{\_\_default\_mode\_number}=i\_default\_mode\_number
+723         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_aadb3b6381c9159d303cd150e5a748096}{\_\_modes}=lq\_modes
+724         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a92a1947d6110ada3bd813cc8e84d84ad}{\_\_name}=s\_name
+725         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_adf2c2370358ac051464aef108d75caa3}{\_\_lablewidth}=i\_labelwidth
+726         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a96cbcef967bddfd5035b827c0ae50c05}{\_\_labeljustify}=s\_label\_justify
+727         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a1fa18274aa53997c8b5fe446779b9a9d}{\_\_buttons\_justify}=s\_buttons\_justify
+728         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_afb2be50b6de2bac5c96b9d73d93da416}{\_\_isenabled}=b\_is\_enabled
+729         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_aa9b8f1b85890b51192559ff142d2360f}{\_\_associated\_attribute}=s\_associated\_attribute
+730         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a14174765fdf3479d1f7f09fe1deda5cf}{\_\_associated\_attribute\_object}=o\_associated\_attribute\_object
+731         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a0e462eacf72e4afb9711c917fe1c0d6a}{\_\_def\_on\_button\_change}=def\_on\_button\_change
+732         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a869087c9cc908de0226eec78cb4282bb}{\_\_put\_buttons\_in\_row}=b\_buttons\_in\_a\_row
+733         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_aa1bb987386f2e559c6de976b745f185e}{\_\_current\_button\_value}=self.
       \hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ab1e309b3e63c5c4a57d37d2a61f4e90d}{\_\_init\_current\_button\_val}( o\_value\_type )
-566         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a3a453ac47871c2f8b894442fd3ef5d07}{\_\_label\_name}=self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a92a1947d6110ada3bd813cc8e84d84ad}{\_\_name} \textcolor{keywordflow}{if} s\_label\_name \textcolor{keywordflow}{is} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} s\_label\_name
-567         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a01ea2795b9136b4fab5d6fe78dc2947d}{\_\_force\_disable}=b\_force\_disable
-568         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ae2f1424ab33f1ff0c9477dcf401748ca}{\_\_tooltip}=self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a3a453ac47871c2f8b894442fd3ef5d07}{\_\_label\_name} \textcolor{keywordflow}{if} s\_tooltip == \textcolor{stringliteral}{""} \textcolor{keywordflow}{else} s\_tooltip
-569         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ad2350dd7438d98d077c86e8295425ca0}{\_\_subframe}=\textcolor{keywordtype}{None}
-570         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a1e890256208ab06e21db468c7aed6bd8}{\_\_setup}()
+734         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a3a453ac47871c2f8b894442fd3ef5d07}{\_\_label\_name}=self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a92a1947d6110ada3bd813cc8e84d84ad}{\_\_name} \textcolor{keywordflow}{if} s\_label\_name \textcolor{keywordflow}{is} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} s\_label\_name
+735         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a01ea2795b9136b4fab5d6fe78dc2947d}{\_\_force\_disable}=b\_force\_disable
+736         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ae2f1424ab33f1ff0c9477dcf401748ca}{\_\_tooltip}=self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a3a453ac47871c2f8b894442fd3ef5d07}{\_\_label\_name} \textcolor{keywordflow}{if} s\_tooltip == \textcolor{stringliteral}{""} \textcolor{keywordflow}{else} s\_tooltip
+737         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_ad2350dd7438d98d077c86e8295425ca0}{\_\_subframe}=\textcolor{keywordtype}{None}
+738         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame_a1e890256208ab06e21db468c7aed6bd8}{\_\_setup}()
 \end{DoxyCode}
 
 
