@@ -3,6 +3,7 @@ Description
 Implements abstract class AGPOperation for simuPop simulations,
 as coded by Tiago Antao's sim.py modlule.  See class description.
 '''
+
 __filename__ = "pgopsimupop.py"
 __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -251,7 +252,8 @@ class PGOpSimuPop( modop.APGOperation ):
 		nLoci=self.input.numMSats + self.input.numSNPs
 		startLambda=self.input.startLambda
 		lbd=self.input.lbd
-		initOps = [sp.InitSex(maleFreq=self.input.maleProb)]
+		##todo !! this is where you select sex proporotion(maleProp) or freqency(maleFreq)
+		initOps = [sp.InitSex(maleProp=self.input.maleProb)]
 		if startLambda < pgin.START_LAMBDA_IGNORE:
 			preOps = [sp.ResizeSubPops(proportions=(float(lbd), ),
 								begin=startLambda)]
@@ -742,6 +744,82 @@ class PGOpSimuPop( modop.APGOperation ):
 		return True
 	#end __cull
 
+
+	##Brian Trethewey addition to set
+	def __equalSexCull(self, pop):
+		kills = []
+		cohortDict = {}
+		for i in pop.individuals():
+			indAge = i.age
+
+			if not indAge in cohortDict:
+				cohortDict[indAge] = []
+			cohortDict[indAge].append(i)
+
+
+		for cohortKey in cohortDict:
+			## !! Cohort 0 does not get culled!!
+			if cohortKey == 0.0:
+				continue
+
+			cohortKills = []
+
+			#setup data and seperate males and females
+			cohort = cohortDict[cohortKey]
+			print(cohortKey)
+			cohortTotal = len(cohort)
+			cohortMales = [x for x in cohort if x.sex()==1]
+			maleCount = len(cohortMales)
+			cohortFemales = [x for x in cohort if x.sex() == 2]
+			femaleCount = len(cohortFemales)
+			print cohortTotal
+			print maleCount
+			print femaleCount
+			print"\n"
+
+			#determine survival rate of this cohort
+			survivalRate =1- (self.input.survivalMale[int(cohortKey) - 1]+self.input.survivalFemale[int(cohortKey) - 1])/2
+			print survivalRate
+			survivorCount = numpy.round(cohortTotal * survivalRate)
+			cullCount = cohortTotal  - survivorCount
+			print survivorCount
+			print cullCount
+			print "\n\n\n"
+
+			#choose which sex to kill first
+			#flag is one and 0 for easy switching
+			killChoiceFlag = round(random.random())
+			if femaleCount > maleCount:
+				killChoiceFlag = 0
+			if maleCount > femaleCount:
+				killChoiceFlag = 1
+
+			#Lottery Loop
+			lotteryCount = 0
+			while lotteryCount < cullCount:
+				#sample by gender
+				if killChoiceFlag == 1:
+					lottoInd = random.sample(cohortMales,1)[0]
+					print "MaleChosen "+str(lottoInd.ind_id)
+				else:
+					lottoInd = random.sample(cohortFemales,1)[0]
+					print "FemaleChosen "+str(lottoInd.ind_id)
+				#if not already "dead"
+				if not lottoInd.ind_id in cohortKills:
+					lotteryCount +=1
+					print "Dead "+str(lotteryCount)
+					cohortKills.append(lottoInd.ind_id)
+					killChoiceFlag = abs(killChoiceFlag-1)
+
+
+			kills.extend(cohortKills)
+			# endif age>0 andage<.....
+		# end for i in pop
+		pop.removeIndividuals(IDs=kills)
+		return True
+
+# end __equalSexCull
+
 	def __zeroC( self, v ):
 		a = str(v)
 		while len(a) < 3:
@@ -904,7 +982,7 @@ class PGOpSimuPop( modop.APGOperation ):
 					subPopSize=self.__calcDemo )
 
 		agePostOps = [ sp.PyOperator(func=self.__outputMega), 
-					sp.PyOperator(func=self.__cull) ]
+					sp.PyOperator(func=self.__equalSexCull) ]
 
 		pop.setVirtualSplitter(sp.InfoSplitter(field='age',
 			   cutoff=range(1, self.input.ages)))

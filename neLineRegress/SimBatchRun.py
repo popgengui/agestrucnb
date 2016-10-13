@@ -23,7 +23,7 @@ def readconfig(filename):
     mutationRate = [0]
     lociSampling = [1.0]
     populationSampling = [1.0]
-    simReps = [1000]
+    simReps = [100]
 
     ##SET FILE DELIMITERS
     delimiters = ',|\||\n|;'
@@ -124,6 +124,8 @@ def readconfig(filename):
             simReps = [int(value) for value in paramList]
 
 
+
+
     ##create parameter dictionary for return
     paramDict = {"species":speciesFile,
                  "outputFolder":outFolder,
@@ -138,12 +140,12 @@ def readconfig(filename):
                  "lociSampling":lociSampling,
                  "popSampling":populationSampling,
                  "simReps":simReps}
+    return paramDict
 
 def runSimulation(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate):
-    neFile = ""
+    outputFiles = []
     #create folder for simupop run
     #run simupop
-    #convert output files to TSV
 
     return outputFiles
 
@@ -180,10 +182,11 @@ def run(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SN
     neFile = runNeEst(simFiles,locisampling,popsampling,regressConfig)
     return neFile
 
-def runSamplingOnly(,locisampling,popsampling,regressConfig):
+def runSamplingOnly(files,locisampling,popsampling,regressConfig):
 
 
-def batch(configFile,operations,threads = 1):
+
+def batch(configFile,threads = 1):
     configs  = readconfig(configFile)
     speciesFile = configs["species"]
     outFolder = configs["outputFolder"]
