@@ -613,11 +613,14 @@ def convert_genepop_files_string_to_list_format( s_genepop_files ):
 
 def run_driveneestimator_in_new_process( o_multiprocessing_event,
 										s_genepop_files,
-										s_sample_scheme,
-										li_sample_params,
-										i_min_pop_size, 
+										qs_sample_scheme_args,
 										f_min_allele_freq,
 										i_replicates,
+										s_loci_sampling_scheme,
+										s_loci_sampling_scheme_param,
+										i_min_loci_position,
+										i_max_loci_position,
+										i_max_total_loci,
 										i_num_processes,
 										s_runmode,
 										s_outfile_basename,
@@ -634,6 +637,7 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	which itself multiplexes the NeAnlaysis of multiple genepop files and (likely) multiple
 	pops per file using python.multiprocessing.Process objects.
 	'''
+
 	s_os_plaform_name=platform.system()
 	
 	#if we're on windows, file
@@ -668,14 +672,24 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 		s_runmode="no_debug"
 	#end if default runmode
 
-	seq_arg_set=( s_genepop_files_formatted_as_python_list,
-						s_sample_scheme,
-						",".join( [ str( i_param) for i_param in li_sample_params ] ),
-						str( i_min_pop_size ),
-						str( f_min_allele_freq ),
-						str( i_replicates ),
-						str( i_num_processes ),
-						s_runmode )
+	#Make of a single sequence of strings.
+	qs_files_args=( s_genepop_files_formatted_as_python_list, ) 
+
+	s_loci_range="-".join( [ str( i_min_loci_position ),
+								str( i_max_loci_position ) ] )
+
+	qs_terminal_args=( str( f_min_allele_freq ), 
+								str( i_replicates ), 
+								s_loci_sampling_scheme,
+								s_loci_sampling_scheme_param,
+								s_loci_range,
+								str( i_max_total_loci ),
+								str( i_num_processes ), 
+								s_runmode )
+
+	seq_arg_set=qs_files_args \
+					+ qs_sample_scheme_args \
+					+ qs_terminal_args
 
 	s_main_output_filename=s_outfile_basename + "." \
 			+ NE_ESTIMATION_MAIN_TABLE_FILE_EXT
@@ -696,6 +710,9 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	#(see pgdriveneestimator.py def execute_ne_for_each_sample):
 	seq_arg_set += ( o_multiprocessing_event, )
 
+	##### temp
+	print( "arg set: " + str( seq_arg_set ) )
+	#####
 
 	pgne.mymain( *seq_arg_set )
 

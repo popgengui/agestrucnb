@@ -379,7 +379,12 @@ class PGInputSimuPop( object ):
 	#end __get_configparser_input_params
 
 	def getDictParamValuesByAttributeName( self ):
-	
+		'''
+		Note that this algorithm simply skips
+		over paramters with names in the PGParamSet
+		object, but without a corresponding attribute
+		in this (self) instance.
+		'''
 		dv_param_values_by_name={}
 
 		if self.__param_names is None:
@@ -426,6 +431,7 @@ class PGInputSimuPop( object ):
 
 	def makeInputConfig( self ):
 		self.__get_config()
+		self.__make_params_whose_values_are_lists_have_uniform_item_types()
 		return
 	#end makeInputConfig
 
@@ -455,6 +461,49 @@ class PGInputSimuPop( object ):
 
 		return o_copy
 	#end copyMe
+
+	def __make_params_whose_values_are_lists_have_uniform_item_types( self ):
+
+		'''
+		Some lists as given in configuraion files have "0" entered as one item, 
+		which the python's "eval" call evaluates as an int, while other items 
+		in the lists have decimals, such as "32.2", which is evaluated as a float 
+		type.  In these cases, in order to manage input by users, when
+		this object is tied to a GUI, we want uniform types, and so will promote
+		these ints to floats.  Note that as of 2016_09_20, we only correct his case.
+		If we find paramaters (as given by our member PGParamSet object) with list
+		as value, also having multi-types among its items, we will throw an exception.
+		'''
+
+		dv_param_vals_by_name=self.getDictParamValuesByAttributeName()
+
+		for s_param_name in dv_param_vals_by_name:
+			v_val=dv_param_vals_by_name[ s_param_name ]
+			if type( v_val ) == list:
+
+				di_types={ type( this_val ).__name__:1 for this_val in v_val }
+				
+				ls_types=list( di_types.keys() )
+				ls_types.sort()
+				if len( ls_types ) > 1:
+					if ls_types==[ 'float','int' ]:
+						setattr( self, s_param_name, [ float( i ) for i in v_val ] )
+					else:
+						s_msg="In PGInputSimuPop instance, " \
+								+ "def __make_params_whose_values" \
+								+ "_are_lists_have_uniform_item_types" \
+								+ "the parameter " + s_param_name \
+								+ "has more than one type.  The only valid " \
+								+ "case of such lists is those with int and float " \
+								+ "items.  This list, " + str( v_val ) \
+								+ " , with types, " + str( lo_types ) + "."
+						raise Exception( s_msg )
+					#end if list is mix of ints and floats, make all floats, else error
+				#end if non-uniqe types in list
+			#end of attribute is a list
+		#end for each param name
+		return
+	#end __make_params_whose_values_are_lists_have_uniform_item_types
 #end class
 
 if __name__ == "__main__":

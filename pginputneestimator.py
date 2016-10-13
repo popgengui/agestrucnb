@@ -39,11 +39,9 @@ class PGInputNeEstimator (object):
 
 	@run_params.setter
 	def run_params( self, dv_params ):
-	
 		for s_name in dv_params:
 			self.__run_params[ s_name ] = dv_params[ s_name ]
 		#end for each param
-
 		return
 	#end setRunParams
 

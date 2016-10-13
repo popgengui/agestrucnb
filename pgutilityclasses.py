@@ -66,7 +66,6 @@ class IndependantProcessGroup( object ):
 
 #end class IndependantProcessGroup
 
-
 class IndependantSubprocessGroup( object ):
 	'''
 	Minimal Revision of class independantProcessGroup	
@@ -275,15 +274,411 @@ class FloatIntStringParamValidity( object ):
 		return self.__value
 	#end def value
 
-	@ value.setter
+	@value.setter
 	def value( self, v_value ):
 		self.__value=v_value
 		self.__set_validity()
 	#end setter
 #end class FloatIntStringParamWrapped
 
+class NeEstimatorSamplingSchemeParameterManager( object ):
+	'''
+	Needed a way to manage the several sampling scheme
+	parameters aquired in the PGGuiNeEstimator objects
+	sampleparams interface, which then need to be used 
+	in a call to pgdriveneestimator.
+	'''
+
+	'''
+	A dictionary to get sampling scheme param names.  The names
+	(the values in the inner dictionaries) were extracted from file 
+	resources/neestimator_param_names on 2016_09_24
+	'''
+
+	'''
+	Attribute names used by all sample schemes
+	(though in the interface their attr names
+	will be preceeded by the scheme name:
+	'''
+
+	DELIMITER_FOR_LIST_ARG=","
+	DELIMITER_FOR_COMMAND_ARGS=","
+
+	SCHEME_ALL="All"
+	SCHEME_NONE="None"
+	SCHEME_PERCENT="Percent"
+	SCHEME_REMOVE="Remove-N"
+	SCHEME_CRIT="Indiv Criteria"
+	SCHEME_COHORTS="Cohorts"
+	SCHEME_RELATEDS="Relateds"
+
+	SCHEMES_REQUIRING_ID_FIELDS=[ SCHEME_CRIT, 
+									SCHEME_COHORTS, 
+										SCHEME_RELATEDS ]
+
+	ATTR_NAME_SCHEME="sampscheme"
+	ATTR_NAME_MIN_POP_NUMBER="min_pop_number"
+	ATTR_NAME_MAX_POP_NUMBER="max_pop_number"
+	ATTR_NAME_MIN_POP_SIZE="min_pop_size"
+	ATTR_NAME_MAX_POP_SIZE="max_pop_size"
+
+	DICT_DRIVER_SCHEME_NAME_BY_INTERFACE_NAME = { \
+				SCHEME_NONE : "none",
+				SCHEME_PERCENT : "percent",
+				SCHEME_REMOVE : "remove",
+				SCHEME_CRIT : "criteria",
+				SCHEME_COHORTS : "cohorts",
+				SCHEME_RELATEDS : "relateds" }
+		
+	DICT_ATTR_BY_SCHEME= { \
+				SCHEME_ALL : { "min_pop_number" : "scheme_all_min_pop_number",
+							"max_pop_number" : "scheme_all_max_pop_number" },
+				SCHEME_NONE : { "min_pop_size" : "scheme_none_min_pop_size",
+								"max_pop_size" : "scheme_none_max_pop_size",
+								"none_dummy_param" : "scheme_none_dummy_param"},
+				SCHEME_PERCENT : { "min_pop_size" : "scheme_percent_min_pop_size",
+									"max_pop_size" : "scheme_percent_max_pop_size",
+									"percentages" : "scheme_percent_percentages" },
+				SCHEME_REMOVE : { "min_pop_size" : "scheme_removen_min_pop_size",
+									"max_pop_size" : "scheme_removen_max_pop_size",
+									 "n": "scheme_removen_n" },
+				SCHEME_CRIT : { "min_age" : "scheme_crit_min_age", 
+							"max_age" : "scheme_crit_max_age",
+							"min_pop_size" : "scheme_crit_min_pop_size",
+							"max_pop_size" : "scheme_crit_max_pop_size" },
+				SCHEME_COHORTS : { "max_age" : "scheme_cohort_max_age",
+								"min_pop_size" : "scheme_cohort_min_indiv_per_gen",
+								"max_pop_size" : "scheme_cohort_max_indiv_per_gen" },
+				SCHEME_RELATEDS : { "percent_relateds" : "scheme_relateds_percent_relateds",
+							"min_pop_size" : "scheme_relateds_min_indiv_per_gen",
+							"max_pop_size" : "scheme_relateds_max_indiv_per_gen" } }
+
+	DICT_ATTR_ORDER_BY_SCHEME= { \
+				SCHEME_ALL : [ "min_pop_number", "max_pop_number" ],
+				SCHEME_NONE : [ "none_dummy_param", "min_pop_size", "max_pop_size" ],
+				SCHEME_PERCENT : [ "percentages", "min_pop_size", "max_pop_size"  ],
+				SCHEME_REMOVE : [ "n", "min_pop_size", "max_pop_size"  ],
+				SCHEME_CRIT : [ "min_age" , "max_age", "min_pop_size", "max_pop_size" ],
+				SCHEME_COHORTS : [ "max_age" , "min_pop_size", "max_pop_size" ],
+				SCHEME_RELATEDS : [ "percent_relateds", "min_pop_size",  "max_pop_size" ] }
+		
+	CRIT_EXPRESSIONS_IN_ATTR_ORDER=[ "%age% >= ", "%age% <=" ]
+
+	def __init__( self, o_pgguineestimator, s_attr_prefix ):
+		self.__interface=o_pgguineestimator
+		self.__attr_prefix=s_attr_prefix
+		return
+	#end __init__
+
+	def __get_scheme_name( self ):
+		
+		s_sampling_scheme_name = None
+
+		try: 
+			s_attr_name=self.__attr_prefix \
+						+ NeEstimatorSamplingSchemeParameterManager\
+									.ATTR_NAME_SCHEME 
+		
+			s_sampling_scheme_name=getattr( self.__interface,
+													s_attr_name )
+
+		except Exception as oex:
+			s_msg="In NeEstimatorSamplingSchemeParameterManager instance, " \
+						+ "def __get_scheme_name, " \
+						+ "could not get the sample scheme attribute " \
+						+ "value from the interface.  Exception raised: " \
+						+ str( oex ) + "."
+		#end try . . . except
+
+		if s_sampling_scheme_name not in \
+				NeEstimatorSamplingSchemeParameterManager.DICT_ATTR_BY_SCHEME:
+			s_msg="In NeEstimatorSamplingSchemeParameterManager instance, " \
+						+ "def __get_scheme_name, " \
+						+ "the interface has a sampling scheme attribute value, " \
+						+  s_sampling_scheme_name + ", " \
+						+ "not found among the types listed in the dictionary " \
+						+ "used by this class instance." 
+			raise Exception ( s_msg )
+		#end if unknown sampling scheme
+
+		return s_sampling_scheme_name
+
+	# end __get_scheme_name
+
+	def __get_sampling_args_for_schemes_not_requiring_id_fields( self ):
+		s_scheme=self.__get_scheme_name()
+
+		ls_sample_scheme_args_as_strings=[]
+
+		ls_sample_scheme_args_as_strings.append( \
+				NeEstimatorSamplingSchemeParameterManager\
+							.DICT_DRIVER_SCHEME_NAME_BY_INTERFACE_NAME[ s_scheme ] )
+
+		for s_arg in NeEstimatorSamplingSchemeParameterManager\
+							.DICT_ATTR_ORDER_BY_SCHEME[ s_scheme ]:
+
+			s_attr_name=self.__attr_prefix \
+					+ NeEstimatorSamplingSchemeParameterManager\
+											.DICT_ATTR_BY_SCHEME[ s_scheme ][ s_arg ]
+
+			v_value=getattr( self.__interface, 
+									s_attr_name )
+		
+			s_value=None
+
+			'''
+			If a list, we assume it is the sample params
+			list (a multi-valued arg)
+			'''
+			if type( v_value ) == list:
+				s_value= \
+					NeEstimatorSamplingSchemeParameterManager\
+								.DELIMITER_FOR_LIST_ARG\
+								.join( [ str( v_item ) for v_item in v_value ] )
+			else:
+				s_value=str( v_value )
+			#end if type is a list else not
+
+			ls_sample_scheme_args_as_strings.append( s_value )
+		#end for each arg in DICT_ATTR_ORDER_BY_SCHEME
+
+		return ls_sample_scheme_args_as_strings
+	#end def __get_sampling_args_for_schemes_not_requiring_id_fields
+
+	def __get_attr_val_as_string( self, s_scheme, s_arg ):
+
+		##### temp
+		print( "getting value for arg name: " + s_arg )
+		#####
+
+		s_attr_name=self.__attr_prefix + s_arg
+		v_value=getattr( self.__interface, s_attr_name )
+		s_value=str( v_value )
+
+		##### temp
+		print( "returning value: " + s_value )
+		#####
+
+		return s_value
+	#end __get_attr_val_as_string
+		
+
+	def __get_sampling_args_for_schemes_requiring_id_fields( self ):
+		'''	
+		As of 2016_09_30, pgdriveneestimator.py takes these
+		scheme args like this:
+		<scheme_name> <id;sex;father;mother;age,float;int;float;float;float;,param,param,...>
+		where param differs.  In case of Indiv Criteia, param is a list of test expressions, currently
+		onlt two such, "age>=min_age and age>=max_age".
+		In case of cohorts, it consists of 1 int, max age.  In case of Relateds it consists
+		of one float, percent relateds.
+		'''
+		
+		CLSVALS=NeEstimatorSamplingSchemeParameterManager 
+		DELIMIT_FIELD_LISTS=";"
+		DELIMIT_FIELD_RELATED_PARAMS=","
+		FLOAT_NAME=float.__name__
+		INT_NAME=int.__name__
+		FIELD_NAMES=DELIMIT_FIELD_LISTS.join( \
+				[ "id", "sex", "father", "mother", "age" ] )
+		FIELD_TYPES=DELIMIT_FIELD_LISTS.join( \
+				[ FLOAT_NAME, INT_NAME, FLOAT_NAME, FLOAT_NAME, FLOAT_NAME ] )
+
+		ls_params=[ FIELD_NAMES, FIELD_TYPES ] 
+
+		s_scheme=self.__get_scheme_name()
+
+		ls_sample_scheme_args_as_strings=[]
+
+		ls_sample_scheme_args_as_strings.append( \
+				CLSVALS.DICT_DRIVER_SCHEME_NAME_BY_INTERFACE_NAME[ s_scheme ] )
+
+		ls_final_sample_scheme_args=[]
+
+
+	
+		i_total_id_field_crit_expressions=len( CLSVALS.CRIT_EXPRESSIONS_IN_ATTR_ORDER )
+
+		for idx in range( len( CLSVALS.DICT_ATTR_ORDER_BY_SCHEME[ s_scheme ] ) ):
+
+			s_param_key=CLSVALS.DICT_ATTR_ORDER_BY_SCHEME[ s_scheme ][ idx ]
+			s_param_name=CLSVALS.DICT_ATTR_BY_SCHEME[ s_scheme ][ s_param_key ]
+			s_value = self.__get_attr_val_as_string( s_scheme, s_param_name )	
+
+			'''	
+			For the Indiv Criteria sampling scheme, the first N (currently, N=2)
+			paramaters supplied by the interface are used in expressions (currently
+			age>=x and age<=y), which are the 3rd and 4th comma-delimited parts of 
+			the sampling scheme detail argument when calling pgdriveneestimator.py.
+			'''
+			if s_scheme==CLSVALS.SCHEME_CRIT and \
+							idx < i_total_id_field_crit_expressions:
+					s_expression=CLSVALS.CRIT_EXPRESSIONS_IN_ATTR_ORDER[ idx ]
+					s_param=s_expression+s_value
+					ls_params.append( s_param )
+			elif idx == 0:
+				'''
+				For id-field schemes other than Indiv Criteia,
+				we have (as of 2016_09_30) only a single id-field 
+				parameter, always listed first in the attribute order, 
+				to append to the id-field-params arg.
+				'''
+				ls_params.append( s_value )
+			else:
+				ls_final_sample_scheme_args.append( s_value )
+			#end if this arg is a field param, else not
+		#end for each arg value
+
+		s_field_related_params=\
+				DELIMIT_FIELD_RELATED_PARAMS.join(  ls_params )
+
+		ls_sample_scheme_args_as_strings.append( s_field_related_params )
+		ls_sample_scheme_args_as_strings += ls_final_sample_scheme_args
+		
+		return ls_sample_scheme_args_as_strings
+	#end def __get_sampling_args_for_schemes_requiring_id_fields
+
+	def getSampleSchemeArgsForDriver( self ):
+
+		'''
+		We contruct the param-scheme-related
+		arguments to a call to the main def
+		in pgdriveneestimator.py.  As of
+		2016_09_26 the args are in this order:
+		<sample scheme> <parameter list (comma-delimited)>
+		<min pop size> <max pop size>
+		'''
+
+		##### temp
+		print( "in getSample" )
+		#####
+
+		CLSVALS=NeEstimatorSamplingSchemeParameterManager
+
+		s_scheme=self.__get_scheme_name()
+
+		ls_sample_scheme_args_as_strings=None
+	
+		#Sampling scheme Indiv Criteia needs a special algorithm 
+		#to assemble param args
+		if s_scheme in \
+				CLSVALS.SCHEMES_REQUIRING_ID_FIELDS:
+			ls_sample_scheme_args_as_strings=\
+					self.__get_sampling_args_for_schemes_requiring_id_fields()
+		else:
+			ls_sample_scheme_args_as_strings=\
+					self.__get_sampling_args_for_schemes_not_requiring_id_fields()
+		#end if not indiv criteria scheme, call def for such,
+		#else call def to get indiv criteria scheme args
+
+		'''
+		All sampling schemes have a range of pop numbers,
+		passed to pgdriveneestimator.py as a hyphenated
+		pair min-max:
+		'''
+		s_scheme_all=CLSVALS.SCHEME_ALL
+		s_attr_min_pop_number=self.__attr_prefix \
+				+ CLSVALS.DICT_ATTR_BY_SCHEME[ s_scheme_all ] [ "min_pop_number" ]
+
+		s_attr_max_pop_number= self.__attr_prefix \
+				+ CLSVALS.DICT_ATTR_BY_SCHEME[ s_scheme_all ][ "max_pop_number" ]
+	
+		i_min_pop_number=getattr( self.__interface, s_attr_min_pop_number )
+		i_max_pop_number=getattr( self.__interface, s_attr_max_pop_number )
+						
+		s_pop_range_arg=str( i_min_pop_number ) + "-" + str( i_max_pop_number )
+
+		ls_sample_scheme_args_as_strings.append( s_pop_range_arg )
+
+		##### temp
+		print( "sample scheme args: " + str( ls_sample_scheme_args_as_strings ) )
+		#####
+
+		#We return as tuple, to use as operand in creating
+		#a complete arg set.
+		return tuple( ls_sample_scheme_args_as_strings )
+
+	#end getSampleSchemeArgToDriver
+
+#end class NeEstimatorSamplingSchemeParameterManager
+
+class ValueValidator( object ):
+
+	'''
+	Class to evaluate a value by applying
+	a client-supplied def. On __init__ a
+	lambda operation is created by 
+	concatenating "lambda x: "
+	with the string. 
+	
+	Class created to use a PGParamSet instance "validation"
+	value, from its tag item that
+	gives an expression in x that evals to T/F, 
+	for example, type(x)==int and x <= 1".
+
+	Note that def names and signatures are made
+	to match relevant ones in class FloatIntStringParamValidity,
+	since, as of 2016_10_03, we are calling them in the KeyValFrame
+	class (see def __reset_value) as defined in mod pgguiutilities.py
+	'''
+
+	def __init__( self, s_boolean_expression_in_x, v_value=None ):
+
+		s_lambda="lambda x: " + s_boolean_expression_in_x
+
+		try:
+			self.__validator=eval( s_lambda  )
+		except Exception as oex:
+			s_msg="In ValueValidator instance, def __init__, " \
+						+ "failed to eval expression: " \
+						+ s_lambda + ".  Exception raised: " \
+						+ str( oex ) + "."
+			raise Exception( s_msg )
+		#end try to eval, except . . .
+
+		self.__expression=s_boolean_expression_in_x
+		self.__value=v_value
+		return
+	#end __init__
+
+	def isValid( self ):
+		try:
+			b_result=self.__validator( self.__value )
+		except:
+			s_msg="In ValueValidator instance, " \
+						+ "def isValid, " \
+						+ "call to __validator failed."
+			raise Exception( s_msg )
+		#end try . . . except . . .
+		return b_result
+	#end def validate
+
+	def reportInvalidityOnly( self ):
+		s_msg=None
+		if not self.isValid():
+			s_msg="Value, " + str( self.__value ) \
+						+ ", failed validity test, " \
+						+ self.__expression + "."
+		#end if invalid
+
+		return s_msg
+	#end reportInvalidityOnly
+
+	@property
+	def value( self ):
+		return self.__value
+	#end def value
+
+	@value.setter
+	def value( self, v_value ):
+		self.__value = v_value
+		return
+	#end  value setter
+	
+#end class ValueValidator
 
 if __name__ == "__main__":
+
 #	import multiprocessing
 #	import time
 #

@@ -6,8 +6,8 @@ __filename__ = "pgsimupopper.py"
 __date__ = "20160124"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-VERBOSE=False
-VERY_VERBOSE=False
+VERBOSE=True
+VERY_VERBOSE=True
 
 DO_PUDB=False
 
@@ -211,7 +211,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		'''
 		
-		ENTRY_WIDTH=50
+		ENTRY_WIDTH=70
 		LABEL_WIDTH=20
 		LOCATIONS_FRAME_PADDING=30
 		LOCATIONS_FRAME_LABEL="Load/Run"
@@ -236,9 +236,11 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					int, self.__total_processes_for_sims, 
 					1, i_tot_procs )
 
-		o_tot_process_kv=KeyValFrame( "Processes", 
-						self.__total_processes_for_sims,
-						o_run_sub_subframe,
+		o_tot_process_kv=KeyValFrame( s_name="Processes", 
+						v_value=self.__total_processes_for_sims,
+						o_type=int,
+						v_default_value="",
+						o_master=o_run_sub_subframe,
 						o_associated_attribute_object=self,
 						s_associated_attribute="_PGGuiSimuPop" \
 									+ "__total_processes_for_sims",
@@ -267,9 +269,11 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		v_config_file_val="None" if s_curr_config_file == "" else s_curr_config_file
 
-		o_config_kv=KeyValFrame( "Load Configuration File:", 
-						v_config_file_val,
-						o_file_locations_subframe,
+		o_config_kv=KeyValFrame( s_name="Load Configuration File:", 
+						v_value=v_config_file_val,
+						v_default_value="",
+						o_type=str,
+						o_master=o_file_locations_subframe,
 						i_entrywidth=ENTRY_WIDTH,
 						i_labelwidth=LABEL_WIDTH,
 						b_is_enabled=False,
@@ -283,9 +287,11 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		i_row+=1
 
-		o_outdir_kv=KeyValFrame( "Select Output directory", 
-					self.__output_directory.get(), 
-					o_file_locations_subframe,
+		o_outdir_kv=KeyValFrame( s_name="Select Output directory", 
+					v_value=self.__output_directory.get(), 
+					v_default_value="",
+					o_type=str,
+					o_master=o_file_locations_subframe,
 					i_entrywidth=ENTRY_WIDTH,
 					i_labelwidth=LABEL_WIDTH,
 					b_is_enabled=False,
@@ -305,6 +311,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		
 		self.__outbase_kv=KeyValFrame( s_name="Output files base name: ", 
 					v_value=self.output_base_name, 
+					o_type=str,
+					v_default_value="",
 					o_master=o_file_locations_subframe, 
 					o_associated_attribute_object=self,
 					s_associated_attribute="output_base_name",
@@ -485,15 +493,48 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#end if the value is a string
 
 			if o_input.param_names is not None:
+
 				#returns None if this param has no longname,
 				#and the KeyValFrame will ignore s_label_name if
 				#its value is None, using instead the param name 
 				#as given by s_param
-				s_longname=o_input.param_names.longname( s_param )
+				s_longname=o_input.param_names.getLongnameForParam( s_param )
 				s_nametag=o_input.param_names.tag( s_param )
 				s_tooltip=o_input.param_names.getToolTipForParam( s_param )
 				s_section_name= \
 						o_input.param_names.getConfigSectionNameFromTag( s_nametag )
+				s_param_type=o_input.param_names.getParamTypeForParam( s_param )
+				#Param set files use "list<type>" when the parameter is a list
+				#of python types <type>, so to convert to list item type, 
+				#(needed by the KeyValFrame object) we strip off the "list"
+				s_param_type=s_param_type.replace( "list", "" )
+				try:
+					o_param_type=eval( s_param_type )
+				except Exception as oex:
+					s_msg="In PGGuiSimuPop instance, " \
+							+ "def __load_param_interface, " \
+							+ "unable to eval param type for " \
+							+ "param, " + s_param + ".  " \
+							+ "Type as given by params file: " \
+							+ s_param_type + ".  " \
+							+ "Exception raised: " + str( oex ) +"."
+					raise Exception( s_msg )
+				#end try . . . except . . .
+
+				s_default_value=o_input.param_names.getDefaultValueForParam( s_param )
+				v_default_value=None
+				try:
+					v_default_value=eval( s_default_value )
+				except Exception as oex:
+					s_msg="In PGGuiSimuPop instance, " \
+							+ "def __load_param_interface, " \
+							+ "unable to eval default value for " \
+							+ "param, " + s_param + ".  " \
+							+ "Default value as given by params file: " \
+							+ s_default_value + ".  " \
+							+ "Exception raised: " + str( oex ) + "."
+					raise Exception( s_msg )
+				#end try . . . except . . .
 			#end if we have a set of param names
 
 			#if not in the param names file, we don't want to suppress it,
@@ -528,18 +569,21 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					i_entry_width=len(v_val) if type( v_val ) == str else 7
 					s_entry_justify='left' if type( v_val ) == str else 'right' 
 
-					
-					o_kv=KeyValFrame( s_param, v_val, o_frame_for_this_param, 
-							o_associated_attribute_object=self.__input,
-							s_associated_attribute=s_param,
-							def_entry_change_command=self.__test_value,
-							i_labelwidth=i_width_labelname,	
-							s_label_name=s_longname,
-							i_entrywidth = i_entry_width,
-							s_entry_justify=s_entry_justify,
-							b_is_enabled=b_allow_entry_change,
-							b_force_disable=b_force_disable,
-							s_tooltip=s_tooltip )
+					o_kv=KeyValFrame( s_name=s_param, 
+								v_value=v_val, 
+								v_default_value=v_default_value,
+								o_type=o_param_type,
+								o_master=o_frame_for_this_param, 
+								o_associated_attribute_object=self.__input,
+								s_associated_attribute=s_param,
+								def_entry_change_command=self.__test_value,
+								i_labelwidth=i_width_labelname,	
+								s_label_name=s_longname,
+								i_entrywidth = i_entry_width,
+								s_entry_justify=s_entry_justify,
+								b_is_enabled=b_allow_entry_change,
+								b_force_disable=b_force_disable,
+								s_tooltip=s_tooltip )
 						
 				else:
 
@@ -597,7 +641,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			if s_config_file != INIT_ENTRY_CONFIG_FILE: 
 				s_msg="Problem loading configuration.\n" \
 						+ "File: " + str( s_config_file ) + "\n\n" \
-						+ "Details:\n\n" \
+						+ "Details: " \
 						+ "Exception: " + str( oe ) + "."
 				o_diag=PGGUIInfoMessage( self, s_msg )
 			#end if entry not None
@@ -634,7 +678,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		o_model_resources=None
 		o_param_names=None
 		o_pgin=None
-
+	
 		if len( self.__life_table_files ) > 0:
 			o_model_resources=pgsr.PGSimuPopResources( self.__life_table_files )
 		#end if we have a file list
@@ -648,6 +692,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#and as long as the config file has evaluatable values for
 			#all of its options, we still get a valid PGInputSimuPop object:
 			o_pgin=pgin.PGInputSimuPop( self.__config_file.get(), o_model_resources, o_param_names ) 
+			
 			o_pgin.makeInputConfig()
 		except Exception as exc:
 			self.__config_file.set("")

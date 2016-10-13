@@ -291,7 +291,14 @@ class PGOutputSimuPop( object ):
 		    
 			ls_line = s_line.rstrip().split(" ")
 
-			i_id = int(float(ls_line[IDX_GEN_INDIV]))
+			'''
+			As of 2016_09_01, we are no longer typing the id as an int, since
+			we changed the indiv id string that is written to the gen file,
+			(see pgopsimupop.py def __outputAge )
+			to be a (currenly semicolon) delimited list of the indiv age,sex,etc)
+			'''
+			s_id = ls_line[IDX_GEN_INDIV]
+
 			i_gen = int(float(ls_line[IDX_GEN_GENERATION]))
 			idx_first_allele_in_line=( idx_allele_start + IDX_FIRST_ALLELE ) - 1
 			idx_last_allele_in_line=( idx_allele_stop  + IDX_FIRST_ALLELE ) - 1 
@@ -303,7 +310,7 @@ class PGOutputSimuPop( object ):
 			    #end if new generation (== new population )
 		    	#end if we should make a new population for each generation
 
-			o_genepopfile.write( str( i_id ) + "," +  " ".join( ls_alleles ) + "\n"  )
+			o_genepopfile.write( str( s_id ) + "," +  " ".join( ls_alleles ) + "\n"  )
 
 		#end for each line in gen file
 

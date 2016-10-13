@@ -53,6 +53,8 @@ class PGOpSimuPop( modop.APGOperation ):
 	INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS="numMSats"
 	INPUT_ATTRIBUTE_NUMBER_OF_SNPS="numSNPs"
 
+	DELIMITER_INDIV_ID=";"
+
 	def __init__(self, o_input, o_output, b_compress_output=True, 
 									b_remove_db_gen_sim_files=False,
 									b_write_input_as_config_file=True):  
@@ -725,7 +727,6 @@ class PGOpSimuPop( modop.APGOperation ):
 	def __cull( self, pop ):
 		kills = []
 		for i in pop.individuals():
-
 			if i.age > 0 and i.age < self.input.ages - 1:
 				if i.sex() == 1:
 					cut = self.input.survivalMale[int(i.age) - 1]
@@ -784,23 +785,38 @@ class PGOpSimuPop( modop.APGOperation ):
 			create the genepop.  It may be that we'll just keep this original 
 			filter on the gen, and create the genepop using the indiv list to 
 			get the individual ids, and this gen output to lookup genotypes.
+			
+
+			As of 2016_09_01, combining the age, sex, and parantage info into the indiv id
+			for the first (indiv id) field in the *gen file.  Note above that this info
+			is also written to the *sim file.  Putting it in the gen file will allow
+			the gen file to be the sole source for writing  gen2genepop conversion
+			in instances of type PGOutputSimuPop.  Also, we will again eliminate
+			the filter used in writing the gen file indivs/cycle, and to 
+			apply age or other filter conditions downstream from this output (using
+			instances of class objects in new module genepopindividualid.py). Hence,
+			once again we rem out the original filter on age for the gen-file indiv/generation
 			'''
-			if i.age == 1 or gen == 0:
+#			if i.age == 1 or gen == 0:
 
-				self.output.err.write("%d %d " % (i.ind_id, gen))
+			s_id_fields=PGOpSimuPop.DELIMITER_INDIV_ID.join( [ \
+						str( i.ind_id ), str( i.sex() ), str( i.father_id ),
+						str( i.mother_id ), str( i.age ) ] )
 
-				for pos in range(len(i.genotype(0))):
-					a1 = self.__zeroC(i.allele(pos, 0))
-					a2 = self.__zeroC(i.allele(pos, 1))
-					self.output.err.write(a1 + a2 + " ")
-				#end for pos in range
+			self.output.err.write("%s %d " % (s_id_fields, gen))
 
-				self.output.err.write("\n")
+			for pos in range(len(i.genotype(0))):
+				a1 = self.__zeroC(i.allele(pos, 0))
+				a2 = self.__zeroC(i.allele(pos, 1))
+				self.output.err.write(a1 + a2 + " ")
+			#end for pos in range
+
+			self.output.err.write("\n")
 			
 			#end if age == 1 or gen == 0
 
 			'''
-			End of change to Tiago's code (removing the if statement ).
+			End of change to Tiago's code.
 			'''
 
 
