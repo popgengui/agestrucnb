@@ -54,7 +54,7 @@ def scrapeNe(filename, firstVal):
         if not sourceName in dataDict:
             dataDict[sourceName] = {}
             popDict[sourceName] = {}
-        dataDict[sourceName][popNum] = (neEst,maxError,minError)
+        dataDict[sourceName][popNum] = neEst
         popDict[sourceName][popNum] = individualCount
     replicateKeys = dataDict.keys()
     resultTable = {}

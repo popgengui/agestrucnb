@@ -7,6 +7,7 @@ import LineRegress
 from neLineRegress import resultScraper
 
 
+
 def readconfig(filename):
 
     ## SETS DEFaULTS
@@ -149,19 +150,20 @@ def runSimulation(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alle
 
     return outputFiles
 
-def runNeEst(files,locisampling,popsampling,regressConfig):
-    outputFile = ""
+def runNeEst(files,runFolder,locisampling,popsampling,regressConfig):
+    statsFile = ""
     #create output folder
     #run neEstimator
     neFile = ""
     #run lineregress
-    statsFile =  LineRegress.neStats(neFile, regressConfig)
+    configVals = LineRegress.neConfigRead(regressConfig)
+
+    statsFile =  LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
     return statsFile
 
-def gatherNe(files):
-    for filename in files:
-        results, temp = resultScraper.scrapeNE(filename)
-
+def gatherNe(fileName):
+    results, temp = resultScraper.scrapeNE(fileName)
+    return results
 
 def gatherPower(filename):
     powerData = resultScraper.scrapePower(filename)
@@ -171,18 +173,57 @@ def gatherSlopesO(filename):
     slopeData = resultScraper.scrapeSlopes(filename)
     return slopeData
 
-def run(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig):
-    runFolder = "l"+str(lambdaVal)+"p"+str(startPop)+"N0"+N0+"m"+str(microSats)+"ac"+str(alleleCount)+SNPs+str(SNPs)+"mr"+str(mutationRate)+"ls"+str(locisampling)+"ps"+str(popsampling)
+def getIdentifier(species, outFolder, simReps, lambdaVal, startPop, N0, microSats, alleleCount, SNPs, mutationRate, locisampling, popsampling, regressConfig):
+
+    identifier = "l" + str(lambdaVal) + "p" + str(startPop) + "N0" + N0 + "m" + str(microSats) + "ac" + str(alleleCount) + "SNPs" + str(SNPs) + "mr" + str(mutationRate) + "ls" + str(locisampling) + "ps" + str(popsampling))
+    return identifier
+
+def parseIdentifier(identifier)
+    re.compile('l(?P<lambda>[\d.\.]*)p(?P<startPop>[\d*])N0(?P<N0>[\d]*)m(?P<microsats>[\d]*)ac(?P<allelecount>[\d]*)SNPs(?P<SNPs>[\d]*)mr(?P<mutations>[\d\.]*)ls(?P<locisampling>[\d\.]*)ps(?P<popsampling>[\d\.]*)')
+
+
+
+
+
+def nameRunFolder(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig):
+    runFolder = getIdentifier(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig)
     print runFolder
-    runFolder = outFolder+runFolder
+    runFolder = os.sys.join(outFolder, runFolder)
     if os.path.isdir(runFolder):
         return None
+    return runFolder
+
+def run(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig):
+    runFolder = nameRunFolder(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig)
+    if  not runFolder:
+        return
     os.makedirs(runFolder)
     simFiles = runSimulation(species,runFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate)
-    neFile = runNeEst(simFiles,locisampling,popsampling,regressConfig)
-    return neFile
+    neFile, statsFile = runNeEst(simFiles,runFolder,locisampling,popsampling,regressConfig)
 
-def runSamplingOnly(files,locisampling,popsampling,regressConfig):
+    return neFile, statsFile
+
+def runSamplingOnly(files,runFolder,locisampling,popsampling,regressConfig):
+    neFile, statsFile = runNeEst(files,runFolder,locisampling,popsampling,regressConfig)
+    return neFile,statsFile
+
+def collectStatsData(neDict, statsDict, outFolder):
+    slopesName = "slopes.csv"
+    powerName = "power.csv"
+    neName = "Ne.csv"
+
+    for identifier in neDict:
+        neFile = neDict[identifier]
+        neData = gatherNe(neFile)
+        nePath = os.path.join(outFolder,neName)
+        neOut = open(nePath,"w")
+        neOut.write("replicate,Reproductive Cycle,Ne")
+        for datapoint in neData:
+            data = neData[datapoint]
+            neOut.write(datapoint+","+data[0]+","+data[1])
+
+
+
 
 
 
@@ -201,14 +242,27 @@ def batch(configFile,threads = 1):
         if threads == 1:
             neFiles = []
             simFiles = runSimulation(runParams[0],runParams[1],runParams[2],runParams[3],runParams[4],runParams[5],runParams[6],runParams[7],runParams[8],runParams[9])
-
+            neDict = {}
+            statsDict ={}
             for paramset in runParams:
-                neFile =
+                runFolder = nameRunFolder(*runParams)
+                if not runFolder:
+                    continue
+                ident = getIdentifier(*runParams)
+                neFile, statsFile = run(*runParams)
+                neDict[ident] = neFile
+                statsDict[ident] = statsFile
     else:
         if threads ==1:
-            neFiles = []
+            neDict = {}
+            statsDict ={}
             for paramset in runParams:
-                neFiles.append(run(*runParams))
+                ident = getIdentifier(*runParams)
+                neFile, statsFile = run(*runParams)
+                neDict[ident] = neFile
+                statsDict[ident] = statsFile
+
+
 
 
 
