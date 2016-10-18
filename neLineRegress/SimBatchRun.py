@@ -3,8 +3,7 @@ import os
 import re
 from itertools import product
 import LineRegress
-
-from neLineRegress import resultScraper
+import ResultScraper
 
 
 
@@ -157,28 +156,27 @@ def runNeEst(files,runFolder,locisampling,popsampling,regressConfig):
     neFile = ""
     #run lineregress
     configVals = LineRegress.neConfigRead(regressConfig)
-
-    statsFile =  LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
+    statsFile =  LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statsFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
     return statsFile
 
-def gatherNe(fileName):
-    results, temp = resultScraper.scrapeNE(fileName)
+def gatherNe(fileName,firstVal):
+    results, temp = ResultScraper.scrapeNE(fileName,firstVal)
     return results
 
 def gatherPower(filename):
-    powerData = resultScraper.scrapePower(filename)
+    powerData = ResultScraper.scrapePower(filename)
     return powerData
 
-def gatherSlopesO(filename):
-    slopeData = resultScraper.scrapeSlopes(filename)
+def gatherSlopes(filename):
+    slopeData = ResultScraper.scrapeSlopes(filename)
     return slopeData
 
-def getIdentifier(species, outFolder, simReps, lambdaVal, startPop, N0, microSats, alleleCount, SNPs, mutationRate, locisampling, popsampling, regressConfig):
 
+def getIdentifier(species, outFolder, simReps, lambdaVal, startPop, N0, microSats, alleleCount, SNPs, mutationRate, locisampling, popsampling, regressConfig):
     identifier = "l" + str(lambdaVal) + "p" + str(startPop) + "N0" + N0 + "m" + str(microSats) + "ac" + str(alleleCount) + "SNPs" + str(SNPs) + "mr" + str(mutationRate) + "ls" + str(locisampling) + "ps" + str(popsampling))
     return identifier
 
-def parseIdentifier(identifier)
+def parseIdentifier(identifier):
     re.compile('l(?P<lambda>[\d.\.]*)p(?P<startPop>[\d*])N0(?P<N0>[\d]*)m(?P<microsats>[\d]*)ac(?P<allelecount>[\d]*)SNPs(?P<SNPs>[\d]*)mr(?P<mutations>[\d\.]*)ls(?P<locisampling>[\d\.]*)ps(?P<popsampling>[\d\.]*)')
 
 
@@ -207,20 +205,26 @@ def runSamplingOnly(files,runFolder,locisampling,popsampling,regressConfig):
     neFile, statsFile = runNeEst(files,runFolder,locisampling,popsampling,regressConfig)
     return neFile,statsFile
 
-def collectStatsData(neDict, statsDict, outFolder):
+def collectStatsData(neDict, statsDict, outFolder,firstVal):
     slopesName = "slopes.csv"
     powerName = "power.csv"
     neName = "Ne.csv"
 
     for identifier in neDict:
         neFile = neDict[identifier]
-        neData = gatherNe(neFile)
-        nePath = os.path.join(outFolder,neName)
-        neOut = open(nePath,"w")
-        neOut.write("replicate,Reproductive Cycle,Ne")
+        neData = gatherNe(neFile, firstVal)
+        nePath = os.path.join(outFolder, neName)
+        neOut = open(nePath, "w")
+        neOut.write("parameters,replicate,Reproductive Cycle,Ne\n")
         for datapoint in neData:
+            print datapoint
             data = neData[datapoint]
-            neOut.write(datapoint+","+data[0]+","+data[1])
+            print data
+            for point in data:
+                neOut.write(str(identifier) + "," + str(datapoint) + "," + str(point[0]) + "," + str(point[1]) + "\n")
+    neOut.close()
+
+
 
 
 
