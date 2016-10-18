@@ -745,7 +745,7 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __cull
 
 
-	##Brian Trethewey addition to set
+	##Brian Trethewey addition to ensure equal sex ratio
 	def __equalSexCull(self, pop):
 		kills = []
 		cohortDict = {}
@@ -778,13 +778,13 @@ class PGOpSimuPop( modop.APGOperation ):
 			print"\n"
 
 			#determine survival rate of this cohort
-			survivalRate =1- (self.input.survivalMale[int(cohortKey) - 1]+self.input.survivalFemale[int(cohortKey) - 1])/2
+			survivalRate =(self.input.survivalMale[int(cohortKey) - 1]+self.input.survivalFemale[int(cohortKey) - 1])/2
 			print survivalRate
-			survivorCount = numpy.round(cohortTotal * survivalRate)
-			cullCount = cohortTotal  - survivorCount
+			cullCount = numpy.round(cohortTotal * survivalRate)
+			survivorCount = cohortTotal  - cullCount
 			print survivorCount
 			print cullCount
-			print "\n\n\n"
+			print "\n\n"
 
 			#choose which sex to kill first
 			#flag is one and 0 for easy switching
@@ -794,15 +794,40 @@ class PGOpSimuPop( modop.APGOperation ):
 			if maleCount > femaleCount:
 				killChoiceFlag = 1
 
+			# halfCull = int(cullCount / 2)
+			# maleKills = halfCull
+			# femaleKills = halfCull
+			# if cullCount%2 ==1:
+			# 	if killChoiceFlag == 1:
+			# 		maleKills +=1
+			# 	else:
+			# 		femaleKills+=1
+			# maleCulls = random.sample(cohortMales,maleKills)
+			# femaleCulls = random.sample(cohortFemales,femaleKills)
+			# print len(maleCulls)
+			# print len(femaleCulls)
+			# for male in maleCulls:
+			# 	cohortKills.append(male.ind_id)
+			# 	print "male "+str(male.ind_id)
+			# for female in femaleCulls:
+			# 	cohortKills.append(female.ind_id)
+			# 	print "female "+str(female.ind_id)
+			# print "\n\n\n"
+
+
 			#Lottery Loop
 			lotteryCount = 0
+			maleCullOrder =list(cohortMales)
+			femaleCullOrder = list(cohortFemales)
+			random.shuffle(maleCullOrder)
+			random.shuffle(femaleCullOrder)
 			while lotteryCount < cullCount:
 				#sample by gender
 				if killChoiceFlag == 1:
-					lottoInd = random.sample(cohortMales,1)[0]
+					lottoInd = maleCullOrder.pop()
 					print "MaleChosen "+str(lottoInd.ind_id)
 				else:
-					lottoInd = random.sample(cohortFemales,1)[0]
+					lottoInd = femaleCullOrder.pop()
 					print "FemaleChosen "+str(lottoInd.ind_id)
 				#if not already "dead"
 				if not lottoInd.ind_id in cohortKills:

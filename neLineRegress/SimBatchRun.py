@@ -161,10 +161,9 @@ def runNeEst(files,runFolder,locisampling,popsampling,regressConfig):
     statsFile =  LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
     return statsFile
 
-def gatherNe(files):
-    for filename in files:
-        results, temp = resultScraper.scrapeNE(filename)
-
+def gatherNe(fileName):
+    results, temp = resultScraper.scrapeNE(fileName)
+    return results
 
 def gatherPower(filename):
     powerData = resultScraper.scrapePower(filename)
@@ -189,13 +188,13 @@ def parseIdentifier(identifier)
 def nameRunFolder(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig):
     runFolder = getIdentifier(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig)
     print runFolder
-    runFolder = outFolder + runFolder
+    runFolder = os.sys.join(outFolder, runFolder)
     if os.path.isdir(runFolder):
         return None
     return runFolder
 
 def run(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig):
-    runFolder = nameRunFolder (species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig)
+    runFolder = nameRunFolder(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig)
     if  not runFolder:
         return
     os.makedirs(runFolder)
@@ -209,9 +208,20 @@ def runSamplingOnly(files,runFolder,locisampling,popsampling,regressConfig):
     return neFile,statsFile
 
 def collectStatsData(neDict, statsDict, outFolder):
+    slopesName = "slopes.csv"
+    powerName = "power.csv"
+    neName = "Ne.csv"
+
     for identifier in neDict:
         neFile = neDict[identifier]
-        gatherNe
+        neData = gatherNe(neFile)
+        nePath = os.path.join(outFolder,neName)
+        neOut = open(nePath,"w")
+        neOut.write("replicate,Reproductive Cycle,Ne")
+        for datapoint in neData:
+            data = neData[datapoint]
+            neOut.write(datapoint+","+data[0]+","+data[1])
+
 
 
 
