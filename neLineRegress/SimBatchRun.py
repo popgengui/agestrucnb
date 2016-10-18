@@ -172,9 +172,19 @@ def gatherSlopes(filename):
     return slopeData
 
 
-def getIdentifier(species, outFolder, simReps, lambdaVal, startPop, N0, microSats, alleleCount, SNPs, mutationRate, locisampling, popsampling, regressConfig):
-    identifier = "l" + str(lambdaVal) + "p" + str(startPop) + "N0" + N0 + "m" + str(microSats) + "ac" + str(alleleCount) + "SNPs" + str(SNPs) + "mr" + str(mutationRate) + "ls" + str(locisampling) + "ps" + str(popsampling))
+
+def createIdentifier(species, outFolder, simReps, lambdaVal, startPop, N0, microSats, alleleCount, SNPs, mutationRate, locisampling, popsampling, regressConfig):
+    identifier = "l"+str(lambdaVal)
+    +"p" + str(startPop)\
+    + "N0" + str(N0) \
+    + "m" + str(microSats)\
+    + "ac" + str(alleleCount)\
+    + "SNPs" + str(SNPs)\
+    + "mr" + str(mutationRate)\
+    + "ls" + str(locisampling)\
+    + "ps" + str(popsampling)
     return identifier
+
 
 def parseIdentifier(identifier):
     re.compile('l(?P<lambda>[\d.\.]*)p(?P<startPop>[\d*])N0(?P<N0>[\d]*)m(?P<microsats>[\d]*)ac(?P<allelecount>[\d]*)SNPs(?P<SNPs>[\d]*)mr(?P<mutations>[\d\.]*)ls(?P<locisampling>[\d\.]*)ps(?P<popsampling>[\d\.]*)')
