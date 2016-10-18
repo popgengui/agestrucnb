@@ -194,7 +194,7 @@ def parseIdentifier(identifier):
 
 
 def nameRunFolder(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig):
-    runFolder = getIdentifier(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig)
+    runFolder = createIdentifier(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig)
     print runFolder
     runFolder = os.sys.join(outFolder, runFolder)
     if os.path.isdir(runFolder):
@@ -262,7 +262,7 @@ def batch(configFile,threads = 1):
                 runFolder = nameRunFolder(*runParams)
                 if not runFolder:
                     continue
-                ident = getIdentifier(*runParams)
+                ident = createIdentifier(*runParams)
                 neFile, statsFile = run(*runParams)
                 neDict[ident] = neFile
                 statsDict[ident] = statsFile
