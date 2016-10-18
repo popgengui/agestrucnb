@@ -35,7 +35,7 @@ def scrapeSlopes(fileName):
     resultDict = {"slope":slopeArray,"intercept":interceptArray,"lowerCI":lowerCIArray,"upperCI":upperCIArray}
     return resultDict
 
-def scrapeNe(filename, firstVal):
+def scrapeNE(filename, firstVal):
     fileBuffer = open(filename, "rb")
     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
     dataDict = {}
