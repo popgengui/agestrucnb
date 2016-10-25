@@ -253,7 +253,8 @@ class PGOpSimuPop( modop.APGOperation ):
 		startLambda=self.input.startLambda
 		lbd=self.input.lbd
 		##todo !! this is where you select sex proporotion(maleProp) or freqency(maleFreq)
-		initOps = [sp.InitSex(maleProp=self.input.maleProb)]
+		#initOps = [sp.InitSex(maleProp=self.input.maleProb)]
+		initOps = [sp.InitSex(maleProp=0.5)]
 		if startLambda < pgin.START_LAMBDA_IGNORE:
 			preOps = [sp.ResizeSubPops(proportions=(float(lbd), ),
 								begin=startLambda)]
@@ -745,7 +746,7 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __cull
 
 
-	##Brian Trethewey addition to ensure equal sex ratio
+	##Brian Trethewey addition for the immediate culling of a proportion of the adult population
 	def __equalSexCull(self, pop):
 		kills = []
 		cohortDict = {}
@@ -780,8 +781,8 @@ class PGOpSimuPop( modop.APGOperation ):
 			#determine survival rate of this cohort
 			survivalRate =(self.input.survivalMale[int(cohortKey) - 1]+self.input.survivalFemale[int(cohortKey) - 1])/2
 			print survivalRate
-			cullCount = numpy.round(cohortTotal * survivalRate)
-			survivorCount = cohortTotal  - cullCount
+			survivorCount = numpy.round(cohortTotal * survivalRate)
+			cullCount = cohortTotal  - survivorCount
 			print survivorCount
 			print cullCount
 			print "\n\n"
@@ -823,7 +824,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			random.shuffle(femaleCullOrder)
 			while lotteryCount < cullCount:
 				#sample by gender
-				if killChoiceFlag == 1:
+				if len(maleCullOrder)>len(femaleCullOrder):
 					lottoInd = maleCullOrder.pop()
 					print "MaleChosen "+str(lottoInd.ind_id)
 				else:
@@ -833,17 +834,86 @@ class PGOpSimuPop( modop.APGOperation ):
 				if not lottoInd.ind_id in cohortKills:
 					lotteryCount +=1
 					print "Dead "+str(lotteryCount)
-					cohortKills.append(lottoInd.ind_id)
+					kills.append(lottoInd.ind_id)
 					killChoiceFlag = abs(killChoiceFlag-1)
 
 
-			kills.extend(cohortKills)
+			#kills.extend(cohortKills)
 			# endif age>0 andage<.....
+		# end for i in pop
+		print kills
+		pop.removeIndividuals(IDs=kills)
+		return True
+
+# end __equalSexCull
+
+	def __harvest(self, pop):
+		kills = []
+		cohortDict = {}
+		for i in pop.individuals():
+			indAge = i.age
+
+			if not indAge in cohortDict:
+				cohortDict[indAge] = []
+			cohortDict[indAge].append(i)
+
+		for cohortKey in cohortDict:
+			## !! Cohort 0 does not get culled!!
+			# if cohortKey == 0.0:
+			#	continue
+
+			cohortKills = []
+
+			# setup data and seperate males and females
+			cohort = cohortDict[cohortKey]
+			print(cohortKey)
+			cohortTotal = len(cohort)
+			cohortMales = [x for x in cohort if x.sex() == 1]
+			maleCount = len(cohortMales)
+			cohortFemales = [x for x in cohort if x.sex() == 2]
+			femaleCount = len(cohortFemales)
+			print cohortTotal
+			print maleCount
+			print femaleCount
+			print"\n"
+			gen = pop.dvars().gen
+
+			#determine harvest rate for this generation
+
+			harvestRate = (self.input.harvest[gen])
+			print harvestRate
+			maleHarvest = numpy.round(maleCount * harvestRate)
+			femaleHarvest = numpy.round(femaleCount * harvestRate)
+			print "\n\n"
+
+			# choose which sex to kill first
+			# flag is one and 0 for easy switching
+			# killChoiceFlag = round(random.random())
+			# if femaleCount > maleCount:
+			# 	killChoiceFlag = 0
+			# if maleCount > femaleCount:
+			# 	killChoiceFlag = 1
+
+
+			#sample  harvest
+			maleHarvestList = numpy.sample(cohortMales,maleHarvest)
+			femaleHarvestList = numpy.sample(cohortFemales,femaleHarvest)
+			for ind in maleHarvestList:
+				print "Dead " + str(ind.ind_id)
+				kills.append(ind.ind_id)
+			for ind in femaleHarvestList:
+				print "Dead " + str(ind.ind_id)
+				kills.append(ind.ind_id)
+
+				# kills.extend(cohortKills)
+				# endif age>0 andage<.....
 		# end for i in pop
 		pop.removeIndividuals(IDs=kills)
 		return True
 
 # end __equalSexCull
+
+
 
 	def __zeroC( self, v ):
 		a = str(v)

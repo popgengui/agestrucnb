@@ -233,7 +233,12 @@ def collectStatsData(neDict, statsDict, outFolder,firstVal):
             for point in data:
                 neOut.write(str(identifier) + "," + str(datapoint) + "," + str(point[0]) + "," + str(point[1]) + "\n")
     neOut.close()
-
+    for identifier in statsDict:
+        statsFile = statsDict[identifier]
+        slopePath =os.path.join(outFolder, slopesName)
+        powerPath = os.path.join(outFolder, powerName)
+        powerOut = open(powerPath,"w")
+        slopeOut = open(slopePath,"w")
 
 
 
@@ -271,7 +276,7 @@ def batch(configFile,threads = 1):
             neDict = {}
             statsDict ={}
             for paramset in runParams:
-                ident = getIdentifier(*runParams)
+                ident = createIdentifier(*runParams)
                 neFile, statsFile = run(*runParams)
                 neDict[ident] = neFile
                 statsDict[ident] = statsFile
