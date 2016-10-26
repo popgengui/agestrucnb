@@ -142,6 +142,16 @@ class PGParamSet( object ):
 	'''
 	IDX_TAG_FIELD_VALIDATION=12
 
+	'''
+	Added 2016_10_16, if not None, this
+	names a def, which must be present in
+	the object to which it is assigned, and which
+	can be passed to an KeyVal control (mostly
+	KeyValFrame objects) giving a def to be called
+	when a param value changes.
+	'''
+	IDX_TAG_FIELD_ASSOC_DEF=13
+
 	COMMENT_CHAR="#"
 
 	def __init__( self, s_file_with_param_names = None ):
@@ -292,10 +302,16 @@ class PGParamSet( object ):
 	#end getControlListFromTag
 
 	def getValidationFromTag( self, s_tag ):
-		s_validation=self.__get_tag_Field( s_tag,
+		s_validation=self.__get_tag_field( s_tag,
 					PGParamSet.IDX_TAG_FIELD_VALIDATION )
 		return s_validation
 	#end getValidationFromTag
+
+	def getAssocDefFromTag( self, s_tag ):
+		s_def=self.__get_tag_field( s_tag,
+					PGParamSet.IDX_TAG_FIELD_ASSOC_DEF )
+		return s_def
+	#end getAssocDefFromTag
 
 	def getConfigSectionNameForParam( self, s_name ):
 		s_tag=self.tag( s_name )
@@ -387,6 +403,13 @@ class PGParamSet( object ):
 					PGParamSet.IDX_TAG_FIELD_VALIDATION )
 		return s_validation
 	#end getValidationForParam
+
+	def getAssocDefForParam( self, s_name ):
+		s_tag=self.tag( s_name )
+		s_def=self.__get_tag_field( s_tag, 
+				PGParamSet.IDX_TAG_FIELD_ASSOC_DEF )
+		return s_def
+	#end getAssocDefForParam
 
 	def tag( self, s_name ):
 		'''

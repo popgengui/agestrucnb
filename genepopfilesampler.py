@@ -25,6 +25,7 @@ SCHEME_PROPORTION="proportion"
 SCHEME_REMOVAL="remove"
 SCHEME_CRITERIA="criteria"
 SCHEME_COHORTS="cohorts"
+SCHEME_COHORTS_PERC="cohortsperc"
 SCHEME_RELATEDS="relateds"
 
 #subsampling loci, not individuals
@@ -41,13 +42,17 @@ def make_subsample_tag( v_value, i_replicate_number, s_scheme ):
 		s_val_initial="c"
 	elif s_scheme==SCHEME_COHORTS:
 		s_val_initial="h"
+	elif s_scheme==SCHEME_COHORTS_PERC:
+		s_val_initial="t"
 	elif s_scheme==SCHEME_RELATEDS:
 		s_val_initial="r"
 	elif s_scheme==SCHEME_LOCI:
 		s_val_initial="l"
 	else:
 		s_msg = "In genpopfilesampler.py, def make_subsample_tag, " \
-								+ "unknown scheme: " + s_scheme + "."
+								+ "scheme, " + s_scheme \
+								+ ".  The scheme name is either unknown " \
+								+ "or has no associated tag."
 		raise Exception( s_msg )
 	#end if scheme proportion, else removal, else error
 
@@ -73,9 +78,13 @@ def get_sample_value_and_replicate_number_from_sample_tag( s_sample_tag, s_schem
 			v_sample_value=str( ls_fields[ 1 ] )
 		elif s_scheme==SCHEME_RELATEDS:
 			v_sample_value=str( ls_fields[ 1 ] )
+		elif s_scheme==SCHEME_COHORTS_PERC:
+			v_sample_value=str( ls_fields[ 1 ] )
 		else:
-			s_msg = "In genpopfilesampler.py, def get_sample_value_and_replicate_number_from_sample_tag, " \
-								+ "unknown scheme: " + s_scheme + "."
+			s_msg = "In genpopfilesampler.py, "\
+						+ "def get_sample_value_and_replicate_number_from_sample_tag, " \
+						+ "scheme," + s_scheme + ".  The name is either uknown or has no " \
+						+ "determined parsing format."
 			raise Exception( s_msg )
 		#end if scheme is proportion, else removal, else error
 
@@ -160,17 +169,20 @@ class GenepopFileSampleParams( object ):
 
 #end  class GenepopFileSampleParams
 
-class GenepopFileSampleParamsLociByRangeAndTotal( GenepopFileSampleParams ):
+class GenepopFileSampleParamsLoci( GenepopFileSampleParams ):
 	'''
 	Parameter set for sampling loci from the ith to the jth, 
 	as listed in the genepop file individual entries. 
 	Also provides for a max_total_loci, to trunctate the total loci 
-	to this number by random sampling. See class below,
-	GenepopFileSamplerLociByRangeAndTotal.
+	to this number by random sampling. Also provides a propotioin value,
+	if needed, for randomly sampling a proportion of the loci within
+	the given range.  See classs below, GenepopFileSamplerLociByRangeAndTotal and
+	GenepopFileSampleParamsLociByRangeAndPercentage
 	'''
 	def __init__( self, li_population_numbers, i_min_loci_position,
 												i_max_loci_position,
 												i_max_total_loci=None,
+												f_proportion=None,
 												i_replicates=1,
 												s_population_subsample_name="population_numbers",
 												v_sample_value="rt",
@@ -187,6 +199,7 @@ class GenepopFileSampleParamsLociByRangeAndTotal( GenepopFileSampleParams ):
 		self.__max_total_loci=i_max_total_loci
 		self.__sample_param_value="rt"
 		self.__replicates=i_replicates
+		self.__proportion=f_proportion
 
 		return
 	#end __init__
@@ -216,7 +229,12 @@ class GenepopFileSampleParamsLociByRangeAndTotal( GenepopFileSampleParams ):
 		return self.__sample_param_value
 	#end property sample_param_value
 
-#end class GenepopFileSampleParamsLociByRangeAndTotal
+	@property
+	def proportion( self ):
+		return self.__proportion
+	#end property proportion
+
+#end class GenepopFileSampleParamsLoci
 
 class GenepopFileSampleParamsNone( GenepopFileSampleParams ):
 	'''
@@ -528,6 +546,12 @@ class GenepopFileSampleParamsAgeStructureCohorts( GenepopFileSampleParams ):
 								i_min_individuals_per_gen,
 								i_max_individuals_per_gen, 
 								i_ceiling_if_no_total_individuals_per_gen=200,
+								#this param added 2016_10_19, to allow
+								#subclass of the GenepopFileSamplerIndividualsAgeStructureCohorts 
+								#that will sample a proportion of the cohort(s) collected.
+								#default None means it is not used, as for the original sampler
+								#that used the min/max indiv per gen limits:
+								f_proportion=None,
 								s_population_subsample_name="population_numbers",
 								i_replicates=1,
 								b_lp=False,
@@ -548,6 +572,13 @@ class GenepopFileSampleParamsAgeStructureCohorts( GenepopFileSampleParams ):
 			#Value used in naming the subsample (see global def, 
 			#make_subsample_tag).
 			self.__sample_param_value=s_sample_param_value
+
+			#proportion of indivicuals to sample, after
+			#even (uniform total per age) sampling.  This 
+			#property only employed in the sublcass
+			#GenepopFileSamplerIndividualsAgeStructureCohortsPercentage
+
+			self.__proportion=f_proportion
 
 			return
 	#end __init__
@@ -572,6 +603,15 @@ class GenepopFileSampleParamsAgeStructureCohorts( GenepopFileSampleParams ):
 	#end indiv_per_gen
 
 	@property
+	#This is not used in class 
+	#GenepopFileSamplerIndividualsAgeStructureCohorts,
+	#It is used in the derived class,
+	#GenepopFileSamplerIndividualsAgeStructureCohortsPercentage.
+	def proportion( self ):
+		return self.__proportion
+	#end proportion
+
+	@property
 	def replicates( self ):
 		return self.__replicates
 	#end def replicates
@@ -585,7 +625,7 @@ class GenepopFileSampleParamsAgeStructureCohorts( GenepopFileSampleParams ):
 
 class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 	'''
-	This sampler class meant to implement Tiago's sampling code in his
+	This sampler class is meant to implement Tiago's sampling code in his
 	sampleIndivsCohort.py module.  It samples  individuals grouped by age.
 	The GenepopFileSampleParams object used by instances
 	of this class has the values Tiagos module takes at the command line 
@@ -626,10 +666,61 @@ class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 
 	#end __get_individuals
 
+	def resize_sample_to_meet_size_criteria( self, li_indiv_by_age_collected ):
+		'''
+		Given the individuals collected by age, 
+		check min/max limits and subsample
+		if needed.  If within limits, return
+		the original list
+		'''
+
+		#If too few we raise an error.  If too many we
+		#randomly select to reach our max valid pop size
+		i_tot_collected=len( li_indiv_by_age_collected )
+
+		li_indiv_by_age_sampled=None
+
+		if i_tot_collected < self.sampleparams.min_indiv_per_gen:
+			s_msg="In GenepopFileSamplerIndividualsAgeStructureCohorts instance, " \
+					"after sampling cohorts, total collected, " \
+					+ str( i_tot_collected ) \
+					+ ", is less than the value given for " \
+					+ "the minimum pop size, " \
+					+ str( self.sampleparams.min_indiv_per_gen ) \
+					+ "."
+			raise Exception ( s_msg )
+
+		elif i_tot_collected > self.sampleparams.max_indiv_per_gen:
+			try:
+
+				li_indiv_by_age_sampled=random.sample( \
+									li_indiv_by_age_collected,
+									self.sampleparams.max_indiv_per_gen )
+										
+			except Exception as oex:
+				s_sample_error_msg= \
+					"In GenepopFileSamplerIndividualsAgeStructureCohorts " \
+						+ "instance, def doSample, "  \
+						+ "random.sample failed on list of " \
+						+ str( len( li_indiv_by_age_collected ) ) \
+						+ " individuals.  Target total to be sampled: " \
+						+ str( self.sampleparams.max_indiv_per_gen ) + "."
+				s_msg=s_sample_error_msg \
+						+ "  Exception message: " + str( oex ) + "."
+				raise Exception( s_msg )
+			#end try . . . except
+		else:
+			#within interval min to max pop size, so keep original 
+			li_indiv_by_age_sampled=li_indiv_by_age_collected
+
+		#end if too few, error, else if too many, sample, else no change
+		return li_indiv_by_age_sampled
+	#end resize_sample_to_meet_size_criteria 
+
 	def doSample( self ):
 		'''
-		Sample siblings in age group, for ages < max age. Sample even numbers per age, 
-		then reduce to meet max pop-per-gen.  See Tiagos code in his 
+		Sample siblings in age group, for ages < max age. Sample identical numbers per age, 
+		then reduce to meet max indiv per gen or proportion.  See Tiagos code in his 
 		sampleIndivsCohort.py module.  Note that when param "lp" is included, then
 		Tiagos code adds to his lines that print out, gen_number\sindiv, the same lines
 		without a gen number, presumably for downstream filtering when making the final
@@ -639,7 +730,7 @@ class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 
 		#estimator driver needs a pop number subsample when it adds calls to the NeEstimator:
 		self.filemanager.subsamplePopulationsByList( self.sampleparams.population_numbers,
-													s_subsample_tag=self.sampleparams.population_subsample_name )
+										s_subsample_tag=self.sampleparams.population_subsample_name )
 
 		FIELD_NAME_AGE="age"
 
@@ -682,7 +773,8 @@ class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 					entry in the "pop" section of this pop in the genepop file, as used
 					by the genepopfilemanager object to point to it's byte address in the file.
 					Thus it's our way of collecting samples of individuals and passing them into the
-					genepop file manager object's subsampling records (its attribute __indiv_subsamples).
+					genepop file manager object's subsampling records (its attribute 
+					__indiv_subsamples).
 					'''
 
 					i_indiv_number=idx+1
@@ -694,46 +786,19 @@ class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 
 				li_indiv_by_age_collected=self.__get_individuals( \
 												dli_indiv_index_by_age ) 
-				
-				#If too few we raise an error.  If too many we
-				#randomly select to reach our max valid pop size
-				i_tot_collected=len( li_indiv_by_age_collected )
+			
+				'''
+				Resize the sample if it exceeds size limits (as given by
+				min,max, or, in the case of a proportionaly sampling scheme
+				(subclass GenepopFileSamplerIndividualsAgeStructureCohortsPercentage),
+				subsample a proportion.  Note that these lists will be sorted by the
+				GenepopFileManager in the subsampleIndividualsByNumberList call
+				below.
+				'''
 
-				li_indiv_by_age_sampled=None	
+				li_indiv_by_age_sampled=self.resize_sample_to_meet_size_criteria( 
+															li_indiv_by_age_collected )	
 
-				if i_tot_collected < self.sampleparams.min_indiv_per_gen:
-					s_msg="In GenepopFileSamplerIndividualsAgeStructureCohorts instance, " \
-							"after sampling cohorts, total collected, " \
-							+ str( i_tot_collected ) \
-							+ ", is less than the value given for " \
-							+ "the minimum pop size, " \
-							+ str( self.sampleparams.min_indiv_per_gen ) \
-							+ "."
-					raise Exception ( s_msg )
-
-				elif i_tot_collected > self.sampleparams.max_indiv_per_gen:
-					try:
-
-						li_indiv_by_age_sampled=random.sample( \
-											li_indiv_by_age_collected,
-											self.sampleparams.max_indiv_per_gen )
-												
-					except Exception as oex:
-						s_sample_error_msg= \
-							"In GenepopFileSamplerIndividualsAgeStructureCohorts " \
-								+ "instance, def doSample, "  \
-								+ "random.sample failed on list of " \
-								+ str( len( li_indiv_by_age_collected ) ) \
-								+ " individuals.  Target total to be sampled: " \
-								+ str( self.sampleparams.max_indiv_per_gen ) + "."
-						s_msg=s_sample_error_msg \
-								+ "  Exception message: " + str( oex ) + "."
-						raise Exception( s_msg )
-					#end try . . . except
-				else:
-					#within interval min to max pop size, so keep original 
-					li_indiv_by_age_sampled=li_indiv_by_age_collected
-				#end if too few, error, else if too many, sample
 
 				#We rely on the genpopfilemanager object to sort 
 				#these indices when we pass them to the def,
@@ -751,6 +816,8 @@ class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 												i_replicate_number, 
 												SCHEME_COHORTS )
 			#end if tag is not None
+			
+
 
 			self.filemanager.subsampleIndividualsByNumberList( \
 									dli_indiv_index_lists_by_pop_number,
@@ -760,6 +827,94 @@ class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 		return
 	#end doSample
 #end class GenepopFileSamplerIndividualsAgeStructureCohorts
+
+class GenepopFileSamplerIndividualsAgeStructureCohortsPercentage( \
+					GenepopFileSamplerIndividualsAgeStructureCohorts ):
+	'''
+	Sublcass of GenepopFileSamplerIndividualsAgeStructureCohorts.  The only revision
+	fo the parent class is in def resize_sample_to_meet_size_criteria.  For this
+	subclass we use the proportion attribute to subsample, whereas in the parent
+	class we apply max indiv per pop.
+	'''
+	def __init__( self, o_genepopfilemanager, o_genepopfilesampleparams ):
+		GenepopFileSamplerIndividualsAgeStructureCohorts.__init__( \
+											self, o_genepopfilemanager, 
+												o_genepopfilesampleparams )
+		return
+	#end __init__
+
+	def resize_sample_to_meet_size_criteria( self, li_indiv_by_age_collected ):
+		'''
+		This def overrides its counter part in the parent class.  Given the 
+		individuals collected by age, check min/max limits and subsample the 
+		requested proportion (via sample params object attribute "proportion"). 
+		(Alternatively, In the parent class,  it is the max_total_loci
+		that limits the sample size.)
+		'''
+
+		i_tot_collected=len( li_indiv_by_age_collected )
+
+		li_indiv_by_age_sampled=None
+
+		if i_tot_collected < self.sampleparams.min_indiv_per_gen:
+			s_msg="In GenepopFileSamplerIndividualsAgeStructureCohortsPercentage " \
+					+ "instance, def resize_sample_to_meet_size_criteria " \
+					+ "after sampling cohorts, total collected, " \
+					+ str( i_tot_collected ) \
+					+ ", is less than the value given for " \
+					+ "the minimum pop size, " \
+					+ str( self.sampleparams.min_indiv_per_gen ) \
+					+ "."
+			raise Exception ( s_msg )
+		if i_tot_collected > self.sampleparams.max_indiv_per_gen:
+			s_msg="In GenepopFileSamplerIndividualsAgeStructureCohorts " \
+					+ "instance, def resize_sample_to_meet_size_criteria " \
+					+ "after sampling cohorts, total collected, " \
+					+ str( i_tot_collected ) \
+					+ ", is greader than the value given for " \
+					+ "the maximum pop size, " \
+					+ str( self.sampleparams.max_indiv_per_gen ) \
+					+ ".  For percentage sampling, unlike "  \
+					+ "Cohort sampling without a percentage, " \
+					+ "in which the max number is sampled randomly, " \
+					+ "in the percentage scheme, cohort samples over " \
+					+ "the max are treated as invalid."
+			raise Exception( s_msg )
+		else:
+			i_sample_size=None
+			try:
+				'''
+				In honor of python version uncertanties, we
+				cast all operands and results.  For example, 
+				inpython2, round returns a float.  In python3,
+				at least for round with a single arg, an int is 
+				returned.
+				'''
+				i_sample_size=int( \
+						round( float( i_tot_collected )*self.sampleparams.proportion ) )
+
+				li_indiv_by_age_sampled=random.sample( \
+									li_indiv_by_age_collected,
+												i_sample_size )
+										
+			except Exception as oex:
+				s_sample_error_msg= \
+					"In GenepopFileSamplerIndividualsAgeStructureCohortsPercentage" \
+						+ "instance, def resize_sample_to_meet_size_criteria, "  \
+						+ "random.sample failed on list of " \
+						+ str( len( li_indiv_by_age_collected ) ) \
+						+ " individuals.  Target proportioin to be sampled: " \
+						+ str( i_sample_size  ) + "."
+				s_msg=s_sample_error_msg \
+						+ "  Exception message: " + str( oex ) + "."
+				raise Exception( s_msg )
+			#end try . . . except
+		#end if too few, error, else if too many, error, else sample proportion.
+
+		return li_indiv_by_age_sampled
+	#end resize_sample_to_meet_size_criteria 
+
+#end class GenepopFileSamplerIndividualsAgeStructureCohortsPercentage
 
 class GenepopFileSampleParamsAgeStructureRelateds( GenepopFileSampleParams ):
 
@@ -1090,10 +1245,6 @@ class GenepopFileSamplerLociByRangeAndTotal( GenepopFileSampler ):
 	#end __init__
 
 	def doSample( self ):
-		#self, i_min_loci_position, 
-		#			i_max_loci_position,
-		#			s_loci_subsample_tag,
-		#			i_max_total_loci=None 
 
 		for i_replicate_number in range( self.sampleparams.replicates ):
 
@@ -1115,6 +1266,43 @@ class GenepopFileSamplerLociByRangeAndTotal( GenepopFileSampler ):
 		return
 	#end doSample
 #end class GenepopFileSamplerLociByRangeAndTotal
+
+class GenepopFileSamplerLociByRangeAndPercentage( GenepopFileSampler ):
+	'''
+	Sample loci from the ith to the jth, as listed in the 
+	genepop file individual entries.  Then, randomly select a subsample
+	by proportion, as given by the sample params "proportion" argument.
+	'''
+
+	def __init__( self, o_genepopfilemanager, o_genepopfilesampleparams ):
+		GenepopFileSampler.__init__( self, o_genepopfilemanager, o_genepopfilesampleparams )
+		return
+	#end __init__
+
+	def doSample( self ):
+
+		for i_replicate_number in range( self.sampleparams.replicates ):
+
+			s_loci_subsample_tag=None
+			if self.sampleparams.sample_tag is not None:
+				s_loci_subsample_tag=self.sampleparams.sample_tag
+			else:
+				s_loci_subsample_tag=make_subsample_tag( self.sampleparams.sample_param_value,
+															i_replicate_number,
+															SCHEME_LOCI )
+			#end if tag param exits use it, else make one
+
+			self.filemanager.subsampleLociByRangeAndProportion( self.sampleparams.min_loci_position,
+																self.sampleparams.max_loci_position,
+																s_loci_subsample_tag,
+																self.sampleparams.proportion )
+		#end for each replicate
+
+		return
+	#end doSample
+#end class GenepopFileSamplerLociByRangeAndTotal
+
+
 
 class GenepopFileSamplerNone( GenepopFileSampler ):
 	'''

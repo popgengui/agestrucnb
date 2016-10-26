@@ -28,32 +28,62 @@ def cleanup_gui( o_host ):
 
 if __name__ == "__main__":
 
+	import argparse as ap
+
 	WINDOW_MARGIN=0.20
 	CONTAINER_PADDING=10
 
 
-	ls_optional_args=[  "number of processes to use for replicate simulations" ]
+	LS_FLAGS_SHORT_OPTIONAL=[ "-p", "-l" ]
+	LS_FLAGS_LONG_OPTIONAL=[ "--processes", "--lifetable" ]
 
-	s_usage=pgut.do_usage_check( sys.argv, [], ls_optional_arg_descriptions=ls_optional_args )
+	s_help_processes_option="Number of processes to use in the simulation (1 used per replicate, one process " \
+							+ "used if not supplied)"
+	s_help_lifetable_option="life table file or pattern to match multiple life table files (use quotes). " \
+							+ "If not supplied, all life table files in the " \
+							+ "\"resources\" directory, " \
+							+ "matching pattern, *life table info, will be loaded, " \
+							+ "and the life table file with its model (species) value " \
+							+ "matching the config file \"model\" (species) value will be used."
 
-	if s_usage:
-		print( s_usage )
-		sys.exit()
-	#end if usage
+	LS_ARGS_HELP_OPTIONAL=[ s_help_processes_option , s_help_lifetable_option ]
+
+
+	o_parser=ap.ArgumentParser()
+
+
+	i_total_options=len( LS_FLAGS_SHORT_OPTIONAL )
+
+
+	for idx in range( i_total_options ):
+		o_parser.add_argument( \
+				LS_FLAGS_SHORT_OPTIONAL[ idx ],
+				LS_FLAGS_LONG_OPTIONAL[ idx ],
+				help=LS_ARGS_HELP_OPTIONAL[ idx ],
+				required=False )
+	#end for each optional arg
+
+	o_args=o_parser.parse_args()
 
 	s_my_mod_path=os.path.abspath( __file__ )
 	
 	s_my_mod_dir=os.path.dirname( s_my_mod_path )
 
-	if len( sys.argv ) == 2:
-		i_total_simultaneous_processes=int( sys.argv[1] )
-	else:
-		i_total_simultaneous_processes=1
+	i_total_simultaneous_processes=1
+
+	if o_args.processes is not None:
+		i_total_simultaneous_processes=int( o_args.processes  )
 	#end if sys args exits
 
 	s_default_life_tables = s_my_mod_dir + "/resources/*life.table.info"
+
+	if o_args.lifetable is not None:
+		s_default_life_tables=o_args.lifetable
+	#end iw optional life table file entered
+
 	s_menu_config=s_my_mod_dir + "/resources/menu_main_interface.txt" 
 	s_param_name_file=s_my_mod_dir + "/resources/simupop.param.names"
+
 
 	if pgut.is_windows_platform():
 		s_default_life_tables=pgut.fix_windows_path( s_default_life_tables )

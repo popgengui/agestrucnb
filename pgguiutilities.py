@@ -197,6 +197,8 @@ class KeyValFrame( Frame ):
 		#that may be subject to config
 		#after init:
 		self.__entry_boxes=[]
+		self.__textvariables=[]
+
 		self.__button_object=None
 
 		#Canvas, Frame, and other attributes
@@ -253,10 +255,15 @@ class KeyValFrame( Frame ):
 					v_newval=o_type( int( o_entryval.get() ) )
 				#end if not 1 or 0, else is one or zero
 
-			#if a currently "None" value, we check to see
-			#if the new value is valid for the replacement type
-			#as given in the init def:
-			elif  o_type.__name__ == 'NoneType':
+				'''
+			if a currently "None" value, we check to see
+			if the new value is valid for the replacement type
+			as given in the init def.  Note that "NoneType",
+			although returned to stdout given type( myv ) where
+			myv is None, is not the __name__ attribute, and
+			type Nonetype has no name, so:
+				'''
+			elif  o_type == type( None ):
 				if o_entryval.get() != "None":
 					s_msg="In KeyValFrame instance, " \
 							+ "def __reset_value, " \
@@ -300,8 +307,8 @@ class KeyValFrame( Frame ):
 				#end if not valid 
 			else:
 				v_newval=o_type( o_entryval.get() )
-			#end if bool and not 0 or 1
-
+			#end if bool, else if val type  None, else if entry box has "None",
+			#else if we have a validity tester
 		except ValueError as ve:
 
 			s_msg= "KeyValFrame instance, trying to update value(s) " \
@@ -493,6 +500,7 @@ class KeyValFrame( Frame ):
 		o_entry.bind( "<FocusOut>", self.__on_enterkey )
 
 		self.__entry_boxes.append( o_entry )
+		self.__textvariables.append( o_strvar )
 
 		return o_entry
 
@@ -567,13 +575,11 @@ class KeyValFrame( Frame ):
 			#end if attribute object is None, then use master, else use object
 		#end if caller passed an attribute 
 
-		return
-	#end def __update_value_in_clients
-
 		#if there is a command associated with an update in the entry (or list of entries), execute:
 		if self.__entry_change_command is not None:
 			self.__entry_change_command()
 		#end if entry change command is not none
+	#end __update_value_in_clients
 
 	def __update_list( self ):
 
@@ -590,11 +596,7 @@ class KeyValFrame( Frame ):
 
 	#end __update_list
 
-	def __on_enterkey( self, event=None ):
-
-		if self.__isenabled == False or self.__force_disable == True:
-			return
-		#end
+	def __update_after_entry_change( self ):
 
 		i_len_entryvals=len( self.__entryvals )
 		i_len_vals=len( self.__value )
@@ -606,7 +608,7 @@ class KeyValFrame( Frame ):
 						+ " are not equal to length of the value list" )
 		#end if lengths same else not
 	
-		#Because we store even scalars as list items, we extracnt the 
+		#Because we store even scalars as list items, we extract the 
 		#value for updating the client's attribute or sending to 
 		#client's def -- we returnn a list only if orig was a list, else return scalar
 		v_attr_val=self.__value if self.__orig_value_is_list else self.__value[0]
@@ -621,9 +623,26 @@ class KeyValFrame( Frame ):
 		if self.__list_editor is not None:
 			self.__list_editor.thelist=self.__value
 		#end if we have a list editor object
+	#end _update_after_entry_change
 
+	def __on_enterkey( self, event=None ):
+
+		if self.__isenabled == False or self.__force_disable == True:
+			return
+		else:
+			self.__update_after_entry_change()
+		#end
 		return
 	#end __on_enterkey
+
+	def manuallyUpdateValue( self, v_value, i_idx=0 ):
+
+		o_strvar=self.__textvariables[ i_idx ]
+		o_strvar.set( str( v_value ) )
+		self.__update_after_entry_change()
+
+		return
+	#end manallyUpdateValue
 
 	def __are_valid_lists( self ):
 		i_len_entryvals=len( self.__entryvals )

@@ -710,10 +710,6 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	#(see pgdriveneestimator.py def execute_ne_for_each_sample):
 	seq_arg_set += ( o_multiprocessing_event, )
 
-	##### temp
-	print( "arg set: " + str( seq_arg_set ) )
-	#####
-
 	pgne.mymain( *seq_arg_set )
 
 	o_main_output.close()

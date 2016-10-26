@@ -78,7 +78,8 @@ B11 Fixed 2016_08_15, Windows success on win10 -- win10 and win7, when
 	-- looks like a bad path formation in the code.
 
 Thu Aug 25 19:24:42 MDT 2016 
-	B12 If any genepop file name has one or more comma
+
+B12 If any genepop file name has one or more comma
 	in it, the Ne Estimation interface can't correctly parse the file name and will
 	generate a file not found message.  B13 NeEstimator sometimes leaves *xTp*txt
 	files after a run, and they should have a default save or delete.  B14 In
@@ -87,17 +88,29 @@ Thu Aug 25 19:24:42 MDT 2016
 	complain about the output files existing (need a separate function to check for
 	existing output files versus the intermediate files based on input genepop
 	names.
+
 Tue Aug 30 16:07:04 MDT 2016
-	B13 simuPOP thrashes when lambda makes pop size shrink to too small
+
+B13 simuPOP thrashes when lambda makes pop size shrink to too small
 	before gens are done.  On OSX, have seen that cancelling the sim leaves the
 	simuPOP python processes orphaned and still working.  tests on linux, invoking
 	the same thrashing show that the processes are killed.  However, Not sure if the
 	OSX problem was a special case that is repeatable on other platforms, since
 	exact actions leading to the instance of orphaned working processes on the OSX problem 
 	are not known.
+
 Wed Aug 31 12:45:31 MDT 2016
-	B14 If you run a simulation and set "replicates" to >1, then the *conf file that is produced
+
+B14 If you run a simulation and set "replicates" to >1, then the *conf file that is produced
 	by the run will have its "replicates" param set to 1 (since the replicates are run as single
 	instances, reloading simupop for each replicate).  Using the *conf file, then, to repeat
 	the run with > 1 replicate, currently requires the user to reset the "repicates" param in
 	the interface.
+
+Tue Oct 25 23:40:20 MDT 2016
+
+B15 In the ne estimation gui, tooltips do not disappear properly when mouse moves off.  This 
+	seems to happen to only the longer tooltips, in particular those that explain combo box options.  
+	Not sure if this problem is confined to the ne estimation interface only.
+	B16 Have had inexplicable hangs in ne-estimation doing cohort sampling on a 20-pop genepop with N0 at  about 50.  Unable to consistently
+	reproduce this bug, as identical interface inputs run to completion when attempting to reproduce the bug.

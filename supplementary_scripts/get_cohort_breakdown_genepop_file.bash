@@ -70,8 +70,17 @@ function printtotals
 	ageofmin=$( echo -e "$minagegroup" | cut -f "$outcolage" )
 	totofmin=$( echo -e "$minagegroup" | cut -f "$outcoltot" )
 
-	echo -e "${outsorted}"
+	if [ -z "$ageofmin" ] 
+	then
+		ageofmin="No age"
+	fi
+	if [ -z "$totofmin" ]
+	then
+		totofmin="None"
+	fi
+
 	echo "For pop ${popnum}, smallest cohort has age: ${ageofmin}, with total indiv: ${totofmin}" 1>&2
+	echo -e "${outsorted}"
 
 
 	

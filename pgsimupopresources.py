@@ -33,7 +33,6 @@ class PGSimuPopResources( object ):
 			with table info, such as survivial and fecundity rates,
 			gamma values, and ages.
 		Param b_write_warnings is a flag. If true warnigs are written to stderr.
-		
 		'''
 		self.__life_table_files=ls_life_table_files
 		self.__write_warnings=b_write_warnings
@@ -56,7 +55,9 @@ class PGSimuPopResources( object ):
 			try:
 				s_model_name=o_this_parser.get( "model" , "name" )
 			except NoSectionError as nse:
-				sys.stderr.write( "In PGSimuPopResources instance, found no \"model\" section " \
+				sys.stderr.write( "In PGSimuPopResources instance, def __get_life_tables, " \
+						+ "file: " + s_file \
+						+ ".  Config parser found no \"model\" section " \
 						+ "with a \"name\" section\n" )
 				raise nse
 			#end try...except

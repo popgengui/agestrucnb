@@ -46,7 +46,6 @@ class PGInputSimuPop( object ):
 			param in the simpupop configuration attribute 
 			list
 		'''
-
 		self.__config_parser=None
 		self.__resources=o_model_resources
 		self.__param_names=o_param_names
@@ -133,6 +132,50 @@ class PGInputSimuPop( object ):
 		return
 	#end __update_attribute_config_file_info
 
+	def __get_effective_size_info_if_avail( self ):
+		o_parser=self.__config_parser
+
+		i_nb=None
+		f_nbnc=None
+		s_nb_from_eff_size_section=None 
+		s_nbnc_from_eff_size_section=None
+
+		if o_parser.has_option( "effective_size", "Nb" ):
+			s_nb_from_eff_size_section=o_parser.get( "effective_size", "Nb" )
+		else:
+			#Returns None is no such section/options in the life table config 
+			#parser
+			s_nb_from_eff_size_section=self.__resources.getLifeTableValue( \
+										self.model_name, "effective_size", "Nb" )
+		#end if not in config file, check life table
+
+		if o_parser.has_option( "effective_size", "NbNc" ):
+			s_nbnc_from_eff_size_section=o_parser.get( "effective_size" , "NbNc" )
+		else:
+			s_nbnc_from_eff_size_section=self.__resources.getLifeTableValue( \
+										self.model_name, "effective_size", "NbNc" )
+		#end if NbNc not in  config file, check life table
+
+		if s_nb_from_eff_size_section is not None \
+				and  s_nbnc_from_eff_size_section is not None:
+			try:
+				i_nb=int( s_nb_from_eff_size_section )
+				f_nbnc=float( s_nbnc_from_eff_size_section )
+			#probably ValueError, but we want
+			#To add our custom message to any error:
+			except Exception as oex:
+				s_msg="In PGInputSimuPop instance, def __get_effective_size_info_if_avail, " \
+						+ "there wasd an error converting Nb and NbNc config file entries into " \
+						+ "numeric types. The config parser has these values for it's effective  "\
+						+ "size info: Nb=" + s_nb_from_eff_size_section \
+						+ " and NbNc= " + s_nbnc_from_eff_size_section  + "."
+				raise Exception( s_msg )
+		#end try...except
+
+		#end if both params not None, then convert to numerics
+		return ( i_nb, f_nbnc )
+	#end __get_effective_size_info_if_avail
+
 
 	def __get_config( self ):
 
@@ -145,8 +188,7 @@ class PGInputSimuPop( object ):
 		
 		self.__update_attribute_config_file_info( "model_name", "model", "name" )
 
-		self.N0 = config.getint("pop", "N0")
-		self.__update_attribute_config_file_info( "N0", "pop", "N0" )
+		self.__N0_from_pop_section = config.getint("pop", "N0")
 
 		self.popSize = config.getint("pop", "popSize")
 		self.__update_attribute_config_file_info( "popSize", "pop", "popSize" )
@@ -160,7 +202,6 @@ class PGInputSimuPop( object ):
 			self.isMonog = False
 		#end if isMonog else not
 		self.__update_attribute_config_file_info( "isMonog", "pop", "isMonog" )
-
 
 		if config.has_option("pop", "forceSkip"):
 			self.forceSkip = config.getfloat("pop", "forceSkip") / 100
@@ -248,13 +289,35 @@ class PGInputSimuPop( object ):
 			v_nb_val=eval( config.get( "pop", "Nb" ) ) 
 			v_nbvar_val=eval(config.get("pop", "NbVar") )
 
-			self.Nb = None if v_nb_val is None else config.getint("pop", "Nb")
+			'''
+			As of 2016_10_14, we don't want to accept on-None values
+			for np in the pop section, as we now only use a given Nb
+			as supplied in an (optional) "effective_size" section
+			(section can be in config file (checked first) or
+			life table (see below).
+			'''
+			if v_nb_val is not None:
+				s_msg="In PGInputSimuPop instance, def get_config, " \
+						+ "the config file's \"pop\" section has a " \
+						+ "non None value for parameter \"Nb\".  As " \
+						+ "of 2016_10_14, the simulation operation "\
+						+ "ignores Nb values (and NbVar values given "\
+						+ "the config file \"pop\" section.  " \
+					 	+ "It is now only used when supplied "\
+						+ "in an \"effective_size\" section.  Nb is now " \
+						+ "used only to compute N0 when Nb and Nb/Nc are supplied " \
+						+ "(if no Nb and Nb/Nc is supplied, an N0 value should be " \
+						+ "supplied in the config files \"pop\" section."
+				raise Exception( s_msg )
+			#end if an Nb val was found in the pop section, error
+
+			self.__Nb_from_pop_section = None if v_nb_val is None else config.getint("pop", "Nb")
 			self.NbVar = None if v_nbvar_val is None else config.getfloat("pop", "NbVar")
 		else:
-			self.Nb = None
+			self.__Nb_from_pop_section = None
 			self.NbVar = None
 		#end if config has Nb, else not
-		self.__update_attribute_config_file_info( "Nb", "pop", "Nb" )
+		self.__update_attribute_config_file_info( "_PGInputSimuPop__Nb_from_pop_section", "pop", "Nb" )
 		self.__update_attribute_config_file_info( "NbVar", "pop", "NbVar" )
 
 		self.startAlleles = config.getint("genome", "startAlleles")
@@ -271,7 +334,8 @@ class PGInputSimuPop( object ):
 		else:
 			self.numSNPs = 0
 		#end if config has numSNps else not
-		self.__update_attribute_config_file_info( "numSnps", "genome", "numSnps" )
+
+		self.__update_attribute_config_file_info( "numSNPs", "genome", "numSNPs" )
 
 		self.reps = config.getint("sim", "reps")
 		self.__update_attribute_config_file_info( "reps", "sim", "reps" )
@@ -280,6 +344,7 @@ class PGInputSimuPop( object ):
 		else:
 			self.startSave = 0
 		#end if config has startSave
+
 		self.__update_attribute_config_file_info( "startSave", "sim", "startSave" )
 
 		self.gens = config.getint("sim", "gens")
@@ -288,8 +353,45 @@ class PGInputSimuPop( object ):
 		self.dataDir = config.get("sim", "dataDir")
 		self.__update_attribute_config_file_info( "dataDir", "sim", "dataDir" )
 
+		#See the getter property def "N0".  If available, Nb and NbNc, 
+		#from a life table or config file section "effective_size",
+		#will be used to calculate N0.  Otherwise the NO from the "pop" section
+		#will be used.
+		i_nb_from_eff_size_info, f_nbnc_ratio_from_eff_size_info= \
+								self.__get_effective_size_info_if_avail()
+		
+		if i_nb_from_eff_size_info is not None \
+					and f_nbnc_ratio_from_eff_size_info is not None:
+			#Note that this value may exist along with Nb
+			#from the config file "pop" section:
+
+			self.__Nb_from_eff_size_info=i_nb_from_eff_size_info
+
+			self.NbNc=f_nbnc_ratio_from_eff_size_info
+			self.__update_attribute_config_file_info( \
+					"_PGInputSimuPop__Nb_from_eff_size_info", 
+												"effective_size", "Nb" )
+			self.__update_attribute_config_file_info( "NbNc", "effective_size", "NbNc" )
+		#end if we compute N0, else use given 	
+
+		self.__update_attribute_config_file_info( "N0", "pop", "N0" )
 		return
 	#end __get_config
+
+	def __compute_n0_from_eff_size_info( self ):
+
+		i_n0=None
+
+		if hasattr( self, "_PGInputSimuPop__Nb_from_eff_size_info" ) and hasattr( self, "NbNc" ):
+			i_n0=0 if self.NbNc == 0.0 else int( round ( float( self.__Nb_from_eff_size_info )/self.NbNc ) )
+		else:
+			s_msg="In PGInputSimuPop object, def __compute_n0_from_eff_size_info, " \
+					+ "either Nb or NbNc attributes are missing from the instance."
+			raise Exception( s_msg )
+		#end if either attribute is missing
+		
+		return i_n0
+	#end __compute_n0_from_eff_size_info
 
 	def setupConfigParser( self, s_config_file_name ):
 		self.config_file=os.path.basename( s_config_file_name )
@@ -328,6 +430,7 @@ class PGInputSimuPop( object ):
 	#end addParameter
 
 	def __get_configparser_input_params( self ):
+
 		'''
 		make a ConfigParser object using the current set of input parmater 
 		attribute values, using the param_names member attribute to 
@@ -344,35 +447,18 @@ class PGInputSimuPop( object ):
 		o_parser=ConfigParser()
 		o_parser.optionxform=str
 
-		ls_attribute_names=self.param_names.shortnames
+		ls_attribute_names=self.__config_file_section_name_by_attribute_name.keys()
 
 		for s_attribute in ls_attribute_names:
-			if hasattr( self, s_attribute ): 
-				#if this attribute was not in the original config file,
-				#but was set in the GUI, we rely on the param_names
-				#object (listing attribute names, their corresponding lable text,
-				#and their section names (as part of the parma_names.tags), to provide
-				#the section name, with which we update this input object:
-				if s_attribute not in self.__config_file_section_name_by_attribute_name:
-					s_new_entry_section=self.param_names.getConfigSectionNameForParam( s_attribute )
-					#for config file sections, this will be all lower case:
-					s_new_entry_section=s_new_entry_section.lower()
 
-					#for this attribute we assume that the code from Tiago uses the same name
-					#for the config file as is used in his original cfg object, now our self input object:
-					self.__update_attribute_config_file_info( s_attribute, s_new_entry_section, s_attribute )
-				#end if attribute was not registered in section dict (i.e. was not listed in the original
-				#config file read in in def __get_config
+			s_section_name=self.__config_file_section_name_by_attribute_name[ s_attribute ]
+			s_option_name=self.__config_file_option_name_by_attribute_name[ s_attribute ]
 
-				s_section_name=self.__config_file_section_name_by_attribute_name[ s_attribute ]
-				s_option_name=self.__config_file_option_name_by_attribute_name[ s_attribute ]
+			if s_section_name not in o_parser.sections():
+				o_parser.add_section( s_section_name )
+			#end if new section
 
-				if s_section_name not in o_parser.sections():
-					o_parser.add_section( s_section_name )
-				#end if new section
-
-				o_parser.set( s_section_name, s_option_name, getattr( self, s_attribute ) ) 
-			#end if this instance has this attribute 
+			o_parser.set( s_section_name, s_option_name, getattr( self, s_attribute ) ) 
 		#end for each attribue
 
 		return o_parser
@@ -504,7 +590,177 @@ class PGInputSimuPop( object ):
 		#end for each param name
 		return
 	#end __make_params_whose_values_are_lists_have_uniform_item_types
-#end class
+
+	def __get_nb_attribute_derivation( self ):
+
+		'''
+		Older versions of life tables lack an Nb and Nb/Nc ratio.  All life tables have an N0,
+		and some older versions have an Nb given by config file "pop" section.  For instances 
+		of this calss that use older life tables, we simply return the self.__N0 attribute.  
+		Otherwise we compute it from Nb and NbNc.
+		'''
+
+		s_attribute_derivation=None
+
+		b_has_pop_N0=hasattr( self, "_PGInputSimuPop__N0_from_pop_section" )
+		b_has_pop_Nb=hasattr( self, "_PGInputSimuPop__Nb_from_pop_section" )
+		b_has_NbNc=hasattr( self, "NbNc" ) 
+		b_has_eff_size_Nb=hasattr( self, "_PGInputSimuPop__Nb_from_eff_size_info" )
+
+		if b_has_pop_N0 and b_has_pop_Nb and ( not( b_has_NbNc ) ):
+			s_attribute_derivation = "pop_section"
+		elif b_has_eff_size_Nb and b_has_NbNc:
+			s_attribute_derivation = "effective_size_section"
+		else:
+			s_msg="In PGInputSimuPop instance, def __get_nb_attribute_derivation, " \
+					+ "could not evaluate source of Nb. It did not occur either (i) " \
+					+ "only in the \"pop\" section of the configuration file, or (ii) "\
+					+ "in an \"effective_size\" section of the life table or config file " \
+					+ "along with an NbNc value (Nb/Nc ratio)."
+			raise Exception( s_msg )
+		#end if pop section only, or effective size params are both present
+		
+		return s_attribute_derivation
+	#end __get_nb_attribute_derivation
+
+	def N0IsCalculatedFromEffectiveSizeInfo( self ):
+		s_nb_attribute_source=self.__get_nb_attribute_derivation()
+
+		return s_nb_attribute_source=="effective_size_section"
+	#end NbIsCalculatedFromEffectiveSizeInfo
+
+	@property
+	def N0( self ):
+		'''
+		Older versions of life tables lack an Nb and Nb/Nc ratio.  All life tables have an N0,
+		and some older versions have an Nb given by config file "pop" section.  For instances 
+		of this calss that use older life tables, we simply return the self.__N0 attribute.  
+		Otherwise we compute it from Nb and NbNc.
+		'''
+
+		s_nb_source=self.__get_nb_attribute_derivation()
+
+		if s_nb_source=="pop_section":
+			return self.__N0_from_pop_section
+		elif s_nb_source=="effective_size_section":			
+			return self.__compute_n0_from_eff_size_info()
+		else:
+			s_msg="In PGInputSimuPop instance, property N0, " \
+					+ "cannot find N0 value, neither from config file \"pop\"" \
+					+ " nor as computable from Nb and NbNc attributes."
+			raise Exception( s_msg )
+		#end if Nb only from single val, else compute from Nb and NbNc, else error
+	#end property N0
+
+	@N0.setter
+	def N0( self, v_value ):
+		s_nb_source=self.__get_nb_attribute_derivation()	
+
+		if s_nb_source=="pop_section":
+			self.__N0_from_pop_section=v_value
+		elif s_nb_source=="effective_size_section":
+			''' 
+			If we have effecgtive size info, and the 
+			client assigns an N0 value via this setter,
+			we assume the client intends to set N0 without
+			calculating from Nb and Nb/Nc, which is currently
+			not allowed:
+			'''
+			s_msg="In PGInputSimuPop instance, property N0.setter, " \
+							+ "The N0 value passed, " + str( v_value ) \
+							+ ", cannot be assigned, " \
+							+ "because this input object has Nb and Nb/Nc " \
+							+ "values which are used to calculate N0."
+			Exception( s_msg )
+		else:
+			s_msg="In PGInputSimuPop instance, property N0.setter, " \
+						+ "unknown string value returned from " \
+						+ "call to __get_nb_attribute_derivation."
+			raise Exception( s_msg )
+	#end setter N0
+
+	@property 
+	def Nb( self ):
+		s_nb_source=self.__get_nb_attribute_derivation()
+
+		if s_nb_source=="pop_section":
+			return self.__Nb_from_pop_section
+		elif s_nb_source=="effective_size_section": 			
+			return self.__Nb_from_eff_size_info
+		else:
+			s_msg="In PGInputSimuPop instance, property Nb, " \
+						+ "unknown string value returned from " \
+						+ "call to __get_nb_attribute_derivation."
+			raise Exception( s_msg )
+		#end if pop_section else if "effective_size_section"	
+		#else error
+	#end property Nb
+
+	@Nb.setter
+	def Nb( self, v_value ):
+
+		s_nb_source=self.__get_nb_attribute_derivation()
+
+		if s_nb_source=="pop_section":
+
+			self.__Nb_from_pop_section=v_value
+		elif s_nb_source=="effective_size_section":
+			self.__Nb_from_eff_size_info=v_value
+		else:
+			s_msg="In PGInputSimuPop instance, property Nb.setter, " \
+						+ "unknown string value returned from " \
+						+ "call to __get_nb_attribute_derivation."
+			raise Exception( s_msg )
+		#end if source is pop section else if effective_size_section
+		#else error
+
+	@property
+	def Nb_for_restrict_generator( self ):
+		'''
+		This Nb val is the original value
+		(originally the sole "Nb" attribute
+		in the input object), that Tiago 
+		uses in his code that chooses
+		which generator to use (see "mateOp="
+		assignment in the createAge def in
+		mod pgopsimupop.py).  With our
+		addition of Nb and Nb/Nc  paramters,
+		in an "effective_size" section in life tables
+		(or config files), and used to caluclate the N0 (aka, N1),
+		we need to check for the Nb attribute sources, when
+		the original code requests the Nb for use in a generator.
+		If we've used an effective_size-derived Nb in an N0 calc, 
+		and the pop section Nb is supplied as non "None",
+		then we throw an error.  If, however, there is only one
+		Nb value supplied, and it is in the pop section, we 
+		then supply is to the sim op to be used in the generator
+		choice.
+		'''
+		i_returnval=None
+		s_nb_source=self.__get_nb_attribute_derivation()
+		if s_nb_source=="pop_section":
+			i_returnval=self.__Nb_from_pop_section
+		elif s_nb_source=="effective_size_section":
+			if self.__Nb_from_pop_section is not None:
+				s_msg="In PGInputSimuPop instance, property Nb_for_restrict_generator, " \
+						+ "Nb was derived from an \"effective_size\" section, " \
+						+ "found in the life table or config file, " \
+						+ "but there is also an Nb value in the \"pop\" section " \
+						+ "that is not \"None\".  Currently the simkulation cannot use " \
+						+ "a pop section derived Nb, when there is another present in " \
+						+ "an effective_size section."
+				raise Exception( s_msg )
+			#end if we have a non-None value in pop section, error
+			i_returnval=self.__Nb_from_pop_section
+		else:
+			s_msg="In PGInputSimuPop instance, property Nb_for_restrict_generator, " \
+					+ "unknown string value returned form call to __get_nb_attribute_derivation." 
+			raise Exception( s_msg )
+		#end if pop-section Nb, else effective size, else unknown
+		return i_returnval
+	#end properby Nb_for_restrict_generator
+
+#end class PGInputSimuPop
 
 if __name__ == "__main__":
 	import sys

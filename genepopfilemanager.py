@@ -437,16 +437,20 @@ class GenepopFileManager( object ):
 				li_indiv_list=ddli_subsamples[ s_indiv_subsample_tag ][ i_pop_number ] 
 
 				for i_indiv_number in li_indiv_list:
+
 					#if this is the "pop" entry we can simply write it to file,
 					#or, if we have no loci subsample, we can also write the indiv
 					#entry as given in our original file:
+
 					if i_indiv_number==GenepopFileManager.KEY_POP_ENTRY or s_loci_subsample_tag is None:
 						for i_line_number in self.__pop_byte_addresses[ i_pop_number ][ i_indiv_number ]:
-							o_origfile.seek( self.__pop_byte_addresses[ i_pop_number ][ i_indiv_number ][ i_line_number ] )
+							o_origfile.seek( self.__pop_byte_addresses[ i_pop_number ]\
+															[ i_indiv_number ][ i_line_number ] )
 							o_newfile.write( o_origfile.readline() )
 						#end for each line number
 					#otherwise we need to get loci via subsample:
 					else:
+					
 						#Get ID separately:
 						#We assume the complete individual ID is in line 1 of
 						#the individual entry:
@@ -757,6 +761,55 @@ class GenepopFileManager( object ):
 		return s_loci
 	#end getLociForIndiv
 
+	def __get_range_loci_nums( self, 
+									i_min_loci_position,
+									i_max_loci_position,
+									b_truncate_max_to_total ):
+		'''
+		Returns a range object (in python3, not synonymous
+		with a list type).  Checks for valid range.  iv the 
+		b_truncate_max_to_total is True, then it truncates
+		to the max loci number N (1,2,3...N for N total loci).
+		'''
+
+		li_range_loci_numbers=None
+
+		'''
+		Allows use of any value for max
+		without knowing how many loci are
+		available.  We still sample from
+		correct range:
+		'''
+		if b_truncate_max_to_total:
+			i_max_loci_position=min( self.__loci_count, i_max_loci_position )
+		#end if truncate
+
+		b_min_out_of_range=i_min_loci_position < 1 or \
+				i_min_loci_position >= i_max_loci_position \
+				or  i_min_loci_position >= self.__loci_count 
+
+		b_max_out_of_range=i_max_loci_position > self.__loci_count
+							
+		if b_min_out_of_range or b_max_out_of_range:
+			s_msg="In GenepopFileManager instance, " \
+						+ "def __get_range_loci_nums, " \
+						+ "start-end loci range requested, " \
+						+ str( i_min_loci_position ) \
+						+ "-" + str( i_max_loci_position ) \
+						+ ", out of range for file, " \
+						+ self.__filename \
+						+ ", with loci total, " \
+						+ str( self.__loci_count ) + "."
+			raise Exception( s_msg )
+		#end if requested range invalid
+
+	
+		li_range_loci_numbers=range( i_min_loci_position, ( i_max_loci_position + 1 ) )
+
+		return li_range_loci_numbers
+	#end def 
+
+
 	def subsampleLociByRangeAndMax( self, i_min_loci_position, 
 			i_max_loci_position,
 			s_loci_subsample_tag,
@@ -772,43 +825,18 @@ class GenepopFileManager( object ):
 
 		self.__loci_subsamples[ s_loci_subsample_tag ]=[]
 
-		#Allows use of any value for max
-		#without knowing how many loci are
-		#available.  We still sample from
-		#correct range:
-		if b_truncate_max_to_total:
-			i_max_loci_position=min( self.__loci_count, i_max_loci_position )
-		#end if truncate
-
-		b_min_out_of_range=i_min_loci_position < 1 or \
-				i_min_loci_position >= i_max_loci_position \
-				or  i_min_loci_position >= self.__loci_count 
-
-		b_max_out_of_range=i_max_loci_position > self.__loci_count
-							
-		if b_min_out_of_range or b_max_out_of_range:
-			s_msg="In GenepopFileManager instance, " \
-						+ "def subsampleLociByRangeAndMinMax" \
-						+ "start-end loci range requested, " \
-						+ str( i_min_loci_position ) \
-						+ "-" + str( i_max_loci_position ) \
-						+ ", out of range for file, " \
-						+ self.__filename \
-						+ ", with loci total, " \
-						+ str( self.__loci_count ) + "."
-			raise Exception( s_msg )
-		#end if requested range invalid
-
-		i_loci_range_interval_size=( i_max_loci_position - i_min_loci_position ) + 1
+		o_range_to_sample=self.__get_range_loci_nums( i_min_loci_position, 
+															i_max_loci_position,
+															b_truncate_max_to_total )
+		
+		i_loci_range_interval_size=len( o_range_to_sample )
 
 		i_sample_size=i_loci_range_interval_size 
-		
+
 		if i_max_total_loci is not None:
 			i_sample_size=\
 					min( i_loci_range_interval_size, i_max_total_loci )	
 		#end if we have a value for max total loci 
-
-		o_range_to_sample=range( i_min_loci_position, ( i_max_loci_position + 1 ) )
 
 		li_subsample=random.sample( o_range_to_sample, i_sample_size )
 
@@ -818,6 +846,45 @@ class GenepopFileManager( object ):
 
 		return
 	#end def subsampleLociByRangeAndMax
+
+	def subsampleLociByRangeAndProportion( self, 
+			i_min_loci_position, 
+			i_max_loci_position,
+			s_loci_subsample_tag,
+			f_proportion_of_total_loci,
+			b_truncate_max_to_total=True ):
+			
+		'''
+		Generate list of integers that stand for loci positions,
+		and as such allow for printing the given proportion of loci
+		with the indices range given.  Flag b_truncate_max_to_total
+		when True will truncate the max-loci-positioin param to the
+		max loci number, when the given value exceeds.  Otherwise,
+		if max is out of range an error will be thrown.
+
+		'''
+
+		self.__loci_subsamples[ s_loci_subsample_tag ]=[]
+		
+		o_range_to_sample=self.__get_range_loci_nums( i_min_loci_position, 
+															i_max_loci_position,
+															b_truncate_max_to_total )
+		
+		i_loci_range_interval_size=len( o_range_to_sample )
+
+		f_proportion_of_sample=float (i_loci_range_interval_size  ) * f_proportion_of_total_loci 
+
+		i_sample_size=int( round(  f_proportion_of_sample ) )
+
+		li_subsample=random.sample( o_range_to_sample, i_sample_size )
+
+		li_subsample.sort()
+
+		self.__loci_subsamples[ s_loci_subsample_tag ]=li_subsample
+
+		return
+
+	#end subsampleLociByRangeAndProportion
 
 	def getListIndividuals( self, i_pop_number=1, s_indiv_subsample_tag = None ):
 
@@ -1119,12 +1186,14 @@ class GenepopFileManager( object ):
 			'''
 			li_this_indiv_list=[0]
 			if i_pop_num in dli_individual_numbers:
-				#we always store sorted indiv ordinals
-				#in the sublsample lists:
-				li_this_indiv_list.sort()
+				
 				#all indiv subsample lists include the zeroth item,
 				#the "pop" entry
 				li_this_indiv_list =  [ 0 ] +  dli_individual_numbers[ i_pop_num ] 
+
+				#we always store sorted indiv ordinals
+				#in the subsample lists:
+				li_this_indiv_list.sort()
 			#end if we have a list of indiv for this pop
 			self.__indiv_subsamples[ s_subsample ] [ i_pop_num ] = li_this_indiv_list
 		#end for each pop number in file

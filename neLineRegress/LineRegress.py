@@ -81,6 +81,22 @@ def createGraph(lineArray, title = None, xlab = None, yLab= None, colorVctr = No
             plt.show()
         else:
             plt.savefig(dest, bbox_inches='tight')
+ #method to create a boxplot of the outputNEs
+def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
+    flatData = [table[key] for key in table]
+
+    plotData = []
+
+    unzippedX, unzippedy = zip(*flatData)
+    setX = set(unzippedX)
+    listX = list(setX)
+    listX.sort()
+    for x in listX:
+        ySet = [datum[1] for datum in flatData if datum[0] == x]
+        plotData.append(ySet)
+        # plotData = unzippedy
+
+
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -285,8 +301,9 @@ def neConfigRead(filename):
     xLab = None
     yLab = None
     setExpected = None
-    destination = "show"
+    boxplotDest = "show"
     destType = "show"
+    regressionDest = "show"
     xLims =None
     yLims = None
     autoFlag = False
@@ -308,8 +325,11 @@ def neConfigRead(filename):
         destType = config.get("destination","desttype")
         if destType=="none":
             destType = "none"
+            regressionDest = "none"
+            boxplotDest = "none"
         if destType != "show" or "none":
-            destination = config.get("destination","destFile")
+            regressionDest = config.get("destination","regressionfile")
+            boxplotDest = config.get("destination","boxplotfile")
     if config.has_section("comparison"):
         valueFlag = True
         setExpected = None
@@ -353,7 +373,8 @@ def neConfigRead(filename):
     configDict["xLab"] = xLab
     configDict["yLab"] = yLab
     configDict["expected"] = setExpected
-    configDict["dest"] = destination
+    configDict["dest"] = regressionDest
+    configDict["boxplot"] = boxplotDest
     configDict["xLims"] = xLims
     configDict["yLims"] = yLims
     configDict["alpha"] = alphaVal
@@ -371,6 +392,7 @@ def neGrapher(neFile, configFile):
     if not configFile:
         table , countsTable= neFileRead(neFile)
         neGraphMaker(table)
+        createBoxPlot(table)
         return True
     configs = neConfigRead(configFile)
     table,countsTable = neFileRead(neFile,configs["startData"])
@@ -601,6 +623,11 @@ if __name__ == "__main__":
     testTable =[]
     for yVct in testYs:
         testTable.append(zip(testX,yVct))
+    id = 0
+    testDict = {}
+    for data in testTable:
+        testDict[id] = data
+        id+=1
 
     lines, color, styles = _NeRegressionGraphCalc(testTable)
 
@@ -634,7 +661,9 @@ if __name__ == "__main__":
     configwrite.set("labels", "yLab", "yLabel")
     configwrite.add_section("destination")
     configwrite.set("destination","desttype", "PDF")
-    configwrite.set("destination","destFile", "test.pdf")
+    configwrite.set("destination","regressionfile", "test.pdf")
+    configwrite.set("destination","boxplotfile", "box.pdf")
+
     configwrite.add_section("comparison")
     configwrite.set("comparison", "type", "pop")
     configwrite.set("comparison", "expectedSlope", -0.1)

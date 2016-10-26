@@ -76,6 +76,10 @@ Wed Sep  7 18:12:26 MDT 2016
 	GenepopFileSamplerIndividualsAgeStructureRelateds):
 			1. float, percent of relateds each gen
 	Also added max pop size as new arg, now arg #
+2016_10_20
+	Adding to Loci scheme "percent," to subsample a percentage
+	of the loci (as circumscribed by existing params min loci 
+	position and max loci position.
 '''
 __filename__ = "pgdriveneestimator.py"
 __date__ = "20160510"
@@ -116,8 +120,9 @@ LS_FLAGS_SHORT_REQUIRED=[ "-f",  "-s", "-p", "-m", "-a", "-r", "-e", "-c", "-l",
 LS_FLAGS_LONG_REQUIRED=[ "--gpfiles", "--scheme", "--params", "--minpopsize", "--maxpopsize", "--poprange", "--minallelefreq", "--replicates", "--locischeme", "--locischemeparams", "--locirange", "--maxtotalloci" ]
 LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes. " \
 						+ "(Example: \"mydir/*txt\")",
-				"\"none\", \"percent\", \"remove\", \"criteria\", \"cohorts\", or \"relateds\", " \
-						+ "indicating whether to sample none (only apply min/max pop size criteria), " \
+				"\"none\", \"percent\", \"remove\", \"criteria\", \"cohorts\", \"cohortsperc\", or \"relateds\", " \
+						+ "indicating and individual-sampling scheme,  whether to sample none " \
+						+ "(only apply min/max pop size criteria), " \
 						+ "by percentages, removing N individuals randomly, testing individual id fields, " \
 						+ "selecting evenly within age groups, or selecing siblings.",
 				"The comma-delimited list of parameters used for the sampling scheme. " \
@@ -131,6 +136,9 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 						 + spacer3 + "\"critera\": Quote-enclosed, semicolon-delimited test expressions " \
 						 + "(ex: \"age<5;sex==1\")." \
 						 + spacer3 + "\"cohorts\": single integer giving max age of cohorts " \
+						 + spacer3 + "\"cohortsperc\": two semicolon-delimited values, a single " \
+						 + "integer giving max age of cohorts, and a single number (int or float) " \
+						 + "giving a percenantage. " \
 						 + spacer3 + "\"relateds\": single float giving percent of relateds to select " \
 							+ "(remainder filled in by the un-chosen to meet the min pop size value).", 
 		"Minimum pop size (single integer).",
@@ -141,20 +149,25 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 		"Integer, total replicates to run (Note: under the \"remove\" scheme," \
 				+ "when sampling by removing one individual from a pop of size p, " \
 				+ "all p combinations will be run, ignoring this arg).", 
-		"String, loci sampling scheme, currently only \"none\" is available.  None does use " \
-				+ "the loci range and max parms that follow.",
-		"String, loci sampling scheme paramater, currently requires but ignores a single string " \
-				+ "value (ex: \"none\").",
+		"String, loci sampling scheme, applied once, so that all replicates use the " \
+				+ "same loci sample.  Values for the scheme are \"none\" or " \
+				+ "\"percent\".  Both use the loci range values (see below). " \
+				+ "Under the loci scheme \"none\", the value for max total loci "\
+				+ "(see below ) will result in a random sample of the max " \
+				+ "value when the range exceeds it.  When the loci sampling scheme " \
+				+ "is \"percent\", the max loci total, if exceeded by the range, will " \
+				+ "result in halted execution with an error message.",
+		"Sampling scheme paramaters, for \"none\", any string (ignored); for \"percent\"  \
+			a numeric value (int or float) p, with 0<=p<=100",
 		"Loci range (hyphenated pair of integers), include loci numbers i-j as ordrered in the file.",
 		"Integer, maximum number of loci, randomly selected among i-j, if max is less than (j-i)+1." ]
 
 LS_FLAGS_SHORT_OPTIONAL=[ "-o", "-d" ]
 LS_FLAGS_LONG_OPTIONAL=[ "--processes", "--mode" ]
-LS_ARGS_HELP_OPTIONAL=[ "total processes to use (single integer) Default is 1 process.  " \
-		+ "This arg is required if the final debug optional arg is added",
+LS_ARGS_HELP_OPTIONAL=[ "total processes to use (single integer) Default is 1 process.",
 				"\"no_debug\", \"debug1\", \"debug2\", \"debug3\", \"testserial\", \"testmulti\"" \
 				+ ".  Indicates a run mode. The default is \"no_debug\", which runs multiplexed with standard output.  " \
-				+ "Other modes except \"testmulti\", run non-parallelized, with incresing output." \
+				+ "Other modes except \"testmulti\", run non-parallelized, with increasing output.  " \
 				+ "Debug 3, for example, adds to the output a table listing, for each indiv. " \
 				+ "in each file, which replicate Ne estimates include the individual.  It also preserves " \
 				+ "the intermediate genepop and NeEstimator output files" ]
@@ -198,12 +211,14 @@ SAMPLE_BY_PERCENTAGES="percent"
 SAMPLE_BY_REMOVAL="remove"
 SAMPLE_BY_CRITERIA="criteria"
 SAMPLE_BY_COHORT="cohorts"
+SAMPLE_BY_COHORT_PERCENTAGE="cohortsperc"
 SAMPLE_BY_RELATEDS="relateds"
 
 SAMPLE_SCHEMES_NON_CRITERIA=[ SAMPLE_BY_PERCENTAGES, 
 									SAMPLE_BY_REMOVAL ]
 
 SAMPLE_LOCI_SCHEME_NONE="none"
+SAMPLE_LOCI_SCHEME_PERCENT="percent"
 
 DEFAULT_LOCI_SAMPLE_TAG="loci_sample"
 
@@ -401,8 +416,6 @@ def file_name_list_is_all_strings( ls_files ):
 	return b_all_strings
 
 #end file_name_list_is_all_strings
-
-
 	
 def get_genepop_file_list( s_genepop_files_arg ):
 	'''
@@ -421,6 +434,9 @@ def get_genepop_file_list( s_genepop_files_arg ):
 
 	try:
 
+		##### temp
+		print ( "in get_genepop_file_list, type of arg: " + str( type( s_genepop_files_arg ) )  )
+		#####
 		ls_files=eval( s_genepop_files_arg )
 
 		if type( ls_files ) != list:
@@ -450,7 +466,17 @@ def get_genepop_file_list( s_genepop_files_arg ):
 		'''
 
 		ls_files=glob.glob( s_genepop_files_arg )
-	#end try eval, except name error
+
+	except Exception as unknown_fail:
+		s_errortype=type( unknown_fail ).__name__
+		s_msg="In pgdriveneestimator.py, def get_genepop_file_list, " \
+						+ "gene pop file arg, " \
+						+ str( s_genepop_files_arg ) \
+						+ ", eval operation produced " \
+						+ "error of type " + s_errortype \
+						+ ", with message, " + str( unknown_fail ) + "." 
+		raise Exception( s_msg )
+	#end try eval, except name error, except other
 
 	return ls_files
 #end get_genepop_file_list
@@ -505,7 +531,8 @@ def parse_args( *args ):
 																SAMPLE_SCHEME_PARAM_DELIMITER ) ]
 	elif s_sample_scheme == SAMPLE_BY_CRITERIA \
 			or s_sample_scheme == SAMPLE_BY_COHORT \
-			or s_sample_scheme == SAMPLE_BY_RELATEDS:
+			or s_sample_scheme == SAMPLE_BY_RELATEDS \
+			or s_sample_scheme == SAMPLE_BY_COHORT_PERCENTAGE:
 		lv_sample_values=[ s_val for s_val in args[ IDX_SAMPLE_VALUE_LIST ].split( \
 																SAMPLE_SCHEME_PARAM_DELIMITER ) ]
 	else:
@@ -556,8 +583,12 @@ def parse_args( *args ):
 
 	s_loci_sampling_scheme=args[ IDX_LOCI_SAMPLING_SCHEME ]
 
+	v_loci_sampling_scheme_param=None
+
 	if s_loci_sampling_scheme == SAMPLE_LOCI_SCHEME_NONE:
 		pass
+	elif s_loci_sampling_scheme == SAMPLE_LOCI_SCHEME_PERCENT:
+		v_loci_sampling_scheme_param=float( args[ IDX_LOCI_SCHEME_PARAM ] )/100.0
 	else:
 		s_msg="In pgdriveneestimator.py, def parse_args, " \
 					+ "unrecognized loci sampling scheme: " \
@@ -592,6 +623,7 @@ def parse_args( *args ):
 								f_min_allele_freq, 
 								i_total_replicates, 
 								s_loci_sampling_scheme,
+								v_loci_sampling_scheme_param,
 								i_min_loci_position,
 								i_max_loci_position,
 								i_max_total_loci,
@@ -618,6 +650,8 @@ def get_sample_val_and_rep_number_from_sample_name( s_sample_name, s_sample_sche
 		s_sampler_type=gps.SCHEME_CRITERIA
 	elif s_sample_scheme==SAMPLE_BY_COHORT:
 		s_sampler_type=gps.SCHEME_COHORTS
+	elif s_sample_scheme==SAMPLE_BY_COHORT_PERCENTAGE:
+		s_sampler_type=gps.SCHEME_COHORTS_PERC
 	elif s_sample_scheme==SAMPLE_BY_RELATEDS:
 		s_sampler_type=gps.SCHEME_RELATEDS
 	else:
@@ -679,31 +713,29 @@ def get_pops_in_file_outside_valid_size_range( o_genepopfile,
 def do_estimate( ( o_genepopfile, o_ne_estimator, 
 				v_sample_param_val, f_min_allele_freq, 
 				s_subsample_tag, s_loci_sample_tag, 
-				s_pop_subsample_tag, i_replicate_number, 
+				s_population_number, s_census, i_replicate_number, 
 				o_debug_mode, IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP) ):
 
+	
 	s_genepop_file_subsample=o_ne_estimator.input.genepop_file
 
-	'''
-	Note the the subsample tag (non-pop), names both the
-	individual subsample, as well as (any) loci subsample.
-	'''	
 	o_genepopfile.writeGenePopFile( s_genepop_file_subsample, 
 										s_indiv_subsample_tag=s_subsample_tag,
-										s_pop_subsample_tag=s_pop_subsample_tag,
-											s_loci_subsample_tag=s_loci_sample_tag ) 
+										s_pop_subsample_tag=s_population_number,
+										s_loci_subsample_tag=s_loci_sample_tag ) 
 
 	o_ne_estimator.doOp()
 
 	llv_output=o_ne_estimator.deliverResults()
 
 	li_sample_indiv_count=o_genepopfile.getIndividualCounts( s_indiv_subsample_tag = s_subsample_tag, 
-			s_pop_subsample_tag = s_pop_subsample_tag )
+			s_pop_subsample_tag = s_population_number )
 
 	s_sample_indiv_count = str( li_sample_indiv_count[ 0 ] )
 
 	ls_runinfo=[ o_genepopfile.original_file_name, 
-								s_pop_subsample_tag, 
+								s_population_number, 
+								s_census,
 								s_sample_indiv_count, 
 								str( v_sample_param_val ), 
 								str( i_replicate_number), 
@@ -749,7 +781,7 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 
 	if o_debug_mode.isSet( DebugMode.MAKE_INDIV_TABLE ):
 		ls_indiv_list = o_genepopfile.getListIndividuals( 
-				i_pop_number=int( s_pop_subsample_tag ), 
+				i_pop_number=int( s_population_number ), 
 				s_indiv_subsample_tag = s_subsample_tag )	
 	#end if return list indiv
 	
@@ -785,7 +817,7 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 						"sample_val": v_sample_param_val,
 						"rep" : i_replicate_number,
 						"list" : ls_indiv_list,
-						"pop" : s_pop_subsample_tag } }
+						"pop" : s_population_number } }
 
 #end do_estimate
 
@@ -1039,10 +1071,18 @@ def get_cohorts_sampling_params( lv_sample_values ):
 
 	IDX_MAX_AGE=0
 	
-	i_max_age=int( ls_params[ IDX_MAX_AGE ] )
+	f_max_age=float( ls_params[ IDX_MAX_AGE ] )
 
+	'''
+	Currently (2016_10_25), 
+	the mod pgopsimupop.py writes all fields
+	in the individual demography, to the *gen file,
+	as floats, except sex.  We assume age is an integer
+	(i.e a float with no decimal portion).
+	'''
+	i_max_age=int( round( f_max_age ) )
 	return ( o_genepop_indiv_fields,
-				i_max_age )
+				f_max_age )
 
 #end get_cohorts_sampling_params
 
@@ -1060,7 +1100,7 @@ def get_relateds_sampling_params( lv_sample_values ):
 	return ( o_genepop_indiv_fields,
 				f_percent_relateds )
 
-#end get_cohorts_sampling_params
+#end get_relateds_sampling_params
 
 def do_sample( o_genepopfile, 
 				i_min_pop_range,
@@ -1071,6 +1111,7 @@ def do_sample( o_genepopfile,
 				lv_sample_values, 
 				i_replicates,
 				s_loci_sampling_scheme,
+				v_loci_sampling_scheme_param,
 				i_min_loci_position,
 				i_max_loci_position,
 				i_max_total_loci ):
@@ -1178,6 +1219,47 @@ def do_sample( o_genepopfile,
 
 		o_sampler=gps.GenepopFileSamplerIndividualsAgeStructureCohorts( o_genepopfile,
 																	o_sample_params )
+	elif s_sample_scheme==SAMPLE_BY_COHORT_PERCENTAGE:
+
+		#this scheme has params identical to the regular "cohorts" scheme,
+		#with a percentage value appended to the max-age param, so we extract
+		#the last two values of the last param list:	
+		
+		COHORT_PARAM_LIST_DELIMITER=";"
+		IDX_MAX_AGE=0
+		IDX_PERC=1
+
+		s_last_param=lv_sample_values[ -1 ]
+
+		ls_age_and_percentage=s_last_param.split( \
+						COHORT_PARAM_LIST_DELIMITER )
+
+		s_max_age=ls_age_and_percentage[ IDX_MAX_AGE ]
+		s_percentage=ls_age_and_percentage[ IDX_PERC ]
+		
+
+		#we reassemble the list to match the expected
+		#cohort sampling params (without the percentage):
+		lv_cohort_param_fields=lv_sample_values[ 0:len( lv_sample_values ) - 1 ] \
+															+ [ s_max_age ]		
+		#Convert the percentage to a proportion:
+		f_proportion=float( s_percentage )/100.0
+
+		( o_indiv_fields,
+				i_max_age ) = get_cohorts_sampling_params( lv_cohort_param_fields )
+
+		o_sample_params=gps.GenepopFileSampleParamsAgeStructureCohorts( \
+											o_genepop_indiv_id_fields = o_indiv_fields,
+											li_population_numbers = li_population_list,
+											i_max_age=i_max_age,
+											f_proportion=f_proportion,
+											i_min_individuals_per_gen=i_min_pop_size,
+											i_max_individuals_per_gen=i_max_pop_size,
+											i_replicates=i_replicates )
+
+		o_sampler=gps.GenepopFileSamplerIndividualsAgeStructureCohortsPercentage( o_genepopfile,
+																					o_sample_params )
+								
 	elif s_sample_scheme==SAMPLE_BY_RELATEDS:
 
 			( o_indiv_fields,
@@ -1206,6 +1288,7 @@ def do_sample( o_genepopfile,
 	#we also want to sample loci for each replicate:
 	do_sample_loci( o_genepopfile,
 					s_loci_sampling_scheme,
+					v_loci_sampling_scheme_param,
 					i_min_loci_position,
 					i_max_loci_position,
 					i_max_total_loci,
@@ -1216,6 +1299,7 @@ def do_sample( o_genepopfile,
 
 def do_sample_loci( o_genepopfile,
 						s_loci_sampling_scheme,
+						v_loci_sampling_scheme_param,
 						i_min_loci_position,
 						i_max_loci_position,
 						i_max_total_loci,
@@ -1228,17 +1312,23 @@ def do_sample_loci( o_genepopfile,
 	results in total loci over the max. 
 
 	Further, we currently only permit one loci subsample for
-	each individual subsample replicate.
+	each individual subsampling session -- i.e. for all 
+	of a given sample replicate.
+
+	As of 2016_10_20, we've added new scheme "percent", but
+	still doing one sample in the genepop file per call
+	to this def, which now still means one loci sample will
+	be applied to all replicate indiv samples.
 	'''
 
 
 	if s_loci_sampling_scheme == SAMPLE_LOCI_SCHEME_NONE:
 
-			'''
-			note that we'er subsampleing once for each indiv subsample:
-			which will give us one loci subsampling for each indiv subsample
-			'''
-			o_sample_params=gps.GenepopFileSampleParamsLociByRangeAndTotal( \
+		'''
+		note that we'er subsampleing once for each indiv subsample:
+		which will give us one loci subsampling for each indiv subsample
+		'''
+		o_sample_params=gps.GenepopFileSampleParamsLoci( \
 									li_population_numbers=li_population_list,
 									i_min_loci_position=i_min_loci_position,
 									i_max_loci_position=i_max_loci_position,
@@ -1246,19 +1336,34 @@ def do_sample_loci( o_genepopfile,
 									i_replicates=1,
 									s_sample_tag=DEFAULT_LOCI_SAMPLE_TAG )
 
-			o_sampler=gps.GenepopFileSamplerLociByRangeAndTotal( o_genepopfile,
+		o_sampler=gps.GenepopFileSamplerLociByRangeAndTotal( o_genepopfile,
 						o_sample_params )
-
-			
-			o_sampler.doSample()
 													
-		#end for each subsample of individuals, subsample loci
+	elif s_loci_sampling_scheme == SAMPLE_LOCI_SCHEME_PERCENT:
+		'''
+		For the percent scheme, the Loci sample params include
+		a "proportion" value, which defaults to None, and is not 
+		used above (for example) by the "none" scheme, but is accessed
+		by the sampler we use here.
+		'''
+
+		o_sample_params=gps.GenepopFileSampleParamsLoci( \
+												li_population_numbers=li_population_list,
+												i_min_loci_position=i_min_loci_position,
+												i_max_loci_position=i_max_loci_position,
+												f_proportion=v_loci_sampling_scheme_param,
+												i_replicates=1,
+												s_sample_tag=DEFAULT_LOCI_SAMPLE_TAG )
+		o_sampler=gps.GenepopFileSamplerLociByRangeAndPercentage( o_genepopfile,
+																	o_sample_params )
 	else:
 		s_msg="In pgdriveneestimator.py, def do_sample_loci, " \
 					+ "unknown loci sampling scheme: " \
 					+ s_loci_sampling_scheme + "."
 		raise Exception( s_msg )
 	#end if sampling scheme none else unknown
+
+	o_sampler.doSample()
 	return
 #end do_sample_loci
 
@@ -1295,8 +1400,19 @@ def get_subsample_genepop_file_name( s_original_genepop_file_name,
 	input file to the NeEstimator program, I belive, completely solves the
 	problems.
 	'''
-	s_genepop_file_subsample=s_genepop_file_subsample.replace( ".", INPUT_FILE_DOT_CHAR_REPLACEMENT )
+	##### temp
+	s_basename=os.path.basename( s_genepop_file_subsample )
+	s_dirs=os.path.dirname( s_genepop_file_subsample )
+	s_genepop_file_basename=s_basename.replace( ".", INPUT_FILE_DOT_CHAR_REPLACEMENT )
+	s_genepop_file_subsample=os.path.join( s_dirs, s_basename )
 	
+	#remmed out -- problems when the orig file has path that includes 
+	#directories with dots in their names, so the wholesale replace
+	#then includes directories that are renamed and (no doubt) non-existent
+
+	#s_genepop_file_subsample=s_genepop_file_subsample.replace( ".", INPUT_FILE_DOT_CHAR_REPLACEMENT )
+	
+	#####
 	'''
 	problem seen in Windows, in which when this mod is invoked as __main__ from a shell
 	then ".\\" is appended to (at least) one genepop file name.  This then is mangled by
@@ -1382,8 +1498,9 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 		the pops up among processes:
 		'''
 		for i_population_number in li_population_numbers:
+
 			if i_population_number in li_pops_with_invalid_size:
-				s_msg= "In pgdriveneestimator.py, def drive_estimator, " \
+				s_msg= "In pgdriveneestimator.py, def add_to_set_of_calls_to_do_estimate, " \
 								+ " in file, " + o_genepopfile.original_file_name \
 								+ ", skipping pop number, "  + str( i_population_number ) \
 								+ ".  It has an indiv count outside of valid " \
@@ -1393,17 +1510,21 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 				continue
 			#end if i_population_number is
 
-			#we make population subsample list consisting of only this populations number:
-			s_this_pop_sample_name=str( i_population_number ) 
+			#for downstream analysis, we get the census of total indiv
+			#non-sampled, for this pop section:
+			s_census=str( o_genepopfile.getIndividualCount( i_population_number ) )
 
-			o_genepopfile.subsamplePopulationsByList( [ i_population_number ], s_this_pop_sample_name )
+			#we make population subsample list consisting of only this populations number:
+			s_this_pop_number=str( i_population_number ) 
+
+			o_genepopfile.subsamplePopulationsByList( [ i_population_number ], s_this_pop_number )
 
 			if o_debug_mode.isSet( DebugMode.PRINT_REPLICATE_SELECTIONS ):
 				print_test_list_replicate_selection_indices( o_genepopfile, 
 										s_sample_scheme,	
 										s_indiv_sample, 
 										o_secondary_outfile, 
-										s_population_subsample_tag=s_this_pop_sample_name )
+										s_population_subsample_tag=s_this_pop_number )
 			#end if we're testing, print 
 			
 
@@ -1412,7 +1533,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 			#path mangling, so we made a separate def:
 			s_genepop_file_subsample=get_subsample_genepop_file_name( o_genepopfile.original_file_name, 
 													s_indiv_sample, 
-													s_this_pop_sample_name )
+													s_this_pop_number )
 
 			i_sample_value, i_replicate_number= \
 						get_sample_val_and_rep_number_from_sample_name( s_indiv_sample, s_sample_scheme )
@@ -1445,7 +1566,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 								f_min_allele_freq, 
 								s_indiv_sample, 
 								s_loci_subsample_tag,
-								s_this_pop_sample_name, 
+								s_this_pop_number, 
+								s_census,
 								i_replicate_number, 
 								o_debug_mode,
 								IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP ]
@@ -1557,7 +1679,7 @@ def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outf
 		#end if field in estimatorfields
 	#end for each estimator fields
 
-	ls_run_fields=[ "original_file", "pop", "indiv_count", "sample_value", "replicate_number", 
+	ls_run_fields=[ "original_file", "pop", "census",   "indiv_count", "sample_value", "replicate_number", 
 						"min_allele_freq" ] 
 
 	o_main_outfile.write( OUTPUT_DELIMITER.join( ls_run_fields + ls_reported_fields  ) + OUTPUT_ENDLINE )
@@ -1587,6 +1709,7 @@ def drive_estimator( *args ):
 				f_min_allele_freq, 
 				i_total_replicates, 
 				s_loci_sampling_scheme,
+				v_loci_sampling_scheme_param,
 				i_min_loci_position,
 				i_max_loci_position,
 				i_max_total_loci,
@@ -1638,6 +1761,7 @@ def drive_estimator( *args ):
 					lv_sample_values, 
 					i_total_replicates,
 					s_loci_sampling_scheme,
+					v_loci_sampling_scheme_param,
 					i_min_loci_position,
 					i_max_loci_position,
 					i_max_total_loci )
@@ -1809,6 +1933,5 @@ if __name__ == "__main__":
 
 	mymain( *( ls_args_passed ) )
 
-	
 #end if main
 

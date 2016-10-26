@@ -6,8 +6,8 @@ __filename__ = "pgsimupopper.py"
 __date__ = "20160124"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-VERBOSE=True
-VERY_VERBOSE=True
+VERBOSE=False
+VERY_VERBOSE=False
 
 DO_PUDB=False
 
@@ -176,6 +176,13 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#(not yet implemented, 2016_08_05
 
 		self.__category_frames=None
+
+		#we also hold refernces to the keyvalue
+		#frames that hold param values.  This
+		#allows us to communicate with the entry
+		#boxes via param name.
+		self.__param_key_value_frames=None
+
 
 		self.__run_state_message=""
 		self.__init_interface()
@@ -443,6 +450,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#flag to false for the KeyValFrame entry box:
 		CONFIG_INFO_TAG_KEYWORD="Configuration Info"
 
+		self.__param_key_value_frames={}
+
 		i_row=0
 
 		o_input=self.__input
@@ -451,8 +460,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		ls_tags=o_input.param_names.tags
 
-		ls_sections=[  o_input.param_names.getConfigSectionNameFromTag( \
-											s_tag )  for s_tag in ls_tags ]
+		ls_sections=[  o_input.param_names\
+					.getConfigSectionNameFromTag( s_tag )  for s_tag in ls_tags ]
 
 		#clear existing category frames (if any): 
 		self.__clear_grid_below_row( self, 1 )
@@ -508,6 +517,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#of python types <type>, so to convert to list item type, 
 				#(needed by the KeyValFrame object) we strip off the "list"
 				s_param_type=s_param_type.replace( "list", "" )
+
 				try:
 					o_param_type=eval( s_param_type )
 				except Exception as oex:
@@ -537,6 +547,24 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#end try . . . except . . .
 			#end if we have a set of param names
 
+			s_associated_def=o_input.param_names.getAssocDefForParam( s_param )
+
+			#if no specific def is to be called on value change
+			#then we default to the def that shows current param vals:
+			def_to_call_on_change=self.__test_value
+
+			if s_associated_def != "None":
+				try:
+					def_to_call_on_change=getattr( self, s_associated_def )
+				except:
+					s_msg="In PGGuiSimuPop instance, def __load_values_into_interface, " \
+								+ "for param, " + s_param \
+								+ ", unable to find input def for param's associated def string: " \
+								+ s_associated_def + "."
+					raise Exception( s_msg )
+			#end if s_associated_def not None
+
+
 			#if not in the param names file, we don't want to suppress it,
 			#If it is in the param names we don't suppress as long as the
 			#param is not tagged as "suppress"
@@ -561,6 +589,15 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					#end if input param is type config info, disable
 				#end if nametag exists
 
+				s_attribute_to_update=s_param
+
+				if s_param == "N0":
+					if o_input.N0IsCalculatedFromEffectiveSizeInfo():
+						b_allow_entry_change=False
+						s_attribute_to_update=None	
+					#end if we're
+				#end if param is "N0"
+
 				#we send in the input object to the KeyValFrame (or KeyCategoricalValueFrame 
 				#instance so it will be the object whose attribute (with name s_param)
 				#is reset when user resets the value in the KeyValFrame:
@@ -575,8 +612,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 								o_type=o_param_type,
 								o_master=o_frame_for_this_param, 
 								o_associated_attribute_object=self.__input,
-								s_associated_attribute=s_param,
-								def_entry_change_command=self.__test_value,
+								s_associated_attribute=s_attribute_to_update,
+								def_entry_change_command=def_to_call_on_change,
 								i_labelwidth=i_width_labelname,	
 								s_label_name=s_longname,
 								i_entrywidth = i_entry_width,
@@ -603,7 +640,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							o_master=o_frame_for_this_param, 
 							s_associated_attribute=s_param,
 							o_associated_attribute_object=self.__input,
-							def_on_button_change=self.__test_value,
+							def_on_button_change=def_to_call_on_change,
 							i_labelwidth=i_width_labelname,
 							s_label_name=s_longname,
 							b_buttons_in_a_row = True,
@@ -612,7 +649,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							s_tooltip=s_tooltip )
 
 				o_kv.grid( row=i_row, sticky=(NW) )
+
 			#end if param has non-boolean value else boolean
+
+			self.__param_key_value_frames[ s_param ] = o_kv
 		#end for each input param
 
 		self.__place_category_frames( self.__category_frames )
@@ -652,6 +692,32 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.__set_controls_by_run_state( self.__get_run_state() )
 		return
 	#end load_config_file
+
+	def updateN0EntryBox( self ):
+		'''
+		N0 parameter updates differently according to
+		whether it is simply taken from a config file's
+		pop section, or, alternatively, calculated from
+		params Nb and Nb/Nc as given by an "effective_size"
+		section in a life table or config file.  In the latter
+		case, the keyvalue frame will be disabled and its entrybox
+		will be manually updated from this def.  
+		'''
+		if self.__input.N0IsCalculatedFromEffectiveSizeInfo():
+			#Nb is a property, calculated or just returned
+			#depending on its source (effec size or hus a value
+			#given in the pop section).
+			i_current_n0_val=self.__input.N0
+
+			self.__param_key_value_frames[ "N0" ].manuallyUpdateValue( i_current_n0_val )
+		#end if N0 is calc'd from effective size info
+
+		if VERY_VERBOSE:
+			self.__test_value()
+		#end if very verbose, show param values
+
+		return
+	#end updateN0EntryBox
 
 	def __get_life_table_file_list( self, s_glob_expression ):
 		self.__life_table_files = \
@@ -1045,4 +1111,5 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	def cleanup( self ):
 		self.__cancel_simulation()
 		self.__remove_temporary_config_file()
+	#end cleanup
 #end class PGGuiSimuPop
