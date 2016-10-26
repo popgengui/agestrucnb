@@ -1,62 +1,66 @@
-#This file provides paramater names and other values used to load an interface
+#his file provides paramater names and other values used to load an interface
 #for the AgeStructureNe GUI tab page that sets up and runs SimuPOP simulations
 #Columns give:
 #	1.  Actual variable name, ususally the original used in Tiago's 
 #	    cfg object (see his sim.py)
-#	2.  Name used for the label in the interface
-#	3.  Formatting and default value fields, semi-colon-delimited
+#	2.  Formatting and default value fields, semi-colon-delimited
 #	    ( many fields currently (20160820) not used).  Field types:
-#		i.   IDX_TAG_FIELD_CONFIG_SECTION=0
-#		ii.  IDX_TAG_FIELD_PLACEMENT_ORDER=1
-#		iii. IDX_TAG_FIELD_COLUMN_NUMBER=2
-#		iv.  IDX_TAG_FIELD_PARAM_ORDER=3
-#		v.   IDX_TAG_FIELD_DEFAULT_VALUE=4
-#		vi.  IDX_TAG_FIELD_PARAM_TYPE=5
-#		vii. IDX_TAG_FIELD_MIN_VALUE=6
-#		viii.IDX_TAG_FIELD_MAX_VALUE=7
-#		viv. IDX_TAG_FIELD_TOOL_TIP=8
-#		x. IDX_TAG_FIELD_GUI_CONTROL=9
-#		xi. IDX_TAG_FIELD_GUI_CONTROL_LIST=10
-#		
-#Many of these are not yet used by the interface (as of 2016_08_20 ). Note especially 
-#that for the PGInputSimuPop and PGGuiSimuPop objects default values are 
+#	    	i.   IDX_TAG_FIELD_LONGNAME=0
+#		ii.   IDX_TAG_FIELD_CONFIG_SECTION=1
+#		iii.  IDX_TAG_FIELD_PLACEMENT_ORDER=2
+#		iv. IDX_TAG_FIELD_COLUMN_NUMBER=3
+#		v.  IDX_TAG_FIELD_PARAM_ORDER=4
+#		vi.   IDX_TAG_FIELD_DEFAULT_VALUE=5
+#		vii.  IDX_TAG_FIELD_PARAM_TYPE=6
+#		viii. IDX_TAG_FIELD_MIN_VALUE=7
+#		viv.IDX_TAG_FIELD_MAX_VALUE=8
+#		x. IDX_TAG_FIELD_TOOL_TIP=9
+#		xi. IDX_TAG_FIELD_GUI_CONTROL=10
+#		xii. IDX_TAG_FIELD_GUI_CONTROL_LIST=11
+#		xiii. IDX_TAG_FIELD_VALIDATION=12
+#		xiv. IDX_TAG_FIELD_ASSOC_DEF=13
+#Many of the the above fields are not yet used by the interface (as of 2016_08_20 ). Note especially #that for the PGInputSimuPop and PGGuiSimuPop objects default values are 
 #not accessed from this file, rather from the config file that is loaded, and, in some 
 #cases from the code itself that reads in the config file and sets the input attribute 
 #values in PGInputSimuPop. Type checks using value ranges are also ignored by using 
 #None;None;None for the type, min, and max fields.
 #
-N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle (before lambda).;entry;None
-Nb	Nb;suppress;0;0;1;0;int;None;None;"";entry;None
-NbVar	NbVar;suppress;0;0;1;0;int;None;None;"";entry;None
-ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None
-config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None
-life_table_glob	Life Table File(s);Configuration Info;1;1;1;"none";str;None;None;Life table files;entry;None
-dataDir	Data Directory;suppress;0;0;1;"";str;None;None;"";entry;None
+NbNc	Nb/Nc;Population;2;1;1;0.0;float;None;None;Nb/Nc, where Nc=No;entry;None;type(x)==float;updateN0EntryBox
+N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle (before lambda). Calculated as Nb/( Nb/Nc ).;entry;None;type(x)==int and x >= 0;None
+Nb	Nb;Population;0;0;1;0;int;None;None;"";entry;None;type(x)==int and x>= 0;updateN0EntryBox
+NbVar	NbVar;suppress;0;0;1;0;int;None;None;"";entry;None;type(x)==int;None
+ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None;type(x)==int and x >= 0;None
+config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None;type(x)==str;None
+life_table_glob	Life Table File(s);Configuration Info;1;1;1;"none";str;None;None;Life table files;entry;None;type(x)=str;None
+dataDir	Data Directory;suppress;0;0;1;"";str;None;None;"";entry;None;type(x)==str;None
 #suppressing the negative binomial switch as of 2016_08_24, as it is actually
 #a param treated as an internal flag, and depends solely on absense/presence of gamma lists (see below)
-doNegBinom	Use negative binomial;suppress;4;1;1;False;bool;None;None;Use Negative Binomial;entry;None
-fecundityFemale	Female relative fecundity;Population;2;1;1;None;listfloat;None;None;Female Relative Fecundity;entry;None
-fecundityMale	Male relative fecundity;Population;2;1;1;None;listfloat;None;None;Male Relative Fecundity;entry;None
-forceSkip	Force skip;Population;2;1;1;None;int;None;None;Force Skip;entry;None
-gens	Reproductive cycles;Population;2;1;1;1;int;None;None;Reproductive Cycles;entry;None
-isMonog	Monogamous;Population;2;1;1;False;bool;None;None;Monogamous;entry;None
-lbd	Lambda (after burn-in);Simulation;4;1;1;1.0;float;None;None;Lambda after burn in;entry;None
-litter	Litter;Population;2;1;1;None;listint;None;None;Litter;entry;None
-maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth;entry;None
-model_name	Model;Configuration Info;1;1;1;"none";str;None;None;Model name;entry;None;entry;None
-numSNPs	Number of SNPs;Genome;3;1;1;0;int;None;None;Number of SNPs;entry;None
-mutFreq	Mutation frequency;Genome;3;1;1;0;int;None;None;Mutation Frequency;entry;None
-numMSats	Number of microsatellites;Genome;3;1;1;0;int;None;None;Number of Microsats;entry;None
-param_names	param names object;suppress;0;0;0;0;str;None;None;"";entry;None
-popSize	Population size;Population;2;1;1;0;None;None;None;Populaion Size;entry;None
-reps	Replicates;Simulation;4;1;1;1;None;None;None;Replicates;entry;None
-skip	Skip breeding probability;Simulation;4;1;1;None;listfloat;None;None;Skip breeding probability;entry;None
-startAlleles	Starting Msat allele total;Genome;3;1;1;0;None;None;None;Starting microsat allele total;entry;None
-startLambda	Cycles of burn-in;Simulation;5;1;1;99999;None;None;None;Lambda burn-in (99999 means no burn-in.);entry;None
-startSave	Starting save;suppress;5;1;1;1;None;None;None;Starting Starting data save;entry;None
-survivalFemale	Female survival;Population;2;1;1;None;listfloat;None;None;Female Survival;entry;None
-survivalMale	Male survival;Population;2;1;1;None;listfloat;None;None;Male Survival;entry;None
-gammaAFemale	Female gamma A;Population;2;1;1;None;listfloat;None;None;Female Gamma A;entry;None
-gammaBFemale	Female gamma B;Population;2;1;1;None;listfloat;None;None;Female Gamma B;entry;None
-gammaAMale	Male gamma A;Population;2;1;1;None;listfloat;None;None;Male Gamma A;entry;None
-gammaBMale	Male gamma B;Population;2;1;1;None;listfloat;None;None;Male Gamma B;entry;None
+doNegBinom	Use negative binomial;suppress;4;1;1;False;bool;None;None;Use Negative Binomial;entry;None;type(x)==bool;None
+fecundityFemale	Female relative fecundity;Population;2;1;1;None;listfloat;None;None;Female Relative Fecundity;entry;None;type(x)==float and x>=0 and x<=1.0;None
+fecundityMale	Male relative fecundity;Population;2;1;1;None;listfloat;None;None;Male Relative Fecundity;entry;None;type(x)==float and x>=0 and x <= 1.0;None
+forceSkip	Force skip;Population;2;1;1;None;int;None;None;Force Skip;entry;None;type(x)=int and x >= 0;None
+gens	Reproductive cycles;Population;2;1;1;1;int;None;None;Reproductive Cycles;entry;None;type(x)=int and x >= 0;None
+isMonog	Monogamous;Population;2;1;1;False;bool;None;None;Monogamous;entry;None;type(x)==bool;None
+lbd	Lambda (after burn-in);Simulation;4;1;1;1.0;float;None;None;Lambda after burn in;entry;None;type(x)==float and type(x)>=0;None
+litter	Litter;Population;2;1;1;None;listint;None;None;Litter;entry;None;type(int)==int;None
+maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;None
+model_name	Model;Configuration Info;1;1;1;"none";str;None;None;Model name;entry;None;entry;None;type(x)==str;None
+numSNPs	Number of SNPs;Genome;3;1;1;0;int;None;None;Number of SNPs;entry;None;type(x)==int and x >= 0;None
+mutFreq	Mutation frequency;Genome;3;1;1;0.0;float;None;None;Mutation Frequency;entry;None;type(x)==float;None
+numMSats	Number of microsatellites;Genome;3;1;1;0;int;None;None;Number of Microsats;entry;None;type(x)=int and x >= 0;None
+param_names	param names object;suppress;0;0;0;0;str;None;None;"";entry;None;type(x)==str;None
+popSize	Population size;Population;2;1;1;0;None;None;None;Populaion Size;entry;None;type(x)==int and x >= 0;None
+reps	Replicates;Simulation;4;1;1;1;None;None;None;Replicates;entry;None;type(x)==int and x>=1;None
+skip	Skip breeding probability;Simulation;4;1;1;None;listfloat;None;None;Skip breeding probability;entry;None;type(x)==float and x>=0.0 and x<=1.0;None
+startAlleles	Starting Msat allele total;Genome;3;1;1;0;int;None;None;Starting microsat allele total;entry;None;type(x)=int and x >= 0;None
+startLambda	Cycles of burn-in;Simulation;5;1;1;99999;None;None;None;Lambda burn-in (99999 means no burn-in.);entry;None;None;None
+startSave	Starting save;suppress;5;1;1;1;None;None;None;Starting Starting data save;entry;None;None;None
+survivalFemale	Female survival;Population;2;1;1;None;listfloat;None;None;Female Survival;entry;None;type(x)==float;None
+survivalMale	Male survival;Population;2;1;1;None;listfloat;None;None;Male Survival;entry;None;type(x)==float;None
+gammaAFemale	Female gamma A;Population;2;1;1;None;listfloat;None;None;Female Gamma A;entry;None;type(x)==float;None
+gammaBFemale	Female gamma B;Population;2;1;1;None;listfloat;None;None;Female Gamma B;entry;None;type(x)==float;None
+gammaAMale	Male gamma A;Population;2;1;1;None;listfloat;None;None;Male Gamma A;entry;None;type(x)==float;None
+gammaBMale	Male gamma B;Population;2;1;1;None;listfloat;None;None;Male Gamma B;entry;None;type(x)==float;None
+#this is a dummy entry, for an Nb param value that is assigned, checked and calculated within the input object, and accessed only
+#by the pgopsimupop object:
+Nb_for_restrict_generator	Nb derived from supplied params, for generator assignment;suppress;0;0;0;0;int;None;None;"";entry;None;type(x)==int;None

@@ -1,0 +1,12 @@
+[model]
+name=wfrog
+[resources]
+ages = 4
+survivalFemale = [0.143, 0.124]
+survivalMale = [0.143, 0.124]
+fecFemale = [1.04, 286.0, 342.0]
+fecMale = [1.04, 286.0, 342.0]
+
+[meta]
+name = 
+
