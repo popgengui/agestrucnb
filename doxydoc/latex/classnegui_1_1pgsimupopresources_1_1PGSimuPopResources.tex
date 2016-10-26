@@ -39,7 +39,8 @@ Definition at line 26 of file pgsimupopresources.\+py.
 \begin{DoxyVerb}Param ls_life_table_files is a list of configuration file names,
     with table info, such as survivial and fecundity rates,
     gamma values, and ages.
-Param b_write_warnings is a flag. If true warnigs are written to stderr.\end{DoxyVerb}
+Param b_write_warnings is a flag. If true warnigs are written to stderr.
+\end{DoxyVerb}
  
 
 Definition at line 30 of file pgsimupopresources.\+py.
@@ -52,14 +53,13 @@ Definition at line 30 of file pgsimupopresources.\+py.
 33 \textcolor{stringliteral}{            with table info, such as survivial and fecundity rates,}
 34 \textcolor{stringliteral}{            gamma values, and ages.}
 35 \textcolor{stringliteral}{        Param b\_write\_warnings is a flag. If true warnigs are written to stderr.}
-36 \textcolor{stringliteral}{        }
-37 \textcolor{stringliteral}{        '''}
-38         self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_a70ffb8eb62a843aec8f42e337c81fc3b}{\_\_life\_table\_files}=ls\_life\_table\_files
-39         self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_ae4805ab6ba55817bc2e40fd622d76483}{\_\_write\_warnings}=b\_write\_warnings
-40         self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_ae32ca7cc4b6a1563734a82da0a0c6608}{\_\_lifetables}=\{\}
-41         self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_aed06da70af5eea2be1c6caabf35032af}{\_\_get\_life\_tables}( ls\_life\_table\_files )
-42 
-43         \textcolor{keywordflow}{return}
+36 \textcolor{stringliteral}{        '''}
+37         self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_a70ffb8eb62a843aec8f42e337c81fc3b}{\_\_life\_table\_files}=ls\_life\_table\_files
+38         self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_ae4805ab6ba55817bc2e40fd622d76483}{\_\_write\_warnings}=b\_write\_warnings
+39         self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_ae32ca7cc4b6a1563734a82da0a0c6608}{\_\_lifetables}=\{\}
+40         self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_aed06da70af5eea2be1c6caabf35032af}{\_\_get\_life\_tables}( ls\_life\_table\_files )
+41 
+42         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 
@@ -86,56 +86,56 @@ stderr.
 \end{DoxyVerb}
  
 
-Definition at line 77 of file pgsimupopresources.\+py.
+Definition at line 78 of file pgsimupopresources.\+py.
 
 
 \begin{DoxyCode}
-77     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_a37fa2c7b4da84a2281231943a8e61c6c}{getLifeTableValue}( self, s\_model\_name, s\_section, s\_option ):
-78         \textcolor{stringliteral}{"""}
-79 \textcolor{stringliteral}{        Tries to fetch the value, }
-80 \textcolor{stringliteral}{        Returns a None instance if any of }
-81 \textcolor{stringliteral}{        the parameter values are not found.}
-82 \textcolor{stringliteral}{}
-83 \textcolor{stringliteral}{        On fail also records the first level}
-84 \textcolor{stringliteral}{        that was not found, and}
-85 \textcolor{stringliteral}{        if flag self.\_\_write\_warnings}
-86 \textcolor{stringliteral}{        is true, reports the failure to}
-87 \textcolor{stringliteral}{        stderr.}
-88 \textcolor{stringliteral}{        """}
-89 
-90         v\_value=\textcolor{keywordtype}{None}
-91         s\_warning=\textcolor{keywordtype}{None}
-92 
-93         \textcolor{keywordflow}{try}:
-94             o\_parser=self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_ae32ca7cc4b6a1563734a82da0a0c6608}{\_\_lifetables}[ s\_model\_name ]
-95             v\_value=o\_parser.get( s\_section, s\_option )
-96         \textcolor{keywordflow}{except} KeyError \textcolor{keyword}{as} ke:
-97 
-98             s\_warnings= \textcolor{stringliteral}{"Warning: In PGSimuPopResources instance, def getLifeTableValue, "} \(\backslash\)
-99                     + \textcolor{stringliteral}{"no life table found for model: "}  \(\backslash\)
-100                     + s\_model\_name + \textcolor{stringliteral}{"\(\backslash\)n"} 
-101 
-102         \textcolor{keywordflow}{except} NoSectionError \textcolor{keyword}{as} nse:
-103 
-104             s\_warning=\textcolor{stringliteral}{"Warning: In PGSimuPopResources instance, def getLifeTableValue, "} \(\backslash\)
-105                     + \textcolor{stringliteral}{"no section in life table for model: "}  \(\backslash\)
-106                     + s\_model\_name + \textcolor{stringliteral}{"section: "} + s\_section + \textcolor{stringliteral}{"\(\backslash\)n"} 
-107 
-108         \textcolor{keywordflow}{except} NoOptionError \textcolor{keyword}{as} noe:
-109 
-110             s\_warning= \textcolor{stringliteral}{"Warning: In PGSimuPopResources instance, def getLifeTableValue, "} \(\backslash\)
-111                     + \textcolor{stringliteral}{"no option in life table for model: "}  \(\backslash\)
-112                     + s\_model\_name + \textcolor{stringliteral}{"section: "} + s\_section + \textcolor{stringliteral}{"option: "} \(\backslash\)
-113                     + s\_option + \textcolor{stringliteral}{"\(\backslash\)n"} 
-114         \textcolor{comment}{#end try, except, except, except}
-115 
-116         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_ae4805ab6ba55817bc2e40fd622d76483}{\_\_write\_warnings} \textcolor{keywordflow}{and} s\_warning \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-117             sys.stderr.write( s\_warning )
-118         \textcolor{comment}{#end if write warnings }
-119 
-120         \textcolor{comment}{#eval will throw a type error if v\_value is None}
-121         \textcolor{keywordflow}{return} eval( v\_value ) \textcolor{keywordflow}{if} v\_value \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} \textcolor{keywordtype}{None}
-122 
+78     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_a37fa2c7b4da84a2281231943a8e61c6c}{getLifeTableValue}( self, s\_model\_name, s\_section, s\_option ):
+79         \textcolor{stringliteral}{"""}
+80 \textcolor{stringliteral}{        Tries to fetch the value, }
+81 \textcolor{stringliteral}{        Returns a None instance if any of }
+82 \textcolor{stringliteral}{        the parameter values are not found.}
+83 \textcolor{stringliteral}{}
+84 \textcolor{stringliteral}{        On fail also records the first level}
+85 \textcolor{stringliteral}{        that was not found, and}
+86 \textcolor{stringliteral}{        if flag self.\_\_write\_warnings}
+87 \textcolor{stringliteral}{        is true, reports the failure to}
+88 \textcolor{stringliteral}{        stderr.}
+89 \textcolor{stringliteral}{        """}
+90 
+91         v\_value=\textcolor{keywordtype}{None}
+92         s\_warning=\textcolor{keywordtype}{None}
+93 
+94         \textcolor{keywordflow}{try}:
+95             o\_parser=self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_ae32ca7cc4b6a1563734a82da0a0c6608}{\_\_lifetables}[ s\_model\_name ]
+96             v\_value=o\_parser.get( s\_section, s\_option )
+97         \textcolor{keywordflow}{except} KeyError \textcolor{keyword}{as} ke:
+98 
+99             s\_warnings= \textcolor{stringliteral}{"Warning: In PGSimuPopResources instance, def getLifeTableValue, "} \(\backslash\)
+100                     + \textcolor{stringliteral}{"no life table found for model: "}  \(\backslash\)
+101                     + s\_model\_name + \textcolor{stringliteral}{"\(\backslash\)n"} 
+102 
+103         \textcolor{keywordflow}{except} NoSectionError \textcolor{keyword}{as} nse:
+104 
+105             s\_warning=\textcolor{stringliteral}{"Warning: In PGSimuPopResources instance, def getLifeTableValue, "} \(\backslash\)
+106                     + \textcolor{stringliteral}{"no section in life table for model: "}  \(\backslash\)
+107                     + s\_model\_name + \textcolor{stringliteral}{"section: "} + s\_section + \textcolor{stringliteral}{"\(\backslash\)n"} 
+108 
+109         \textcolor{keywordflow}{except} NoOptionError \textcolor{keyword}{as} noe:
+110 
+111             s\_warning= \textcolor{stringliteral}{"Warning: In PGSimuPopResources instance, def getLifeTableValue, "} \(\backslash\)
+112                     + \textcolor{stringliteral}{"no option in life table for model: "}  \(\backslash\)
+113                     + s\_model\_name + \textcolor{stringliteral}{"section: "} + s\_section + \textcolor{stringliteral}{"option: "} \(\backslash\)
+114                     + s\_option + \textcolor{stringliteral}{"\(\backslash\)n"} 
+115         \textcolor{comment}{#end try, except, except, except}
+116 
+117         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pgsimupopresources_1_1PGSimuPopResources_ae4805ab6ba55817bc2e40fd622d76483}{\_\_write\_warnings} \textcolor{keywordflow}{and} s\_warning \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+118             sys.stderr.write( s\_warning )
+119         \textcolor{comment}{#end if write warnings }
+120 
+121         \textcolor{comment}{#eval will throw a type error if v\_value is None}
+122         \textcolor{keywordflow}{return} eval( v\_value ) \textcolor{keywordflow}{if} v\_value \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} \textcolor{keywordtype}{None}
+123 
 \end{DoxyCode}
 
 

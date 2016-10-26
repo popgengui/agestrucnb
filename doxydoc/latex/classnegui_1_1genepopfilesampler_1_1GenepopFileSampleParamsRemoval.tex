@@ -34,7 +34,7 @@ of size M_i, removing each N where N=1,2,3...M_i.
 \end{DoxyVerb}
  
 
-Definition at line 304 of file genepopfilesampler.\+py.
+Definition at line 322 of file genepopfilesampler.\+py.
 
 
 
@@ -62,32 +62,32 @@ param b_do_all_combos_when_n_equals_one -- if true treat n=1 differently,
 \end{DoxyVerb}
  
 
-Definition at line 323 of file genepopfilesampler.\+py.
+Definition at line 341 of file genepopfilesampler.\+py.
 
 
 \begin{DoxyCode}
-323             s\_sample\_tag=\textcolor{keywordtype}{None} ):
-324 
-325         \textcolor{stringliteral}{'''}
-326 \textcolor{stringliteral}{        param li\_population\_numbers, list of ints, see parent class}
-327 \textcolor{stringliteral}{        param li\_n\_to\_remove, list of ints, indicating, for each pop, randomly }
-328 \textcolor{stringliteral}{              remove n individuals}
-329 \textcolor{stringliteral}{        param i\_replicates, for each i\_n, repeat i\_replicates times}
-330 \textcolor{stringliteral}{        param s\_population\_subsample\_name, see parent class}
-331 \textcolor{stringliteral}{        param b\_do\_all\_combos\_when\_n\_equals\_one -- if true treat n=1 differently,}
-332 \textcolor{stringliteral}{              by repeating a remove-one-indiv for each indiv in each pop.}
-333 \textcolor{stringliteral}{        '''}
-334 
-335         GenepopFileSampleParams.\_\_init\_\_( self, 
-336                     li\_population\_numbers=li\_population\_numbers, 
-337                     s\_population\_subsample\_name=s\_population\_subsample\_name,
-338                     s\_sample\_tag=s\_sample\_tag )
-339 
-340         self.\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsRemoval_a23d601163d8118b7af9acf6acf78eecf}{\_\_n\_to\_remove}=li\_n\_to\_remove
-341         self.\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsRemoval_ae2a4f45ac6b5377f749dc84a560dbf01}{\_\_replicates}=i\_replicates
-342         self.\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsRemoval_a24a47d9cdac499238a1368dcc626e8a3}{\_\_do\_all\_combos\_when\_n\_equals\_one}=
+341             s\_sample\_tag=\textcolor{keywordtype}{None} ):
+342 
+343         \textcolor{stringliteral}{'''}
+344 \textcolor{stringliteral}{        param li\_population\_numbers, list of ints, see parent class}
+345 \textcolor{stringliteral}{        param li\_n\_to\_remove, list of ints, indicating, for each pop, randomly }
+346 \textcolor{stringliteral}{              remove n individuals}
+347 \textcolor{stringliteral}{        param i\_replicates, for each i\_n, repeat i\_replicates times}
+348 \textcolor{stringliteral}{        param s\_population\_subsample\_name, see parent class}
+349 \textcolor{stringliteral}{        param b\_do\_all\_combos\_when\_n\_equals\_one -- if true treat n=1 differently,}
+350 \textcolor{stringliteral}{              by repeating a remove-one-indiv for each indiv in each pop.}
+351 \textcolor{stringliteral}{        '''}
+352 
+353         GenepopFileSampleParams.\_\_init\_\_( self, 
+354                     li\_population\_numbers=li\_population\_numbers, 
+355                     s\_population\_subsample\_name=s\_population\_subsample\_name,
+356                     s\_sample\_tag=s\_sample\_tag )
+357 
+358         self.\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsRemoval_a23d601163d8118b7af9acf6acf78eecf}{\_\_n\_to\_remove}=li\_n\_to\_remove
+359         self.\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsRemoval_ae2a4f45ac6b5377f749dc84a560dbf01}{\_\_replicates}=i\_replicates
+360         self.\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsRemoval_a24a47d9cdac499238a1368dcc626e8a3}{\_\_do\_all\_combos\_when\_n\_equals\_one}=
       b\_do\_all\_combos\_when\_n\_equals\_one
-343         \textcolor{keywordflow}{return}
+361         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 

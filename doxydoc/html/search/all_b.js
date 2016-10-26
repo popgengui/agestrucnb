@@ -7,6 +7,8 @@ var searchData=
   ['genepopfilesampler',['genepopfilesampler',['../namespacenegui_1_1genepopfilesampler.html',1,'negui']]],
   ['genepopindividualid',['genepopindividualid',['../namespacenegui_1_1genepopindividualid.html',1,'negui']]],
   ['indiv',['indiv',['../namespacenegui_1_1indiv.html',1,'negui']]],
+  ['n0',['N0',['../classnegui_1_1pginputsimupop_1_1PGInputSimuPop.html#a7fd0bd28a9b4b0468f704db0ac882310',1,'negui::pginputsimupop::PGInputSimuPop']]],
+  ['nb_5ffor_5frestrict_5fgenerator',['Nb_for_restrict_generator',['../classnegui_1_1pginputsimupop_1_1PGInputSimuPop.html#ac788ef76c43e7e8faca73a1ee82b6da4',1,'negui::pginputsimupop::PGInputSimuPop']]],
   ['neestimatorsamplingschemeparametermanager',['NeEstimatorSamplingSchemeParameterManager',['../classnegui_1_1pgutilityclasses_1_1NeEstimatorSamplingSchemeParameterManager.html',1,'negui::pgutilityclasses']]],
   ['negui',['negui',['../namespacenegui_1_1negui.html',1,'negui']]],
   ['pgdriveneestimator',['pgdriveneestimator',['../namespacenegui_1_1pgdriveneestimator.html',1,'negui']]],

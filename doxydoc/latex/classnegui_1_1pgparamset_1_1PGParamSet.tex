@@ -50,6 +50,9 @@ def {\bfseries get\+Control\+List\+From\+Tag} (self, s\+\_\+tag)\hypertarget{cla
 def {\bfseries get\+Validation\+From\+Tag} (self, s\+\_\+tag)\hypertarget{classnegui_1_1pgparamset_1_1PGParamSet_a205a20b31d36f64c3e722576c9689a66}{}\label{classnegui_1_1pgparamset_1_1PGParamSet_a205a20b31d36f64c3e722576c9689a66}
 
 \item 
+def {\bfseries get\+Assoc\+Def\+From\+Tag} (self, s\+\_\+tag)\hypertarget{classnegui_1_1pgparamset_1_1PGParamSet_a8fd4b2e598c482fd92013b957a80e7c0}{}\label{classnegui_1_1pgparamset_1_1PGParamSet_a8fd4b2e598c482fd92013b957a80e7c0}
+
+\item 
 def {\bfseries get\+Config\+Section\+Name\+For\+Param} (self, s\+\_\+name)\hypertarget{classnegui_1_1pgparamset_1_1PGParamSet_a4a82ee083106b30250988df78efa89d3}{}\label{classnegui_1_1pgparamset_1_1PGParamSet_a4a82ee083106b30250988df78efa89d3}
 
 \item 
@@ -87,6 +90,9 @@ def {\bfseries get\+Longname\+For\+Param} (self, s\+\_\+name)\hypertarget{classn
 
 \item 
 def {\bfseries get\+Validation\+For\+Param} (self, s\+\_\+name)\hypertarget{classnegui_1_1pgparamset_1_1PGParamSet_a551326a24cfdff0bc6e0d7dd18c70757}{}\label{classnegui_1_1pgparamset_1_1PGParamSet_a551326a24cfdff0bc6e0d7dd18c70757}
+
+\item 
+def {\bfseries get\+Assoc\+Def\+For\+Param} (self, s\+\_\+name)\hypertarget{classnegui_1_1pgparamset_1_1PGParamSet_a5a1de9fe821b1f28de85dcf5c2f088eb}{}\label{classnegui_1_1pgparamset_1_1PGParamSet_a5a1de9fe821b1f28de85dcf5c2f088eb}
 
 \item 
 def \hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aef97e7ee992a99258a6bbd7b7bf7c5fe}{tag} (self, s\+\_\+name)
@@ -162,6 +168,9 @@ int {\bfseries I\+D\+X\+\_\+\+T\+A\+G\+\_\+\+F\+I\+E\+L\+D\+\_\+\+G\+U\+I\+\_\+\
 int {\bfseries I\+D\+X\+\_\+\+T\+A\+G\+\_\+\+F\+I\+E\+L\+D\+\_\+\+V\+A\+L\+I\+D\+A\+T\+I\+ON} = 12\hypertarget{classnegui_1_1pgparamset_1_1PGParamSet_a859b19d511c2d6b5b912f9fabe172b10}{}\label{classnegui_1_1pgparamset_1_1PGParamSet_a859b19d511c2d6b5b912f9fabe172b10}
 
 \item 
+int {\bfseries I\+D\+X\+\_\+\+T\+A\+G\+\_\+\+F\+I\+E\+L\+D\+\_\+\+A\+S\+S\+O\+C\+\_\+\+D\+EF} = 13\hypertarget{classnegui_1_1pgparamset_1_1PGParamSet_a2cb31672fc6311c072bf03d6cb07676e}{}\label{classnegui_1_1pgparamset_1_1PGParamSet_a2cb31672fc6311c072bf03d6cb07676e}
+
+\item 
 string {\bfseries C\+O\+M\+M\+E\+N\+T\+\_\+\+C\+H\+AR} = \char`\"{}\#\char`\"{}\hypertarget{classnegui_1_1pgparamset_1_1PGParamSet_a3699c7f57795876fe0a6d4482bfd3295}{}\label{classnegui_1_1pgparamset_1_1PGParamSet_a3699c7f57795876fe0a6d4482bfd3295}
 
 \end{DoxyCompactItemize}
@@ -210,26 +219,26 @@ name, the third (if present)
 \end{DoxyVerb}
  
 
-Definition at line 147 of file pgparamset.\+py.
+Definition at line 157 of file pgparamset.\+py.
 
 
 \begin{DoxyCode}
-147     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_a598ea6a166f56fe5be01f86d4d8c91ba}{\_\_init\_\_}( self, s\_file\_with\_param\_names = None ):
-148 
-149         \textcolor{stringliteral}{'''}
-150 \textcolor{stringliteral}{        If provided, arg s\_file\_with\_param\_names}
-151 \textcolor{stringliteral}{        should be a file with 2 or more strings on each line,}
-152 \textcolor{stringliteral}{        tab-separated, the first value giving the short}
-153 \textcolor{stringliteral}{        name of the parameter, the second the long (full)}
-154 \textcolor{stringliteral}{        name, the third (if present)}
-155 \textcolor{stringliteral}{        '''}
-156         self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aafa67026a09aa523151728cba95e0d6d}{\_\_file\_with\_param\_names}=s\_file\_with\_param\_names
-157         self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aa13eaff9049bc16fa4090c8b85915f3c}{\_\_tags\_by\_shortname}=\{\}
+157     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_a598ea6a166f56fe5be01f86d4d8c91ba}{\_\_init\_\_}( self, s\_file\_with\_param\_names = None ):
 158 
-159         \textcolor{keywordflow}{if} s\_file\_with\_param\_names \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-160             self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_abc19f133ab3ecc86ec8099549b0b45bb}{\_\_init\_from\_file}( s\_file\_with\_param\_names )
-161         \textcolor{comment}{#end if file name given}
-162         \textcolor{keywordflow}{return}
+159         \textcolor{stringliteral}{'''}
+160 \textcolor{stringliteral}{        If provided, arg s\_file\_with\_param\_names}
+161 \textcolor{stringliteral}{        should be a file with 2 or more strings on each line,}
+162 \textcolor{stringliteral}{        tab-separated, the first value giving the short}
+163 \textcolor{stringliteral}{        name of the parameter, the second the long (full)}
+164 \textcolor{stringliteral}{        name, the third (if present)}
+165 \textcolor{stringliteral}{        '''}
+166         self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aafa67026a09aa523151728cba95e0d6d}{\_\_file\_with\_param\_names}=s\_file\_with\_param\_names
+167         self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aa13eaff9049bc16fa4090c8b85915f3c}{\_\_tags\_by\_shortname}=\{\}
+168 
+169         \textcolor{keywordflow}{if} s\_file\_with\_param\_names \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+170             self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_abc19f133ab3ecc86ec8099549b0b45bb}{\_\_init\_from\_file}( s\_file\_with\_param\_names )
+171         \textcolor{comment}{#end if file name given}
+172         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 
@@ -249,29 +258,29 @@ provides its tag as the return value.
 \end{DoxyVerb}
  
 
-Definition at line 391 of file pgparamset.\+py.
+Definition at line 414 of file pgparamset.\+py.
 
 
 \begin{DoxyCode}
-391     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aef97e7ee992a99258a6bbd7b7bf7c5fe}{tag}( self, s\_name ):
-392         \textcolor{stringliteral}{'''}
-393 \textcolor{stringliteral}{        param s\_name can be either among the }
-394 \textcolor{stringliteral}{        short or long names (or both). Shortnames}
-395 \textcolor{stringliteral}{        are checked first.  First instance of name}
-396 \textcolor{stringliteral}{        provides its tag as the return value.}
-397 \textcolor{stringliteral}{        '''}
-398         s\_val=\textcolor{keywordtype}{None}
-399 
-400         \textcolor{keywordflow}{if} s\_name \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aa13eaff9049bc16fa4090c8b85915f3c}{\_\_tags\_by\_shortname}:
-401             s\_val = self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aa13eaff9049bc16fa4090c8b85915f3c}{\_\_tags\_by\_shortname}[ s\_name ]
-402         \textcolor{keywordflow}{else}:
-403             s\_msg=\textcolor{stringliteral}{"In PGParamSet instance, def tag(), no tag "} \(\backslash\)
-404                     + \textcolor{stringliteral}{"associated with "} \(\backslash\)
-405                     + \textcolor{stringliteral}{"param name, "} + s\_name + \textcolor{stringliteral}{"."}
-406             \textcolor{keywordflow}{raise} Exception ( s\_msg )
-407         \textcolor{comment}{#end if tag in short else if tag in long}
-408 
-409         \textcolor{keywordflow}{return} s\_val
+414     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aef97e7ee992a99258a6bbd7b7bf7c5fe}{tag}( self, s\_name ):
+415         \textcolor{stringliteral}{'''}
+416 \textcolor{stringliteral}{        param s\_name can be either among the }
+417 \textcolor{stringliteral}{        short or long names (or both). Shortnames}
+418 \textcolor{stringliteral}{        are checked first.  First instance of name}
+419 \textcolor{stringliteral}{        provides its tag as the return value.}
+420 \textcolor{stringliteral}{        '''}
+421         s\_val=\textcolor{keywordtype}{None}
+422 
+423         \textcolor{keywordflow}{if} s\_name \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aa13eaff9049bc16fa4090c8b85915f3c}{\_\_tags\_by\_shortname}:
+424             s\_val = self.\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_aa13eaff9049bc16fa4090c8b85915f3c}{\_\_tags\_by\_shortname}[ s\_name ]
+425         \textcolor{keywordflow}{else}:
+426             s\_msg=\textcolor{stringliteral}{"In PGParamSet instance, def tag(), no tag "} \(\backslash\)
+427                     + \textcolor{stringliteral}{"associated with "} \(\backslash\)
+428                     + \textcolor{stringliteral}{"param name, "} + s\_name + \textcolor{stringliteral}{"."}
+429             \textcolor{keywordflow}{raise} Exception ( s\_msg )
+430         \textcolor{comment}{#end if tag in short else if tag in long}
+431 
+432         \textcolor{keywordflow}{return} s\_val
 \end{DoxyCode}
 \index{negui\+::pgparamset\+::\+P\+G\+Param\+Set@{negui\+::pgparamset\+::\+P\+G\+Param\+Set}!tags@{tags}}
 \index{tags@{tags}!negui\+::pgparamset\+::\+P\+G\+Param\+Set@{negui\+::pgparamset\+::\+P\+G\+Param\+Set}}
@@ -287,20 +296,20 @@ the paramset into groups
 \end{DoxyVerb}
  
 
-Definition at line 460 of file pgparamset.\+py.
+Definition at line 483 of file pgparamset.\+py.
 
 
 \begin{DoxyCode}
-460     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_a292c23c3d6349027f5c19eec70ea34f8}{tags}(self):
-461         \textcolor{stringliteral}{'''}
-462 \textcolor{stringliteral}{        returns a list of tags, without their associated}
-463 \textcolor{stringliteral}{        param names (short or long).  Useful to get}
-464 \textcolor{stringliteral}{        the set of unique tags if the tags categorize}
-465 \textcolor{stringliteral}{        the paramset into groups}
-466 \textcolor{stringliteral}{        '''}
-467         ls\_tags=self.\_\_tags\_by\_shortname.values()
-468         ls\_tags.sort()
-469         \textcolor{keywordflow}{return} ls\_tags
+483     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgparamset_1_1PGParamSet_a292c23c3d6349027f5c19eec70ea34f8}{tags}(self):
+484         \textcolor{stringliteral}{'''}
+485 \textcolor{stringliteral}{        returns a list of tags, without their associated}
+486 \textcolor{stringliteral}{        param names (short or long).  Useful to get}
+487 \textcolor{stringliteral}{        the set of unique tags if the tags categorize}
+488 \textcolor{stringliteral}{        the paramset into groups}
+489 \textcolor{stringliteral}{        '''}
+490         ls\_tags=self.\_\_tags\_by\_shortname.values()
+491         ls\_tags.sort()
+492         \textcolor{keywordflow}{return} ls\_tags
 \end{DoxyCode}
 
 

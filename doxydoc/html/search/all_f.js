@@ -6,5 +6,6 @@ var searchData=
   ['subsampleindividualsleaventhoutfrompop',['subsampleIndividualsLeaveNthOutFromPop',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#afb85a943b15c9a259510cc7f61b085b3',1,'negui::genepopfilemanager::GenepopFileManager']]],
   ['subsampleindividualsrandomlybyproportion',['subsampleIndividualsRandomlyByProportion',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#a5c85ac4838fd6919be1c408bcd39f54e',1,'negui::genepopfilemanager::GenepopFileManager']]],
   ['subsamplelocibyrangeandmax',['subsampleLociByRangeAndMax',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#a4334a9164415aa05de38ac7b31d59e40',1,'negui::genepopfilemanager::GenepopFileManager']]],
+  ['subsamplelocibyrangeandproportion',['subsampleLociByRangeAndProportion',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#af1dae6f9128c3c19ac204f518e838df1',1,'negui::genepopfilemanager::GenepopFileManager']]],
   ['subsamplenindividualsrandomlyfromeachpop',['subsampleNIndividualsRandomlyFromEachPop',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#affaeb9457d84736dc1f289d600808f56',1,'negui::genepopfilemanager::GenepopFileManager']]]
 ];

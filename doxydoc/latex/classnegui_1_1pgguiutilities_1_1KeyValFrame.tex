@@ -11,6 +11,9 @@ Inheritance diagram for negui.\+pgguiutilities.\+Key\+Val\+Frame\+:\begin{figure
 \item 
 def \hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a9d507011f4523f708351c682b788f3e5}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+name, v\+\_\+value, o\+\_\+type, v\+\_\+default\+\_\+value=None, o\+\_\+master=None, s\+\_\+associated\+\_\+attribute=None, o\+\_\+associated\+\_\+attribute\+\_\+object=None, i\+\_\+entrywidth=7, i\+\_\+labelwidth=15, b\+\_\+is\+\_\+enabled=True, s\+\_\+label\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+entry\+\_\+justify=\textquotesingle{}right\textquotesingle{}, s\+\_\+button\+\_\+text=\textquotesingle{}Cmd\textquotesingle{}, def\+\_\+button\+\_\+command=None, def\+\_\+entry\+\_\+change\+\_\+command=None, type\+\_\+replaces\+\_\+none=float, s\+\_\+label\+\_\+name=None, i\+\_\+subframe\+\_\+padding=0, o\+\_\+validity\+\_\+tester=None, b\+\_\+force\+\_\+disable=False, s\+\_\+tooltip=None, b\+\_\+use\+\_\+list\+\_\+editor=False)
 \item 
+def {\bfseries manually\+Update\+Value} (self, v\+\_\+value, i\+\_\+idx=0)\hypertarget{classnegui_1_1pgguiutilities_1_1KeyValFrame_a0294b9b997f26832e76783b4d9a7404f}{}\label{classnegui_1_1pgguiutilities_1_1KeyValFrame_a0294b9b997f26832e76783b4d9a7404f}
+
+\item 
 def {\bfseries val} (self)\hypertarget{classnegui_1_1pgguiutilities_1_1KeyValFrame_a735c32759de5e4519d15ec2511da6e4f}{}\label{classnegui_1_1pgguiutilities_1_1KeyValFrame_a735c32759de5e4519d15ec2511da6e4f}
 
 \item 
@@ -247,17 +250,19 @@ Definition at line 91 of file pgguiutilities.\+py.
 197         \textcolor{comment}{#that may be subject to config}
 198         \textcolor{comment}{#after init:}
 199         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_aca02061228a06555b1089c0f29e76c16}{\_\_entry\_boxes}=[]
-200         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a81a445bf0dde094f7a637862633f326d}{\_\_button\_object}=\textcolor{keywordtype}{None}
+200         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a4c7f885ec8170c01e0518a3ce9f83825}{\_\_textvariables}=[]
 201 
-202         \textcolor{comment}{#Canvas, Frame, and other attributes}
-203         \textcolor{comment}{#that will allow scrolling and correct}
-204         \textcolor{comment}{#resizing (see def \_\_setup\_subwidgets)}
-205         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a84a06231bb7ea897130918df961a8b7a}{\_\_canvas}=\textcolor{keywordtype}{None}
-206         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a235e50f36bb184384f5890419a5fbe6b}{\_\_subframe}=\textcolor{keywordtype}{None}
-207         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a142189024bf58f59618aa83128270459}{\_\_subframe\_id}=\textcolor{keywordtype}{None}
-208         
-209         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a9d6430a9f908364c1f00e07b47dcbff5}{\_\_setup}()
-210 
+202         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a81a445bf0dde094f7a637862633f326d}{\_\_button\_object}=\textcolor{keywordtype}{None}
+203 
+204         \textcolor{comment}{#Canvas, Frame, and other attributes}
+205         \textcolor{comment}{#that will allow scrolling and correct}
+206         \textcolor{comment}{#resizing (see def \_\_setup\_subwidgets)}
+207         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a84a06231bb7ea897130918df961a8b7a}{\_\_canvas}=\textcolor{keywordtype}{None}
+208         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a235e50f36bb184384f5890419a5fbe6b}{\_\_subframe}=\textcolor{keywordtype}{None}
+209         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a142189024bf58f59618aa83128270459}{\_\_subframe\_id}=\textcolor{keywordtype}{None}
+210         
+211         self.\hyperlink{classnegui_1_1pgguiutilities_1_1KeyValFrame_a9d6430a9f908364c1f00e07b47dcbff5}{\_\_setup}()
+212 
 \end{DoxyCode}
 
 

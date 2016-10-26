@@ -811,16 +811,12 @@ Definition at line 627 of file pgutilities.\+py.
 710     \textcolor{comment}{#(see pgdriveneestimator.py def execute\_ne\_for\_each\_sample):}
 711     seq\_arg\_set += ( o\_multiprocessing\_event, )
 712 
-713     \textcolor{comment}{##### temp}
-714     print( \textcolor{stringliteral}{"arg set: "} + str( seq\_arg\_set ) )
-715     \textcolor{comment}{#####}
-716 
-717     pgne.mymain( *seq\_arg\_set )
-718 
-719     o\_main\_output.close()
-720     o\_secondary\_output.close()
-721 
-722     \textcolor{keywordflow}{return}
-723 \textcolor{comment}{#end run\_driveneestimator\_in\_new\_process}
-724 
+713     pgne.mymain( *seq\_arg\_set )
+714 
+715     o\_main\_output.close()
+716     o\_secondary\_output.close()
+717 
+718     \textcolor{keywordflow}{return}
+719 \textcolor{comment}{#end run\_driveneestimator\_in\_new\_process}
+720 
 \end{DoxyCode}

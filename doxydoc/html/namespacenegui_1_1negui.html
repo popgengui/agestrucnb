@@ -111,21 +111,45 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>WINDOW_MARGIN</b> = 
 <tr class="memitem:a697772153f0161816728f03911a53ed4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a697772153f0161816728f03911a53ed4"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>CONTAINER_PADDING</b> = 10</td></tr>
 <tr class="separator:a697772153f0161816728f03911a53ed4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0e9000340ecb28a76174866dbd51c619"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0e9000340ecb28a76174866dbd51c619"></a>
-list&#160;</td><td class="memItemRight" valign="bottom"><b>ls_optional_args</b> = [ &quot;number of processes to use for replicate simulations&quot; ]</td></tr>
-<tr class="separator:a0e9000340ecb28a76174866dbd51c619"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3655412177f9ff140033a529e87bcf06"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3655412177f9ff140033a529e87bcf06"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>s_usage</b> = pgut.do_usage_check( sys.argv, [], ls_optional_arg_descriptions=ls_optional_args )</td></tr>
-<tr class="separator:a3655412177f9ff140033a529e87bcf06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae53d15f57c250565845a17a425a90afa"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae53d15f57c250565845a17a425a90afa"></a>
+list&#160;</td><td class="memItemRight" valign="bottom"><b>LS_FLAGS_SHORT_OPTIONAL</b> = [ &quot;-p&quot;, &quot;-l&quot; ]</td></tr>
+<tr class="separator:ae53d15f57c250565845a17a425a90afa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46e303892af9fa268c656af527ac1568"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a46e303892af9fa268c656af527ac1568"></a>
+list&#160;</td><td class="memItemRight" valign="bottom"><b>LS_FLAGS_LONG_OPTIONAL</b> = [ &quot;--processes&quot;, &quot;--lifetable&quot; ]</td></tr>
+<tr class="separator:a46e303892af9fa268c656af527ac1568"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0b1d5dce29751ae81f30927168edc3c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa0b1d5dce29751ae81f30927168edc3c"></a>
+string&#160;</td><td class="memItemRight" valign="bottom"><b>s_help_processes_option</b> = &quot;Number of processes to use in the simulation (1 used per replicate, one process &quot;</td></tr>
+<tr class="separator:aa0b1d5dce29751ae81f30927168edc3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afffa3d3a92fb8773a23551764f8f8eaa"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afffa3d3a92fb8773a23551764f8f8eaa"></a>
+string&#160;</td><td class="memItemRight" valign="bottom"><b>s_help_lifetable_option</b> = &quot;life table file or pattern to match multiple life table files (use quotes). &quot;</td></tr>
+<tr class="separator:afffa3d3a92fb8773a23551764f8f8eaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a212525736c85a79708529d797635af9e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a212525736c85a79708529d797635af9e"></a>
+list&#160;</td><td class="memItemRight" valign="bottom"><b>LS_ARGS_HELP_OPTIONAL</b> = [ s_help_processes_option , s_help_lifetable_option ]</td></tr>
+<tr class="separator:a212525736c85a79708529d797635af9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0238cdb30b4db858939b3a3547a01291"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0238cdb30b4db858939b3a3547a01291"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>o_parser</b> = ap.ArgumentParser()</td></tr>
+<tr class="separator:a0238cdb30b4db858939b3a3547a01291"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a755d148e355ee43be3122668737cca98"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a755d148e355ee43be3122668737cca98"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>i_total_options</b> = len( LS_FLAGS_SHORT_OPTIONAL )</td></tr>
+<tr class="separator:a755d148e355ee43be3122668737cca98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2f52d57c94461393fe55c281d73c2eb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab2f52d57c94461393fe55c281d73c2eb"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>help</b></td></tr>
+<tr class="separator:ab2f52d57c94461393fe55c281d73c2eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a997e18ffce4f999fc997cf56e330ca14"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a997e18ffce4f999fc997cf56e330ca14"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>required</b></td></tr>
+<tr class="separator:a997e18ffce4f999fc997cf56e330ca14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13daffa2de8e8d9b13b95a03859f0f17"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a13daffa2de8e8d9b13b95a03859f0f17"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>o_args</b> = o_parser.parse_args()</td></tr>
+<tr class="separator:a13daffa2de8e8d9b13b95a03859f0f17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3d503277c8f4b646ff8bc4a88922931"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac3d503277c8f4b646ff8bc4a88922931"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>s_my_mod_path</b> = os.path.abspath( __file__ )</td></tr>
 <tr class="separator:ac3d503277c8f4b646ff8bc4a88922931"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af56cb9927731f0b94f9bf9744ae41e4f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af56cb9927731f0b94f9bf9744ae41e4f"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>s_my_mod_dir</b> = os.path.dirname( s_my_mod_path )</td></tr>
 <tr class="separator:af56cb9927731f0b94f9bf9744ae41e4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab356fd36c69789db2b3bc1a0793d937d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab356fd36c69789db2b3bc1a0793d937d"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>i_total_simultaneous_processes</b> = int( sys.argv[1] )</td></tr>
-<tr class="separator:ab356fd36c69789db2b3bc1a0793d937d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3d7219be606c9a080eeb9b3121c1c85"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac3d7219be606c9a080eeb9b3121c1c85"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>i_total_simultaneous_processes</b> = 1</td></tr>
+<tr class="separator:ac3d7219be606c9a080eeb9b3121c1c85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aebe3cdf18a6fb06977342427f5bdf539"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aebe3cdf18a6fb06977342427f5bdf539"></a>
 string&#160;</td><td class="memItemRight" valign="bottom"><b>s_default_life_tables</b> = s_my_mod_dir+&quot;/resources/*life.table.info&quot;</td></tr>
 <tr class="separator:aebe3cdf18a6fb06977342427f5bdf539"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,7 +204,7 @@ Provisional driver for the negui program
       </table>
 </div><div class="memdoc">
 <b>Initial value:</b><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno"><a class="line" href="namespacenegui_1_1negui.html">    1</a></span>&#160;= pgn.PGHostNotebook( o_master, </div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;            s_menu_config, </div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;            s_param_name_file, </div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;            s_glob_life_tables=s_default_life_tables,</div><div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;            i_max_process_total=i_total_simultaneous_processes )</div></div><!-- fragment -->
-<p>Definition at line <a class="el" href="negui_8py_source.html#l00072">72</a> of file <a class="el" href="negui_8py_source.html">negui.py</a>.</p>
+<p>Definition at line <a class="el" href="negui_8py_source.html#l00102">102</a> of file <a class="el" href="negui_8py_source.html">negui.py</a>.</p>
 
 </div>
 </div>

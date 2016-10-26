@@ -22,7 +22,7 @@ according one or more proportions (percentages).
 \end{DoxyVerb}
  
 
-Definition at line 1168 of file genepopfilesampler.\+py.
+Definition at line 1356 of file genepopfilesampler.\+py.
 
 
 
@@ -45,51 +45,51 @@ member "population_subsample_name")
 \end{DoxyVerb}
  
 
-Definition at line 1178 of file genepopfilesampler.\+py.
+Definition at line 1366 of file genepopfilesampler.\+py.
 
 
 \begin{DoxyCode}
-1178     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_ad8170ea6661afa7bff72d484372209e3}{doSample}( self ):
-1179         \textcolor{stringliteral}{'''}
-1180 \textcolor{stringliteral}{        as of Mon Jul 11 20:17:02 MDT 2016, for simplicity, the GenepopFileManager subsampling}
-1181 \textcolor{stringliteral}{        defs that subsample individuals or loci, do so across all populations,}
-1182 \textcolor{stringliteral}{        so that the subset of populations given by this objects member sampleparams property }
-1183 \textcolor{stringliteral}{        "population\_numbers", will only be applied as a filter when writeGenePopFile (or printGenePopFile)}
-1184 \textcolor{stringliteral}{        is applied to this objects GenepopFileManager object (self.filemanager ). The call}
-1185 \textcolor{stringliteral}{        to the GenepopFileManager.writeGenePopFile, will need to include among its args the }
-1186 \textcolor{stringliteral}{        population subsample name ( assigned as the GenepopFileSampleParams object's}
-1187 \textcolor{stringliteral}{        member "population\_subsample\_name") }
-1188 \textcolor{stringliteral}{        '''}
-1189 
-1190         self.filemanager.subsamplePopulationsByList( self.sampleparams.population\_numbers, 
-1191                 s\_subsample\_tag=self.sampleparams.population\_subsample\_name )
-1192 
-1193         lf\_proportions=self.sampleparams.proportions
-1194         i\_total\_replicates=self.sampleparams.replicates
-1195 
-1196         \textcolor{keywordflow}{for} f\_proportion \textcolor{keywordflow}{in} lf\_proportions:
-1197             \textcolor{keywordflow}{for} i\_replicate\_number \textcolor{keywordflow}{in} range( i\_total\_replicates ):
-1198 
-1199                 s\_subsampletag=\textcolor{keywordtype}{None}
-1200 
-1201                 \textcolor{keywordflow}{if} self.sampleparams.sample\_tag \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-1202                     s\_subsampletag=self.sampleparams.sample\_tag
-1203                 \textcolor{keywordflow}{else}:
-1204                     \textcolor{comment}{#standardized subsample tag uses the proportion and the rep number:}
-1205                     \textcolor{comment}{#note that the "." char delimiter will need to be replaced by a diff}
-1206                     \textcolor{comment}{#char when using this tag to name input or output file names for}
-1207                     \textcolor{comment}{#NeEstimator (which truncates filenames using pattern .* for some of }
-1208                     \textcolor{comment}{#its output files)}
-1209                     s\_subsampletag=make\_subsample\_tag(  f\_proportion, i\_replicate\_number , 
+1366     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion_ad8170ea6661afa7bff72d484372209e3}{doSample}( self ):
+1367         \textcolor{stringliteral}{'''}
+1368 \textcolor{stringliteral}{        as of Mon Jul 11 20:17:02 MDT 2016, for simplicity, the GenepopFileManager subsampling}
+1369 \textcolor{stringliteral}{        defs that subsample individuals or loci, do so across all populations,}
+1370 \textcolor{stringliteral}{        so that the subset of populations given by this objects member sampleparams property }
+1371 \textcolor{stringliteral}{        "population\_numbers", will only be applied as a filter when writeGenePopFile (or printGenePopFile)}
+1372 \textcolor{stringliteral}{        is applied to this objects GenepopFileManager object (self.filemanager ). The call}
+1373 \textcolor{stringliteral}{        to the GenepopFileManager.writeGenePopFile, will need to include among its args the }
+1374 \textcolor{stringliteral}{        population subsample name ( assigned as the GenepopFileSampleParams object's}
+1375 \textcolor{stringliteral}{        member "population\_subsample\_name") }
+1376 \textcolor{stringliteral}{        '''}
+1377 
+1378         self.filemanager.subsamplePopulationsByList( self.sampleparams.population\_numbers, 
+1379                 s\_subsample\_tag=self.sampleparams.population\_subsample\_name )
+1380 
+1381         lf\_proportions=self.sampleparams.proportions
+1382         i\_total\_replicates=self.sampleparams.replicates
+1383 
+1384         \textcolor{keywordflow}{for} f\_proportion \textcolor{keywordflow}{in} lf\_proportions:
+1385             \textcolor{keywordflow}{for} i\_replicate\_number \textcolor{keywordflow}{in} range( i\_total\_replicates ):
+1386 
+1387                 s\_subsampletag=\textcolor{keywordtype}{None}
+1388 
+1389                 \textcolor{keywordflow}{if} self.sampleparams.sample\_tag \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+1390                     s\_subsampletag=self.sampleparams.sample\_tag
+1391                 \textcolor{keywordflow}{else}:
+1392                     \textcolor{comment}{#standardized subsample tag uses the proportion and the rep number:}
+1393                     \textcolor{comment}{#note that the "." char delimiter will need to be replaced by a diff}
+1394                     \textcolor{comment}{#char when using this tag to name input or output file names for}
+1395                     \textcolor{comment}{#NeEstimator (which truncates filenames using pattern .* for some of }
+1396                     \textcolor{comment}{#its output files)}
+1397                     s\_subsampletag=make\_subsample\_tag(  f\_proportion, i\_replicate\_number , 
       SCHEME\_PROPORTION )
-1210                 \textcolor{comment}{#end if tag exists use it else make one}
-1211 
-1212                 self.filemanager.subsampleIndividualsRandomlyByProportion( f\_proportion, s\_subsampletag ) 
-1213             \textcolor{comment}{#end for each replicate number  }
-1214         \textcolor{comment}{#end for each proportion}
-1215         \textcolor{keywordflow}{return}
-1216 \textcolor{comment}{#end class GenepopFileSamplerIndividualsByProportion}
-1217 
+1398                 \textcolor{comment}{#end if tag exists use it else make one}
+1399 
+1400                 self.filemanager.subsampleIndividualsRandomlyByProportion( f\_proportion, s\_subsampletag ) 
+1401             \textcolor{comment}{#end for each replicate number  }
+1402         \textcolor{comment}{#end for each proportion}
+1403         \textcolor{keywordflow}{return}
+1404 \textcolor{comment}{#end class GenepopFileSamplerIndividualsByProportion}
+1405 
 \end{DoxyCode}
 
 
