@@ -81,9 +81,12 @@ def createGraph(lineArray, title = None, xlab = None, yLab= None, colorVctr = No
             plt.show()
         else:
             plt.savefig(dest, bbox_inches='tight')
+        plt.close()
+        plt.clf()
  #method to create a boxplot of the outputNEs
 def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
-    flatData = [table[key] for key in table]
+
+    flatData = [val for sublist in table for val in table[sublist]]
 
     plotData = []
 
@@ -95,8 +98,20 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         ySet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)
         # plotData = unzippedy
+    plt.boxplot(plotData)
+    if title:
+        plt.title(title)
+    if xlab:
+        plt.xlabel(xlab)
+    if yLab:
+        plt.ylabel(yLab)
 
-
+    if dest == "show":
+        plt.show()
+    else:
+        plt.savefig(dest, bbox_inches='tight')
+    plt.close()
+    plt.clf()
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -213,7 +228,7 @@ def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
         if expectedSlope == "pop":
             if popTable:
                 averagePopPoints = []
-                allpoints = [val for sublist in popTable for val in sublist]
+                allpoints = [val for sublist in popTable for val in popTable[sublist]]
                 xVals, yVals = zip(*allpoints)
                 xSet = set(xVals)
                 for x in xSet:
@@ -397,7 +412,7 @@ def neGrapher(neFile, configFile):
     configs = neConfigRead(configFile)
     table,countsTable = neFileRead(neFile,configs["startData"])
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
-
+    createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
 
 #master function for creating a table of confidence intervals form neEstimation data
 #neFile: filepath of neEstimation output file
@@ -629,14 +644,18 @@ if __name__ == "__main__":
         testDict[id] = data
         id+=1
 
-    lines, color, styles = _NeRegressionGraphCalc(testTable)
+    lines, color, styles = _NeRegressionGraphCalc(testDict)
 
     createGraph(lines,colorVctr=color,styleVctr=styles)
 
     testYs = [[0,0,0,0,0],[1,2,3,4,5],[-1,-2,-3,-4,-5],[1,3,0,2,-1]]
     for yVct in testYs:
         testTable.append(zip(testX,yVct))
-    lines, color, styles = _NeRegressionGraphCalc(testTable, -0.333)
+    testDict = {}
+    for data in testTable:
+        testDict[id] = data
+        id += 1
+    lines, color, styles = _NeRegressionGraphCalc(testDict, -0.333)
 
     createGraph(lines,colorVctr=color,styleVctr=styles)
 
@@ -660,7 +679,7 @@ if __name__ == "__main__":
     configwrite.set("labels", "xLab", "xLabel")
     configwrite.set("labels", "yLab", "yLabel")
     configwrite.add_section("destination")
-    configwrite.set("destination","desttype", "PDF")
+    configwrite.set("destination","desttype", "show")
     configwrite.set("destination","regressionfile", "test.pdf")
     configwrite.set("destination","boxplotfile", "box.pdf")
 
