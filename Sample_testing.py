@@ -22,6 +22,15 @@ def calcN0(Nb, NbNcRatio, maleSurvival, femaleSurvial, MRatio):
         cumPopPorp+= currentFemaleProp
     #calulate N0
     N0 = Nc/cumPopPorp
+    return N0
+
+
+print calcN0(50,0.144,[0.142,0.124],[0.142,0.124],0.5)
+print calcN0(20,0.144,[0.142,0.124],[0.142,0.124],0.7)
+
+print calcN0(20,0.144,[0.144,0.126],[0.140,0.122],0.5)
+print calcN0(20,0.144,[0.144,0.126],[0.140,0.122],0.6)
+print calcN0(20,0.144,[0.144,0.126],[0.140,0.122],0.4)
 
 
 

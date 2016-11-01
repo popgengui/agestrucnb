@@ -220,12 +220,12 @@ def collectStatsData(neDict, statsDict, outFolder,firstVal):
     powerName = "power.csv"
     neName = "Ne.csv"
 
+    nePath = os.path.join(outFolder, neName)
+    neOut = open(nePath, "w")
+    neOut.write("parameters,replicate,Reproductive Cycle,Ne\n")
     for identifier in neDict:
         neFile = neDict[identifier]
         neData = gatherNe(neFile, firstVal)
-        nePath = os.path.join(outFolder, neName)
-        neOut = open(nePath, "w")
-        neOut.write("parameters,replicate,Reproductive Cycle,Ne\n")
         for datapoint in neData:
             print datapoint
             data = neData[datapoint]
@@ -233,12 +233,16 @@ def collectStatsData(neDict, statsDict, outFolder,firstVal):
             for point in data:
                 neOut.write(str(identifier) + "," + str(datapoint) + "," + str(point[0]) + "," + str(point[1]) + "\n")
     neOut.close()
+    statsFile = statsDict[identifier]
+    slopePath = os.path.join(outFolder, slopesName)
+    powerPath = os.path.join(outFolder, powerName)
+    powerOut = open(powerPath, "w")
+    slopeOut = open(slopePath, "w")
     for identifier in statsDict:
-        statsFile = statsDict[identifier]
-        slopePath =os.path.join(outFolder, slopesName)
-        powerPath = os.path.join(outFolder, powerName)
-        powerOut = open(powerPath,"w")
-        slopeOut = open(slopePath,"w")
+        power = gatherPower(statsFile)
+        slopes = gatherSlopes(statsFile)
+
+
 
 
 
