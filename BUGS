@@ -109,8 +109,11 @@ B14 If you run a simulation and set "replicates" to >1, then the *conf file that
 
 Tue Oct 25 23:40:20 MDT 2016
 
-B15 In the ne estimation gui, tooltips do not disappear properly when mouse moves off.  This 
-	seems to happen to only the longer tooltips, in particular those that explain combo box options.  
-	Not sure if this problem is confined to the ne estimation interface only.
-	B16 Have had inexplicable hangs in ne-estimation doing cohort sampling on a 20-pop genepop with N0 at  about 50.  Unable to consistently
+B15 Fixed 20161031 (difficult to confirm complete fix, but many tests show no more persisiting tooltip windows).
+	In the ne estimation gui, tooltips do not disappear properly when mouse moves off.  This 
+	seems to happen to (soley?) in the combo boxes, when the keyboard is used to select from the dropdown
+	list, while the mouse is over the control, so that the tooltip reappears when the keyboard selection
+	is done, but the tooltip window then will not disappear as it should after mouse off.
+
+B16 Have had inexplicable hangs in ne-estimation doing cohort sampling on a 20-pop genepop with N0 at  about 50.  Unable to consistently
 	reproduce this bug, as identical interface inputs run to completion when attempting to reproduce the bug.
