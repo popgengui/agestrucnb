@@ -198,9 +198,9 @@ class KeyValFrame( Frame ):
 		#after init:
 		self.__entry_boxes=[]
 		self.__textvariables=[]
-
 		self.__button_object=None
 
+		
 		#Canvas, Frame, and other attributes
 		#that will allow scrolling and correct
 		#resizing (see def __setup_subwidgets)
@@ -497,7 +497,6 @@ class KeyValFrame( Frame ):
 				state=s_enabled,
 				foreground="black",
 				justify=self.__entryjustify )
-		o_entry.bind( "<FocusOut>", self.__on_enterkey )
 
 		self.__entry_boxes.append( o_entry )
 		self.__textvariables.append( o_strvar )
@@ -549,6 +548,17 @@ class KeyValFrame( Frame ):
 			o_entry.grid( row = 0, column = i_colcount )
 			o_entry.bind( '<Return>', self.__on_enterkey )
 			o_entry.bind( '<Tab>', self.__on_enterkey )
+
+			'''
+			Note that I moved this binding  to FocusOut, to
+			this location in the code.  Originally it
+			was executed in def __make_entry above.  I found
+			that the binding done before these in the separate
+			def caused it to be masked or otherwise nullified,
+			so that the focusout event was not causing a call
+			to __on_enterkey
+			'''
+			o_entry.bind( "<FocusOut>", self.__on_enterkey )
 		#end for each index
 		return
 	#end __make_value_row
@@ -630,6 +640,9 @@ class KeyValFrame( Frame ):
 		if self.__isenabled == False or self.__force_disable == True:
 			return
 		else:
+			##### temp
+			print( "calling __update_after_entry_change()" )
+			##### end temp
 			self.__update_after_entry_change()
 		#end
 		return
@@ -1028,7 +1041,16 @@ class KeyListComboFrame( Frame ):
 		self.__force_disable=b_force_disable
 		self.__tooltip=self.__label_name if s_tooltip == "" else s_tooltip
 		self.__subframe=None
+
+		'''
+		We want a reference to the combobox
+		in order to use it to recreate the
+		tooltip in def __on_new_combobox_selection:
+		'''
+		self.__combobox=None
+
 		self.__setup()
+		return	
 	#end init
 
 	def __setup( self ):
@@ -1105,6 +1127,8 @@ class KeyListComboFrame( Frame ):
 		#referenc to combobox choices
 		o_combobox.current( self.__default_choice_number - 1 )
 
+		self.__combobox_object=o_combobox
+
 		#initialize the parent attr and 
 		#execute parent def if needed
 		self.__on_new_combobox_selection()
@@ -1133,11 +1157,10 @@ class KeyListComboFrame( Frame ):
 		if self.__isenabled == False or self.__force_disable == True:
 			return
 		#end if disabled, do nothing
-
-
 		self.__update_parent_attr_and_def()
+
 		return
-	#end __on_button_change
+	#end __on_new_combobox_selection
 
 	@property
 	def val( self ):
@@ -1435,6 +1458,14 @@ class ListEditingSubframe( Frame ):
 
 	Note that this class would be unneccesary if Tkinter
 	has a sreadsheet-like widget.
+
+	2016_10_31 
+	Because I'm currently not using the assign-range, 
+	funcion, and, although it seems to be working, it nonetheless
+	complicates the communications between this class objectd
+	and its parent KeyValFrame, I'm for now going to hide these
+	controls. See def __setup, where I've commented out the
+	grid assignments of the assign-range controls.
 	'''
 
 	def __init__( self, 
@@ -1587,13 +1618,20 @@ class ListEditingSubframe( Frame ):
 
 		self.__btn_extend.grid( row=0, column=self.BTN_COL_EXTEND )
 		self.__btn_trim.grid( row=0, column=self.BTN_COL_TRIM )
-		self.__label_assign.grid( row=0, column=self.LABEL_COL_ASSIGN )
-		self.__entry_from.grid( row=0, column=self.ENTRY_COL_FROM )
-		self.__label_to.grid( row=0, column=self.LABEL_COL_TO )
-		self.__entry_to.grid( row=0, column=self.ENTRY_COL_TO )
-		self.__label_assign_val.grid( row=0, column=self.LABEL_COL_VALUE )
-		self.__entry_assign_val.grid( row=0, column=self.ENTRY_COL_VALUE )
-		self.__btn_assign.grid( row=0, column=self.BTN_COL_ASSIGN )
+		'''
+		Because I'm currently (2016_10_31) not using the assign-range, 
+		funcion, and, though it seems to be working, it nonetheless
+		complicates the communications between this class objectd
+		and its parent KeyValFrame, I'm for now going to hide these
+		controls.
+		'''
+#		self.__label_assign.grid( row=0, column=self.LABEL_COL_ASSIGN )
+#		self.__entry_from.grid( row=0, column=self.ENTRY_COL_FROM )
+#		self.__label_to.grid( row=0, column=self.LABEL_COL_TO )
+#		self.__entry_to.grid( row=0, column=self.ENTRY_COL_TO )
+#		self.__label_assign_val.grid( row=0, column=self.LABEL_COL_VALUE )
+#		self.__entry_assign_val.grid( row=0, column=self.ENTRY_COL_VALUE )
+#		self.__btn_assign.grid( row=0, column=self.BTN_COL_ASSIGN )
 
 		self.grid( row=1, column=1, columnspan=max( i_num_entries, self.TOTAL_CONTROLS ), sticky="nw")
 

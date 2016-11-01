@@ -150,6 +150,21 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		#or "parameters"
 		self.__interface_subframes={}
 
+		'''
+		A way to access one of the objecta that
+		controls the param-value in one or more 
+		entry/list/combo boxes.  This added on 2016_10_31, 
+		to get access to their tooltip objects, 		
+		as some of these were persisting after accessing,
+		then leaving the reloading the param boxes (in particular
+		the combo boxes). Although the tooltip problem
+		was solved by simpler changes in the CreateToolTip
+		class itself, but we'll keep this attribute and append
+		the objects (kv frames, as created in load_parm defs)
+		in case the direct access to these controls is needed.
+		'''
+		self.__param_value_frames_by_attr_name={}
+
 		#create interface
 		self.__get_param_set( s_param_names_file )
 		self.__set_initial_file_info()
@@ -620,6 +635,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		LOCATIONS_FRAME_PADDING=30
 		LOCATIONS_FRAME_LABEL="Load/Run"
 		LOCATIONS_FRAME_STYLE="groove"
+		RUNBUTTON_PADDING=07	
 
 		o_file_locations_subframe=LabelFrame( self,
 				padding=LOCATIONS_FRAME_PADDING,
@@ -637,11 +653,41 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		'''
 		o_run_sub_subframe=Frame( o_file_locations_subframe )
 
+		if self.__processes is None:
+			self.__processes=1
+		#end assign min if not set
+
+		i_tot_procs=pgut.get_cpu_count()
+
+		o_tot_process_validator=FloatIntStringParamValidity( \
+					"proccess total",
+					int, self.__processes, 
+					1, i_tot_procs )
+
+		o_tot_process_kv=KeyValFrame( s_name="Total processes to use: ", 
+						v_value=self.__processes,
+						o_type=int,
+						v_default_value="",
+						o_master=o_run_sub_subframe,
+						o_associated_attribute_object=self,
+						s_associated_attribute="_PGGuiNeEstimator__" \
+									+ "__processes",
+						s_entry_justify='left',
+						s_label_justify='left',
+						s_button_text="Select",
+						b_force_disable=b_force_disable,
+						o_validity_tester= o_tot_process_validator,
+						s_tooltip = "Ne estimator can allocate one process " \
+								+ "for each pop, and within pop, eache subsample " \
+								+ "percentate or remove-N value or replicate. " )
+
+		o_tot_process_kv.grid( row=i_row, column=0, sticky=( NW ) )
+
 		self.__run_button=Button( o_run_sub_subframe, 
 						command= \
 							self.__on_click_run_or_cancel_neestimation_button )
 		
-		self.__run_button.grid( row=i_row, sticky=( NW )	)
+		self.__run_button.grid( row=i_row, column=1, sticky=( NW ), padx=RUNBUTTON_PADDING )
 
 		#this label will have text showing when an estimation
 		#is running:
@@ -926,6 +972,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 	def __load_param_interface( self, 
 							b_force_disable=False, 
 							s_sampling_scheme_to_load="None" ):
+		if VERY_VERBOSE:
+			print( "in __load_param_interface")
+		#end if very verbose
 
 		PARAMETERS_FRAME_PADDING=30
 		PARAMETERS_FRAME_LABEL="Parameters"
@@ -978,7 +1027,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					
 				continue
 			#end if param is to be suppressed, or is a sampling param
-
 
 			#we use the first entry in the list
 			#as the default value for the list editor
@@ -1086,6 +1134,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		
 			o_this_keyval.grid( row=i_row + ( i_param_position_in_order - 1 ), sticky=( NW ) )
 
+			#Keep a reference to this param frame frame keyed to its attribute name
+			self.__param_value_frames_by_attr_name[ s_attr_name ] = o_this_keyval
+
 		#end for each param
 
 		o_params_subframe.grid( row=ROW_NUM_PARAMETERS_FRAME, 
@@ -1102,6 +1153,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	def __load_genepopfile_sampling_params_interface( self, 
 											b_force_disable=False ):
+		if VERY_VERBOSE:
+			print ( "in __load_genepopfile_sampling_params_interface")
+		#end if very verbose
 
 		PARAMETERS_FRAME_PADDING=30
 		PARAMETERS_FRAME_LABEL="Pop Sampling Parameters"
@@ -1186,7 +1240,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 			o_validity_checker=None
 
-
 			#we use the first entry in the list
 			#as the default value for the list editor
 			#(used by the KeyValFrame object):
@@ -1203,10 +1256,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			s_this_entry_justify="left" if type( v_param_default_value ) == str \
 					else "right"
 
-
 			b_attr_val_exists=hasattr( self, s_attr_name )
-
-					
+		
 			if b_attr_val_exists:
 				v_init_value_for_keyval_control=getattr( self, s_attr_name )
 			else:
@@ -1258,6 +1309,10 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			#end if control type is entry, else error
 
 			o_this_keyval.grid( row=i_row + ( i_param_position_in_order - 1 ), sticky=( NW ) )
+
+			#So we can access attributes/defs for this frame: 
+			self.__param_value_frames_by_attr_name[ s_attr_name ] = o_this_keyval
+
 		#end for each parameter
 
 		o_samplingparams_subframe.grid( row=ROW_NUM_SAMPLING_PARAMS_FRAME, 

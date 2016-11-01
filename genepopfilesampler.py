@@ -1429,7 +1429,8 @@ class GenepopFileSamplerIndividualsByRemoval( GenepopFileSampler ):
 		li_pop_numbers=self.sampleparams.population_numbers
 
 		for i_pop_number in li_pop_numbers:
-			i_tot_indiv=self.filemanager.getIndivCountForPop( i_pop_number ) 
+
+			i_tot_indiv=self.filemanager.getIndividualCount( i_pop_number ) 
 
 			for i_indiv in range( 1, i_tot_indiv + 1 ):
 
