@@ -33,7 +33,8 @@ def scrapeSlopes(fileName):
     lowerCIArray=[dict['lowerCI']for dict in slopeResults]
     upperCIArray = [dict['upperCI'] for dict in slopeResults]
     resultDict = {"slope":slopeArray,"intercept":interceptArray,"lowerCI":lowerCIArray,"upperCI":upperCIArray}
-    return resultDict
+    print resultDict
+    return slopeResults, resultDict
 
 def scrapeNE(filename, firstVal):
     fileBuffer = open(filename, "rb")
