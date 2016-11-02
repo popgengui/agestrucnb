@@ -168,8 +168,8 @@ def gatherPower(filename):
     return powerData
 
 def gatherSlopes(filename):
-    slopeData = ResultScraper.scrapeSlopes(filename)
-    return slopeData
+    instanceArray, arrayDict = ResultScraper.scrapeSlopes(filename)
+    return instanceArray
 
 
 
@@ -233,17 +233,24 @@ def collectStatsData(neDict, statsDict, outFolder,firstVal):
             for point in data:
                 neOut.write(str(identifier) + "," + str(datapoint) + "," + str(point[0]) + "," + str(point[1]) + "\n")
     neOut.close()
-    statsFile = statsDict[identifier]
+
+    #compile stats file
     slopePath = os.path.join(outFolder, slopesName)
     powerPath = os.path.join(outFolder, powerName)
     powerOut = open(powerPath, "w")
+    powerOut.write("parameters,Positive Slopes,Neutral Slopes, Negative Slopes, Total\n")
     slopeOut = open(slopePath, "w")
+    slopeOut.write("parameters,Slope,Intercept,CI Slope Min,CI Slope Max\n")
     for identifier in statsDict:
+        statsFile = statsDict[identifier]
         power = gatherPower(statsFile)
         slopes = gatherSlopes(statsFile)
-
-
-
+        sumPower = sum(power.values())
+        powerOut.write(str(identifier)+ "," +str(power["positive"])+ "," +str(power["neutral"])+ "," +str(power["negative"])+ "," +str(sumPower)+"\n")
+        for dataPoint in slopes:
+            slopeOut.write(str(identifier)+ "," +dataPoint["slope"]+ "," +dataPoint["intercept"]+ "," +dataPoint["lowerCI"]+ "," +dataPoint["upperCI"]+"\n")
+    powerOut.close()
+    slopeOut.close()
 
 
 

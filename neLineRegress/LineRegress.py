@@ -99,6 +99,8 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         plotData.append(ySet)
         # plotData = unzippedy
     plt.boxplot(plotData)
+    #set xAxis
+    plt.xticks(range(len(listX)), listX)
     if title:
         plt.title(title)
     if xlab:
