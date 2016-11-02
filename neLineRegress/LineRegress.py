@@ -83,9 +83,37 @@ def createGraph(lineArray, title = None, xlab = None, yLab= None, colorVctr = No
             plt.savefig(dest, bbox_inches='tight')
         plt.close()
         plt.clf()
+
+# method to create a scatterPlot of the outputNEs
+def createScatterPlot(table, title=None, xlab=None, yLab=None, dest="show"):
+    if dest =="none":
+        return
+    plt.figure("scatter")
+    flatData = [val for sublist in table for val in table[sublist]]
+
+    plotData = []
+
+    unzippedX, unzippedY = zip(*flatData)
+    plt.scatter(unzippedX, unzippedY)
+    if title:
+        plt.title(title)
+    if xlab:
+        plt.xlabel(xlab)
+    if yLab:
+        plt.ylabel(yLab)
+
+    if dest == "show":
+        plt.show("scatter")
+    else:
+        plt.savefig(dest, bbox_inches='tight')
+    plt.clf()
+    plt.close("scatter")
+
  #method to create a boxplot of the outputNEs
 def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
-
+    if dest == "none":
+        return
+    plt.figure("box")
     flatData = [val for sublist in table for val in table[sublist]]
 
     plotData = []
@@ -109,11 +137,11 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         plt.ylabel(yLab)
 
     if dest == "show":
-        plt.show()
+        plt.show("box")
     else:
         plt.savefig(dest, bbox_inches='tight')
-    plt.close()
     plt.clf()
+    plt.close("box")
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -321,6 +349,7 @@ def neConfigRead(filename):
     boxplotDest = "show"
     destType = "show"
     regressionDest = "show"
+    scatterDest = "show"
     xLims =None
     yLims = None
     autoFlag = False
@@ -344,9 +373,11 @@ def neConfigRead(filename):
             destType = "none"
             regressionDest = "none"
             boxplotDest = "none"
+            scatterDest = "none"
         if destType != "show" or "none":
             regressionDest = config.get("destination","regressionfile")
             boxplotDest = config.get("destination","boxplotfile")
+            scatterDest = config.get("destination","scatterfile")
     if config.has_section("comparison"):
         valueFlag = True
         setExpected = None
@@ -392,6 +423,7 @@ def neConfigRead(filename):
     configDict["expected"] = setExpected
     configDict["dest"] = regressionDest
     configDict["boxplot"] = boxplotDest
+    configDict["scatter"] = scatterDest
     configDict["xLims"] = xLims
     configDict["yLims"] = yLims
     configDict["alpha"] = alphaVal
@@ -410,11 +442,14 @@ def neGrapher(neFile, configFile):
         table , countsTable= neFileRead(neFile)
         neGraphMaker(table)
         createBoxPlot(table)
+        createScatterPlot(table)
         return True
     configs = neConfigRead(configFile)
     table,countsTable = neFileRead(neFile,configs["startData"])
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
     createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
+    createScatterPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
+
 
 #master function for creating a table of confidence intervals form neEstimation data
 #neFile: filepath of neEstimation output file
@@ -684,7 +719,7 @@ if __name__ == "__main__":
     configwrite.set("destination","desttype", "show")
     configwrite.set("destination","regressionfile", "test.pdf")
     configwrite.set("destination","boxplotfile", "box.pdf")
-
+    configwrite.set("destination","scatterfile", "show")
     configwrite.add_section("comparison")
     configwrite.set("comparison", "type", "pop")
     configwrite.set("comparison", "expectedSlope", -0.1)
