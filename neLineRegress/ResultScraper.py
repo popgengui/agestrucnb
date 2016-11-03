@@ -33,7 +33,8 @@ def scrapeSlopes(fileName):
     lowerCIArray=[dict['lowerCI']for dict in slopeResults]
     upperCIArray = [dict['upperCI'] for dict in slopeResults]
     resultDict = {"slope":slopeArray,"intercept":interceptArray,"lowerCI":lowerCIArray,"upperCI":upperCIArray}
-    return resultDict
+    print resultDict
+    return slopeResults, resultDict
 
 def scrapeNE(filename, firstVal):
     fileBuffer = open(filename, "rb")
@@ -75,12 +76,7 @@ def scrapeNE(filename, firstVal):
         individualCountTable[replicate] = individualCountVctr
     return resultTable, individualCountTable
 
-##### temp Ted added if statement
-#so that this mod can be imported 
-#without executing the calls inside:
-if __name__=="__main__":
-	file  = "neStatsOut.txt"
+file  = "neStatsOut.txt"
 
-	scrapePower(file)
-	scrapeSlopes(file)
-#end if main
+scrapePower(file)
+scrapeSlopes(file)
