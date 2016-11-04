@@ -640,9 +640,6 @@ class KeyValFrame( Frame ):
 		if self.__isenabled == False or self.__force_disable == True:
 			return
 		else:
-			##### temp
-			print( "calling __update_after_entry_change()" )
-			##### end temp
 			self.__update_after_entry_change()
 		#end
 		return

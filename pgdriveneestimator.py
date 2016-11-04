@@ -434,9 +434,6 @@ def get_genepop_file_list( s_genepop_files_arg ):
 
 	try:
 
-		##### temp
-		print ( "in get_genepop_file_list, type of arg: " + str( type( s_genepop_files_arg ) )  )
-		#####
 		ls_files=eval( s_genepop_files_arg )
 
 		if type( ls_files ) != list:
@@ -1400,7 +1397,6 @@ def get_subsample_genepop_file_name( s_original_genepop_file_name,
 	input file to the NeEstimator program, I belive, completely solves the
 	problems.
 	'''
-	##### temp
 	s_basename=os.path.basename( s_genepop_file_subsample )
 	s_dirs=os.path.dirname( s_genepop_file_subsample )
 	s_genepop_file_basename=s_basename.replace( ".", INPUT_FILE_DOT_CHAR_REPLACEMENT )
@@ -1412,7 +1408,6 @@ def get_subsample_genepop_file_name( s_original_genepop_file_name,
 
 	#s_genepop_file_subsample=s_genepop_file_subsample.replace( ".", INPUT_FILE_DOT_CHAR_REPLACEMENT )
 	
-	#####
 	'''
 	problem seen in Windows, in which when this mod is invoked as __main__ from a shell
 	then ".\\" is appended to (at least) one genepop file name.  This then is mangled by

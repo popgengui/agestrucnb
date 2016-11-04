@@ -59,6 +59,8 @@ class PGParamSet( object ):
 	IDX_PARAM_TAG=1
 	PARAM_FIELDS_TOTAL=2
 
+	TAG_FIELDS_TOTAL=14
+
 	'''
 	Below indices refer to the semicolon delimited
 	fields in the tag column. This zeroth index
@@ -154,6 +156,16 @@ class PGParamSet( object ):
 
 	COMMENT_CHAR="#"
 
+	'''
+	These constants will be accessed by
+	clients in order to have one placer
+	to find the kewords that give control
+	types:
+	'''
+	CONTROL_TYPE_ENTRY_BOX="entry"
+	CONTROL_TYPE_COMBO_BOX="cbox"
+	CONTROL_TYPE_BOOL_RADIO_BUTTONS="boolradio"
+
 	def __init__( self, s_file_with_param_names = None ):
 
 		'''
@@ -181,6 +193,7 @@ class PGParamSet( object ):
 			#end if comment
 
 			s_tag=None
+
 			ls_vals= s_line.strip().split( "\t" )
 
 			try:
@@ -188,6 +201,7 @@ class PGParamSet( object ):
 				s_shortname=ls_vals[ PGParamSet.IDX_PARAM_SHORTNAME ]
 
 				self.__set_parameter( s_shortname)
+
 				if len( ls_vals )>=PGParamSet.PARAM_FIELDS_TOTAL:
 					s_tag=ls_vals[ PGParamSet.IDX_PARAM_TAG ] if ls_vals[ PGParamSet.IDX_PARAM_TAG ] != "None" else None
 				#end if we have a 3rd string 
@@ -263,13 +277,13 @@ class PGParamSet( object ):
 		s_section_param_order_as_string=self.__get_tag_field( s_tag,
 									PGParamSet.IDX_TAG_FIELD_PARAM_ORDER )
 		return s_section_param_order_as_string
-	#end getSectionColNumFromTag
+	#end getParamOrderNumberFromTag
 
 	def getToolTipFromTag( self, s_tag ):
 		s_tool_tip=self.__get_tag_field( s_tag,
 						PGParamSet.IDX_TAG_FIELD_TOOL_TIP )
 		return s_section_param_order_as_string
-	#end getSectionColNumFromTag
+	#end getToolTipFromTag
 
 	def getParamTypeFromTag( self, s_tag ):
 		s_type_as_string=self.__get_tag_field( s_tag,
@@ -332,7 +346,7 @@ class PGParamSet( object ):
 		s_section_order_as_string=self.__get_tag_field( s_tag, 
 						PGParamSet.IDX_TAG_FIELD_CONFIG_SECTION_PLACEMENT_ORDER )
 		return s_section_order_as_string
-	#end getSectionOrderForParamTag
+	#end getSectionOrderForParam
 
 	def getParamOrderNumberForParam( self, s_name ):
 		s_tag=self.tag( s_name )
@@ -431,6 +445,7 @@ class PGParamSet( object ):
 
 		return s_val
 	#end tag
+
 	def __set_parameter( self, s_shortname, s_tag=None ):
 		
 		
@@ -452,6 +467,113 @@ class PGParamSet( object ):
 		self.__init_from_file( s_param_name_file )
 		return
 	#end initFromFile
+
+	def isInSet( self, s_param ):
+		b_returnval=False
+		if s_param in self.__tags_by_shortname:
+			b_returnval=True
+		#end if param is among the shortnames
+		return b_returnval
+	#emd property isInSet
+
+	def getAllParamSettings( self, s_param ):
+
+		s_param_longname=self.getLongnameForParam(  s_param )
+		s_param_interface_section=self.getConfigSectionNameForParam( s_param )
+		i_param_section_order_number=self.getSectionOrderForParam( s_param )
+		i_param_column_number=int( self.getSectionColNumForParam( s_param ) )
+		i_param_position_in_order=int( self.getParamOrderNumberForParam( s_param ) )
+		s_param_default_value=self.getDefaultValueForParam( s_param )
+		s_param_type=self.getParamTypeForParam( s_param )
+		s_param_min_val=self.getParamMinForParam( s_param )
+		s_param_max_val=self.getParamMaxForParam( s_param )
+		s_param_tooltip=self.getToolTipForParam( s_param )
+		s_param_control_type=self.getGUIControlForParam( s_param )
+		s_param_control_list=self.getControlListForParam( s_param )
+		s_param_validity_expression=self.getValidationForParam( s_param )
+		s_param_assoc_def=self.getAssocDefForParam( s_param )
+
+		v_param_default_value=None
+
+		#convert the value entries into proper types
+		dsv_param_vals_by_name={ "default":s_param_default_value, 
+											"min":s_param_min_val, 
+											"max":s_param_max_val }
+					
+		for s_param_value_name in dsv_param_vals_by_name:
+			try: 
+				s_string_form=dsv_param_vals_by_name[ s_param_value_name ] 
+				v_param_value=eval( s_string_form )
+				dsv_param_vals_by_name[ s_param_value_name ] = v_param_value
+
+			except Exception as oex:
+
+				s_msg="In PGParamSet instance, def "\
+						+ "getAllParamSettings, " \
+						+ "for param " + s_param_value_name \
+						+ " value, there was an error trying to eval " \
+						+ "the extracted string form of the  value, "  \
+						+ s_string_form + ".  Exception raised: " \
+						+ str( oex ) + "."
+
+				raise Exception( s_msg )
+			#end try . . . except . . .
+		#end for each param value (default, min, max)
+
+		#Types that are lists have a type name of form list<type>, so we
+		#can (in future, if needed), know that the value should be a list
+		#of items.  For now we just extract the python type of list items,
+		#so the KeyValFrame object can test for type:
+
+		b_param_is_list=s_param_type.startswith( "list" )
+
+		if b_param_is_list:
+			s_param_type=s_param_type.replace("list", "" )
+		#end if type is list, we extract the list item type
+		o_param_type=None
+
+		try:
+			o_param_type=eval( s_param_type )
+		except Exception as oex:
+			s_msg="In PGGuiNeEstimator instance, def " \
+					+ "__get_param_settings," \
+					+ "trying to extract the param type " \
+					+ "for param " + s_param \
+					+ ", unable to eval " \
+					+ s_param_type \
+					+ " as a python type.  " \
+					+ "Exception raised: " \
+					+ str( oex ) + "."
+			raise Exception( oex )
+		#end try . . . except
+
+		qv_return_values = ( s_param_longname,
+						s_param_interface_section,
+						i_param_section_order_number,
+						i_param_column_number,
+						i_param_position_in_order,
+						dsv_param_vals_by_name[ "default" ],
+						o_param_type,
+						dsv_param_vals_by_name[ "min" ],
+						dsv_param_vals_by_name[ "max" ],
+						s_param_tooltip,
+						s_param_control_type,
+						s_param_control_list,
+						s_param_validity_expression,
+						s_param_assoc_def )
+		
+		if len( qv_return_values ) != PGParamSet.TAG_FIELDS_TOTAL:
+			s_msg = "In PGParamSet instance, def getAllParamSettings, " \
+						+ "number of values to be returned, " \
+						+ str( len( qv_return_values ) ) + \
+						+" does not equal the expected total tag fields: " \
+						+ str( PGParamSet.TAG_FIELDS_TOTAL ) + "."
+			raise Exception( s_msg ) 
+		#end if not correct number of values to return
+
+		return qv_return_values
+	#end getAllParamSettings
+
 
 	@property
 	def param_names_file( self ):

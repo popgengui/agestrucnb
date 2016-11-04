@@ -9,7 +9,7 @@ __filename__ = "pgguineestimator.py"
 __date__ = "20160805"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-VERBOSE=True
+VERBOSE=False
 VERY_VERBOSE=False
 
 ESTIMATION_RUNNING_MSG="Estimation in progress"

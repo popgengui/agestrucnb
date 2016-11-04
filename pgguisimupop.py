@@ -27,6 +27,7 @@ import pgparamset as pgps
 import pgoutputsimupop as pgout
 
 from pgguiutilities import KeyValFrame
+from pgguiutilities import KeyListComboFrame
 from pgguiutilities import KeyCategoricalValueFrame
 from pgguiutilities import PGGUIInfoMessage
 from pgguiutilities import PGGUIYesNoMessage
@@ -445,10 +446,26 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		LENSMALL=20
 
 		LABEL_WIDTH = [ WIDTHSMALL if i<LENSMALL else WIDTHBIG for i in range( MAXLABELLEN ) ] 
-		
-		#for parameters with this tag, we set enabled 
+		PARAMETERS_CBOX_WIDTH=15
+
+		'''
+		When we look for config file attributes
+		in the PGInputSimuPop member, that are o
+		settable input parameters, we want
+		to ignore constants, declared
+		in the object with this prefix
+		'''
+		PREFIX_FOR_INPUT_CONSTANTS="CONST_"
+
+		#for parameters in this section, we set enabled 
 		#flag to false for the KeyValFrame entry box:
-		CONFIG_INFO_TAG_KEYWORD="Configuration Info"
+		CONFIG_INFO_SECTION_NAME="Configuration Info"
+
+		#For params (if any) not in the input
+		#objects paramset instance (from the
+		#file simupop.param.names)
+		DEFAULT_CONTROL_TYPE=pgps.PGParamSet.CONTROL_TYPE_ENTRY_BOX
+
 
 		self.__param_key_value_frames={}
 
@@ -456,7 +473,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		o_input=self.__input
 		
-		ls_input_params=[ s_param for s_param in dir( o_input ) if not( s_param.startswith( "_" ) )  ]
+		ls_input_params=[ s_param for s_param in dir( o_input ) if not( s_param.startswith( "_" ) ) \
+											and not( s_param.startswith( PREFIX_FOR_INPUT_CONSTANTS ) )  ]
 
 		ls_tags=o_input.param_names.tags
 
@@ -476,12 +494,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			PADPIX=0
 
 			i_row+=1
-			s_longname=None
-			s_nametag=None
-			s_tooltip=""
-			i_len_labelname=None
 
-			o_def_to_run_on_value_change=None
+			i_len_labelname=None
 
 			if VERBOSE == True:
 				o_def_to_run_on_value_change=self.__test_value
@@ -501,78 +515,74 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#end if method, skip
 			#end if the value is a string
 
-			if o_input.param_names is not None:
+			if o_input.param_names is None:
+				s_msg=" In PGOpSimuPop, " \
+						+ "def __load_values_into_interface, " \
+						+ "member __input has missing PGParamset " \
+						+ "instance."
+				raise Exception( s_msg )
+			#end of no param_set object
 
-				#returns None if this param has no longname,
-				#and the KeyValFrame will ignore s_label_name if
-				#its value is None, using instead the param name 
-				#as given by s_param
-				s_longname=o_input.param_names.getLongnameForParam( s_param )
-				s_nametag=o_input.param_names.tag( s_param )
-				s_tooltip=o_input.param_names.getToolTipForParam( s_param )
-				s_section_name= \
-						o_input.param_names.getConfigSectionNameFromTag( s_nametag )
-				s_param_type=o_input.param_names.getParamTypeForParam( s_param )
-				#Param set files use "list<type>" when the parameter is a list
-				#of python types <type>, so to convert to list item type, 
-				#(needed by the KeyValFrame object) we strip off the "list"
-				s_param_type=s_param_type.replace( "list", "" )
-
-				try:
-					o_param_type=eval( s_param_type )
-				except Exception as oex:
-					s_msg="In PGGuiSimuPop instance, " \
-							+ "def __load_param_interface, " \
-							+ "unable to eval param type for " \
-							+ "param, " + s_param + ".  " \
-							+ "Type as given by params file: " \
-							+ s_param_type + ".  " \
-							+ "Exception raised: " + str( oex ) +"."
+			if not( o_input.param_names.isInSet( s_param ) ):
+					s_msg=" In PGOpSimuPop, " \
+						+ "def __load_values_into_interface, " \
+						+ "member __input members PGParamset " \
+						+ "instance has no param, " + s_param + "."
 					raise Exception( s_msg )
-				#end try . . . except . . .
+			#end if param not in param_names objectd
 
-				s_default_value=o_input.param_names.getDefaultValueForParam( s_param )
-				v_default_value=None
-				try:
-					v_default_value=eval( s_default_value )
-				except Exception as oex:
-					s_msg="In PGGuiSimuPop instance, " \
-							+ "def __load_param_interface, " \
-							+ "unable to eval default value for " \
-							+ "param, " + s_param + ".  " \
-							+ "Default value as given by params file: " \
-							+ s_default_value + ".  " \
-							+ "Exception raised: " + str( oex ) + "."
-					raise Exception( s_msg )
-				#end try . . . except . . .
-			#end if we have a set of param names
+			b_param_is_in_param_set=True
+			
+			'''
+			This call requires we get all
+			the values from the param tag,
+			but we'll only use the ones we
+			need (see below):
+			'''
 
-			s_associated_def=o_input.param_names.getAssocDefForParam( s_param )
+			( s_longname,
+				s_section_name,
+				i_param_section_order_number,
+				i_param_column_number,
+				i_param_position_in_order,
+				v_default_value,
+				o_param_type,
+				v_min_value,
+				v_max_value,
+				s_tooltip,
+				s_param_control_type,
+				s_param_control_list,
+				s_param_validity_expression,
+				s_param_assoc_def ) = \
+						o_input.param_names.getAllParamSettings( s_param )
+				#end if param is in paramset
+
 
 			#if no specific def is to be called on value change
 			#then we default to the def that shows current param vals:
 			def_to_call_on_change=self.__test_value
 
-			if s_associated_def != "None":
+			if s_param_assoc_def != "None":
 				try:
-					def_to_call_on_change=getattr( self, s_associated_def )
+					
+					def_to_call_on_change=getattr( self, s_param_assoc_def )
+
 				except:
 					s_msg="In PGGuiSimuPop instance, def __load_values_into_interface, " \
 								+ "for param, " + s_param \
 								+ ", unable to find input def for param's associated def string: " \
-								+ s_associated_def + "."
+								+ s_param_assoc_def + "."
 					raise Exception( s_msg )
 			#end if s_associated_def not None
 
 
-			#if not in the param names file, we don't want to suppress it,
 			#If it is in the param names we don't suppress as long as the
 			#param is not tagged as "suppress"
-			if s_nametag is None or s_section_name != "suppress":
+			if s_section_name != "suppress":
 
 				o_frame_for_this_param=None
 
-				if s_nametag is None or s_section_name not in self.__category_frames:
+				if s_section_name not in self.__category_frames:
 					o_frame_for_this_param=self.__category_frames[ "none" ]
 				else:
 					o_frame_for_this_param=self.__category_frames[ s_section_name ]
@@ -583,11 +593,9 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 				b_allow_entry_change = True
 
-				if s_nametag is not None:
-					if CONFIG_INFO_TAG_KEYWORD in s_nametag:
-						b_allow_entry_change=False
-					#end if input param is type config info, disable
-				#end if nametag exists
+				if s_section_name == CONFIG_INFO_SECTION_NAME:
+					b_allow_entry_change=False
+				#end if input param is type config info, disable
 
 				s_attribute_to_update=s_param
 
@@ -595,15 +603,16 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					if o_input.N0IsCalculatedFromEffectiveSizeInfo():
 						b_allow_entry_change=False
 						s_attribute_to_update=None	
-					#end if we're
+					#end if we're calculating N0
 				#end if param is "N0"
 
-				#we send in the input object to the KeyValFrame (or KeyCategoricalValueFrame 
+				#we send in the input object to the KeyValFrame (or similar class)
 				#instance so it will be the object whose attribute (with name s_param)
 				#is reset when user resets the value in the KeyValFrame:
-				if type( v_val ) != bool:
+				if s_param_control_type == pgps.PGParamSet.CONTROL_TYPE_ENTRY_BOX:
 
 					i_entry_width=len(v_val) if type( v_val ) == str else 7
+
 					s_entry_justify='left' if type( v_val ) == str else 'right' 
 
 					o_kv=KeyValFrame( s_name=s_param, 
@@ -622,7 +631,41 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 								b_force_disable=b_force_disable,
 								s_tooltip=s_tooltip )
 						
-				else:
+				elif s_param_control_type == pgps.PGParamSet.CONTROL_TYPE_COMBO_BOX:
+
+					qs_control_list=eval( s_param_control_list )
+
+					i_current_item_number=None
+
+					if v_val not in qs_control_list:
+						s_msg="Current value for parameter " \
+							 	+ s_param + " is not found " \
+								+ "among the values listed as valid: " \
+								+ str( qs_control_list ) + ""
+						raise Exception( s_msg )
+					else:
+						#KeyListComboFrame init expects 1-based value, so
+						#we increment the python, zero-based index
+						i_current_item_number=qs_control_list.index( v_val )
+						i_current_item_number +=1
+					#end if v_val not in value list
+
+					o_kv=KeyListComboFrame( s_name=s_param,
+								qs_choices=qs_control_list,
+								i_default_choice_number=i_current_item_number,
+								o_master=o_frame_for_this_param,
+								s_associated_attribute=s_attribute_to_update,
+								o_associated_attribute_object=self.__input,
+								def_on_new_selection=def_to_call_on_change,
+								i_labelwidth=i_width_labelname,
+								i_cbox_width=PARAMETERS_CBOX_WIDTH,
+								s_label_justify='left',
+								s_label_name=s_longname,
+								s_tooltip=s_tooltip,
+								b_is_enabled=True,
+								b_force_disable=b_force_disable )
+
+				elif s_param_control_type == pgps.PGParamSet.CONTROL_TYPE_BOOL_RADIO_BUTTONS:
 
 					#we construct a KeyCategoricalValueFrame
 					#instance, and set the default button to
@@ -648,22 +691,43 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							b_force_disable=b_force_disable,
 							s_tooltip=s_tooltip )
 
+				else:
+					s_msg="In PGGuiSimuPop instance, def " \
+							+ "__load_values_into_interface, " \
+							+ "unknown control type spcified: " \
+							+ s_param_control_type + "."
+					raise Exception( s_msg )
+
+				#end if control type entry, else combobox, else bool radio button, else unknown
+
 				o_kv.grid( row=i_row, sticky=(NW) )
+				self.__param_key_value_frames[ s_param ] = o_kv
 
-			#end if param has non-boolean value else boolean
-
-			self.__param_key_value_frames[ s_param ] = o_kv
+			#end if section name not "suppress"
 		#end for each input param
 
 		self.__place_category_frames( self.__category_frames )
-
-		#end for each param
-
 		self.grid_columnconfigure( 0, weight=1 )
 		self.grid_rowconfigure( 0, weight=1 )
 
 		return
 	#end __load_values_into_interface
+
+	def onCullMethodSelectionChange( self ):
+		'''
+		Not implemented, 2016_11_01.  May
+		not need to add any code here, since
+		KeyListComboFrame control object resets
+		the attribute in the input object
+		automatically.
+		'''
+
+		if VERY_VERBOSE:
+			self.__test_value()
+		#end if very verbose
+
+		return
+	#end __on_cull_method_selection_change
 
 	def load_config_file( self, event=None ):
 		s_current_value=self.__config_file.get()

@@ -25,6 +25,12 @@ class PGInputSimuPop( object ):
 	defs in this input object, in order to, for example, show or allow
 	changes in parameter values for users before they run the simulation.
 	'''
+	
+	#Add prefix "CONST" so pgguisimupop instances
+	#can ignore these as non-parameterized attributes
+	CONST_CULL_METHOD_SURVIVIAL_RATES="survival_rates"
+	CONST_CULL_METHOD_EQUAL_SEX_RATIOS="equal_sex_ratio"
+
 	def __init__( self, s_config_file = None, o_model_resources = None, o_param_names=None ):
 		'''
 		param s_config_file, parseable by ConfigParser, params for 
@@ -178,6 +184,8 @@ class PGInputSimuPop( object ):
 
 
 	def __get_config( self ):
+
+		DEFAULT_CULL_METHOD="survival_rates"
 
 		config=self.__config_parser
 
@@ -375,6 +383,17 @@ class PGInputSimuPop( object ):
 		#end if we compute N0, else use given 	
 
 		self.__update_attribute_config_file_info( "N0", "pop", "N0" )
+
+
+
+		if config.has_option("sim", "cull_method"):
+			self.cull_method = config.get("sim", "cull_method")
+		else:
+			self.cull_method = DEFAULT_CULL_METHOD
+		#end if config has startSave
+		self.__update_attribute_config_file_info( "cull_method", "sim", "cull_method" )
+
+
 		return
 	#end __get_config
 

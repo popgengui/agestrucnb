@@ -52,7 +52,6 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS="numMSats"
 	INPUT_ATTRIBUTE_NUMBER_OF_SNPS="numSNPs"
-
 	DELIMITER_INDIV_ID=";"
 
 	def __init__(self, o_input, o_output, b_compress_output=True, 
@@ -1089,8 +1088,26 @@ class PGOpSimuPop( modop.APGOperation ):
 					sp.CloneMating(subPops=mySubPops, weight=-1)],
 					subPopSize=self.__calcDemo )
 
-		agePostOps = [ sp.PyOperator(func=self.__outputMega), 
-					sp.PyOperator(func=self.__equalSexCull) ]
+		#Code added 2016_11_01, with new input value "cull_method", we
+		#choose our culling def ref accordingly
+		def_for_culling=None
+
+		if self.input.cull_method == pgin.PGInputSimuPop.CONST_CULL_METHOD_SURVIVIAL_RATES:
+			def_for_culling=self.__cull
+		elif self.input.cull_method == pgin.PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS:
+			def_for_culling=self.__equalSexCull
+		else:
+			s_msg="In PGOpSimuPop instance, def __createAge, " \
+						+ "input object's value for cull_method " \
+						+ "is unknown: " + self.input.cull_method \
+						+ "."
+			raise Exception( s_msg )
+		#end if cull method survival rates, equal sex,  else unkown
+
+		#Code revised 2016_11_01 to use the above def_for_culling
+		#reference, to assign user-input method:
+		agePostOps = [ sp.PyOperator( func=self.__outputMega ), 
+					sp.PyOperator( func=def_for_culling ) ]
 
 		pop.setVirtualSplitter(sp.InfoSplitter(field='age',
 			   cutoff=range(1, self.input.ages)))
