@@ -670,8 +670,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						v_default_value="",
 						o_master=o_run_sub_subframe,
 						o_associated_attribute_object=self,
-						s_associated_attribute="_PGGuiNeEstimator__" \
-									+ "__processes",
+						s_associated_attribute="_PGGuiNeEstimator__processes", 
 						s_entry_justify='left',
 						s_label_justify='left',
 						s_button_text="Select",
