@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['keycategoricalvalueframe',['KeyCategoricalValueFrame',['../classnegui_1_1pgguiutilities_1_1KeyCategoricalValueFrame.html',1,'negui::pgguiutilities']]],
-  ['keylistcomboframe',['KeyListComboFrame',['../classnegui_1_1pgguiutilities_1_1KeyListComboFrame.html',1,'negui::pgguiutilities']]],
-  ['keyvalframe',['KeyValFrame',['../classnegui_1_1pgguiutilities_1_1KeyValFrame.html',1,'negui::pgguiutilities']]]
+  ['independantprocessgroup',['IndependantProcessGroup',['../classnegui_1_1pgutilityclasses_1_1IndependantProcessGroup.html',1,'negui::pgutilityclasses']]],
+  ['independantsubprocessgroup',['IndependantSubprocessGroup',['../classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup.html',1,'negui::pgutilityclasses']]],
+  ['indiv_5fsubsample_5ftags',['indiv_subsample_tags',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#ae77bd8c465db4d95839db838c236f4cd',1,'negui::genepopfilemanager::GenepopFileManager']]]
 ];

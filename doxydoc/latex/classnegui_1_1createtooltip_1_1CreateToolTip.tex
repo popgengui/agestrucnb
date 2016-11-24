@@ -9,17 +9,17 @@ Inheritance diagram for negui.\+createtooltip.\+Create\+Tool\+Tip\+:\begin{figur
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, widget, text=\textquotesingle{}widget info\textquotesingle{}, i\+\_\+font\+\_\+size=10)\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_aec360f7f4bfc95876b04ad68a7c54140}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_aec360f7f4bfc95876b04ad68a7c54140}
-
+def \hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_aec360f7f4bfc95876b04ad68a7c54140}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, widget, text=\textquotesingle{}widget info\textquotesingle{}, i\+\_\+font\+\_\+size=10)
 \item 
-def {\bfseries enter} (self, event=None)\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_ab37624e73833e8ba485d10410c5986bb}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_ab37624e73833e8ba485d10410c5986bb}
-
+def \hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_ab37624e73833e8ba485d10410c5986bb}{enter} (self, event=None)
 \item 
-def {\bfseries close} (self, event=None)\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_aa6f6887d11b3e07e5f6e12b267412fae}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_aa6f6887d11b3e07e5f6e12b267412fae}
-
+def \hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_aa6f6887d11b3e07e5f6e12b267412fae}{close} (self, event=None)
 \end{DoxyCompactItemize}
 \subsection*{Public Attributes}
 \begin{DoxyCompactItemize}
+\item 
+{\bfseries tw}\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}
+
 \item 
 {\bfseries widget}\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_a6619448e568b135261fd02a6d9b36725}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_a6619448e568b135261fd02a6d9b36725}
 
@@ -28,9 +28,6 @@ def {\bfseries close} (self, event=None)\hypertarget{classnegui_1_1createtooltip
 
 \item 
 {\bfseries font\+\_\+size}\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_a42f2306cb6ad9995d76e0eb556416bed}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_a42f2306cb6ad9995d76e0eb556416bed}
-
-\item 
-{\bfseries tw}\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}
 
 \end{DoxyCompactItemize}
 
@@ -44,8 +41,160 @@ gives a Tkinter widget a tooltip as the mouse is above the widget
 tested with Python27 and Python34  by  vegaseat  09sep2014\end{DoxyVerb}
  
 
-Definition at line 41 of file createtooltip.\+py.
+Definition at line 38 of file createtooltip.\+py.
 
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{negui\+::createtooltip\+::\+Create\+Tool\+Tip@{negui\+::createtooltip\+::\+Create\+Tool\+Tip}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!negui\+::createtooltip\+::\+Create\+Tool\+Tip@{negui\+::createtooltip\+::\+Create\+Tool\+Tip}}
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, widget, text=\textquotesingle{}widget info\textquotesingle{}, i\+\_\+font\+\_\+size=10)}{__init__(self, widget, text='widget info', i_font_size=10)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+createtooltip.\+Create\+Tool\+Tip.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{widget, }
+\item[{}]{text = {\ttfamily \textquotesingle{}widget~info\textquotesingle{}}, }
+\item[{}]{i\+\_\+font\+\_\+size = {\ttfamily 10}}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_aec360f7f4bfc95876b04ad68a7c54140}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_aec360f7f4bfc95876b04ad68a7c54140}
+\begin{DoxyVerb}Ted added, in case close gets called before enter,
+we'll have tw inditialzed to None.
+\end{DoxyVerb}
+ 
+
+Definition at line 48 of file createtooltip.\+py.
+
+
+\begin{DoxyCode}
+48     \textcolor{keyword}{def }\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_aec360f7f4bfc95876b04ad68a7c54140}{\_\_init\_\_}(self, widget, text='widget info', i\_font\_size=10 ):
+49         \textcolor{stringliteral}{'''}
+50 \textcolor{stringliteral}{        Ted added, in case close gets called before enter,}
+51 \textcolor{stringliteral}{        we'll have tw inditialzed to None.}
+52 \textcolor{stringliteral}{        '''}
+53         self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}{tw}=\textcolor{keywordtype}{None}
+54         self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_a6619448e568b135261fd02a6d9b36725}{widget} = widget
+55         self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_a198b3395803def62ec55ed820e756b11}{text} = text
+56         self.widget.bind(\textcolor{stringliteral}{"<Enter>"}, self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_ab37624e73833e8ba485d10410c5986bb}{enter})
+57         self.widget.bind(\textcolor{stringliteral}{"<Leave>"}, self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_aa6f6887d11b3e07e5f6e12b267412fae}{close})
+58         \textcolor{stringliteral}{'''}
+59 \textcolor{stringliteral}{        Trying to fix bug in which tooltop persists}
+60 \textcolor{stringliteral}{        permanently.}
+61 \textcolor{stringliteral}{        '''}
+62         self.widget.bind( \textcolor{stringliteral}{"<FocusOut>"}, self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_aa6f6887d11b3e07e5f6e12b267412fae}{close})
+63         self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_a42f2306cb6ad9995d76e0eb556416bed}{font\_size}=i\_font\_size
+\end{DoxyCode}
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::createtooltip\+::\+Create\+Tool\+Tip@{negui\+::createtooltip\+::\+Create\+Tool\+Tip}!close@{close}}
+\index{close@{close}!negui\+::createtooltip\+::\+Create\+Tool\+Tip@{negui\+::createtooltip\+::\+Create\+Tool\+Tip}}
+\subsubsection[{\texorpdfstring{close(self, event=\+None)}{close(self, event=None)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+createtooltip.\+Create\+Tool\+Tip.\+close (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{event = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_aa6f6887d11b3e07e5f6e12b267412fae}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_aa6f6887d11b3e07e5f6e12b267412fae}
+\begin{DoxyVerb}Code testing and assigning tw for/to None,
+added 2016_10_31 to more consistently manage 
+the tw member.  See the def "enter",
+for more details on some buggy
+behavior.
+\end{DoxyVerb}
+ 
+
+Definition at line 110 of file createtooltip.\+py.
+
+
+\begin{DoxyCode}
+110     \textcolor{keyword}{def }\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_aa6f6887d11b3e07e5f6e12b267412fae}{close}(self, event=None):
+111         \textcolor{stringliteral}{'''}
+112 \textcolor{stringliteral}{        Code testing and assigning tw for/to None,}
+113 \textcolor{stringliteral}{        added 2016\_10\_31 to more consistently manage }
+114 \textcolor{stringliteral}{        the tw member.  See the def "enter",}
+115 \textcolor{stringliteral}{        for more details on some buggy}
+116 \textcolor{stringliteral}{        behavior.}
+117 \textcolor{stringliteral}{        '''}
+118         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}{tw} \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+119             self.tw.destroy()
+120         \textcolor{comment}{#end if}
+121 
+122         \textcolor{stringliteral}{'''}
+123 \textcolor{stringliteral}{        Consistent value for tw after call}
+124 \textcolor{stringliteral}{        to close, no matter its previous one:}
+125 \textcolor{stringliteral}{        '''}
+126         self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}{tw} = \textcolor{keywordtype}{None}
+\end{DoxyCode}
+\index{negui\+::createtooltip\+::\+Create\+Tool\+Tip@{negui\+::createtooltip\+::\+Create\+Tool\+Tip}!enter@{enter}}
+\index{enter@{enter}!negui\+::createtooltip\+::\+Create\+Tool\+Tip@{negui\+::createtooltip\+::\+Create\+Tool\+Tip}}
+\subsubsection[{\texorpdfstring{enter(self, event=\+None)}{enter(self, event=None)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+createtooltip.\+Create\+Tool\+Tip.\+enter (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{event = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1createtooltip_1_1CreateToolTip_ab37624e73833e8ba485d10410c5986bb}{}\label{classnegui_1_1createtooltip_1_1CreateToolTip_ab37624e73833e8ba485d10410c5986bb}
+\begin{DoxyVerb}Code added 2016_10_31, setting the tw member 
+to None in __init__ (see above), then always 
+testing it before recreating it, seems to have
+resolved a bug, seemingly only associated with
+comboboxes and very rarely with text boxes,
+via my KeyVal objects, in which the tooltip
+window was created but never closed.  This
+was reliably invoked by using the keyboard
+to update a combobox, while the mouse was still
+over the control. On th ekeyboard selection, the
+tooltip windows would appear and persist, while
+new ones would appear over it.  This management
+and testing of the tw member seems to have solved
+it.
+\end{DoxyVerb}
+ 
+
+Definition at line 66 of file createtooltip.\+py.
+
+
+\begin{DoxyCode}
+66     \textcolor{keyword}{def }\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_ab37624e73833e8ba485d10410c5986bb}{enter}(self, event=None):
+67 
+68         \textcolor{stringliteral}{'''}
+69 \textcolor{stringliteral}{        Code added 2016\_10\_31, setting the tw member }
+70 \textcolor{stringliteral}{        to None in \_\_init\_\_ (see above), then always }
+71 \textcolor{stringliteral}{        testing it before recreating it, seems to have}
+72 \textcolor{stringliteral}{        resolved a bug, seemingly only associated with}
+73 \textcolor{stringliteral}{        comboboxes and very rarely with text boxes,}
+74 \textcolor{stringliteral}{        via my KeyVal objects, in which the tooltip}
+75 \textcolor{stringliteral}{        window was created but never closed.  This}
+76 \textcolor{stringliteral}{        was reliably invoked by using the keyboard}
+77 \textcolor{stringliteral}{        to update a combobox, while the mouse was still}
+78 \textcolor{stringliteral}{        over the control. On th ekeyboard selection, the}
+79 \textcolor{stringliteral}{        tooltip windows would appear and persist, while}
+80 \textcolor{stringliteral}{        new ones would appear over it.  This management}
+81 \textcolor{stringliteral}{        and testing of the tw member seems to have solved}
+82 \textcolor{stringliteral}{        it.}
+83 \textcolor{stringliteral}{        '''}
+84         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}{tw} \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
+85             \textcolor{stringliteral}{'''}
+86 \textcolor{stringliteral}{            I added 2016\_10\_31}
+87 \textcolor{stringliteral}{            constants used below,}
+88 \textcolor{stringliteral}{            instead of literals,}
+89 \textcolor{stringliteral}{            '''} 
+90             PADX=25
+91             PADY=20
+92 
+93             x = y = 0
+94             x, y, cx, cy = self.widget.bbox(\textcolor{stringliteral}{"insert"})
+95             x += self.widget.winfo\_rootx() + PADX
+96             y += self.widget.winfo\_rooty() + PADY
+97             \textcolor{comment}{# creates a toplevel window}
+98             self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}{tw} = tk.Toplevel(self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_a6619448e568b135261fd02a6d9b36725}{widget})
+99             \textcolor{comment}{# Leaves only the label and removes the app window}
+100             self.tw.wm\_overrideredirect(\textcolor{keyword}{True})
+101             self.tw.wm\_geometry(\textcolor{stringliteral}{"+%d+%d"} % (x, y))
+102             label = tk.Label(self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_ac47a0f82a5a354f6c8914c4631d1a0cf}{tw}, text=self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_a198b3395803def62ec55ed820e756b11}{text}, justify=\textcolor{stringliteral}{'left'},
+103                            background=\textcolor{stringliteral}{'yellow'}, relief=\textcolor{stringliteral}{'solid'}, borderwidth=1,
+104                            font=(\textcolor{stringliteral}{"times"}, self.\hyperlink{classnegui_1_1createtooltip_1_1CreateToolTip_a42f2306cb6ad9995d76e0eb556416bed}{font\_size}, \textcolor{stringliteral}{"normal"}))
+105             label.pack(ipadx=1)
+106         \textcolor{comment}{#end if self.tw is  None}
+107 
+\end{DoxyCode}
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}

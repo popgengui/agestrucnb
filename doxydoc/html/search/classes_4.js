@@ -20,6 +20,7 @@ var searchData=
   ['genepopfilesamplerindividualsbyproportion',['GenepopFileSamplerIndividualsByProportion',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByProportion.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesamplerindividualsbyremoval',['GenepopFileSamplerIndividualsByRemoval',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByRemoval.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesamplerlocibyrangeandpercentage',['GenepopFileSamplerLociByRangeAndPercentage',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerLociByRangeAndPercentage.html',1,'negui::genepopfilesampler']]],
+  ['genepopfilesamplerlocibyrangeandsampletotallist',['GenepopFileSamplerLociByRangeAndSampleTotalList',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerLociByRangeAndSampleTotalList.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesamplerlocibyrangeandtotal',['GenepopFileSamplerLociByRangeAndTotal',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerLociByRangeAndTotal.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesamplernone',['GenepopFileSamplerNone',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerNone.html',1,'negui::genepopfilesampler']]],
   ['genepopindivcriteria',['GenepopIndivCriteria',['../classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria.html',1,'negui::genepopindividualid']]],

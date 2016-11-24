@@ -92,52 +92,52 @@ for replicate runs of the simulation, and thus
 reduce the number of output files. \end{DoxyVerb}
  
 
-Definition at line 60 of file pgopsimupop.\+py.
+Definition at line 59 of file pgopsimupop.\+py.
 
 
 \begin{DoxyCode}
-60                                     b\_write\_input\_as\_config\_file=\textcolor{keyword}{True}):  
-61         \textcolor{stringliteral}{'''}
-62 \textcolor{stringliteral}{            o\_input, a PGInputSimuPop object}
-63 \textcolor{stringliteral}{            o\_output, a PGOutputSimuPop object}
-64 \textcolor{stringliteral}{            b\_compress\_output, if set to True}
-65 \textcolor{stringliteral}{                will compress outputfiles using bz2}
-66 \textcolor{stringliteral}{            b\_remove\_db\_gen\_sim\_files, if set to True,}
-67 \textcolor{stringliteral}{                will remove the output files with the}
-68 \textcolor{stringliteral}{                indicated extensions.  This was added}
-69 \textcolor{stringliteral}{                after some testing and noting that}
-70 \textcolor{stringliteral}{                users most interested in using the genepop}
-71 \textcolor{stringliteral}{                file output suffered from the many additional}
-72 \textcolor{stringliteral}{                output files when trying to load genepop files}
-73 \textcolor{stringliteral}{                for ne-estimation}
-74 \textcolor{stringliteral}{            b\_write\_input\_as\_config\_file, if set to false, will }
-75 \textcolor{stringliteral}{                skip the step in doOp that writes the current params}
-76 \textcolor{stringliteral}{                to config file, via the input objects attributes }
-77 \textcolor{stringliteral}{                and defs. As for the above flag, this was added}
-78 \textcolor{stringliteral}{                to prevent writing identical configuration files}
-79 \textcolor{stringliteral}{                for replicate runs of the simulation, and thus}
-80 \textcolor{stringliteral}{                reduce the number of output files. }
-81 \textcolor{stringliteral}{}
-82 \textcolor{stringliteral}{        '''}
-83 
-84         super( PGOpSimuPop, self ).\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a6548b8996f7ace76266e629d9ff8c11e}{\_\_init\_\_}( o\_input, o\_output )
-85 
-86         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a1061b53dea80371a6414760b43b2cd1e}{\_\_lSizes} = [0, 0, 0, 0, 0, 0]
-87         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a1224d81cfdf1400b2f12970074c81817}{\_\_reportOps} = [ sp.Stat(popSize=\textcolor{keyword}{True}) ]
-88         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_ac10f21f990f51e85c7fab2b5aa888edd}{\_\_is\_prepared}=\textcolor{keyword}{False}
-89         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_acccf36393e66057c8026cba0557d3fb8}{\_\_compress\_output}=b\_compress\_output
-90         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a5a64b272404e6113dd1c7ba70235c366}{\_\_remove\_db\_gen\_sim\_files}=b\_remove\_db\_gen\_sim\_files
-91         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a9a27655cf00df0e11603e221c314c0a9}{\_\_write\_input\_as\_config\_file}=b\_write\_input\_as\_config\_file
-92 
-93         \textcolor{comment}{#if this object is created in one of multiple}
-94         \textcolor{comment}{#python so-called "Processes" objects from class}
-95         \textcolor{comment}{#"multiprocessing", all pops in their separate "process"}
-96         \textcolor{comment}{#will have identical individuals (same number/genotypes) }
-97         \textcolor{comment}{#unless we reseed the numpy random number generator }
-98         \textcolor{comment}{#for each "process:"}
-99         numpy.random.seed()
-100         
-101         \textcolor{keywordflow}{return}
+59                                     b\_write\_input\_as\_config\_file=\textcolor{keyword}{True}):  
+60         \textcolor{stringliteral}{'''}
+61 \textcolor{stringliteral}{            o\_input, a PGInputSimuPop object}
+62 \textcolor{stringliteral}{            o\_output, a PGOutputSimuPop object}
+63 \textcolor{stringliteral}{            b\_compress\_output, if set to True}
+64 \textcolor{stringliteral}{                will compress outputfiles using bz2}
+65 \textcolor{stringliteral}{            b\_remove\_db\_gen\_sim\_files, if set to True,}
+66 \textcolor{stringliteral}{                will remove the output files with the}
+67 \textcolor{stringliteral}{                indicated extensions.  This was added}
+68 \textcolor{stringliteral}{                after some testing and noting that}
+69 \textcolor{stringliteral}{                users most interested in using the genepop}
+70 \textcolor{stringliteral}{                file output suffered from the many additional}
+71 \textcolor{stringliteral}{                output files when trying to load genepop files}
+72 \textcolor{stringliteral}{                for ne-estimation}
+73 \textcolor{stringliteral}{            b\_write\_input\_as\_config\_file, if set to false, will }
+74 \textcolor{stringliteral}{                skip the step in doOp that writes the current params}
+75 \textcolor{stringliteral}{                to config file, via the input objects attributes }
+76 \textcolor{stringliteral}{                and defs. As for the above flag, this was added}
+77 \textcolor{stringliteral}{                to prevent writing identical configuration files}
+78 \textcolor{stringliteral}{                for replicate runs of the simulation, and thus}
+79 \textcolor{stringliteral}{                reduce the number of output files. }
+80 \textcolor{stringliteral}{}
+81 \textcolor{stringliteral}{        '''}
+82 
+83         super( PGOpSimuPop, self ).\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a6548b8996f7ace76266e629d9ff8c11e}{\_\_init\_\_}( o\_input, o\_output )
+84 
+85         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a1061b53dea80371a6414760b43b2cd1e}{\_\_lSizes} = [0, 0, 0, 0, 0, 0]
+86         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a1224d81cfdf1400b2f12970074c81817}{\_\_reportOps} = [ sp.Stat(popSize=\textcolor{keyword}{True}) ]
+87         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_ac10f21f990f51e85c7fab2b5aa888edd}{\_\_is\_prepared}=\textcolor{keyword}{False}
+88         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_acccf36393e66057c8026cba0557d3fb8}{\_\_compress\_output}=b\_compress\_output
+89         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a5a64b272404e6113dd1c7ba70235c366}{\_\_remove\_db\_gen\_sim\_files}=b\_remove\_db\_gen\_sim\_files
+90         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a9a27655cf00df0e11603e221c314c0a9}{\_\_write\_input\_as\_config\_file}=b\_write\_input\_as\_config\_file
+91 
+92         \textcolor{comment}{#if this object is created in one of multiple}
+93         \textcolor{comment}{#python so-called "Processes" objects from class}
+94         \textcolor{comment}{#"multiprocessing", all pops in their separate "process"}
+95         \textcolor{comment}{#will have identical individuals (same number/genotypes) }
+96         \textcolor{comment}{#unless we reseed the numpy random number generator }
+97         \textcolor{comment}{#for each "process:"}
+98         numpy.random.seed()
+99         
+100         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 

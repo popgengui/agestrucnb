@@ -1,11 +1,10 @@
 var searchData=
 [
-  ['subsampleindividualsbyidcriteria',['subsampleIndividualsByIdCriteria',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#a361b30c9f9533b8610b3f587dc2677ea',1,'negui::genepopfilemanager::GenepopFileManager']]],
-  ['subsampleindividualsbynumberlist',['subsampleIndividualsByNumberList',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#abc486d49a3634caa7a64cd19cb6ff945',1,'negui::genepopfilemanager::GenepopFileManager']]],
-  ['subsampleindividualsbypopsize',['subsampleIndividualsByPopSize',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#afdad8528d7b19a8b2eeca447bb95a5a0',1,'negui::genepopfilemanager::GenepopFileManager']]],
-  ['subsampleindividualsleaventhoutfrompop',['subsampleIndividualsLeaveNthOutFromPop',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#afb85a943b15c9a259510cc7f61b085b3',1,'negui::genepopfilemanager::GenepopFileManager']]],
-  ['subsampleindividualsrandomlybyproportion',['subsampleIndividualsRandomlyByProportion',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#a5c85ac4838fd6919be1c408bcd39f54e',1,'negui::genepopfilemanager::GenepopFileManager']]],
-  ['subsamplelocibyrangeandmax',['subsampleLociByRangeAndMax',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#a4334a9164415aa05de38ac7b31d59e40',1,'negui::genepopfilemanager::GenepopFileManager']]],
-  ['subsamplelocibyrangeandproportion',['subsampleLociByRangeAndProportion',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#af1dae6f9128c3c19ac204f518e838df1',1,'negui::genepopfilemanager::GenepopFileManager']]],
-  ['subsamplenindividualsrandomlyfromeachpop',['subsampleNIndividualsRandomlyFromEachPop',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#affaeb9457d84736dc1f289d600808f56',1,'negui::genepopfilemanager::GenepopFileManager']]]
+  ['raise_5fexception_5fif_5fnon_5fsingle_5fpop_5ffile',['raise_exception_if_non_single_pop_file',['../namespacenegui_1_1pgdriveneestimator.html#ac98833013f11d6aa3544b0fc60951632',1,'negui::pgdriveneestimator']]],
+  ['rebindscrollwheel',['rebindScrollwheel',['../classnegui_1_1pgguiutilities_1_1FrameContainerScrolled.html#afcc54f75cc509614a3d265d6578cc147',1,'negui::pgguiutilities::FrameContainerScrolled']]],
+  ['remove_5fsimulation_5freplicate_5foutput_5ffiles',['remove_simulation_replicate_output_files',['../namespacenegui_1_1pgutilities.html#aa37c7d125e4eaec2eeea639f53fa140d',1,'negui::pgutilities']]],
+  ['resize_5fsample_5fto_5fmeet_5fsize_5fcriteria',['resize_sample_to_meet_size_criteria',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts.html#a28deaac6347b19f565b2a50f233a6f06',1,'negui.genepopfilesampler.GenepopFileSamplerIndividualsAgeStructureCohorts.resize_sample_to_meet_size_criteria()'],['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohortsPercentage.html#a84ae04a169f95a289b6aacc21db39a17',1,'negui.genepopfilesampler.GenepopFileSamplerIndividualsAgeStructureCohortsPercentage.resize_sample_to_meet_size_criteria()']]],
+  ['rightclickmenu',['RightClickMenu',['../classnegui_1_1pgguiutilities_1_1RightClickMenu.html',1,'negui::pgguiutilities']]],
+  ['run_5fdriveneestimator_5fin_5fnew_5fprocess',['run_driveneestimator_in_new_process',['../namespacenegui_1_1pgutilities.html#a177345979e44820072e37052d92bfd32',1,'negui::pgutilities']]],
+  ['runestimator',['runEstimator',['../classnegui_1_1pgguineestimator_1_1PGGuiNeEstimator.html#aa1ee1f0041f2dcce74e3e3ead41c9491',1,'negui::pgguineestimator::PGGuiNeEstimator']]]
 ];

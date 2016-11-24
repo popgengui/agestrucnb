@@ -114,17 +114,20 @@ Inheritance diagram for negui.genepopfilesampler.GenepopFileSampleParams:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1731e7a334311beccf587ca3c9d2cea6"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a1731e7a334311beccf587ca3c9d2cea6">__init__</a> (self, li_population_numbers, s_population_subsample_name=&quot;population_numbers&quot;, s_sample_tag=None)</td></tr>
-<tr class="separator:a1731e7a334311beccf587ca3c9d2cea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97adc62099fe8f021d4baa948551b970"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a97adc62099fe8f021d4baa948551b970">__init__</a> (self, li_population_numbers, s_population_subsample_name=&quot;population_numbers&quot;, s_sample_tag_base=None, i_replicates=1)</td></tr>
+<tr class="separator:a97adc62099fe8f021d4baa948551b970"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ecc667eef35a832923e5c4ce659cfe7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5ecc667eef35a832923e5c4ce659cfe7"></a>
 def&#160;</td><td class="memItemRight" valign="bottom"><b>population_numbers</b> (self)</td></tr>
 <tr class="separator:a5ecc667eef35a832923e5c4ce659cfe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3ae1c545edd5230e6c37db9507d0535"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab3ae1c545edd5230e6c37db9507d0535"></a>
 def&#160;</td><td class="memItemRight" valign="bottom"><b>population_subsample_name</b> (self)</td></tr>
 <tr class="separator:ab3ae1c545edd5230e6c37db9507d0535"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa34487d4f6dd79d0313cf0e2038a1ef1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa34487d4f6dd79d0313cf0e2038a1ef1"></a>
-def&#160;</td><td class="memItemRight" valign="bottom"><b>sample_tag</b> (self)</td></tr>
-<tr class="separator:aa34487d4f6dd79d0313cf0e2038a1ef1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a943ad5572fa9623ea33b940286df2e3a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a943ad5572fa9623ea33b940286df2e3a"></a>
+def&#160;</td><td class="memItemRight" valign="bottom"><b>sample_tag_base</b> (self)</td></tr>
+<tr class="separator:a943ad5572fa9623ea33b940286df2e3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca3ce40cd559719396e4cadec36dfbd1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aca3ce40cd559719396e4cadec36dfbd1"></a>
+def&#160;</td><td class="memItemRight" valign="bottom"><b>replicates</b> (self)</td></tr>
+<tr class="separator:aca3ce40cd559719396e4cadec36dfbd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><pre class="fragment">Supporting objects for GenepopFileSampler instances,
@@ -137,9 +140,9 @@ These objects also supply a list of population numbers,
 from the range 1,2,3,...,N of the genepop files N
 populations
 </pre> 
-<p>Definition at line <a class="el" href="genepopfilesampler_8py_source.html#l00128">128</a> of file <a class="el" href="genepopfilesampler_8py_source.html">genepopfilesampler.py</a>.</p>
+<p>Definition at line <a class="el" href="genepopfilesampler_8py_source.html#l00158">158</a> of file <a class="el" href="genepopfilesampler_8py_source.html">genepopfilesampler.py</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a1731e7a334311beccf587ca3c9d2cea6"></a>
+<a class="anchor" id="a97adc62099fe8f021d4baa948551b970"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -165,7 +168,13 @@ populations
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><em>s_sample_tag</em> = <code>None</code>&#160;</td>
+          <td class="paramname"><em>s_sample_tag_base</em> = <code>None</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>i_replicates</em> = <code>1</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -179,10 +188,11 @@ each of i of which refers to the ith population
 in the genepop file as represented by a 
 genepopfilemanager object
 </pre> 
-<p>Definition at line <a class="el" href="genepopfilesampler_8py_source.html#l00142">142</a> of file <a class="el" href="genepopfilesampler_8py_source.html">genepopfilesampler.py</a>.</p>
-<div class="fragment"><div class="line"><a name="l00142"></a><span class="lineno"><a class="line" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a1731e7a334311beccf587ca3c9d2cea6">  142</a></span>&#160;                s_sample_tag=<span class="keywordtype">None</span> ):</div><div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;        <span class="stringliteral">&#39;&#39;&#39;</span></div><div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;<span class="stringliteral">        Param li_populations is a list of integers,</span></div><div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;<span class="stringliteral">        each of i of which refers to the ith population</span></div><div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;<span class="stringliteral">        in the genepop file as represented by a </span></div><div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;<span class="stringliteral">        genepopfilemanager object</span></div><div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="stringliteral">        &#39;&#39;&#39;</span></div><div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        self.<a class="code" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a48dfd2df4eb75dbacdc8a274cd3323ad">__populationnumbers</a>=li_population_numbers</div><div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        self.<a class="code" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#ae03531d2c9d450d7f717816a06f3a08a">__populationsubsamplename</a>=s_population_subsample_name</div><div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;        self.<a class="code" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a8241527923481f69d4e6c4f17de30262">__sample_tag</a>=s_sample_tag</div><div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        <span class="keywordflow">return</span></div><div class="ttc" id="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams_html_a8241527923481f69d4e6c4f17de30262"><div class="ttname"><a href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a8241527923481f69d4e6c4f17de30262">negui.genepopfilesampler.GenepopFileSampleParams.__sample_tag</a></div><div class="ttdeci">__sample_tag</div><div class="ttdef"><b>Definition:</b> <a href="genepopfilesampler_8py_source.html#l00151">genepopfilesampler.py:151</a></div></div>
-<div class="ttc" id="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams_html_ae03531d2c9d450d7f717816a06f3a08a"><div class="ttname"><a href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#ae03531d2c9d450d7f717816a06f3a08a">negui.genepopfilesampler.GenepopFileSampleParams.__populationsubsamplename</a></div><div class="ttdeci">__populationsubsamplename</div><div class="ttdef"><b>Definition:</b> <a href="genepopfilesampler_8py_source.html#l00150">genepopfilesampler.py:150</a></div></div>
-<div class="ttc" id="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams_html_a48dfd2df4eb75dbacdc8a274cd3323ad"><div class="ttname"><a href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a48dfd2df4eb75dbacdc8a274cd3323ad">negui.genepopfilesampler.GenepopFileSampleParams.__populationnumbers</a></div><div class="ttdeci">__populationnumbers</div><div class="ttdef"><b>Definition:</b> <a href="genepopfilesampler_8py_source.html#l00149">genepopfilesampler.py:149</a></div></div>
+<p>Definition at line <a class="el" href="genepopfilesampler_8py_source.html#l00173">173</a> of file <a class="el" href="genepopfilesampler_8py_source.html">genepopfilesampler.py</a>.</p>
+<div class="fragment"><div class="line"><a name="l00173"></a><span class="lineno"><a class="line" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a97adc62099fe8f021d4baa948551b970">  173</a></span>&#160;                i_replicates=1):</div><div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;        <span class="stringliteral">&#39;&#39;&#39;</span></div><div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="stringliteral">        Param li_populations is a list of integers,</span></div><div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="stringliteral">        each of i of which refers to the ith population</span></div><div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="stringliteral">        in the genepop file as represented by a </span></div><div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="stringliteral">        genepopfilemanager object</span></div><div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="stringliteral">        &#39;&#39;&#39;</span></div><div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;        self.<a class="code" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a48dfd2df4eb75dbacdc8a274cd3323ad">__populationnumbers</a>=li_population_numbers</div><div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;        self.<a class="code" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#ae03531d2c9d450d7f717816a06f3a08a">__populationsubsamplename</a>=s_population_subsample_name</div><div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        self.<a class="code" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a4193649748e4c6da4b84ce8c0c994b47">__sample_tag_base</a>=s_sample_tag_base</div><div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;        self.<a class="code" href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#aa16473f580e2f263162f643b6278fb19">__replicates</a>=i_replicates</div><div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;</div><div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;        <span class="keywordflow">return</span></div><div class="ttc" id="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams_html_ae03531d2c9d450d7f717816a06f3a08a"><div class="ttname"><a href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#ae03531d2c9d450d7f717816a06f3a08a">negui.genepopfilesampler.GenepopFileSampleParams.__populationsubsamplename</a></div><div class="ttdeci">__populationsubsamplename</div><div class="ttdef"><b>Definition:</b> <a href="genepopfilesampler_8py_source.html#l00181">genepopfilesampler.py:181</a></div></div>
+<div class="ttc" id="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams_html_aa16473f580e2f263162f643b6278fb19"><div class="ttname"><a href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#aa16473f580e2f263162f643b6278fb19">negui.genepopfilesampler.GenepopFileSampleParams.__replicates</a></div><div class="ttdeci">__replicates</div><div class="ttdef"><b>Definition:</b> <a href="genepopfilesampler_8py_source.html#l00183">genepopfilesampler.py:183</a></div></div>
+<div class="ttc" id="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams_html_a4193649748e4c6da4b84ce8c0c994b47"><div class="ttname"><a href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a4193649748e4c6da4b84ce8c0c994b47">negui.genepopfilesampler.GenepopFileSampleParams.__sample_tag_base</a></div><div class="ttdeci">__sample_tag_base</div><div class="ttdef"><b>Definition:</b> <a href="genepopfilesampler_8py_source.html#l00182">genepopfilesampler.py:182</a></div></div>
+<div class="ttc" id="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams_html_a48dfd2df4eb75dbacdc8a274cd3323ad"><div class="ttname"><a href="classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html#a48dfd2df4eb75dbacdc8a274cd3323ad">negui.genepopfilesampler.GenepopFileSampleParams.__populationnumbers</a></div><div class="ttdeci">__populationnumbers</div><div class="ttdef"><b>Definition:</b> <a href="genepopfilesampler_8py_source.html#l00180">genepopfilesampler.py:180</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>

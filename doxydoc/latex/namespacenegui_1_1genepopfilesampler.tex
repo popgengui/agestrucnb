@@ -41,6 +41,8 @@ class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividua
 \item 
 class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerLociByRangeAndPercentage}{Genepop\+File\+Sampler\+Loci\+By\+Range\+And\+Percentage}
 \item 
+class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerLociByRangeAndSampleTotalList}{Genepop\+File\+Sampler\+Loci\+By\+Range\+And\+Sample\+Total\+List}
+\item 
 class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerLociByRangeAndTotal}{Genepop\+File\+Sampler\+Loci\+By\+Range\+And\+Total}
 \item 
 class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerNone}{Genepop\+File\+Sampler\+None}
@@ -48,7 +50,7 @@ class \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerNone}{Gen
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-def {\bfseries make\+\_\+subsample\+\_\+tag} (v\+\_\+value, i\+\_\+replicate\+\_\+number, s\+\_\+scheme)\hypertarget{namespacenegui_1_1genepopfilesampler_a1bc84ad362bf9aa4a57f568fd740171e}{}\label{namespacenegui_1_1genepopfilesampler_a1bc84ad362bf9aa4a57f568fd740171e}
+def {\bfseries make\+\_\+subsample\+\_\+tag} (v\+\_\+value, i\+\_\+replicate\+\_\+number, s\+\_\+scheme, s\+\_\+prefix=None)\hypertarget{namespacenegui_1_1genepopfilesampler_a64afa11c4c2d928a96377cdf3d610012}{}\label{namespacenegui_1_1genepopfilesampler_a64afa11c4c2d928a96377cdf3d610012}
 
 \item 
 def {\bfseries get\+\_\+sample\+\_\+value\+\_\+and\+\_\+replicate\+\_\+number\+\_\+from\+\_\+sample\+\_\+tag} (s\+\_\+sample\+\_\+tag, s\+\_\+scheme)\hypertarget{namespacenegui_1_1genepopfilesampler_add6542ca0344658bb772d671ef34d761}{}\label{namespacenegui_1_1genepopfilesampler_add6542ca0344658bb772d671ef34d761}
@@ -72,6 +74,9 @@ string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+R\+E\+M\+O\+V\+AL} = \char`\"{}remove\
 string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+C\+R\+I\+T\+E\+R\+IA} = \char`\"{}criteria\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_a588f1b68f192dd6901bac76e51979419}{}\label{namespacenegui_1_1genepopfilesampler_a588f1b68f192dd6901bac76e51979419}
 
 \item 
+string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+C\+R\+I\+T\+E\+R\+I\+A\+\_\+\+G\+R\+O\+U\+P\+ED} = \char`\"{}critgrouped\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_ac9ebd7f9f91d41d391b71618a4cee0c7}{}\label{namespacenegui_1_1genepopfilesampler_ac9ebd7f9f91d41d391b71618a4cee0c7}
+
+\item 
 string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+C\+O\+H\+O\+R\+TS} = \char`\"{}cohorts\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_ac13c205986ea013af9a7b7a908529e93}{}\label{namespacenegui_1_1genepopfilesampler_ac13c205986ea013af9a7b7a908529e93}
 
 \item 
@@ -81,7 +86,13 @@ string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+C\+O\+H\+O\+R\+T\+S\+\_\+\+P\+E\+RC} =
 string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+R\+E\+L\+A\+T\+E\+DS} = \char`\"{}relateds\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_acec997bb8951673a46f30157dd69973e}{}\label{namespacenegui_1_1genepopfilesampler_acec997bb8951673a46f30157dd69973e}
 
 \item 
-string {\bfseries S\+C\+H\+E\+M\+\_\+\+L\+O\+CI} = \char`\"{}loci\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_a389ea2c8351b6c9f6a405cb2c4a1fff4}{}\label{namespacenegui_1_1genepopfilesampler_a389ea2c8351b6c9f6a405cb2c4a1fff4}
+string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+L\+O\+C\+I\+\_\+\+M\+A\+X\+\_\+\+A\+N\+D\+\_\+\+R\+A\+N\+GE} = \char`\"{}loci\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_a2c2d4868169126359e5c546ed7cd429c}{}\label{namespacenegui_1_1genepopfilesampler_a2c2d4868169126359e5c546ed7cd429c}
+
+\item 
+string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+L\+O\+C\+I\+\_\+\+P\+E\+R\+C\+\_\+\+A\+N\+D\+\_\+\+R\+A\+N\+GE} = \char`\"{}lociperc\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_a6e83e86e771a30ab2d457bc0f46517cb}{}\label{namespacenegui_1_1genepopfilesampler_a6e83e86e771a30ab2d457bc0f46517cb}
+
+\item 
+string {\bfseries S\+C\+H\+E\+M\+E\+\_\+\+L\+O\+C\+I\+\_\+\+T\+O\+T\+A\+L\+S\+\_\+\+A\+N\+D\+\_\+\+R\+A\+N\+GE} = \char`\"{}locitots\char`\"{}\hypertarget{namespacenegui_1_1genepopfilesampler_a673c0970d35fb8481047f33f4da1b096}{}\label{namespacenegui_1_1genepopfilesampler_a673c0970d35fb8481047f33f4da1b096}
 
 \item 
 list {\bfseries ls\+\_\+args} = \mbox{[} \char`\"{}genepop file\char`\"{}, \char`\"{}test number\char`\"{} \mbox{]}\hypertarget{namespacenegui_1_1genepopfilesampler_af0949cf58ac4626034b74cc9feaf35de}{}\label{namespacenegui_1_1genepopfilesampler_af0949cf58ac4626034b74cc9feaf35de}

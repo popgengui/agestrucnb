@@ -147,6 +147,18 @@ def \hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ac788ef76c43e7e8fa
 \item 
 {\bfseries Nb\+Nc}\hypertarget{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a27c974f16a0d5a18fd811dafaa053bd9}{}\label{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a27c974f16a0d5a18fd811dafaa053bd9}
 
+\item 
+{\bfseries cull\+\_\+method}\hypertarget{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a7c529897ef0900ad932c09b94a50b4db}{}\label{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a7c529897ef0900ad932c09b94a50b4db}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+string {\bfseries C\+O\+N\+S\+T\+\_\+\+C\+U\+L\+L\+\_\+\+M\+E\+T\+H\+O\+D\+\_\+\+S\+U\+R\+V\+I\+V\+I\+A\+L\+\_\+\+R\+A\+T\+ES} = \char`\"{}survival\+\_\+rates\char`\"{}\hypertarget{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a4b5a5c2217d1929c9edffcf9e40bdcdb}{}\label{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a4b5a5c2217d1929c9edffcf9e40bdcdb}
+
+\item 
+string {\bfseries C\+O\+N\+S\+T\+\_\+\+C\+U\+L\+L\+\_\+\+M\+E\+T\+H\+O\+D\+\_\+\+E\+Q\+U\+A\+L\+\_\+\+S\+E\+X\+\_\+\+R\+A\+T\+I\+OS} = \char`\"{}equal\+\_\+sex\+\_\+ratio\char`\"{}\hypertarget{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a475049ff00dc47d34f4ceb7f507d3090}{}\label{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a475049ff00dc47d34f4ceb7f507d3090}
+
 \end{DoxyCompactItemize}
 
 
@@ -197,49 +209,49 @@ param o_param_names, object ot type PGParamSet,
 \end{DoxyVerb}
  
 
-Definition at line 28 of file pginputsimupop.\+py.
+Definition at line 34 of file pginputsimupop.\+py.
 
 
 \begin{DoxyCode}
-28     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a1452a83a005c9d30e778b34ae67a399f}{\_\_init\_\_}( self, s\_config\_file = None, o\_model\_resources = None, o\_param\_names=None ):
-29         \textcolor{stringliteral}{'''}
-30 \textcolor{stringliteral}{        param s\_config\_file, parseable by ConfigParser, params for }
-31 \textcolor{stringliteral}{            running simuPop, or references into the resources}
-32 \textcolor{stringliteral}{            object.  Note that this config file must have a}
-33 \textcolor{stringliteral}{            section called "model" with a "name" option, which}
-34 \textcolor{stringliteral}{            should match a name key in the PGModelResources objects}
-35 \textcolor{stringliteral}{            dictionary.}
-36 \textcolor{stringliteral}{}
-37 \textcolor{stringliteral}{        param o\_model\_resources, object of type PGModelResources,}
-38 \textcolor{stringliteral}{            whose member dictionary has the sub-dictionaries}
-39 \textcolor{stringliteral}{            that have the param values not given in the config file,}
-40 \textcolor{stringliteral}{            such as fecundity and reproductive values, and exposed}
-41 \textcolor{stringliteral}{            via calls to is getValue def.}
+34     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a1452a83a005c9d30e778b34ae67a399f}{\_\_init\_\_}( self, s\_config\_file = None, o\_model\_resources = None, o\_param\_names=None ):
+35         \textcolor{stringliteral}{'''}
+36 \textcolor{stringliteral}{        param s\_config\_file, parseable by ConfigParser, params for }
+37 \textcolor{stringliteral}{            running simuPop, or references into the resources}
+38 \textcolor{stringliteral}{            object.  Note that this config file must have a}
+39 \textcolor{stringliteral}{            section called "model" with a "name" option, which}
+40 \textcolor{stringliteral}{            should match a name key in the PGModelResources objects}
+41 \textcolor{stringliteral}{            dictionary.}
 42 \textcolor{stringliteral}{}
-43 \textcolor{stringliteral}{        param o\_param\_names, object ot type PGParamSet,}
-44 \textcolor{stringliteral}{            that gives a shortname (attribute name)}
-45 \textcolor{stringliteral}{            and a longname (readable text), for each }
-46 \textcolor{stringliteral}{            param in the simpupop configuration attribute }
-47 \textcolor{stringliteral}{            list}
-48 \textcolor{stringliteral}{        '''}
-49         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af6628ecaa63a594fc96d1b9273fd1fd6}{\_\_config\_parser}=\textcolor{keywordtype}{None}
-50         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a6c00be5e58b61b239273e04c671cd9e8}{\_\_resources}=o\_model\_resources
-51         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0a737393cb4d1c66062f9403296c7f19}{\_\_param\_names}=o\_param\_names
-52 
-53         \textcolor{comment}{#for writing current param values to a new config file,}
-54         \textcolor{comment}{#and updated as attributes are created either by reading}
-55         \textcolor{comment}{#in the orig config file in def get\_config, or by adding the parameter}
-56         \textcolor{comment}{#in def addParameter:}
-57         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a893ab501191e9e1ed89f4f878310d97b}{\_\_config\_file\_option\_name\_by\_attribute\_name}=\{\}      
-58         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_acd9740f17e53a6e471d4e85565962369}{\_\_config\_file\_section\_name\_by\_attribute\_name}=\{\}
-59 
-60         \textcolor{keywordflow}{if} s\_config\_file \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-61             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ad7c3feef55c16989a35f56c3e0d9943e}{\_\_full\_config\_file\_name}=s\_config\_file
-62             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af82bde7e564aee524fc30f2e06fde934}{config\_file}=os.path.basename( s\_config\_file )
-63             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0b34c99730e86de268c5503ed226d15e}{\_\_make\_config\_parser}( s\_config\_file )
-64         \textcolor{comment}{#end if we have a conf file}
+43 \textcolor{stringliteral}{        param o\_model\_resources, object of type PGModelResources,}
+44 \textcolor{stringliteral}{            whose member dictionary has the sub-dictionaries}
+45 \textcolor{stringliteral}{            that have the param values not given in the config file,}
+46 \textcolor{stringliteral}{            such as fecundity and reproductive values, and exposed}
+47 \textcolor{stringliteral}{            via calls to is getValue def.}
+48 \textcolor{stringliteral}{}
+49 \textcolor{stringliteral}{        param o\_param\_names, object ot type PGParamSet,}
+50 \textcolor{stringliteral}{            that gives a shortname (attribute name)}
+51 \textcolor{stringliteral}{            and a longname (readable text), for each }
+52 \textcolor{stringliteral}{            param in the simpupop configuration attribute }
+53 \textcolor{stringliteral}{            list}
+54 \textcolor{stringliteral}{        '''}
+55         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af6628ecaa63a594fc96d1b9273fd1fd6}{\_\_config\_parser}=\textcolor{keywordtype}{None}
+56         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a6c00be5e58b61b239273e04c671cd9e8}{\_\_resources}=o\_model\_resources
+57         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0a737393cb4d1c66062f9403296c7f19}{\_\_param\_names}=o\_param\_names
+58 
+59         \textcolor{comment}{#for writing current param values to a new config file,}
+60         \textcolor{comment}{#and updated as attributes are created either by reading}
+61         \textcolor{comment}{#in the orig config file in def get\_config, or by adding the parameter}
+62         \textcolor{comment}{#in def addParameter:}
+63         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a893ab501191e9e1ed89f4f878310d97b}{\_\_config\_file\_option\_name\_by\_attribute\_name}=\{\}      
+64         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_acd9740f17e53a6e471d4e85565962369}{\_\_config\_file\_section\_name\_by\_attribute\_name}=\{\}
 65 
-66         \textcolor{keywordflow}{return}
+66         \textcolor{keywordflow}{if} s\_config\_file \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+67             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ad7c3feef55c16989a35f56c3e0d9943e}{\_\_full\_config\_file\_name}=s\_config\_file
+68             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af82bde7e564aee524fc30f2e06fde934}{config\_file}=os.path.basename( s\_config\_file )
+69             self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0b34c99730e86de268c5503ed226d15e}{\_\_make\_config\_parser}( s\_config\_file )
+70         \textcolor{comment}{#end if we have a conf file}
+71 
+72         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 
@@ -265,25 +277,25 @@ from the option name that gives the value.
 \end{DoxyVerb}
  
 
-Definition at line 416 of file pginputsimupop.\+py.
+Definition at line 473 of file pginputsimupop.\+py.
 
 
 \begin{DoxyCode}
-416             s\_config\_file\_section\_name ):
-417         \textcolor{stringliteral}{'''}
-418 \textcolor{stringliteral}{        If user wants to add a parameter not in the current set of params as read}
-419 \textcolor{stringliteral}{        in from the config file source of this instance, this def will both add the }
-420 \textcolor{stringliteral}{        param and value, plus update the member dictionaries that facilitate}
-421 \textcolor{stringliteral}{        writing a new config file that includes this parameter.  Note that the}
-422 \textcolor{stringliteral}{        arg s\_config\_file\_option\_name is necessitated by Tiago's standards in }
-423 \textcolor{stringliteral}{        his config files, as he often uses an attribute name different}
-424 \textcolor{stringliteral}{        from the option name that gives the value.}
-425 \textcolor{stringliteral}{        '''}
-426         setattr( self, s\_attribute\_name, v\_attribute\_value )
-427         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a27abd811d6b6108a9593372c3b0c7881}{\_\_update\_attribute\_config\_file\_info}( s\_attribute\_name, 
+473             s\_config\_file\_section\_name ):
+474         \textcolor{stringliteral}{'''}
+475 \textcolor{stringliteral}{        If user wants to add a parameter not in the current set of params as read}
+476 \textcolor{stringliteral}{        in from the config file source of this instance, this def will both add the }
+477 \textcolor{stringliteral}{        param and value, plus update the member dictionaries that facilitate}
+478 \textcolor{stringliteral}{        writing a new config file that includes this parameter.  Note that the}
+479 \textcolor{stringliteral}{        arg s\_config\_file\_option\_name is necessitated by Tiago's standards in }
+480 \textcolor{stringliteral}{        his config files, as he often uses an attribute name different}
+481 \textcolor{stringliteral}{        from the option name that gives the value.}
+482 \textcolor{stringliteral}{        '''}
+483         setattr( self, s\_attribute\_name, v\_attribute\_value )
+484         self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a27abd811d6b6108a9593372c3b0c7881}{\_\_update\_attribute\_config\_file\_info}( s\_attribute\_name, 
       s\_config\_file\_section\_name, 
-428                 s\_config\_file\_option\_name )
-429         \textcolor{keywordflow}{return}
+485                 s\_config\_file\_option\_name )
+486         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop@{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop}!get\+Dict\+Param\+Values\+By\+Attribute\+Name@{get\+Dict\+Param\+Values\+By\+Attribute\+Name}}
 \index{get\+Dict\+Param\+Values\+By\+Attribute\+Name@{get\+Dict\+Param\+Values\+By\+Attribute\+Name}!negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop@{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop}}
@@ -299,34 +311,34 @@ in this (self) instance.
 \end{DoxyVerb}
  
 
-Definition at line 467 of file pginputsimupop.\+py.
+Definition at line 524 of file pginputsimupop.\+py.
 
 
 \begin{DoxyCode}
-467     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a099e2f01dabe86e713df7519a08fecca}{getDictParamValuesByAttributeName}( self ):
-468         \textcolor{stringliteral}{'''}
-469 \textcolor{stringliteral}{        Note that this algorithm simply skips}
-470 \textcolor{stringliteral}{        over paramters with names in the PGParamSet}
-471 \textcolor{stringliteral}{        object, but without a corresponding attribute}
-472 \textcolor{stringliteral}{        in this (self) instance.}
-473 \textcolor{stringliteral}{        '''}
-474         dv\_param\_values\_by\_name=\{\}
-475 
-476         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0a737393cb4d1c66062f9403296c7f19}{\_\_param\_names} \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
-477             s\_msg=\textcolor{stringliteral}{"In PGInputSimuPop instance, can't get dict of param/values"} \(\backslash\)
-478                     + \textcolor{stringliteral}{": missing the required PGParamSet object."}
-479             \textcolor{keywordflow}{raise} Exception( s\_msg )
-480         \textcolor{comment}{#end if no parma set object}
-481 
-482         ls\_attribute\_names=self.param\_names.shortnames
-483 
-484         \textcolor{keywordflow}{for} s\_name \textcolor{keywordflow}{in} ls\_attribute\_names:
-485             \textcolor{keywordflow}{if} hasattr( self, s\_name ):
-486                 dv\_param\_values\_by\_name[ s\_name ]=getattr( self, s\_name )
-487             \textcolor{comment}{#end if hasattr}
-488         \textcolor{comment}{#end for each param name}
-489         
-490         \textcolor{keywordflow}{return} dv\_param\_values\_by\_name
+524     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a099e2f01dabe86e713df7519a08fecca}{getDictParamValuesByAttributeName}( self ):
+525         \textcolor{stringliteral}{'''}
+526 \textcolor{stringliteral}{        Note that this algorithm simply skips}
+527 \textcolor{stringliteral}{        over paramters with names in the PGParamSet}
+528 \textcolor{stringliteral}{        object, but without a corresponding attribute}
+529 \textcolor{stringliteral}{        in this (self) instance.}
+530 \textcolor{stringliteral}{        '''}
+531         dv\_param\_values\_by\_name=\{\}
+532 
+533         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a0a737393cb4d1c66062f9403296c7f19}{\_\_param\_names} \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
+534             s\_msg=\textcolor{stringliteral}{"In PGInputSimuPop instance, can't get dict of param/values"} \(\backslash\)
+535                     + \textcolor{stringliteral}{": missing the required PGParamSet object."}
+536             \textcolor{keywordflow}{raise} Exception( s\_msg )
+537         \textcolor{comment}{#end if no parma set object}
+538 
+539         ls\_attribute\_names=self.param\_names.shortnames
+540 
+541         \textcolor{keywordflow}{for} s\_name \textcolor{keywordflow}{in} ls\_attribute\_names:
+542             \textcolor{keywordflow}{if} hasattr( self, s\_name ):
+543                 dv\_param\_values\_by\_name[ s\_name ]=getattr( self, s\_name )
+544             \textcolor{comment}{#end if hasattr}
+545         \textcolor{comment}{#end for each param name}
+546         
+547         \textcolor{keywordflow}{return} dv\_param\_values\_by\_name
 \end{DoxyCode}
 \index{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop@{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop}!N0@{N0}}
 \index{N0@{N0}!negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop@{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop}}
@@ -342,30 +354,30 @@ Otherwise we compute it from Nb and NbNc.
 \end{DoxyVerb}
  
 
-Definition at line 633 of file pginputsimupop.\+py.
+Definition at line 690 of file pginputsimupop.\+py.
 
 
 \begin{DoxyCode}
-633     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a7fd0bd28a9b4b0468f704db0ac882310}{N0}( self ):
-634         \textcolor{stringliteral}{'''}
-635 \textcolor{stringliteral}{        Older versions of life tables lack an Nb and Nb/Nc ratio.  All life tables have an N0,}
-636 \textcolor{stringliteral}{        and some older versions have an Nb given by config file "pop" section.  For instances }
-637 \textcolor{stringliteral}{        of this calss that use older life tables, we simply return the self.\_\_N0 attribute.  }
-638 \textcolor{stringliteral}{        Otherwise we compute it from Nb and NbNc.}
-639 \textcolor{stringliteral}{        '''}
-640 
-641         s\_nb\_source=self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ab22ca7220fa560cf8c7b4d8b6bcb87f3}{\_\_get\_nb\_attribute\_derivation}()
-642 
-643         \textcolor{keywordflow}{if} s\_nb\_source==\textcolor{stringliteral}{"pop\_section"}:
-644             \textcolor{keywordflow}{return} self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af25160fc2d3417eb257a7ab28f6bc19d}{\_\_N0\_from\_pop\_section}
-645         \textcolor{keywordflow}{elif} s\_nb\_source==\textcolor{stringliteral}{"effective\_size\_section"}:         
-646             \textcolor{keywordflow}{return} self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_abd206373a3765732d391dfb291398b57}{\_\_compute\_n0\_from\_eff\_size\_info}()
-647         \textcolor{keywordflow}{else}:
-648             s\_msg=\textcolor{stringliteral}{"In PGInputSimuPop instance, property N0, "} \(\backslash\)
-649                     + \textcolor{stringliteral}{"cannot find N0 value, neither from config file \(\backslash\)"pop\(\backslash\)""} \(\backslash\)
-650                     + \textcolor{stringliteral}{" nor as computable from Nb and NbNc attributes."}
-651             \textcolor{keywordflow}{raise} Exception( s\_msg )
-652         \textcolor{comment}{#end if Nb only from single val, else compute from Nb and NbNc, else error}
+690     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a7fd0bd28a9b4b0468f704db0ac882310}{N0}( self ):
+691         \textcolor{stringliteral}{'''}
+692 \textcolor{stringliteral}{        Older versions of life tables lack an Nb and Nb/Nc ratio.  All life tables have an N0,}
+693 \textcolor{stringliteral}{        and some older versions have an Nb given by config file "pop" section.  For instances }
+694 \textcolor{stringliteral}{        of this calss that use older life tables, we simply return the self.\_\_N0 attribute.  }
+695 \textcolor{stringliteral}{        Otherwise we compute it from Nb and NbNc.}
+696 \textcolor{stringliteral}{        '''}
+697 
+698         s\_nb\_source=self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ab22ca7220fa560cf8c7b4d8b6bcb87f3}{\_\_get\_nb\_attribute\_derivation}()
+699 
+700         \textcolor{keywordflow}{if} s\_nb\_source==\textcolor{stringliteral}{"pop\_section"}:
+701             \textcolor{keywordflow}{return} self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_af25160fc2d3417eb257a7ab28f6bc19d}{\_\_N0\_from\_pop\_section}
+702         \textcolor{keywordflow}{elif} s\_nb\_source==\textcolor{stringliteral}{"effective\_size\_section"}:         
+703             \textcolor{keywordflow}{return} self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_abd206373a3765732d391dfb291398b57}{\_\_compute\_n0\_from\_eff\_size\_info}()
+704         \textcolor{keywordflow}{else}:
+705             s\_msg=\textcolor{stringliteral}{"In PGInputSimuPop instance, property N0, "} \(\backslash\)
+706                     + \textcolor{stringliteral}{"cannot find N0 value, neither from config file \(\backslash\)"pop\(\backslash\)""} \(\backslash\)
+707                     + \textcolor{stringliteral}{" nor as computable from Nb and NbNc attributes."}
+708             \textcolor{keywordflow}{raise} Exception( s\_msg )
+709         \textcolor{comment}{#end if Nb only from single val, else compute from Nb and NbNc, else error}
 \end{DoxyCode}
 \index{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop@{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop}!Nb\+\_\+for\+\_\+restrict\+\_\+generator@{Nb\+\_\+for\+\_\+restrict\+\_\+generator}}
 \index{Nb\+\_\+for\+\_\+restrict\+\_\+generator@{Nb\+\_\+for\+\_\+restrict\+\_\+generator}!negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop@{negui\+::pginputsimupop\+::\+P\+G\+Input\+Simu\+Pop}}
@@ -395,53 +407,53 @@ choice.
 \end{DoxyVerb}
  
 
-Definition at line 718 of file pginputsimupop.\+py.
+Definition at line 775 of file pginputsimupop.\+py.
 
 
 \begin{DoxyCode}
-718     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ac788ef76c43e7e8faca73a1ee82b6da4}{Nb\_for\_restrict\_generator}( self ):
-719         \textcolor{stringliteral}{'''}
-720 \textcolor{stringliteral}{        This Nb val is the original value}
-721 \textcolor{stringliteral}{        (originally the sole "Nb" attribute}
-722 \textcolor{stringliteral}{        in the input object), that Tiago }
-723 \textcolor{stringliteral}{        uses in his code that chooses}
-724 \textcolor{stringliteral}{        which generator to use (see "mateOp="}
-725 \textcolor{stringliteral}{        assignment in the createAge def in}
-726 \textcolor{stringliteral}{        mod pgopsimupop.py).  With our}
-727 \textcolor{stringliteral}{        addition of Nb and Nb/Nc  paramters,}
-728 \textcolor{stringliteral}{        in an "effective\_size" section in life tables}
-729 \textcolor{stringliteral}{        (or config files), and used to caluclate the N0 (aka, N1),}
-730 \textcolor{stringliteral}{        we need to check for the Nb attribute sources, when}
-731 \textcolor{stringliteral}{        the original code requests the Nb for use in a generator.}
-732 \textcolor{stringliteral}{        If we've used an effective\_size-derived Nb in an N0 calc, }
-733 \textcolor{stringliteral}{        and the pop section Nb is supplied as non "None",}
-734 \textcolor{stringliteral}{        then we throw an error.  If, however, there is only one}
-735 \textcolor{stringliteral}{        Nb value supplied, and it is in the pop section, we }
-736 \textcolor{stringliteral}{        then supply is to the sim op to be used in the generator}
-737 \textcolor{stringliteral}{        choice.}
-738 \textcolor{stringliteral}{        '''}
-739         i\_returnval=\textcolor{keywordtype}{None}
-740         s\_nb\_source=self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ab22ca7220fa560cf8c7b4d8b6bcb87f3}{\_\_get\_nb\_attribute\_derivation}()
-741         \textcolor{keywordflow}{if} s\_nb\_source==\textcolor{stringliteral}{"pop\_section"}:
-742             i\_returnval=self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a2525ee53b93e309b99914e0cdf175901}{\_\_Nb\_from\_pop\_section}
-743         \textcolor{keywordflow}{elif} s\_nb\_source==\textcolor{stringliteral}{"effective\_size\_section"}:
-744             \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a2525ee53b93e309b99914e0cdf175901}{\_\_Nb\_from\_pop\_section} \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-745                 s\_msg=\textcolor{stringliteral}{"In PGInputSimuPop instance, property Nb\_for\_restrict\_generator, "} \(\backslash\)
-746                         + \textcolor{stringliteral}{"Nb was derived from an \(\backslash\)"effective\_size\(\backslash\)" section, "} \(\backslash\)
-747                         + \textcolor{stringliteral}{"found in the life table or config file, "} \(\backslash\)
-748                         + \textcolor{stringliteral}{"but there is also an Nb value in the \(\backslash\)"pop\(\backslash\)" section "} \(\backslash\)
-749                         + \textcolor{stringliteral}{"that is not \(\backslash\)"None\(\backslash\)".  Currently the simkulation cannot use "} \(\backslash\)
-750                         + \textcolor{stringliteral}{"a pop section derived Nb, when there is another present in "} \(\backslash\)
-751                         + \textcolor{stringliteral}{"an effective\_size section."}
-752                 \textcolor{keywordflow}{raise} Exception( s\_msg )
-753             \textcolor{comment}{#end if we have a non-None value in pop section, error}
-754             i\_returnval=self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a2525ee53b93e309b99914e0cdf175901}{\_\_Nb\_from\_pop\_section}
-755         \textcolor{keywordflow}{else}:
-756             s\_msg=\textcolor{stringliteral}{"In PGInputSimuPop instance, property Nb\_for\_restrict\_generator, "} \(\backslash\)
-757                     + \textcolor{stringliteral}{"unknown string value returned form call to \_\_get\_nb\_attribute\_derivation."} 
-758             \textcolor{keywordflow}{raise} Exception( s\_msg )
-759         \textcolor{comment}{#end if pop-section Nb, else effective size, else unknown}
-760         \textcolor{keywordflow}{return} i\_returnval
+775     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ac788ef76c43e7e8faca73a1ee82b6da4}{Nb\_for\_restrict\_generator}( self ):
+776         \textcolor{stringliteral}{'''}
+777 \textcolor{stringliteral}{        This Nb val is the original value}
+778 \textcolor{stringliteral}{        (originally the sole "Nb" attribute}
+779 \textcolor{stringliteral}{        in the input object), that Tiago }
+780 \textcolor{stringliteral}{        uses in his code that chooses}
+781 \textcolor{stringliteral}{        which generator to use (see "mateOp="}
+782 \textcolor{stringliteral}{        assignment in the createAge def in}
+783 \textcolor{stringliteral}{        mod pgopsimupop.py).  With our}
+784 \textcolor{stringliteral}{        addition of Nb and Nb/Nc  paramters,}
+785 \textcolor{stringliteral}{        in an "effective\_size" section in life tables}
+786 \textcolor{stringliteral}{        (or config files), and used to caluclate the N0 (aka, N1),}
+787 \textcolor{stringliteral}{        we need to check for the Nb attribute sources, when}
+788 \textcolor{stringliteral}{        the original code requests the Nb for use in a generator.}
+789 \textcolor{stringliteral}{        If we've used an effective\_size-derived Nb in an N0 calc, }
+790 \textcolor{stringliteral}{        and the pop section Nb is supplied as non "None",}
+791 \textcolor{stringliteral}{        then we throw an error.  If, however, there is only one}
+792 \textcolor{stringliteral}{        Nb value supplied, and it is in the pop section, we }
+793 \textcolor{stringliteral}{        then supply is to the sim op to be used in the generator}
+794 \textcolor{stringliteral}{        choice.}
+795 \textcolor{stringliteral}{        '''}
+796         i\_returnval=\textcolor{keywordtype}{None}
+797         s\_nb\_source=self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_ab22ca7220fa560cf8c7b4d8b6bcb87f3}{\_\_get\_nb\_attribute\_derivation}()
+798         \textcolor{keywordflow}{if} s\_nb\_source==\textcolor{stringliteral}{"pop\_section"}:
+799             i\_returnval=self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a2525ee53b93e309b99914e0cdf175901}{\_\_Nb\_from\_pop\_section}
+800         \textcolor{keywordflow}{elif} s\_nb\_source==\textcolor{stringliteral}{"effective\_size\_section"}:
+801             \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a2525ee53b93e309b99914e0cdf175901}{\_\_Nb\_from\_pop\_section} \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+802                 s\_msg=\textcolor{stringliteral}{"In PGInputSimuPop instance, property Nb\_for\_restrict\_generator, "} \(\backslash\)
+803                         + \textcolor{stringliteral}{"Nb was derived from an \(\backslash\)"effective\_size\(\backslash\)" section, "} \(\backslash\)
+804                         + \textcolor{stringliteral}{"found in the life table or config file, "} \(\backslash\)
+805                         + \textcolor{stringliteral}{"but there is also an Nb value in the \(\backslash\)"pop\(\backslash\)" section "} \(\backslash\)
+806                         + \textcolor{stringliteral}{"that is not \(\backslash\)"None\(\backslash\)".  Currently the simkulation cannot use "} \(\backslash\)
+807                         + \textcolor{stringliteral}{"a pop section derived Nb, when there is another present in "} \(\backslash\)
+808                         + \textcolor{stringliteral}{"an effective\_size section."}
+809                 \textcolor{keywordflow}{raise} Exception( s\_msg )
+810             \textcolor{comment}{#end if we have a non-None value in pop section, error}
+811             i\_returnval=self.\hyperlink{classnegui_1_1pginputsimupop_1_1PGInputSimuPop_a2525ee53b93e309b99914e0cdf175901}{\_\_Nb\_from\_pop\_section}
+812         \textcolor{keywordflow}{else}:
+813             s\_msg=\textcolor{stringliteral}{"In PGInputSimuPop instance, property Nb\_for\_restrict\_generator, "} \(\backslash\)
+814                     + \textcolor{stringliteral}{"unknown string value returned form call to \_\_get\_nb\_attribute\_derivation."} 
+815             \textcolor{keywordflow}{raise} Exception( s\_msg )
+816         \textcolor{comment}{#end if pop-section Nb, else effective size, else unknown}
+817         \textcolor{keywordflow}{return} i\_returnval
 \end{DoxyCode}
 
 

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['loci_5fsubsample_5ftags',['loci_subsample_tags',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#a9818ed890508a24026ea37fa734c898e',1,'negui::genepopfilemanager::GenepopFileManager']]]
+  ['indiv_5fsubsample_5ftags',['indiv_subsample_tags',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#ae77bd8c465db4d95839db838c236f4cd',1,'negui::genepopfilemanager::GenepopFileManager']]]
 ];
