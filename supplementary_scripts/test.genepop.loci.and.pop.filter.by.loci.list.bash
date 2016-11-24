@@ -85,8 +85,18 @@ colindiv="5"
 #pop by pop number.
 declare -A indivsbypop
 
+#we stop reading the stderr output
+#from this line forward:
+firstlineparamtable="Table of parameters and values:"
+
 while read myline
 do
+
+	if [ "$myline" == "$firstlineparamtable" ]
+	then
+		break
+	fi
+
 	mypopindex=$( echo "$myline" | cut -f "$colpopnum")
 	myindivs=$( echo "$myline" | cut -f "$colindiv")
 	myindivs=$( echo "myl=[ int( i ) for i in '${myindivs}'.split( ',') ];myl.sort();print ','.join( [ str(i) for i in myl ]);" \
@@ -117,7 +127,7 @@ popcount="0"
 
 for pn in $( seq $p1 $p2 )
 do
-	#gp file for this pop, derived from the original
+	#gp files for this pop, derived from the original
 	#that is filtered  for the indiv, as given
 	#by the list of indiv numbers output by
 	#pgdriveneestimator.py
