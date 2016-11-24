@@ -208,9 +208,9 @@ class GenepopFileManager( object ):
 		#end for line in file
 		
 		#with correct genepop line and code, should never reach this line:
-		raise Exception( "GenepopFileAddresses object, in def __read_header_and_loci, " \
+		raise Exception( "In GenepopFileManager instance, def __read_header_and_loci, " \
 				+ "found no \"pop\" line (case insensitive) in file, " \
-				+ self.__filename )
+				+ self.__filename + "." )
 
 	#end __read_header_and_loci
 
@@ -362,6 +362,22 @@ class GenepopFileManager( object ):
 	#end __get_pop_list
 
 	def __get_header_and_loci_entries_for_loci_subsample( self, s_loci_subsample_tag ):
+		if s_loci_subsample_tag is None:
+			li_header_and_loci_lines=self.__header_and_loci_byte_addresses.keys()
+		else:
+			l_header_address=self.__header_and_loci_byte_addresses[ 0 ]
+			li_header_and_loci_lines=[ l_header_address ] \
+					+ [ idx for idx in  self.__loci_subsamples[ s_loci_subsample_tag ] ]
+		#end if we include all loci, else subsample
+		
+		#write header and loci list:
+		for i_line_number in li_header_and_loci_lines:
+
+			o_origfile.seek( self.__header_and_loci_byte_addresses[ i_line_number ] )
+			o_newfile.write( o_origfile.readline() )
+		#end for each line in the header and loci section
+
+
 		return
 	#end __get_header_and_loci_entries_for_loci_subsample
 
@@ -370,6 +386,20 @@ class GenepopFileManager( object ):
 			s_indiv_subsample_tag=None, 
 			s_loci_subsample_tag=None,
 			i_min_pop_size=0 ):
+
+		'''
+		We convert all endlines to unix endlines. Found
+		that in testing some dos-endline files, that
+		simply writing whole lines from the file, then
+		mixing with my subsampled loci lines, that i had
+		genepop files with mixed endlines.  Note that testing
+		these iwth NeEstimator shows they werre properly
+		processed, but rather than test for which endline in 
+		orig, I'll simply use strip() and replace all whole
+		line read/writes form the original with the unix endline.
+		'''
+
+		UNIX_ENDLINE="\n"
 
 		#here we open the file without the 'b' flag, so we
 		#will read string in both python 2 and 3
@@ -404,7 +434,8 @@ class GenepopFileManager( object ):
 		for i_line_number in li_header_and_loci_lines:
 
 			o_origfile.seek( self.__header_and_loci_byte_addresses[ i_line_number ] )
-			o_newfile.write( o_origfile.readline() )
+			s_line_stripped=( o_origfile.readline() ).strip()
+			o_newfile.write( s_line_stripped + UNIX_ENDLINE )
 		#end for each line in the header and loci section
 
 		#write pops:
@@ -446,7 +477,8 @@ class GenepopFileManager( object ):
 						for i_line_number in self.__pop_byte_addresses[ i_pop_number ][ i_indiv_number ]:
 							o_origfile.seek( self.__pop_byte_addresses[ i_pop_number ]\
 															[ i_indiv_number ][ i_line_number ] )
-							o_newfile.write( o_origfile.readline() )
+							s_line_stripped=( o_origfile.readline() ).strip()
+							o_newfile.write( s_line_stripped + UNIX_ENDLINE )
 						#end for each line number
 					#otherwise we need to get loci via subsample:
 					else:
@@ -461,7 +493,7 @@ class GenepopFileManager( object ):
 														i_indiv_number=i_indiv_number, 
 														s_loci_subsample_tag=s_loci_subsample_tag )
 
-						o_newfile.write( s_id + "," + s_loci + "\n" )
+						o_newfile.write( s_id + "," + s_loci + UNIX_ENDLINE )
 					#end if no loci subsample, simply print orig entry, else get loci subsample
 				#end for each item number
 			#end if num individuals in this pop at or over min
@@ -767,7 +799,7 @@ class GenepopFileManager( object ):
 									b_truncate_max_to_total ):
 		'''
 		Returns a range object (in python3, not synonymous
-		with a list type).  Checks for valid range.  iv the 
+		with a list type).  Checks for valid range.  if the 
 		b_truncate_max_to_total is True, then it truncates
 		to the max loci number N (1,2,3...N for N total loci).
 		'''
@@ -807,19 +839,29 @@ class GenepopFileManager( object ):
 		li_range_loci_numbers=range( i_min_loci_position, ( i_max_loci_position + 1 ) )
 
 		return li_range_loci_numbers
-	#end def 
-
+	#end def __get_range_loci_nums
 
 	def subsampleLociByRangeAndMax( self, i_min_loci_position, 
 			i_max_loci_position,
 			s_loci_subsample_tag,
+			i_min_total_loci=None,
 			i_max_total_loci=None,
 			b_truncate_max_to_total=True ):
 			
 		'''
 		Generate list of integers that stand for loci positions,
 		and as such allow for printing all or a subset of the loci
-		for a given pop/indiv.
+		for a given pop/indiv.  Given we have a set of N loci l_x in a
+		genepop file listed in order l_1, l_2, l_3...l_N.
+
+		param i_min_loci_position : integer giving lower index for range of loci numbers
+		param i_min_loci_position : integer giving upper index for range of loci numbers
+		param i_min_total: sample at least this many loci, or throw error
+		param i_max_total: sample at most this many loci, randomly select if range exceeds
+		param b_truncate_max_to_total : boolean, if True, then, when the param i_max_loci_position
+			                            exceeds N, we set it to N.  If false then we keep the max
+										position, in order to throw an error if it exceeds N
+										(see def __get_range_loci_nums).
 
 		'''
 
@@ -832,6 +874,19 @@ class GenepopFileManager( object ):
 		i_loci_range_interval_size=len( o_range_to_sample )
 
 		i_sample_size=i_loci_range_interval_size 
+
+		if i_min_total_loci is not None:
+			if i_sample_size < i_min_total_loci:
+				s_msg="In GenepopFileManager instance, def " \
+							+ "subsampleLociByRangeAndMax " \
+							+ "loci sample size, " \
+							+ str( i_sample_size )  \
+							+ ", is less than the minimum " \
+							+ "given by the passed argument: "  \
+							+ str( i_min_total_loci ) + "."
+				raise Exception( s_msg )
+			#end if sample size under min
+		#end if min total loci is not None
 
 		if i_max_total_loci is not None:
 			i_sample_size=\
@@ -852,20 +907,21 @@ class GenepopFileManager( object ):
 			i_max_loci_position,
 			s_loci_subsample_tag,
 			f_proportion_of_total_loci,
+			i_min_total_loci=None,
 			b_truncate_max_to_total=True ):
 			
 		'''
 		Generate list of integers that stand for loci positions,
 		and as such allow for printing the given proportion of loci
 		with the indices range given.  Flag b_truncate_max_to_total
-		when True will truncate the max-loci-positioin param to the
+		when True will truncate the max-loci-position param to the
 		max loci number, when the given value exceeds.  Otherwise,
 		if max is out of range an error will be thrown.
 
 		'''
 
 		self.__loci_subsamples[ s_loci_subsample_tag ]=[]
-		
+
 		o_range_to_sample=self.__get_range_loci_nums( i_min_loci_position, 
 															i_max_loci_position,
 															b_truncate_max_to_total )
@@ -875,6 +931,19 @@ class GenepopFileManager( object ):
 		f_proportion_of_sample=float (i_loci_range_interval_size  ) * f_proportion_of_total_loci 
 
 		i_sample_size=int( round(  f_proportion_of_sample ) )
+		
+		if i_min_total_loci is not None:
+			if i_sample_size < i_min_total_loci:
+				s_msg="In GenepopFileManager instance, def " \
+							+ "subsampleLociByRangeAndProportion, " \
+							+ "loci sample size, " \
+							+ str( i_sample_size )  \
+							+ " is less than the minimum " \
+							+ "given by the passed argument: "  \
+							+ str( i_min_total_loci ) + "."
+				raise Exception( s_msg )
+			#end if sample size under min
+		#end if i_min_total_loci is not None
 
 		li_subsample=random.sample( o_range_to_sample, i_sample_size )
 
@@ -1033,57 +1102,52 @@ class GenepopFileManager( object ):
 	#end subsampleIndividualsMinusRandomNFromEachPop
 
 	def subsampleIndividualsLeaveNthOutFromPop( self, i_n, 
-													i_pop_number, 
 													s_indiv_subsample_tag ):
 		'''
-		From a singleh pop in the file remove the nth of M individuals, 
+		Remove the nth of M individuals, 
 		where individuals are numbered 1,2,3...M
 
-		Requires value for i_n, 0<i_n<i_
-
-		Also requires both an individual subsample tag and a pop number,
-		As this subsample must involve only a single population
+		Requires value for i_n, 0<i_n.  If i_n > pop size,
+		we enter an empty list for the pop for ths given subsample tag.
 		'''
-	
-		i_tot_pops=self.__get_count_populations()
-
-		if i_pop_number < 1 or i_pop_number > i_tot_pops:
-			s_msg="In GenepopFileManager instance, def " \
-					+ "subsampleIndividualsLeaveNthOutFromPop, " \
-					+ "invalid population nunmber.  With " + str( i_tot_pops ) \
-					+ " populatins and  population number, " \
-					+ str( i_pop_number ) + "."
-
-			raise Exception ( s_msg )
-		#end if invalid pop number
-
-		li_indiv_list=self.__get_list_indiv_numbers( i_pop_number, s_indiv_subsample_tag=None )
-
-		#want a copy of the list:
-		li_indiv_list_copy=[ i_indiv for i_indiv in li_indiv_list ]
-
-		i_pop_size=len( li_indiv_list_copy )
 
 		self.__indiv_subsamples[ s_indiv_subsample_tag ] = {}
 
-		if i_n>i_pop_size or i_n < 1:
-			s_msg="In GenepopFileManager instance, def " \
-					+ "subsampleIndividualsLeaveNthOutFromPop, " \
-					+ "invalid N.  With " + str( i_pop_size ) \
-					+ " individuals, and N = " \
-					+ str( i_n ) + "."
-
-			raise Exception ( s_msg )
-		#end if n out of bounds
+		li_all_population_numbers=self.__get_pop_list()
 		
-		li_indiv_list_copy.remove( i_n )
-		
-		#to any sample we always add the zeroth
-		#indiviudal number, which is the "pop"
-		#entry
-		self.__indiv_subsamples[ s_indiv_subsample_tag ] [ i_pop_number ] = \
-				[0] + li_indiv_list_copy
+		li_indiv_list_copy=None
 
+		for i_pop_number in li_all_population_numbers:
+
+			li_indiv_list=self.__get_list_indiv_numbers( i_pop_number, s_indiv_subsample_tag=None )
+
+			i_pop_size=len( li_indiv_list )
+
+			if  i_n < 1:
+				s_msg="In GenepopFileManager instance, def " \
+						+ "subsampleIndividualsLeaveNthOutFromPop, " \
+						+ "invalid N.  With " + str( i_pop_size ) \
+						+ " individuals, and N = " \
+						+ str( i_n ) + "."
+
+				raise Exception ( s_msg )
+			elif i_n>i_pop_size:
+				#Can't leave out nth indiv, since n too large,
+				#so we assign an emtpy list for this pop:
+				li_indiv_list_copy=[]
+
+			else:	
+				#want a copy of the list:
+				li_indiv_list_copy = [ i_indiv for i_indiv in li_indiv_list ]
+				li_indiv_list_copy.remove( i_n )
+			#end if n < 1, n>pop size, else in range
+			
+			#to any sample we always add the zeroth
+			#indiviudal number, which is the "pop"
+			#entry
+			self.__indiv_subsamples[ s_indiv_subsample_tag ] [ i_pop_number ] = \
+					[0] + li_indiv_list_copy
+		#end for each pop number
 		return
 	#end subsampleIndividualsLeaveNthOutFromPop
 

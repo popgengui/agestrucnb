@@ -31,6 +31,7 @@ from pgguiutilities import KeyListComboFrame
 from pgguiutilities import KeyCategoricalValueFrame
 from pgguiutilities import PGGUIInfoMessage
 from pgguiutilities import PGGUIYesNoMessage
+from pgguiutilities import PGGUIErrorMessage
 from pgutilityclasses import IndependantSubprocessGroup
 from pgutilityclasses import FloatIntStringParamValidity
 import pgutilities as pgut
@@ -558,6 +559,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#end if param is in paramset
 
 
+
 			#if no specific def is to be called on value change
 			#then we default to the def that shows current param vals:
 			def_to_call_on_change=self.__test_value
@@ -762,15 +764,22 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		N0 parameter updates differently according to
 		whether it is simply taken from a config file's
 		pop section, or, alternatively, calculated from
-		params Nb and Nb/Nc as given by an "effective_size"
-		section in a life table or config file.  In the latter
+		params Nb,Nb/Nc as given by an "effective_size"
+		section in a life table or config file, and also
+		using input params maleProb, survivalMale, and
+		survivalFemale.  In the latter
 		case, the keyvalue frame will be disabled and its entrybox
 		will be manually updated from this def.  
 		'''
 		if self.__input.N0IsCalculatedFromEffectiveSizeInfo():
-			#Nb is a property, calculated or just returned
-			#depending on its source (effec size or hus a value
-			#given in the pop section).
+			'''
+			Nb is a property, calculated or just returned
+			depending on its source (effec size or hus a value
+			given in the pop section). The property def in
+			our __input member will test the state and calculate
+			N0 accordingly:
+			'''
+
 			i_current_n0_val=self.__input.N0
 
 			self.__param_key_value_frames[ "N0" ].manuallyUpdateValue( i_current_n0_val )
@@ -1068,91 +1077,97 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end __output_files_exist_with_current_output_basename
 
 	def runSimulation( self ):
-		if self.__output is None \
-			or self.__input is None:
-			s_msg="Simulation not ready to run.  Input or Output parameters " \
-					+ "have not been set" 
-			sys.stderr.write( s_msg + "\n" )
-			PGGUIInfoMessage( self, s_msg )
-			return	
-		#end if output or input is None
+		try:
 
-		self.__setup_op()
+			if self.__output is None \
+				or self.__input is None:
+				s_msg="Simulation not ready to run.  Input or Output parameters " \
+						+ "have not been set" 
+				sys.stderr.write( s_msg + "\n" )
+				PGGUIInfoMessage( self, s_msg )
+				return	
+			#end if output or input is None
 
-		'''
-		this check was added in case a user completed a simulation,
-		then accidentally hit "run simulation" button again without
-		changing anything in the interface, and then (very quickly) 
-		hit the "cancel simulation" button -- initiating a file removal
-		before the program has reached the point at which which the
-		PGOutputSimuPop object could abort the run by throwing an 
-		exception that the output files already exist.
-		The following check is meant to halt the sim before any
-		separate processes are even started (and so no multiprocessing
-		event will cause cancel prompt and cleanup on "yes" ).
-		'''
-		if self.__output_files_exist_with_current_output_basename():
-			s_msg="The program can't start the simulation. Output files " \
-					+ "already exist with current " \
-					+ "path and basename: " + self.__output.basename + ".  " \
-					+ "\nTo start a new simulation please do one of the following:\n" \
-					+ "1. Remove or rename the output files.\n" \
-					+ "2. Rename the output files base name or output directory." 
+			self.__setup_op()
 
-			sys.stderr.write( s_msg + "\n" )
+			'''
+			this check was added in case a user completed a simulation,
+			then accidentally hit "run simulation" button again without
+			changing anything in the interface, and then (very quickly) 
+			hit the "cancel simulation" button -- initiating a file removal
+			before the program has reached the point at which which the
+			PGOutputSimuPop object could abort the run by throwing an 
+			exception that the output files already exist.
+			The following check is meant to halt the sim before any
+			separate processes are even started (and so no multiprocessing
+			event will cause cancel prompt and cleanup on "yes" ).
+			'''
+			if self.__output_files_exist_with_current_output_basename():
+				s_msg="The program can't start the simulation. Output files " \
+						+ "already exist with current " \
+						+ "path and basename: " + self.__output.basename + ".  " \
+						+ "\nTo start a new simulation please do one of the following:\n" \
+						+ "1. Remove or rename the output files.\n" \
+						+ "2. Rename the output files base name or output directory." 
+
+				sys.stderr.write( s_msg + "\n" )
+				
+				PGGUIInfoMessage( self, s_msg )
+				return
+			#end if output files exist	
+
+			#input file to reaplace the orig config file
+			#as well as the attr/value dict originally passed to each 
+			#process.  We need to set this temp file name attribute
+			#in this instance before spawning a multiprocessing.process
+			#in do_operation, else it will not appear during call backs
+			#to __check_progress_operation_process, in which we delete
+			#the temp file when sim processes are finished
+			self.__temp_config_file_for_running_replicates=str( uuid.uuid4() ) 
 			
-			PGGUIInfoMessage( self, s_msg )
-			return
-		#end if output files exist	
+			self.__input.writeInputParamsAsConfigFile( \
+				self.__temp_config_file_for_running_replicates )
 
-		#input file to reaplace the orig config file
-		#as well as the attr/value dict originally passed to each 
-		#process.  We need to set this temp file name attribute
-		#in this instance before spawning a multiprocessing.process
-		#in do_operation, else it will not appear during call backs
-		#to __check_progress_operation_process, in which we delete
-		#the temp file when sim processes are finished
-		self.__temp_config_file_for_running_replicates=str( uuid.uuid4() ) 
-		
-		self.__input.writeInputParamsAsConfigFile( \
-			self.__temp_config_file_for_running_replicates )
+			#we pass a ref to this object to the target (def in pgutilities, do_simulation_reps_in_subprocesses) 
+			#for op_process, #Then, from this object instance can call "set()" on the event, 
+			#after, for example #an __on_click_run_or_cancel_simulation_button->__cancel_simulation()
+			#sequence, so that the event will to pass True and then the ref in
+			#op_process will return True when the op_process interrog 
+			#o_event.is_set()  and it can accordingly clean
+			#up its collection of subprocess.Popen processes 
+			self.__sim_multi_process_event=multiprocessing.Event()
 
-		#we pass a ref to this object to the target (def in pgutilities, do_operation_outside) 
-		#for op_process, #Then, from this object instance can call "set()" on the event, 
-		#after, for example #an __on_click_run_or_cancel_simulation_button->__cancel_simulation()
-		#sequence, so that the event will to pass True and then the ref in
-		#op_process will return True when the op_process interrog 
-		#o_event.is_set()  and it can accordingly clean
-		#up its collection of subprocess.Popen processes 
-		self.__sim_multi_process_event=multiprocessing.Event()
+			#our sim run(s) should not block the main gui, so we
+			#run it(them) in one or more python.subprocesses:
+			self.__op_process=multiprocessing.Process( target=pgut.do_simulation_reps_in_subprocesses, 
+						 args=( self.__sim_multi_process_event, 
+							self.__input.reps, 
+							self.__total_processes_for_sims,
+							self.__temp_config_file_for_running_replicates,
+							self.__life_table_files,
+							self.__param_names_file,
+							self.__output.basename ) ) 
 
-		#our sim run(s) should not block the main gui, so we
-		#run it(them) in a new python.multiprocessing.process:
-		self.__op_process=multiprocessing.Process( target=pgut.do_operation_outside, 
-					 args=( self.__sim_multi_process_event, 
-						self.__input.reps, 
-						self.__total_processes_for_sims,
-						self.__temp_config_file_for_running_replicates,
-						self.__life_table_files,
-						self.__param_names_file,
-						self.__output.basename ) ) 
+			self.__op_process.start()
 
-		self.__op_process.start()
+			self.__simulation_is_in_progress=True
 
-		self.__simulation_is_in_progress=True
+			#Need some padding in front, or
+			#it's too close to the run button:
+			self.__run_state_message="  " + SIM_RUNNING_MSG
 
-		#Need some padding in front, or
-		#it's too close to the run button:
-		self.__run_state_message="  " + SIM_RUNNING_MSG
+			self.__set_controls_by_run_state( self.__get_run_state() )
 
-		self.__set_controls_by_run_state( self.__get_run_state() )
+			self.__init_interface( b_force_disable=True )
+			self.__load_values_into_interface( b_force_disable=True )
 
-		self.__init_interface( b_force_disable=True )
-		self.__load_values_into_interface( b_force_disable=True )
-
-		self.after( 500, 
-				self.__check_progress_operation_process )
-
+			self.after( 500, 
+					self.__check_progress_operation_process )
+		except Exception as oex:
+			PGGUIErrorMessage( o_parent=self, s_message= \
+					oex.__class__.__name__ + ", " + str( oex ) )
+			raise oex 
+		#end try . . . except
 		return
 	#end runSimulation
 

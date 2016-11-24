@@ -574,6 +574,46 @@ class PGParamSet( object ):
 		return qv_return_values
 	#end getAllParamSettings
 
+	def getShortnamesOrderedBySectionNumByParamNum( self, ):
+		'''
+		Returns a list of parm names sorted first by section number
+		(i.e. order of section as given by tag field), and then 
+		by param order number (another tag field). 
+
+		This def allows gui client to get a list of param names in 
+		their placement order, so that frames holding sections and
+		controls holding param labels and entry boxes with be created
+		in proper order to automatically create the correct tab order
+		(in Tkinter, anyway).
+		'''
+		#convendice to get a struct-like var
+		class ParamPlacements( object ):
+			def __init__( self, s_param, i_section_number, i_param_number ):
+				self.param=s_param
+				self.section_number=i_section_number
+				self.param_number=i_param_number
+				return
+			#end __init__
+		#end class
+
+		lo_paramobjects=[]
+
+		for s_param in self.__tags_by_shortname.keys():
+			i_section_order=self.getSectionOrderForParam( s_param )
+			i_param_order=self.getParamOrderNumberForParam( s_param )
+			lo_paramobjects.append( ParamPlacements( s_param, 
+									i_section_order, i_param_order ) )
+		#end for each param, make placments obj, append
+
+		lo_paramobjects_sorted=sorted( lo_paramobjects, key=lambda x: (x.section_number, x.param_number ) )
+		ls_param_names_sorted=[ o_this.param for o_this in lo_paramobjects_sorted ]
+		return ls_param_names_sorted
+	#end 
+
+	def paramIsList( self, s_param_shortname ):
+		s_type_name=self.getParamTypeForParam( s_param_shortname )
+		return ( s_type_name.startswith( "list" ) )
+	#end paramIsList
 
 	@property
 	def param_names_file( self ):

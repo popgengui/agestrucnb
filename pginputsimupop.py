@@ -398,17 +398,55 @@ class PGInputSimuPop( object ):
 	#end __get_config
 
 	def __compute_n0_from_eff_size_info( self ):
+		'''
+		2016_11_04
+		Revising by incorporating Brian Trethway's new calc method 
+		(adapted from his module Sample_testing.py, which he pushed to
+		our github repo a few days ago).
+		'''
 
 		i_n0=None
-
-		if hasattr( self, "_PGInputSimuPop__Nb_from_eff_size_info" ) and hasattr( self, "NbNc" ):
-			i_n0=0 if self.NbNc == 0.0 else int( round ( float( self.__Nb_from_eff_size_info )/self.NbNc ) )
-		else:
-			s_msg="In PGInputSimuPop object, def __compute_n0_from_eff_size_info, " \
-					+ "either Nb or NbNc attributes are missing from the instance."
-			raise Exception( s_msg )
-		#end if either attribute is missing
 		
+		#First make sure we have the parmeters in our input object:
+		ls_required_params=[ "NbNc", "_PGInputSimuPop__Nb_from_eff_size_info", "survivalFemale",
+							"survivalMale", "maleProb" ]
+		
+		ls_missing_params=[]
+
+		for s_param_name in ls_required_params:
+			if not hasattr( self, s_param_name ):
+				ls_missing_params.append( s_param_name )
+			#end if our input object does not have the attribute
+		#end for each param
+
+		if len( ls_missing_params ) != 0:
+			s_msg="In PGInputSimuPop instance, def __compute_n0_from_eff_size_info, " \
+						+ "Unable to caluclate N0 due to missing parameter(s): " \
+						+ ", ".join( ls_missing_params ) + "."
+			raise Exception( s_msg )
+		#end if one or more params missing
+
+		f_female_ratio = 1-self.maleProb
+		f_Nc = self.__Nb_from_eff_size_info / self.NbNc
+
+		f_current_male_prop=self.maleProb
+		f_current_female_prop=f_female_ratio
+		f_cum_pop_porp = 1
+
+		#Assumes male and female survivals have same length
+		for i_age in range(len(self.survivalMale)):
+			#calcualte new male Ratio
+			f_current_male_prop = f_current_male_prop * self.survivalMale[i_age]
+			#calculate new female ratio
+			f_current_female_prop = f_current_female_prop * self.survivalFemale[i_age]
+			#add to cumulative
+			f_cum_pop_porp+=f_current_male_prop
+			f_cum_pop_porp+=f_current_female_prop
+		#end for each age in male survival list
+
+		#calulate N0
+		i_n0 = int( round ( f_Nc/f_cum_pop_porp ) )
+			
 		return i_n0
 	#end __compute_n0_from_eff_size_info
 

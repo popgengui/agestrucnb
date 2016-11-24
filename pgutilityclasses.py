@@ -287,21 +287,18 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 	parameters aquired in the PGGuiNeEstimator objects
 	sampleparams interface, which then need to be used 
 	in a call to pgdriveneestimator.
-	'''
 
-	'''
 	A dictionary to get sampling scheme param names.  The names
 	(the values in the inner dictionaries) were extracted from file 
 	resources/neestimator_param_names on 2016_09_24
-	'''
 
-	'''
 	Attribute names used by all sample schemes
 	(though in the interface their attr names
 	will be preceeded by the scheme name:
 	'''
 
 	DELIMITER_FOR_LIST_ARG=","
+	DELIMITER_FOR_ID_FIELD_SCHEMES_NUMERIC_LISTS="-"
 	DELIMITER_FOR_COMMAND_ARGS=","
 
 	SCHEME_ALL="All"
@@ -312,22 +309,31 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 	SCHEME_COHORTS="Cohorts"
 	SCHEME_RELATEDS="Relateds"
 
+
 	SCHEMES_REQUIRING_ID_FIELDS=[ SCHEME_CRIT, 
 									SCHEME_COHORTS, 
 										SCHEME_RELATEDS ]
+
+	PARAMS_IN_ID_FIELD_SCHEMES_WITH_NUMERIC_LISTS= [ "scheme_cohort_percentages" ]
 
 	ATTR_NAME_SCHEME="sampscheme"
 	ATTR_NAME_MIN_POP_NUMBER="min_pop_number"
 	ATTR_NAME_MAX_POP_NUMBER="max_pop_number"
 	ATTR_NAME_MIN_POP_SIZE="min_pop_size"
 	ATTR_NAME_MAX_POP_SIZE="max_pop_size"
-
+	
+	'''
+	Note that in the GUI interface, all cohort
+	scheme settings include one or more percentages,
+	so we use the "cohortsperc" scheme arg for the 
+	driver, while the interface uses simply "Cohorts".
+	'''
 	DICT_DRIVER_SCHEME_NAME_BY_INTERFACE_NAME = { \
 				SCHEME_NONE : "none",
 				SCHEME_PERCENT : "percent",
 				SCHEME_REMOVE : "remove",
 				SCHEME_CRIT : "criteria",
-				SCHEME_COHORTS : "cohorts",
+				SCHEME_COHORTS : "cohortsperc",
 				SCHEME_RELATEDS : "relateds" }
 		
 	DICT_ATTR_BY_SCHEME= { \
@@ -348,7 +354,8 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 							"max_pop_size" : "scheme_crit_max_pop_size" },
 				SCHEME_COHORTS : { "max_age" : "scheme_cohort_max_age",
 								"min_pop_size" : "scheme_cohort_min_indiv_per_gen",
-								"max_pop_size" : "scheme_cohort_max_indiv_per_gen" },
+								"max_pop_size" : "scheme_cohort_max_indiv_per_gen",
+								"percentages" : "scheme_cohort_percentages" },
 				SCHEME_RELATEDS : { "percent_relateds" : "scheme_relateds_percent_relateds",
 							"min_pop_size" : "scheme_relateds_min_indiv_per_gen",
 							"max_pop_size" : "scheme_relateds_max_indiv_per_gen" } }
@@ -359,7 +366,7 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 				SCHEME_PERCENT : [ "percentages", "min_pop_size", "max_pop_size"  ],
 				SCHEME_REMOVE : [ "n", "min_pop_size", "max_pop_size"  ],
 				SCHEME_CRIT : [ "min_age" , "max_age", "min_pop_size", "max_pop_size" ],
-				SCHEME_COHORTS : [ "max_age" , "min_pop_size", "max_pop_size" ],
+				SCHEME_COHORTS : [ "max_age" , "percentages", "min_pop_size", "max_pop_size" ],
 				SCHEME_RELATEDS : [ "percent_relateds", "min_pop_size",  "max_pop_size" ] }
 		
 	CRIT_EXPRESSIONS_IN_ATTR_ORDER=[ "%age% >= ", "%age% <=" ]
@@ -446,23 +453,21 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 	#end def __get_sampling_args_for_schemes_not_requiring_id_fields
 
 	def __get_attr_val_as_string( self, s_scheme, s_arg ):
-
-		##### temp
-		print( "getting value for arg name: " + s_arg )
-		#####
-
+		MYCLS=self.__class__
+		s_value=None
 		s_attr_name=self.__attr_prefix + s_arg
 		v_value=getattr( self.__interface, s_attr_name )
-		s_value=str( v_value )
 
-		##### temp
-		print( "returning value: " + s_value )
-		#####
+		if s_arg in MYCLS.PARAMS_IN_ID_FIELD_SCHEMES_WITH_NUMERIC_LISTS:
+			s_value=MYCLS.DELIMITER_FOR_ID_FIELD_SCHEMES_NUMERIC_LISTS.join( \
+					[ str( v_numeric) for v_numeric in v_value  ] )
+		else:
+			s_value=str( v_value )
+		#end if numeric list in id-field scheme, join with correct delimiter
 
 		return s_value
 	#end __get_attr_val_as_string
 		
-
 	def __get_sampling_args_for_schemes_requiring_id_fields( self ):
 		'''	
 		As of 2016_09_30, pgdriveneestimator.py takes these
@@ -483,6 +488,8 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 				[ "id", "sex", "father", "mother", "age" ] )
 		FIELD_TYPES=DELIMIT_FIELD_LISTS.join( \
 				[ FLOAT_NAME, INT_NAME, FLOAT_NAME, FLOAT_NAME, FLOAT_NAME ] )
+
+		IDX_PARAM_VALS_AFTER_FIELD_LISTS=2
 
 		ls_params=[ FIELD_NAMES, FIELD_TYPES ] 
 
@@ -521,9 +528,20 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 				For id-field schemes other than Indiv Criteia,
 				we have (as of 2016_09_30) only a single id-field 
 				parameter, always listed first in the attribute order, 
-				to append to the id-field-params arg.
-				'''
+				to append to the id-field-params arg:				'''
 				ls_params.append( s_value )
+			elif s_param_name in CLSVALS.PARAMS_IN_ID_FIELD_SCHEMES_WITH_NUMERIC_LISTS:
+				'''
+				In some id-field schemess, such as cohorts, 
+				we also have a list of percentages (hyphen
+				delimited (see __get_attr_val_as_string),appended
+				to the param arg, for the join using the same 
+				delimiter (semicolon) as used between field lists:
+				'''
+				ls_params[ IDX_PARAM_VALS_AFTER_FIELD_LISTS ] = \
+						ls_params[ IDX_PARAM_VALS_AFTER_FIELD_LISTS ] \
+						+  DELIMIT_FIELD_LISTS + s_value
+
 			else:
 				ls_final_sample_scheme_args.append( s_value )
 			#end if this arg is a field param, else not
@@ -548,10 +566,6 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 		<sample scheme> <parameter list (comma-delimited)>
 		<min pop size> <max pop size>
 		'''
-
-		##### temp
-		print( "in getSample" )
-		#####
 
 		CLSVALS=NeEstimatorSamplingSchemeParameterManager
 
@@ -590,10 +604,6 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 
 		ls_sample_scheme_args_as_strings.append( s_pop_range_arg )
 
-		##### temp
-		print( "sample scheme args: " + str( ls_sample_scheme_args_as_strings ) )
-		#####
-
 		#We return as tuple, to use as operand in creating
 		#a complete arg set.
 		return tuple( ls_sample_scheme_args_as_strings )
@@ -601,6 +611,177 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 	#end getSampleSchemeArgToDriver
 
 #end class NeEstimatorSamplingSchemeParameterManager
+
+
+class NeEstimatorLociSamplingSchemeParameterManager( object ):
+	'''
+	Version of class pgguiutilities.NeEstimatorSamplingSchemeParameterManager
+	(see) significanly shortened, simplified  for loci sampling rather than pop (individual)
+	sampling.
+	'''
+	DELIMITER_FOR_LIST_ARG=","
+
+	SCHEME_ALL="All"
+	SCHEME_NONE="None"
+	SCHEME_PERCENT="Percent"
+	SCHEME_TOTAL="Total"
+
+	ATTR_NAME_SCHEME="locisampscheme"
+	ATTR_NAME_MIN_LOCI_NUMBER="min_loci_number"
+	ATTR_NAME_MAX_LOCI_NUMBER="max_loci_number"
+	ATTR_NAME_MAX_LOCI_COUNT="max_loci_count"
+
+	DICT_DRIVER_SCHEME_NAME_BY_INTERFACE_NAME = { \
+				SCHEME_NONE : "none",
+				SCHEME_PERCENT : "percent",
+				SCHEME_TOTAL : "total" }
+		
+	DICT_ATTR_BY_SCHEME= { \
+				SCHEME_ALL : { "min_loci_number" : "locischeme_all_min_loci_number",
+								"max_loci_number" : "locischeme_all_max_loci_number" },
+				SCHEME_NONE : { "none_dummy_param" : "locischeme_none_dummy_param",
+									"min_loci_count" : "locischeme_none_min_loci_count",
+									"max_loci_count" : "locischeme_none_max_loci_count" }, 
+				SCHEME_PERCENT : { "percentages" : "locischeme_percent_percentages",
+									"min_loci_count" : "locischeme_percent_min_loci_count",
+									"max_loci_count" : "locischeme_percent_max_loci_count" },
+				SCHEME_TOTAL : { "totals" : "locischeme_total_totals", 
+										"min_loci_count":"locischeme_total_min_loci_count",
+										"max_loci_count":"locischeme_total_min_loci_count" } }
+
+	#Note that the "total" scheme, while it does not use the min and max loci count params,
+	#Nonetheless needs the default values to make a valid call to the driver.
+	DICT_ATTR_ORDER_BY_SCHEME = { SCHEME_ALL : [ "min_loci_number", "max_loci_number" ], 
+									SCHEME_NONE : [ "none_dummy_param", "min_loci_count", "max_loci_count" ],
+									SCHEME_PERCENT : [ "percentages", "min_loci_count", "max_loci_count" ],
+									SCHEME_TOTAL : [ "totals", "min_loci_count", "max_loci_count" ] }
+
+	def __init__( self, o_pgguineestimator, s_attr_prefix ):
+		self.__interface=o_pgguineestimator
+		self.__attr_prefix=s_attr_prefix
+		return
+	#end __init__
+
+	def __get_scheme_name( self ):
+		
+		s_sampling_scheme_name = None
+
+		try: 
+			s_attr_name=self.__attr_prefix \
+						+ NeEstimatorLociSamplingSchemeParameterManager\
+									.ATTR_NAME_SCHEME 
+		
+			s_sampling_scheme_name=getattr( self.__interface,
+													s_attr_name )
+
+		except Exception as oex:
+			s_msg="In NeEstimatorLociSamplingSchemeParameterManager instance, " \
+						+ "def __get_scheme_name, " \
+						+ "could not get the sample scheme attribute " \
+						+ "value from the interface.  Exception raised: " \
+						+ str( oex ) + "."
+		#end try . . . except
+
+		if s_sampling_scheme_name not in \
+					NeEstimatorLociSamplingSchemeParameterManager.DICT_ATTR_BY_SCHEME:
+			s_msg="In NeEstimatorLociSamplingSchemeParameterManager instance, " \
+						+ "def __get_scheme_name, " \
+						+ "the interface has a sampling scheme attribute value, " \
+						+  s_sampling_scheme_name + ", " \
+						+ "not found among the types listed in the dictionary " \
+						+ "used by this class instance." 
+			raise Exception ( s_msg )
+		#end if unknown sampling scheme
+
+		return s_sampling_scheme_name
+
+	# end __get_scheme_name
+
+	def __get_sampling_args_for_scheme( self ):
+
+		s_scheme=self.__get_scheme_name()
+
+		ls_sample_scheme_args_as_strings=[]
+
+		ls_sample_scheme_args_as_strings.append( \
+				NeEstimatorLociSamplingSchemeParameterManager\
+							.DICT_DRIVER_SCHEME_NAME_BY_INTERFACE_NAME[ s_scheme ] )
+
+		for s_arg in NeEstimatorLociSamplingSchemeParameterManager\
+							.DICT_ATTR_ORDER_BY_SCHEME[ s_scheme ]:
+
+			s_attr_name=self.__attr_prefix \
+					+ NeEstimatorLociSamplingSchemeParameterManager\
+											.DICT_ATTR_BY_SCHEME[ s_scheme ][ s_arg ]
+
+			v_value=getattr( self.__interface, 
+									s_attr_name )
+		
+			s_value=None
+
+			'''
+			If a list, we assume it is the sample params
+			list (a multi-valued arg)
+			'''
+			if type( v_value ) == list:
+				s_value= \
+					NeEstimatorLociSamplingSchemeParameterManager\
+								.DELIMITER_FOR_LIST_ARG\
+								.join( [ str( v_item ) for v_item in v_value ] )
+			else:
+				s_value=str( v_value )
+			#end if type is a list else not
+
+			ls_sample_scheme_args_as_strings.append( s_value )
+		#end for each arg in DICT_ATTR_ORDER_BY_SCHEME
+
+
+		return ls_sample_scheme_args_as_strings
+	#end def __get_sampling_args_for_scheme
+
+	def getSampleSchemeArgsForDriver( self ):
+
+		'''
+		We contruct the param-scheme-related
+		arguments to a call to the main def
+		in pgdriveneestimator.py.  
+		'''
+
+		CLSVALS=NeEstimatorLociSamplingSchemeParameterManager
+
+		s_scheme=self.__get_scheme_name()
+
+	
+		ls_sample_scheme_args_as_strings=\
+					self.__get_sampling_args_for_scheme()
+
+		'''
+		All sampling schemes have a range of loci numbers,
+		passed to pgdriveneestimator.py as a hyphenated
+		pair min-max:
+		'''
+		s_scheme_all=CLSVALS.SCHEME_ALL
+		s_attr_min_loci_number=self.__attr_prefix \
+				+ CLSVALS.DICT_ATTR_BY_SCHEME[ s_scheme_all ] [ "min_loci_number" ]
+
+		s_attr_max_loci_number= self.__attr_prefix \
+				+ CLSVALS.DICT_ATTR_BY_SCHEME[ s_scheme_all ][ "max_loci_number" ]
+	
+		i_min_loci_number=getattr( self.__interface, s_attr_min_loci_number )
+		i_max_loci_number=getattr( self.__interface, s_attr_max_loci_number )
+						
+		s_loci_range_arg=str( i_min_loci_number ) + "-" + str( i_max_loci_number )
+
+		ls_sample_scheme_args_as_strings.append( s_loci_range_arg )
+
+		#We return as tuple, to use as operand in creating
+		#a complete arg set.
+		return tuple( ls_sample_scheme_args_as_strings )
+
+	#end getSampleSchemeArgToDriver
+
+#end class NeEstimatorLociSamplingSchemeParameterManager 
+
 
 class ValueValidator( object ):
 

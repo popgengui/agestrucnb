@@ -2,9 +2,12 @@
 Description
 Support defs for the pop gen interface programs.
 '''
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 __filename__ = "pgutilities.py"
 __date__ = "20160601"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
+
 
 import os
 import sys
@@ -24,13 +27,13 @@ import inspect
 import time
 import multiprocessing
 
-#for def do_operation_outside,
+#for def do_simulation_reps_in_subprocesses,
 #used to detect windows, and 
 #correct strings that give file paths:
 import platform
 
-from pgutilityclasses import IndependantSubprocessGroup 
 
+from pgutilityclasses import IndependantSubprocessGroup 
 VERBOSE=False
 
 PROCESS_QUEUE_STOP_SIGN='STOP'
@@ -39,6 +42,10 @@ DELIMITER_LIFE_TABLE_FILES=","
 
 NE_ESTIMATION_MAIN_TABLE_FILE_EXT="ldne.tsv"
 NE_ESTIMATION_SECONDARY_OUTPUT_FILE_EXT="ldne.msgs"
+
+SYS_LINUX="linux"
+SYS_WINDOWS="windows"
+SYS_MAC="mac"
 
 def do_usage_check( ls_this_argv, 
             ls_required_arg_descriptions, 
@@ -384,9 +391,30 @@ def get_separator_character_for_current_os():
 	return os.path.sep
 #end get_separator_character_for_current_os
 
+def get_platform():
+
+	s_os_platform_name=platform.system()
+	
+	s_platform_informal=None
+
+	if "linux" in s_os_platform_name.lower():
+		s_platform_informal=SYS_LINUX
+	elif "windows" in s_os_platform_name.lower():
+		s_platform_informal=SYS_WINDOWS
+	elif "darwin" in s_os_plaform_name.lower():
+		s_platform_informal=SYS_MAC
+	else:
+		s_msg="In pgutilitites, def get_platform, "  \
+					+ "unrecognized platform name: " \
+					+ s_os_platform_name + "."
+		raise Exception( s_msg )
+	#end if linux, else win, else mac, else error
+	return s_platform_informal
+#end get_platform
+
 def is_windows_platform():
-	s_os_plaform_name=platform.system()
-	return ( s_os_plaform_name == "windows" )
+	s_os_plaform_name=get_platform()	
+	return ( s_os_plaform_name == SYS_WINDOWS )
 #end is_windows_platform
 
 def fix_windows_path( s_path ):
@@ -394,7 +422,7 @@ def fix_windows_path( s_path ):
 	return s_fixed_path
 #end def fix_windows_path
 
-def do_operation_outside( o_multiprocessing_event,
+def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 			i_input_reps, 
 			i_total_processes_for_sims,
 			s_temp_config_file_for_running_replicates,
@@ -409,8 +437,8 @@ def do_operation_outside( o_multiprocessing_event,
 	Sat Jul 30 22:38:42 MDT 2016, is to use OS processes via python's 
 	subprocess module, creating them in this def, which gets its
 	requisite info needed for the sim from the pgguisimupop instance
-	that calls this def (this def is called in a new python.multiprocessing.process
-	instance, in order not to block the gui).
+	that calls this def (this def is called by the GUI interface instance
+	in a new python.multiprocessing.process instance, in order not to block the gui).
 
 	Note that this def was originally inside the pgguisimupop instance that calls it,
 	but on windows there was a pickling error not seen on linux or Mac.  Moving this
@@ -422,139 +450,152 @@ def do_operation_outside( o_multiprocessing_event,
 
 	'''	
 
-	s_life_tables_stringified=",".join( ls_life_table_files )
+	'''	
+	Running this inside a try block allows us to notify GUI
+	users of exceptions propogated from anywere inside the 
+	simulation setup and execution code. When we catch exceptions 
+	below, we send an error message to a gui message box, then
+	re-raise the exception.	
+	'''
+	try:
+		s_life_tables_stringified=",".join( ls_life_table_files )
 
-	s_os_plaform_name=platform.system()
+		#if we're on windows, out strings of file
+		#paths may be a mangled mix of unix and 
+		#windows separators -- with errors resulting
+		#downstream.  So we standardize:
+		if is_windows_platform():
+			s_life_tables_stringified= \
+				fix_windows_path( s_life_tables_stringified )
+			s_param_names_file= \
+				fix_windows_path( s_param_names_file )				
+			s_output_basename= \
+				fix_windows_path( s_output_basename )	
+		#end if windows, fix file path strings
 
-	b_is_windows_os = ( s_os_plaform_name.lower() == "windows" )
-	#if we're on windows, out strings of file
-	#paths may be a mangled mix of unix and 
-	#windows separators -- with errors resulting
-	#downstream.  So we standardize:
-	if b_is_windows_os:
-		s_life_tables_stringified= \
-			fix_windows_path( s_life_tables_stringified )
-		s_param_names_file= \
-			fix_windows_path( s_param_names_file )				
-		s_output_basename= \
-			fix_windows_path( s_output_basename )	
-	#end if windows, fix file path strings
+		i_total_replicates_requested=i_input_reps
 
-	i_total_replicates_requested=i_input_reps
-
-	i_max_processes_to_use=i_total_processes_for_sims
+		i_max_processes_to_use=i_total_processes_for_sims
 
 
-	#we use a python command for a -c arg in the Popen command (see below)
-	#and these will be the same args for each replicate (we add the rep-number
-	#arg below).  We stringify so that they can be Popen command args.  Some
-	#are de-stringified by the pgutilities def before sending to pgop-creator
-	seq_first_four_args_to_sim_call=( s_temp_config_file_for_running_replicates,
-									s_life_tables_stringified,
-									s_param_names_file,
-									s_output_basename )
-	
-	i_total_replicates_started=0
-
-	o_subprocess_group=IndependantSubprocessGroup()
-
-	while i_total_replicates_started < i_total_replicates_requested:
-		#see if we need to cancel:	
-		if o_multiprocessing_event.is_set():
-
-			if VERBOSE:
-				print ( "received event in setup loop" )
-			#end if VERBOSE
-
-			o_subprocess_group.terminateAllSubprocesses()
-			
-			remove_simulation_replicate_output_files( s_output_basename )
-
-			break
-
-		else:
-
-			i_number_subprocesses_alive=o_subprocess_group.getTotalAlive()
-
-			i_number_subprocesses_available= \
-					i_max_processes_to_use-i_number_subprocesses_alive
-
-			i_number_replicates_to_go=i_total_replicates_requested - i_total_replicates_started
-
-			i_number_subprocesses_to_start=i_number_subprocesses_available
-
-			#reduce the number to start if we have fewer reps to go than avail procs:
-			if i_number_subprocesses_available > i_number_replicates_to_go:
-					i_number_subprocesses_to_start = i_number_replicates_to_go
-			#end if fewer needed than available
-
-			for idx in range( i_number_subprocesses_to_start ):
-
-				i_total_replicates_started += 1
-				
-				#In the Popen call, rather than rely on a driver python script 
-				#that would need to be in PATH, we'll simply
-				#invoke python with a "-c" argument that imports the 
-				#pgutilities module and executes the correct def:
+		#we use a python command for a -c arg in the Popen command (see below)
+		#and these will be the same args for each replicate (we add the rep-number
+		#arg below).  We stringify so that they can be Popen command args.  Some
+		#are de-stringified by the pgutilities def before sending to pgop-creator
+		seq_first_four_args_to_sim_call=( s_temp_config_file_for_running_replicates,
+										s_life_tables_stringified,
+										s_param_names_file,
+										s_output_basename )
 		
-				#complete the set of args used in the command by adding the
-				#replicate number (recall need comma in sequence with single item,
-				#to delineate sequence versus simple expression):
-				seq_complete_arg_set=seq_first_four_args_to_sim_call + ( str( i_total_replicates_started ), )
+		i_total_replicates_started=0
 
-				'''
-				in case the negui mods are not in the default python 
-				install dirs, then we need to add them to the sys.paths in
-				any  spawned invocation of python exe -- seems that 
-				the PYTHONPATH env var known to this parent process 
-				is unknown to the "python" invocation via Popen.  
-				We can get for and then add to our new python invocation
-				the path to all negui modules by getting the
-				path to this module:
-				'''
-				s_curr_mod_path = os.path.abspath(__file__)
+		o_subprocess_group=IndependantSubprocessGroup()
 
-				#path only (stripped off "/utilities.py" )
-				#-- gives path to all negui mods:
-				s_mod_dir=os.path.dirname( s_curr_mod_path )
+		while i_total_replicates_started < i_total_replicates_requested:
+			#see if we need to cancel:	
+			if o_multiprocessing_event.is_set():
 
-				#need to fix the path if we're on windows:
-				if b_is_windows_os:
-					s_mod_dir=fix_windows_path( s_mod_dir )
-				#end if windows, fix path
+				if VERBOSE:
+					print ( "received event in setup loop" )
+				#end if VERBOSE
+
+				o_subprocess_group.terminateAllSubprocesses()
 				
-				s_path_append_statements="import sys; sys.path.append( \"" \
-						+ s_mod_dir + "\" );"
+				remove_simulation_replicate_output_files( s_output_basename )
 
-				s_python_command=s_path_append_statements + "import pgutilities;" \
-									"pgutilities.prep_and_call_do_pgopsimupop_replicate" \
-									+ "( \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" )" %  seq_complete_arg_set
+				break
 
-				o_new_subprocess=subprocess.Popen( [ "python", "-c", s_python_command ] )
-				o_subprocess_group.addSubprocess( o_new_subprocess ) 
-			#end for each idx of new procs
-		#end if event is set else not
-	#end while preplicates need to be started
+			else:
 
-	#we don't want to return untill all processes are done.
-	#meantime test for cancel-request
-	i_total_still_alive_after_creating_all=o_subprocess_group.getTotalAlive()
+				i_number_subprocesses_alive=o_subprocess_group.getTotalAlive()
 
-	while i_total_still_alive_after_creating_all > 0:
-		if o_multiprocessing_event.is_set():
+				i_number_subprocesses_available= \
+						i_max_processes_to_use-i_number_subprocesses_alive
 
-			if VERBOSE:
-				print( "received event in final loop" )
-			#end if verbose
+				i_number_replicates_to_go=i_total_replicates_requested - i_total_replicates_started
 
-			o_subprocess_group.terminateAllSubprocesses()
-			remove_simulation_replicate_output_files( s_output_basename )
-		#end if we are to cancel
+				i_number_subprocesses_to_start=i_number_subprocesses_available
+
+				#reduce the number to start if we have fewer reps to go than avail procs:
+				if i_number_subprocesses_available > i_number_replicates_to_go:
+						i_number_subprocesses_to_start = i_number_replicates_to_go
+				#end if fewer needed than available
+
+				for idx in range( i_number_subprocesses_to_start ):
+
+					i_total_replicates_started += 1
+					
+					#In the Popen call, rather than rely on a driver python script 
+					#that would need to be in PATH, we'll simply
+					#invoke python with a "-c" argument that imports the 
+					#pgutilities module and executes the correct def:
+			
+					#complete the set of args used in the command by adding the
+					#replicate number (recall need comma in sequence with single item,
+					#to delineate sequence versus simple expression):
+					seq_complete_arg_set=seq_first_four_args_to_sim_call + ( str( i_total_replicates_started ), )
+
+					'''
+					in case the negui mods are not in the default python 
+					install dirs, then we need to add them to the sys.paths in
+					any  spawned invocation of python exe -- seems that 
+					the PYTHONPATH env var known to this parent process 
+					is unknown to the "python" invocation via Popen.  
+					We can get for and then add to our new python invocation
+					the path to all negui modules by getting the
+					path to this module:
+					'''
+					s_curr_mod_path = os.path.abspath(__file__)
+
+					#path only (stripped off "/utilities.py" )
+					#-- gives path to all negui mods:
+					s_mod_dir=os.path.dirname( s_curr_mod_path )
+
+					#need to fix the path if we're on windows:
+					if is_windows_platform():
+						s_mod_dir=fix_windows_path( s_mod_dir )
+					#end if windows, fix path
+					
+					s_path_append_statements="import sys; sys.path.append( \"" \
+							+ s_mod_dir + "\" );"
+
+					s_python_command=s_path_append_statements + "import pgutilities;" \
+										"pgutilities.prep_and_call_do_pgopsimupop_replicate" \
+										+ "( \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" )" %  seq_complete_arg_set
+
+					o_new_subprocess=subprocess.Popen( [ "python", "-c", s_python_command ] )
+					o_subprocess_group.addSubprocess( o_new_subprocess ) 
+				#end for each idx of new procs
+			#end if event is set else not
+		#end while preplicates need to be started
+
+		#we don't want to return untill all processes are done.
+		#meantime test for cancel-request
 		i_total_still_alive_after_creating_all=o_subprocess_group.getTotalAlive()
-	#end while
+
+		while i_total_still_alive_after_creating_all > 0:
+			if o_multiprocessing_event.is_set():
+
+				if VERBOSE:
+					print( "received event in final loop" )
+				#end if verbose
+
+				o_subprocess_group.terminateAllSubprocesses()
+				remove_simulation_replicate_output_files( s_output_basename )
+			#end if we are to cancel
+			i_total_still_alive_after_creating_all=o_subprocess_group.getTotalAlive()
+		#end while
+
+	except Exception as oex:
+		show_error_in_messagebox_in_new_process( oex, 
+				s_msg_prefix = "Error caught by pgutilities, "
+								+ "def __do_simulation_reps_in_subprocesses." )
+		raise oex
+	#end try...except...
+
 
 	return
-#end __do_operation_outside
+#end __do_simulation_reps_in_subprocesses
 
 def get_cpu_count():
 	return multiprocessing.cpu_count()
@@ -591,7 +632,6 @@ def dialog_returns_nothing( v_return_value ):
 
 	return b_is_nothing 
 #end dialog_returns_nothing
-		
 
 def convert_genepop_files_string_to_list_format( s_genepop_files ):	
 		'''
@@ -616,108 +656,147 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 										qs_sample_scheme_args,
 										f_min_allele_freq,
 										i_replicates,
-										s_loci_sampling_scheme,
-										s_loci_sampling_scheme_param,
-										i_min_loci_position,
-										i_max_loci_position,
-										i_max_total_loci,
+										qs_loci_sampling_scheme_args,
+										i_loci_replicates,
 										i_num_processes,
 										s_runmode,
 										s_outfile_basename,
 										s_file_delimiter="," ):
 	'''
-	Similar to def above, "do_operation_outside," this def is called from a
+	Similar to def above, "do_simulation_reps_in_subprocesses," this def is called from a
 	PGGuiNeEstimator instance, in def runEstimator(), which first spawns
 	a python multiprocessing.Process, which targest this def, and provides
 	it with the multiprocessing.Event that will signal it to abort and cleanup
 	(see above).
 
-	This def is simpler than the do_operation_outside def, however, in that it
+	This def is simpler than the do_simulation_reps_in_subprocesses def, however, in that it
 	spawns only a single OS process, that calls python to execute pgdriveneestimator.py,
 	which itself multiplexes the NeAnlaysis of multiple genepop files and (likely) multiple
 	pops per file using python.multiprocessing.Process objects.
 	'''
-
-	s_os_plaform_name=platform.system()
-	
-	#if we're on windows, file
-	#paths may be a mangled mix of unix and 
-	#windows separators -- with errors resulting
-	#downstream.  So we standardize:
-	if s_os_plaform_name == "windows":
-
-		ls_current_file_list=s_genepop_files.split( s_file_delimiter )
-		ls_new_file_list=[]
-		for s_file in ls_current_file_list:
-			ls_new_file_list.append( fix_windows_path( s_file ) )
-		#end for each file
+	try:
+		s_os_plaform_name=platform.system()
 		
-		#replace orig arg with new "fixed" file paths
-		s_genepop_files=",".join( ls_new_file_list )
+		#if we're on windows, file
+		#paths may be a mangled mix of unix and 
+		#windows separators -- with errors resulting
+		#downstream.  So we standardize:
+		if s_os_plaform_name == "windows":
 
-		#also need to fix outile path:
-		s_outfile_basename = fix_windows_path( s_outfile_basename )
-	#end if windows, fix file path strings
+			ls_current_file_list=s_genepop_files.split( s_file_delimiter )
+			ls_new_file_list=[]
+			for s_file in ls_current_file_list:
+				ls_new_file_list.append( fix_windows_path( s_file ) )
+			#end for each file
+			
+			#replace orig arg with new "fixed" file paths
+			s_genepop_files=",".join( ls_new_file_list )
 
-	#get the correct format for pgdriveneestimator.py's file name parsing alg:
-	s_genepop_files_formatted_as_python_list= \
-			convert_genepop_files_string_to_list_format( s_genepop_files )
+			#also need to fix outile path:
+			s_outfile_basename = fix_windows_path( s_outfile_basename )
+		#end if windows, fix file path strings
 
-	#caller, assumed to be a pgguineestimator instance,
-	#will have "default" for the runmode val, 
-	#when no extra output is desired, and multiprocessing is also
-	#desired.  We convert to the proper term used by pgdriveneestimator.py
-	#to designate this type of run:
-	if s_runmode=="default":
-		s_runmode="no_debug"
-	#end if default runmode
+		#get the correct format for pgdriveneestimator.py's file name parsing alg:
+		s_genepop_files_formatted_as_python_list= \
+				convert_genepop_files_string_to_list_format( s_genepop_files )
 
-	#Make of a single sequence of strings.
-	qs_files_args=( s_genepop_files_formatted_as_python_list, ) 
+		#caller, assumed to be a pgguineestimator instance,
+		#will have "default" for the runmode val, 
+		#when no extra output is desired, and multiprocessing is also
+		#desired.  We convert to the proper term used by pgdriveneestimator.py
+		#to designate this type of run:
+		if s_runmode=="default":
+			s_runmode="no_debug"
+		#end if default runmode
 
-	s_loci_range="-".join( [ str( i_min_loci_position ),
-								str( i_max_loci_position ) ] )
+		#Make of a single sequence of strings.
+		qs_files_args=( s_genepop_files_formatted_as_python_list, ) 
 
-	qs_terminal_args=( str( f_min_allele_freq ), 
-								str( i_replicates ), 
-								s_loci_sampling_scheme,
-								s_loci_sampling_scheme_param,
-								s_loci_range,
-								str( i_max_total_loci ),
-								str( i_num_processes ), 
-								s_runmode )
+		#join tuples of arguments in the proper order
+		#for the call to pgdriveneestimator.py:
+		seq_arg_set=qs_files_args \
+						+ qs_sample_scheme_args \
+						+ ( str( f_min_allele_freq ), str( i_replicates ) ) \
+						+ qs_loci_sampling_scheme_args \
+						+ ( str( i_loci_replicates ), str( i_num_processes ), s_runmode ) 
 
-	seq_arg_set=qs_files_args \
-					+ qs_sample_scheme_args \
-					+ qs_terminal_args
+		s_main_output_filename=s_outfile_basename + "." \
+				+ NE_ESTIMATION_MAIN_TABLE_FILE_EXT
 
-	s_main_output_filename=s_outfile_basename + "." \
-			+ NE_ESTIMATION_MAIN_TABLE_FILE_EXT
+		s_secondary_output_filename=s_outfile_basename + "." \
+				+ NE_ESTIMATION_SECONDARY_OUTPUT_FILE_EXT
 
-	s_secondary_output_filename=s_outfile_basename + "." \
-			+ NE_ESTIMATION_SECONDARY_OUTPUT_FILE_EXT
+		#pgdriveneestimator will write stdout and stderr, respectively
+		#to these files:
+		o_main_output=open( s_main_output_filename, 'w' )
+		o_secondary_output=open( s_secondary_output_filename, 'w' )
 
-	#pgdriveneestimator will write stdout and stderr, respectively
-	#to these files:
-	o_main_output=open( s_main_output_filename, 'w' )
-	o_secondary_output=open( s_secondary_output_filename, 'w' )
+		seq_arg_set += ( o_main_output, o_secondary_output )
+		
+		#the driver also takes a final arg, ref to
+		#the multiproc event -- and then checks for 
+		#it being set during map_async when using multiprocesses
+		#(see pgdriveneestimator.py def execute_ne_for_each_sample):
+		seq_arg_set += ( o_multiprocessing_event, )
 
-	seq_arg_set += ( o_main_output, o_secondary_output )
-	
-	#the driver also takes a final arg, ref to
-	#the multiproc event -- and then checks for 
-	#it being set during map_async when using multiprocesses
-	#(see pgdriveneestimator.py def execute_ne_for_each_sample):
-	seq_arg_set += ( o_multiprocessing_event, )
+		pgne.mymain( *seq_arg_set )
 
-	pgne.mymain( *seq_arg_set )
-
-	o_main_output.close()
-	o_secondary_output.close()
+		o_main_output.close()
+		o_secondary_output.close()
+	except Exception as oex:
+		show_error_in_messagebox_in_new_process( oex, 
+				s_msg_prefix = "Error caught by pgutilities, "
+								+ "def run_driveneestimator_in_new_process." )
+		raise oex
+	#end try...except...
 
 	return
 #end run_driveneestimator_in_new_process
 
+def show_error_in_messagebox_in_new_process( o_exception, s_msg_prefix=None ):
+	
+	s_errortype= o_exception.__class__.__name__
+	s_msg=str( o_exception ).replace( "\n", "  " )	
+
+	s_msg=s_msg.replace( "\"", "" )
+
+	s_errormsg=s_errortype + ", " + s_msg
+
+	#prepend a prefix if caller supplied one.
+	if s_msg_prefix is not None:
+		s_errormsg=s_msg_prefix + "\\n" + s_errormsg
+	#end if we have a prefix
+
+	s_curr_mod_path = os.path.abspath(__file__)
+
+	#path only (stripped off "/utilities.py" )
+	#-- gives path to all negui mods:
+	s_mod_dir=os.path.dirname( s_curr_mod_path )
+
+	'''
+	Found that windows python would claim no such
+	module found in the import pgguiutilities 
+	statment, unless I replaced the windows os.sep
+	char with linux "/".
+	'''
+	if is_windows_platform():
+		s_mod_dir=fix_windows_path( s_mod_dir )
+	#end if windows platform
+
+
+	s_path_append_statements="import sys; sys.path.append( \"" \
+						+ s_mod_dir + "\" );"
+
+	s_import_statement="from pgguiutilities import PGGUIErrorMessage;"
+
+	s_gui_statement="PGGUIErrorMessage( s_message=\"" + s_errormsg  + "\" )"
+
+
+	s_command=s_path_append_statements + s_import_statement + s_gui_statement
+
+	subprocess.Popen( [ "python", "-c" , s_command ] )
+
+#end show_error_in_messagebox_in_new_process
 if __name__ == "__main__":
 
     s_exec_name=sys.argv[ 1 ]

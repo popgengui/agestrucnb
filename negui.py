@@ -18,13 +18,13 @@ import pghostnotebook as pgn
 import pgutilities as pgut
 import atexit
 from pgguiutilities import PGGUIYesNoMessage
+from pgguiutilities import PGGUIErrorMessage
 
 def cleanup_gui( o_host ):
 	o_host.cleanupAllTabs()
 	#end if yes
 	return
 #end cleanup_gui
-
 
 if __name__ == "__main__":
 
@@ -116,6 +116,7 @@ if __name__ == "__main__":
 	o_master.grid_columnconfigure( 0, weight=1 )
 
 	atexit.register( cleanup_gui, o_host )
+
 
 	def ask_before_exit():
 		s_msg="Exiting will kill any unfinished analyses " \

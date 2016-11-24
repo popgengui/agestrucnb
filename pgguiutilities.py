@@ -2,7 +2,6 @@
 Description
 Class objects in this module are TKinter=based
 helper objects, with no PG specific function.
-
 '''
 __filename__ = "pgguiutilities.py"
 __date__ = "20160427"
@@ -12,8 +11,8 @@ from Tkinter import *
 from ttk import *
 import createtooltip as ctt
 import sys
-
 import tkMessageBox
+import pgutilities as pgut
 
 '''
 Fred Lundh's code from
@@ -131,6 +130,10 @@ class KeyValFrame( Frame ):
 		      gives the type required for a valid value.
 		Param s_label_name, if supplied, replaces s_name as the text for the label.
 		Param i_subframe_padding gives the padding in pixels of the subframe inside its master frame
+		Param o_validity_tester, an object of class type ValueValidator or FloatIntStringParamValidity,
+			  (the latter class may be deprecated). If supplied, the KeyValFrame will use it to test all
+			  input values into an entry box, and disallow, with error message, when invalid values are
+			  entered. For class details see module pgutilityclasses.py
 		Param b_force_disable, if True, will cause all Entry objects to be disabled 
 			  in the def __make_entry
 		Param b_use_list_editor, if True, and if param v_value (see above) is passed as a list, 
@@ -609,6 +612,7 @@ class KeyValFrame( Frame ):
 	def __update_after_entry_change( self ):
 
 		i_len_entryvals=len( self.__entryvals )
+
 		i_len_vals=len( self.__value )
 
 		if i_len_entryvals == i_len_vals:
@@ -617,10 +621,12 @@ class KeyValFrame( Frame ):
 			raise Exception ( "In KeyValFrame instance, the current entry values " \
 						+ " are not equal to length of the value list" )
 		#end if lengths same else not
-	
-		#Because we store even scalars as list items, we extract the 
-		#value for updating the client's attribute or sending to 
-		#client's def -- we returnn a list only if orig was a list, else return scalar
+
+		'''	
+		We extract the value for updating the client's attribute 
+		or sending to client's def, and returnn a list only if 
+		orig was a list, else return scalar
+		'''
 		v_attr_val=self.__value if self.__orig_value_is_list else self.__value[0]
 
 		self.__update_value_in_clients( v_attr_val )
@@ -633,6 +639,7 @@ class KeyValFrame( Frame ):
 		if self.__list_editor is not None:
 			self.__list_editor.thelist=self.__value
 		#end if we have a list editor object
+
 	#end _update_after_entry_change
 
 	def __on_enterkey( self, event=None ):
@@ -1254,8 +1261,41 @@ class FrameContainerScrolled( object ):
 		self.__child_frame.bind( '<Configure>', self.__on_configure_child )
 		self.__canvas.bind( '<Configure>', self.__on_configure_canvas )
 
+		self.__bind_canvas_to_scrollwheel()
+
 		return
 	#end __setup 
+
+	def __bind_canvas_to_scrollwheel( self ):
+
+		'''
+		Platform dependant event name and handling.
+		(See also, below, def __scrollCanvas).
+		'''
+		s_platform=pgut.get_platform()
+		if s_platform==pgut.SYS_LINUX:
+			self.__canvas.bind_all( '<4>', self.__scrollCanvas )
+			self.__canvas.bind_all( '<5>', self.__scrollCanvas )
+		elif s_platform==pgut.SYS_MAC or s_platform==pgut.SYS_WINDOWS:
+			self.__canvas.bind_all( '<MouseWheel>', self.__scrollCanvas )
+		#end if linux, else mac/win
+		return
+	#end __bind_canvas_to_scrollwheel
+
+	def rebindScrollwheel(self):
+		'''
+		This def allows clients to rebind the mouse scrollwheel
+		to this object's canvas.  This was necessitated by
+		tab swithes in the pghostnotebook.py class object,
+		which casue the mouse wheel to be bound to the latest
+		tab, and "disconnects" it from all others, so that,
+		returning to an older tab, gives an inteface without
+		mouse wheel scrolling enabled.
+		'''
+
+		self.__bind_canvas_to_scrollwheel()
+		return
+	#end rebindScrollwheel
 
 	def __on_configure_child( self, event ):
 		
@@ -1292,6 +1332,28 @@ class FrameContainerScrolled( object ):
 		return
 	#end __on_configure_child
 
+	def __scrollCanvas( self, event ):
+		'''
+		Platform-dependant handling according to,
+		http://stackoverflow.com/questions/17355902
+					/python-tkinter-binding-mousewheel-to-scrollbar
+		also, used the linux handling code from:
+		https://mail.python.org/pipermail/tkinter-discuss
+										/2006-June/000808.html.
+		'''
+		s_platform=pgut.get_platform()
+		if s_platform == pgut.SYS_LINUX:
+			if event.num == 4:
+				self.__canvas.yview( 'scroll', -1, 'units' )
+			elif event.num== 5:
+				self.__canvas.yview( 'scroll', 1, 'units' )
+			#end if event num is 4 else 5
+		elif s_platform == pgut.SYS_MAC:
+			self.__canvas.yview_scroll( event.delta/120 , 'units' )
+		elif s_platform == pgut.SYS_WINDOWS:
+			self.__canvas.yview_scroll( -1 * ( event.delta/120 ), 'units' )
+		#end if linux, else mac, else windows
+		return
 #end class FrameContainerScrolled
 
 class FrameContainerVScroll( object ):
@@ -1347,6 +1409,8 @@ class FrameContainerVScroll( object ):
 		self.__child_frame.bind( '<Configure>', self.__on_configure_child )
 		self.__canvas.bind( '<Configure>', self.__on_configure_canvas )
 
+		self.__bind_canvas_to_scrollwheel()
+
 		return
 	#end __setup 
 
@@ -1378,8 +1442,14 @@ class FrameContainerVScroll( object ):
 #end class FrameContainerVScroll
 
 class PGGUIErrorMessage( object ):
-	def __init__( self, o_parent, s_message ):
-		tkMessageBox.showerror(  parent=o_parent, title="Error", message=s_message )
+	def __init__( self, o_parent=None, s_message="Unknown Error" ):
+		if o_parent is None:
+			root=Tk()
+			root.withdraw()
+			tkMessageBox.showerror( title="Error", message=s_message )
+		else:
+			tkMessageBox.showerror(  parent=o_parent, title="Error", message=s_message )
+		#end if no parent, then make a parent and hide it, else just invode messagebox
 		return
 	#end __init__
 #End class PGGUIErrorMessage
@@ -1472,6 +1542,7 @@ class ListEditingSubframe( Frame ):
 					v_default_value=0.0,
 					s_state="enabled",
 					i_control_width=10,
+					i_button_width=8,
 					o_acceptable_item_type=float,
 					b_allow_none_value_for_list=True ):
 
@@ -1484,6 +1555,7 @@ class ListEditingSubframe( Frame ):
 		self.__default_value=v_default_value
 		self.__state=s_state
 		self.__control_width=i_control_width
+		self.__button_width=i_button_width
 		self.__acceptable_item_type=o_acceptable_item_type
 		self.__allow_none_value=b_allow_none_value_for_list
 
@@ -1569,20 +1641,22 @@ class ListEditingSubframe( Frame ):
 		their spacing.
 		'''
 
+		BUTTON_PADDING=3
+
 		i_num_entries=len( self.__mylist )
 
 		o_editing_subframe=self
 
 		self.__btn_extend=Button( self,
-								text="Extend",
+								text="Add Value",
 								command=self.__extend_list,
 								state=self.__state,
-								width=self.__control_width )
+								width=self.__button_width )
 
 		self.__btn_trim=Button( self, text="Trim", 
 								command=self.__trim_list,
 								state=self.__state,
-								width=self.__control_width )
+								width=self.__button_width )
 
 		self.__label_assign=Label( self, \
 				text="       Assign range from: " )
@@ -1613,7 +1687,7 @@ class ListEditingSubframe( Frame ):
 								state=self.__state,
 								width=self.__control_width )
 
-		self.__btn_extend.grid( row=0, column=self.BTN_COL_EXTEND )
+		self.__btn_extend.grid( row=0, column=self.BTN_COL_EXTEND, padx=BUTTON_PADDING )
 		self.__btn_trim.grid( row=0, column=self.BTN_COL_TRIM )
 		'''
 		Because I'm currently (2016_10_31) not using the assign-range, 
@@ -1651,14 +1725,9 @@ class ListEditingSubframe( Frame ):
 
 	def __extend_list( self ):
 
-		print( "in extend with mylist: " + str( self.__mylist ) )
-
 		lv_newlist=self.__get_copy_mylist()
 
-		print ( "in extend with copy list: " + str( lv_newlist ) )
-		print ( "in extend with defaultval: " + str( self.__default_value) )
 		v_value_to_add=self.__default_value
-
 
 		'''
 		If we have at least one item in 
@@ -1669,7 +1738,6 @@ class ListEditingSubframe( Frame ):
 			v_value_to_add=self.__mylist[ len( self.__mylist ) - 1 ]
 		#end if list has at least one item
 
-		print( "in extend with value to add " + str( v_value_to_add ) ) 
 		lv_newlist.append( v_value_to_add )
 
 		self.__validate_list( lv_newlist, 

@@ -20,8 +20,10 @@ class PGInputNeEstimator (object):
 
 		#these are the default params in the signature of the run method of
 		#Tiago's NeEstimator2Controller
-		self.__run_params={ "crits":None, "LD":True, "coanc":False, "temp":None,
-				"monogamy":False, "options":None }
+
+		self.__run_params={ "crits":None, "LD":True, 
+							"hets":False, "coanc":False, 
+							"temp":None, "monogamy":False, "options":None }
 		return
 	#end __init__
 	

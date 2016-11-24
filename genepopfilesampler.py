@@ -24,30 +24,42 @@ SCHEME_NONE="none"
 SCHEME_PROPORTION="proportion"
 SCHEME_REMOVAL="remove"
 SCHEME_CRITERIA="criteria"
+SCHEME_CRITERIA_GROUPED="critgrouped"
 SCHEME_COHORTS="cohorts"
 SCHEME_COHORTS_PERC="cohortsperc"
 SCHEME_RELATEDS="relateds"
 
 #subsampling loci, not individuals
-SCHEM_LOCI="loci"
+SCHEME_LOCI_MAX_AND_RANGE="loci"
+SCHEME_LOCI_PERC_AND_RANGE="lociperc"
+SCHEME_LOCI_TOTALS_AND_RANGE="locitots"
 
-def make_subsample_tag( v_value, i_replicate_number, s_scheme ):
-	if s_scheme==SCHEME_NONE:
-		s_val_initial="o"
-	elif s_scheme==SCHEME_PROPORTION:
+def make_subsample_tag( v_value, i_replicate_number, s_scheme, s_prefix = None ):
+	
+	ls_return_vals = []
+
+	if s_scheme==SCHEME_PROPORTION:
 		s_val_initial="p"
+	elif s_scheme==SCHEME_NONE:
+		s_val_initial="o"
 	elif s_scheme==SCHEME_REMOVAL:
 		s_val_initial="n"
 	elif s_scheme==SCHEME_CRITERIA:
 		s_val_initial="c"
+	elif s_scheme==SCHEME_CRITERIA_GROUPED:
+		s_val_initial="g"
 	elif s_scheme==SCHEME_COHORTS:
 		s_val_initial="h"
 	elif s_scheme==SCHEME_COHORTS_PERC:
 		s_val_initial="t"
 	elif s_scheme==SCHEME_RELATEDS:
 		s_val_initial="r"
-	elif s_scheme==SCHEME_LOCI:
+	elif s_scheme==SCHEME_LOCI_MAX_AND_RANGE:
 		s_val_initial="l"
+	elif s_scheme==SCHEME_LOCI_PERC_AND_RANGE:
+		s_val_initial="i"
+	elif s_scheme==SCHEME_LOCI_TOTALS_AND_RANGE:
+		s_val_initial="s"
 	else:
 		s_msg = "In genpopfilesampler.py, def make_subsample_tag, " \
 								+ "scheme, " + s_scheme \
@@ -56,30 +68,49 @@ def make_subsample_tag( v_value, i_replicate_number, s_scheme ):
 		raise Exception( s_msg )
 	#end if scheme proportion, else removal, else error
 
-	return TAG_DELIMITER.join( [ s_val_initial, 
-									str( v_value ), "r", 
-									str( i_replicate_number ) ] )
+	if s_prefix is not None:
+		ls_return_vals.append( s_prefix )
+	#end if we have a prefix
+
+	s_value=str( v_value )
+#	#If the value is a float, we omit the dot char:
+#	if type( v_value ) == float:
+#		s_value=str( v_value ).replace( ".", "" )
+#	#end if orig is float, omit dot from string version
+
+	ls_return_vals += [ s_val_initial, s_value, str( i_replicate_number ) ]
+
+	return TAG_DELIMITER.join( ls_return_vals )
 #end make_subsample_tag
 
 def get_sample_value_and_replicate_number_from_sample_tag( s_sample_tag, s_scheme ):
 		
 		ls_fields=s_sample_tag.split( TAG_DELIMITER )
 
-		v_sample_value=None	
+		s_sample_value=None	
+
 		if s_scheme==SCHEME_NONE:
-			v_sample_value=str( ls_fields[ 1 ] )
+			s_sample_value=ls_fields[ 1 ] 
 		elif s_scheme==SCHEME_PROPORTION:
-			v_sample_value=float( ls_fields[ 1 ] )
+			s_sample_value=ls_fields[ 1 ]
+			#remove the decimal dot char:
+			#s_sample_value=s_sample_value_with_dot.replace( ".", "" )
 		elif s_scheme==SCHEME_REMOVAL:
-			v_sample_value=int( ls_fields[ 1 ] )
+			s_sample_value=ls_fields[ 1 ]
 		elif s_scheme==SCHEME_CRITERIA:
-			v_sample_value=str( ls_fields[ 1 ] )
+			s_sample_value=ls_fields[ 1 ]
+		elif s_scheme==SCHEME_CRITERIA_GROUPED:
+			s_sample_value=ls_fields[ 1 ]
 		elif s_scheme==SCHEME_COHORTS:
-			v_sample_value=str( ls_fields[ 1 ] )
+			s_sample_value=ls_fields[ 1 ]
 		elif s_scheme==SCHEME_RELATEDS:
-			v_sample_value=str( ls_fields[ 1 ] )
+			s_sample_value= ls_fields[ 1 ]
 		elif s_scheme==SCHEME_COHORTS_PERC:
-			v_sample_value=str( ls_fields[ 1 ] )
+			s_sample_value=ls_fields[ 1 ]
+		elif s_scheme==SCHEME_LOCI_MAX_AND_RANGE:
+			s_sample_value=ls_fields[ 1 ]
+		elif s_scheme==SCHEME_LOCI_PERC_AND_RANGE:
+			s_sample_value=ls_fields[ 1 ]
 		else:
 			s_msg = "In genpopfilesampler.py, "\
 						+ "def get_sample_value_and_replicate_number_from_sample_tag, " \
@@ -88,9 +119,9 @@ def get_sample_value_and_replicate_number_from_sample_tag( s_sample_tag, s_schem
 			raise Exception( s_msg )
 		#end if scheme is proportion, else removal, else error
 
-		i_replicate_number=int( ls_fields[ 3 ] )
+		s_replicate_number= ls_fields[ 2 ] 
 
-		return ( v_sample_value, i_replicate_number )
+		return ( s_sample_value, s_replicate_number )
 #end get_sample_value_and_replicate_number_from_sample_tag
 
 class GenepopFileSampler( object ):
@@ -101,7 +132,6 @@ class GenepopFileSampler( object ):
 	a session in which a large number of samples need to be taken from a single
 	genepop file, according to one of various possible sampling schemes.
 	'''
-
 
 	def __init__( self, o_genepopfilemanager, o_genepopfilesampleparams ):
 		self.__filemanager=o_genepopfilemanager
@@ -139,7 +169,8 @@ class GenepopFileSampleParams( object ):
 	'''
 	def __init__( self, li_population_numbers, 
 				s_population_subsample_name="population_numbers",
-				s_sample_tag=None ):
+				s_sample_tag_base=None,
+				i_replicates=1):
 		'''
 		Param li_populations is a list of integers,
 		each of i of which refers to the ith population
@@ -148,7 +179,9 @@ class GenepopFileSampleParams( object ):
 		'''
 		self.__populationnumbers=li_population_numbers
 		self.__populationsubsamplename=s_population_subsample_name
-		self.__sample_tag=s_sample_tag
+		self.__sample_tag_base=s_sample_tag_base
+		self.__replicates=i_replicates
+
 		return
 	#end __init__
 
@@ -163,10 +196,14 @@ class GenepopFileSampleParams( object ):
 	#end property population_subsample_name
 
 	@property
-	def sample_tag( self ):
-		return self.__sample_tag
-	#end property sample_tag
+	def sample_tag_base( self ):
+		return self.__sample_tag_base
+	#end property sample_tag_base
 
+	@property
+	def replicates( self ):
+		return self.__replicates
+	#end property replicates
 #end  class GenepopFileSampleParams
 
 class GenepopFileSampleParamsLoci( GenepopFileSampleParams ):
@@ -182,24 +219,28 @@ class GenepopFileSampleParamsLoci( GenepopFileSampleParams ):
 	def __init__( self, li_population_numbers, i_min_loci_position,
 												i_max_loci_position,
 												i_max_total_loci=None,
-												f_proportion=None,
+												i_min_total_loci=None,
+												lf_proportions=None,
+												li_sample_totals=None,
 												i_replicates=1,
 												s_population_subsample_name="population_numbers",
 												v_sample_value="rt",
-												s_sample_tag=None ):
+												s_sample_tag_base=None ):
 
 	
 		GenepopFileSampleParams.__init__( self,
 							li_population_numbers=li_population_numbers,
 							s_population_subsample_name=s_population_subsample_name,
-							s_sample_tag=s_sample_tag )			
+							s_sample_tag_base=s_sample_tag_base,
+							i_replicates=i_replicates )			
 												
 		self.__min_loci_position=i_min_loci_position
 		self.__max_loci_position=i_max_loci_position
+		self.__min_total_loci=i_min_total_loci
 		self.__max_total_loci=i_max_total_loci
 		self.__sample_param_value="rt"
-		self.__replicates=i_replicates
-		self.__proportion=f_proportion
+		self.__proportions=lf_proportions
+		self.__sample_totals=li_sample_totals
 
 		return
 	#end __init__
@@ -215,14 +256,14 @@ class GenepopFileSampleParamsLoci( GenepopFileSampleParams ):
 	#end property max_loci_position
 
 	@property
+	def min_total_loci( self ):
+		return self.__min_total_loci
+	#end property min_total_loci
+
+	@property
 	def max_total_loci( self ):
 		return self.__max_total_loci
 	#end property max_total_loci
-
-	@property
-	def replicates( self ):
-		return self.__replicates
-	#end property replicates
 
 	@property
 	def sample_param_value( self ):
@@ -230,9 +271,14 @@ class GenepopFileSampleParamsLoci( GenepopFileSampleParams ):
 	#end property sample_param_value
 
 	@property
-	def proportion( self ):
-		return self.__proportion
-	#end property proportion
+	def proportions( self ):
+		return self.__proportions
+	#end property proportions
+
+	@property 
+	def sample_totals( self ):
+		return self.__sample_totals
+	#end property sample_totals
 
 #end class GenepopFileSampleParamsLoci
 
@@ -248,17 +294,17 @@ class GenepopFileSampleParamsNone( GenepopFileSampleParams ):
 				i_replicates=1,
 				s_population_subsample_name="population_numbers",
 				v_sample_value = "n",
-				s_sample_tag=None ):
+				s_sample_tag_base=None ):
 
 		GenepopFileSampleParams.__init__( self,
 									li_population_numbers=li_population_numbers,
 									s_population_subsample_name=s_population_subsample_name,
-									s_sample_tag=s_sample_tag )
+									s_sample_tag_base=s_sample_tag_base,
+									i_replicates=i_replicates )
 
 		self.__min_pop_size=i_min_pop_size
 		self.__max_pop_size=i_max_pop_size
 		self.__sample_param_value=v_sample_value
-		self.__replicates=i_replicates
 		
 		return
 	#end __init__
@@ -278,11 +324,6 @@ class GenepopFileSampleParamsNone( GenepopFileSampleParams ):
 		return self.__sample_param_value
 	#end sample_param_value
 
-	@property
-	def replicates( self ):
-		return self.__replicates
-	#end replicates
-
 #end class GenepopFileSampleParamsNone
 
 class GenepopFileSampleParamsProportion( GenepopFileSampleParams ):
@@ -290,7 +331,7 @@ class GenepopFileSampleParamsProportion( GenepopFileSampleParams ):
 			lf_proportions, 
 			i_replicates, 
 			s_population_subsample_name="population_numbers",
-			s_sample_tag=None ):
+			s_sample_tag_base=None ):
 
 		'''
 		param li_populations, list of ints, which pops to sample (see remarks, parant class )
@@ -301,9 +342,9 @@ class GenepopFileSampleParamsProportion( GenepopFileSampleParams ):
 
 		GenepopFileSampleParams.__init__(self, li_population_numbers=li_population_numbers, 
 											s_population_subsample_name=s_population_subsample_name,
-											s_sample_tag=s_sample_tag )
+											s_sample_tag_base=s_sample_tag_base,
+											i_replicates=i_replicates )
 		self.__proportions=lf_proportions
-		self.__replicates=i_replicates
 		return
 	#end __init__
 
@@ -312,11 +353,6 @@ class GenepopFileSampleParamsProportion( GenepopFileSampleParams ):
 		return self.__proportions
 	#end property proportions
 	
-	@property
-	def replicates( self ):
-		return self.__replicates
-	#end property replicates
-
 #end class GenepopFileSampleParamsProportion
 
 class GenepopFileSampleParamsRemoval( GenepopFileSampleParams ):
@@ -338,7 +374,7 @@ class GenepopFileSampleParamsRemoval( GenepopFileSampleParams ):
 			i_replicates,
 			s_population_subsample_name="poplulation_numbers",
 			b_do_all_combos_when_n_equals_one=True,
-			s_sample_tag=None ):
+			s_sample_tag_base=None ):
 
 		'''
 		param li_population_numbers, list of ints, see parent class
@@ -353,10 +389,10 @@ class GenepopFileSampleParamsRemoval( GenepopFileSampleParams ):
 		GenepopFileSampleParams.__init__( self, 
 					li_population_numbers=li_population_numbers, 
 					s_population_subsample_name=s_population_subsample_name,
-					s_sample_tag=s_sample_tag )
+					s_sample_tag_base=s_sample_tag_base,
+					i_replicates=i_replicates )
 
 		self.__n_to_remove=li_n_to_remove
-		self.__replicates=i_replicates
 		self.__do_all_combos_when_n_equals_one=b_do_all_combos_when_n_equals_one
 		return
 	#end __init
@@ -365,11 +401,6 @@ class GenepopFileSampleParamsRemoval( GenepopFileSampleParams ):
 	def n_to_remove( self ):
 		return self.__n_to_remove
 	#end property n_to_remove
-
-	@property
-	def replicates( self ):
-		return self.__replicates
-	#end property replicates
 
 	@property
 	def do_all_combos_when_n_equals_one( self ):
@@ -395,7 +426,7 @@ class GenepopFileSampleParamsCriteria( GenepopFileSampleParams ):
 			i_replicates=1,
 			i_min_sampled_pop_size=None,
 			i_max_sampled_pop_size=None,
-			s_sample_tag=None ):
+			s_sample_tag_base=None ):
 
 		'''
 		param o_genepop_indiv_id_fields, instance of GenepopIndivIdFields,
@@ -421,11 +452,11 @@ class GenepopFileSampleParamsCriteria( GenepopFileSampleParams ):
 		GenepopFileSampleParams.__init__(self, 
 					li_population_numbers=li_population_numbers, 
 					s_population_subsample_name=s_population_subsample_name,
-					s_sample_tag=s_sample_tag )
+					s_sample_tag_base=s_sample_tag_base,
+					i_replicates=i_replicates )
 
 		self.__fields=o_genepop_indiv_id_fields
 		self.__criteria=o_genepop_indiv_id_critera
-		self.__replicates=i_replicates
 		self.__min_pop_size=i_min_sampled_pop_size
 		self.__max_pop_size=i_max_sampled_pop_size
 
@@ -441,19 +472,6 @@ class GenepopFileSampleParamsCriteria( GenepopFileSampleParams ):
 	def criteria( self ):
 		return self.__criteria
 	#end def criteria
-
-	'''
-	For conformity with other params 
-	objects, we include a replicates property,
-	though all replicate seesions of sampling
-	the same genepop file by a given set of
-	criteria should be identical. So, default
-	value as set in __init__ param is "1"
-	'''
-	@property
-	def replicates( self ):
-		return self.__replicates
-	#end property replicates
 
 	@property
 	def min_sampled_pop_size( self ):
@@ -490,7 +508,7 @@ class GenepopFileSampleParamsCriteriaOnGroups( GenepopFileSampleParamsCriteria )
 				s_population_subsample_name="poplulation_numbers",
 				i_replicates=1,
 				i_max_sampled_pop_size=None,
-				s_sample_tag=None ):
+				s_sample_tag_base=None ):
 
 		'''
 		param o_genepop_indiv_id_fields, instance of GenepopIndivIdFields,
@@ -524,7 +542,7 @@ class GenepopFileSampleParamsCriteriaOnGroups( GenepopFileSampleParamsCriteria )
 					s_population_subsample_name=s_population_subsample_name,
 					i_replicates=i_replicates, 
 					i_max_sampled_pop_size=None,
-					s_sample_tag=s_sample_tag )
+					s_sample_tag_base=s_sample_tag_base )
 
 		
 		self.__grouped_fields
@@ -551,23 +569,23 @@ class GenepopFileSampleParamsAgeStructureCohorts( GenepopFileSampleParams ):
 								#that will sample a proportion of the cohort(s) collected.
 								#default None means it is not used, as for the original sampler
 								#that used the min/max indiv per gen limits:
-								f_proportion=None,
+								lf_proportions=None,
 								s_population_subsample_name="population_numbers",
 								i_replicates=1,
 								b_lp=False,
 								s_sample_param_value="c",
-								s_sample_tag=None ):
+								s_sample_tag_base=None ):
 
 			GenepopFileSampleParams.__init__(self, 
 						li_population_numbers=li_population_numbers, 
 						s_population_subsample_name=s_population_subsample_name,
-						s_sample_tag=s_sample_tag )
+						s_sample_tag_base=s_sample_tag_base,
+						i_replicates=i_replicates )
 
 			self.__fields=o_genepop_indiv_id_fields	
 			self.__max_age=i_max_age
 			self.__max_individuals_per_gen=i_max_individuals_per_gen
 			self.__min_individuals_per_gen=i_min_individuals_per_gen
-			self.__replicates=i_replicates
 			self.__lp=b_lp
 			#Value used in naming the subsample (see global def, 
 			#make_subsample_tag).
@@ -578,7 +596,7 @@ class GenepopFileSampleParamsAgeStructureCohorts( GenepopFileSampleParams ):
 			#property only employed in the sublcass
 			#GenepopFileSamplerIndividualsAgeStructureCohortsPercentage
 
-			self.__proportion=f_proportion
+			self.__proportions=lf_proportions
 
 			return
 	#end __init__
@@ -603,23 +621,34 @@ class GenepopFileSampleParamsAgeStructureCohorts( GenepopFileSampleParams ):
 	#end indiv_per_gen
 
 	@property
-	#This is not used in class 
+	#This list of sampling proportions is not used in class 
 	#GenepopFileSamplerIndividualsAgeStructureCohorts,
 	#It is used in the derived class,
 	#GenepopFileSamplerIndividualsAgeStructureCohortsPercentage.
-	def proportion( self ):
-		return self.__proportion
+	def proportions( self ):
+		return self.__proportions
 	#end proportion
-
-	@property
-	def replicates( self ):
-		return self.__replicates
-	#end def replicates
 
 	@property
 	def sample_param_value( self ):
 		return self.__sample_param_value
 	#end def sample_param_value
+
+	'''
+	For this class we add a setter
+	to the sample_param_value, so
+	the derived class can reset this
+	value as it iterates over (proportions).
+
+	We leave no indication of the type, 
+	to be used for this attribute, as it
+	may be used by more derived classes, as
+	needed.
+	'''
+	@sample_param_value.setter
+	def sample_param_value( self, v_value ):
+		self.__sample_param_value=v_value
+	#end sample_param_value
 
 #end class GenepopFileSampleParamsAgeStructureCohorts
 
@@ -700,7 +729,7 @@ class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 			except Exception as oex:
 				s_sample_error_msg= \
 					"In GenepopFileSamplerIndividualsAgeStructureCohorts " \
-						+ "instance, def doSample, "  \
+						+ "instance, def resize_sample_to_meet_size_criteria, "  \
 						+ "random.sample failed on list of " \
 						+ str( len( li_indiv_by_age_collected ) ) \
 						+ " individuals.  Target total to be sampled: " \
@@ -806,19 +835,13 @@ class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 				dli_indiv_index_lists_by_pop_number[ i_pop_number ] = \
 													li_indiv_by_age_sampled
 			#end for each pop number
-
-			#for sample param value we use "c" to indicate "cohorts"
-			if self.sampleparams.sample_tag is not None:
-				s_this_subsample_name = self.sampleparams.sample_tag
-			else:
-				s_this_subsample_name=make_subsample_tag( \
-												self.sampleparams.sample_param_value, 
-												i_replicate_number, 
-												SCHEME_COHORTS )
-			#end if tag is not None
 			
-
-
+			s_this_subsample_name=make_subsample_tag( \
+								self.sampleparams.sample_param_value, 
+								i_replicate_number, 
+								SCHEME_COHORTS,
+								s_prefix=self.sampleparams.sample_tag_base )
+			
 			self.filemanager.subsampleIndividualsByNumberList( \
 									dli_indiv_index_lists_by_pop_number,
 									s_this_subsample_name )
@@ -840,6 +863,16 @@ class GenepopFileSamplerIndividualsAgeStructureCohortsPercentage( \
 		GenepopFileSamplerIndividualsAgeStructureCohorts.__init__( \
 											self, o_genepopfilemanager, 
 												o_genepopfilesampleparams )
+		'''
+		New member is accessed in this
+		object's override of the def 
+		resize_sample_to_meet_size_criteria.
+		It is set, once for each proportion in
+		the sample params member "proportions",
+		in this objects override of doSample."
+		'''
+		self.__current_proportion=None
+
 		return
 	#end __init__
 
@@ -891,7 +924,7 @@ class GenepopFileSamplerIndividualsAgeStructureCohortsPercentage( \
 				returned.
 				'''
 				i_sample_size=int( \
-						round( float( i_tot_collected )*self.sampleparams.proportion ) )
+						round( float( i_tot_collected )*self.__current_proportion ) )
 
 				li_indiv_by_age_sampled=random.sample( \
 									li_indiv_by_age_collected,
@@ -914,6 +947,33 @@ class GenepopFileSamplerIndividualsAgeStructureCohortsPercentage( \
 		return li_indiv_by_age_sampled
 	#end resize_sample_to_meet_size_criteria 
 
+	def doSample( self ):
+		'''
+		This override of the parent class doSample def
+		iterates over the param list of proportions, 
+		for each proportion value it sets member __current_param
+		accordingly, and then calls the parent doSample.  This 
+		latter will then, after collecting cohorts per max age,
+		then call the overridden def resize_sample_to_meet_size_criteria, 
+		which will sample at the "__current_param" proportion.
+		'''
+		for f_proportion in self.sampleparams.proportions:
+
+			'''
+			When the parent class calls the resize_sample_to_meet_size_criteria
+			def, this derived classe's version will use this
+			value to sample the pop, after parent applies the
+			age filter:
+			'''
+			self.__current_proportion=f_proportion
+
+			#When the parent class calls def, make_subsample_tag, it
+			#will find this value in the sampleparams:
+			self.sampleparams.sample_param_value=f_proportion 
+
+			super( GenepopFileSamplerIndividualsAgeStructureCohortsPercentage, self ).doSample()
+		#end for each proportion
+		return
 #end class GenepopFileSamplerIndividualsAgeStructureCohortsPercentage
 
 class GenepopFileSampleParamsAgeStructureRelateds( GenepopFileSampleParams ):
@@ -926,18 +986,18 @@ class GenepopFileSampleParamsAgeStructureRelateds( GenepopFileSampleParams ):
 								s_population_subsample_name="population_numbers",
 								i_replicates=1,
 								s_sample_param_value="r",
-								s_sample_tag=None ):
+								s_sample_tag_base=None ):
 
 			GenepopFileSampleParams.__init__(self, 
 					li_population_numbers=li_population_numbers, 
 					s_population_subsample_name=s_population_subsample_name,
-					s_sample_tag=s_sample_tag )
+					s_sample_tag_base=s_sample_tag_base,
+					i_replicates=i_replicates )
 
 			self.__fields=o_genepop_indiv_id_fields	
 			self.__percent_relateds=f_percent_relateds_per_gen
 			self.__max_individuals_per_gen=i_max_individuals_per_gen
 			self.__min_individuals_per_gen=i_min_individuals_per_gen
-			self.__replicates=i_replicates
 			self.__sample_param_value=s_sample_param_value
 
 			#the param value field used to construct the
@@ -966,11 +1026,6 @@ class GenepopFileSampleParamsAgeStructureRelateds( GenepopFileSampleParams ):
 	def percent_relateds( self ):
 		return self.__percent_relateds
 	#end percent_relateds
-
-	@property
-	def replicates( self ):
-		return self.__replicates
-	#end replicates
 
 	@property
 	def sample_param_value( self ):
@@ -1212,17 +1267,11 @@ class GenepopFileSamplerIndividualsAgeStructureRelateds( GenepopFileSampler ):
 				dli_indiv_index_lists_by_pop_number[ i_pop_number ] = li_indiv_sample
 			#end for each pop number
 
-			s_this_subsample_name=None
-
-			if self.sampleparams.sample_tag is not None:
-				s_this_subsample_name=self.sampleparams.sample_tag
-			else:
-				#for sample param value we use "r" to indicate "relateds"
-				s_this_subsample_name=make_subsample_tag( \
-												self.sampleparams.sample_param_value, 
-												i_replicate_number, 
-												SCHEME_RELATEDS )
-			#end if we have a tag param, else make it
+			s_this_subsample_name=make_subsample_tag( \
+								self.sampleparams.sample_param_value, 
+								i_replicate_number, 
+								SCHEME_RELATEDS,
+								s_prefix=self.sampleparams.sample_tag_base )
 
 			self.filemanager.subsampleIndividualsByNumberList( \
 									dli_indiv_index_lists_by_pop_number, 
@@ -1248,19 +1297,18 @@ class GenepopFileSamplerLociByRangeAndTotal( GenepopFileSampler ):
 
 		for i_replicate_number in range( self.sampleparams.replicates ):
 
-			s_loci_subsample_tag=None
-			if self.sampleparams.sample_tag is not None:
-				s_loci_subsample_tag=self.sampleparams.sample_tag
-			else:
-				s_loci_subsample_tag=make_subsample_tag( self.sampleparams.sample_param_value,
-															i_replicate_number,
-															SCHEME_LOCI )
-			#end if tag param exits use it, else make one
+			s_loci_subsample_tag=make_subsample_tag( 
+					self.sampleparams.sample_param_value,
+					i_replicate_number,
+					SCHEME_LOCI_MAX_AND_RANGE,
+					self.sampleparams.sample_tag_base )
 
-			self.filemanager.subsampleLociByRangeAndMax( self.sampleparams.min_loci_position,
-															self.sampleparams.max_loci_position,
-															s_loci_subsample_tag,
-															self.sampleparams.max_total_loci )
+			self.filemanager.subsampleLociByRangeAndMax( \
+							self.sampleparams.min_loci_position,
+							self.sampleparams.max_loci_position,
+							s_loci_subsample_tag,
+							self.sampleparams.min_total_loci,
+							self.sampleparams.max_total_loci )
 		#end for each replicate
 
 		return
@@ -1281,27 +1329,64 @@ class GenepopFileSamplerLociByRangeAndPercentage( GenepopFileSampler ):
 
 	def doSample( self ):
 
-		for i_replicate_number in range( self.sampleparams.replicates ):
+		for f_proportion in self.sampleparams.proportions:
+			for i_replicate_number in range( self.sampleparams.replicates ):
+				s_loci_subsample_tag=make_subsample_tag( \
+						f_proportion,
+						i_replicate_number,
+						SCHEME_LOCI_PERC_AND_RANGE,
+						self.sampleparams.sample_tag_base )
 
-			s_loci_subsample_tag=None
-			if self.sampleparams.sample_tag is not None:
-				s_loci_subsample_tag=self.sampleparams.sample_tag
-			else:
-				s_loci_subsample_tag=make_subsample_tag( self.sampleparams.sample_param_value,
-															i_replicate_number,
-															SCHEME_LOCI )
-			#end if tag param exits use it, else make one
+				self.filemanager.subsampleLociByRangeAndProportion( \
+						self.sampleparams.min_loci_position,
+						self.sampleparams.max_loci_position,
+						s_loci_subsample_tag,
+						f_proportion,
+						i_min_total_loci=self.sampleparams.min_total_loci )
+			#end for each replicate
+		#end for each proportion
+		return
+	#end doSample
+#end class GenepopFileSamplerLociByRangeAndPercentage
 
-			self.filemanager.subsampleLociByRangeAndProportion( self.sampleparams.min_loci_position,
-																self.sampleparams.max_loci_position,
-																s_loci_subsample_tag,
-																self.sampleparams.proportion )
-		#end for each replicate
+class GenepopFileSamplerLociByRangeAndSampleTotalList( GenepopFileSampler ):
+	'''
+	Sample loci from the ith to the jth, as listed in the 
+	genepop file individual entries. Sample N loci for each value
+	N in the paramater sample_totals list.
+	'''
+
+	def __init__( self, o_genepopfilemanager, o_genepopfilesampleparams ):
+		GenepopFileSampler.__init__( self, o_genepopfilemanager, o_genepopfilesampleparams )
+		return
+	#end __init__
+
+	def doSample( self ):
+
+		for i_total in self.sampleparams.sample_totals:
+			for i_replicate_number in range( self.sampleparams.replicates ):
+
+				s_loci_subsample_tag=make_subsample_tag( 
+						str( i_total ),
+						i_replicate_number,
+						SCHEME_LOCI_TOTALS_AND_RANGE,
+						self.sampleparams.sample_tag_base )
+				
+				#We call the genepop file managers range and max
+				#sampler, and give our current total as both min
+				#and max:
+				self.filemanager.subsampleLociByRangeAndMax( \
+								self.sampleparams.min_loci_position,
+								self.sampleparams.max_loci_position,
+								s_loci_subsample_tag,
+								i_total,
+								i_total )
+			#end for each replicate
+		#end for each sample total
 
 		return
 	#end doSample
 #end class GenepopFileSamplerLociByRangeAndTotal
-
 
 
 class GenepopFileSamplerNone( GenepopFileSampler ):
@@ -1325,7 +1410,7 @@ class GenepopFileSamplerNone( GenepopFileSampler ):
 		'''
 		
 		self.filemanager.subsamplePopulationsByList( self.sampleparams.population_numbers,
-													s_subsample_tag=self.sampleparams.population_subsample_name )
+										s_subsample_tag=self.sampleparams.population_subsample_name )
 		'''
 		Despite the fact that replicates will be indentical, we
 		still perform multi replicates if the replicates>1,
@@ -1333,16 +1418,11 @@ class GenepopFileSamplerNone( GenepopFileSampler ):
 		'''
 		for i_replicate_number in range( self.sampleparams.replicates ): 
 
-			s_this_subsample_name=None
-
-			if self.sampleparams.sample_tag is not None:
-				s_this_subsample_name=self.sampleparams.sample_tag
-			else:
-				s_this_subsample_name=make_subsample_tag( \
-												self.sampleparams.sample_param_value, 
-											i_replicate_number, 
-											SCHEME_NONE )
-			#end if sample tag exits use, else make one
+			s_this_subsample_name=make_subsample_tag( \
+						self.sampleparams.sample_param_value, 
+						i_replicate_number, 
+						SCHEME_NONE,
+						s_prefix=self.sampleparams.sample_tag_base )
 
 			self.filemanager.subsampleIndividualsByPopSize( self.sampleparams.min_pop_size,
 															self.sampleparams.max_pop_size,
@@ -1384,18 +1464,10 @@ class GenepopFileSamplerIndividualsByProportion( GenepopFileSampler ):
 		for f_proportion in lf_proportions:
 			for i_replicate_number in range( i_total_replicates ):
 
-				s_subsampletag=None
-
-				if self.sampleparams.sample_tag is not None:
-					s_subsampletag=self.sampleparams.sample_tag
-				else:
-					#standardized subsample tag uses the proportion and the rep number:
-					#note that the "." char delimiter will need to be replaced by a diff
-					#char when using this tag to name input or output file names for
-					#NeEstimator (which truncates filenames using pattern .* for some of 
-					#its output files)
-					s_subsampletag=make_subsample_tag(  f_proportion, i_replicate_number , SCHEME_PROPORTION )
-				#end if tag exists use it else make one
+				s_subsampletag=make_subsample_tag(  f_proportion, 
+													i_replicate_number , 
+													SCHEME_PROPORTION,
+													self.sampleparams.sample_tag_base)
 
 				self.filemanager.subsampleIndividualsRandomlyByProportion( f_proportion, s_subsampletag ) 
 			#end for each replicate number	
@@ -1426,21 +1498,21 @@ class GenepopFileSamplerIndividualsByRemoval( GenepopFileSampler ):
 		in 1,2,3...M
 		'''
 
-		li_pop_numbers=self.sampleparams.population_numbers
+		'''
+		We call LeaveNthOut for each individual, according
+		to the population with the most individuals, numbering N_max. 
+		We will create N_max subsamples (numbered as replicates in
+		the output table produced by pgdriveneestimator.py.  
+		For each of these, any populations with less than the given size
+		will be assigned an empty list of individual numbers.		
+		'''
 
-		for i_pop_number in li_pop_numbers:
+		i_size_largest_pop=max( self.filemanager.getIndividualCounts() )
 
-			i_tot_indiv=self.filemanager.getIndividualCount( i_pop_number ) 
-
-			for i_indiv in range( 1, i_tot_indiv + 1 ):
-
-				s_indiv_subsample_tag=make_subsample_tag( 1, i_indiv, SCHEME_REMOVAL )
-
-				self.filemanager.subsampleIndividualsLeaveNthOutFromPop( i_indiv, 
-																		i_pop_number,
-																		s_indiv_subsample_tag )
-			#end for each indiv, leave it out of sample
-		#end for each pop number
+		for i_indiv in range( 1, i_size_largest_pop + 1 ):
+			s_indiv_subsample_tag=make_subsample_tag( 1, i_indiv, SCHEME_REMOVAL )
+			self.filemanager.subsampleIndividualsLeaveNthOutFromPop( i_indiv, s_indiv_subsample_tag )
+		#end for each indiv, leave it out of sample
 		return
 	#end __do_remove_one
 
@@ -1452,18 +1524,17 @@ class GenepopFileSamplerIndividualsByRemoval( GenepopFileSampler ):
 		i_replicate_total=self.sampleparams.replicates
 
 		for i_n in li_n_values:
+			
 			if i_n == 1 \
 					and self.sampleparams.do_all_combos_when_n_equals_one == True:
 				self.__do_remove_one()
 			else:
 				for idx in range( i_replicate_total ):
 
-					s_subsample_tag=None
-					if self.sampleparams.sample_tag is not None:
-						s_subsample_tag=self.sampleparams.sample_tag
-					else:
-						s_subsample_tag=make_subsample_tag( str( i_n ),  idx, SCHEME_REMOVAL )
-					#end if we have a tag param else make one
+					s_subsample_tag=make_subsample_tag( str( i_n ),  
+														idx, 
+														SCHEME_REMOVAL, 
+														s_prefix=self.sampleparams.sample_tag_base )
 
 					self.filemanager.subsampleIndividualsMinusRandomNFromEachPop( i_n, s_subsample_tag )
 				#end for each replicate
@@ -1499,13 +1570,10 @@ class GenepopFileSamplerIndividualsByCriteria( GenepopFileSampler ):
 
 		for idx in range( i_replicate_total ):
 
-			s_subsample_tag = None	
-
-			if self.sampleparams.sample_tag is not None:
-				s_subsample_tag=self.sampleparams.sample_tag
-			else:
-				s_subsample_tag=make_subsample_tag( "c"+ str(i_num_criteria), idx, SCHEME_CRITERIA )
-			#end if param tag exits, else make one
+			s_subsample_tag=make_subsample_tag( "c"+ str(i_num_criteria), 
+														idx, 
+														SCHEME_CRITERIA,
+														self.sampleparams.sample_tag_base )
 			
 			self.filemanager.subsampleIndividualsByIdCriteria( self.sampleparams.fields,
 														self.sampleparams.criteria,
@@ -1562,13 +1630,10 @@ class GenepopFileSamplerIndividualsByCriteriaFactored( GenepopFileSampler ):
 
 		for idx in range( i_replicate_total ):
 
-			s_subsample_tag=None
-
-			if self.sampleparams.sample_tab is not None:
-				s_subsample_tag=self.sampleparams.sample_tag
-			else:
-				s_subsample_tag=make_subsample_tag( "c"+ str(i_num_criteria), idx, SCHEME_CRITERIA )
-			#end if tag param exists else make one
+			s_subsample_tag=make_subsample_tag( "c"+ str(i_num_criteria), 
+												idx, 
+												SCHEME_CRITERIA,
+												self.sampleparams.sample_tag_base )
 
 			for idx in self.sampleparams.criteria.critera_count:
 
@@ -1644,12 +1709,11 @@ class GenepopFileSamplerIndividualsByCriteriaGrouped( object ):
 													"group", 
 													self.sampleparams.grouped_fields,
 													s_test_expression )
-			s_subsample_name=None
-			if self.sampleparams.sample_tag is not None:
-				s_subsample_name=self.sampleparams.sample_tag
-			else:
-				s_subsample_name="combo_" + str( i_combo_count )
-			#end if we have a tag param else make one
+
+			s_subsample_name=make_subsample_tag(  v_value="combo_" + str( i_combo_count),
+												  i_replicate_number=0,
+												  s_scheme=SCHEME_CRITERIA_GROUPED,
+												  s_prefix=self.sampleparams.sample_tag_base )
 
 			ls_temp_subsample_names.append( s_subsample_name )
 

@@ -28,6 +28,8 @@ import tempfile
 #so we can delete the temporary directory
 #and all of its files:
 import shutil
+#so we can copy renamed input files
+import glob
 
 class PGOpNeEstimator( APGOperation ):
 	'''
@@ -40,6 +42,11 @@ class PGOpNeEstimator( APGOperation ):
 
 		super( PGOpNeEstimator, self ).__init__( o_input, o_output )
 
+		self.__indir=None
+		self.__outdir=None
+		self.__infile=None
+		self.__outfile=None
+
 		return
 	#end __init__
 
@@ -50,13 +57,24 @@ class PGOpNeEstimator( APGOperation ):
 		raise Exception( "def not implemented" )
 	#end prepareOp
 
-	def __get_separate_dir_and_file_name(self,  s_filename ):
+	def __extract_file_in_out_info( self ):
 		'''
 		Because we are, per Tiago's advice, running
 		the NeEstimator with currdir in a temp directory,
 		we use absolute paths to input/output files to 
-		simplify their input into NeEstimator:
+		simplify copying to/from temp dir:
 		'''
+
+		self.__indir, self.__infile= \
+				self.__get_separate_dir_and_file_name( self.input.genepop_file )
+
+		self.__outdir, self.__outfile= \
+				self.__get_separate_dir_and_file_name (  self.output.run_output_file  )
+		return
+	#end __extract_file_in_out_info
+
+	def __get_separate_dir_and_file_name(self,  s_filename ):
+
 		s_abs_path_and_file=os.path.abspath( s_filename )
 		s_dir=os.path.dirname( s_abs_path_and_file )
 		s_file=os.path.basename( s_abs_path_and_file )
@@ -140,24 +158,57 @@ class PGOpNeEstimator( APGOperation ):
 		return
 	#end __remove_temporary_directory_and_all_its_contents
 
+	def __copy_genepop_input_and_get_temp_file_names( self ):
+
+		s_temp_input_filename="tempgp"
+		s_temp_output_base="tempout"
+
+		s_currdir=os.path.abspath( os.curdir )
+
+		shutil.copy( self.__indir + os.path.sep + self.__infile, 
+						s_currdir + os.path.sep + s_temp_input_filename )
+
+		return s_temp_input_filename, s_temp_output_base
+	#end __prepare_temp_files_and_get_temp_file_names
+
+	def __copy_results_to_orig_dir( self, s_temp_out_base ):
+		'''
+		This def assumes our current dir is still the 
+		temp dir with result files inside.
+		'''
+		ls_output_files=glob.glob( s_temp_out_base + "*" )
+		
+		for s_file in ls_output_files:
+			s_copy_for_orig_dir=self.__outdir + os.path.sep \
+					+ s_file.replace( s_temp_out_base, self.__outfile )
+			shutil.copy( s_file, s_copy_for_orig_dir  )
+		#end for each file prefixed with our temp output file name
+
+		return
+	#end __copy_results_to_orig_dir
+
 	def doOp( self ): 
 
 		ne2c=NeEstimator2Controller()
 
-		s_outdir, s_outfile=self.__get_separate_dir_and_file_name ( self.output.run_output_file  )
-
-		s_indir, s_infile=self.__get_separate_dir_and_file_name( self.input.genepop_file )
+		#This gives our instance attributes
+		#values for dirnames and filenames
+		#for the input genepop file and the
+		#output base name:
+		self.__extract_file_in_out_info()
 	
 		#run the estimator in a temporary directory, per Tiago's recommendation:
 		s_temp_dir=self.__change_current_directory_to_temporary_directory_inside_current()
 
-		##### temp
-		print ( "run params: " + str( ( self.input.run_params ) ) )
-		##### end temp
+		s_temp_in, s_temp_out=self.__copy_genepop_input_and_get_temp_file_names()	
 
+		#run estimator -- give it full path to currdir:
+		s_currdir=os.path.abspath( os.curdir )
 
-		ne2c.run( s_indir, s_infile, s_outdir, s_outfile, **( self.input.run_params  ) )
+		ne2c.run( s_currdir, s_temp_in, s_currdir, s_temp_out, **( self.input.run_params  ) )
 
+		self.__copy_results_to_orig_dir( s_temp_out )
+			
 		#make the current directory the original, before the change to a temporary dir:
 		self.__return_to_original_non_temporary_directory()
 

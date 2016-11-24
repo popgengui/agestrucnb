@@ -21,7 +21,6 @@ from ttk import *
 import glob
 
 #currently local modules
-import pgutilities as pgut
 import pgmenubuilder as pgmb
 import pgguisimupop as pggs
 
@@ -67,6 +66,11 @@ class PGHostNotebook( Notebook ):
 		#we collect references to the pggui* objects created
 		#and on delete, we clean up using these references:
 		self.__my_gui_objects_by_tab_text={}
+		#This allows direct access to the rebindScrollwheel def
+		#in the FrameContainerScrolled instance in each gui interface:
+		self.__scrolled_frame_objects_by_tab_text={}
+
+		self.bind( "<<NotebookTabChanged>>", self.__on_tab_change )
 		return
 	#end __init__
 
@@ -76,23 +80,22 @@ class PGHostNotebook( Notebook ):
 		'''
 		o_container=Frame( self, padding=self.__container_padding )
 		o_canvas=Canvas( o_container )
-
 		o_pgg=pggs.PGGuiSimuPop( o_container, 
 						self.__param_names_file_for_simulations, 
 						self.__glob_life_tables, 
 						i_total_processes_for_sims=self.__max_process_total )
 
 		o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
-		i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
-
+							i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
+		
 		s_tab_text="Simulation " + str( self.__tab_count )
 		self.add( o_container, text=s_tab_text )
 		self.__tab_children.append( o_container )
 		self.__tab_count+=1
 		self.select( o_container )
 		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
-		return
-	#end addPGGuiSimupop
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+		self.enable_traversal()
 
 	def addPGGuiNeEstimation( self ):
 		'''
@@ -104,18 +107,22 @@ class PGHostNotebook( Notebook ):
 			o_canvas=Canvas( o_container )
 
 			o_pgg=pgne.PGGuiNeEstimator( o_container, 
-							self.__param_names_file_for_neestimation )
+							self.__param_names_file_for_neestimation,
+							i_total_processes_for_est=self.__max_process_total )
 
 			o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
 			i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
 
 			s_tab_text="Nb Estimation " + str( self.__tab_count )
+
 			self.add( o_container, text=s_tab_text )
 			self.__tab_children.append( o_container )
 			self.__tab_count+=1
 			self.select( o_container )
 
 			self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
+			self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+
 		#end if NE_GUI_IS_IMPLEMENTED
 		return
 
@@ -144,6 +151,23 @@ class PGHostNotebook( Notebook ):
 		return len( self.tabs() )
 	#end __get_tab_count
 
+	def __on_tab_change( self, event ):
+		'''
+		As of 2016_11_13, on tab change our only
+		action is to rebind the mouse scrollwheel
+		to the canvas inside the FrameContainerScrolled
+		instance associated with each GUI interface.
+		'''
+
+		if self.index("end") > 0:
+			i_tab_index=self.index( "current" )
+			s_text_this_tab=self.tab( "current", option="text" )
+			self.__scrolled_frame_objects_by_tab_text[ s_text_this_tab ].rebindScrollwheel()
+		#end if we have at least one tab
+
+		return
+	#end __on_tab_change
+
 	def removeCurrentTab( self ):
 		if self.__get_tab_count() > 0:
 			s_msg="If you're currently running a program in this tab, " \
@@ -156,7 +180,7 @@ class PGHostNotebook( Notebook ):
 
 			if b_do_it:
 				i_tab_index=self.index( "current" )
-				s_text_this_tab = self.tab( "current" , option="text"	 )
+				s_text_this_tab = self.tab( "current" , option="text" )
 				
 				if VERBOSE:
 					print( "removing gui with tab text: " + s_text_this_tab )
@@ -204,7 +228,6 @@ class PGHostNotebook( Notebook ):
 
 		#end if we have at least one tab
 	#end removeAllTabs
-
 
 	def cleanupAllTabs( self ):
 		for o_gui in self.__my_gui_objects_by_tab_text.values():
