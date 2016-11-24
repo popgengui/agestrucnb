@@ -253,10 +253,6 @@ def collectStatsData(neDict, statsDict, outFolder,firstVal):
     slopeOut.close()
 
 
-
-
-
-
 def batch(configFile,threads = 1):
     configs  = readconfig(configFile)
     speciesFile = configs["species"]

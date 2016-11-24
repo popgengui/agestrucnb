@@ -74,6 +74,6 @@ def neFileRead(filename, firstVal = 0):
         individualCountTable[replicate] = individualCountVctr
     return resultTable,individualCountTable
 
-def createErrorPlot(table,errorTable title = None, xlab = None, yLab= None, dest = "show")
+def createErrorPlot(table,errorTable, title = None, xlab = None, yLab= None, dest = "show"):
 
 

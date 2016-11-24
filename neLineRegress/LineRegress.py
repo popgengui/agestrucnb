@@ -82,7 +82,7 @@ def createGraph(lineArray, title = None, xlab = None, yLab= None, colorVctr = No
             plt.show()
         else:
             plt.savefig(dest, bbox_inches='tight')
-        plt.close()
+        #plt.close()
         plt.clf()
 
 # method to create a scatterPlot of the outputNEs
@@ -107,8 +107,7 @@ def createScatterPlot(table, title=None, xlab=None, yLab=None, dest="show"):
         plt.show("scatter")
     else:
         plt.savefig(dest, bbox_inches='tight')
-    plt.clf()
-    plt.close("scatter")
+        plt.clf()
 
  #method to create a boxplot of the outputNEs
 def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
@@ -141,8 +140,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         plt.show("box")
     else:
         plt.savefig(dest, bbox_inches='tight')
-    plt.clf()
-    plt.close("box")
+        plt.clf()
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -725,7 +723,7 @@ if __name__ == "__main__":
     configwrite.set("labels", "yLab", "yLabel")
     configwrite.add_section("destination")
     configwrite.set("destination","desttype", "show")
-    configwrite.set("destination","regressionfile", "test.pdf")
+    configwrite.set("destination","regressionfile", "test.png")
     configwrite.set("destination","boxplotfile", "box.pdf")
     configwrite.set("destination","scatterfile", "show")
     configwrite.add_section("comparison")
