@@ -26,8 +26,8 @@
 #None;None;None for the type, min, and max fields.
 #
 NbNc	Nb/Nc;Population;2;1;1;0.0;float;None;None;Nb/Nc, where Nc=No;entry;None;type(x)==float;updateN0EntryBox
-N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle (before lambda). Calculated as Nb/( Nb/Nc ).;entry;None;type(x)==int and x >= 0;None
-Nb	Nb;Population;0;0;1;0;int;None;None;"";entry;None;type(x)==int and x>= 0;updateN0EntryBox
+N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle (before lambda). If not editable then calculated using Nb, Nb/Nc, survival rates, and male birth probability.;entry;None;type(x)==int and x >= 0;None
+Nb	Nb;Population;0;0;1;0;int;None;None;"Nb";entry;None;type(x)==int and x>= 0;updateN0EntryBox
 NbVar	NbVar;suppress;0;0;1;0;int;None;None;"";entry;None;type(x)==int;None
 ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None;type(x)==int and x >= 0;None
 config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None;type(x)==str;None
@@ -43,7 +43,7 @@ gens	Reproductive cycles;Population;2;1;1;1;int;None;None;Reproductive Cycles;en
 isMonog	Monogamous;Population;2;1;1;False;bool;None;None;Monogamous;entry;None;type(x)==bool;None
 lbd	Lambda (after burn-in);Simulation;4;1;1;1.0;float;None;None;Lambda after burn in;entry;None;type(x)==float and type(x)>=0;None
 litter	Litter;Population;2;1;1;None;listint;None;None;Litter;entry;None;type(int)==int;None
-maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;None
+maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;updateN0EntryBox
 model_name	Model;Configuration Info;1;1;1;"none";str;None;None;Model name;entry;None;entry;None;type(x)==str;None
 numSNPs	Number of SNPs;Genome;3;1;1;0;int;None;None;Number of SNPs;entry;None;type(x)==int and x >= 0;None
 mutFreq	Mutation frequency;Genome;3;1;1;0.0;float;None;None;Mutation Frequency;entry;None;type(x)==float;None
@@ -55,8 +55,8 @@ skip	Skip breeding probability;Simulation;4;1;1;None;listfloat;None;None;Skip br
 startAlleles	Starting Msat allele total;Genome;3;1;1;0;int;None;None;Starting microsat allele total;entry;None;type(x)=int and x >= 0;None
 startLambda	Cycles of burn-in;Simulation;5;1;1;99999;int;None;None;Lambda burn-in (99999 means no burn-in.);entry;None;None;None
 startSave	Starting save;suppress;5;1;1;1;int;None;None;Starting Starting data save;entry;None;None;None
-survivalFemale	Female survival;Population;2;1;1;None;listfloat;None;None;Female Survival;entry;None;type(x)==float;None
-survivalMale	Male survival;Population;2;1;1;None;listfloat;None;None;Male Survival;entry;None;type(x)==float;None
+survivalFemale	Female survival;Population;2;1;1;None;listfloat;None;None;Female Survival;entry;None;type(x)==float;updateN0EntryBox
+survivalMale	Male survival;Population;2;1;1;None;listfloat;None;None;Male Survival;entry;None;type(x)==float;updateN0EntryBox
 gammaAFemale	Female gamma A;Population;2;1;1;None;listfloat;None;None;Female Gamma A;entry;None;type(x)==float;None
 gammaBFemale	Female gamma B;Population;2;1;1;None;listfloat;None;None;Female Gamma B;entry;None;type(x)==float;None
 gammaAMale	Male gamma A;Population;2;1;1;None;listfloat;None;None;Male Gamma A;entry;None;type(x)==float;None
