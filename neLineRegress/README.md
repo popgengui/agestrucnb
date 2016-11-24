@@ -1,2 +1,0 @@
-# neLineRegress
-addonModule for neGui
