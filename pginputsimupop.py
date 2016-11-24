@@ -717,7 +717,7 @@ class PGInputSimuPop( object ):
 			self.__N0_from_pop_section=v_value
 		elif s_nb_source=="effective_size_section":
 			''' 
-			If we have effecgtive size info, and the 
+			If we have effective size info, and the 
 			client assigns an N0 value via this setter,
 			we assume the client intends to set N0 without
 			calculating from Nb and Nb/Nc, which is currently

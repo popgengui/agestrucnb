@@ -96,6 +96,18 @@ class PGOpSimuPop( modop.APGOperation ):
 		#unless we reseed the numpy random number generator 
 		#for each "process:"
 		numpy.random.seed()
+		'''
+		With introduction of the N0 as 
+		calculated by other parameters,
+		I chose to keep it unaltered in 
+		the input object (see N0 property
+		in the PGInputSimuPop class), and
+		to accomodate lambda adustments,
+		to use this attribute as the 
+		N0 accessor in the simulation operations.
+		We initiallize to the input object's value:
+		'''
+		self.__current_N0=self.input.N0
 		
 		return
 	#end __init__
@@ -332,10 +344,10 @@ class PGOpSimuPop( modop.APGOperation ):
 		#end for i in pop
 
 		if gen >= self.input.startLambda:
-			self.input.N0 = self.input.N0 * self.input.lbd
+			self.__current_N0=self.__current_N0 * self.input.lbd
 		#endif gen >= start lambda
 
-		v_return_value = self.input.N0 + curr
+		v_return_value = self.__current_N0 + curr
 
 		if VERBOSE:
 			print( "in __calcDemo, with args, %s %s %s %s, returning %s "
@@ -528,8 +540,11 @@ class PGOpSimuPop( modop.APGOperation ):
 				cofs.append(nofs)
 			#end if fecs
 		#end for ind in pop
-
-		kbar = 2.0 * self.input.N0 / len(cofs)
+		##### temp
+		print ("---------------")
+		print ("setting kbar" )
+		#####
+		kbar = 2.0 * self.__current_N0 / len(cofs)
 		Vk = numpy.var(cofs)
 		nb = (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
 		#print len(pair), kbar, Vk, (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
@@ -556,7 +571,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			gen = self.__litterSkipGenerator(pop, subPop)
 			#print 1, pop.dvars().gen, nb
 
-			for i in range(self.input.N0):
+			for i in range(self.__current_N0):
 				pair.append(gen.next())
 			#end for i in range
 
@@ -764,25 +779,32 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			#setup data and seperate males and females
 			cohort = cohortDict[cohortKey]
-			print(cohortKey)
+
 			cohortTotal = len(cohort)
 			cohortMales = [x for x in cohort if x.sex()==1]
 			maleCount = len(cohortMales)
 			cohortFemales = [x for x in cohort if x.sex() == 2]
 			femaleCount = len(cohortFemales)
-			print cohortTotal
-			print maleCount
-			print femaleCount
-			print"\n"
+
+			if VERBOSE:
+				print(cohortKey)
+				print cohortTotal
+				print maleCount
+				print femaleCount
+				print"\n"
+			#end if verbose
 
 			#determine survival rate of this cohort
 			survivalRate =(self.input.survivalMale[int(cohortKey) - 1]+self.input.survivalFemale[int(cohortKey) - 1])/2
-			print survivalRate
 			survivorCount = numpy.round(cohortTotal * survivalRate)
 			cullCount = cohortTotal  - survivorCount
-			print survivorCount
-			print cullCount
-			print "\n\n"
+			
+			if VERBOSE:
+				print survivalRate
+				print survivorCount
+				print cullCount
+				print "\n\n"
+			#end if verbose
 
 			#choose which sex to kill first
 			#flag is one and 0 for easy switching
@@ -823,22 +845,31 @@ class PGOpSimuPop( modop.APGOperation ):
 				#sample by gender
 				if len(maleCullOrder)>len(femaleCullOrder):
 					lottoInd = maleCullOrder.pop()
-					print "MaleChosen "+str(lottoInd.ind_id)
+					if VERBOSE:
+						print "MaleChosen "+str(lottoInd.ind_id)
+					#end if VERBOSE
 				else:
 					lottoInd = femaleCullOrder.pop()
-					print "FemaleChosen "+str(lottoInd.ind_id)
+					if VERBOSE:
+						print "FemaleChosen "+str(lottoInd.ind_id)
+					#end if VERBOSE
 				#if not already "dead"
 				if not lottoInd.ind_id in cohortKills:
 					lotteryCount +=1
-					print "Dead "+str(lotteryCount)
+					if VERBOSE:
+						print "Dead "+str(lotteryCount)
+					#end if VERBOSE
+
 					kills.append(lottoInd.ind_id)
 					killChoiceFlag = abs(killChoiceFlag-1)
-
 
 			#kills.extend(cohortKills)
 			# endif age>0 andage<.....
 		# end for i in pop
-		print kills
+		if VERBOSE:
+			print kills
+		#end if VERBOSE
+
 		pop.removeIndividuals(IDs=kills)
 		return True
 
