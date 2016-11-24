@@ -81,3 +81,14 @@ filtering individuals.
 
 Mon Oct 10 19:40:20 MDT 2016
 1. Set tab order in interface entry boxes.
+
+Thu Nov  3 20:07:20 MDT 2016
+1. Param names files, wrapped into PGParamSet objects, and used to get type and
+default values plus many gui-related paramters,for the gui input of sim and ne
+estimation parameters, now have so many fields that my file format (currently
+two columns, the first a param name, and the second 14 semi-colon delimited
+fields) should be revised to be a more regularized and readable form, such
+as an xml file.
+fields
+2. For the todo above sept 2, number 1, should simply generlize to propogate
+all excpetions into dialogs, for all the programs functions.

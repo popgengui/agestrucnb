@@ -1,6 +1,6 @@
 #List of known bugs
 
-Fri Jul 29 15:49:24 MDT 2016
+Fri Jul 29 DT 2016
 
 B1.  Running 9 simulations -- bug may be solved, but have not yet
 	retested ( 2016_08_15 ) -- have added code to kill processes when the gui is
@@ -14,9 +14,9 @@ B1.  Running 9 simulations -- bug may be solved, but have not yet
 
 B2.  Related to B1, clicking the "Cancel Simulatin" button during a long
 simulation did not kill the process.  --testing shows fixed as of Fri Aug 12
-13:34:50 MDT 2016
+DT 2016
 
-Fri Aug 12 13:35:10 MDT 2016
+Fri Aug 12 DT 2016
 
 B3.  Cancelling an ne-estmation in the gui has seconds of delay before Ne2
 executable stops.  Then process dies with error in the multiprocessing mod --
@@ -54,7 +54,7 @@ B9.  Total characters in a genepop file go be used as input into the
 	to intermediate NeEstimation files.  I don't yet have a fix, but I have coded
 	warning dialogs when genepop files for input have names that exceed the limit.
 
-Mon Aug 15 15:14:34 MDT 2016
+Mon Aug 15 DT 2016
 
 B10 Fixed 20160825 -- Windows -- seems to have resolve after revisions to
 	pgdriveneestimator.py as of 2016_08_22 -- may have been change from
@@ -77,7 +77,7 @@ B11 Fixed 2016_08_15, Windows success on win10 -- win10 and win7, when
 	form "_\\*filename
 	-- looks like a bad path formation in the code.
 
-Thu Aug 25 19:24:42 MDT 2016 
+Thu Aug 25 DT 2016 
 
 B12 If any genepop file name has one or more comma
 	in it, the Ne Estimation interface can't correctly parse the file name and will
@@ -89,7 +89,7 @@ B12 If any genepop file name has one or more comma
 	existing output files versus the intermediate files based on input genepop
 	names.
 
-Tue Aug 30 16:07:04 MDT 2016
+Tue Aug 30 DT 2016
 
 B13 simuPOP thrashes when lambda makes pop size shrink to too small
 	before gens are done.  On OSX, have seen that cancelling the sim leaves the
@@ -99,21 +99,47 @@ B13 simuPOP thrashes when lambda makes pop size shrink to too small
 	exact actions leading to the instance of orphaned working processes on the OSX problem 
 	are not known.
 
-Wed Aug 31 12:45:31 MDT 2016
+Wed Aug 31 DT 2016
 
 B14 If you run a simulation and set "replicates" to >1, then the *conf file that is produced
-	by the run will have its "replicates" param set to 1 (since the replicates are run as single
-	instances, reloading simupop for each replicate).  Using the *conf file, then, to repeat
-	the run with > 1 replicate, currently requires the user to reset the "repicates" param in
-	the interface.
+	by the run will have its "replicates" param set to 1 (since the
+	replicates are run as single instances, reloading simupop for each replicate).
+	Using the *conf file, then, to repeat the run with > 1 replicate, currently
+	requires the user to reset the "repicates" param in the interface.
 
-Tue Oct 25 23:40:20 MDT 2016
+Tue Oct 25 DT 2016
 
-B15 Fixed 20161031 (difficult to confirm complete fix, but many tests show no more persisiting tooltip windows).
-	In the ne estimation gui, tooltips do not disappear properly when mouse moves off.  This 
-	seems to happen to (soley?) in the combo boxes, when the keyboard is used to select from the dropdown
-	list, while the mouse is over the control, so that the tooltip reappears when the keyboard selection
-	is done, but the tooltip window then will not disappear as it should after mouse off.
+B15 Fixed 20161031 (difficult to confirm complete fix, but many tests show no
+	more persisiting tooltip windows).  In the ne estimation gui, tooltips do not
+	disappear properly when mouse moves off.  This seems to happen to (soley?) in
+	the combo boxes, when the keyboard is used to select from the dropdown list,
+	while the mouse is over the control, so that the tooltip reappears when the
+	keyboard selection is done, but the tooltip window then will not disappear as it
+	should after mouse off.
 
-B16 Have had inexplicable hangs in ne-estimation doing cohort sampling on a 20-pop genepop with N0 at  about 50.  Unable to consistently
-	reproduce this bug, as identical interface inputs run to completion when attempting to reproduce the bug.
+B16 Have had inexplicable hangs in ne-estimation doing cohort sampling on a
+	20-pop genepop with N0 at  about 50.  Unable to consistently reproduce this bug,
+	as identical interface inputs run to completion when attempting to reproduce the
+	bug.
+
+Sun Nov  6 ST 2016
+
+B17 Fixed -- this bug was introduced recently, and fixed today.  Pre-validation
+	of params in pgguineestimator.py misses exising  *_g_* NeEstimator
+	intermediates, then runs and throws error when the pgdriver finds them exising.
+
+Sun Nov 13 ST 2016
+
+B18 Fixed -- Vertical scrolling in a tab does not re-engage after a new
+	simulation or ne-estimation is created (in a new tab).
+
+Sun Nov 20 ST 2016
+
+B19 Windows 10 GUI (Windows 7 32-bit did not show this problem), some labels
+	and buttons do not have enough width for the text. Also, in the Ne estimation
+	GUI, the output file base name label runs under its corrsponding Entry box.
+
+B20 Windows GUI, if the current focus is a combobox, the scroll wheel not only
+	scrolls the whole interface (as desired), but also scrolls through and changes
+	the combobox selection. 
+
