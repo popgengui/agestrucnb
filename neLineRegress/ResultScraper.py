@@ -41,12 +41,14 @@ def scrapeNE(filename, firstVal):
     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
     dataDict = {}
     popDict = {}
+    maxDict = {}
+    minDict ={}
     popNum = 0
     for item in replicateData:
         sourceName = item['original_file']
         pop = item['pop']
         popNum = int(pop)
-        individualCount = int(item["indiv_count"])
+        individualCount = int(item["census"])
         neEst = float(item['est_ne'])
         maxError = float(item['95ci_high'])
         minError = float(item['95ci_low'])
@@ -55,14 +57,21 @@ def scrapeNE(filename, firstVal):
         if not sourceName in dataDict:
             dataDict[sourceName] = {}
             popDict[sourceName] = {}
+            maxDict[sourceName] = {}
+            minDict[sourceName] = {}
+
         dataDict[sourceName][popNum] = neEst
         popDict[sourceName][popNum] = individualCount
+        maxDict[sourceName][popNum] = maxError
+        minDict[sourceName][popNum] = minError
     replicateKeys = dataDict.keys()
     resultTable = {}
     individualCountTable = {}
+    errorTable = {}
     for replicate in replicateKeys:
         replicateVctr = []
         individualCountVctr = []
+        errorVctr = []
         replicateDict = dataDict[replicate]
         individualCountDict = popDict[replicate]
         popKeys = replicateDict.keys()
@@ -72,9 +81,11 @@ def scrapeNE(filename, firstVal):
                 # print popKey
                 replicateVctr.append((popKey, replicateDict[popKey]))
                 individualCountVctr.append((popKey, individualCountDict[popKey]))
+                errorVctr.append((popKey,minDict[popKey],maxDict[popKey]))
         resultTable[replicate] = replicateVctr
         individualCountTable[replicate] = individualCountVctr
-    return resultTable, individualCountTable
+        errorTable[replicate] = errorVctr
+    return resultTable, errorTable
 
 file  = "neStatsOut.txt"
 

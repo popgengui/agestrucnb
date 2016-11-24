@@ -371,15 +371,19 @@ def neConfigRead(filename):
         if config.has_option("labels", "yLab"):
             yLab = config.get("labels", "yLab")
     if config.has_section("destination"):
-        destType = config.get("destination","desttype")
+        if config.has_option("destination", "desttype"):
+            destType = config.get("destination","desttype")
+
         if destType=="none":
             destType = "none"
             regressionDest = "none"
             boxplotDest = "none"
             scatterDest = "none"
-        if destType != "show" or "none":
+        if config.has_option("destination","regressionfile"):
             regressionDest = config.get("destination","regressionfile")
+        if config.has_option("destination", "boxplotfile"):
             boxplotDest = config.get("destination","boxplotfile")
+        if config.has_option("destination", "scatterfile"):
             scatterDest = config.get("destination","scatterfile")
     if config.has_section("comparison"):
         valueFlag = True
@@ -449,6 +453,7 @@ def neGrapher(neFile, configFile):
         return True
     configs = neConfigRead(configFile)
     table,countsTable = neFileRead(neFile,configs["startData"])
+    print table
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
     createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
     createScatterPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
