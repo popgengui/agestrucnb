@@ -7,11 +7,12 @@
 import ConfigParser
 
 from numpy import array, math
-from scipy import stats
+from scipy import stats, random
 import matplotlib.pyplot as plt
 from numpy import mean, median, isnan
 import csv
 import sys
+import os
 
 #function to perform the linear regression and store the results in a dictionary
 def lineRegress(linePoints):
@@ -149,11 +150,11 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
 #linePoints: list of touples defining the x and y coordinates of a point
 #returns 3 variables, the slope of the regression, the intercept of the regression, and a touple containing the upper and lower bounds of the confidence interval of the slope
 def slopeConfidence(alpha, linePoints):
-    if len(linePoints)<2:
+    if len(linePoints)<=2:
         return "Error: not enough points for calculation"
-    if len(linePoints)==2:
-        regression = lineRegress(linePoints)
-        return regression["slope"], regression["intercept"],(regression["slope"],regression["slope"])
+    #if len(linePoints)==2:
+    #    regression = lineRegress(linePoints)
+    #    return regression["slope"], regression["intercept"],(regression["slope"],regression["slope"])
     #get linear regression for points
     regression = lineRegress(linePoints)
     #get Tscore
@@ -308,9 +309,11 @@ def neFileRead(filename, firstVal = 0):
     popNum = 0
     for item in replicateData:
         sourceName = item['original_file']
+        sourceName = os.path.basename(sourceName)
+
         pop =  item['pop']
         popNum = int(pop)
-        individualCount = int(item["indiv_count"])
+        individualCount = int(item["census"])
         neEst = float(item['est_ne'])
         #if neEst == "NaN":
         #    neEst = sys.maxint
@@ -332,8 +335,8 @@ def neFileRead(filename, firstVal = 0):
         for popKey in popKeys:
             if popKey >=firstVal:
                 #print popKey
-                replicateVctr.append((popKey,replicateDict[popKey]))
-                individualCountVctr.append((popKey,individualCountDict[popKey]))
+                replicateVctr.append((popKey-firstVal,replicateDict[popKey]))
+                individualCountVctr.append((popKey-firstVal,individualCountDict[popKey]))
         resultTable[replicate] = replicateVctr
         individualCountTable[replicate] = individualCountVctr
     return resultTable,individualCountTable

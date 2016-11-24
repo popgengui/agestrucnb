@@ -73,3 +73,5 @@ def neFileRead(filename, firstVal = 0):
         resultTable[replicate] = replicateVctr
         individualCountTable[replicate] = individualCountVctr
     return resultTable,individualCountTable
+
+
