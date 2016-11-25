@@ -82,8 +82,8 @@ def createGraph(lineArray, title = None, xlab = None, yLab= None, colorVctr = No
             plt.show()
         else:
             plt.savefig(dest, bbox_inches='tight')
-        #plt.close()
-        plt.clf()
+            #plt.close()
+            plt.clf()
 
 # method to create a scatterPlot of the outputNEs
 def createScatterPlot(table, title=None, xlab=None, yLab=None, dest="show"):
