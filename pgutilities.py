@@ -26,6 +26,7 @@ import glob
 import inspect
 import time
 import multiprocessing
+import shutil
 
 #for def do_simulation_reps_in_subprocesses,
 #used to detect windows, and 
@@ -587,13 +588,12 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 		#end while
 
 	except Exception as oex:
+		
 		show_error_in_messagebox_in_new_process( oex, 
 				s_msg_prefix = "Error caught by pgutilities, "
 								+ "def __do_simulation_reps_in_subprocesses." )
 		raise oex
 	#end try...except...
-
-
 	return
 #end __do_simulation_reps_in_subprocesses
 
@@ -674,7 +674,14 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	which itself multiplexes the NeAnlaysis of multiple genepop files and (likely) multiple
 	pops per file using python.multiprocessing.Process objects.
 	'''
+
+	o_main_output=None
+	o_secondary_output=None
+
 	try:
+		o_main_output=None
+		o_secondary_output=None
+
 		s_os_plaform_name=platform.system()
 		
 		#if we're on windows, file
@@ -705,9 +712,16 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 		#when no extra output is desired, and multiprocessing is also
 		#desired.  We convert to the proper term used by pgdriveneestimator.py
 		#to designate this type of run:
+		#2016_11_26 -- while a bug in the parallel processing of ne estimates
+		#is being solved, we're now offering in the gui the two modes "serial"
+		#and "parallel", and recommending "serial"
 		if s_runmode=="default":
 			s_runmode="no_debug"
-		#end if default runmode
+		elif s_runmode=="serial":
+			s_runmode="no_debug_serial"
+		elif s_runmode =="parallel":
+			s_runmode="no_debug"
+		#end if runmode needs translating for the drive
 
 		#Make of a single sequence of strings.
 		qs_files_args=( s_genepop_files_formatted_as_python_list, ) 
@@ -744,6 +758,17 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 		o_main_output.close()
 		o_secondary_output.close()
 	except Exception as oex:
+
+		'''
+		The calling GUI tests for this event's set status.
+		If it finds set, it will reset the GUI to show
+		the estimation has halted.
+		'''
+		if o_multiprocessing_event is not None:
+			o_multiprocessing_event.set()
+		#end if we have a non-None event object
+		
+
 		show_error_in_messagebox_in_new_process( oex, 
 				s_msg_prefix = "Error caught by pgutilities, "
 								+ "def run_driveneestimator_in_new_process." )

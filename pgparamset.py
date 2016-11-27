@@ -127,6 +127,9 @@ class PGParamSet( object ):
 	to present the parameter for editing and/or
 	visualizing.  As of 2016_09_21, possible entries
 	are "entry" or "cbox" (combo box ).
+
+	2016_11_25, refined cbox to give state, so now
+	"cboxreadonly" or "cboxnormal"
 	'''
 	IDX_TAG_FIELD_GUI_CONTROL=10
 
@@ -155,16 +158,6 @@ class PGParamSet( object ):
 	IDX_TAG_FIELD_ASSOC_DEF=13
 
 	COMMENT_CHAR="#"
-
-	'''
-	These constants will be accessed by
-	clients in order to have one placer
-	to find the kewords that give control
-	types:
-	'''
-	CONTROL_TYPE_ENTRY_BOX="entry"
-	CONTROL_TYPE_COMBO_BOX="cbox"
-	CONTROL_TYPE_BOOL_RADIO_BUTTONS="boolradio"
 
 	def __init__( self, s_file_with_param_names = None ):
 

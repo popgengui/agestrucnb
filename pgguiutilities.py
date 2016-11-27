@@ -998,6 +998,8 @@ class KeyListComboFrame( Frame ):
 			s_label_justify='right',
 			s_label_name=None,
 			b_force_disable=False,
+			o_validity_tester=None,
+			s_state='readonly',
 			s_tooltip = "" ):
 
 		"""
@@ -1023,6 +1025,10 @@ class KeyListComboFrame( Frame ):
 		Param s_label_name, if not None, replaces s_name as the text for the label.
 		Param b_force_disable, if True, will override the b_is_enabled value and disable all entry 
 			  boxes
+		Param s_state, if (default) readonly, user can only select dropdown list items, if 'normal'
+			  user can enter text as well, and if 'disabled' no change possible.
+		Param o_validity_tester, object used to validate entry on combobox selection.  For details
+			 see attribute of same name in class KeyValFrame
 		"""
 
 		#TCL won't allow uppercase names for windows
@@ -1043,7 +1049,9 @@ class KeyListComboFrame( Frame ):
 		self.__def_on_new_selection=def_on_new_selection
 		self.__label_name=self.__name if s_label_name is None else s_label_name
 		self.__force_disable=b_force_disable
+		self.__validity_tester=o_validity_tester
 		self.__tooltip=self.__label_name if s_tooltip == "" else s_tooltip
+		self.__cbox_state=s_state,
 		self.__subframe=None
 
 		'''
@@ -1106,19 +1114,44 @@ class KeyListComboFrame( Frame ):
 
 		i_rowcount=0
 
-		s_state="enabled"
+		s_state=self.__cbox_state
 
 		if self.__isenabled==False or self.__force_disable==True:
 			s_state="disabled" 
 		#end if enabled else not
 
+		'''
+		Registering and assigning the validation def does
+		fire on the first leave focus on Linux.  I added this
+		in an attempt to get a call to the on_new_combobox_selection
+		def (which does validation), when the mouse pointer leaves
+		the combobox. It does fire the first time, but not thereaafter
+		(see cbox event bindings below).
+		'''
+		o_registered_validation=self.register( \
+				self.__validate_per_registered_command )
+
 		o_combobox=Combobox( self.__subframe,
 					textvariable=self.__value,
-					width=self.__cbox_width )
+					state=s_state,
+					width=self.__cbox_width,
+					validate='focusout',
+					validatecommand=( o_registered_validation, '%P' ) )
 
 		o_combobox[ 'values' ] = self.__choices
 
 		o_combobox.bind("<<ComboboxSelected>>", self.__on_new_combobox_selection )
+		'''
+		Putatively, says tkk dpocuments, to fire when mouse pointer leaves
+		the widget, but, in Linux at least, it does not fire.
+		'''
+		o_combobox.bind( '<Leave>', self.__on_new_combobox_selection )
+		'''
+		Fails except on first leaving focus, in Linux at least.
+		'''
+		o_combobox.bind( '<FocusOut>', self.__on_new_combobox_selection )
+		o_combobox.bind( '<Return>', self.__on_new_combobox_selection )
+		o_combobox.bind( '<Tab>', self.__on_new_combobox_selection )
 
 		#For PGParamSet object-derived text, we need to
 		#substiture double-tildes with newlines.
@@ -1138,6 +1171,17 @@ class KeyListComboFrame( Frame ):
 		self.__on_new_combobox_selection()
 		return
 	#end __setup_combobox
+
+	def __validate_per_registered_command( self, v_val ):
+		'''
+		Crated this def, along with validation registration
+		per ttk docs, in an attempt to get a call to the 
+		selection def after mouse pointer leaves the cbox, 
+		but very limited performance (see __setup_combobox
+		above).
+		'''
+		self.__on_new_combobox_selection()
+	#end __validate
 
 	def __update_parent_attr_and_def( self ):
 
@@ -1161,7 +1205,27 @@ class KeyListComboFrame( Frame ):
 		if self.__isenabled == False or self.__force_disable == True:
 			return
 		#end if disabled, do nothing
-		self.__update_parent_attr_and_def()
+
+		if self.__validity_tester is not None:
+
+			s_val_to_test=s_current_val=self.__value.get()
+
+			self.__validity_tester.value=s_val_to_test			
+
+			if not self.__validity_tester.isValid():
+				#message to user:
+				s_msg=self.__validity_tester.reportInvalidityOnly()
+				PGGUIInfoMessage( self, s_msg )
+	
+				#list items are zero-indexed, but clients pass a 1-indexed
+				#referenc to combobox choices
+				self.__combobox_object.current( self.__default_choice_number - 1 )
+			else:
+				self.__update_parent_attr_and_def()
+			#end if not valid reset to default, else update
+		else:
+			self.__update_parent_attr_and_def()
+		#end if we have a validity tester, else just update
 
 		return
 	#end __on_new_combobox_selection

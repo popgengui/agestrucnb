@@ -540,10 +540,7 @@ class PGOpSimuPop( modop.APGOperation ):
 				cofs.append(nofs)
 			#end if fecs
 		#end for ind in pop
-		##### temp
-		print ("---------------")
-		print ("setting kbar" )
-		#####
+
 		kbar = 2.0 * self.__current_N0 / len(cofs)
 		Vk = numpy.var(cofs)
 		nb = (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)

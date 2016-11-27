@@ -165,8 +165,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#immediately
 		self.__setup_output()
 
-
-
 		self.__simulation_is_in_progress=False
 
 		self.__total_processes_for_sims=i_total_processes_for_sims
@@ -296,7 +294,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		i_row+=1
 
-		o_outdir_kv=KeyValFrame( s_name="Select Output directory", 
+		o_outdir_kv=KeyValFrame( s_name="Select output directory", 
 					v_value=self.__output_directory.get(), 
 					v_default_value="",
 					o_type=str,
@@ -462,12 +460,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#flag to false for the KeyValFrame entry box:
 		CONFIG_INFO_SECTION_NAME="Configuration Info"
 
-		#For params (if any) not in the input
-		#objects paramset instance (from the
-		#file simupop.param.names)
-		DEFAULT_CONTROL_TYPE=pgps.PGParamSet.CONTROL_TYPE_ENTRY_BOX
-
-
 		self.__param_key_value_frames={}
 
 		i_row=0
@@ -476,7 +468,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		
 		ls_input_params=[ s_param for s_param in dir( o_input ) if not( s_param.startswith( "_" ) ) \
 											and not( s_param.startswith( PREFIX_FOR_INPUT_CONSTANTS ) )  ]
-
 		ls_tags=o_input.param_names.tags
 
 		ls_sections=[  o_input.param_names\
@@ -611,7 +602,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#we send in the input object to the KeyValFrame (or similar class)
 				#instance so it will be the object whose attribute (with name s_param)
 				#is reset when user resets the value in the KeyValFrame:
-				if s_param_control_type == pgps.PGParamSet.CONTROL_TYPE_ENTRY_BOX:
+				if s_param_control_type == "entry":
 
 					i_entry_width=len(v_val) if type( v_val ) == str else 7
 
@@ -632,8 +623,22 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 								b_is_enabled=b_allow_entry_change,
 								b_force_disable=b_force_disable,
 								s_tooltip=s_tooltip )
-						
-				elif s_param_control_type == pgps.PGParamSet.CONTROL_TYPE_COMBO_BOX:
+				#cbox types are specified as cboxreadonly or cboxnormal, so we test for prefix:	
+				elif s_param_control_type.startswith( "cbox" ):
+					'''
+					As of 2016_11_25, there are two types of combobox
+					'''
+					s_state_this_cbox=None
+					if s_param_control_type == "cboxnormal":
+						s_state_this_cbox="normal"
+					elif s_param_control_type == "cboxreadonly":
+						s_state_this_cbox="readonly"
+					else:
+						s_msg="In PGGuiSimuPop, def __load_values_into_interface, " \
+									+ "unknown cbox control type: " \
+									+ s_param_control_type + "."
+						raise Exception( s_msg )
+					#end if normal, else readonly cbox
 
 					qs_control_list=eval( s_param_control_list )
 
@@ -665,9 +670,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 								s_label_name=s_longname,
 								s_tooltip=s_tooltip,
 								b_is_enabled=True,
+								s_state=s_state_this_cbox,
 								b_force_disable=b_force_disable )
 
-				elif s_param_control_type == pgps.PGParamSet.CONTROL_TYPE_BOOL_RADIO_BUTTONS:
+				elif s_param_control_type == "boolradio":
 
 					#we construct a KeyCategoricalValueFrame
 					#instance, and set the default button to

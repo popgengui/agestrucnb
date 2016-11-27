@@ -64,5 +64,5 @@ gammaBMale	Male gamma B;Population;2;1;1;None;listfloat;None;None;Male Gamma B;e
 #this is a dummy entry, for an Nb param value that is assigned, checked and calculated within the input object, and accessed only
 #by the pgopsimupop object:
 Nb_for_restrict_generator	Nb derived from supplied params, for generator assignment;suppress;0;0;0;0;int;None;None;"";entry;None;type(x)==int;None
-cull_method	Cull method;Simulation;6;1;1;"survival_rates";str;None;None;Method of culling individuals after each reproductive cycle.;cbox;( "survival_rates", "equal_sex_ratio" );x in [ 'survival_rates', 'equal_sex_ratio' ];onCullMethodSelectionChange
+cull_method	Cull method;Simulation;6;1;1;"survival_rates";str;None;None;Method of culling individuals after each reproductive cycle.;cboxreadonly;( "survival_rates", "equal_sex_ratio" );x in [ 'survival_rates', 'equal_sex_ratio' ];onCullMethodSelectionChange
 harvest	Harvest;Simulation;7;1;1;None;liststr;None;None;For each cycle-number:proportion numeric pair N:i, with population size p, remove i*p individuals at cycle N;entry;None; [ type(eval(i) for i in x.split( ":" ) ] == [ int, float ];onHarvestInputChange
