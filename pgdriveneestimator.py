@@ -117,7 +117,7 @@ import pgoutputneestimator as pgout
 import pgutilities as pgut
 
 VERBOSE=False
-VERY_VERBOSE=False
+VERY_VERBOSE=True
 
 #arguments passed either at command line
 #or from python using def mymain, having
@@ -1950,7 +1950,7 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 		
 		MIN_ALLOWED_TIMEOUT=3*60
 		SLOWEST_PER_CALL_RATE=0.4
-		ELBOW_ROOM_FACTOR=3
+		ELBOW_ROOM_FACTOR=6
 
 		#computes the chunk size (number of calls to do_estimate per chunk):
 		seqdiv=divmod( len( llv_args_each_process ), o_process_pool._processes * 4 )
