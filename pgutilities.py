@@ -8,7 +8,6 @@ __filename__ = "pgutilities.py"
 __date__ = "20160601"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-
 import os
 import sys
 import types
@@ -33,10 +32,11 @@ import shutil
 #correct strings that give file paths:
 import platform
 
-
 from pgutilityclasses import IndependantSubprocessGroup 
+
 VERBOSE=False
 
+PYEXE_FOR_POPEN="python"
 PROCESS_QUEUE_STOP_SIGN='STOP'
 SIMULATION_OUTPUT_FILE_REPLICATE_TAG=".r"
 DELIMITER_LIFE_TABLE_FILES=","
@@ -564,7 +564,7 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 										"pgutilities.prep_and_call_do_pgopsimupop_replicate" \
 										+ "( \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" )" %  seq_complete_arg_set
 
-					o_new_subprocess=subprocess.Popen( [ "python", "-c", s_python_command ] )
+					o_new_subprocess=subprocess.Popen( [ PYEXE_FOR_POPEN, "-c", s_python_command ] )
 					o_subprocess_group.addSubprocess( o_new_subprocess ) 
 				#end for each idx of new procs
 			#end if event is set else not
@@ -778,6 +778,54 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	return
 #end run_driveneestimator_in_new_process
 
+
+def run_plotting_program( s_type, s_estimates_table_file, s_plotting_config_file ):
+ 
+	if s_type == "Regression":
+		
+		s_curr_mod_path = os.path.abspath(__file__)
+
+		#path only (stripped off "/utilities.py" )
+		#-- gives path to all negui mods:
+		s_mod_dir=os.path.dirname( s_curr_mod_path )
+
+		'''
+		Found that windows python would claim no such
+		module found in the import pgguiutilities 
+		statment, unless I replaced the windows os.sep
+		char with linux "/".
+		'''
+		if is_windows_platform():
+			s_mod_dir=fix_windows_path( s_mod_dir )
+		#end if windows platform
+
+
+		s_path_append_statements="import sys; sys.path.append( \"" \
+						+ s_mod_dir + "\" );"
+
+		s_import_statement="import Viz.GraphDrive;"
+
+		s_quoted_ne_file="\"" + s_estimates_table_file + "\""
+		s_quoted_config_file="\"" + s_plotting_config_file + "\""
+
+		s_command_statements=\
+				"lr.neGrapher("  \
+				+  s_quoted_ne_file + "," + s_quoted_config_file + ");" \
+				+ "lr.neStats(" \
+				+ s_quoted_ne_file + "," +  s_quoted_config_file + ");"
+		
+		s_command_statements="GraphDrive.py"
+	
+		s_python_command=s_path_append_statements + s_import_statement + s_command_statements
+	
+		subprocess.Popen( [ PYEXE_FOR_POPEN, "-c" , s_python_command ] )
+		
+	else:
+		pass
+	#end if type is regression, else...
+	return
+#end run_plotting_program
+
 def show_error_in_messagebox_in_new_process( o_exception, s_msg_prefix=None ):
 	
 	s_errortype= o_exception.__class__.__name__
@@ -819,7 +867,7 @@ def show_error_in_messagebox_in_new_process( o_exception, s_msg_prefix=None ):
 
 	s_command=s_path_append_statements + s_import_statement + s_gui_statement
 
-	subprocess.Popen( [ "python", "-c" , s_command ] )
+	subprocess.Popen( [ PYEXE_FOR_POPEN, "-c" , s_command ] )
 
 #end show_error_in_messagebox_in_new_process
 if __name__ == "__main__":
