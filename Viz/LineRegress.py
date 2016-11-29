@@ -13,6 +13,7 @@ from numpy import mean, median, isnan
 import csv
 import sys
 import os
+from  ResultScraper import scrapeNE
 
 #function to perform the linear regression and store the results in a dictionary
 def lineRegress(linePoints):
@@ -82,20 +83,34 @@ def createGraph(lineArray, title = None, xlab = None, yLab= None, colorVctr = No
             plt.show()
         else:
             plt.savefig(dest, bbox_inches='tight')
-            #plt.close()
-            plt.clf()
+            plt.close()
 
 # method to create a scatterPlot of the outputNEs
-def createScatterPlot(table, title=None, xlab=None, yLab=None, dest="show"):
+def createScatterPlot(table,errorTable, title=None, xlab=None, yLab=None, dest="show"):
     if dest =="none":
         return
     plt.figure("scatter")
     flatData = [val for sublist in table for val in table[sublist]]
+    errorData = [val for sublist in errorTable for val in errorTable[sublist]]
 
-    plotData = []
+    minErrorVctr = []
+    maxErrorVctr = []
+    for errorIdx in range(len(errorData)):
+        minError = errorData[errorIdx][1]
+        maxError = errorData[errorIdx][2]
+        dataVal = flatData[errorIdx][1]
+        print minError, maxError, dataVal
+        print "\n\n"
+        minDelta = abs(dataVal - minError)
+        maxDelta = abs(maxError - dataVal)
 
+        minErrorVctr.append(minDelta)
+        maxErrorVctr.append(maxDelta)
+    errorArray = [minErrorVctr,maxErrorVctr]
+    print errorArray
     unzippedX, unzippedY = zip(*flatData)
-    plt.scatter(unzippedX, unzippedY)
+    plt.errorbar(unzippedX, unzippedY,errorArray, fmt = "o")
+    plt.margins(0.15,0.15)
     if title:
         plt.title(title)
     if xlab:
@@ -107,7 +122,7 @@ def createScatterPlot(table, title=None, xlab=None, yLab=None, dest="show"):
         plt.show("scatter")
     else:
         plt.savefig(dest, bbox_inches='tight')
-        plt.clf()
+        plt.close()
 
  #method to create a boxplot of the outputNEs
 def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
@@ -124,6 +139,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
     listX.sort()
     for x in listX:
         ySet = [datum[1] for datum in flatData if datum[0] == x]
+        errorSet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)
         # plotData = unzippedy
     plt.boxplot(plotData)
@@ -140,7 +156,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         plt.show("box")
     else:
         plt.savefig(dest, bbox_inches='tight')
-        plt.clf()
+        plt.close()
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -298,46 +314,46 @@ def neGraphMaker(pointsVctrs, expectedSlope = None,title = None, xlab = None, yL
     lines, colors, styles = _NeRegressionGraphCalc(pointsVctrs, expectedSlope,countTable)
     createGraph(lines, colorVctr=colors, styleVctr=styles, title=title, xlab=xlab,yLab=yLab, dest=dest, xLim = xLim, yLim = yLim)
 
-#reads in data fron neEst file outputs
-def neFileRead(filename, firstVal = 0):
-    fileBuffer = open(filename, "rb")
-    replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
-    dataDict = {}
-    popDict={}
-    popNum = 0
-    for item in replicateData:
-        sourceName = item['original_file']
-        sourceName = os.path.basename(sourceName)
-
-        pop =  item['pop']
-        popNum = int(pop)
-        individualCount = int(item["census"])
-        neEst = float(item['est_ne'])
-        #if neEst == "NaN":
-        #    neEst = sys.maxint
-        if  not sourceName in dataDict:
-            dataDict[sourceName] = {}
-            popDict[sourceName] = {}
-        dataDict[sourceName][popNum] = neEst
-        popDict[sourceName][popNum]=individualCount
-    replicateKeys = dataDict.keys()
-    resultTable = {}
-    individualCountTable = {}
-    for replicate in replicateKeys:
-        replicateVctr = []
-        individualCountVctr = []
-        replicateDict = dataDict[replicate]
-        individualCountDict = popDict[replicate]
-        popKeys = replicateDict.keys()
-        popKeys.sort()
-        for popKey in popKeys:
-            if popKey >=firstVal:
-                #print popKey
-                replicateVctr.append((popKey-firstVal,replicateDict[popKey]))
-                individualCountVctr.append((popKey-firstVal,individualCountDict[popKey]))
-        resultTable[replicate] = replicateVctr
-        individualCountTable[replicate] = individualCountVctr
-    return resultTable,individualCountTable
+# #reads in data fron neEst file outputs
+# def neFileRead(filename, firstVal = 0):
+#     fileBuffer = open(filename, "rb")
+#     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
+#     dataDict = {}
+#     popDict={}
+#     popNum = 0
+#     for item in replicateData:
+#         sourceName = item['original_file']
+#         sourceName = os.path.basename(sourceName)
+#
+#         pop =  item['pop']
+#         popNum = int(pop)
+#         individualCount = int(item["census"])
+#         neEst = float(item['est_ne'])
+#         #if neEst == "NaN":
+#         #    neEst = sys.maxint
+#         if  not sourceName in dataDict:
+#             dataDict[sourceName] = {}
+#             popDict[sourceName] = {}
+#         dataDict[sourceName][popNum] = neEst
+#         popDict[sourceName][popNum]=individualCount
+#     replicateKeys = dataDict.keys()
+#     resultTable = {}
+#     individualCountTable = {}
+#     for replicate in replicateKeys:
+#         replicateVctr = []
+#         individualCountVctr = []
+#         replicateDict = dataDict[replicate]
+#         individualCountDict = popDict[replicate]
+#         popKeys = replicateDict.keys()
+#         popKeys.sort()
+#         for popKey in popKeys:
+#             if popKey >=firstVal:
+#                 #print popKey
+#                 replicateVctr.append((popKey-firstVal,replicateDict[popKey]))
+#                 individualCountVctr.append((popKey-firstVal,individualCountDict[popKey]))
+#         resultTable[replicate] = replicateVctr
+#         individualCountTable[replicate] = individualCountVctr
+#     return resultTable,individualCountTable
 
 
 #Method to read in a graph config file and return a dictionary of
@@ -444,17 +460,17 @@ def neConfigRead(filename):
 def neGrapher(neFile, configFile):
 
     if not configFile:
-        table , countsTable= neFileRead(neFile)
+        table , countsTable, errorTable= scrapeNE(neFile)
         neGraphMaker(table)
         createBoxPlot(table)
         createScatterPlot(table)
         return True
     configs = neConfigRead(configFile)
-    table,countsTable = neFileRead(neFile,configs["startData"])
+    table,countsTable, errorTable = scrapeNE(neFile,configs["startData"])
     print table
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
     createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
-    createScatterPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
+    createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
 
 
 #master function for creating a table of confidence intervals form neEstimation data
@@ -467,7 +483,7 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     tableFormat = "{:<30}{:<30}{:<50}{:<80}\n"
     confPercent = (1 - confidenceAlpha)*100
     tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)","Source File")
-    table, countsTable = neFileRead(neFile,firstVal)
+    table, countsTable, errorTable = scrapeNE(neFile,firstVal)
     slopeVctr = []
     confidenceVctr = []
 
@@ -706,11 +722,11 @@ if __name__ == "__main__":
     testArray.sort()
     print  testArray
 
-    table, countsTable = neFileRead("testData.txt")
+    table, countsTable, errorTable = scrapeNE("testData.txt")
 
     print table
     print countsTable
-
+    print errorTable
 
 
 
@@ -730,9 +746,9 @@ if __name__ == "__main__":
     configwrite.set("comparison", "type", "pop")
     configwrite.set("comparison", "expectedSlope", -0.1)
     configwrite.add_section("data")
-    configwrite.set("data", "startCollect", 2)
+    configwrite.set("data", "startCollect",11)
     configwrite.add_section("confidence")
-    configwrite.set("confidence","alpha",0.1)
+    configwrite.set("confidence","alpha",0.05)
     configwrite.write(open("example1.cfg","w"))
 
     print neConfigRead("example1.cfg")

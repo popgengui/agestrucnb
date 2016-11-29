@@ -10,7 +10,8 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
 
     plotData = []
 
-    unzippedX, unzippedy = zip(*flatData)
+    unzippedX = [x[0] for x in flatData if x[0]]
+    print unzippedX
     setX = set(unzippedX)
     listX = list(setX)
     listX.sort()
@@ -18,15 +19,16 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         ySet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)
         # plotData = unzippedy
-    plt.boxplot(plotData)
-    #set v axis
-    plt.xticks(range(len(listX)),listX)
+    plt.boxplot(plotData, labels= listX)
+    plt.xticks(rotation=45)
     if title:
         plt.title(title)
     if xlab:
         plt.xlabel(xlab)
     if yLab:
         plt.ylabel(yLab)
+    plt.subplots_adjust(bottom = 0.15)
+    plt.margins(0.15,0.15)
 
     if dest == "show":
         plt.show()
@@ -41,11 +43,13 @@ def neFileRead(filename, firstVal = 0):
     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
     dataDict = {}
     popDict={}
-    popNum = 0
+    popSample = 0
     for item in replicateData:
         sourceName = item['original_file']
         pop =  item['sample_value']
-        popNum = float(pop)
+        popSample = float(pop)
+        loci = item['loci_sample_value']
+        lociSample = float(loci)
         individualCount = int(item["indiv_count"])
         neEst = float(item['est_ne'])
         #if neEst == "NaN":
@@ -53,8 +57,14 @@ def neFileRead(filename, firstVal = 0):
         if  not sourceName in dataDict:
             dataDict[sourceName] = {}
             popDict[sourceName] = {}
-        dataDict[sourceName][popNum] = neEst
-        popDict[sourceName][popNum]=individualCount
+        if not popSample in dataDict[sourceName]:
+            dataDict[sourceName][popSample] = {}
+            popDict[sourceName][popSample] = {}
+        if not lociSample in dataDict[sourceName][popSample]:
+            dataDict[sourceName][popSample][lociSample] = []
+            popDict[sourceName][popSample][lociSample] = []
+        dataDict[sourceName][popSample][lociSample].append(neEst)
+        popDict[sourceName][popSample][lociSample].append(individualCount)
     replicateKeys = dataDict.keys()
     resultTable = {}
     individualCountTable = {}
@@ -66,14 +76,67 @@ def neFileRead(filename, firstVal = 0):
         popKeys = replicateDict.keys()
         popKeys.sort()
         for popKey in popKeys:
-            if popKey >=firstVal:
+            lociKeys = replicateDict[popKey].keys()
+            lociKeys.sort()
+            for lociKey in lociKeys:
                 #print popKey
-                replicateVctr.append((popKey,replicateDict[popKey]))
-                individualCountVctr.append((popKey,individualCountDict[popKey]))
+                print popKey
+                print lociKey
+                replicateVctr.append((popKey,lociKey,replicateDict[popKey][lociKey]))
+                individualCountVctr.append((popKey,lociKey,individualCountDict[popKey][lociKey]))
         resultTable[replicate] = replicateVctr
         individualCountTable[replicate] = individualCountVctr
+        print resultTable
     return resultTable,individualCountTable
+
+
+def groupBy(table,groupIdentifier = "pop"):
+    sortedDict = {}
+    for key in table.keys():
+        keyData = table[key]
+        newKeyVctr = []
+        if groupIdentifier == "pop":
+            sorted(keyData, key=lambda tup: (tup[0],tup[1]) )
+        if groupIdentifier == "loci":
+            sorted(keyData, key=lambda tup: (tup[1], tup[0]))
+        for touple in keyData:
+            newTouple = ((touple[0],touple[1]),touple[2])
+            newKeyVctr.append(newTouple)
+
+        sortedDict[key] = newKeyVctr
+    return sortedDict
+
+
 
 def createErrorPlot(table,errorTable, title = None, xlab = None, yLab= None, dest = "show"):
 
+    flatData = [val for sublist in table for val in table[sublist]]
 
+    plotData = []
+
+    unzippedX, unzippedy = zip(*flatData)
+    setX = set(unzippedX)
+    listX = list(setX)
+    listX.sort()
+    for x in listX:
+        ySet = [datum[1] for datum in flatData if datum[0] == x]
+        plotData.append(ySet)
+        # plotData = unzippedy
+
+#def create3Dplot
+
+def subSamplePlotter(neFile, configFile = None):
+    if configFile == None:
+        table, popTable = neFileRead(neFile)
+        sortedTable = groupBy(table)
+        if len(table.keys()) ==1:
+            createBoxPlot(sortedTable)
+
+        else:
+            for key in table.keys():
+                tempTable = {key:table[key]}
+
+                createBoxPlot(tempTable)
+
+if __name__ == "__main__":
+    subSamplePlotter("test.tsv")

@@ -41,11 +41,13 @@ def neFileRead(filename, firstVal = 0):
     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
     dataDict = {}
     popDict={}
-    popNum = 0
+    popSample = 0
     for item in replicateData:
         sourceName = item['original_file']
         pop =  item['sample_value']
-        popNum = float(pop)
+        popSample = float(pop)
+        loci = item['loci_sample_value']
+        lociSample = float(loci)
         individualCount = int(item["indiv_count"])
         neEst = float(item['est_ne'])
         #if neEst == "NaN":
@@ -53,8 +55,8 @@ def neFileRead(filename, firstVal = 0):
         if  not sourceName in dataDict:
             dataDict[sourceName] = {}
             popDict[sourceName] = {}
-        dataDict[sourceName][popNum] = neEst
-        popDict[sourceName][popNum]=individualCount
+        dataDict[sourceName][popSample][lociSample] = neEst
+        popDict[sourceName][popSample][lociSample]=individualCount
     replicateKeys = dataDict.keys()
     resultTable = {}
     individualCountTable = {}
@@ -66,14 +68,62 @@ def neFileRead(filename, firstVal = 0):
         popKeys = replicateDict.keys()
         popKeys.sort()
         for popKey in popKeys:
-            if popKey >=firstVal:
+            lociKeys = replicateDict[popKey].keys()
+            lociKeys.sort()
+            for lociKey in lociKeys:
                 #print popKey
-                replicateVctr.append((popKey,replicateDict[popKey]))
-                individualCountVctr.append((popKey,individualCountDict[popKey]))
+                replicateVctr.append((popKey,lociKey,replicateDict[popKey][lociKey]))
+                individualCountVctr.append((popKey,lociKey,individualCountDict[popKey][lociKey]))
         resultTable[replicate] = replicateVctr
         individualCountTable[replicate] = individualCountVctr
     return resultTable,individualCountTable
 
+
+def groupBy(table,groupIdentifier = "pop"):
+    sortedDict = {}
+    for key in table.keys():
+        keyData = table[key]
+        newKeyVctr = []
+        if groupIdentifier == "pop":
+            sorted(keyData, key=lambda tup: (tup[0],tup[1]) )
+        if groupIdentifier == "loci":
+            sorted(keyData, key=lambda tup: (tup[1], tup[0]))
+        for touple in keyData:
+            newTouple = ((touple[0],touple[1]),touple[2])
+            newKeyVctr.append(newTouple)
+
+        sortedDict[key] = newKeyVctr
+    return sortedDict
+
+
+
 def createErrorPlot(table,errorTable, title = None, xlab = None, yLab= None, dest = "show"):
 
+    flatData = [val for sublist in table for val in table[sublist]]
+
+    plotData = []
+
+    unzippedX, unzippedy = zip(*flatData)
+    setX = set(unzippedX)
+    listX = list(setX)
+    listX.sort()
+    for x in listX:
+        ySet = [datum[1] for datum in flatData if datum[0] == x]
+        plotData.append(ySet)
+        # plotData = unzippedy
+
+#def create3Dplot
+
+def subSamplePlotter(neFile, configFile = None):
+    if configFile == None:
+        table, popTable = neFileRead(neFile)
+        if len(table.keys()) ==1:
+            createBoxPlot(table)
+        else:
+            for key in table.keys():
+                tempTable = {key:table[key]}
+                createBoxPlot(tempTable)
+
+if __name__ == "__main__":
+    subSamplePlotter("test.tsv")
 

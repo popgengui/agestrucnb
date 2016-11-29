@@ -36,7 +36,7 @@ def scrapeSlopes(fileName):
     print resultDict
     return slopeResults, resultDict
 
-def scrapeNE(filename, firstVal):
+def scrapeNE(filename, firstVal=0):
     fileBuffer = open(filename, "rb")
     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
     dataDict = {}
@@ -74,6 +74,9 @@ def scrapeNE(filename, firstVal):
         errorVctr = []
         replicateDict = dataDict[replicate]
         individualCountDict = popDict[replicate]
+        minRepDict = minDict[replicate]
+        maxRepDict = maxDict[replicate]
+
         popKeys = replicateDict.keys()
         popKeys.sort()
         for popKey in popKeys:
@@ -81,11 +84,11 @@ def scrapeNE(filename, firstVal):
                 # print popKey
                 replicateVctr.append((popKey, replicateDict[popKey]))
                 individualCountVctr.append((popKey, individualCountDict[popKey]))
-                errorVctr.append((popKey,minDict[popKey],maxDict[popKey]))
+                errorVctr.append((popKey,minRepDict[popKey],maxRepDict[popKey]))
         resultTable[replicate] = replicateVctr
         individualCountTable[replicate] = individualCountVctr
         errorTable[replicate] = errorVctr
-    return resultTable, errorTable
+    return resultTable,individualCountTable, errorTable
 
 file  = "neStatsOut.txt"
 
