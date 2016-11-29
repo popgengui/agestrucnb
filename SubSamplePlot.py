@@ -121,7 +121,7 @@ def subSamplePlotter(neFile, configFile = None):
     if configFile == None:
         table, popTable = neFileRead(neFile)
         if len(table.keys()) ==1:
-            createBoxPlot(table)
+            createBoxPlot(table,"loci")
         else:
             for key in table.keys():
                 tempTable = {key:table[key]}

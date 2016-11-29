@@ -90,6 +90,114 @@ def scrapeNE(filename, firstVal=0):
         errorTable[replicate] = errorVctr
     return resultTable,individualCountTable, errorTable
 
+#Method to read in a graph config file and return a dictionary of
+def configRead(filename):
+    configDict = {}
+    title =  None
+    xLab = None
+    yLab = None
+    setExpected = None
+    boxplotDest = "show"
+    destType = "show"
+    regressionDest = "show"
+    scatterDest = "show"
+    xLims =None
+    yLims = None
+    autoFlag = False
+    startDataCollect = 0
+    alphaVal = 0.05
+    statFileOut = "neStats.out"
+    sigSlope = 0
+    fileOrder = None
+    groupBy = "pop"
+
+    config = ConfigParser.ConfigParser()
+    config.readfp(open(filename))
+    if config.has_section("labels"):
+        if config.has_option("labels", "title"):
+            title = config.get("labels", "title")
+        if config.has_option("labels", "xLab"):
+            xLab = config.get("labels", "xLab")
+        if config.has_option("labels", "yLab"):
+            yLab = config.get("labels", "yLab")
+    if config.has_section("destination"):
+        if config.has_option("destination", "desttype"):
+            destType = config.get("destination","desttype")
+
+        if destType=="none":
+            destType = "none"
+            regressionDest = "none"
+            boxplotDest = "none"
+            scatterDest = "none"
+        if config.has_option("destination","regressionfile"):
+            regressionDest = config.get("destination","regressionfile")
+        if config.has_option("destination", "boxplotfile"):
+            boxplotDest = config.get("destination","boxplotfile")
+        if config.has_option("destination", "scatterfile"):
+            scatterDest = config.get("destination","scatterfile")
+    if config.has_section("comparison"):
+        valueFlag = True
+        setExpected = None
+        if config.has_option("comparison", "type"):
+            comparisonType = config.get("comparison", "type")
+            if comparisonType == "auto"  or comparisonType == "Auto"or comparisonType == "pop" or comparisonType == "Pop":
+                setExpected = comparisonType
+                valueFlag = False
+            elif comparisonType == "None" or comparisonType == "none":
+                valueFlag = False
+        if  valueFlag:
+            if config.has_option("comparison", "lambda"):
+                lambdaValue = config.getfloat("comparison", "lambda")
+                setExpected = lambdaValue-1
+            if config.has_option("comparison", "expectedSlope"):
+                expectedSlope = config.getfloat("comparison", "expectedSlope")
+                setExpected =  expectedSlope
+
+    if config.has_section("limits"):
+        if config.has_option("limits", "xMin") and config.has_option("limits", "xMax"):
+            xMin = config.getfloat("limits", "xMin")
+            xMax = config.getfloat("limits", "xMax")
+            xLims = (xMin, xMax)
+        if config.has_option("limits", "yMin")and config.has_option("limits", "yMax"):
+            yMin = config.getfloat("limits", "yMin")
+            yMax = config.getfloat("limits", "yMax")
+            yLims = (yMin, yMax)
+    if config.has_section("confidence"):
+        if config.has_option("confidence","alpha"):
+            alphaVal = config.getfloat("confidence", "alpha")
+        if config.has_option("confidence","outputFilename"):
+            statFileOut = config.get("confidence","outputFilename")
+        if config.has_option("confidence", "significantSlope"):
+            sigSlope = config.getfloat("confidence", "significantSlope")
+
+    if config.has_section("data"):
+        if config.has_option("data","startCollect"):
+            startDataCollect = config.getint("data","startCollect")
+
+    if config.has_section("SubSample"):
+        if config.has_option("SubSample", "GroupBy"):
+            groupBy = config.get("SubSample", "GroupBy")
+
+
+
+    configDict["title"]=title
+    configDict["xLab"] = xLab
+    configDict["yLab"] = yLab
+    configDict["expected"] = setExpected
+    configDict["dest"] = regressionDest
+    configDict["boxplot"] = boxplotDest
+    configDict["scatter"] = scatterDest
+    configDict["xLims"] = xLims
+    configDict["yLims"] = yLims
+    configDict["alpha"] = alphaVal
+    configDict["startData"] = startDataCollect
+    configDict["statsFilename"] = statFileOut
+    configDict["sigSlope"] = sigSlope
+    configDict["groupBy"] = groupBy
+    configDict["fileOrding"] = fileOrder
+    return configDict
+
+
 file  = "neStatsOut.txt"
 
 scrapePower(file)

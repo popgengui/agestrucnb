@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 
-def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
+def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", sortCrit = "pop"):
 
     flatData = [val for sublist in table for val in table[sublist]]
 
@@ -14,7 +14,12 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
     print unzippedX
     setX = set(unzippedX)
     listX = list(setX)
-    listX.sort()
+    print listX
+    if sortCrit == "pop":
+        listX = sorted(listX,key=lambda tup: (tup[0],tup[1]))
+    else:
+        listX = sorted(listX,key=lambda tup: (tup[1],tup[0]))
+        print listX
     for x in listX:
         ySet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)
@@ -98,10 +103,11 @@ def groupBy(table,groupIdentifier = "pop"):
         keyData = table[key]
         newKeyVctr = []
         if groupIdentifier == "pop":
-            sorted(keyData, key=lambda tup: (tup[0],tup[1]) )
-        if groupIdentifier == "loci":
-            sorted(keyData, key=lambda tup: (tup[1], tup[0]))
-        for touple in keyData:
+            data = sorted(keyData, key=lambda tup: (tup[0],tup[1]) )
+        else:
+            data = sorted(keyData, key=lambda tup: (tup[1], tup[0]))
+            print keyData
+        for touple in data:
             newTouple = ((touple[0],touple[1]),touple[2])
             newKeyVctr.append(newTouple)
 
@@ -130,9 +136,9 @@ def createErrorPlot(table,errorTable, title = None, xlab = None, yLab= None, des
 def subSamplePlotter(neFile, configFile = None):
     if configFile == None:
         table, popTable = neFileRead(neFile)
-        sortedTable = groupBy(table)
+        sortedTable = groupBy(table,"loci")
         if len(table.keys()) ==1:
-            createBoxPlot(sortedTable)
+            createBoxPlot(sortedTable,sortCrit = "loci")
 
         else:
             for key in table.keys():
