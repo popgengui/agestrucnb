@@ -1864,8 +1864,6 @@ def get_loci_subsample_tags_for_this_indiv_subsample( o_genepopfile,  s_indiv_sa
 
 def write_result_sets( lds_results, lv_sample_values, o_debug_mode, o_main_outfile, o_secondary_outfile ):
 
-		
-
 	dddli_indiv_list=None
 
 	if o_debug_mode.isSet( DebugMode.MAKE_INDIV_TABLE ):
@@ -1887,7 +1885,6 @@ def write_result_sets( lds_results, lv_sample_values, o_debug_mode, o_main_outfi
 				2016_11_22, the *indiv.table file is not 
 				correctly updated to the current output,
 				and so for now I'm no longer calling.
-				See warning above.
 				'''
 				pass
 #				update_indiv_list( dddli_indiv_list, 
@@ -1940,14 +1937,37 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 		and return these to drive_estimator, which in turn
 		handles writinng an interrupted set of outfiles,
 		and raises an error. )
-		'''
 
-		POOL_TIMEOUT=120
- 
+		Heuristically, with high observed variance in the per-chunk runtime,
+		We give at least 3 minutes per chunk in the fastest case, and compute
+		a per chunk timout based on the slowest per-call rate that I observed 
+		in a few tests (two Linux computers, one Windows), with total 160000 calls
+		and from 2 to 12 processes used.  Note that the typical longest chunk 
+		processing time (to get results into the mapresult objec) was the first
+		chunk, but I did observe nearly as lengthly times in subsequenct chunks
+		in Windows.
+		'''
+		
+		MIN_ALLOWED_TIMEOUT=3*60
+		SLOWEST_PER_CALL_RATE=0.4
+		ELBOW_ROOM_FACTOR=3
+
+		#computes the chunk size (number of calls to do_estimate per chunk):
+		seqdiv=divmod( len( llv_args_each_process ), o_process_pool._processes * 4 )
+		i_chunk_size= seqdiv[ 0 ] + ( seqdiv[ 1 ] > 0 )
+
+		i_timeout_as_fx_chunksize=round( i_chunk_size * SLOWEST_PER_CALL_RATE * ELBOW_ROOM_FACTOR ) 
+
+		i_pool_timeout=max( MIN_ALLOWED_TIMEOUT, i_timeout_as_fx_chunksize )
+
+		if VERY_VERBOSE:
+			print( "In pgdriveneestimator, def execute_ne_for_each_sample, timeout set: " + str( i_pool_timeout ) )
 		i_last_work_chunk_total=0
 
 		f_chunk_progress_start_time=time.time()
-
+		
+		#We set chunksize to 1 so we can use a timeout that estimates suffiient
+		#time to run 1 call to do_estimate:
 		o_mapresult=o_process_pool.map_async( do_estimate, llv_args_each_process )
 		
 		while not ( o_mapresult.ready() ):
@@ -1958,12 +1978,31 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 
 			i_updated_work_chunk_total=o_mapresult._number_left
 
+
 			if i_last_work_chunk_total != i_updated_work_chunk_total:
+
+				if VERY_VERBOSE:
+					f_elapsed=time.time()-f_chunk_progress_start_time
+					print( "In pgdriveneestimator, def execute_ne_for_each_sample, chunk " \
+							+ str( i_last_work_chunk_total ) + " processed in " \
+							+ str( f_elapsed ) + " seconds." )
+				#end if very verbose
+
 				i_last_work_chunk_total=i_updated_work_chunk_total
 				f_chunk_progress_start_time=time.time()
+
 			else:
+
 				f_time_elapsed_last_chunk_total=time.time()-f_chunk_progress_start_time
-				if f_time_elapsed_last_chunk_total >= POOL_TIMEOUT:
+			
+				if VERY_VERBOSE:
+					print ( "In pgdriveneestimator, def execute_ne_for_each_sample, " \
+								+ "chunk: " + str( i_last_work_chunk_total ) \
+								+ ", elapsed_time: " + str( f_time_elapsed_last_chunk_total ) \
+								+ "." )
+				#end if very verbose
+
+				if f_time_elapsed_last_chunk_total >= i_pool_timeout:
 					'''
 					We make a result set list minus any with "None",
 					assuming that the maprsult object either has 
@@ -1972,9 +2011,16 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 					truncated result set to caller, with flag set to
 					indicate interrupted run.
 					'''
+					if VERY_VERBOSE:
+						print ( "===========" )
+						print ( "time out with chunk total: " + str( i_last_work_chunk_total ) )
+					#end if VERY_VERBOSE
+
 					b_run_was_interrupted=True
 					ldv_interruped_results=o_mapresult._value
 					ldv_completed_results=[]
+
+
 					for  dv_result in ldv_interruped_results:
 						if dv_result is not None:
 							ldv_completed_results.append( dv_result )
@@ -1988,8 +2034,10 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 			if o_multiprocessing_event is not None:
 
 				if VERY_VERBOSE:
+					print( "In pgdriveneestimator, def execute_ne_for_each_sample, with chunksize: " + str( o_mapresult._chunksize ) )
 					print ( "In pgdriveneestimator, def execute_ne_for_each_sample, remaining work chunks: " + str( o_mapresult._number_left ) )
-					print ( "In pgdriveneestimator, def execute_ne_for_each_sample, value: " + str( o_mapresult._value ) )
+					print ( "In pgdriveneestimator, def execute_ne_for_each_sample, total completed calls: "  \
+								+ str( sum( [ ( o_res is not None ) for o_res in o_mapresult._value  ] ) ) )
 				#end if very verbose
 
 				if o_multiprocessing_event.is_set():

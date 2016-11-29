@@ -83,6 +83,7 @@ class PGOpNeEstimator( APGOperation ):
 	#end get_separate_dir
 
 	def __change_current_directory_to_temporary_directory_inside_current( self ):
+
 		s_temp_dir=None
 
 		s_abs_path_current_directory = \

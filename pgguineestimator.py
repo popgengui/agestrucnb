@@ -73,6 +73,8 @@ from pgdriveneestimator import MAX_GENEPOP_FILE_NAME_LENGTH
 from pgutilityclasses import NeEstimatorSamplingSchemeParameterManager 
 from pgutilityclasses import NeEstimatorLociSamplingSchemeParameterManager
 
+from pglineregressconfigfilemaker import PGLineRegressConfigFileMaker
+
 class PGGuiNeEstimator( pgg.PGGuiApp ):
 	'''
 	Subclass of PGGuiApp builds a gui,
@@ -154,6 +156,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__op_process=None
 
 		self.__estimation_in_progress=False
+		self.__plotting_program_needs_to_be_run=False
+
 		self.__run_state_message=""
 
 		#A way to access one of the interface
@@ -222,7 +226,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			if self.__params_look_valid( b_show_message=True ):
 				self.runEstimator()
 			#end if params look valid
-
 		#end if sim in progress else not
 		return
 
@@ -631,7 +634,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__load_param_interface( b_force_disable=True )
 		self.__update_genepopfile_sampling_params_interface( b_force_disable=True )
 		self.__update_genepopfile_loci_sampling_params_interface( b_force_disable=True )
+		self.__update_viz_params_interface( b_force_disable=True )
 		self.__run_state_message="  " + ESTIMATION_RUNNING_MSG
+		self.__plotting_program_needs_to_be_run=True 
 		self.after( 500, self.__check_progress_operation_process )
 
 		if VERY_VERBOSE:
@@ -1704,11 +1709,13 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					s_value=getattr( self, s_attr_name )
 
 					if s_value not in qs_control_list:
-						s_msg="Current value for parameter " \
-									+ s_param + " is not found " \
-									+ "among the values listed as valid: " \
-									+ str( qs_control_list ) + "."
-						raise Exception( s_msg )
+						if o_validity_checker is not None:
+							o_validity_checker.value=s_value
+							if  not o_validity_checker.isValid():
+								s_msg=self.__validity_checker.reportInvalidityOnly()
+								PGGUIInfoMessage( self, s_msg + "\nResetting to default value." )
+								setattr( self, s_attr_name, v_default_item_value )
+							#end if invalid current value
 					else:
 						#KeyListComboFrame init expects 1-based value, so
 						#we increment the python, zero-based index
@@ -1983,7 +1990,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						self.__estimation_in_progress=False
 						self.__set_controls_by_run_state( self.__get_run_state() )
 						'''
-						We want this def to be called after we'ver terminated:
+						We want this def to be called after we've terminated
+						the process, so that the GUI controls get reset:
 						'''
 						self.after( 500, self.__check_progress_operation_process )
 						return
@@ -1997,15 +2005,34 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				if VERY_VERBOSE:
 					print( "checking and process not None but not alive" )
 				#end if very verbose, print
-				
+
+				'''
+				Check to see if the viz plotting needs to be done:
+				'''
+				if self.__plotting_program_needs_to_be_run:
+					try:
+						self.runViz()
+					except Exception as oex:
+						#We let the viz fail, and let the GUI
+						#complete the reset of the run.
+						self.__plotting_program_needs_to_be_run=False
+						PGGUIErrorMessage( self, 
+									"Error running plotting program: " \
+											+ str( oex ) )
+						pass
+					#end try to run viz
+				#end if viz needs to be run	
+
 				self.__estimation_in_progress = False
 
-				#found that the process as object will persist
-				#long past finishing.  In this case if the user
-				#closes the whole gui or the tab for this instance,
-				#then the cleanup will read the op_process as alive,
-				#and will remove output files, even though the process
-				#has finished:
+				'''
+				I found that the process as object will persist
+				long past finishing.  In this case if the user
+				closes the whole gui or the tab for this instance,
+				then the cleanup will read the op_process as alive,
+				and will remove output files, even though the process
+				has finished:
+				'''
 				self.__op_process=None
 				self.__neest_multi_process_event=None
 				self.__run_state_message=""
@@ -2013,6 +2040,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				self.__load_param_interface( b_force_disable = False )
 				self.__update_genepopfile_sampling_params_interface( b_force_disable = False )
 				self.__update_genepopfile_loci_sampling_params_interface( b_force_disable = False )
+				self.__update_viz_params_interface( b_force_disable = False )
 
 			#end if process alive else not
 
@@ -2022,6 +2050,24 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			if VERY_VERBOSE:	
 				print( "process found to be None" )
 			#endif very verbose, pring
+			'''
+			Check to see if the viz plotting needs to be done:
+			'''
+			if self.__plotting_program_needs_to_be_run:
+				try:
+					self.runViz()
+				except Exception as oex:
+					#We let the viz fail, let the user
+					#see the exception, then let the gui
+					#reset the run.
+					self.__plotting_program_needs_to_be_run=False
+					PGGUIErrorMessage( self,
+								"Error running plotting program: " \
+										+ str( oex ) )
+					pass
+				#end try to run viz
+			#end if viz needs to be run	
+
 
 			self.__estimation_in_progress_is_in_progress = False
 			self.__run_state_message=""
@@ -2029,6 +2075,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			self.__load_param_interface( b_force_disable = False )
 			self.__update_genepopfile_sampling_params_interface( b_force_disable = False )
 			self.__update_genepopfile_loci_sampling_params_interface( b_force_disable = False )
+			self.__update_viz_params_interface( b_force_disable = False )
 
 			self.__set_controls_by_run_state( self.__get_run_state() )
 
@@ -2041,6 +2088,52 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__cancel_neestimation()
 		return
 	#end cleanup
+
+	def __write_viz_config_file( self ):
+		o_config_maker=PGLineRegressConfigFileMaker( self )
+		o_config_maker.writeConfigFile()
+		
+		return o_config_maker.config_file_name
+	#end __write_viz_config_file
+
+	def __run_viz_by_type( self, s_config_file ):
+		s_plotting_type=self.__viztype
+		ls_existing_outfiles=self.__get_existing_output_files()
+		s_estimates_table=None
+
+		for s_outfile in ls_existing_outfiles:
+			if s_outfile.endswith( ".tsv" ):
+				s_estimates_table=s_outfile
+			#end if outfile ends in tsv
+		#end for each outfile
+
+		if s_estimates_table==None:
+			s_msg="In PGGuiNeEstimator instance, " \
+					+ "def __run_viz_by_type " \
+					+ "could not find a *tsv file."
+			raise Exception( s_msg )
+		#end if no estimates table
+
+		o_plotting_process=multiprocessing.Process( \
+				target=pgut.run_plotting_program,
+							args=(  self.__viztype,
+								s_estimates_table,
+									s_config_file ) )
+		o_plotting_process.start()
+		
+		return
+	#end __run_viz_by_type
+
+	def runViz( self ):
+		##### temp
+		# 2016_11_29 I'm passing on this until I have
+		# better downstream implementation
+
+#		s_config_file_name=self.__write_viz_config_file()
+#		self.__run_viz_by_type( s_config_file_name )
+
+		return
+	#end runViz
 
 #end class PGGuiNeEstimator 
 
