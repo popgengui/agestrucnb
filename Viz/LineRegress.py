@@ -13,7 +13,7 @@ from numpy import mean, median, isnan
 import csv
 import sys
 import os
-from  ResultScraper import scrapeNE
+from  FileIO import scrapeNE, configRead
 
 #function to perform the linear regression and store the results in a dictionary
 def lineRegress(linePoints):
@@ -356,102 +356,6 @@ def neGraphMaker(pointsVctrs, expectedSlope = None,title = None, xlab = None, yL
 #     return resultTable,individualCountTable
 
 
-#Method to read in a graph config file and return a dictionary of
-def neConfigRead(filename):
-    configDict = {}
-    title =  None
-    xLab = None
-    yLab = None
-    setExpected = None
-    boxplotDest = "show"
-    destType = "show"
-    regressionDest = "show"
-    scatterDest = "show"
-    xLims =None
-    yLims = None
-    autoFlag = False
-    startDataCollect = 0
-    alphaVal = 0.05
-    statFileOut = "neStats.out"
-    sigSlope = 0
-
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(filename))
-    if config.has_section("labels"):
-        if config.has_option("labels", "title"):
-            title = config.get("labels", "title")
-        if config.has_option("labels", "xLab"):
-            xLab = config.get("labels", "xLab")
-        if config.has_option("labels", "yLab"):
-            yLab = config.get("labels", "yLab")
-    if config.has_section("destination"):
-        if config.has_option("destination", "desttype"):
-            destType = config.get("destination","desttype")
-
-        if destType=="none":
-            destType = "none"
-            regressionDest = "none"
-            boxplotDest = "none"
-            scatterDest = "none"
-        if config.has_option("destination","regressionfile"):
-            regressionDest = config.get("destination","regressionfile")
-        if config.has_option("destination", "boxplotfile"):
-            boxplotDest = config.get("destination","boxplotfile")
-        if config.has_option("destination", "scatterfile"):
-            scatterDest = config.get("destination","scatterfile")
-    if config.has_section("comparison"):
-        valueFlag = True
-        setExpected = None
-        if config.has_option("comparison", "type"):
-            comparisonType = config.get("comparison", "type")
-            if comparisonType == "auto"  or comparisonType == "Auto"or comparisonType == "pop" or comparisonType == "Pop":
-                setExpected = comparisonType
-                valueFlag = False
-            elif comparisonType == "None" or comparisonType == "none":
-                valueFlag = False
-        if  valueFlag:
-            if config.has_option("comparison", "lambda"):
-                lambdaValue = config.getfloat("comparison", "lambda")
-                setExpected = lambdaValue-1
-            if config.has_option("comparison", "expectedSlope"):
-                expectedSlope = config.getfloat("comparison", "expectedSlope")
-                setExpected =  expectedSlope
-
-    if config.has_section("limits"):
-        if config.has_option("limits", "xMin") and config.has_option("limits", "xMax"):
-            xMin = config.getfloat("limits", "xMin")
-            xMax = config.getfloat("limits", "xMax")
-            xLims = (xMin, xMax)
-        if config.has_option("limits", "yMin")and config.has_option("limits", "yMax"):
-            yMin = config.getfloat("limits", "yMin")
-            yMax = config.getfloat("limits", "yMax")
-            yLims = (yMin, yMax)
-    if config.has_section("confidence"):
-        if config.has_option("confidence","alpha"):
-            alphaVal = config.getfloat("confidence", "alpha")
-        if config.has_option("confidence","outputFilename"):
-            statFileOut = config.get("confidence","outputFilename")
-        if config.has_option("confidence", "significantSlope"):
-            sigSlope = config.getfloat("confidence", "significantSlope")
-
-    if config.has_section("data"):
-        if config.has_option("data","startCollect"):
-            startDataCollect = config.getint("data","startCollect")
-
-    configDict["title"]=title
-    configDict["xLab"] = xLab
-    configDict["yLab"] = yLab
-    configDict["expected"] = setExpected
-    configDict["dest"] = regressionDest
-    configDict["boxplot"] = boxplotDest
-    configDict["scatter"] = scatterDest
-    configDict["xLims"] = xLims
-    configDict["yLims"] = yLims
-    configDict["alpha"] = alphaVal
-    configDict["startData"] = startDataCollect
-    configDict["statsFilename"] = statFileOut
-    configDict["sigSlope"] = sigSlope
-    return configDict
 
 #master function to create a graph from neEstimation data.
 #neFile: filepath for the neEstimation output file desired.
@@ -465,7 +369,7 @@ def neGrapher(neFile, configFile):
         createBoxPlot(table)
         createScatterPlot(table)
         return True
-    configs = neConfigRead(configFile)
+    configs = configRead(configFile)
     table,countsTable, errorTable = scrapeNE(neFile,configs["startData"])
     print table
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
@@ -541,7 +445,7 @@ def neStats(neFile, configFile = None, testFlag = False):
     if not  configFile:
         return _neStatsHelper(neFile,0.05)
 
-    configVals = neConfigRead(configFile)
+    configVals = configRead(configFile)
     return _neStatsHelper(neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
 
 
@@ -751,7 +655,7 @@ if __name__ == "__main__":
     configwrite.set("confidence","alpha",0.05)
     configwrite.write(open("example1.cfg","w"))
 
-    print neConfigRead("example1.cfg")
+    print configRead("example1.cfg")
     print "test master methods"
     neGrapher("testData.txt","example1.cfg")
     _neStatsHelper("testData.txt",0.1,testFlag=True)

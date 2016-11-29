@@ -155,7 +155,7 @@ def runNeEst(files,runFolder,locisampling,popsampling,regressConfig):
     #run neEstimator
     neFile = ""
     #run lineregress
-    configVals = LineRegress.neConfigRead(regressConfig)
+    configVals = LineRegress.configRead(regressConfig)
     statsFile =  LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statsFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
     return statsFile
 
