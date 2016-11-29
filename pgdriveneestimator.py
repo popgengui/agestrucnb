@@ -1947,8 +1947,9 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 		chunk, but I did observe nearly as lengthly times in subsequenct chunks
 		in Windows.
 		'''
-		
-		MIN_ALLOWED_TIMEOUT=3*60
+	
+		#for now giving each chunk at least 3 hours:
+		MIN_ALLOWED_TIMEOUT=60*180
 		SLOWEST_PER_CALL_RATE=0.4
 		ELBOW_ROOM_FACTOR=6
 
