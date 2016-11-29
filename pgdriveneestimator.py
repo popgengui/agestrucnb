@@ -117,7 +117,7 @@ import pgoutputneestimator as pgout
 import pgutilities as pgut
 
 VERBOSE=False
-VERY_VERBOSE=True
+VERY_VERBOSE=False
 
 #arguments passed either at command line
 #or from python using def mymain, having
