@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 
-def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
+def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", sortCrit = "pop"):
 
     flatData = [val for sublist in table for val in table[sublist]]
 
@@ -13,7 +13,10 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
     unzippedX, unzippedy = zip(*flatData)
     setX = set(unzippedX)
     listX = list(setX)
-    listX.sort()
+    if sortCrit == "pop":
+        sorted(listX,key=lambda tup: (tup[0],tup[1]))
+    else:
+        sorted(listX,key=lambda tup: (tup[1],tup[0]))
     for x in listX:
         ySet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)

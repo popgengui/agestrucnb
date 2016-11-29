@@ -19,6 +19,8 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         ySet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)
         # plotData = unzippedy
+    plotData.append([])
+    listX.append("$(Pop,Loci)$")
     plt.boxplot(plotData, labels= listX)
     plt.xticks(rotation=45)
     if title:
@@ -27,7 +29,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         plt.xlabel(xlab)
     if yLab:
         plt.ylabel(yLab)
-    plt.subplots_adjust(bottom = 0.15)
+    plt.subplots_adjust(bottom = 0.25)
     plt.margins(0.15,0.15)
 
     if dest == "show":
