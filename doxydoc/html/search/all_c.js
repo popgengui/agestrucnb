@@ -20,6 +20,7 @@ var searchData=
   ['pghostnotebook',['pghostnotebook',['../namespacenegui_1_1pghostnotebook.html',1,'negui']]],
   ['pginputneestimator',['pginputneestimator',['../namespacenegui_1_1pginputneestimator.html',1,'negui']]],
   ['pginputsimupop',['pginputsimupop',['../namespacenegui_1_1pginputsimupop.html',1,'negui']]],
+  ['pglineregressconfigfilemaker',['pglineregressconfigfilemaker',['../namespacenegui_1_1pglineregressconfigfilemaker.html',1,'negui']]],
   ['pgmenubuilder',['pgmenubuilder',['../namespacenegui_1_1pgmenubuilder.html',1,'negui']]],
   ['pgopneestimator',['pgopneestimator',['../namespacenegui_1_1pgopneestimator.html',1,'negui']]],
   ['pgopsimupop',['pgopsimupop',['../namespacenegui_1_1pgopsimupop.html',1,'negui']]],
@@ -28,6 +29,5 @@ var searchData=
   ['pgparamset',['pgparamset',['../namespacenegui_1_1pgparamset.html',1,'negui']]],
   ['pgsimupopresources',['pgsimupopresources',['../namespacenegui_1_1pgsimupopresources.html',1,'negui']]],
   ['pgutilities',['pgutilities',['../namespacenegui_1_1pgutilities.html',1,'negui']]],
-  ['pgutilityclasses',['pgutilityclasses',['../namespacenegui_1_1pgutilityclasses.html',1,'negui']]],
-  ['temp',['temp',['../namespacenegui_1_1temp.html',1,'negui']]]
+  ['pgutilityclasses',['pgutilityclasses',['../namespacenegui_1_1pgutilityclasses.html',1,'negui']]]
 ];

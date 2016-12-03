@@ -270,6 +270,9 @@ list {\bfseries N\+E\+\_\+\+E\+S\+T\+I\+M\+A\+T\+O\+R\+\_\+\+O\+U\+T\+P\+U\+T\+\
 list {\bfseries N\+E\+\_\+\+E\+S\+T\+I\+M\+A\+T\+O\+R\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+L\+E\+\_\+\+T\+A\+GS} = \mbox{[} \char`\"{}No\+Dat.\+txt\char`\"{}, \char`\"{}x\+Tp.\+txt\char`\"{}, \char`\"{}ne\+\_\+run.\+txt\char`\"{} \mbox{]}\hypertarget{namespacenegui_1_1pgdriveneestimator_a167fb016fbc3709c4c778c4a5157cd06}{}\label{namespacenegui_1_1pgdriveneestimator_a167fb016fbc3709c4c778c4a5157cd06}
 
 \item 
+string {\bfseries N\+E\+\_\+\+E\+S\+T\+I\+M\+A\+T\+O\+R\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+L\+E\+S\+\_\+\+G\+E\+N\+E\+R\+A\+L\+\_\+\+T\+AG} = \char`\"{}\+\_\+g\+\_\+\mbox{[}0-\/9\mbox{]}\char`\"{}\hypertarget{namespacenegui_1_1pgdriveneestimator_a059746bfc2b8e2fe32625877a1c83b34}{}\label{namespacenegui_1_1pgdriveneestimator_a059746bfc2b8e2fe32625877a1c83b34}
+
+\item 
 string {\bfseries G\+L\+O\+B\+\_\+\+I\+N\+T\+E\+R\+M\+E\+D\+I\+A\+T\+E\+\_\+\+G\+E\+N\+E\+P\+O\+P\+\_\+\+F\+I\+L\+E\+\_\+\+T\+A\+GS} = \char`\"{}$\ast$\+\_\+r\+\_\+$\ast$\+\_\+g\+\_\+$\ast$\char`\"{}\hypertarget{namespacenegui_1_1pgdriveneestimator_a1bb977fffd730588ade2008f702d6110}{}\label{namespacenegui_1_1pgdriveneestimator_a1bb977fffd730588ade2008f702d6110}
 
 \item 
@@ -412,181 +415,181 @@ to def do_estimate.  The call is then appended to llv_args_each_process
 \end{DoxyVerb}
  
 
-Definition at line 1632 of file pgdriveneestimator.\+py.
+Definition at line 1661 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-1632                                             o\_secondary\_outfile ):
-1633     \textcolor{stringliteral}{'''     }
-1634 \textcolor{stringliteral}{    This def creates ne-estimator caller object and adds it to list of args for a single call}
-1635 \textcolor{stringliteral}{    to def do\_estimate.  The call is then appended to llv\_args\_each\_process}
-1636 \textcolor{stringliteral}{    '''}
-1637 
-1638     \textcolor{comment}{#all these GenepopFileManager objects should now have}
-1639     \textcolor{comment}{#a single population sample name:}
-1640     s\_population\_sample\_name=o\_genepopfile.population\_subsample\_tags[ 0 ]
-1641 
-1642     ls\_indiv\_sample\_names=o\_genepopfile.indiv\_subsample\_tags
-1643 
-1644     li\_population\_numbers=o\_genepopfile.getListPopulationNumbers( s\_population\_sample\_name )
-1645     \textcolor{comment}{#for each sample (i.e. for each replicate of a sampling with a given set of params:}
-1646     \textcolor{keywordflow}{for} s\_indiv\_sample \textcolor{keywordflow}{in} ls\_indiv\_sample\_names:
-1647 
-1648         \textcolor{comment}{#we also check that at least one pop has at least one individual}
-1649         \textcolor{comment}{#listed for this subsample}
-1650         li\_indiv\_counts\_for\_this\_sample=o\_genepopfile.getIndividualCounts( s\_indiv\_subsample\_tag=
+1661                                             o\_secondary\_outfile ):
+1662     \textcolor{stringliteral}{'''     }
+1663 \textcolor{stringliteral}{    This def creates ne-estimator caller object and adds it to list of args for a single call}
+1664 \textcolor{stringliteral}{    to def do\_estimate.  The call is then appended to llv\_args\_each\_process}
+1665 \textcolor{stringliteral}{    '''}
+1666 
+1667     \textcolor{comment}{#all these GenepopFileManager objects should now have}
+1668     \textcolor{comment}{#a single population sample name:}
+1669     s\_population\_sample\_name=o\_genepopfile.population\_subsample\_tags[ 0 ]
+1670 
+1671     ls\_indiv\_sample\_names=o\_genepopfile.indiv\_subsample\_tags
+1672 
+1673     li\_population\_numbers=o\_genepopfile.getListPopulationNumbers( s\_population\_sample\_name )
+1674     \textcolor{comment}{#for each sample (i.e. for each replicate of a sampling with a given set of params:}
+1675     \textcolor{keywordflow}{for} s\_indiv\_sample \textcolor{keywordflow}{in} ls\_indiv\_sample\_names:
+1676 
+1677         \textcolor{comment}{#we also check that at least one pop has at least one individual}
+1678         \textcolor{comment}{#listed for this subsample}
+1679         li\_indiv\_counts\_for\_this\_sample=o\_genepopfile.getIndividualCounts( s\_indiv\_subsample\_tag=
       s\_indiv\_sample )
-1651 
-1652         \textcolor{keywordflow}{if} sum( li\_indiv\_counts\_for\_this\_sample ) == 0:
-1653             s\_sample\_value, i\_replicate\_count=get\_sample\_val\_and\_rep\_number\_from\_sample\_name( \(\backslash\)
-1654                                             s\_indiv\_sample, s\_sample\_scheme )
-1655             \textcolor{comment}{#we only want to report the first replicate}
-1656             \textcolor{comment}{#(by inference of course all replicates will be skipped:}
-1657             \textcolor{keywordflow}{if} i\_replicate\_count == 0:
-1658                 s\_msg=\textcolor{stringliteral}{"Skipping samples from: "} \(\backslash\)
-1659                         + o\_genepopfile.original\_file\_name \(\backslash\)
-1660                         + \textcolor{stringliteral}{".  In pgdriveneestimator.py, all populations "} \(\backslash\)
-1661                         + \textcolor{stringliteral}{"have zero individuals when sampled using "} \(\backslash\)
-1662                         + \textcolor{stringliteral}{"scheme: "} + s\_sample\_scheme \(\backslash\)
-1663                         + \textcolor{stringliteral}{", and with sample parameter, "} + s\_sample\_value + \textcolor{stringliteral}{"."}
-1664                 o\_secondary\_outfile.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
-1665             \textcolor{comment}{#end if first replicate, report}
-1666             \textcolor{keywordflow}{continue}
-1667         \textcolor{comment}{#end skip this subsample if no pops have any individuals}
-1668 
-1669         \textcolor{stringliteral}{'''}
-1670 \textcolor{stringliteral}{        For percent and remove-N schemes, the min/max pop size params are not }
-1671 \textcolor{stringliteral}{        enforced in the sampler, and, as of 2016\_09\_27, are to be applied}
-1672 \textcolor{stringliteral}{        before sampling.  Thus, for these scheme we skip populations if their }
-1673 \textcolor{stringliteral}{        original, un-subsampled size is outside the pop size range.  Other schemes}
-1674 \textcolor{stringliteral}{        should have applied the criteria when subsampling.  For the latter, this}
-1675 \textcolor{stringliteral}{        would not be an appropriate test::}
-1676 \textcolor{stringliteral}{        '''}
-1677 
-1678         li\_pops\_with\_invalid\_size=[]
-1679         
-1680         \textcolor{keywordflow}{if} s\_sample\_scheme \textcolor{keywordflow}{in} SAMPLE\_SCHEMES\_NON\_CRITERIA:
-1681             li\_pops\_with\_invalid\_size=\hyperlink{namespacenegui_1_1pgdriveneestimator_ab546af99f06d3ec795da61f806ffafa9}{get\_pops\_in\_file\_outside\_valid\_size\_range}
+1680 
+1681         \textcolor{keywordflow}{if} sum( li\_indiv\_counts\_for\_this\_sample ) == 0:
+1682             s\_sample\_value, i\_replicate\_count=get\_sample\_val\_and\_rep\_number\_from\_sample\_name( \(\backslash\)
+1683                                             s\_indiv\_sample, s\_sample\_scheme )
+1684             \textcolor{comment}{#we only want to report the first replicate}
+1685             \textcolor{comment}{#(by inference of course all replicates will be skipped:}
+1686             \textcolor{keywordflow}{if} i\_replicate\_count == 0:
+1687                 s\_msg=\textcolor{stringliteral}{"Skipping samples from: "} \(\backslash\)
+1688                         + o\_genepopfile.original\_file\_name \(\backslash\)
+1689                         + \textcolor{stringliteral}{".  In pgdriveneestimator.py, all populations "} \(\backslash\)
+1690                         + \textcolor{stringliteral}{"have zero individuals when sampled using "} \(\backslash\)
+1691                         + \textcolor{stringliteral}{"scheme: "} + s\_sample\_scheme \(\backslash\)
+1692                         + \textcolor{stringliteral}{", and with sample parameter, "} + s\_sample\_value + \textcolor{stringliteral}{"."}
+1693                 o\_secondary\_outfile.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
+1694             \textcolor{comment}{#end if first replicate, report}
+1695             \textcolor{keywordflow}{continue}
+1696         \textcolor{comment}{#end skip this subsample if no pops have any individuals}
+1697 
+1698         \textcolor{stringliteral}{'''}
+1699 \textcolor{stringliteral}{        For percent and remove-N schemes, the min/max pop size params are not }
+1700 \textcolor{stringliteral}{        enforced in the sampler, and, as of 2016\_09\_27, are to be applied}
+1701 \textcolor{stringliteral}{        before sampling.  Thus, for these scheme we skip populations if their }
+1702 \textcolor{stringliteral}{        original, un-subsampled size is outside the pop size range.  Other schemes}
+1703 \textcolor{stringliteral}{        should have applied the criteria when subsampling.  For the latter, this}
+1704 \textcolor{stringliteral}{        would not be an appropriate test::}
+1705 \textcolor{stringliteral}{        '''}
+1706 
+1707         li\_pops\_with\_invalid\_size=[]
+1708         
+1709         \textcolor{keywordflow}{if} s\_sample\_scheme \textcolor{keywordflow}{in} SAMPLE\_SCHEMES\_NON\_CRITERIA:
+1710             li\_pops\_with\_invalid\_size=\hyperlink{namespacenegui_1_1pgdriveneestimator_ab546af99f06d3ec795da61f806ffafa9}{get\_pops\_in\_file\_outside\_valid\_size\_range}
       ( o\_genepopfile, 
-1682                                                                                 i\_min\_pop\_size,
-1683                                                                                 i\_max\_pop\_size )
-1684         \textcolor{comment}{#end if we need to check original (non-sampled) pop sizes}
-1685 
-1686 
-1687         ls\_loci\_subsample\_tags\_associated\_with\_this\_indiv\_sample= \(\backslash\)
-1688                 get\_loci\_subsample\_tags\_for\_this\_indiv\_subsample( o\_genepopfile,
-1689                                                                     s\_indiv\_sample )
-1690 
-1691         \textcolor{keywordflow}{for} s\_loci\_subsample\_tag \textcolor{keywordflow}{in} ls\_loci\_subsample\_tags\_associated\_with\_this\_indiv\_sample:
-1692 
-1693             \textcolor{stringliteral}{'''}
-1694 \textcolor{stringliteral}{            To most-efficiently use multi-processes, that is, to assign many}
-1695 \textcolor{stringliteral}{            processes a single file with many populations, we do an}
-1696 \textcolor{stringliteral}{            estimate on each pop in the file separately, and divvy}
-1697 \textcolor{stringliteral}{            the pops up among processes:}
-1698 \textcolor{stringliteral}{            '''}
-1699             \textcolor{keywordflow}{for} i\_population\_number \textcolor{keywordflow}{in} li\_population\_numbers:
-1700 
-1701                 \textcolor{keywordflow}{if} i\_population\_number \textcolor{keywordflow}{in} li\_pops\_with\_invalid\_size:
-1702                     s\_msg= \textcolor{stringliteral}{"In pgdriveneestimator.py, def add\_to\_set\_of\_calls\_to\_do\_estimate, "} \(\backslash\)
-1703                                     + \textcolor{stringliteral}{" in file, "} + o\_genepopfile.original\_file\_name \(\backslash\)
-1704                                     + \textcolor{stringliteral}{", skipping pop number, "}  + str( i\_population\_number ) \(\backslash\)
-1705                                     + \textcolor{stringliteral}{".  It has an indiv count outside of valid "} \(\backslash\)
-1706                                     + \textcolor{stringliteral}{"range, "} + str( i\_min\_pop\_size ) \(\backslash\)
-1707                                     + \textcolor{stringliteral}{" - "} + str( i\_max\_pop\_size ) + \textcolor{stringliteral}{"."}
-1708                     o\_secondary\_outfile.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
-1709                     \textcolor{keywordflow}{continue}
-1710                 \textcolor{comment}{#end if i\_population\_number is}
-1711 
-1712                 \textcolor{stringliteral}{'''}
-1713 \textcolor{stringliteral}{                We send to def do\_estimate the genepop file object, o\_genepopfile, and the subsample tag}
-1714 \textcolor{stringliteral}{                that identifies the correct subsample calculated and stored in the object, so we can write}
-1715 \textcolor{stringliteral}{                each subsample genepop file in the same process that will use it as input to the the
-       estimator.}
-1716 \textcolor{stringliteral}{                This should limit the number of input files existing concurrenty in the directory to the }
-1717 \textcolor{stringliteral}{                number of processes in use.  We also send allele freq, and the original genepop file name }
-1718 \textcolor{stringliteral}{                inside the genepop file manager object):}
-1719 \textcolor{stringliteral}{                '''}
-1720                 s\_sample\_value, s\_replicate\_number = \(\backslash\)
-1721                         get\_sample\_val\_and\_rep\_number\_from\_sample\_name( s\_indiv\_sample, s\_sample\_scheme )
-1722 
-1723                 s\_loci\_sample\_value, s\_loci\_replicate\_number = \(\backslash\)
-1724                         \hyperlink{namespacenegui_1_1pgdriveneestimator_abd853ec3bf6e5ad25f39ba0b41302f14}{get\_loci\_sample\_val\_and\_rep\_number\_from\_loci\_sample\_tag}
-      ( s\_loci\_subsample\_tag )
-1725 
-1726                 i\_tot\_indivs\_this\_subsample=o\_genepopfile.getIndividualCount( i\_population\_number, 
-      s\_indiv\_sample )
-1727 
-1728                 \textcolor{keywordflow}{if} i\_tot\_indivs\_this\_subsample == 0:
-1729                     s\_msg= \textcolor{stringliteral}{"In pgdriveneestimator.py, def add\_to\_set\_of\_calls\_to\_do\_estimate, "} \(\backslash\)
-1730                                     + \textcolor{stringliteral}{" in file, "} + o\_genepopfile.original\_file\_name \(\backslash\)
-1731                                     + \textcolor{stringliteral}{", with sample value: "} + s\_sample\_value \(\backslash\)
-1732                                     + \textcolor{stringliteral}{", and loci sample value: "} + s\_loci\_sample\_value \(\backslash\)
+1711                                                                                 i\_min\_pop\_size,
+1712                                                                                 i\_max\_pop\_size )
+1713         \textcolor{comment}{#end if we need to check original (non-sampled) pop sizes}
+1714 
+1715 
+1716         ls\_loci\_subsample\_tags\_associated\_with\_this\_indiv\_sample= \(\backslash\)
+1717                 get\_loci\_subsample\_tags\_for\_this\_indiv\_subsample( o\_genepopfile,
+1718                                                                     s\_indiv\_sample )
+1719 
+1720         \textcolor{keywordflow}{for} s\_loci\_subsample\_tag \textcolor{keywordflow}{in} ls\_loci\_subsample\_tags\_associated\_with\_this\_indiv\_sample:
+1721 
+1722             \textcolor{stringliteral}{'''}
+1723 \textcolor{stringliteral}{            To most-efficiently use multi-processes, that is, to assign many}
+1724 \textcolor{stringliteral}{            processes a single file with many populations, we do an}
+1725 \textcolor{stringliteral}{            estimate on each pop in the file separately, and divvy}
+1726 \textcolor{stringliteral}{            the pops up among processes:}
+1727 \textcolor{stringliteral}{            '''}
+1728             \textcolor{keywordflow}{for} i\_population\_number \textcolor{keywordflow}{in} li\_population\_numbers:
+1729 
+1730                 \textcolor{keywordflow}{if} i\_population\_number \textcolor{keywordflow}{in} li\_pops\_with\_invalid\_size:
+1731                     s\_msg= \textcolor{stringliteral}{"In pgdriveneestimator.py, def add\_to\_set\_of\_calls\_to\_do\_estimate, "} \(\backslash\)
+1732                                     + \textcolor{stringliteral}{" in file, "} + o\_genepopfile.original\_file\_name \(\backslash\)
 1733                                     + \textcolor{stringliteral}{", skipping pop number, "}  + str( i\_population\_number ) \(\backslash\)
-1734                                     + \textcolor{stringliteral}{".  It has a zero indiv count."}
-1735                     o\_secondary\_outfile.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
-1736                     \textcolor{keywordflow}{continue}
-1737                 \textcolor{comment}{# end if this sample for this pop has zero individuals}
-1738 
-1739                 \textcolor{comment}{#for downstream analysis, we get the census of total indiv}
-1740                 \textcolor{comment}{#non-sampled, for this pop section:}
-1741                 s\_census=str( o\_genepopfile.getIndividualCount( i\_population\_number ) )
-1742 
-1743                 \textcolor{comment}{#we make population subsample list consisting of only this populations number:}
-1744                 s\_this\_pop\_number=str( i\_population\_number ) 
-1745 
-1746                 o\_genepopfile.subsamplePopulationsByList( [ i\_population\_number ], s\_this\_pop\_number )
-1747 
-1748                 \textcolor{keywordflow}{if} o\_debug\_mode.isSet( DebugMode.PRINT\_REPLICATE\_SELECTIONS ):
-1749                     print\_test\_list\_replicate\_selection\_indices( o\_genepopfile, 
-1750                                             s\_sample\_scheme,    
-1751                                             s\_indiv\_sample, 
-1752                                             s\_loci\_sample\_value,
-1753                                             s\_loci\_replicate\_number,
-1754                                             o\_secondary\_outfile, 
-1755                                             s\_population\_subsample\_tag=s\_this\_pop\_number )
-1756                 \textcolor{comment}{#end if we're testing, print }
-1757                 
-1758 
-1759                 \textcolor{comment}{#in naming a the genepop file for the subsampled pop,}
-1760                 \textcolor{comment}{#some processing is needed to avoid NeEstimator file naming errors, and}
-1761                 \textcolor{comment}{#path mangling, so we made a separate def:}
-1762                 s\_genepop\_file\_subsample=\hyperlink{namespacenegui_1_1pgdriveneestimator_a9359fcbe384546efd152c8d06fec5aa5}{get\_subsample\_genepop\_file\_name}( 
-      o\_genepopfile.original\_file\_name, 
-1763                                                         s\_loci\_subsample\_tag, 
-1764                                                         s\_this\_pop\_number )
-1765 
-1766                 s\_run\_output\_file=s\_genepop\_file\_subsample + \textcolor{stringliteral}{"\_ne\_run.txt"}
+1734                                     + \textcolor{stringliteral}{".  It has an indiv count outside of valid "} \(\backslash\)
+1735                                     + \textcolor{stringliteral}{"range, "} + str( i\_min\_pop\_size ) \(\backslash\)
+1736                                     + \textcolor{stringliteral}{" - "} + str( i\_max\_pop\_size ) + \textcolor{stringliteral}{"."}
+1737                     o\_secondary\_outfile.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
+1738                     \textcolor{keywordflow}{continue}
+1739                 \textcolor{comment}{#end if i\_population\_number is}
+1740 
+1741                 \textcolor{stringliteral}{'''}
+1742 \textcolor{stringliteral}{                We send to def do\_estimate the genepop file object, o\_genepopfile, and the subsample tag}
+1743 \textcolor{stringliteral}{                that identifies the correct subsample calculated and stored in the object, so we can write}
+1744 \textcolor{stringliteral}{                each subsample genepop file in the same process that will use it as input to the the
+       estimator.}
+1745 \textcolor{stringliteral}{                This should limit the number of input files existing concurrenty in the directory to the }
+1746 \textcolor{stringliteral}{                number of processes in use.  We also send allele freq, and the original genepop file name }
+1747 \textcolor{stringliteral}{                inside the genepop file manager object):}
+1748 \textcolor{stringliteral}{                '''}
+1749                 s\_sample\_value, s\_replicate\_number = \(\backslash\)
+1750                         get\_sample\_val\_and\_rep\_number\_from\_sample\_name( s\_indiv\_sample, s\_sample\_scheme )
+1751 
+1752                 s\_loci\_sample\_value, s\_loci\_replicate\_number = \(\backslash\)
+1753                         \hyperlink{namespacenegui_1_1pgdriveneestimator_abd853ec3bf6e5ad25f39ba0b41302f14}{get\_loci\_sample\_val\_and\_rep\_number\_from\_loci\_sample\_tag}
+      ( s\_loci\_subsample\_tag )
+1754 
+1755                 i\_tot\_indivs\_this\_subsample=o\_genepopfile.getIndividualCount( i\_population\_number, 
+      s\_indiv\_sample )
+1756 
+1757                 \textcolor{keywordflow}{if} i\_tot\_indivs\_this\_subsample == 0:
+1758                     s\_msg= \textcolor{stringliteral}{"In pgdriveneestimator.py, def add\_to\_set\_of\_calls\_to\_do\_estimate, "} \(\backslash\)
+1759                                     + \textcolor{stringliteral}{" in file, "} + o\_genepopfile.original\_file\_name \(\backslash\)
+1760                                     + \textcolor{stringliteral}{", with sample value: "} + s\_sample\_value \(\backslash\)
+1761                                     + \textcolor{stringliteral}{", and loci sample value: "} + s\_loci\_sample\_value \(\backslash\)
+1762                                     + \textcolor{stringliteral}{", skipping pop number, "}  + str( i\_population\_number ) \(\backslash\)
+1763                                     + \textcolor{stringliteral}{".  It has a zero indiv count."}
+1764                     o\_secondary\_outfile.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
+1765                     \textcolor{keywordflow}{continue}
+1766                 \textcolor{comment}{# end if this sample for this pop has zero individuals}
 1767 
-1768                 o\_neinput=pgin.PGInputNeEstimator( s\_genepop\_file\_subsample )
-1769 
-1770                 o\_neinput.run\_params=\{ \textcolor{stringliteral}{"crits"}:[ f\_min\_allele\_freq ]  \}
+1768                 \textcolor{comment}{#for downstream analysis, we get the census of total indiv}
+1769                 \textcolor{comment}{#non-sampled, for this pop section:}
+1770                 s\_census=str( o\_genepopfile.getIndividualCount( i\_population\_number ) )
 1771 
-1772                 o\_neoutput=pgout.PGOutputNeEstimator( s\_genepop\_file\_subsample, s\_run\_output\_file ) 
-1773 
-1774                 o\_ne\_estimator=pgne.PGOpNeEstimator( o\_neinput, o\_neoutput ) 
-1775                 
-1776                 lv\_these\_args = [ o\_genepopfile,  
-1777                                     o\_ne\_estimator, 
-1778                                     s\_sample\_value, 
-1779                                     s\_loci\_sample\_value,
-1780                                     f\_min\_allele\_freq, 
-1781                                     s\_indiv\_sample, 
-1782                                     s\_loci\_subsample\_tag,
-1783                                     s\_this\_pop\_number, 
-1784                                     s\_census,
-1785                                     s\_replicate\_number, 
-1786                                     s\_loci\_replicate\_number,
-1787                                     o\_debug\_mode,
-1788                                     IDX\_NE\_ESTIMATOR\_OUTPUT\_FIELDS\_TO\_SKIP ]
-1789 
-1790                 llv\_args\_each\_process.append( lv\_these\_args )
-1791             \textcolor{comment}{#end for each population}
-1792         \textcolor{comment}{#end for each loci sample name assoc with this indiv sample name}
-1793     \textcolor{comment}{#end for each indiv sample name}
-1794     \textcolor{keywordflow}{return}
-1795 \textcolor{comment}{#end add\_to\_set\_of\_calls\_to\_do\_estimate}
+1772                 \textcolor{comment}{#we make population subsample list consisting of only this populations number:}
+1773                 s\_this\_pop\_number=str( i\_population\_number ) 
+1774 
+1775                 o\_genepopfile.subsamplePopulationsByList( [ i\_population\_number ], s\_this\_pop\_number )
+1776 
+1777                 \textcolor{keywordflow}{if} o\_debug\_mode.isSet( DebugMode.PRINT\_REPLICATE\_SELECTIONS ):
+1778                     print\_test\_list\_replicate\_selection\_indices( o\_genepopfile, 
+1779                                             s\_sample\_scheme,    
+1780                                             s\_indiv\_sample, 
+1781                                             s\_loci\_sample\_value,
+1782                                             s\_loci\_replicate\_number,
+1783                                             o\_secondary\_outfile, 
+1784                                             s\_population\_subsample\_tag=s\_this\_pop\_number )
+1785                 \textcolor{comment}{#end if we're testing, print }
+1786                 
+1787 
+1788                 \textcolor{comment}{#in naming a the genepop file for the subsampled pop,}
+1789                 \textcolor{comment}{#some processing is needed to avoid NeEstimator file naming errors, and}
+1790                 \textcolor{comment}{#path mangling, so we made a separate def:}
+1791                 s\_genepop\_file\_subsample=\hyperlink{namespacenegui_1_1pgdriveneestimator_a9359fcbe384546efd152c8d06fec5aa5}{get\_subsample\_genepop\_file\_name}( 
+      o\_genepopfile.original\_file\_name, 
+1792                                                         s\_loci\_subsample\_tag, 
+1793                                                         s\_this\_pop\_number )
+1794 
+1795                 s\_run\_output\_file=s\_genepop\_file\_subsample + \textcolor{stringliteral}{"\_ne\_run.txt"}
 1796 
+1797                 o\_neinput=pgin.PGInputNeEstimator( s\_genepop\_file\_subsample )
+1798 
+1799                 o\_neinput.run\_params=\{ \textcolor{stringliteral}{"crits"}:[ f\_min\_allele\_freq ]  \}
+1800 
+1801                 o\_neoutput=pgout.PGOutputNeEstimator( s\_genepop\_file\_subsample, s\_run\_output\_file ) 
+1802 
+1803                 o\_ne\_estimator=pgne.PGOpNeEstimator( o\_neinput, o\_neoutput ) 
+1804                 
+1805                 lv\_these\_args = [ o\_genepopfile,  
+1806                                     o\_ne\_estimator, 
+1807                                     s\_sample\_value, 
+1808                                     s\_loci\_sample\_value,
+1809                                     f\_min\_allele\_freq, 
+1810                                     s\_indiv\_sample, 
+1811                                     s\_loci\_subsample\_tag,
+1812                                     s\_this\_pop\_number, 
+1813                                     s\_census,
+1814                                     s\_replicate\_number, 
+1815                                     s\_loci\_replicate\_number,
+1816                                     o\_debug\_mode,
+1817                                     IDX\_NE\_ESTIMATOR\_OUTPUT\_FIELDS\_TO\_SKIP ]
+1818 
+1819                 llv\_args\_each\_process.append( lv\_these\_args )
+1820             \textcolor{comment}{#end for each population}
+1821         \textcolor{comment}{#end for each loci sample name assoc with this indiv sample name}
+1822     \textcolor{comment}{#end for each indiv sample name}
+1823     \textcolor{keywordflow}{return}
+1824 \textcolor{comment}{#end add\_to\_set\_of\_calls\_to\_do\_estimate}
+1825 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!do\+\_\+sample\+\_\+individuals@{do\+\_\+sample\+\_\+individuals}}
 \index{do\+\_\+sample\+\_\+individuals@{do\+\_\+sample\+\_\+individuals}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -611,188 +614,188 @@ will have assigned None to both min and max.
 \end{DoxyVerb}
  
 
-Definition at line 1278 of file pgdriveneestimator.\+py.
+Definition at line 1307 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-1278                 i\_replicates ):
-1279 
-1280     \textcolor{stringliteral}{'''}
-1281 \textcolor{stringliteral}{    do\_sample adds subsample info to the o\_genepopfile GenepopFileManager object,}
-1282 \textcolor{stringliteral}{    and so changes it in place, returns no value.  The o\_genepopfile can then}
-1283 \textcolor{stringliteral}{    be accessed to write a new genepop file that contains the subsampled data.}
-1284 \textcolor{stringliteral}{    sampler requires a population list (in case we want to sample fewer than}
-1285 \textcolor{stringliteral}{    all the pops in the file). If the client passed in "all" parse\_args}
-1286 \textcolor{stringliteral}{    will have assigned None to both min and max.}
-1287 \textcolor{stringliteral}{    '''}
-1288 
-1289     i\_total\_pops\_in\_file=o\_genepopfile.pop\_total
-1290     li\_population\_list=\textcolor{keywordtype}{None}
-1291 
-1292     \textcolor{keywordflow}{if} i\_min\_pop\_range \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
-1293         \textcolor{comment}{#make sure both are None, else}
-1294         \textcolor{comment}{#arg-parsing error:}
-1295         \textcolor{keywordflow}{if} i\_max\_pop\_range \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
-1296             li\_population\_list=list( range( 1, i\_total\_pops\_in\_file + 1 ) )
-1297         \textcolor{keywordflow}{else}:
-1298             s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def do\_sample, "} \(\backslash\)
-1299                         + \textcolor{stringliteral}{" found arg min pop range is None, "} \(\backslash\)
-1300                         + \textcolor{stringliteral}{" but max pop range is not None, "} \(\backslash\)
-1301                         + str( i\_max\_pop\_range ) \(\backslash\)
-1302                         + \textcolor{stringliteral}{".  Invalid argument pair."}
-1303             \textcolor{keywordflow}{raise} Exception( s\_msg )
-1304         \textcolor{comment}{#end if max is None else error}
-1305     \textcolor{keywordflow}{else}:
-1306         \textcolor{keywordflow}{if} i\_min\_pop\_range < 1 \textcolor{keywordflow}{or} i\_min\_pop\_range > i\_max\_pop\_range:
-1307             s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def do\_sample, "} \(\backslash\)
-1308                         + \textcolor{stringliteral}{"min pop number range, "} \(\backslash\)
-1309                         + str( i\_min\_pop\_range ) \(\backslash\)
-1310                         + \textcolor{stringliteral}{", is less than one or "} \(\backslash\)
-1311                         + \textcolor{stringliteral}{"greaterh than max pop number, "} \(\backslash\)
-1312                         + str( i\_max\_pop\_range ) + \textcolor{stringliteral}{"."} 
-1313             \textcolor{keywordflow}{raise} Exception( s\_msg )
-1314         \textcolor{comment}{#end if min or max out of range}
-1315 
-1316         i\_max\_pop\_range=min( i\_max\_pop\_range, i\_total\_pops\_in\_file )
+1307                 i\_replicates ):
+1308 
+1309     \textcolor{stringliteral}{'''}
+1310 \textcolor{stringliteral}{    do\_sample adds subsample info to the o\_genepopfile GenepopFileManager object,}
+1311 \textcolor{stringliteral}{    and so changes it in place, returns no value.  The o\_genepopfile can then}
+1312 \textcolor{stringliteral}{    be accessed to write a new genepop file that contains the subsampled data.}
+1313 \textcolor{stringliteral}{    sampler requires a population list (in case we want to sample fewer than}
+1314 \textcolor{stringliteral}{    all the pops in the file). If the client passed in "all" parse\_args}
+1315 \textcolor{stringliteral}{    will have assigned None to both min and max.}
+1316 \textcolor{stringliteral}{    '''}
 1317 
-1318         li\_population\_list=range( i\_min\_pop\_range, i\_max\_pop\_range + 1 )
-1319     \textcolor{comment}{#end if min pop range is None, else have a value}
+1318     i\_total\_pops\_in\_file=o\_genepopfile.pop\_total
+1319     li\_population\_list=\textcolor{keywordtype}{None}
 1320 
-1321     o\_sampler=\textcolor{keywordtype}{None}  
-1322 
-1323     s\_population\_subsample\_tag=s\_sample\_scheme
-1324 
-1325     \textcolor{keywordflow}{if} s\_sample\_scheme==SAMPLE\_BY\_NONE:
-1326         o\_sample\_params=gps.GenepopFileSampleParamsNone( li\_population\_numbers=li\_population\_list,
-1327                                                             i\_min\_pop\_size=i\_min\_pop\_size,
-1328                                                             i\_max\_pop\_size=i\_max\_pop\_size,
-1329                                                             i\_replicates=i\_replicates,
-1330                                                             s\_population\_subsample\_name=
-      s\_population\_subsample\_tag )    
-1331 
-1332         o\_sampler=gps.GenepopFileSamplerNone( o\_genepopfile, o\_sample\_params )
-1333 
-1334     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_PERCENTAGES:
-1335 
-1336         \textcolor{comment}{#our "proportion" sampler object needs proportions instead of percentages:}
-1337 
-1338         o\_sample\_params=gps.GenepopFileSampleParamsProportion( li\_population\_numbers=li\_population\_list,
-1339                                                 lf\_proportions=lv\_sample\_values,
-1340                                                 i\_replicates=i\_replicates,
-1341                                                 s\_population\_subsample\_name=s\_population\_subsample\_tag )
-1342 
-1343         o\_sampler=gps.GenepopFileSamplerIndividualsByProportion( o\_genepopfile, o\_sample\_params )
+1321     \textcolor{keywordflow}{if} i\_min\_pop\_range \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
+1322         \textcolor{comment}{#make sure both are None, else}
+1323         \textcolor{comment}{#arg-parsing error:}
+1324         \textcolor{keywordflow}{if} i\_max\_pop\_range \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
+1325             li\_population\_list=list( range( 1, i\_total\_pops\_in\_file + 1 ) )
+1326         \textcolor{keywordflow}{else}:
+1327             s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def do\_sample, "} \(\backslash\)
+1328                         + \textcolor{stringliteral}{" found arg min pop range is None, "} \(\backslash\)
+1329                         + \textcolor{stringliteral}{" but max pop range is not None, "} \(\backslash\)
+1330                         + str( i\_max\_pop\_range ) \(\backslash\)
+1331                         + \textcolor{stringliteral}{".  Invalid argument pair."}
+1332             \textcolor{keywordflow}{raise} Exception( s\_msg )
+1333         \textcolor{comment}{#end if max is None else error}
+1334     \textcolor{keywordflow}{else}:
+1335         \textcolor{keywordflow}{if} i\_min\_pop\_range < 1 \textcolor{keywordflow}{or} i\_min\_pop\_range > i\_max\_pop\_range:
+1336             s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def do\_sample, "} \(\backslash\)
+1337                         + \textcolor{stringliteral}{"min pop number range, "} \(\backslash\)
+1338                         + str( i\_min\_pop\_range ) \(\backslash\)
+1339                         + \textcolor{stringliteral}{", is less than one or "} \(\backslash\)
+1340                         + \textcolor{stringliteral}{"greaterh than max pop number, "} \(\backslash\)
+1341                         + str( i\_max\_pop\_range ) + \textcolor{stringliteral}{"."} 
+1342             \textcolor{keywordflow}{raise} Exception( s\_msg )
+1343         \textcolor{comment}{#end if min or max out of range}
 1344 
-1345     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_REMOVAL:
+1345         i\_max\_pop\_range=min( i\_max\_pop\_range, i\_total\_pops\_in\_file )
 1346 
-1347         o\_sample\_params=gps.GenepopFileSampleParamsRemoval( li\_population\_numbers=li\_population\_list,
-1348                                                 li\_n\_to\_remove=lv\_sample\_values,
-1349                                                 i\_replicates=i\_replicates,
-1350                                                 s\_population\_subsample\_name=s\_population\_subsample\_tag )
+1347         li\_population\_list=range( i\_min\_pop\_range, i\_max\_pop\_range + 1 )
+1348     \textcolor{comment}{#end if min pop range is None, else have a value}
+1349 
+1350     o\_sampler=\textcolor{keywordtype}{None}  
 1351 
-1352         o\_sampler=gps.GenepopFileSamplerIndividualsByRemoval( o\_genepopfile, o\_sample\_params )
+1352     s\_population\_subsample\_tag=s\_sample\_scheme
 1353 
-1354     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_CRITERIA:
-1355 
-1356         o\_indiv\_fields, o\_criteria = get\_criteria\_sampling\_params( lv\_sample\_values )
-1357 
-1358         o\_sample\_params=gps.GenepopFileSampleParamsCriteria( o\_genepop\_indiv\_id\_fields=o\_indiv\_fields,
-1359                                                                     o\_genepop\_indiv\_id\_critera=o\_criteria,
-1360                                                                     li\_population\_numbers=
-      li\_population\_list,
-1361                                                                     i\_min\_sampled\_pop\_size=i\_min\_pop\_size,
-1362                                                                     i\_max\_sampled\_pop\_size=i\_max\_pop\_size,
-1363                                                                     s\_population\_subsample\_name = 
-      s\_population\_subsample\_tag,
-1364                                                                     i\_replicates=i\_replicates )
-1365 
-1366         o\_sampler=gps.GenepopFileSamplerIndividualsByCriteria( o\_genepopfile, o\_sample\_params )
-1367 
-1368     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_COHORT:
-1369 
-1370         ( o\_indiv\_fields,
-1371             i\_max\_age ) = get\_cohorts\_sampling\_params( lv\_sample\_values )
-1372 
-1373         o\_sample\_params=gps.GenepopFileSampleParamsAgeStructureCohorts( \(\backslash\)
-1374                                         o\_genepop\_indiv\_id\_fields = o\_indiv\_fields,
-1375                                         li\_population\_numbers = li\_population\_list,
-1376                                         i\_max\_age=i\_max\_age,
-1377                                         i\_min\_individuals\_per\_gen=i\_min\_pop\_size,
-1378                                         i\_max\_individuals\_per\_gen=i\_max\_pop\_size,
-1379                                         i\_replicates=i\_replicates )
+1354     \textcolor{keywordflow}{if} s\_sample\_scheme==SAMPLE\_BY\_NONE:
+1355         o\_sample\_params=gps.GenepopFileSampleParamsNone( li\_population\_numbers=li\_population\_list,
+1356                                                             i\_min\_pop\_size=i\_min\_pop\_size,
+1357                                                             i\_max\_pop\_size=i\_max\_pop\_size,
+1358                                                             i\_replicates=i\_replicates,
+1359                                                             s\_population\_subsample\_name=
+      s\_population\_subsample\_tag )    
+1360 
+1361         o\_sampler=gps.GenepopFileSamplerNone( o\_genepopfile, o\_sample\_params )
+1362 
+1363     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_PERCENTAGES:
+1364 
+1365         \textcolor{comment}{#our "proportion" sampler object needs proportions instead of percentages:}
+1366 
+1367         o\_sample\_params=gps.GenepopFileSampleParamsProportion( li\_population\_numbers=li\_population\_list,
+1368                                                 lf\_proportions=lv\_sample\_values,
+1369                                                 i\_replicates=i\_replicates,
+1370                                                 s\_population\_subsample\_name=s\_population\_subsample\_tag )
+1371 
+1372         o\_sampler=gps.GenepopFileSamplerIndividualsByProportion( o\_genepopfile, o\_sample\_params )
+1373 
+1374     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_REMOVAL:
+1375 
+1376         o\_sample\_params=gps.GenepopFileSampleParamsRemoval( li\_population\_numbers=li\_population\_list,
+1377                                                 li\_n\_to\_remove=lv\_sample\_values,
+1378                                                 i\_replicates=i\_replicates,
+1379                                                 s\_population\_subsample\_name=s\_population\_subsample\_tag )
 1380 
-1381         o\_sampler=gps.GenepopFileSamplerIndividualsAgeStructureCohorts( o\_genepopfile,
-1382                                                                     o\_sample\_params )
-1383     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_COHORT\_PERCENTAGE:
+1381         o\_sampler=gps.GenepopFileSamplerIndividualsByRemoval( o\_genepopfile, o\_sample\_params )
+1382 
+1383     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_CRITERIA:
 1384 
-1385         \textcolor{comment}{#this scheme has params identical to the regular "cohorts" scheme,}
-1386         \textcolor{comment}{#with a hyphenated list percentage values appended to the max-age param, }
-1387         \textcolor{comment}{#so we extract the last two values of the last param list:  }
-1388         
-1389         COHORT\_PARAM\_LIST\_DELIMITER=\textcolor{stringliteral}{";"}
-1390         COHORT\_PERC\_DELIM=\textcolor{stringliteral}{"-"}
-1391         IDX\_MAX\_AGE=0
-1392         IDX\_PERC=1
-1393 
-1394         s\_last\_param=lv\_sample\_values[ -1 ]
-1395 
-1396         ls\_age\_and\_percentage=s\_last\_param.split( \(\backslash\)
-1397                         COHORT\_PARAM\_LIST\_DELIMITER )
+1385         o\_indiv\_fields, o\_criteria = get\_criteria\_sampling\_params( lv\_sample\_values )
+1386 
+1387         o\_sample\_params=gps.GenepopFileSampleParamsCriteria( o\_genepop\_indiv\_id\_fields=o\_indiv\_fields,
+1388                                                                     o\_genepop\_indiv\_id\_critera=o\_criteria,
+1389                                                                     li\_population\_numbers=
+      li\_population\_list,
+1390                                                                     i\_min\_sampled\_pop\_size=i\_min\_pop\_size,
+1391                                                                     i\_max\_sampled\_pop\_size=i\_max\_pop\_size,
+1392                                                                     s\_population\_subsample\_name = 
+      s\_population\_subsample\_tag,
+1393                                                                     i\_replicates=i\_replicates )
+1394 
+1395         o\_sampler=gps.GenepopFileSamplerIndividualsByCriteria( o\_genepopfile, o\_sample\_params )
+1396 
+1397     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_COHORT:
 1398 
-1399         s\_max\_age=ls\_age\_and\_percentage[ IDX\_MAX\_AGE ]
-1400         s\_percentages=ls\_age\_and\_percentage[ IDX\_PERC ]
-1401         
-1402         \textcolor{comment}{#we reassemble the list to match the expected}
-1403         \textcolor{comment}{#cohort sampling params (without the percentage):}
-1404         lv\_cohort\_param\_fields=lv\_sample\_values[ 0:len( lv\_sample\_values ) - 1 ] \(\backslash\)
-1405                                                             + [ s\_max\_age ]     
-1406         \textcolor{comment}{#Convert the percentages to a list of floats giving proportion:}
-1407         lf\_proportions=[ float( s\_percentage )/100.0 \textcolor{keywordflow}{for} s\_percentage  \(\backslash\)
-1408                             \textcolor{keywordflow}{in} s\_percentages.split( COHORT\_PERC\_DELIM ) ]
+1399         ( o\_indiv\_fields,
+1400             i\_max\_age ) = get\_cohorts\_sampling\_params( lv\_sample\_values )
+1401 
+1402         o\_sample\_params=gps.GenepopFileSampleParamsAgeStructureCohorts( \(\backslash\)
+1403                                         o\_genepop\_indiv\_id\_fields = o\_indiv\_fields,
+1404                                         li\_population\_numbers = li\_population\_list,
+1405                                         i\_max\_age=i\_max\_age,
+1406                                         i\_min\_individuals\_per\_gen=i\_min\_pop\_size,
+1407                                         i\_max\_individuals\_per\_gen=i\_max\_pop\_size,
+1408                                         i\_replicates=i\_replicates )
 1409 
-1410         ( o\_indiv\_fields,
-1411                 i\_max\_age ) = get\_cohorts\_sampling\_params( lv\_cohort\_param\_fields )
-1412 
-1413         o\_sample\_params=gps.GenepopFileSampleParamsAgeStructureCohorts( \(\backslash\)
-1414                                             o\_genepop\_indiv\_id\_fields = o\_indiv\_fields,
-1415                                             li\_population\_numbers = li\_population\_list,
-1416                                             i\_max\_age=i\_max\_age,
-1417                                             lf\_proportions=lf\_proportions,
-1418                                             i\_min\_individuals\_per\_gen=i\_min\_pop\_size,
-1419                                             i\_max\_individuals\_per\_gen=i\_max\_pop\_size,
-1420                                             i\_replicates=i\_replicates )
-1421 
-1422         o\_sampler=gps.GenepopFileSamplerIndividualsAgeStructureCohortsPercentage( o\_genepopfile,
-1423                                                                                     o\_sample\_params )
-1424                                 
-1425     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_RELATEDS:
-1426 
-1427             ( o\_indiv\_fields,
-1428                 f\_percent\_relateds) = get\_relateds\_sampling\_params( lv\_sample\_values )
-1429 
-1430             o\_sample\_params=gps.GenepopFileSampleParamsAgeStructureRelateds( \(\backslash\)
-1431                                         o\_genepop\_indiv\_id\_fields = o\_indiv\_fields,
-1432                                         li\_population\_numbers = li\_population\_list,
-1433                                         f\_percent\_relateds\_per\_gen=f\_percent\_relateds,
-1434                                         i\_min\_individuals\_per\_gen=i\_min\_pop\_size,
-1435                                         i\_max\_individuals\_per\_gen=i\_max\_pop\_size,
-1436                                         i\_replicates=i\_replicates )
-1437 
-1438             o\_sampler=gps.GenepopFileSamplerIndividualsAgeStructureRelateds( o\_genepopfile,
-1439                                                                     o\_sample\_params )
-1440     \textcolor{keywordflow}{else}:
+1410         o\_sampler=gps.GenepopFileSamplerIndividualsAgeStructureCohorts( o\_genepopfile,
+1411                                                                     o\_sample\_params )
+1412     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_COHORT\_PERCENTAGE:
+1413 
+1414         \textcolor{comment}{#this scheme has params identical to the regular "cohorts" scheme,}
+1415         \textcolor{comment}{#with a hyphenated list percentage values appended to the max-age param, }
+1416         \textcolor{comment}{#so we extract the last two values of the last param list:  }
+1417         
+1418         COHORT\_PARAM\_LIST\_DELIMITER=\textcolor{stringliteral}{";"}
+1419         COHORT\_PERC\_DELIM=\textcolor{stringliteral}{"-"}
+1420         IDX\_MAX\_AGE=0
+1421         IDX\_PERC=1
+1422 
+1423         s\_last\_param=lv\_sample\_values[ -1 ]
+1424 
+1425         ls\_age\_and\_percentage=s\_last\_param.split( \(\backslash\)
+1426                         COHORT\_PARAM\_LIST\_DELIMITER )
+1427 
+1428         s\_max\_age=ls\_age\_and\_percentage[ IDX\_MAX\_AGE ]
+1429         s\_percentages=ls\_age\_and\_percentage[ IDX\_PERC ]
+1430         
+1431         \textcolor{comment}{#we reassemble the list to match the expected}
+1432         \textcolor{comment}{#cohort sampling params (without the percentage):}
+1433         lv\_cohort\_param\_fields=lv\_sample\_values[ 0:len( lv\_sample\_values ) - 1 ] \(\backslash\)
+1434                                                             + [ s\_max\_age ]     
+1435         \textcolor{comment}{#Convert the percentages to a list of floats giving proportion:}
+1436         lf\_proportions=[ float( s\_percentage )/100.0 \textcolor{keywordflow}{for} s\_percentage  \(\backslash\)
+1437                             \textcolor{keywordflow}{in} s\_percentages.split( COHORT\_PERC\_DELIM ) ]
+1438 
+1439         ( o\_indiv\_fields,
+1440                 i\_max\_age ) = get\_cohorts\_sampling\_params( lv\_cohort\_param\_fields )
 1441 
-1442         s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def do\_sample, "} \(\backslash\)
-1443                 + \textcolor{stringliteral}{"unknown sampling scheme: "} \(\backslash\)
-1444                 + s\_sample\_scheme + \textcolor{stringliteral}{"."}
-1445         \textcolor{keywordflow}{raise} Exception( s\_msg )
-1446     \textcolor{comment}{#end if percent, else removal, else criteria, else cohort, else relateds, else error}
-1447 
-1448     o\_sampler.doSample()
-1449 
-1450     \textcolor{keywordflow}{return} li\_population\_list
-1451 \textcolor{comment}{#end do\_sample\_individuals}
-1452 
+1442         o\_sample\_params=gps.GenepopFileSampleParamsAgeStructureCohorts( \(\backslash\)
+1443                                             o\_genepop\_indiv\_id\_fields = o\_indiv\_fields,
+1444                                             li\_population\_numbers = li\_population\_list,
+1445                                             i\_max\_age=i\_max\_age,
+1446                                             lf\_proportions=lf\_proportions,
+1447                                             i\_min\_individuals\_per\_gen=i\_min\_pop\_size,
+1448                                             i\_max\_individuals\_per\_gen=i\_max\_pop\_size,
+1449                                             i\_replicates=i\_replicates )
+1450 
+1451         o\_sampler=gps.GenepopFileSamplerIndividualsAgeStructureCohortsPercentage( o\_genepopfile,
+1452                                                                                     o\_sample\_params )
+1453                                 
+1454     \textcolor{keywordflow}{elif} s\_sample\_scheme==SAMPLE\_BY\_RELATEDS:
+1455 
+1456             ( o\_indiv\_fields,
+1457                 f\_percent\_relateds) = get\_relateds\_sampling\_params( lv\_sample\_values )
+1458 
+1459             o\_sample\_params=gps.GenepopFileSampleParamsAgeStructureRelateds( \(\backslash\)
+1460                                         o\_genepop\_indiv\_id\_fields = o\_indiv\_fields,
+1461                                         li\_population\_numbers = li\_population\_list,
+1462                                         f\_percent\_relateds\_per\_gen=f\_percent\_relateds,
+1463                                         i\_min\_individuals\_per\_gen=i\_min\_pop\_size,
+1464                                         i\_max\_individuals\_per\_gen=i\_max\_pop\_size,
+1465                                         i\_replicates=i\_replicates )
+1466 
+1467             o\_sampler=gps.GenepopFileSamplerIndividualsAgeStructureRelateds( o\_genepopfile,
+1468                                                                     o\_sample\_params )
+1469     \textcolor{keywordflow}{else}:
+1470 
+1471         s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def do\_sample, "} \(\backslash\)
+1472                 + \textcolor{stringliteral}{"unknown sampling scheme: "} \(\backslash\)
+1473                 + s\_sample\_scheme + \textcolor{stringliteral}{"."}
+1474         \textcolor{keywordflow}{raise} Exception( s\_msg )
+1475     \textcolor{comment}{#end if percent, else removal, else criteria, else cohort, else relateds, else error}
+1476 
+1477     o\_sampler.doSample()
+1478 
+1479     \textcolor{keywordflow}{return} li\_population\_list
+1480 \textcolor{comment}{#end do\_sample\_individuals}
+1481 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!do\+\_\+sample\+\_\+loci@{do\+\_\+sample\+\_\+loci}}
 \index{do\+\_\+sample\+\_\+loci@{do\+\_\+sample\+\_\+loci}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -831,113 +834,113 @@ replicates given by def param i_loci_replicates.
 \end{DoxyVerb}
  
 
-Definition at line 1461 of file pgdriveneestimator.\+py.
+Definition at line 1490 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-1461                         i\_loci\_replicates=1 ):
-1462         
-1463     \textcolor{stringliteral}{'''}
-1464 \textcolor{stringliteral}{    As of 2016\_10\_06, we have no loci sampling scheme}
-1465 \textcolor{stringliteral}{    but we still subsample by loci order, start index, stop index}
-1466 \textcolor{stringliteral}{    and a max total -- randomly drawn if the start/stop range}
-1467 \textcolor{stringliteral}{    results in total loci over the max. }
-1468 \textcolor{stringliteral}{}
-1469 \textcolor{stringliteral}{    Further, we currently only permit one loci subsample for}
-1470 \textcolor{stringliteral}{    each individual subsampling session -- i.e. for all }
-1471 \textcolor{stringliteral}{    of a given sample replicate.}
-1472 \textcolor{stringliteral}{}
-1473 \textcolor{stringliteral}{    As of 2016\_10\_20, we've added new scheme "percent", but}
-1474 \textcolor{stringliteral}{    still doing one sample in the genepop file per call}
-1475 \textcolor{stringliteral}{    to this def, which now still means one loci sample will}
-1476 \textcolor{stringliteral}{    be applied to all replicate indiv samples.}
-1477 \textcolor{stringliteral}{}
-1478 \textcolor{stringliteral}{    2016\_11\_06, revising to do multiple loci sampling.  The}
-1479 \textcolor{stringliteral}{    scheme is, for each existing individual subsample,}
-1480 \textcolor{stringliteral}{    we subsample the loci for each loci-subsampling parameter}
-1481 \textcolor{stringliteral}{    value, and for each of these, for the number of loci}
-1482 \textcolor{stringliteral}{    replicates given by def param i\_loci\_replicates.}
-1483 \textcolor{stringliteral}{    '''}
-1484 
-1485     \textcolor{keywordflow}{for} s\_indiv\_subsample\_tag \textcolor{keywordflow}{in} o\_genepopfile.indiv\_subsample\_tags:
-1486         \textcolor{keywordflow}{if} s\_loci\_sampling\_scheme == SAMPLE\_LOCI\_SCHEME\_NONE:
-1487 
-1488             \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( i\_loci\_replicates ):
-1489                 \textcolor{stringliteral}{'''}
-1490 \textcolor{stringliteral}{                Loci subsample tags consist of an individual subsample tag}
-1491 \textcolor{stringliteral}{                followed by "\_l\_t\_v\_r" where t gives the scheme type, v gives}
-1492 \textcolor{stringliteral}{                the salient param value for the scheme, and r gives the replicate.}
-1493 \textcolor{stringliteral}{                '''}
-1494                 s\_loci\_subsample\_tag\_base=s\_indiv\_subsample\_tag
-1495 
-1496                 o\_sample\_params=gps.GenepopFileSampleParamsLoci( \(\backslash\)
-1497                                             li\_population\_numbers=li\_population\_list,
-1498                                             i\_min\_loci\_position=i\_min\_loci\_position,
-1499                                             i\_max\_loci\_position=i\_max\_loci\_position,
-1500                                             i\_min\_total\_loci=i\_min\_total\_loci,
-1501                                             i\_max\_total\_loci=i\_max\_total\_loci,
-1502                                             i\_replicates=1,
-1503                                             s\_sample\_tag\_base=s\_loci\_subsample\_tag\_base )
-1504 
-1505                 o\_sampler=gps.GenepopFileSamplerLociByRangeAndTotal( o\_genepopfile,
-1506                                                                         o\_sample\_params )
-1507                 o\_sampler.doSample()
-1508             \textcolor{comment}{#end for each replicate}
-1509 
-1510         \textcolor{keywordflow}{elif} s\_loci\_sampling\_scheme == SAMPLE\_LOCI\_SCHEME\_PERCENT:
-1511 
-1512             s\_loci\_subsample\_tag\_base=s\_indiv\_subsample\_tag
+1490                         i\_loci\_replicates=1 ):
+1491         
+1492     \textcolor{stringliteral}{'''}
+1493 \textcolor{stringliteral}{    As of 2016\_10\_06, we have no loci sampling scheme}
+1494 \textcolor{stringliteral}{    but we still subsample by loci order, start index, stop index}
+1495 \textcolor{stringliteral}{    and a max total -- randomly drawn if the start/stop range}
+1496 \textcolor{stringliteral}{    results in total loci over the max. }
+1497 \textcolor{stringliteral}{}
+1498 \textcolor{stringliteral}{    Further, we currently only permit one loci subsample for}
+1499 \textcolor{stringliteral}{    each individual subsampling session -- i.e. for all }
+1500 \textcolor{stringliteral}{    of a given sample replicate.}
+1501 \textcolor{stringliteral}{}
+1502 \textcolor{stringliteral}{    As of 2016\_10\_20, we've added new scheme "percent", but}
+1503 \textcolor{stringliteral}{    still doing one sample in the genepop file per call}
+1504 \textcolor{stringliteral}{    to this def, which now still means one loci sample will}
+1505 \textcolor{stringliteral}{    be applied to all replicate indiv samples.}
+1506 \textcolor{stringliteral}{}
+1507 \textcolor{stringliteral}{    2016\_11\_06, revising to do multiple loci sampling.  The}
+1508 \textcolor{stringliteral}{    scheme is, for each existing individual subsample,}
+1509 \textcolor{stringliteral}{    we subsample the loci for each loci-subsampling parameter}
+1510 \textcolor{stringliteral}{    value, and for each of these, for the number of loci}
+1511 \textcolor{stringliteral}{    replicates given by def param i\_loci\_replicates.}
+1512 \textcolor{stringliteral}{    '''}
 1513 
-1514             o\_sample\_params=gps.GenepopFileSampleParamsLoci( \(\backslash\)
-1515                                                     li\_population\_numbers=li\_population\_list,
-1516                                                     i\_min\_loci\_position=i\_min\_loci\_position,
-1517                                                     i\_max\_loci\_position=i\_max\_loci\_position,
-1518                                                     i\_min\_total\_loci=i\_min\_total\_loci,
-1519                                                     i\_max\_total\_loci=i\_max\_total\_loci,
-1520                                                     lf\_proportions=v\_loci\_sampling\_scheme\_param,
-1521                                                     i\_replicates=i\_loci\_replicates,
-1522                                                     s\_sample\_tag\_base=s\_loci\_subsample\_tag\_base )
-1523 
-1524             o\_sampler=gps.GenepopFileSamplerLociByRangeAndPercentage( o\_genepopfile,
-1525                                                                     o\_sample\_params )
-1526             o\_sampler.doSample()
-1527 
-1528         \textcolor{keywordflow}{elif} s\_loci\_sampling\_scheme == SAMPLE\_LOCI\_CONSTANT\_TOTAL:
-1529 
-1530             s\_loci\_subsample\_tag\_base=s\_indiv\_subsample\_tag
-1531         
-1532             \textcolor{stringliteral}{'''}
-1533 \textcolor{stringliteral}{            For the constant sampling totals, the sampler ignores }
-1534 \textcolor{stringliteral}{            the passed values #for min and max loci total, and }
-1535 \textcolor{stringliteral}{            substitutes the current total for both min and max. Thus,}
-1536 \textcolor{stringliteral}{            for each N in the list of Ns, (and also for each replicate),  }
-1537 \textcolor{stringliteral}{            a random N will be drawn from the loci (positions). }
-1538 \textcolor{stringliteral}{            '''}
-1539 
-1540             o\_sample\_params=gps.GenepopFileSampleParamsLoci( \(\backslash\)
-1541                                         li\_population\_numbers=li\_population\_list,
-1542                                         i\_min\_loci\_position=i\_min\_loci\_position,
-1543                                         i\_max\_loci\_position=i\_max\_loci\_position,
-1544                                         i\_min\_total\_loci=i\_min\_total\_loci,
-1545                                         i\_max\_total\_loci=i\_max\_total\_loci,
-1546                                         li\_sample\_totals=v\_loci\_sampling\_scheme\_param,
-1547                                         i\_replicates=i\_loci\_replicates,
-1548                                         s\_sample\_tag\_base=s\_loci\_subsample\_tag\_base )
-1549 
-1550             o\_sampler=gps.GenepopFileSamplerLociByRangeAndSampleTotalList( o\_genepopfile,
-1551                                                                             o\_sample\_params )
-1552             o\_sampler.doSample()
-1553         \textcolor{keywordflow}{else}:
-1554             s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def do\_sample\_loci, "} \(\backslash\)
-1555                         + \textcolor{stringliteral}{"unknown loci sampling scheme: "} \(\backslash\)
-1556                         + s\_loci\_sampling\_scheme + \textcolor{stringliteral}{"."}
-1557             \textcolor{keywordflow}{raise} Exception( s\_msg )
-1558         \textcolor{comment}{#end if sampling scheme none else unknown}
-1559     \textcolor{comment}{#end for each individual subsample tag}
-1560 
-1561     \textcolor{keywordflow}{return}
-1562 \textcolor{comment}{#end do\_sample\_loci}
-1563 
+1514     \textcolor{keywordflow}{for} s\_indiv\_subsample\_tag \textcolor{keywordflow}{in} o\_genepopfile.indiv\_subsample\_tags:
+1515         \textcolor{keywordflow}{if} s\_loci\_sampling\_scheme == SAMPLE\_LOCI\_SCHEME\_NONE:
+1516 
+1517             \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( i\_loci\_replicates ):
+1518                 \textcolor{stringliteral}{'''}
+1519 \textcolor{stringliteral}{                Loci subsample tags consist of an individual subsample tag}
+1520 \textcolor{stringliteral}{                followed by "\_l\_t\_v\_r" where t gives the scheme type, v gives}
+1521 \textcolor{stringliteral}{                the salient param value for the scheme, and r gives the replicate.}
+1522 \textcolor{stringliteral}{                '''}
+1523                 s\_loci\_subsample\_tag\_base=s\_indiv\_subsample\_tag
+1524 
+1525                 o\_sample\_params=gps.GenepopFileSampleParamsLoci( \(\backslash\)
+1526                                             li\_population\_numbers=li\_population\_list,
+1527                                             i\_min\_loci\_position=i\_min\_loci\_position,
+1528                                             i\_max\_loci\_position=i\_max\_loci\_position,
+1529                                             i\_min\_total\_loci=i\_min\_total\_loci,
+1530                                             i\_max\_total\_loci=i\_max\_total\_loci,
+1531                                             i\_replicates=1,
+1532                                             s\_sample\_tag\_base=s\_loci\_subsample\_tag\_base )
+1533 
+1534                 o\_sampler=gps.GenepopFileSamplerLociByRangeAndTotal( o\_genepopfile,
+1535                                                                         o\_sample\_params )
+1536                 o\_sampler.doSample()
+1537             \textcolor{comment}{#end for each replicate}
+1538 
+1539         \textcolor{keywordflow}{elif} s\_loci\_sampling\_scheme == SAMPLE\_LOCI\_SCHEME\_PERCENT:
+1540 
+1541             s\_loci\_subsample\_tag\_base=s\_indiv\_subsample\_tag
+1542 
+1543             o\_sample\_params=gps.GenepopFileSampleParamsLoci( \(\backslash\)
+1544                                                     li\_population\_numbers=li\_population\_list,
+1545                                                     i\_min\_loci\_position=i\_min\_loci\_position,
+1546                                                     i\_max\_loci\_position=i\_max\_loci\_position,
+1547                                                     i\_min\_total\_loci=i\_min\_total\_loci,
+1548                                                     i\_max\_total\_loci=i\_max\_total\_loci,
+1549                                                     lf\_proportions=v\_loci\_sampling\_scheme\_param,
+1550                                                     i\_replicates=i\_loci\_replicates,
+1551                                                     s\_sample\_tag\_base=s\_loci\_subsample\_tag\_base )
+1552 
+1553             o\_sampler=gps.GenepopFileSamplerLociByRangeAndPercentage( o\_genepopfile,
+1554                                                                     o\_sample\_params )
+1555             o\_sampler.doSample()
+1556 
+1557         \textcolor{keywordflow}{elif} s\_loci\_sampling\_scheme == SAMPLE\_LOCI\_CONSTANT\_TOTAL:
+1558 
+1559             s\_loci\_subsample\_tag\_base=s\_indiv\_subsample\_tag
+1560         
+1561             \textcolor{stringliteral}{'''}
+1562 \textcolor{stringliteral}{            For the constant sampling totals, the sampler ignores }
+1563 \textcolor{stringliteral}{            the passed values #for min and max loci total, and }
+1564 \textcolor{stringliteral}{            substitutes the current total for both min and max. Thus,}
+1565 \textcolor{stringliteral}{            for each N in the list of Ns, (and also for each replicate),  }
+1566 \textcolor{stringliteral}{            a random N will be drawn from the loci (positions). }
+1567 \textcolor{stringliteral}{            '''}
+1568 
+1569             o\_sample\_params=gps.GenepopFileSampleParamsLoci( \(\backslash\)
+1570                                         li\_population\_numbers=li\_population\_list,
+1571                                         i\_min\_loci\_position=i\_min\_loci\_position,
+1572                                         i\_max\_loci\_position=i\_max\_loci\_position,
+1573                                         i\_min\_total\_loci=i\_min\_total\_loci,
+1574                                         i\_max\_total\_loci=i\_max\_total\_loci,
+1575                                         li\_sample\_totals=v\_loci\_sampling\_scheme\_param,
+1576                                         i\_replicates=i\_loci\_replicates,
+1577                                         s\_sample\_tag\_base=s\_loci\_subsample\_tag\_base )
+1578 
+1579             o\_sampler=gps.GenepopFileSamplerLociByRangeAndSampleTotalList( o\_genepopfile,
+1580                                                                             o\_sample\_params )
+1581             o\_sampler.doSample()
+1582         \textcolor{keywordflow}{else}:
+1583             s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def do\_sample\_loci, "} \(\backslash\)
+1584                         + \textcolor{stringliteral}{"unknown loci sampling scheme: "} \(\backslash\)
+1585                         + s\_loci\_sampling\_scheme + \textcolor{stringliteral}{"."}
+1586             \textcolor{keywordflow}{raise} Exception( s\_msg )
+1587         \textcolor{comment}{#end if sampling scheme none else unknown}
+1588     \textcolor{comment}{#end for each individual subsample tag}
+1589 
+1590     \textcolor{keywordflow}{return}
+1591 \textcolor{comment}{#end do\_sample\_loci}
+1592 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!get\+\_\+genepop\+\_\+file\+\_\+list@{get\+\_\+genepop\+\_\+file\+\_\+list}}
 \index{get\+\_\+genepop\+\_\+file\+\_\+list@{get\+\_\+genepop\+\_\+file\+\_\+list}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -956,71 +959,71 @@ the command line with a glob expression, includeing a file name,
 that can be evaluated as a python list (i.e. "[ \"item\", \"item\" ... ]\end{DoxyVerb}
  
 
-Definition at line 532 of file pgdriveneestimator.\+py.
+Definition at line 558 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-532 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_a15b09d2967ec4812353b0e146f074799}{get\_genepop\_file\_list}( s\_genepop\_files\_arg ):
-533     \textcolor{stringliteral}{'''}
-534 \textcolor{stringliteral}{    if invoked from the console the arg is a glob expression}
-535 \textcolor{stringliteral}{    if invoked from the gui interface in pgguineestimator.py,}
-536 \textcolor{stringliteral}{    the arg is a list, such that eval will genreate a python}
-537 \textcolor{stringliteral}{    list of strings.}
-538 \textcolor{stringliteral}{}
-539 \textcolor{stringliteral}{    This def assumes that no user will invoke this mod from }
-540 \textcolor{stringliteral}{    the command line with a glob expression, includeing a file name,}
-541 \textcolor{stringliteral}{    that can be evaluated as a python list (i.e. "[ \(\backslash\)"item\(\backslash\)", \(\backslash\)"item\(\backslash\)" ... ]}
-542 \textcolor{stringliteral}{    }
-543 \textcolor{stringliteral}{    '''}
-544 
-545     ls\_files=\textcolor{keywordtype}{None}
-546 
-547     \textcolor{keywordflow}{try}:
-548 
-549         ls\_files=eval( s\_genepop\_files\_arg )
-550 
-551         \textcolor{keywordflow}{if} type( ls\_files ) != list:
-552             \textcolor{comment}{#still could be a glob expression, for example,}
-553             \textcolor{comment}{#of a file name that python can eval as an int or float,}
-554             \textcolor{comment}{#so we'll just glob the orig:}
-555 
-556             ls\_files=glob.glob( s\_genepop\_files\_arg )
-557         \textcolor{keywordflow}{else}:
-558             \textcolor{comment}{#make sure it's a list of strings}
-559             \textcolor{keywordflow}{if} not( file\_name\_list\_is\_all\_strings( ls\_files ) ):
-560                 s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def get\_genepop\_file\_list, "} \(\backslash\)
-561                         + \textcolor{stringliteral}{"genepop file arg evaluated as a list, but, not composed "} \(\backslash\)
-562                         + \textcolor{stringliteral}{"of strings: "} + str( list ) + \textcolor{stringliteral}{"."}
-563                 \textcolor{keywordflow}{raise} Exception( s\_msg )
-564             \textcolor{comment}{#end if not all strings in list}
-565     \textcolor{keywordflow}{except} ( NameError, SyntaxError ) \textcolor{keyword}{as} evalfail:
-566 
-567         \textcolor{stringliteral}{'''}
-568 \textcolor{stringliteral}{        this is caught if the eval fails due to }
-569 \textcolor{stringliteral}{        the arg being a string.  Further, a syntax}
-570 \textcolor{stringliteral}{        error results if the arg begins/ends in a wildcard}
-571 \textcolor{stringliteral}{        "*" char -- as will happen often with a glob.}
-572 \textcolor{stringliteral}{}
-573 \textcolor{stringliteral}{        So for these eval failures we assume the arg }
-574 \textcolor{stringliteral}{        is a glob expression}
-575 \textcolor{stringliteral}{        '''}
+558 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_a15b09d2967ec4812353b0e146f074799}{get\_genepop\_file\_list}( s\_genepop\_files\_arg ):
+559     \textcolor{stringliteral}{'''}
+560 \textcolor{stringliteral}{    if invoked from the console the arg is a glob expression}
+561 \textcolor{stringliteral}{    if invoked from the gui interface in pgguineestimator.py,}
+562 \textcolor{stringliteral}{    the arg is a list, such that eval will genreate a python}
+563 \textcolor{stringliteral}{    list of strings.}
+564 \textcolor{stringliteral}{}
+565 \textcolor{stringliteral}{    This def assumes that no user will invoke this mod from }
+566 \textcolor{stringliteral}{    the command line with a glob expression, includeing a file name,}
+567 \textcolor{stringliteral}{    that can be evaluated as a python list (i.e. "[ \(\backslash\)"item\(\backslash\)", \(\backslash\)"item\(\backslash\)" ... ]}
+568 \textcolor{stringliteral}{    }
+569 \textcolor{stringliteral}{    '''}
+570 
+571     ls\_files=\textcolor{keywordtype}{None}
+572 
+573     \textcolor{keywordflow}{try}:
+574 
+575         ls\_files=eval( s\_genepop\_files\_arg )
 576 
-577         ls\_files=glob.glob( s\_genepop\_files\_arg )
-578 
-579     \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} unknown\_fail:
-580         s\_errortype=type( unknown\_fail ).\_\_name\_\_
-581         s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def get\_genepop\_file\_list, "} \(\backslash\)
-582                         + \textcolor{stringliteral}{"gene pop file arg, "} \(\backslash\)
-583                         + str( s\_genepop\_files\_arg ) \(\backslash\)
-584                         + \textcolor{stringliteral}{", eval operation produced "} \(\backslash\)
-585                         + \textcolor{stringliteral}{"error of type "} + s\_errortype \(\backslash\)
-586                         + \textcolor{stringliteral}{", with message, "} + str( unknown\_fail ) + \textcolor{stringliteral}{"."} 
-587         \textcolor{keywordflow}{raise} Exception( s\_msg )
-588     \textcolor{comment}{#end try eval, except name error, except other}
-589 
-590     \textcolor{keywordflow}{return} ls\_files
-591 \textcolor{comment}{#end get\_genepop\_file\_list}
+577         \textcolor{keywordflow}{if} type( ls\_files ) != list:
+578             \textcolor{comment}{#still could be a glob expression, for example,}
+579             \textcolor{comment}{#of a file name that python can eval as an int or float,}
+580             \textcolor{comment}{#so we'll just glob the orig:}
+581 
+582             ls\_files=glob.glob( s\_genepop\_files\_arg )
+583         \textcolor{keywordflow}{else}:
+584             \textcolor{comment}{#make sure it's a list of strings}
+585             \textcolor{keywordflow}{if} not( file\_name\_list\_is\_all\_strings( ls\_files ) ):
+586                 s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def get\_genepop\_file\_list, "} \(\backslash\)
+587                         + \textcolor{stringliteral}{"genepop file arg evaluated as a list, but, not composed "} \(\backslash\)
+588                         + \textcolor{stringliteral}{"of strings: "} + str( list ) + \textcolor{stringliteral}{"."}
+589                 \textcolor{keywordflow}{raise} Exception( s\_msg )
+590             \textcolor{comment}{#end if not all strings in list}
+591     \textcolor{keywordflow}{except} ( NameError, SyntaxError ) \textcolor{keyword}{as} evalfail:
 592 
+593         \textcolor{stringliteral}{'''}
+594 \textcolor{stringliteral}{        this is caught if the eval fails due to }
+595 \textcolor{stringliteral}{        the arg being a string.  Further, a syntax}
+596 \textcolor{stringliteral}{        error results if the arg begins/ends in a wildcard}
+597 \textcolor{stringliteral}{        "*" char -- as will happen often with a glob.}
+598 \textcolor{stringliteral}{}
+599 \textcolor{stringliteral}{        So for these eval failures we assume the arg }
+600 \textcolor{stringliteral}{        is a glob expression}
+601 \textcolor{stringliteral}{        '''}
+602 
+603         ls\_files=glob.glob( s\_genepop\_files\_arg )
+604 
+605     \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} unknown\_fail:
+606         s\_errortype=type( unknown\_fail ).\_\_name\_\_
+607         s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def get\_genepop\_file\_list, "} \(\backslash\)
+608                         + \textcolor{stringliteral}{"gene pop file arg, "} \(\backslash\)
+609                         + str( s\_genepop\_files\_arg ) \(\backslash\)
+610                         + \textcolor{stringliteral}{", eval operation produced "} \(\backslash\)
+611                         + \textcolor{stringliteral}{"error of type "} + s\_errortype \(\backslash\)
+612                         + \textcolor{stringliteral}{", with message, "} + str( unknown\_fail ) + \textcolor{stringliteral}{"."} 
+613         \textcolor{keywordflow}{raise} Exception( s\_msg )
+614     \textcolor{comment}{#end try eval, except name error, except other}
+615 
+616     \textcolor{keywordflow}{return} ls\_files
+617 \textcolor{comment}{#end get\_genepop\_file\_list}
+618 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!get\+\_\+invalid\+\_\+file\+\_\+names@{get\+\_\+invalid\+\_\+file\+\_\+names}}
 \index{get\+\_\+invalid\+\_\+file\+\_\+names@{get\+\_\+invalid\+\_\+file\+\_\+names}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -1035,35 +1038,35 @@ MAX_GENEPOP_FILE_NAME_LENGTH.
 \end{DoxyVerb}
  
 
-Definition at line 491 of file pgdriveneestimator.\+py.
+Definition at line 517 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-491 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_a944008262ae2ee7c6fc796499be626ce}{get\_invalid\_file\_names}( ls\_file\_names ):
-492     \textcolor{stringliteral}{'''}
-493 \textcolor{stringliteral}{    Currently only check is for file name}
-494 \textcolor{stringliteral}{    length (see comments above declaration of const }
-495 \textcolor{stringliteral}{    MAX\_GENEPOP\_FILE\_NAME\_LENGTH.}
-496 \textcolor{stringliteral}{    '''}
-497     MSG\_FILE\_TOO\_LONG=\textcolor{stringliteral}{"File name longer than "} \(\backslash\)
-498             + str( MAX\_GENEPOP\_FILE\_NAME\_LENGTH ) \(\backslash\)
-499             + \textcolor{stringliteral}{" characters."}
-500 
-501     ls\_invalid\_file\_names\_and\_messages=[]
-502 
-503     \textcolor{keywordflow}{for} s\_file\_name \textcolor{keywordflow}{in} ls\_file\_names:
-504         s\_file\_name\_no\_path=os.path.basename( s\_file\_name )
-505         i\_len\_file\_name=len( s\_file\_name\_no\_path )
-506 
-507         \textcolor{keywordflow}{if} i\_len\_file\_name > MAX\_GENEPOP\_FILE\_NAME\_LENGTH:
-508             ls\_invalid\_file\_names\_and\_messages.append( \(\backslash\)
-509                     \textcolor{stringliteral}{", "}.join( [ s\_file\_name, MSG\_FILE\_TOO\_LONG ] ) )
-510         \textcolor{comment}{#and if file name too long}
-511     \textcolor{comment}{#end for each file name}
-512 
-513     \textcolor{keywordflow}{return} ls\_invalid\_file\_names\_and\_messages
-514 \textcolor{comment}{#end get\_invalid\_file\_names}
-515 
+517 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_a944008262ae2ee7c6fc796499be626ce}{get\_invalid\_file\_names}( ls\_file\_names ):
+518     \textcolor{stringliteral}{'''}
+519 \textcolor{stringliteral}{    Currently only check is for file name}
+520 \textcolor{stringliteral}{    length (see comments above declaration of const }
+521 \textcolor{stringliteral}{    MAX\_GENEPOP\_FILE\_NAME\_LENGTH.}
+522 \textcolor{stringliteral}{    '''}
+523     MSG\_FILE\_TOO\_LONG=\textcolor{stringliteral}{"File name longer than "} \(\backslash\)
+524             + str( MAX\_GENEPOP\_FILE\_NAME\_LENGTH ) \(\backslash\)
+525             + \textcolor{stringliteral}{" characters."}
+526 
+527     ls\_invalid\_file\_names\_and\_messages=[]
+528 
+529     \textcolor{keywordflow}{for} s\_file\_name \textcolor{keywordflow}{in} ls\_file\_names:
+530         s\_file\_name\_no\_path=os.path.basename( s\_file\_name )
+531         i\_len\_file\_name=len( s\_file\_name\_no\_path )
+532 
+533         \textcolor{keywordflow}{if} i\_len\_file\_name > MAX\_GENEPOP\_FILE\_NAME\_LENGTH:
+534             ls\_invalid\_file\_names\_and\_messages.append( \(\backslash\)
+535                     \textcolor{stringliteral}{", "}.join( [ s\_file\_name, MSG\_FILE\_TOO\_LONG ] ) )
+536         \textcolor{comment}{#and if file name too long}
+537     \textcolor{comment}{#end for each file name}
+538 
+539     \textcolor{keywordflow}{return} ls\_invalid\_file\_names\_and\_messages
+540 \textcolor{comment}{#end get\_invalid\_file\_names}
+541 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!get\+\_\+loci\+\_\+sample\+\_\+val\+\_\+and\+\_\+rep\+\_\+number\+\_\+from\+\_\+loci\+\_\+sample\+\_\+tag@{get\+\_\+loci\+\_\+sample\+\_\+val\+\_\+and\+\_\+rep\+\_\+number\+\_\+from\+\_\+loci\+\_\+sample\+\_\+tag}}
 \index{get\+\_\+loci\+\_\+sample\+\_\+val\+\_\+and\+\_\+rep\+\_\+number\+\_\+from\+\_\+loci\+\_\+sample\+\_\+tag@{get\+\_\+loci\+\_\+sample\+\_\+val\+\_\+and\+\_\+rep\+\_\+number\+\_\+from\+\_\+loci\+\_\+sample\+\_\+tag}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -1079,37 +1082,37 @@ and r giving the replicate number.
 \end{DoxyVerb}
  
 
-Definition at line 1797 of file pgdriveneestimator.\+py.
+Definition at line 1826 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-1797 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_abd853ec3bf6e5ad25f39ba0b41302f14}{get\_loci\_sample\_val\_and\_rep\_number\_from\_loci\_sample\_tag}
+1826 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_abd853ec3bf6e5ad25f39ba0b41302f14}{get\_loci\_sample\_val\_and\_rep\_number\_from\_loci\_sample\_tag}
       ( s\_loci\_subsample\_tag ):
-1798     \textcolor{stringliteral}{'''}
-1799 \textcolor{stringliteral}{    The loci info in the tag follows an indiv tag prefix,}
-1800 \textcolor{stringliteral}{    and has form "\_l\_t\_v\_r", with t giving the scheme,}
-1801 \textcolor{stringliteral}{    v giving the scheme salient param value (ex percent val),}
-1802 \textcolor{stringliteral}{    and r giving the replicate number.}
-1803 \textcolor{stringliteral}{    '''}
-1804     \textcolor{comment}{#Sample param val is 2nd to last item}
-1805     \textcolor{comment}{#in the tag fields, while the replicate}
-1806     \textcolor{comment}{#number is the last:}
-1807     IDX\_LOCI\_SAMPLE\_VAL=-2
-1808     IDX\_LOCI\_REP=-1
-1809 
-1810     s\_sample\_val=\textcolor{keywordtype}{None}
-1811     s\_replicate\_number=\textcolor{keywordtype}{None}
-1812 
-1813     s\_tag\_delim=gps.TAG\_DELIMITER
-1814     
-1815     ls\_tag\_fields=s\_loci\_subsample\_tag.split( s\_tag\_delim )
-1816 
-1817     s\_sample\_val=ls\_tag\_fields[ IDX\_LOCI\_SAMPLE\_VAL ]
-1818     s\_replicate\_number=ls\_tag\_fields[ IDX\_LOCI\_REP ]
-1819 
-1820     \textcolor{keywordflow}{return} s\_sample\_val, s\_replicate\_number
-1821 \textcolor{comment}{#end get\_loci\_sample\_val\_and\_rep\_number\_from\_loci\_sample\_tag}
-1822 
+1827     \textcolor{stringliteral}{'''}
+1828 \textcolor{stringliteral}{    The loci info in the tag follows an indiv tag prefix,}
+1829 \textcolor{stringliteral}{    and has form "\_l\_t\_v\_r", with t giving the scheme,}
+1830 \textcolor{stringliteral}{    v giving the scheme salient param value (ex percent val),}
+1831 \textcolor{stringliteral}{    and r giving the replicate number.}
+1832 \textcolor{stringliteral}{    '''}
+1833     \textcolor{comment}{#Sample param val is 2nd to last item}
+1834     \textcolor{comment}{#in the tag fields, while the replicate}
+1835     \textcolor{comment}{#number is the last:}
+1836     IDX\_LOCI\_SAMPLE\_VAL=-2
+1837     IDX\_LOCI\_REP=-1
+1838 
+1839     s\_sample\_val=\textcolor{keywordtype}{None}
+1840     s\_replicate\_number=\textcolor{keywordtype}{None}
+1841 
+1842     s\_tag\_delim=gps.TAG\_DELIMITER
+1843     
+1844     ls\_tag\_fields=s\_loci\_subsample\_tag.split( s\_tag\_delim )
+1845 
+1846     s\_sample\_val=ls\_tag\_fields[ IDX\_LOCI\_SAMPLE\_VAL ]
+1847     s\_replicate\_number=ls\_tag\_fields[ IDX\_LOCI\_REP ]
+1848 
+1849     \textcolor{keywordflow}{return} s\_sample\_val, s\_replicate\_number
+1850 \textcolor{comment}{#end get\_loci\_sample\_val\_and\_rep\_number\_from\_loci\_sample\_tag}
+1851 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!get\+\_\+pops\+\_\+in\+\_\+file\+\_\+outside\+\_\+valid\+\_\+size\+\_\+range@{get\+\_\+pops\+\_\+in\+\_\+file\+\_\+outside\+\_\+valid\+\_\+size\+\_\+range}}
 \index{get\+\_\+pops\+\_\+in\+\_\+file\+\_\+outside\+\_\+valid\+\_\+size\+\_\+range@{get\+\_\+pops\+\_\+in\+\_\+file\+\_\+outside\+\_\+valid\+\_\+size\+\_\+range}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -1126,30 +1129,30 @@ accept others.
 \end{DoxyVerb}
  
 
-Definition at line 800 of file pgdriveneestimator.\+py.
+Definition at line 826 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-800                                                 i\_max\_pop\_size ):
-801     \textcolor{stringliteral}{'''}
-802 \textcolor{stringliteral}{    checks size of every pop in the file}
-803 \textcolor{stringliteral}{    in case we need to skip some pops and }
-804 \textcolor{stringliteral}{    accept others.}
-805 \textcolor{stringliteral}{    '''}
-806 
-807     li\_popsizes=o\_genepopfile.getIndividualCounts()
-808 
-809     li\_pops\_too\_small = []
-810     \textcolor{keywordflow}{for} idx\_pop \textcolor{keywordflow}{in} range( len ( li\_popsizes ) ):
-811         i\_size\_of\_pop=li\_popsizes[ idx\_pop ] 
-812         \textcolor{keywordflow}{if} i\_size\_of\_pop < i\_min\_pop\_size \(\backslash\)
-813                 \textcolor{keywordflow}{or} i\_size\_of\_pop > i\_max\_pop\_size:
-814             li\_pops\_too\_small.append( idx\_pop )
-815         \textcolor{comment}{#end if subsample size too small}
-816     \textcolor{comment}{#end for each pop number}
-817     \textcolor{keywordflow}{return} li\_pops\_too\_small
-818 \textcolor{comment}{#end get\_pops\_in\_file\_too\_small\_to\_run}
-819 
+826                                                 i\_max\_pop\_size ):
+827     \textcolor{stringliteral}{'''}
+828 \textcolor{stringliteral}{    checks size of every pop in the file}
+829 \textcolor{stringliteral}{    in case we need to skip some pops and }
+830 \textcolor{stringliteral}{    accept others.}
+831 \textcolor{stringliteral}{    '''}
+832 
+833     li\_popsizes=o\_genepopfile.getIndividualCounts()
+834 
+835     li\_pops\_too\_small = []
+836     \textcolor{keywordflow}{for} idx\_pop \textcolor{keywordflow}{in} range( len ( li\_popsizes ) ):
+837         i\_size\_of\_pop=li\_popsizes[ idx\_pop ] 
+838         \textcolor{keywordflow}{if} i\_size\_of\_pop < i\_min\_pop\_size \(\backslash\)
+839                 \textcolor{keywordflow}{or} i\_size\_of\_pop > i\_max\_pop\_size:
+840             li\_pops\_too\_small.append( idx\_pop )
+841         \textcolor{comment}{#end if subsample size too small}
+842     \textcolor{comment}{#end for each pop number}
+843     \textcolor{keywordflow}{return} li\_pops\_too\_small
+844 \textcolor{comment}{#end get\_pops\_in\_file\_too\_small\_to\_run}
+845 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!get\+\_\+subsample\+\_\+genepop\+\_\+file\+\_\+name@{get\+\_\+subsample\+\_\+genepop\+\_\+file\+\_\+name}}
 \index{get\+\_\+subsample\+\_\+genepop\+\_\+file\+\_\+name@{get\+\_\+subsample\+\_\+genepop\+\_\+file\+\_\+name}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -1166,68 +1169,68 @@ dots with underscores, but Windows revealed a case that needed attention
 \end{DoxyVerb}
  
 
-Definition at line 1566 of file pgdriveneestimator.\+py.
+Definition at line 1595 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-1566                                                     s\_this\_pop\_sample\_name ):
-1567     \textcolor{stringliteral}{'''}
-1568 \textcolor{stringliteral}{    Was originally simply a matter of replacing, in the original genepop file,}
-1569 \textcolor{stringliteral}{    dots with underscores, but Windows revealed a case that needed attention }
-1570 \textcolor{stringliteral}{    (see "replace" below).}
-1571 \textcolor{stringliteral}{    '''}
-1572 
-1573     s\_genepop\_file\_subsample=s\_original\_genepop\_file\_name \(\backslash\)
-1574                                 + INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT \(\backslash\)
-1575                                 +  s\_loci\_subsample\_tag \(\backslash\)
-1576                                 + INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT \(\backslash\)
-1577                                 + \textcolor{stringliteral}{"g"} + INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT \(\backslash\)
-1578                                 + s\_this\_pop\_sample\_name
-1579     
-1580     \textcolor{stringliteral}{'''}
-1581 \textcolor{stringliteral}{    Note: In the original file name, if a period is left to the left of that}
-1582 \textcolor{stringliteral}{    used do delimit the file extension, then NeEstimator, when naming}
-1583 \textcolor{stringliteral}{    "*NoDat.txt" file, will replace the left-most period and all text that}
-1584 \textcolor{stringliteral}{    follows it,  with "NoDat.txt" -- this then removes any percent and replicate}
-1585 \textcolor{stringliteral}{    number text I'm using to make files unique, and so creates a non-uniq}
-1586 \textcolor{stringliteral}{    *NoDat.txt file name, which, when one process removes it, and another goes}
-1587 \textcolor{stringliteral}{    looking for it , throws an exception -- (an exception from the}
-1588 \textcolor{stringliteral}{    multiprocessing.Pools async mapping -- file-not-found, but no trace since it}
-1589 \textcolor{stringliteral}{    occurs in a different process from the main).  This peculiar mangling of a}
-1590 \textcolor{stringliteral}{    users input file -- was preventing me in previous versions, from deleting}
-1591 \textcolor{stringliteral}{    NoDat files, and also I think meant that only the last process in a given}
-1592 \textcolor{stringliteral}{    group of replicates (share same genepop file and proportion sampled) to use}
-1593 \textcolor{stringliteral}{    the NoDAt file got to write it's NoDat info.  Removing all periods from the}
-1594 \textcolor{stringliteral}{    input file to the NeEstimator program, I belive, completely solves the}
-1595 \textcolor{stringliteral}{    problems.}
-1596 \textcolor{stringliteral}{    '''}
-1597 
-1598     s\_basename=os.path.basename( s\_genepop\_file\_subsample )
-1599     s\_dirs=os.path.dirname( s\_genepop\_file\_subsample )
-1600     s\_subsample\_file\_basename=s\_basename.replace( \textcolor{stringliteral}{"."}, INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT )
-1601     s\_genepop\_file\_subsample=os.path.join( s\_dirs, s\_subsample\_file\_basename )
-1602     
-1603     \textcolor{comment}{#remmed out -- problems when the orig file has path that includes }
-1604     \textcolor{comment}{#directories with dots in their names, so the wholesale replace}
-1605     \textcolor{comment}{#then includes directories that are renamed and (no doubt) non-existent}
-1606 
-1607     \textcolor{comment}{#s\_genepop\_file\_subsample=s\_genepop\_file\_subsample.replace( ".", INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT )}
+1595                                                     s\_this\_pop\_sample\_name ):
+1596     \textcolor{stringliteral}{'''}
+1597 \textcolor{stringliteral}{    Was originally simply a matter of replacing, in the original genepop file,}
+1598 \textcolor{stringliteral}{    dots with underscores, but Windows revealed a case that needed attention }
+1599 \textcolor{stringliteral}{    (see "replace" below).}
+1600 \textcolor{stringliteral}{    '''}
+1601 
+1602     s\_genepop\_file\_subsample=s\_original\_genepop\_file\_name \(\backslash\)
+1603                                 + INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT \(\backslash\)
+1604                                 +  s\_loci\_subsample\_tag \(\backslash\)
+1605                                 + INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT \(\backslash\)
+1606                                 + \textcolor{stringliteral}{"g"} + INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT \(\backslash\)
+1607                                 + s\_this\_pop\_sample\_name
 1608     
 1609     \textcolor{stringliteral}{'''}
-1610 \textcolor{stringliteral}{    problem seen in Windows, in which when this mod is invoked as \_\_main\_\_ from a shell}
-1611 \textcolor{stringliteral}{    then ".\(\backslash\)\(\backslash\)" is appended to (at least) one genepop file name.  This then is mangled by}
-1612 \textcolor{stringliteral}{    the above replace, so we restore the leading dot char:}
-1613 \textcolor{stringliteral}{    '''}
-1614 
-1615     \textcolor{keywordflow}{if} s\_genepop\_file\_subsample.startswith(  \textcolor{stringliteral}{"\_"} ):
-1616         s\_path\_seperator\_this\_os=os.path.sep
-1617         s\_genepop\_file\_subsample=\textcolor{stringliteral}{"."} + s\_genepop\_file\_subsample[1:] 
-1618     \textcolor{comment}{#end if path was mangled by replace}
-1619 
-1620 
-1621     \textcolor{keywordflow}{return} s\_genepop\_file\_subsample
-1622 \textcolor{comment}{#end get\_subsample\_genepop\_file\_name}
-1623 
+1610 \textcolor{stringliteral}{    Note: In the original file name, if a period is left to the left of that}
+1611 \textcolor{stringliteral}{    used do delimit the file extension, then NeEstimator, when naming}
+1612 \textcolor{stringliteral}{    "*NoDat.txt" file, will replace the left-most period and all text that}
+1613 \textcolor{stringliteral}{    follows it,  with "NoDat.txt" -- this then removes any percent and replicate}
+1614 \textcolor{stringliteral}{    number text I'm using to make files unique, and so creates a non-uniq}
+1615 \textcolor{stringliteral}{    *NoDat.txt file name, which, when one process removes it, and another goes}
+1616 \textcolor{stringliteral}{    looking for it , throws an exception -- (an exception from the}
+1617 \textcolor{stringliteral}{    multiprocessing.Pools async mapping -- file-not-found, but no trace since it}
+1618 \textcolor{stringliteral}{    occurs in a different process from the main).  This peculiar mangling of a}
+1619 \textcolor{stringliteral}{    users input file -- was preventing me in previous versions, from deleting}
+1620 \textcolor{stringliteral}{    NoDat files, and also I think meant that only the last process in a given}
+1621 \textcolor{stringliteral}{    group of replicates (share same genepop file and proportion sampled) to use}
+1622 \textcolor{stringliteral}{    the NoDAt file got to write it's NoDat info.  Removing all periods from the}
+1623 \textcolor{stringliteral}{    input file to the NeEstimator program, I belive, completely solves the}
+1624 \textcolor{stringliteral}{    problems.}
+1625 \textcolor{stringliteral}{    '''}
+1626 
+1627     s\_basename=os.path.basename( s\_genepop\_file\_subsample )
+1628     s\_dirs=os.path.dirname( s\_genepop\_file\_subsample )
+1629     s\_subsample\_file\_basename=s\_basename.replace( \textcolor{stringliteral}{"."}, INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT )
+1630     s\_genepop\_file\_subsample=os.path.join( s\_dirs, s\_subsample\_file\_basename )
+1631     
+1632     \textcolor{comment}{#remmed out -- problems when the orig file has path that includes }
+1633     \textcolor{comment}{#directories with dots in their names, so the wholesale replace}
+1634     \textcolor{comment}{#then includes directories that are renamed and (no doubt) non-existent}
+1635 
+1636     \textcolor{comment}{#s\_genepop\_file\_subsample=s\_genepop\_file\_subsample.replace( ".", INPUT\_FILE\_DOT\_CHAR\_REPLACEMENT )}
+1637     
+1638     \textcolor{stringliteral}{'''}
+1639 \textcolor{stringliteral}{    problem seen in Windows, in which when this mod is invoked as \_\_main\_\_ from a shell}
+1640 \textcolor{stringliteral}{    then ".\(\backslash\)\(\backslash\)" is appended to (at least) one genepop file name.  This then is mangled by}
+1641 \textcolor{stringliteral}{    the above replace, so we restore the leading dot char:}
+1642 \textcolor{stringliteral}{    '''}
+1643 
+1644     \textcolor{keywordflow}{if} s\_genepop\_file\_subsample.startswith(  \textcolor{stringliteral}{"\_"} ):
+1645         s\_path\_seperator\_this\_os=os.path.sep
+1646         s\_genepop\_file\_subsample=\textcolor{stringliteral}{"."} + s\_genepop\_file\_subsample[1:] 
+1647     \textcolor{comment}{#end if path was mangled by replace}
+1648 
+1649 
+1650     \textcolor{keywordflow}{return} s\_genepop\_file\_subsample
+1651 \textcolor{comment}{#end get\_subsample\_genepop\_file\_name}
+1652 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!mymain@{mymain}}
 \index{mymain@{mymain}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -1247,34 +1250,56 @@ params (args for this driver) from their interface
 \end{DoxyVerb}
  
 
-Definition at line 2148 of file pgdriveneestimator.\+py.
+Definition at line 2351 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-2148 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_a9195d73a2642b87625772820ffff8023}{mymain}( *q\_args ):
-2149 
-2150     \textcolor{stringliteral}{'''}
-2151 \textcolor{stringliteral}{    This code was at mod level under if \_\_name\_\_=="\_\_main\_\_",}
-2152 \textcolor{stringliteral}{    but moved inside this def so this mod can be imported}
-2153 \textcolor{stringliteral}{    and run inside python with a set of args identical to}
-2154 \textcolor{stringliteral}{    those required on the command line.}
-2155 \textcolor{stringliteral}{}
-2156 \textcolor{stringliteral}{    This was an adaptation to enable PGGuiNeEstimator objects}
-2157 \textcolor{stringliteral}{    to import this mod, then call this def after they load }
-2158 \textcolor{stringliteral}{    params (args for this driver) from their interface}
-2159 \textcolor{stringliteral}{    '''}
-2160     b\_exec\_found=did\_find\_ne\_estimator\_executable()
-2161 
-2162     \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} did\_find\_ne\_estimator\_executable():
-2163         \textcolor{keywordflow}{raise} Exception( \textcolor{stringliteral}{"in pgdriveneestimator.py, def mymain(), "} \(\backslash\)
-2164                             + \textcolor{stringliteral}{"did not find NeEstimator executable."} )
-2165     \textcolor{comment}{#end if can't find executable}
-2166 
-2167     drive\_estimator(  *( q\_args ) )
-2168 
-2169     \textcolor{keywordflow}{return}
-2170 \textcolor{comment}{#end mymain}
-2171 
+2351 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_a9195d73a2642b87625772820ffff8023}{mymain}( *q\_args ):
+2352 
+2353     \textcolor{stringliteral}{'''}
+2354 \textcolor{stringliteral}{    This code was at mod level under if \_\_name\_\_=="\_\_main\_\_",}
+2355 \textcolor{stringliteral}{    but moved inside this def so this mod can be imported}
+2356 \textcolor{stringliteral}{    and run inside python with a set of args identical to}
+2357 \textcolor{stringliteral}{    those required on the command line.}
+2358 \textcolor{stringliteral}{}
+2359 \textcolor{stringliteral}{    This was an adaptation to enable PGGuiNeEstimator objects}
+2360 \textcolor{stringliteral}{    to import this mod, then call this def after they load }
+2361 \textcolor{stringliteral}{    params (args for this driver) from their interface}
+2362 \textcolor{stringliteral}{    '''}
+2363     
+2364     \textcolor{keywordflow}{if} VERY\_VERBOSE:
+2365         print( \textcolor{stringliteral}{"In pgdriveneestimator, def mymain"} )
+2366     \textcolor{comment}{#end if VERY\_VERBOSE}
+2367 
+2368     b\_exec\_found=did\_find\_ne\_estimator\_executable()
+2369 
+2370     \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} did\_find\_ne\_estimator\_executable():
+2371         \textcolor{keywordflow}{raise} Exception( \textcolor{stringliteral}{"in pgdriveneestimator.py, def mymain(), "} \(\backslash\)
+2372                             + \textcolor{stringliteral}{"did not find NeEstimator executable."} )
+2373     \textcolor{comment}{#end if can't find executable}
+2374     
+2375     \textcolor{comment}{##### temp revision to try running}
+2376     \textcolor{comment}{# as popen subprocess (see pgutilities)}
+2377     i\_lenargs=len( q\_args )
+2378     \textcolor{comment}{##strip off the last 3 items}
+2379     seq\_unaltered\_args=q\_args[0:IDX\_DEBUG\_MODE + 1 ]
+2380     
+2381     o\_infile=open(  q\_args[ IDX\_MAIN\_OUTFILE ], \textcolor{stringliteral}{'w'} )
+2382     o\_outfile=open( q\_args[ IDX\_SECONDARY\_OUTFILE ], \textcolor{stringliteral}{'w'} )
+2383     o\_event=\textcolor{keywordtype}{None}
+2384 
+2385     seq\_args\_to\_parse=seq\_unaltered\_args + ( o\_infile, o\_outfile, o\_event )
+2386     drive\_estimator( *seq\_args\_to\_parse )
+2387 
+2388     o\_infile.close()
+2389     o\_outfile.close()
+2390 
+2391     \textcolor{comment}{##### temp rem out to try revised version}
+2392 \textcolor{comment}{#   drive\_estimator(  *( q\_args ) )}
+2393 
+2394     \textcolor{keywordflow}{return}
+2395 \textcolor{comment}{#end mymain}
+2396 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!parse\+\_\+sampling\+\_\+list\+\_\+that\+\_\+uses\+\_\+indiv\+\_\+id\+\_\+fields@{parse\+\_\+sampling\+\_\+list\+\_\+that\+\_\+uses\+\_\+indiv\+\_\+id\+\_\+fields}}
 \index{parse\+\_\+sampling\+\_\+list\+\_\+that\+\_\+uses\+\_\+indiv\+\_\+id\+\_\+fields@{parse\+\_\+sampling\+\_\+list\+\_\+that\+\_\+uses\+\_\+indiv\+\_\+id\+\_\+fields}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -1300,73 +1325,73 @@ criteria:
       list returned as  ls_params\end{DoxyVerb}
  
 
-Definition at line 1081 of file pgdriveneestimator.\+py.
+Definition at line 1110 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-1081 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_a367b16a89c7ae46ab0bda5b37e68d9af}{parse\_sampling\_list\_that\_uses\_indiv\_id\_fields}( 
+1110 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_a367b16a89c7ae46ab0bda5b37e68d9af}{parse\_sampling\_list\_that\_uses\_indiv\_id\_fields}( 
       ls\_sampling\_list\_items ):
-1082 
-1083     \textcolor{stringliteral}{'''}
-1084 \textcolor{stringliteral}{    We require that we have at least 3 items}
-1085 \textcolor{stringliteral}{    to set up  sampling using individual id field}
-1086 \textcolor{stringliteral}{    criteria:}
-1087 \textcolor{stringliteral}{    --list of field names (space delimited)}
-1088 \textcolor{stringliteral}{        ex: "age parent1 parent2"}
-1089 \textcolor{stringliteral}{    --list of field types (python types, space delimited)}
-1090 \textcolor{stringliteral}{        ex: "int str str"}
-1091 \textcolor{stringliteral}{    --at least one parameter (not validated here}
-1092 \textcolor{stringliteral}{        -> example in criteria expression  "age > 3"}
-1093 \textcolor{stringliteral}{        ->example, in cohort we expect several params like max. age     }
-1094 \textcolor{stringliteral}{    2016\_11\_10}
-1095 \textcolor{stringliteral}{        ->example, in cohorts by percentages, we'll have the max age}
-1096 \textcolor{stringliteral}{          followed by a hyphented list of percentage numerics.  This}
-1097 \textcolor{stringliteral}{          will not be parsed here, but will be passsed as part of the}
-1098 \textcolor{stringliteral}{          list returned as  ls\_params}
-1099 \textcolor{stringliteral}{}
-1100 \textcolor{stringliteral}{    '''}
-1101 
-1102     MIN\_NUM\_SAMPLING\_ITEMS=3
-1103     IDX\_FIELD\_NAMES=0
-1104     IDX\_FIELD\_TYPES=1
-1105     IDX\_FIRST\_PARAM=2
-1106     FIELD\_DELIMITER=\textcolor{stringliteral}{";"}
-1107 
-1108     i\_tot\_sampling\_items=len( ls\_sampling\_list\_items )
-1109 
-1110     \textcolor{keywordflow}{if} i\_tot\_sampling\_items < MIN\_NUM\_SAMPLING\_ITEMS:
-1111         s\_msg = \textcolor{stringliteral}{"In pgdriveneestimatory.py, def parse\_sampling\_list\_that\_uses\_indiv\_id\_fields, "} \(\backslash\)
-1112                     + \textcolor{stringliteral}{"for the sampling criteria list, expecting at 3 items "} \(\backslash\)
-1113                     + \textcolor{stringliteral}{"(field names, field types, and one or more "} \(\backslash\)
-1114                     + \textcolor{stringliteral}{"parameters.  Found list: "} \(\backslash\)
-1115                     + str( ls\_sampling\_list\_items ) + \textcolor{stringliteral}{"."}
-1116         \textcolor{keywordflow}{raise} Exception( s\_msg )
-1117 
-1118     \textcolor{comment}{#end if too few criteria items}
-1119     ls\_field\_names=ls\_sampling\_list\_items[ IDX\_FIELD\_NAMES ].split( FIELD\_DELIMITER )
-1120     ls\_types=ls\_sampling\_list\_items[ IDX\_FIELD\_TYPES ].split( FIELD\_DELIMITER )
-1121     \textcolor{keywordflow}{try}:
-1122 
-1123         lo\_field\_types=[ eval( s\_type ) \textcolor{keywordflow}{for} s\_type \textcolor{keywordflow}{in} ls\_types ]
-1124     
-1125     \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} oex:
-1126         s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def parse\_sampling\_list\_that\_uses\_indiv\_id\_fields, "} \(\backslash\)
-1127                     + \textcolor{stringliteral}{"Exception trying to evaluate the field type list. "}\(\backslash\)
-1128                     + \textcolor{stringliteral}{"Type list: "} + str( ls\_types ) + \textcolor{stringliteral}{".  Exception raised: "} \(\backslash\)
-1129                     + str( oex ) + \textcolor{stringliteral}{"."}
-1130         \textcolor{keywordflow}{raise} Exception ( s\_msg )
-1131     \textcolor{comment}{#end try ... except}
-1132 
-1133     ls\_params=[]
-1134 
-1135     \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( IDX\_FIRST\_PARAM, i\_tot\_sampling\_items ):
-1136         ls\_params.append( ls\_sampling\_list\_items[ idx ] )
-1137     \textcolor{comment}{#end for each item with idx>1}
+1111 
+1112     \textcolor{stringliteral}{'''}
+1113 \textcolor{stringliteral}{    We require that we have at least 3 items}
+1114 \textcolor{stringliteral}{    to set up  sampling using individual id field}
+1115 \textcolor{stringliteral}{    criteria:}
+1116 \textcolor{stringliteral}{    --list of field names (space delimited)}
+1117 \textcolor{stringliteral}{        ex: "age parent1 parent2"}
+1118 \textcolor{stringliteral}{    --list of field types (python types, space delimited)}
+1119 \textcolor{stringliteral}{        ex: "int str str"}
+1120 \textcolor{stringliteral}{    --at least one parameter (not validated here}
+1121 \textcolor{stringliteral}{        -> example in criteria expression  "age > 3"}
+1122 \textcolor{stringliteral}{        ->example, in cohort we expect several params like max. age     }
+1123 \textcolor{stringliteral}{    2016\_11\_10}
+1124 \textcolor{stringliteral}{        ->example, in cohorts by percentages, we'll have the max age}
+1125 \textcolor{stringliteral}{          followed by a hyphented list of percentage numerics.  This}
+1126 \textcolor{stringliteral}{          will not be parsed here, but will be passsed as part of the}
+1127 \textcolor{stringliteral}{          list returned as  ls\_params}
+1128 \textcolor{stringliteral}{}
+1129 \textcolor{stringliteral}{    '''}
+1130 
+1131     MIN\_NUM\_SAMPLING\_ITEMS=3
+1132     IDX\_FIELD\_NAMES=0
+1133     IDX\_FIELD\_TYPES=1
+1134     IDX\_FIRST\_PARAM=2
+1135     FIELD\_DELIMITER=\textcolor{stringliteral}{";"}
+1136 
+1137     i\_tot\_sampling\_items=len( ls\_sampling\_list\_items )
 1138 
-1139     \textcolor{keywordflow}{return} ls\_field\_names, lo\_field\_types, ls\_params
-1140 
-1141 \textcolor{comment}{#end parse\_sampling\_list\_that\_uses\_indiv\_id\_fields}
-1142 
+1139     \textcolor{keywordflow}{if} i\_tot\_sampling\_items < MIN\_NUM\_SAMPLING\_ITEMS:
+1140         s\_msg = \textcolor{stringliteral}{"In pgdriveneestimatory.py, def parse\_sampling\_list\_that\_uses\_indiv\_id\_fields, "} \(\backslash\)
+1141                     + \textcolor{stringliteral}{"for the sampling criteria list, expecting at 3 items "} \(\backslash\)
+1142                     + \textcolor{stringliteral}{"(field names, field types, and one or more "} \(\backslash\)
+1143                     + \textcolor{stringliteral}{"parameters.  Found list: "} \(\backslash\)
+1144                     + str( ls\_sampling\_list\_items ) + \textcolor{stringliteral}{"."}
+1145         \textcolor{keywordflow}{raise} Exception( s\_msg )
+1146 
+1147     \textcolor{comment}{#end if too few criteria items}
+1148     ls\_field\_names=ls\_sampling\_list\_items[ IDX\_FIELD\_NAMES ].split( FIELD\_DELIMITER )
+1149     ls\_types=ls\_sampling\_list\_items[ IDX\_FIELD\_TYPES ].split( FIELD\_DELIMITER )
+1150     \textcolor{keywordflow}{try}:
+1151 
+1152         lo\_field\_types=[ eval( s\_type ) \textcolor{keywordflow}{for} s\_type \textcolor{keywordflow}{in} ls\_types ]
+1153     
+1154     \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} oex:
+1155         s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py, def parse\_sampling\_list\_that\_uses\_indiv\_id\_fields, "} \(\backslash\)
+1156                     + \textcolor{stringliteral}{"Exception trying to evaluate the field type list. "}\(\backslash\)
+1157                     + \textcolor{stringliteral}{"Type list: "} + str( ls\_types ) + \textcolor{stringliteral}{".  Exception raised: "} \(\backslash\)
+1158                     + str( oex ) + \textcolor{stringliteral}{"."}
+1159         \textcolor{keywordflow}{raise} Exception ( s\_msg )
+1160     \textcolor{comment}{#end try ... except}
+1161 
+1162     ls\_params=[]
+1163 
+1164     \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( IDX\_FIRST\_PARAM, i\_tot\_sampling\_items ):
+1165         ls\_params.append( ls\_sampling\_list\_items[ idx ] )
+1166     \textcolor{comment}{#end for each item with idx>1}
+1167 
+1168     \textcolor{keywordflow}{return} ls\_field\_names, lo\_field\_types, ls\_params
+1169 
+1170 \textcolor{comment}{#end parse\_sampling\_list\_that\_uses\_indiv\_id\_fields}
+1171 
 \end{DoxyCode}
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!raise\+\_\+exception\+\_\+if\+\_\+non\+\_\+single\+\_\+pop\+\_\+file@{raise\+\_\+exception\+\_\+if\+\_\+non\+\_\+single\+\_\+pop\+\_\+file}}
 \index{raise\+\_\+exception\+\_\+if\+\_\+non\+\_\+single\+\_\+pop\+\_\+file@{raise\+\_\+exception\+\_\+if\+\_\+non\+\_\+single\+\_\+pop\+\_\+file}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -1380,32 +1405,32 @@ genepop files with >1 population were not accepted.
 \end{DoxyVerb}
  
 
-Definition at line 776 of file pgdriveneestimator.\+py.
+Definition at line 802 of file pgdriveneestimator.\+py.
 
 
 \begin{DoxyCode}
-776 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_ac98833013f11d6aa3544b0fc60951632}{raise\_exception\_if\_non\_single\_pop\_file}( o\_genepopfile ):
-777     \textcolor{stringliteral}{'''}
-778 \textcolor{stringliteral}{    Not currently in use ( 2016\_08\_10 ) -- was used when}
-779 \textcolor{stringliteral}{    genepop files with >1 population were not accepted.}
-780 \textcolor{stringliteral}{    '''}
-781     i\_total\_pops=o\_genepopfile.pop\_total
-782 
-783     \textcolor{keywordflow}{if} ( i\_total\_pops != 1 ):
-784         s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py:"} + OUTPUT\_ENDLINE
-785         \textcolor{keywordflow}{if} i\_total\_pops < 1:
-786             s\_msg+=\textcolor{stringliteral}{"No \(\backslash\)"pop\(\backslash\)" entry found in file, "} \(\backslash\)
-787                     + s\_filename
-788         \textcolor{keywordflow}{else}:
-789             s\_msg+=\textcolor{stringliteral}{"Current implementation of drive accepts genepop "} \(\backslash\)
-790                 + \textcolor{stringliteral}{"files with only a single pop."}
-791         \textcolor{comment}{#end if lt 1 else more}
-792         \textcolor{keywordflow}{raise} Exception( s\_msg )
-793     \textcolor{comment}{#end if non-single pop file}
-794 
-795     \textcolor{keywordflow}{return}
-796 \textcolor{comment}{#end raise\_exception\_non\_single\_pop\_file}
-797 
+802 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgdriveneestimator_ac98833013f11d6aa3544b0fc60951632}{raise\_exception\_if\_non\_single\_pop\_file}( o\_genepopfile ):
+803     \textcolor{stringliteral}{'''}
+804 \textcolor{stringliteral}{    Not currently in use ( 2016\_08\_10 ) -- was used when}
+805 \textcolor{stringliteral}{    genepop files with >1 population were not accepted.}
+806 \textcolor{stringliteral}{    '''}
+807     i\_total\_pops=o\_genepopfile.pop\_total
+808 
+809     \textcolor{keywordflow}{if} ( i\_total\_pops != 1 ):
+810         s\_msg=\textcolor{stringliteral}{"In pgdriveneestimator.py:"} + OUTPUT\_ENDLINE
+811         \textcolor{keywordflow}{if} i\_total\_pops < 1:
+812             s\_msg+=\textcolor{stringliteral}{"No \(\backslash\)"pop\(\backslash\)" entry found in file, "} \(\backslash\)
+813                     + s\_filename
+814         \textcolor{keywordflow}{else}:
+815             s\_msg+=\textcolor{stringliteral}{"Current implementation of drive accepts genepop "} \(\backslash\)
+816                 + \textcolor{stringliteral}{"files with only a single pop."}
+817         \textcolor{comment}{#end if lt 1 else more}
+818         \textcolor{keywordflow}{raise} Exception( s\_msg )
+819     \textcolor{comment}{#end if non-single pop file}
+820 
+821     \textcolor{keywordflow}{return}
+822 \textcolor{comment}{#end raise\_exception\_non\_single\_pop\_file}
+823 
 \end{DoxyCode}
 
 
@@ -1427,7 +1452,7 @@ Definition at line 776 of file pgdriveneestimator.\+py.
 \end{DoxyCode}
 
 
-Definition at line 173 of file pgdriveneestimator.\+py.
+Definition at line 184 of file pgdriveneestimator.\+py.
 
 \index{negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}!S\+A\+M\+P\+L\+E\+\_\+\+S\+C\+H\+E\+M\+E\+S\+\_\+\+N\+O\+N\+\_\+\+C\+R\+I\+T\+E\+R\+IA@{S\+A\+M\+P\+L\+E\+\_\+\+S\+C\+H\+E\+M\+E\+S\+\_\+\+N\+O\+N\+\_\+\+C\+R\+I\+T\+E\+R\+IA}}
 \index{S\+A\+M\+P\+L\+E\+\_\+\+S\+C\+H\+E\+M\+E\+S\+\_\+\+N\+O\+N\+\_\+\+C\+R\+I\+T\+E\+R\+IA@{S\+A\+M\+P\+L\+E\+\_\+\+S\+C\+H\+E\+M\+E\+S\+\_\+\+N\+O\+N\+\_\+\+C\+R\+I\+T\+E\+R\+IA}!negui\+::pgdriveneestimator@{negui\+::pgdriveneestimator}}
@@ -1439,5 +1464,5 @@ Definition at line 173 of file pgdriveneestimator.\+py.
 \end{DoxyCode}
 
 
-Definition at line 244 of file pgdriveneestimator.\+py.
+Definition at line 255 of file pgdriveneestimator.\+py.
 

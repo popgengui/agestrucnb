@@ -136,8 +136,20 @@ Definition at line 59 of file pgopsimupop.\+py.
 96         \textcolor{comment}{#unless we reseed the numpy random number generator }
 97         \textcolor{comment}{#for each "process:"}
 98         numpy.random.seed()
-99         
-100         \textcolor{keywordflow}{return}
+99         \textcolor{stringliteral}{'''}
+100 \textcolor{stringliteral}{        With introduction of the N0 as }
+101 \textcolor{stringliteral}{        calculated by other parameters,}
+102 \textcolor{stringliteral}{        I chose to keep it unaltered in }
+103 \textcolor{stringliteral}{        the input object (see N0 property}
+104 \textcolor{stringliteral}{        in the PGInputSimuPop class), and}
+105 \textcolor{stringliteral}{        to accomodate lambda adustments,}
+106 \textcolor{stringliteral}{        to use this attribute as the }
+107 \textcolor{stringliteral}{        N0 accessor in the simulation operations.}
+108 \textcolor{stringliteral}{        We initiallize to the input object's value:}
+109 \textcolor{stringliteral}{        '''}
+110         self.\hyperlink{classnegui_1_1pgopsimupop_1_1PGOpSimuPop_a2f0c7a20605eb636fd7624e0472b58ed}{\_\_current\_N0}=self.input.N0
+111         
+112         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 

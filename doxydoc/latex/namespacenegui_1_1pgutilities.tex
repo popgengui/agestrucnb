@@ -76,6 +76,18 @@ def \hyperlink{namespacenegui_1_1pgutilities_aed0f15b22462914445ffe1ec2a77cbc8}{
 \item 
 def \hyperlink{namespacenegui_1_1pgutilities_a177345979e44820072e37052d92bfd32}{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process} (o\+\_\+multiprocessing\+\_\+event, s\+\_\+genepop\+\_\+files, qs\+\_\+sample\+\_\+scheme\+\_\+args, f\+\_\+min\+\_\+allele\+\_\+freq, i\+\_\+replicates, qs\+\_\+loci\+\_\+sampling\+\_\+scheme\+\_\+args, i\+\_\+loci\+\_\+replicates, i\+\_\+num\+\_\+processes, s\+\_\+runmode, s\+\_\+outfile\+\_\+basename, s\+\_\+file\+\_\+delimiter=\char`\"{})
 \item 
+def {\bfseries get\+\_\+add\+\_\+path\+\_\+statment\+\_\+for\+\_\+popen} ()\hypertarget{namespacenegui_1_1pgutilities_a606a7615fe2e94332376016ce8abe372}{}\label{namespacenegui_1_1pgutilities_a606a7615fe2e94332376016ce8abe372}
+
+\item 
+def {\bfseries call\+\_\+driveneestimator\+\_\+using\+\_\+subprocess} (seq\+\_\+arg\+\_\+set)\hypertarget{namespacenegui_1_1pgutilities_a893dab54be58c2b407323ae6fee6c4ea}{}\label{namespacenegui_1_1pgutilities_a893dab54be58c2b407323ae6fee6c4ea}
+
+\item 
+def {\bfseries manage\+\_\+driveneestimator\+\_\+subprocess} (o\+\_\+subprocess, o\+\_\+multiprocessing\+\_\+event)\hypertarget{namespacenegui_1_1pgutilities_aa62ddf0928a977844669e59f5b4e3329}{}\label{namespacenegui_1_1pgutilities_aa62ddf0928a977844669e59f5b4e3329}
+
+\item 
+def {\bfseries run\+\_\+plotting\+\_\+program} (s\+\_\+type, s\+\_\+estimates\+\_\+table\+\_\+file, s\+\_\+plotting\+\_\+config\+\_\+file)\hypertarget{namespacenegui_1_1pgutilities_a1e7a7774f29fea829d3b29563c8dd643}{}\label{namespacenegui_1_1pgutilities_a1e7a7774f29fea829d3b29563c8dd643}
+
+\item 
 def {\bfseries show\+\_\+error\+\_\+in\+\_\+messagebox\+\_\+in\+\_\+new\+\_\+process} (o\+\_\+exception, s\+\_\+msg\+\_\+prefix=None)\hypertarget{namespacenegui_1_1pgutilities_a3f2675bc8eb3aae305ba8cc0c7df8d33}{}\label{namespacenegui_1_1pgutilities_a3f2675bc8eb3aae305ba8cc0c7df8d33}
 
 \end{DoxyCompactItemize}
@@ -83,6 +95,9 @@ def {\bfseries show\+\_\+error\+\_\+in\+\_\+messagebox\+\_\+in\+\_\+new\+\_\+pro
 \begin{DoxyCompactItemize}
 \item 
 bool {\bfseries V\+E\+R\+B\+O\+SE} = False\hypertarget{namespacenegui_1_1pgutilities_a274572b1b2788c24df3e269bc2a3f1f7}{}\label{namespacenegui_1_1pgutilities_a274572b1b2788c24df3e269bc2a3f1f7}
+
+\item 
+string {\bfseries P\+Y\+E\+X\+E\+\_\+\+F\+O\+R\+\_\+\+P\+O\+P\+EN} = \char`\"{}python\char`\"{}\hypertarget{namespacenegui_1_1pgutilities_aa64de6ad83c538201adc8d01ab1db845}{}\label{namespacenegui_1_1pgutilities_aa64de6ad83c538201adc8d01ab1db845}
 
 \item 
 string {\bfseries P\+R\+O\+C\+E\+S\+S\+\_\+\+Q\+U\+E\+U\+E\+\_\+\+S\+T\+O\+P\+\_\+\+S\+I\+GN} = \textquotesingle{}S\+T\+OP\textquotesingle{}\hypertarget{namespacenegui_1_1pgutilities_aed436e1fc2eb29963ea30b17e614fd04}{}\label{namespacenegui_1_1pgutilities_aed436e1fc2eb29963ea30b17e614fd04}
@@ -135,29 +150,29 @@ execute eval( s_formatted_list) and retrieve a python list of file names.
 \end{DoxyVerb}
  
 
-Definition at line 636 of file pgutilities.\+py.
+Definition at line 644 of file pgutilities.\+py.
 
 
 \begin{DoxyCode}
-636 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgutilities_aed0f15b22462914445ffe1ec2a77cbc8}{convert\_genepop\_files\_string\_to\_list\_format}( s\_genepop\_files
+644 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgutilities_aed0f15b22462914445ffe1ec2a77cbc8}{convert\_genepop\_files\_string\_to\_list\_format}( s\_genepop\_files
        ):  
-637         \textcolor{stringliteral}{'''}
-638 \textcolor{stringliteral}{        pgguineestimator object stores genepop files as a single string.}
-639 \textcolor{stringliteral}{        Each genepop file is delimited by a comma.  This def will}
-640 \textcolor{stringliteral}{        format the string to s\_formatted\_list, so that pgdriveneestimator.py can }
-641 \textcolor{stringliteral}{        execute eval( s\_formatted\_list) and retrieve a python list of file names.}
-642 \textcolor{stringliteral}{        '''}
-643         ls\_files=s\_genepop\_files.split( \textcolor{stringliteral}{","} )
-644 
-645         ls\_quoted\_file\_names=[ \textcolor{stringliteral}{"'"} + s\_file + \textcolor{stringliteral}{"'"} \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_files ]
-646 
-647         s\_quoted\_files=\textcolor{stringliteral}{","}.join( ls\_quoted\_file\_names )
-648 
-649         s\_genepop\_files\_formatted\_as\_python\_list= \textcolor{stringliteral}{"["} + s\_quoted\_files + \textcolor{stringliteral}{"]"}
-650 
-651         \textcolor{keywordflow}{return} s\_genepop\_files\_formatted\_as\_python\_list
-652 \textcolor{comment}{#end convert\_genepop\_files\_string\_to\_list\_format}
-653 
+645         \textcolor{stringliteral}{'''}
+646 \textcolor{stringliteral}{        pgguineestimator object stores genepop files as a single string.}
+647 \textcolor{stringliteral}{        Each genepop file is delimited by a comma.  This def will}
+648 \textcolor{stringliteral}{        format the string to s\_formatted\_list, so that pgdriveneestimator.py can }
+649 \textcolor{stringliteral}{        execute eval( s\_formatted\_list) and retrieve a python list of file names.}
+650 \textcolor{stringliteral}{        '''}
+651         ls\_files=s\_genepop\_files.split( \textcolor{stringliteral}{","} )
+652 
+653         ls\_quoted\_file\_names=[ \textcolor{stringliteral}{"'"} + s\_file + \textcolor{stringliteral}{"'"} \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_files ]
+654 
+655         s\_quoted\_files=\textcolor{stringliteral}{","}.join( ls\_quoted\_file\_names )
+656 
+657         s\_genepop\_files\_formatted\_as\_python\_list= \textcolor{stringliteral}{"["} + s\_quoted\_files + \textcolor{stringliteral}{"]"}
+658 
+659         \textcolor{keywordflow}{return} s\_genepop\_files\_formatted\_as\_python\_list
+660 \textcolor{comment}{#end convert\_genepop\_files\_string\_to\_list\_format}
+661 
 \end{DoxyCode}
 \index{negui\+::pgutilities@{negui\+::pgutilities}!dialog\+\_\+returns\+\_\+nothing@{dialog\+\_\+returns\+\_\+nothing}}
 \index{dialog\+\_\+returns\+\_\+nothing@{dialog\+\_\+returns\+\_\+nothing}!negui\+::pgutilities@{negui\+::pgutilities}}
@@ -176,42 +191,42 @@ askopenfilenames returns an empty tuple on all cancels.
 \end{DoxyVerb}
  
 
-Definition at line 604 of file pgutilities.\+py.
+Definition at line 612 of file pgutilities.\+py.
 
 
 \begin{DoxyCode}
-604 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgutilities_aa839d4997d2bd2c15016c33cc7fce3b0}{dialog\_returns\_nothing}( v\_return\_value ):
-605 
-606     \textcolor{stringliteral}{'''}
-607 \textcolor{stringliteral}{    To evaluate return values from askopenfilenames,}
-608 \textcolor{stringliteral}{    askdirectory, askopenfilename, dialog windows.}
-609 \textcolor{stringliteral}{    Note that unlike askopenfile (singular),}
-610 \textcolor{stringliteral}{    an empty tuple is returned by askdirectory when}
-611 \textcolor{stringliteral}{    the diag is cancelled on the first instance it}
-612 \textcolor{stringliteral}{    is invoked, and an empty string thereafter.  }
-613 \textcolor{stringliteral}{    askopenfilenames returns an empty tuple on all cancels.}
-614 \textcolor{stringliteral}{    '''} 
-615 
-616     b\_is\_nothing=\textcolor{keyword}{False}
-617 
-618     o\_return\_type=type( v\_return\_value )
-619 
-620     \textcolor{keywordflow}{if} o\_return\_type == tuple:
-621         b\_is\_nothing = ( len( v\_return\_value ) == 0 )
-622     \textcolor{keywordflow}{elif} o\_return\_type == str:
-623         b\_is\_nothing = ( v\_return\_value == \textcolor{stringliteral}{""} )
-624     \textcolor{keywordflow}{elif} o\_return\_type == unicode:
-625         b\_is\_nothing == \textcolor{stringliteral}{""}
-626     \textcolor{keywordflow}{else}:
-627         s\_msg = \textcolor{stringliteral}{"In pgutilities, def dialog\_returns\_nothing(), "} \(\backslash\)
-628                 + \textcolor{stringliteral}{"Unknown return value type: "} \(\backslash\)
-629                 + str( o\_return\_type ) + \textcolor{stringliteral}{"."}
-630         \textcolor{keywordflow}{raise} Exception( s\_msg )
-631     \textcolor{comment}{#end if return is a tuple, else string, else error}
-632 
-633     \textcolor{keywordflow}{return} b\_is\_nothing 
-634 \textcolor{comment}{#end dialog\_returns\_nothing}
-635 
+612 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgutilities_aa839d4997d2bd2c15016c33cc7fce3b0}{dialog\_returns\_nothing}( v\_return\_value ):
+613 
+614     \textcolor{stringliteral}{'''}
+615 \textcolor{stringliteral}{    To evaluate return values from askopenfilenames,}
+616 \textcolor{stringliteral}{    askdirectory, askopenfilename, dialog windows.}
+617 \textcolor{stringliteral}{    Note that unlike askopenfile (singular),}
+618 \textcolor{stringliteral}{    an empty tuple is returned by askdirectory when}
+619 \textcolor{stringliteral}{    the diag is cancelled on the first instance it}
+620 \textcolor{stringliteral}{    is invoked, and an empty string thereafter.  }
+621 \textcolor{stringliteral}{    askopenfilenames returns an empty tuple on all cancels.}
+622 \textcolor{stringliteral}{    '''} 
+623 
+624     b\_is\_nothing=\textcolor{keyword}{False}
+625 
+626     o\_return\_type=type( v\_return\_value )
+627 
+628     \textcolor{keywordflow}{if} o\_return\_type == tuple:
+629         b\_is\_nothing = ( len( v\_return\_value ) == 0 )
+630     \textcolor{keywordflow}{elif} o\_return\_type == str:
+631         b\_is\_nothing = ( v\_return\_value == \textcolor{stringliteral}{""} )
+632     \textcolor{keywordflow}{elif} o\_return\_type == unicode:
+633         b\_is\_nothing == \textcolor{stringliteral}{""}
+634     \textcolor{keywordflow}{else}:
+635         s\_msg = \textcolor{stringliteral}{"In pgutilities, def dialog\_returns\_nothing(), "} \(\backslash\)
+636                 + \textcolor{stringliteral}{"Unknown return value type: "} \(\backslash\)
+637                 + str( o\_return\_type ) + \textcolor{stringliteral}{"."}
+638         \textcolor{keywordflow}{raise} Exception( s\_msg )
+639     \textcolor{comment}{#end if return is a tuple, else string, else error}
+640 
+641     \textcolor{keywordflow}{return} b\_is\_nothing 
+642 \textcolor{comment}{#end dialog\_returns\_nothing}
+643 
 \end{DoxyCode}
 \index{negui\+::pgutilities@{negui\+::pgutilities}!do\+\_\+pgopsimupop\+\_\+replicate\+\_\+from\+\_\+files@{do\+\_\+pgopsimupop\+\_\+replicate\+\_\+from\+\_\+files}}
 \index{do\+\_\+pgopsimupop\+\_\+replicate\+\_\+from\+\_\+files@{do\+\_\+pgopsimupop\+\_\+replicate\+\_\+from\+\_\+files}!negui\+::pgutilities@{negui\+::pgutilities}}
@@ -244,90 +259,90 @@ as changed or edited on the gui interface) configuration files (that includes th
 \end{DoxyVerb}
  
 
-Definition at line 215 of file pgutilities.\+py.
+Definition at line 224 of file pgutilities.\+py.
 
 
 \begin{DoxyCode}
-215                                                 i\_replicate\_number ):
-216     \textcolor{stringliteral}{'''}
-217 \textcolor{stringliteral}{    necessitated by fact that python2 (and 3?) was not able to pickle }
-218 \textcolor{stringliteral}{    a class-instance def to be used to run replicates of the pgopsimupop}
-219 \textcolor{stringliteral}{    doOp().  Python also failed to pickle SWIG-based code used in Simupop.}
-220 \textcolor{stringliteral}{    Thus the better design, in which  multiprocessing Pools would stay  encapsulated }
-221 \textcolor{stringliteral}{    inside a class object seem problematic, though may be implement-able using }
-222 \textcolor{stringliteral}{    reg\_copy -- but I'm not confident in state of regcopy of imported simuPop code,}
-223 \textcolor{stringliteral}{    and so  I think is the safer solution, though it}
-224 \textcolor{stringliteral}{    does create a depandancy of the pgguisimupop object on this outside def.  }
-225 \textcolor{stringliteral}{}
-226 \textcolor{stringliteral}{    Note that this def runs a simupop operation using all the param values as}
-227 \textcolor{stringliteral}{    given in the config file arg, except for the "reps" attribute, with is reset to 1,}
-228 \textcolor{stringliteral}{    whatever the value in the configuration file.}
-229 \textcolor{stringliteral}{}
-230 \textcolor{stringliteral}{    Tue Jul 26 22:01:07 MDT 2016}
-231 \textcolor{stringliteral}{    updated to be called by a driver that creates a new OS process, then calls this def to do the
+224                                                 i\_replicate\_number ):
+225     \textcolor{stringliteral}{'''}
+226 \textcolor{stringliteral}{    necessitated by fact that python2 (and 3?) was not able to pickle }
+227 \textcolor{stringliteral}{    a class-instance def to be used to run replicates of the pgopsimupop}
+228 \textcolor{stringliteral}{    doOp().  Python also failed to pickle SWIG-based code used in Simupop.}
+229 \textcolor{stringliteral}{    Thus the better design, in which  multiprocessing Pools would stay  encapsulated }
+230 \textcolor{stringliteral}{    inside a class object seem problematic, though may be implement-able using }
+231 \textcolor{stringliteral}{    reg\_copy -- but I'm not confident in state of regcopy of imported simuPop code,}
+232 \textcolor{stringliteral}{    and so  I think is the safer solution, though it}
+233 \textcolor{stringliteral}{    does create a depandancy of the pgguisimupop object on this outside def.  }
+234 \textcolor{stringliteral}{}
+235 \textcolor{stringliteral}{    Note that this def runs a simupop operation using all the param values as}
+236 \textcolor{stringliteral}{    given in the config file arg, except for the "reps" attribute, with is reset to 1,}
+237 \textcolor{stringliteral}{    whatever the value in the configuration file.}
+238 \textcolor{stringliteral}{}
+239 \textcolor{stringliteral}{    Tue Jul 26 22:01:07 MDT 2016}
+240 \textcolor{stringliteral}{    updated to be called by a driver that creates a new OS process, then calls this def to do the
        replicate.  No longer}
-232 \textcolor{stringliteral}{    uses the dv\_input\_parm\_values\_by\_attribute, but instead relies on reading a complete and up-to-date
+241 \textcolor{stringliteral}{    uses the dv\_input\_parm\_values\_by\_attribute, but instead relies on reading a complete and up-to-date
        (i.e. all values}
-233 \textcolor{stringliteral}{    as changed or edited on the gui interface) configuration files (that includes the "life table" params).}
-234 \textcolor{stringliteral}{    '''}
-235 
-236     s\_tag\_out=\textcolor{stringliteral}{""}
-237 
-238     NUMBER\_FIRST\_REPLICATE=1
-239 
-240     \textcolor{stringliteral}{'''}
-241 \textcolor{stringliteral}{    As of 2016\_08\_23 the *sim, *gen, *db files}
-242 \textcolor{stringliteral}{    are not used, and clutter up the output directories,}
-243 \textcolor{stringliteral}{    per other users comments}
-244 \textcolor{stringliteral}{    '''}
-245 
-246     \textcolor{comment}{#whether or not to remove the *sim *gen *db}
-247     \textcolor{comment}{#files (original output from Tiago's code ), }
-248     \textcolor{comment}{#which leaves only a *conf and *genepop}
-249     \textcolor{comment}{#files as output}
-250 
-251     REMOVE\_NON\_GENEPOP\_SIM\_OUTPUT\_FILES=\textcolor{keyword}{True}
-252 
-253     \textcolor{keywordflow}{if} i\_replicate\_number \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-254         s\_tag\_out=SIMULATION\_OUTPUT\_FILE\_REPLICATE\_TAG + str( i\_replicate\_number )
-255 
-256     \textcolor{comment}{#end if rep number is not none}
-257 
-258     o\_resources=pgrec.PGSimuPopResources( ls\_life\_table\_files )
-259     o\_paramset=pgpar.PGParamSet( s\_param\_name\_file )
-260     o\_input=pgin.PGInputSimuPop( s\_configuration\_file, o\_resources, o\_paramset ) 
-261     o\_input.makeInputConfig()
-262 
-263     b\_write\_conf\_file=\textcolor{keyword}{False}
+242 \textcolor{stringliteral}{    as changed or edited on the gui interface) configuration files (that includes the "life table" params).}
+243 \textcolor{stringliteral}{    '''}
+244 
+245     s\_tag\_out=\textcolor{stringliteral}{""}
+246 
+247     NUMBER\_FIRST\_REPLICATE=1
+248 
+249     \textcolor{stringliteral}{'''}
+250 \textcolor{stringliteral}{    As of 2016\_08\_23 the *sim, *gen, *db files}
+251 \textcolor{stringliteral}{    are not used, and clutter up the output directories,}
+252 \textcolor{stringliteral}{    per other users comments}
+253 \textcolor{stringliteral}{    '''}
+254 
+255     \textcolor{comment}{#whether or not to remove the *sim *gen *db}
+256     \textcolor{comment}{#files (original output from Tiago's code ), }
+257     \textcolor{comment}{#which leaves only a *conf and *genepop}
+258     \textcolor{comment}{#files as output}
+259 
+260     REMOVE\_NON\_GENEPOP\_SIM\_OUTPUT\_FILES=\textcolor{keyword}{True}
+261 
+262     \textcolor{keywordflow}{if} i\_replicate\_number \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+263         s\_tag\_out=SIMULATION\_OUTPUT\_FILE\_REPLICATE\_TAG + str( i\_replicate\_number )
 264 
-265     \textcolor{comment}{#we only write the configuraton file if the replicate number is 1:}
-266     \textcolor{keywordflow}{if} i\_replicate\_number == NUMBER\_FIRST\_REPLICATE:
-267         b\_write\_conf\_file=\textcolor{keyword}{True}
-268     \textcolor{comment}{#end if first replicate number}
-269 
-270     \textcolor{comment}{#reset reps to 1}
-271     \textcolor{comment}{#as we are executing only one}
-272     \textcolor{comment}{#replicate.  We assume this def}
-273     \textcolor{comment}{#is being called as one of a number}
-274     \textcolor{comment}{#of parallel process calls for}
-275     \textcolor{comment}{#a set of replicates, the total }
-276     \textcolor{comment}{#known to the caller:}
-277     o\_input.reps=1
+265     \textcolor{comment}{#end if rep number is not none}
+266 
+267     o\_resources=pgrec.PGSimuPopResources( ls\_life\_table\_files )
+268     o\_paramset=pgpar.PGParamSet( s\_param\_name\_file )
+269     o\_input=pgin.PGInputSimuPop( s\_configuration\_file, o\_resources, o\_paramset ) 
+270     o\_input.makeInputConfig()
+271 
+272     b\_write\_conf\_file=\textcolor{keyword}{False}
+273 
+274     \textcolor{comment}{#we only write the configuraton file if the replicate number is 1:}
+275     \textcolor{keywordflow}{if} i\_replicate\_number == NUMBER\_FIRST\_REPLICATE:
+276         b\_write\_conf\_file=\textcolor{keyword}{True}
+277     \textcolor{comment}{#end if first replicate number}
 278 
-279     o\_output=pgout.PGOutputSimuPop( s\_outfile\_basename )
-280 
-281     o\_new\_pgopsimupop\_instance=pgsim.PGOpSimuPop( o\_input,
-282             o\_output, 
-283             b\_remove\_db\_gen\_sim\_files=REMOVE\_NON\_GENEPOP\_SIM\_OUTPUT\_FILES,
-284             b\_write\_input\_as\_config\_file=b\_write\_conf\_file )
-285 
-286     o\_new\_pgopsimupop\_instance.prepareOp( s\_tag\_out  )
+279     \textcolor{comment}{#reset reps to 1}
+280     \textcolor{comment}{#as we are executing only one}
+281     \textcolor{comment}{#replicate.  We assume this def}
+282     \textcolor{comment}{#is being called as one of a number}
+283     \textcolor{comment}{#of parallel process calls for}
+284     \textcolor{comment}{#a set of replicates, the total }
+285     \textcolor{comment}{#known to the caller:}
+286     o\_input.reps=1
 287 
-288     o\_new\_pgopsimupop\_instance.doOp()
+288     o\_output=pgout.PGOutputSimuPop( s\_outfile\_basename )
 289 
-290     \textcolor{keywordflow}{return}
-291 \textcolor{comment}{#end do\_pgopsimupop\_replicate\_from\_files}
-292 
+290     o\_new\_pgopsimupop\_instance=pgsim.PGOpSimuPop( o\_input,
+291             o\_output, 
+292             b\_remove\_db\_gen\_sim\_files=REMOVE\_NON\_GENEPOP\_SIM\_OUTPUT\_FILES,
+293             b\_write\_input\_as\_config\_file=b\_write\_conf\_file )
+294 
+295     o\_new\_pgopsimupop\_instance.prepareOp( s\_tag\_out  )
+296 
+297     o\_new\_pgopsimupop\_instance.doOp()
+298 
+299     \textcolor{keywordflow}{return}
+300 \textcolor{comment}{#end do\_pgopsimupop\_replicate\_from\_files}
+301 
 \end{DoxyCode}
 \index{negui\+::pgutilities@{negui\+::pgutilities}!do\+\_\+simulation\+\_\+reps\+\_\+in\+\_\+subprocesses@{do\+\_\+simulation\+\_\+reps\+\_\+in\+\_\+subprocesses}}
 \index{do\+\_\+simulation\+\_\+reps\+\_\+in\+\_\+subprocesses@{do\+\_\+simulation\+\_\+reps\+\_\+in\+\_\+subprocesses}!negui\+::pgutilities@{negui\+::pgutilities}}
@@ -360,183 +375,182 @@ This def manages the replices via creating subprocesses, and
 calling pgutilities.prep_and_call_do_pgopsimupop_replicate.\end{DoxyVerb}
  
 
-Definition at line 431 of file pgutilities.\+py.
+Definition at line 440 of file pgutilities.\+py.
 
 
 \begin{DoxyCode}
-431             s\_output\_basename ):
-432 
-433     \textcolor{stringliteral}{'''}
-434 \textcolor{stringliteral}{    Failed to get independant initialization of population per-replicate}
-435 \textcolor{stringliteral}{    when i used python's multiprocessing.process objects as hosts for }
-436 \textcolor{stringliteral}{    running replicates in parallel.  Solution as of now, }
-437 \textcolor{stringliteral}{    Sat Jul 30 22:38:42 MDT 2016, is to use OS processes via python's }
-438 \textcolor{stringliteral}{    subprocess module, creating them in this def, which gets its}
-439 \textcolor{stringliteral}{    requisite info needed for the sim from the pgguisimupop instance}
-440 \textcolor{stringliteral}{    that calls this def (this def is called by the GUI interface instance}
-441 \textcolor{stringliteral}{    in a new python.multiprocessing.process instance, in order not to block the gui).}
-442 \textcolor{stringliteral}{}
-443 \textcolor{stringliteral}{    Note that this def was originally inside the pgguisimupop instance that calls it,}
-444 \textcolor{stringliteral}{    but on windows there was a pickling error not seen on linux or Mac.  Moving this}
-445 \textcolor{stringliteral}{    target def for the python.multiprocessing.process outside the pgguisimupop instance}
-446 \textcolor{stringliteral}{    seems to have solved the problem on windows (win 10).}
-447 \textcolor{stringliteral}{}
-448 \textcolor{stringliteral}{    This def manages the replices via creating subprocesses, and }
-449 \textcolor{stringliteral}{    calling pgutilities.prep\_and\_call\_do\_pgopsimupop\_replicate.}
-450 \textcolor{stringliteral}{}
-451 \textcolor{stringliteral}{    '''} 
-452 
-453     \textcolor{stringliteral}{''' }
-454 \textcolor{stringliteral}{    Running this inside a try block allows us to notify GUI}
-455 \textcolor{stringliteral}{    users of exceptions propogated from anywere inside the }
-456 \textcolor{stringliteral}{    simulation setup and execution code. When we catch exceptions }
-457 \textcolor{stringliteral}{    below, we send an error message to a gui message box, then}
-458 \textcolor{stringliteral}{    re-raise the exception. }
-459 \textcolor{stringliteral}{    '''}
-460     \textcolor{keywordflow}{try}:
-461         s\_life\_tables\_stringified=\textcolor{stringliteral}{","}.join( ls\_life\_table\_files )
-462 
-463         \textcolor{comment}{#if we're on windows, out strings of file}
-464         \textcolor{comment}{#paths may be a mangled mix of unix and }
-465         \textcolor{comment}{#windows separators -- with errors resulting}
-466         \textcolor{comment}{#downstream.  So we standardize:}
-467         \textcolor{keywordflow}{if} is\_windows\_platform():
-468             s\_life\_tables\_stringified= \(\backslash\)
-469                 fix\_windows\_path( s\_life\_tables\_stringified )
-470             s\_param\_names\_file= \(\backslash\)
-471                 fix\_windows\_path( s\_param\_names\_file )              
-472             s\_output\_basename= \(\backslash\)
-473                 fix\_windows\_path( s\_output\_basename )   
-474         \textcolor{comment}{#end if windows, fix file path strings}
-475 
-476         i\_total\_replicates\_requested=i\_input\_reps
-477 
-478         i\_max\_processes\_to\_use=i\_total\_processes\_for\_sims
-479 
-480 
-481         \textcolor{comment}{#we use a python command for a -c arg in the Popen command (see below)}
-482         \textcolor{comment}{#and these will be the same args for each replicate (we add the rep-number}
-483         \textcolor{comment}{#arg below).  We stringify so that they can be Popen command args.  Some}
-484         \textcolor{comment}{#are de-stringified by the pgutilities def before sending to pgop-creator}
-485         seq\_first\_four\_args\_to\_sim\_call=( s\_temp\_config\_file\_for\_running\_replicates,
-486                                         s\_life\_tables\_stringified,
-487                                         s\_param\_names\_file,
-488                                         s\_output\_basename )
-489         
-490         i\_total\_replicates\_started=0
-491 
-492         o\_subprocess\_group=IndependantSubprocessGroup()
-493 
-494         \textcolor{keywordflow}{while} i\_total\_replicates\_started < i\_total\_replicates\_requested:
-495             \textcolor{comment}{#see if we need to cancel:  }
-496             \textcolor{keywordflow}{if} o\_multiprocessing\_event.is\_set():
-497 
-498                 \textcolor{keywordflow}{if} VERBOSE:
-499                     \textcolor{keywordflow}{print} ( \textcolor{stringliteral}{"received event in setup loop"} )
-500                 \textcolor{comment}{#end if VERBOSE}
-501 
-502                 o\_subprocess\_group.terminateAllSubprocesses()
-503                 
-504                 \hyperlink{namespacenegui_1_1pgutilities_aa37c7d125e4eaec2eeea639f53fa140d}{remove\_simulation\_replicate\_output\_files}( 
+440             s\_output\_basename ):
+441 
+442     \textcolor{stringliteral}{'''}
+443 \textcolor{stringliteral}{    Failed to get independant initialization of population per-replicate}
+444 \textcolor{stringliteral}{    when i used python's multiprocessing.process objects as hosts for }
+445 \textcolor{stringliteral}{    running replicates in parallel.  Solution as of now, }
+446 \textcolor{stringliteral}{    Sat Jul 30 22:38:42 MDT 2016, is to use OS processes via python's }
+447 \textcolor{stringliteral}{    subprocess module, creating them in this def, which gets its}
+448 \textcolor{stringliteral}{    requisite info needed for the sim from the pgguisimupop instance}
+449 \textcolor{stringliteral}{    that calls this def (this def is called by the GUI interface instance}
+450 \textcolor{stringliteral}{    in a new python.multiprocessing.process instance, in order not to block the gui).}
+451 \textcolor{stringliteral}{}
+452 \textcolor{stringliteral}{    Note that this def was originally inside the pgguisimupop instance that calls it,}
+453 \textcolor{stringliteral}{    but on windows there was a pickling error not seen on linux or Mac.  Moving this}
+454 \textcolor{stringliteral}{    target def for the python.multiprocessing.process outside the pgguisimupop instance}
+455 \textcolor{stringliteral}{    seems to have solved the problem on windows (win 10).}
+456 \textcolor{stringliteral}{}
+457 \textcolor{stringliteral}{    This def manages the replices via creating subprocesses, and }
+458 \textcolor{stringliteral}{    calling pgutilities.prep\_and\_call\_do\_pgopsimupop\_replicate.}
+459 \textcolor{stringliteral}{}
+460 \textcolor{stringliteral}{    '''} 
+461 
+462     \textcolor{stringliteral}{''' }
+463 \textcolor{stringliteral}{    Running this inside a try block allows us to notify GUI}
+464 \textcolor{stringliteral}{    users of exceptions propogated from anywere inside the }
+465 \textcolor{stringliteral}{    simulation setup and execution code. When we catch exceptions }
+466 \textcolor{stringliteral}{    below, we send an error message to a gui message box, then}
+467 \textcolor{stringliteral}{    re-raise the exception. }
+468 \textcolor{stringliteral}{    '''}
+469     \textcolor{keywordflow}{try}:
+470         s\_life\_tables\_stringified=\textcolor{stringliteral}{","}.join( ls\_life\_table\_files )
+471 
+472         \textcolor{comment}{#if we're on windows, out strings of file}
+473         \textcolor{comment}{#paths may be a mangled mix of unix and }
+474         \textcolor{comment}{#windows separators -- with errors resulting}
+475         \textcolor{comment}{#downstream.  So we standardize:}
+476         \textcolor{keywordflow}{if} is\_windows\_platform():
+477             s\_life\_tables\_stringified= \(\backslash\)
+478                 fix\_windows\_path( s\_life\_tables\_stringified )
+479             s\_param\_names\_file= \(\backslash\)
+480                 fix\_windows\_path( s\_param\_names\_file )              
+481             s\_output\_basename= \(\backslash\)
+482                 fix\_windows\_path( s\_output\_basename )   
+483         \textcolor{comment}{#end if windows, fix file path strings}
+484 
+485         i\_total\_replicates\_requested=i\_input\_reps
+486 
+487         i\_max\_processes\_to\_use=i\_total\_processes\_for\_sims
+488 
+489 
+490         \textcolor{comment}{#we use a python command for a -c arg in the Popen command (see below)}
+491         \textcolor{comment}{#and these will be the same args for each replicate (we add the rep-number}
+492         \textcolor{comment}{#arg below).  We stringify so that they can be Popen command args.  Some}
+493         \textcolor{comment}{#are de-stringified by the pgutilities def before sending to pgop-creator}
+494         seq\_first\_four\_args\_to\_sim\_call=( s\_temp\_config\_file\_for\_running\_replicates,
+495                                         s\_life\_tables\_stringified,
+496                                         s\_param\_names\_file,
+497                                         s\_output\_basename )
+498         
+499         i\_total\_replicates\_started=0
+500 
+501         o\_subprocess\_group=IndependantSubprocessGroup()
+502 
+503         \textcolor{keywordflow}{while} i\_total\_replicates\_started < i\_total\_replicates\_requested:
+504             \textcolor{comment}{#see if we need to cancel:  }
+505             \textcolor{keywordflow}{if} o\_multiprocessing\_event.is\_set():
+506 
+507                 \textcolor{keywordflow}{if} VERBOSE:
+508                     \textcolor{keywordflow}{print} ( \textcolor{stringliteral}{"received event in setup loop"} )
+509                 \textcolor{comment}{#end if VERBOSE}
+510 
+511                 o\_subprocess\_group.terminateAllSubprocesses()
+512                 
+513                 \hyperlink{namespacenegui_1_1pgutilities_aa37c7d125e4eaec2eeea639f53fa140d}{remove\_simulation\_replicate\_output\_files}( 
       s\_output\_basename )
-505 
-506                 \textcolor{keywordflow}{break}
-507 
-508             \textcolor{keywordflow}{else}:
-509 
-510                 i\_number\_subprocesses\_alive=o\_subprocess\_group.getTotalAlive()
-511 
-512                 i\_number\_subprocesses\_available= \(\backslash\)
-513                         i\_max\_processes\_to\_use-i\_number\_subprocesses\_alive
 514 
-515                 i\_number\_replicates\_to\_go=i\_total\_replicates\_requested - i\_total\_replicates\_started
+515                 \textcolor{keywordflow}{break}
 516 
-517                 i\_number\_subprocesses\_to\_start=i\_number\_subprocesses\_available
+517             \textcolor{keywordflow}{else}:
 518 
-519                 \textcolor{comment}{#reduce the number to start if we have fewer reps to go than avail procs:}
-520                 \textcolor{keywordflow}{if} i\_number\_subprocesses\_available > i\_number\_replicates\_to\_go:
-521                         i\_number\_subprocesses\_to\_start = i\_number\_replicates\_to\_go
-522                 \textcolor{comment}{#end if fewer needed than available}
+519                 i\_number\_subprocesses\_alive=o\_subprocess\_group.getTotalAlive()
+520 
+521                 i\_number\_subprocesses\_available= \(\backslash\)
+522                         i\_max\_processes\_to\_use-i\_number\_subprocesses\_alive
 523 
-524                 \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( i\_number\_subprocesses\_to\_start ):
+524                 i\_number\_replicates\_to\_go=i\_total\_replicates\_requested - i\_total\_replicates\_started
 525 
-526                     i\_total\_replicates\_started += 1
-527                     
-528                     \textcolor{comment}{#In the Popen call, rather than rely on a driver python script }
-529                     \textcolor{comment}{#that would need to be in PATH, we'll simply}
-530                     \textcolor{comment}{#invoke python with a "-c" argument that imports the }
-531                     \textcolor{comment}{#pgutilities module and executes the correct def:}
-532             
-533                     \textcolor{comment}{#complete the set of args used in the command by adding the}
-534                     \textcolor{comment}{#replicate number (recall need comma in sequence with single item,}
-535                     \textcolor{comment}{#to delineate sequence versus simple expression):}
-536                     seq\_complete\_arg\_set=seq\_first\_four\_args\_to\_sim\_call + ( str( 
+526                 i\_number\_subprocesses\_to\_start=i\_number\_subprocesses\_available
+527 
+528                 \textcolor{comment}{#reduce the number to start if we have fewer reps to go than avail procs:}
+529                 \textcolor{keywordflow}{if} i\_number\_subprocesses\_available > i\_number\_replicates\_to\_go:
+530                         i\_number\_subprocesses\_to\_start = i\_number\_replicates\_to\_go
+531                 \textcolor{comment}{#end if fewer needed than available}
+532 
+533                 \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( i\_number\_subprocesses\_to\_start ):
+534 
+535                     i\_total\_replicates\_started += 1
+536                     
+537                     \textcolor{comment}{#In the Popen call, rather than rely on a driver python script }
+538                     \textcolor{comment}{#that would need to be in PATH, we'll simply}
+539                     \textcolor{comment}{#invoke python with a "-c" argument that imports the }
+540                     \textcolor{comment}{#pgutilities module and executes the correct def:}
+541             
+542                     \textcolor{comment}{#complete the set of args used in the command by adding the}
+543                     \textcolor{comment}{#replicate number (recall need comma in sequence with single item,}
+544                     \textcolor{comment}{#to delineate sequence versus simple expression):}
+545                     seq\_complete\_arg\_set=seq\_first\_four\_args\_to\_sim\_call + ( str( 
       i\_total\_replicates\_started ), )
-537 
-538                     \textcolor{stringliteral}{'''}
-539 \textcolor{stringliteral}{                    in case the negui mods are not in the default python }
-540 \textcolor{stringliteral}{                    install dirs, then we need to add them to the sys.paths in}
-541 \textcolor{stringliteral}{                    any  spawned invocation of python exe -- seems that }
-542 \textcolor{stringliteral}{                    the PYTHONPATH env var known to this parent process }
-543 \textcolor{stringliteral}{                    is unknown to the "python" invocation via Popen.  }
-544 \textcolor{stringliteral}{                    We can get for and then add to our new python invocation}
-545 \textcolor{stringliteral}{                    the path to all negui modules by getting the}
-546 \textcolor{stringliteral}{                    path to this module:}
-547 \textcolor{stringliteral}{                    '''}
-548                     s\_curr\_mod\_path = os.path.abspath(\_\_file\_\_)
-549 
-550                     \textcolor{comment}{#path only (stripped off "/utilities.py" )}
-551                     \textcolor{comment}{#-- gives path to all negui mods:}
-552                     s\_mod\_dir=os.path.dirname( s\_curr\_mod\_path )
-553 
-554                     \textcolor{comment}{#need to fix the path if we're on windows:}
-555                     \textcolor{keywordflow}{if} is\_windows\_platform():
-556                         s\_mod\_dir=fix\_windows\_path( s\_mod\_dir )
-557                     \textcolor{comment}{#end if windows, fix path}
-558                     
-559                     s\_path\_append\_statements=\textcolor{stringliteral}{"import sys; sys.path.append( \(\backslash\)""} \(\backslash\)
-560                             + s\_mod\_dir + \textcolor{stringliteral}{"\(\backslash\)" );"}
-561 
-562                     s\_python\_command=s\_path\_append\_statements + \textcolor{stringliteral}{"import pgutilities;"} \(\backslash\)
-563                                         \textcolor{stringliteral}{"pgutilities.prep\_and\_call\_do\_pgopsimupop\_replicate"} \(\backslash\)
-564                                         + \textcolor{stringliteral}{"( \(\backslash\)"%s\(\backslash\)", \(\backslash\)"%s\(\backslash\)", \(\backslash\)"%s\(\backslash\)", \(\backslash\)"%s\(\backslash\)", \(\backslash\)"%s\(\backslash\)" )"} %  
+546 
+547                     \textcolor{stringliteral}{'''}
+548 \textcolor{stringliteral}{                    in case the negui mods are not in the default python }
+549 \textcolor{stringliteral}{                    install dirs, then we need to add them to the sys.paths in}
+550 \textcolor{stringliteral}{                    any  spawned invocation of python exe -- seems that }
+551 \textcolor{stringliteral}{                    the PYTHONPATH env var known to this parent process }
+552 \textcolor{stringliteral}{                    is unknown to the "python" invocation via Popen.  }
+553 \textcolor{stringliteral}{                    We can get for and then add to our new python invocation}
+554 \textcolor{stringliteral}{                    the path to all negui modules by getting the}
+555 \textcolor{stringliteral}{                    path to this module:}
+556 \textcolor{stringliteral}{                    '''}
+557                     s\_curr\_mod\_path = os.path.abspath(\_\_file\_\_)
+558 
+559                     \textcolor{comment}{#path only (stripped off "/utilities.py" )}
+560                     \textcolor{comment}{#-- gives path to all negui mods:}
+561                     s\_mod\_dir=os.path.dirname( s\_curr\_mod\_path )
+562 
+563                     \textcolor{comment}{#need to fix the path if we're on windows:}
+564                     \textcolor{keywordflow}{if} is\_windows\_platform():
+565                         s\_mod\_dir=fix\_windows\_path( s\_mod\_dir )
+566                     \textcolor{comment}{#end if windows, fix path}
+567                     
+568                     s\_path\_append\_statements=\textcolor{stringliteral}{"import sys; sys.path.append( \(\backslash\)""} \(\backslash\)
+569                             + s\_mod\_dir + \textcolor{stringliteral}{"\(\backslash\)" );"}
+570 
+571                     s\_python\_command=s\_path\_append\_statements + \textcolor{stringliteral}{"import pgutilities;"} \(\backslash\)
+572                                         \textcolor{stringliteral}{"pgutilities.prep\_and\_call\_do\_pgopsimupop\_replicate"} \(\backslash\)
+573                                         + \textcolor{stringliteral}{"( \(\backslash\)"%s\(\backslash\)", \(\backslash\)"%s\(\backslash\)", \(\backslash\)"%s\(\backslash\)", \(\backslash\)"%s\(\backslash\)", \(\backslash\)"%s\(\backslash\)" )"} %  
       seq\_complete\_arg\_set
-565 
-566                     o\_new\_subprocess=subprocess.Popen( [ \textcolor{stringliteral}{"python"}, \textcolor{stringliteral}{"-c"}, s\_python\_command ] )
-567                     o\_subprocess\_group.addSubprocess( o\_new\_subprocess ) 
-568                 \textcolor{comment}{#end for each idx of new procs}
-569             \textcolor{comment}{#end if event is set else not}
-570         \textcolor{comment}{#end while preplicates need to be started}
-571 
-572         \textcolor{comment}{#we don't want to return untill all processes are done.}
-573         \textcolor{comment}{#meantime test for cancel-request}
-574         i\_total\_still\_alive\_after\_creating\_all=o\_subprocess\_group.getTotalAlive()
-575 
-576         \textcolor{keywordflow}{while} i\_total\_still\_alive\_after\_creating\_all > 0:
-577             \textcolor{keywordflow}{if} o\_multiprocessing\_event.is\_set():
-578 
-579                 \textcolor{keywordflow}{if} VERBOSE:
-580                     print( \textcolor{stringliteral}{"received event in final loop"} )
-581                 \textcolor{comment}{#end if verbose}
-582 
-583                 o\_subprocess\_group.terminateAllSubprocesses()
-584                 \hyperlink{namespacenegui_1_1pgutilities_aa37c7d125e4eaec2eeea639f53fa140d}{remove\_simulation\_replicate\_output\_files}( 
+574 
+575                     o\_new\_subprocess=subprocess.Popen( [ PYEXE\_FOR\_POPEN, \textcolor{stringliteral}{"-c"}, s\_python\_command ] )
+576                     o\_subprocess\_group.addSubprocess( o\_new\_subprocess ) 
+577                 \textcolor{comment}{#end for each idx of new procs}
+578             \textcolor{comment}{#end if event is set else not}
+579         \textcolor{comment}{#end while preplicates need to be started}
+580 
+581         \textcolor{comment}{#we don't want to return untill all processes are done.}
+582         \textcolor{comment}{#meantime test for cancel-request}
+583         i\_total\_still\_alive\_after\_creating\_all=o\_subprocess\_group.getTotalAlive()
+584 
+585         \textcolor{keywordflow}{while} i\_total\_still\_alive\_after\_creating\_all > 0:
+586             \textcolor{keywordflow}{if} o\_multiprocessing\_event.is\_set():
+587 
+588                 \textcolor{keywordflow}{if} VERBOSE:
+589                     print( \textcolor{stringliteral}{"received event in final loop"} )
+590                 \textcolor{comment}{#end if verbose}
+591 
+592                 o\_subprocess\_group.terminateAllSubprocesses()
+593                 \hyperlink{namespacenegui_1_1pgutilities_aa37c7d125e4eaec2eeea639f53fa140d}{remove\_simulation\_replicate\_output\_files}( 
       s\_output\_basename )
-585             \textcolor{comment}{#end if we are to cancel}
-586             i\_total\_still\_alive\_after\_creating\_all=o\_subprocess\_group.getTotalAlive()
-587         \textcolor{comment}{#end while}
-588 
-589     \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} oex:
-590         show\_error\_in\_messagebox\_in\_new\_process( oex, 
-591                 s\_msg\_prefix = \textcolor{stringliteral}{"Error caught by pgutilities, "}
-592                                 + \textcolor{stringliteral}{"def \_\_do\_simulation\_reps\_in\_subprocesses."} )
-593         \textcolor{keywordflow}{raise} oex
-594     \textcolor{comment}{#end try...except...}
-595 
-596 
-597     \textcolor{keywordflow}{return}
-598 \textcolor{comment}{#end \_\_do\_simulation\_reps\_in\_subprocesses}
-599 
+594             \textcolor{comment}{#end if we are to cancel}
+595             i\_total\_still\_alive\_after\_creating\_all=o\_subprocess\_group.getTotalAlive()
+596         \textcolor{comment}{#end while}
+597 
+598     \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} oex:
+599         
+600         show\_error\_in\_messagebox\_in\_new\_process( oex, 
+601                 s\_msg\_prefix = \textcolor{stringliteral}{"Error caught by pgutilities, "}
+602                                 + \textcolor{stringliteral}{"def \_\_do\_simulation\_reps\_in\_subprocesses."} )
+603         \textcolor{keywordflow}{raise} oex
+604     \textcolor{comment}{#end try...except...}
+605     \textcolor{keywordflow}{return}
+606 \textcolor{comment}{#end \_\_do\_simulation\_reps\_in\_subprocesses}
+607 
 \end{DoxyCode}
 \index{negui\+::pgutilities@{negui\+::pgutilities}!do\+\_\+usage\+\_\+check@{do\+\_\+usage\+\_\+check}}
 \index{do\+\_\+usage\+\_\+check@{do\+\_\+usage\+\_\+check}!negui\+::pgutilities@{negui\+::pgutilities}}
@@ -556,63 +570,63 @@ arg 3 expects a list of strings, in order, any optional args
 \end{DoxyVerb}
  
 
-Definition at line 55 of file pgutilities.\+py.
+Definition at line 64 of file pgutilities.\+py.
 
 
 \begin{DoxyCode}
-55             s\_note=\textcolor{keywordtype}{None}):
-56     \textcolor{stringliteral}{'''}
-57 \textcolor{stringliteral}{    arg 1 expects sys.argv, or a copy}
-58 \textcolor{stringliteral}{    arg 2 expects a list strings, in order, required args}
-59 \textcolor{stringliteral}{    arg 3 expects a list of strings, in order, any optional args}
-60 \textcolor{stringliteral}{    '''}
-61     i\_num\_args\_required = len( ls\_required\_arg\_descriptions )
-62     i\_num\_args\_optional = len( ls\_optional\_arg\_descriptions )
-63     i\_max\_poss\_num\_args = i\_num\_args\_required + i\_num\_args\_optional 
-64     i\_num\_args\_passed = len( ls\_this\_argv ) - 1  
-65     s\_usage\_string = \textcolor{stringliteral}{""}
-66     s\_arg\_delimit=\textcolor{stringliteral}{""}
-67     \textcolor{keywordflow}{if} b\_multi\_line\_msg == \textcolor{keyword}{True}:
-68         s\_arg\_delimit=\textcolor{stringliteral}{"\(\backslash\)n"}
-69     \textcolor{comment}{#end if we put each arg descript on a }
-70     \textcolor{comment}{#separate line of output}
-71 
-72     \textcolor{keywordflow}{if} i\_num\_args\_passed <  i\_num\_args\_required  \(\backslash\)
-73             \textcolor{keywordflow}{or} (i\_num\_args\_passed > i\_max\_poss\_num\_args \textcolor{keywordflow}{and} b\_unlimited\_final\_args == \textcolor{keyword}{False} ): 
-74     
-75         s\_scriptname = os.path.basename( ls\_this\_argv[ 0 ] )    
-76         s\_usage\_string = \textcolor{stringliteral}{"usage: "} + s\_scriptname 
-77 
-78         \textcolor{keywordflow}{if} b\_multi\_line\_msg:
-79             s\_usage\_string=\textcolor{stringliteral}{"usage: "} + s\_scriptname \(\backslash\)
-80                     + \textcolor{stringliteral}{"\(\backslash\)nargs:\(\backslash\)n"}
-81         \textcolor{keywordflow}{else}:
-82             s\_usage\_string = \textcolor{stringliteral}{"usage: "} + s\_scriptname 
-83         \textcolor{comment}{#end if multi line else not}
-84 
-85         \textcolor{keywordflow}{for} s\_arg \textcolor{keywordflow}{in} ls\_required\_arg\_descriptions:
+64             s\_note=\textcolor{keywordtype}{None}):
+65     \textcolor{stringliteral}{'''}
+66 \textcolor{stringliteral}{    arg 1 expects sys.argv, or a copy}
+67 \textcolor{stringliteral}{    arg 2 expects a list strings, in order, required args}
+68 \textcolor{stringliteral}{    arg 3 expects a list of strings, in order, any optional args}
+69 \textcolor{stringliteral}{    '''}
+70     i\_num\_args\_required = len( ls\_required\_arg\_descriptions )
+71     i\_num\_args\_optional = len( ls\_optional\_arg\_descriptions )
+72     i\_max\_poss\_num\_args = i\_num\_args\_required + i\_num\_args\_optional 
+73     i\_num\_args\_passed = len( ls\_this\_argv ) - 1  
+74     s\_usage\_string = \textcolor{stringliteral}{""}
+75     s\_arg\_delimit=\textcolor{stringliteral}{""}
+76     \textcolor{keywordflow}{if} b\_multi\_line\_msg == \textcolor{keyword}{True}:
+77         s\_arg\_delimit=\textcolor{stringliteral}{"\(\backslash\)n"}
+78     \textcolor{comment}{#end if we put each arg descript on a }
+79     \textcolor{comment}{#separate line of output}
+80 
+81     \textcolor{keywordflow}{if} i\_num\_args\_passed <  i\_num\_args\_required  \(\backslash\)
+82             \textcolor{keywordflow}{or} (i\_num\_args\_passed > i\_max\_poss\_num\_args \textcolor{keywordflow}{and} b\_unlimited\_final\_args == \textcolor{keyword}{False} ): 
+83     
+84         s\_scriptname = os.path.basename( ls\_this\_argv[ 0 ] )    
+85         s\_usage\_string = \textcolor{stringliteral}{"usage: "} + s\_scriptname 
 86 
-87             s\_usage\_string += \textcolor{stringliteral}{" <"} \(\backslash\)
-88                 + s\_arg + \textcolor{stringliteral}{">"} \(\backslash\)
-89                 + s\_arg\_delimit
-90         \textcolor{comment}{#end for each requried arg}
-91 
-92         \textcolor{keywordflow}{for} s\_arg \textcolor{keywordflow}{in} ls\_optional\_arg\_descriptions:
+87         \textcolor{keywordflow}{if} b\_multi\_line\_msg:
+88             s\_usage\_string=\textcolor{stringliteral}{"usage: "} + s\_scriptname \(\backslash\)
+89                     + \textcolor{stringliteral}{"\(\backslash\)nargs:\(\backslash\)n"}
+90         \textcolor{keywordflow}{else}:
+91             s\_usage\_string = \textcolor{stringliteral}{"usage: "} + s\_scriptname 
+92         \textcolor{comment}{#end if multi line else not}
 93 
-94             s\_usage\_string += \textcolor{stringliteral}{" <(optional) "} \(\backslash\)
-95                 + s\_arg + \textcolor{stringliteral}{">"} \(\backslash\)
-96                 + s\_arg\_delimit
-97         \textcolor{comment}{#end for each required arg}
-98 
-99     \textcolor{comment}{#end if number of args is out of range}
+94         \textcolor{keywordflow}{for} s\_arg \textcolor{keywordflow}{in} ls\_required\_arg\_descriptions:
+95 
+96             s\_usage\_string += \textcolor{stringliteral}{" <"} \(\backslash\)
+97                 + s\_arg + \textcolor{stringliteral}{">"} \(\backslash\)
+98                 + s\_arg\_delimit
+99         \textcolor{comment}{#end for each requried arg}
 100 
-101     \textcolor{keywordflow}{if} s\_usage\_string != \textcolor{stringliteral}{""} \textcolor{keywordflow}{and} s\_note \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-102         s\_usage\_string=s\_usage\_string + \textcolor{stringliteral}{"\(\backslash\)n"} + s\_note
-103     \textcolor{comment}{#end if note }
-104 
-105     \textcolor{keywordflow}{return}  s\_usage\_string 
-106 \textcolor{comment}{#def do\_usage\_check}
+101         \textcolor{keywordflow}{for} s\_arg \textcolor{keywordflow}{in} ls\_optional\_arg\_descriptions:
+102 
+103             s\_usage\_string += \textcolor{stringliteral}{" <(optional) "} \(\backslash\)
+104                 + s\_arg + \textcolor{stringliteral}{">"} \(\backslash\)
+105                 + s\_arg\_delimit
+106         \textcolor{comment}{#end for each required arg}
 107 
+108     \textcolor{comment}{#end if number of args is out of range}
+109 
+110     \textcolor{keywordflow}{if} s\_usage\_string != \textcolor{stringliteral}{""} \textcolor{keywordflow}{and} s\_note \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+111         s\_usage\_string=s\_usage\_string + \textcolor{stringliteral}{"\(\backslash\)n"} + s\_note
+112     \textcolor{comment}{#end if note }
+113 
+114     \textcolor{keywordflow}{return}  s\_usage\_string 
+115 \textcolor{comment}{#def do\_usage\_check}
+116 
 \end{DoxyCode}
 \index{negui\+::pgutilities@{negui\+::pgutilities}!prep\+\_\+and\+\_\+call\+\_\+do\+\_\+pgopsimupop\+\_\+replicate@{prep\+\_\+and\+\_\+call\+\_\+do\+\_\+pgopsimupop\+\_\+replicate}}
 \index{prep\+\_\+and\+\_\+call\+\_\+do\+\_\+pgopsimupop\+\_\+replicate@{prep\+\_\+and\+\_\+call\+\_\+do\+\_\+pgopsimupop\+\_\+replicate}!negui\+::pgutilities@{negui\+::pgutilities}}
@@ -637,32 +651,32 @@ do_pgopsimupop_replicate_from_files (below).
 \end{DoxyVerb}
  
 
-Definition at line 189 of file pgutilities.\+py.
+Definition at line 198 of file pgutilities.\+py.
 
 
 \begin{DoxyCode}
-189                         s\_replicate\_number ):
-190     \textcolor{stringliteral}{''' }
-191 \textcolor{stringliteral}{    This def to be invoked in a subprocess.Popen command, as}
-192 \textcolor{stringliteral}{    instantiated in a PGGuiSimuPop instance in do\_operation.}
-193 \textcolor{stringliteral}{}
-194 \textcolor{stringliteral}{    This def simply prepares the args for the call to def}
-195 \textcolor{stringliteral}{    do\_pgopsimupop\_replicate\_from\_files (below).}
-196 \textcolor{stringliteral}{    '''}
-197 
-198     \textcolor{comment}{#de-stringify args for call to def below:}
-199     ls\_life\_table\_files = s\_life\_table\_files.split( DELIMITER\_LIFE\_TABLE\_FILES )
-200     i\_replicate\_number=int( s\_replicate\_number )
-201 
-202     \hyperlink{namespacenegui_1_1pgutilities_af3612d8b0b5d45a71109ea49eec4f9b0}{do\_pgopsimupop\_replicate\_from\_files}( s\_config\_file,
-203                         ls\_life\_table\_files,
-204                         s\_param\_file,
-205                         s\_output\_base\_name,
-206                         i\_replicate\_number )
-207 
-208     \textcolor{keywordflow}{return}
-209 \textcolor{comment}{#end prep\_and\_call\_do\_pgopsimupop\_replicate}
+198                         s\_replicate\_number ):
+199     \textcolor{stringliteral}{''' }
+200 \textcolor{stringliteral}{    This def to be invoked in a subprocess.Popen command, as}
+201 \textcolor{stringliteral}{    instantiated in a PGGuiSimuPop instance in do\_operation.}
+202 \textcolor{stringliteral}{}
+203 \textcolor{stringliteral}{    This def simply prepares the args for the call to def}
+204 \textcolor{stringliteral}{    do\_pgopsimupop\_replicate\_from\_files (below).}
+205 \textcolor{stringliteral}{    '''}
+206 
+207     \textcolor{comment}{#de-stringify args for call to def below:}
+208     ls\_life\_table\_files = s\_life\_table\_files.split( DELIMITER\_LIFE\_TABLE\_FILES )
+209     i\_replicate\_number=int( s\_replicate\_number )
 210 
+211     \hyperlink{namespacenegui_1_1pgutilities_af3612d8b0b5d45a71109ea49eec4f9b0}{do\_pgopsimupop\_replicate\_from\_files}( s\_config\_file,
+212                         ls\_life\_table\_files,
+213                         s\_param\_file,
+214                         s\_output\_base\_name,
+215                         i\_replicate\_number )
+216 
+217     \textcolor{keywordflow}{return}
+218 \textcolor{comment}{#end prep\_and\_call\_do\_pgopsimupop\_replicate}
+219 
 \end{DoxyCode}
 \index{negui\+::pgutilities@{negui\+::pgutilities}!remove\+\_\+simulation\+\_\+replicate\+\_\+output\+\_\+files@{remove\+\_\+simulation\+\_\+replicate\+\_\+output\+\_\+files}}
 \index{remove\+\_\+simulation\+\_\+replicate\+\_\+output\+\_\+files@{remove\+\_\+simulation\+\_\+replicate\+\_\+output\+\_\+files}!negui\+::pgutilities@{negui\+::pgutilities}}
@@ -678,42 +692,42 @@ do_pgopsimupop_replicate_from_files
 \end{DoxyVerb}
  
 
-Definition at line 293 of file pgutilities.\+py.
+Definition at line 302 of file pgutilities.\+py.
 
 
 \begin{DoxyCode}
-293 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgutilities_aa37c7d125e4eaec2eeea639f53fa140d}{remove\_simulation\_replicate\_output\_files}( s\_basename ):
-294     \textcolor{stringliteral}{'''}
-295 \textcolor{stringliteral}{    When a sim is cancelled inside a PGGuiSimuPop}
-296 \textcolor{stringliteral}{    object, this def is called}
-297 \textcolor{stringliteral}{    to remove any output files produced by the}
-298 \textcolor{stringliteral}{    do\_pgopsimupop\_replicate\_from\_files}
-299 \textcolor{stringliteral}{    '''}
-300 
-301     \textcolor{comment}{#type is to coerce python 3, despite fact that any iterable}
-302     \textcolor{comment}{#would probably suffice:}
-303     ls\_output\_extentions=list( \(\backslash\)
-304             pgout.PGOutputSimuPop.DICT\_OUTPUT\_FILE\_EXTENSIONS.values() )
-305 
-306     \textcolor{keywordflow}{for} s\_ext \textcolor{keywordflow}{in} ls\_output\_extentions:
-307 
-308         s\_unzipped\_file\_pattern=s\_basename + \textcolor{stringliteral}{"*"} \(\backslash\)
-309                 + SIMULATION\_OUTPUT\_FILE\_REPLICATE\_TAG \(\backslash\)
-310                 + \textcolor{stringliteral}{"*"} + s\_ext
-311 
-312         ls\_files\_unzipped=glob.glob( s\_unzipped\_file\_pattern )
-313 
-314         ls\_files\_zipped=glob.glob( s\_unzipped\_file\_pattern \(\backslash\)
-315                 + \textcolor{stringliteral}{"."} + pgout.PGOutputSimuPop.COMPRESSION\_FILE\_EXTENSION )
+302 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1pgutilities_aa37c7d125e4eaec2eeea639f53fa140d}{remove\_simulation\_replicate\_output\_files}( s\_basename ):
+303     \textcolor{stringliteral}{'''}
+304 \textcolor{stringliteral}{    When a sim is cancelled inside a PGGuiSimuPop}
+305 \textcolor{stringliteral}{    object, this def is called}
+306 \textcolor{stringliteral}{    to remove any output files produced by the}
+307 \textcolor{stringliteral}{    do\_pgopsimupop\_replicate\_from\_files}
+308 \textcolor{stringliteral}{    '''}
+309 
+310     \textcolor{comment}{#type is to coerce python 3, despite fact that any iterable}
+311     \textcolor{comment}{#would probably suffice:}
+312     ls\_output\_extentions=list( \(\backslash\)
+313             pgout.PGOutputSimuPop.DICT\_OUTPUT\_FILE\_EXTENSIONS.values() )
+314 
+315     \textcolor{keywordflow}{for} s\_ext \textcolor{keywordflow}{in} ls\_output\_extentions:
 316 
-317         \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_files\_unzipped + ls\_files\_zipped:
-318             os.remove( s\_file )
-319         \textcolor{comment}{#end for each unzipped and zipped output file with this extension}
-320     \textcolor{comment}{#end for each file ext}
-321 
-322     \textcolor{keywordflow}{return}
-323 \textcolor{comment}{#end remove\_simulation\_replicate\_output\_files}
-324 
+317         s\_unzipped\_file\_pattern=s\_basename + \textcolor{stringliteral}{"*"} \(\backslash\)
+318                 + SIMULATION\_OUTPUT\_FILE\_REPLICATE\_TAG \(\backslash\)
+319                 + \textcolor{stringliteral}{"*"} + s\_ext
+320 
+321         ls\_files\_unzipped=glob.glob( s\_unzipped\_file\_pattern )
+322 
+323         ls\_files\_zipped=glob.glob( s\_unzipped\_file\_pattern \(\backslash\)
+324                 + \textcolor{stringliteral}{"."} + pgout.PGOutputSimuPop.COMPRESSION\_FILE\_EXTENSION )
+325 
+326         \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_files\_unzipped + ls\_files\_zipped:
+327             os.remove( s\_file )
+328         \textcolor{comment}{#end for each unzipped and zipped output file with this extension}
+329     \textcolor{comment}{#end for each file ext}
+330 
+331     \textcolor{keywordflow}{return}
+332 \textcolor{comment}{#end remove\_simulation\_replicate\_output\_files}
+333 
 \end{DoxyCode}
 \index{negui\+::pgutilities@{negui\+::pgutilities}!run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process@{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process}}
 \index{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process@{run\+\_\+driveneestimator\+\_\+in\+\_\+new\+\_\+process}!negui\+::pgutilities@{negui\+::pgutilities}}
@@ -745,101 +759,127 @@ pops per file using python.multiprocessing.Process objects.
 \end{DoxyVerb}
  
 
-Definition at line 664 of file pgutilities.\+py.
+Definition at line 672 of file pgutilities.\+py.
 
 
 \begin{DoxyCode}
-664                                         s\_file\_delimiter=\textcolor{stringliteral}{","} ):
-665     \textcolor{stringliteral}{'''}
-666 \textcolor{stringliteral}{    Similar to def above, "do\_simulation\_reps\_in\_subprocesses," this def is called from a}
-667 \textcolor{stringliteral}{    PGGuiNeEstimator instance, in def runEstimator(), which first spawns}
-668 \textcolor{stringliteral}{    a python multiprocessing.Process, which targest this def, and provides}
-669 \textcolor{stringliteral}{    it with the multiprocessing.Event that will signal it to abort and cleanup}
-670 \textcolor{stringliteral}{    (see above).}
-671 \textcolor{stringliteral}{}
-672 \textcolor{stringliteral}{    This def is simpler than the do\_simulation\_reps\_in\_subprocesses def, however, in that it}
-673 \textcolor{stringliteral}{    spawns only a single OS process, that calls python to execute pgdriveneestimator.py,}
-674 \textcolor{stringliteral}{    which itself multiplexes the NeAnlaysis of multiple genepop files and (likely) multiple}
-675 \textcolor{stringliteral}{    pops per file using python.multiprocessing.Process objects.}
-676 \textcolor{stringliteral}{    '''}
-677     \textcolor{keywordflow}{try}:
-678         s\_os\_plaform\_name=platform.system()
-679         
-680         \textcolor{comment}{#if we're on windows, file}
-681         \textcolor{comment}{#paths may be a mangled mix of unix and }
-682         \textcolor{comment}{#windows separators -- with errors resulting}
-683         \textcolor{comment}{#downstream.  So we standardize:}
-684         \textcolor{keywordflow}{if} s\_os\_plaform\_name == \textcolor{stringliteral}{"windows"}:
+672                                         s\_file\_delimiter=\textcolor{stringliteral}{","} ):
+673     \textcolor{stringliteral}{'''}
+674 \textcolor{stringliteral}{    Similar to def above, "do\_simulation\_reps\_in\_subprocesses," this def is called from a}
+675 \textcolor{stringliteral}{    PGGuiNeEstimator instance, in def runEstimator(), which first spawns}
+676 \textcolor{stringliteral}{    a python multiprocessing.Process, which targest this def, and provides}
+677 \textcolor{stringliteral}{    it with the multiprocessing.Event that will signal it to abort and cleanup}
+678 \textcolor{stringliteral}{    (see above).}
+679 \textcolor{stringliteral}{}
+680 \textcolor{stringliteral}{    This def is simpler than the do\_simulation\_reps\_in\_subprocesses def, however, in that it}
+681 \textcolor{stringliteral}{    spawns only a single OS process, that calls python to execute pgdriveneestimator.py,}
+682 \textcolor{stringliteral}{    which itself multiplexes the NeAnlaysis of multiple genepop files and (likely) multiple}
+683 \textcolor{stringliteral}{    pops per file using python.multiprocessing.Process objects.}
+684 \textcolor{stringliteral}{    '''}
 685 
-686             ls\_current\_file\_list=s\_genepop\_files.split( s\_file\_delimiter )
-687             ls\_new\_file\_list=[]
-688             \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_current\_file\_list:
-689                 ls\_new\_file\_list.append( fix\_windows\_path( s\_file ) )
-690             \textcolor{comment}{#end for each file}
-691             
-692             \textcolor{comment}{#replace orig arg with new "fixed" file paths}
-693             s\_genepop\_files=\textcolor{stringliteral}{","}.join( ls\_new\_file\_list )
-694 
-695             \textcolor{comment}{#also need to fix outile path:}
-696             s\_outfile\_basename = fix\_windows\_path( s\_outfile\_basename )
-697         \textcolor{comment}{#end if windows, fix file path strings}
-698 
-699         \textcolor{comment}{#get the correct format for pgdriveneestimator.py's file name parsing alg:}
-700         s\_genepop\_files\_formatted\_as\_python\_list= \(\backslash\)
-701                 \hyperlink{namespacenegui_1_1pgutilities_aed0f15b22462914445ffe1ec2a77cbc8}{convert\_genepop\_files\_string\_to\_list\_format}( 
+686     o\_main\_output=\textcolor{keywordtype}{None}
+687     o\_secondary\_output=\textcolor{keywordtype}{None}
+688 
+689     \textcolor{keywordflow}{try}:
+690         o\_main\_output=\textcolor{keywordtype}{None}
+691         o\_secondary\_output=\textcolor{keywordtype}{None}
+692 
+693         s\_os\_plaform\_name=platform.system()
+694         
+695         \textcolor{comment}{#if we're on windows, file}
+696         \textcolor{comment}{#paths may be a mangled mix of unix and }
+697         \textcolor{comment}{#windows separators -- with errors resulting}
+698         \textcolor{comment}{#downstream.  So we standardize:}
+699         \textcolor{keywordflow}{if} s\_os\_plaform\_name == \textcolor{stringliteral}{"windows"}:
+700 
+701             ls\_current\_file\_list=s\_genepop\_files.split( s\_file\_delimiter )
+702             ls\_new\_file\_list=[]
+703             \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_current\_file\_list:
+704                 ls\_new\_file\_list.append( fix\_windows\_path( s\_file ) )
+705             \textcolor{comment}{#end for each file}
+706             
+707             \textcolor{comment}{#replace orig arg with new "fixed" file paths}
+708             s\_genepop\_files=\textcolor{stringliteral}{","}.join( ls\_new\_file\_list )
+709 
+710             \textcolor{comment}{#also need to fix outile path:}
+711             s\_outfile\_basename = fix\_windows\_path( s\_outfile\_basename )
+712         \textcolor{comment}{#end if windows, fix file path strings}
+713 
+714         \textcolor{comment}{#get the correct format for pgdriveneestimator.py's file name parsing alg:}
+715         s\_genepop\_files\_formatted\_as\_python\_list= \(\backslash\)
+716                 \hyperlink{namespacenegui_1_1pgutilities_aed0f15b22462914445ffe1ec2a77cbc8}{convert\_genepop\_files\_string\_to\_list\_format}( 
       s\_genepop\_files )
-702 
-703         \textcolor{comment}{#caller, assumed to be a pgguineestimator instance,}
-704         \textcolor{comment}{#will have "default" for the runmode val, }
-705         \textcolor{comment}{#when no extra output is desired, and multiprocessing is also}
-706         \textcolor{comment}{#desired.  We convert to the proper term used by pgdriveneestimator.py}
-707         \textcolor{comment}{#to designate this type of run:}
-708         \textcolor{keywordflow}{if} s\_runmode==\textcolor{stringliteral}{"default"}:
-709             s\_runmode=\textcolor{stringliteral}{"no\_debug"}
-710         \textcolor{comment}{#end if default runmode}
-711 
-712         \textcolor{comment}{#Make of a single sequence of strings.}
-713         qs\_files\_args=( s\_genepop\_files\_formatted\_as\_python\_list, ) 
-714 
-715         \textcolor{comment}{#join tuples of arguments in the proper order}
-716         \textcolor{comment}{#for the call to pgdriveneestimator.py:}
-717         seq\_arg\_set=qs\_files\_args \(\backslash\)
-718                         + qs\_sample\_scheme\_args \(\backslash\)
-719                         + ( str( f\_min\_allele\_freq ), str( i\_replicates ) ) \(\backslash\)
-720                         + qs\_loci\_sampling\_scheme\_args \(\backslash\)
-721                         + ( str( i\_loci\_replicates ), str( i\_num\_processes ), s\_runmode ) 
-722 
-723         s\_main\_output\_filename=s\_outfile\_basename + \textcolor{stringliteral}{"."} \(\backslash\)
-724                 + NE\_ESTIMATION\_MAIN\_TABLE\_FILE\_EXT
-725 
-726         s\_secondary\_output\_filename=s\_outfile\_basename + \textcolor{stringliteral}{"."} \(\backslash\)
-727                 + NE\_ESTIMATION\_SECONDARY\_OUTPUT\_FILE\_EXT
-728 
-729         \textcolor{comment}{#pgdriveneestimator will write stdout and stderr, respectively}
-730         \textcolor{comment}{#to these files:}
-731         o\_main\_output=open( s\_main\_output\_filename, \textcolor{stringliteral}{'w'} )
-732         o\_secondary\_output=open( s\_secondary\_output\_filename, \textcolor{stringliteral}{'w'} )
+717 
+718         \textcolor{comment}{#caller, assumed to be a pgguineestimator instance,}
+719         \textcolor{comment}{#will have "default" for the runmode val, }
+720         \textcolor{comment}{#when no extra output is desired, and multiprocessing is also}
+721         \textcolor{comment}{#desired.  We convert to the proper term used by pgdriveneestimator.py}
+722         \textcolor{comment}{#to designate this type of run:}
+723         \textcolor{comment}{#2016\_11\_26 -- while a bug in the parallel processing of ne estimates}
+724         \textcolor{comment}{#is being solved, we're now offering in the gui the two modes "serial"}
+725         \textcolor{comment}{#and "parallel", and recommending "serial"}
+726         \textcolor{keywordflow}{if} s\_runmode==\textcolor{stringliteral}{"default"}:
+727             s\_runmode=\textcolor{stringliteral}{"no\_debug"}
+728         \textcolor{keywordflow}{elif} s\_runmode==\textcolor{stringliteral}{"serial"}:
+729             s\_runmode=\textcolor{stringliteral}{"no\_debug\_serial"}
+730         \textcolor{keywordflow}{elif} s\_runmode ==\textcolor{stringliteral}{"parallel"}:
+731             s\_runmode=\textcolor{stringliteral}{"no\_debug"}
+732         \textcolor{comment}{#end if runmode needs translating for the drive}
 733 
-734         seq\_arg\_set += ( o\_main\_output, o\_secondary\_output )
-735         
-736         \textcolor{comment}{#the driver also takes a final arg, ref to}
-737         \textcolor{comment}{#the multiproc event -- and then checks for }
-738         \textcolor{comment}{#it being set during map\_async when using multiprocesses}
-739         \textcolor{comment}{#(see pgdriveneestimator.py def execute\_ne\_for\_each\_sample):}
-740         seq\_arg\_set += ( o\_multiprocessing\_event, )
-741 
-742         pgne.mymain( *seq\_arg\_set )
-743 
-744         o\_main\_output.close()
-745         o\_secondary\_output.close()
-746     \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} oex:
-747         show\_error\_in\_messagebox\_in\_new\_process( oex, 
-748                 s\_msg\_prefix = \textcolor{stringliteral}{"Error caught by pgutilities, "}
-749                                 + \textcolor{stringliteral}{"def run\_driveneestimator\_in\_new\_process."} )
-750         \textcolor{keywordflow}{raise} oex
-751     \textcolor{comment}{#end try...except...}
-752 
-753     \textcolor{keywordflow}{return}
-754 \textcolor{comment}{#end run\_driveneestimator\_in\_new\_process}
+734         \textcolor{comment}{#Make of a single sequence of strings.}
+735         qs\_files\_args=( s\_genepop\_files\_formatted\_as\_python\_list, ) 
+736 
+737         \textcolor{comment}{#join tuples of arguments in the proper order}
+738         \textcolor{comment}{#for the call to pgdriveneestimator.py:}
+739         seq\_arg\_set=qs\_files\_args \(\backslash\)
+740                         + qs\_sample\_scheme\_args \(\backslash\)
+741                         + ( str( f\_min\_allele\_freq ), str( i\_replicates ) ) \(\backslash\)
+742                         + qs\_loci\_sampling\_scheme\_args \(\backslash\)
+743                         + ( str( i\_loci\_replicates ), str( i\_num\_processes ), s\_runmode ) 
+744 
+745         s\_main\_output\_filename=s\_outfile\_basename + \textcolor{stringliteral}{"."} \(\backslash\)
+746                 + NE\_ESTIMATION\_MAIN\_TABLE\_FILE\_EXT
+747 
+748         s\_secondary\_output\_filename=s\_outfile\_basename + \textcolor{stringliteral}{"."} \(\backslash\)
+749                 + NE\_ESTIMATION\_SECONDARY\_OUTPUT\_FILE\_EXT
+750 
+751         \textcolor{keywordflow}{if} is\_windows\_platform():
+752             s\_main\_output\_filename=fix\_windows\_path( s\_main\_output\_filename )
+753             s\_secondary\_output\_filename=fix\_windows\_path( s\_secondary\_output\_filename )
+754         \textcolor{comment}{#end if windows, fix paths}
 755 
+756         seq\_arg\_set += ( s\_main\_output\_filename,
+757                                 s\_secondary\_output\_filename )
+758 
+759         o\_subprocess=call\_driveneestimator\_using\_subprocess( seq\_arg\_set )
+760 
+761         \textcolor{stringliteral}{'''}
+762 \textcolor{stringliteral}{        This def loops while calling poll() and tests timeout value, currently}
+763 \textcolor{stringliteral}{        (2016\_12\_02)large enough to be irrelevant.  It also checks for the }
+764 \textcolor{stringliteral}{        callers multiprocesssing.event.set(), and kills the subprocess}
+765 \textcolor{stringliteral}{        and its children in event.set(), then calls even.clear():}
+766 \textcolor{stringliteral}{        '''}
+767         manage\_driveneestimator\_subprocess( o\_subprocess, o\_multiprocessing\_event )
+768 
+769     \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} oex:
+770 
+771         \textcolor{stringliteral}{'''}
+772 \textcolor{stringliteral}{        The calling GUI tests for this event's set status.}
+773 \textcolor{stringliteral}{        If it finds set, it will reset the GUI to show}
+774 \textcolor{stringliteral}{        the estimation has halted.}
+775 \textcolor{stringliteral}{        '''}
+776         \textcolor{keywordflow}{if} o\_multiprocessing\_event \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+777             o\_multiprocessing\_event.set()
+778         \textcolor{comment}{#end if we have a non-None event object}
+779         
+780 
+781         show\_error\_in\_messagebox\_in\_new\_process( oex, 
+782                 s\_msg\_prefix = \textcolor{stringliteral}{"Error caught by pgutilities, "}
+783                                 + \textcolor{stringliteral}{"def run\_driveneestimator\_in\_new\_process."} )
+784         \textcolor{keywordflow}{raise} oex
+785     \textcolor{comment}{#end try...except...}
+786 
+787     \textcolor{keywordflow}{return}
+788 \textcolor{comment}{#end run\_driveneestimator\_in\_new\_process}
+789 
 \end{DoxyCode}

@@ -173,33 +173,31 @@ Definition at line 104 of file pgguisimupop.\+py.
 165         \textcolor{comment}{#immediately}
 166         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a23913431472d154054d66ab5e72daf0e}{\_\_setup\_output}()
 167 
-168 
+168         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a5064bac64c69bd13fe1366b21f1f7ad9}{\_\_simulation\_is\_in\_progress}=\textcolor{keyword}{False}
 169 
-170         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a5064bac64c69bd13fe1366b21f1f7ad9}{\_\_simulation\_is\_in\_progress}=\textcolor{keyword}{False}
+170         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a3885325060336297119229764f6548fb}{\_\_total\_processes\_for\_sims}=i\_total\_processes\_for\_sims
 171 
-172         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a3885325060336297119229764f6548fb}{\_\_total\_processes\_for\_sims}=i\_total\_processes\_for\_sims
-173 
-174         \textcolor{comment}{#we hold references to all subframes}
-175         \textcolor{comment}{#except the run-button subframe,}
-176         \textcolor{comment}{#so that we can enable/disable}
-177         \textcolor{comment}{#according to the simulation-run state}
-178         \textcolor{comment}{#(not yet implemented, 2016\_08\_05}
+172         \textcolor{comment}{#we hold references to all subframes}
+173         \textcolor{comment}{#except the run-button subframe,}
+174         \textcolor{comment}{#so that we can enable/disable}
+175         \textcolor{comment}{#according to the simulation-run state}
+176         \textcolor{comment}{#(not yet implemented, 2016\_08\_05}
+177 
+178         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a67da63f36462b56bd1f47206d8f91c7b}{\_\_category\_frames}=\textcolor{keywordtype}{None}
 179 
-180         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a67da63f36462b56bd1f47206d8f91c7b}{\_\_category\_frames}=\textcolor{keywordtype}{None}
-181 
-182         \textcolor{comment}{#we also hold refernces to the keyvalue}
-183         \textcolor{comment}{#frames that hold param values.  This}
-184         \textcolor{comment}{#allows us to communicate with the entry}
-185         \textcolor{comment}{#boxes via param name.}
-186         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a272523ce4bad4d1073c506e858c59996}{\_\_param\_key\_value\_frames}=\textcolor{keywordtype}{None}
-187 
-188 
-189         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a3ac3a7a5a800876180133b4cc41ca63c}{\_\_run\_state\_message}=\textcolor{stringliteral}{""}
-190         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad38b601eabe45f6c35525b060f0343ea}{\_\_init\_interface}()
-191         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a2c5268e62f40c2548d1475959aa60ca9}{\_\_set\_controls\_by\_run\_state}( self.
+180         \textcolor{comment}{#we also hold refernces to the keyvalue}
+181         \textcolor{comment}{#frames that hold param values.  This}
+182         \textcolor{comment}{#allows us to communicate with the entry}
+183         \textcolor{comment}{#boxes via param name.}
+184         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a272523ce4bad4d1073c506e858c59996}{\_\_param\_key\_value\_frames}=\textcolor{keywordtype}{None}
+185 
+186 
+187         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a3ac3a7a5a800876180133b4cc41ca63c}{\_\_run\_state\_message}=\textcolor{stringliteral}{""}
+188         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad38b601eabe45f6c35525b060f0343ea}{\_\_init\_interface}()
+189         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a2c5268e62f40c2548d1475959aa60ca9}{\_\_set\_controls\_by\_run\_state}( self.
       \hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_aef182e14bccdbabf372a6344bc6f8786}{\_\_get\_run\_state}() )
-192     
-193         \textcolor{keywordflow}{return}
+190     
+191         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 
@@ -219,24 +217,24 @@ automatically.
 \end{DoxyVerb}
  
 
-Definition at line 718 of file pgguisimupop.\+py.
+Definition at line 724 of file pgguisimupop.\+py.
 
 
 \begin{DoxyCode}
-718     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad1d590f23bbaf0eda730d488ea74c1ba}{onCullMethodSelectionChange}( self ):
-719         \textcolor{stringliteral}{'''}
-720 \textcolor{stringliteral}{        Not implemented, 2016\_11\_01.  May}
-721 \textcolor{stringliteral}{        not need to add any code here, since}
-722 \textcolor{stringliteral}{        KeyListComboFrame control object resets}
-723 \textcolor{stringliteral}{        the attribute in the input object}
-724 \textcolor{stringliteral}{        automatically.}
-725 \textcolor{stringliteral}{        '''}
-726 
-727         \textcolor{keywordflow}{if} VERY\_VERBOSE:
-728             self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a1a916d4c19afe08b2c7772d099c71f3f}{\_\_test\_value}()
-729         \textcolor{comment}{#end if very verbose}
-730 
-731         \textcolor{keywordflow}{return}
+724     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad1d590f23bbaf0eda730d488ea74c1ba}{onCullMethodSelectionChange}( self ):
+725         \textcolor{stringliteral}{'''}
+726 \textcolor{stringliteral}{        Not implemented, 2016\_11\_01.  May}
+727 \textcolor{stringliteral}{        not need to add any code here, since}
+728 \textcolor{stringliteral}{        KeyListComboFrame control object resets}
+729 \textcolor{stringliteral}{        the attribute in the input object}
+730 \textcolor{stringliteral}{        automatically.}
+731 \textcolor{stringliteral}{        '''}
+732 
+733         \textcolor{keywordflow}{if} VERY\_VERBOSE:
+734             self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a1a916d4c19afe08b2c7772d099c71f3f}{\_\_test\_value}()
+735         \textcolor{comment}{#end if very verbose}
+736 
+737         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop@{negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop}!update\+N0\+Entry\+Box@{update\+N0\+Entry\+Box}}
 \index{update\+N0\+Entry\+Box@{update\+N0\+Entry\+Box}!negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop@{negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop}}
@@ -257,42 +255,42 @@ will be manually updated from this def.
 \end{DoxyVerb}
  
 
-Definition at line 762 of file pgguisimupop.\+py.
+Definition at line 768 of file pgguisimupop.\+py.
 
 
 \begin{DoxyCode}
-762     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ac193cf44f5e4f1e5b146a43e9563d7b0}{updateN0EntryBox}( self ):
-763         \textcolor{stringliteral}{'''}
-764 \textcolor{stringliteral}{        N0 parameter updates differently according to}
-765 \textcolor{stringliteral}{        whether it is simply taken from a config file's}
-766 \textcolor{stringliteral}{        pop section, or, alternatively, calculated from}
-767 \textcolor{stringliteral}{        params Nb,Nb/Nc as given by an "effective\_size"}
-768 \textcolor{stringliteral}{        section in a life table or config file, and also}
-769 \textcolor{stringliteral}{        using input params maleProb, survivalMale, and}
-770 \textcolor{stringliteral}{        survivalFemale.  In the latter}
-771 \textcolor{stringliteral}{        case, the keyvalue frame will be disabled and its entrybox}
-772 \textcolor{stringliteral}{        will be manually updated from this def.  }
-773 \textcolor{stringliteral}{        '''}
-774         \textcolor{keywordflow}{if} self.\_\_input.N0IsCalculatedFromEffectiveSizeInfo():
-775             \textcolor{stringliteral}{'''}
-776 \textcolor{stringliteral}{            Nb is a property, calculated or just returned}
-777 \textcolor{stringliteral}{            depending on its source (effec size or hus a value}
-778 \textcolor{stringliteral}{            given in the pop section). The property def in}
-779 \textcolor{stringliteral}{            our \_\_input member will test the state and calculate}
-780 \textcolor{stringliteral}{            N0 accordingly:}
-781 \textcolor{stringliteral}{            '''}
-782 
-783             i\_current\_n0\_val=self.\_\_input.N0
-784 
-785             self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a272523ce4bad4d1073c506e858c59996}{\_\_param\_key\_value\_frames}[ \textcolor{stringliteral}{"N0"} ].manuallyUpdateValue( 
+768     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ac193cf44f5e4f1e5b146a43e9563d7b0}{updateN0EntryBox}( self ):
+769         \textcolor{stringliteral}{'''}
+770 \textcolor{stringliteral}{        N0 parameter updates differently according to}
+771 \textcolor{stringliteral}{        whether it is simply taken from a config file's}
+772 \textcolor{stringliteral}{        pop section, or, alternatively, calculated from}
+773 \textcolor{stringliteral}{        params Nb,Nb/Nc as given by an "effective\_size"}
+774 \textcolor{stringliteral}{        section in a life table or config file, and also}
+775 \textcolor{stringliteral}{        using input params maleProb, survivalMale, and}
+776 \textcolor{stringliteral}{        survivalFemale.  In the latter}
+777 \textcolor{stringliteral}{        case, the keyvalue frame will be disabled and its entrybox}
+778 \textcolor{stringliteral}{        will be manually updated from this def.  }
+779 \textcolor{stringliteral}{        '''}
+780         \textcolor{keywordflow}{if} self.\_\_input.N0IsCalculatedFromEffectiveSizeInfo():
+781             \textcolor{stringliteral}{'''}
+782 \textcolor{stringliteral}{            Nb is a property, calculated or just returned}
+783 \textcolor{stringliteral}{            depending on its source (effec size or hus a value}
+784 \textcolor{stringliteral}{            given in the pop section). The property def in}
+785 \textcolor{stringliteral}{            our \_\_input member will test the state and calculate}
+786 \textcolor{stringliteral}{            N0 accordingly:}
+787 \textcolor{stringliteral}{            '''}
+788 
+789             i\_current\_n0\_val=self.\_\_input.N0
+790 
+791             self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a272523ce4bad4d1073c506e858c59996}{\_\_param\_key\_value\_frames}[ \textcolor{stringliteral}{"N0"} ].manuallyUpdateValue( 
       i\_current\_n0\_val )
-786         \textcolor{comment}{#end if N0 is calc'd from effective size info}
-787 
-788         \textcolor{keywordflow}{if} VERY\_VERBOSE:
-789             self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a1a916d4c19afe08b2c7772d099c71f3f}{\_\_test\_value}()
-790         \textcolor{comment}{#end if very verbose, show param values}
-791 
-792         \textcolor{keywordflow}{return}
+792         \textcolor{comment}{#end if N0 is calc'd from effective size info}
+793 
+794         \textcolor{keywordflow}{if} VERY\_VERBOSE:
+795             self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a1a916d4c19afe08b2c7772d099c71f3f}{\_\_test\_value}()
+796         \textcolor{comment}{#end if very verbose, show param values}
+797 
+798         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 

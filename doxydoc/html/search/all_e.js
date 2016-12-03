@@ -15,6 +15,7 @@ var searchData=
   ['pghostnotebook',['PGHostNotebook',['../classnegui_1_1pghostnotebook_1_1PGHostNotebook.html',1,'negui::pghostnotebook']]],
   ['pginputneestimator',['PGInputNeEstimator',['../classnegui_1_1pginputneestimator_1_1PGInputNeEstimator.html',1,'negui::pginputneestimator']]],
   ['pginputsimupop',['PGInputSimuPop',['../classnegui_1_1pginputsimupop_1_1PGInputSimuPop.html',1,'negui::pginputsimupop']]],
+  ['pglineregressconfigfilemaker',['PGLineRegressConfigFileMaker',['../classnegui_1_1pglineregressconfigfilemaker_1_1PGLineRegressConfigFileMaker.html',1,'negui::pglineregressconfigfilemaker']]],
   ['pgmenubuilder',['PGMenuBuilder',['../classnegui_1_1pgmenubuilder_1_1PGMenuBuilder.html',1,'negui::pgmenubuilder']]],
   ['pgopneestimator',['PGOpNeEstimator',['../classnegui_1_1pgopneestimator_1_1PGOpNeEstimator.html',1,'negui::pgopneestimator']]],
   ['pgopsimupop',['PGOpSimuPop',['../classnegui_1_1pgopsimupop_1_1PGOpSimuPop.html',1,'negui::pgopsimupop']]],
