@@ -40,7 +40,7 @@ viztype	Visualization type;Parameters;2;0;6;"Regression";str;None;None;Visualiza
 #
 #runmode	Run Mode;suppress_and_set;2;0;7;'no_debug';str;None;None;Use no_debug to run for a single *tsv table output.  Use debug3 to get more output, including all intermediate files which include:~~    --genepopfiles for each subsample/pop combination.~~    --NeEstimator output files.~~    --In the msgs file, a table giving individual membership (by number as ordered in the pop section) in each sample.~~  Note that debug3 may have a long run time, as it does not use multiple processes (processess input value ignored, defaults to 1).;cboxreadonly;( 'no_debug', 'debug3' );x in [ 'no_debug' , 'debug3' ];None
 #
-runmode	Run Mode;Parameters;2;0;7;'serial';str;None;None;In serial mode:~~   All estimations run in a single process.~~   The total processes value, set above, is ignored.~~   This mode is offered temporarily while a bug in the parallel mode, causing occasional failures to complete, is being solved.~~   This mode is recommened as the reliable method.~~In parallel mode:~~   Estimations are performed in parallel using the number of processes indicated by the Total-processes setting above.~~   In this version the parallel mode sometimes fails to complete, and so should be used under caution.  There may be no results or incomplete results.;cboxreadonly;( 'serial', 'parallel' );x in [ 'serial' , 'parallel' ];None
+runmode	Run Mode;Parameters;2;0;7;'parallel';str;None;None;In serial mode:~~   All estimations run in a single process.~~   The total processes value, set above, is ignored.~~   This mode is offered temporarily while a bug in the parallel mode, causing occasional failures to complete, is being solved.~~   This mode is recommened as the reliable method.~~In parallel mode:~~   Estimations are performed in parallel using the number of processes indicated by the Total-processes setting above.~~   In this version the parallel mode sometimes fails to complete, and so should be used under caution.  There may be no results or incomplete results.;cboxreadonly;( 'serial', 'parallel' );x in [ 'serial' , 'parallel' ];None
 #
 #----- Pop sampling scheme parameters -----
 #
@@ -112,23 +112,23 @@ locischeme_total_max_loci_count	Max loci count;suppress_and_set;4;0;4;99999;int;
 #
 #Viz parameters --all viz types
 #
-viz_all_title	Plot title;VizAll;5;0;1;"title text";str;None;None;Plot title text;entry;None;None;None
-viz_all_xlab	x label;VizAll;5;0;2;"x label";str;None;None;Plot x label;entry;None;None;None
-viz_all_ylab	y label;VizAll;5;0;3;"y label";str;None;None;Plot x label;entry;None;None;None
+viz_all_labels_title	Plot title;VizAll;5;0;1;"title text";str;None;None;Plot title text;entry;None;None;None
+viz_all_labels_xlab	x label;VizAll;5;0;2;"x label";str;None;None;Plot x label;entry;None;None;None
+viz_all_labels_ylab	y label;VizAll;5;0;3;"y label";str;None;None;Plot x label;entry;None;None;None
 #
 #Viz parameters--regression
 #
-viz_regress_regressionfile	Regression file;VizRegress;5;0;4;"show";str;None;None;show (plot), none (no plot), or enter a file name (name must end with .pdf or .png;cboxnormal;( 'show', 'none' );x in [ 'show', 'none' ] or x.endswith( ".pdf" ) or x.endswith( ".png" );None
-viz_regress_boxplotfile	Boxplot file;VizRegress;5;0;5;"show";str;None;None;show (plot), none (no plot), or enter a file name (name must end with .pdf or .png;cboxnormal;( 'show', 'none' );x in [ 'show', 'none' ] or x.endswith( ".pdf" ) or x.endswith( ".png" );None
-viz_regress_scatterfile	Scatterplot filee;VizRegress;5;0;6;"show";str;None;None;show (plot), none (no plot), or enter a file name (name must end with .pdf or .png;cboxnormal;( 'show', 'none' );x in [ 'show', 'none' ] or x.endswith( ".pdf" ) or x.endswith( ".png" );None
-viz_regress_outputFilename	Stas output file;VizRegress;5;0;7;"stats_out.txt";str;None;None;File name for stats output;entry;None;None;None
-viz_regress_type	Line type;VizRegress;5;0;8;"auto";str;None;None;Line type;cboxreadonly;( "auto", "pop", "value", "None" );x in [ 'auto','pop','value', 'None' ];None
-viz_regress_expectedslope	Expected slope;VizRegress;5;0;9;-0.1;float;None;None;Expected slope;entry;None;type(x)==float;None
-viz_regress_xMin	Min x value;VizRegress;5;0;10;0;int;None;None;Minimum value of x shown.;entry;None;type(x)==int;None
-viz_regress_xMax	Max x value;VizRegress;5;0;11;200;int;None;None;Maximum value of x shown.;entry;None;type(x)==int;None
-viz_regress_startCollect	Start at Generation;VizRegress;5;0;12;0;int;None;None;Generation at which to start using the data for plot and stats.;entry;None;type(x)==int;None
-viz_regress_alpha	Alpha for CIs;VizRegress;5;0;13;0.5;float;None;None;alpha value to be used for confidence intervals this should be a value less than 0.5;entry;None;type(x)==float;None
+viz_regress_destination_regressionfile	Regression file;VizRegress;5;0;4;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None
+viz_regress_destination_boxplotfile	Boxplot file;VizRegress;5;0;5;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None
+viz_regress_destination_scatterfile	Scatterplot file;VizRegress;5;0;6;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extenion .pdf or .png, or programs defaults to .png).;cboxnormal;( 'show', 'none' );None;None
+viz_regress_confidence_outputFilename	Stas output file;VizRegress;5;0;7;"stats_out.txt";str;None;None;File name for stats output;entry;None;None;None
+viz_regress_comparison_type	Line type;VizRegress;5;0;8;"auto";str;None;None;Line type;cboxreadonly;( "auto", "pop", "value", "None" );x in [ 'auto','pop','value', 'None' ];None
+viz_regress_comparison_expectedSlope	Expected slope;VizRegress;5;0;9;-0.1;float;None;None;Expected slope;entry;None;type(x)==float;None
+viz_regress_limits_xMin	Min x value;VizRegress;5;0;10;0;int;None;None;Minimum value of x shown.;entry;None;type(x)==int;None
+viz_regress_limits_xMax	Max x value;VizRegress;5;0;11;200;int;None;None;Maximum value of x shown.;entry;None;type(x)==int;None
+viz_regress_data_startCollect	Start at generation;VizRegress;5;0;12;1;int;None;None;Generation at which to start using the data for plot and stats.;entry;None;type(x)==int;None
+viz_regress_confidence_alpha	Alpha for CIs;VizRegress;5;0;13;0.5;float;None;None;alpha value to be used for confidence intervals. E.g., for a 95% confidence interval, alpha should be set at 0.05. ;entry;None;type(x)==float;None
 #
 #Viz parameters--subsampled
 #
-viz_subsample_whiskerplotrfile	Whisker plot;VizSubsample;5;0;4;"show";str;None;None;show (plot), none (no plot), or enter a file name (name must end with .pdf or .png);cboxnormal;( 'show', 'none' );x in [ 'show', 'none' ] or x.endswith( ".pdf" ) or x.endswith( ".png" );None
+viz_subsample_destination_whiskerplotrfile	Whisker plot;VizSubsample;5;0;4;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None

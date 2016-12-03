@@ -694,7 +694,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						b_force_disable=b_force_disable,
 						o_validity_tester= o_tot_process_validator,
 						s_tooltip = "Ne estimator can allocate one process " \
-								+ "for each pop, and within pop, eache subsample " \
+								+ "for each pop, and within pop, each subsample " \
 								+ "percentate or remove-N value or replicate. " )
 
 		o_tot_process_kv.grid( row=i_row, column=0, sticky=( NW ) )

@@ -26,6 +26,14 @@ import inspect
 import time
 import multiprocessing
 import shutil
+'''
+psutil and signal are used below,
+as tools for cancelling the subprocess
+launched to do ne estimations. See def
+run_driveneestimator_in_new_process.
+'''
+import signal
+import psutil
 
 #for def do_simulation_reps_in_subprocesses,
 #used to detect windows, and 
@@ -740,23 +748,24 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 		s_secondary_output_filename=s_outfile_basename + "." \
 				+ NE_ESTIMATION_SECONDARY_OUTPUT_FILE_EXT
 
-		#pgdriveneestimator will write stdout and stderr, respectively
-		#to these files:
-		o_main_output=open( s_main_output_filename, 'w' )
-		o_secondary_output=open( s_secondary_output_filename, 'w' )
+		if is_windows_platform():
+			s_main_output_filename=fix_windows_path( s_main_output_filename )
+			s_secondary_output_filename=fix_windows_path( s_secondary_output_filename )
+		#end if windows, fix paths
 
-		seq_arg_set += ( o_main_output, o_secondary_output )
-		
-		#the driver also takes a final arg, ref to
-		#the multiproc event -- and then checks for 
-		#it being set during map_async when using multiprocesses
-		#(see pgdriveneestimator.py def execute_ne_for_each_sample):
-		seq_arg_set += ( o_multiprocessing_event, )
+		seq_arg_set += ( s_main_output_filename,
+								s_secondary_output_filename )
 
-		pgne.mymain( *seq_arg_set )
+		o_subprocess=call_driveneestimator_using_subprocess( seq_arg_set )
 
-		o_main_output.close()
-		o_secondary_output.close()
+		'''
+		This def loops while calling poll() and tests timeout value, currently
+		(2016_12_02)large enough to be irrelevant.  It also checks for the 
+		callers multiprocesssing.event.set(), and kills the subprocess
+		and its children in event.set(), then calls even.clear():
+		'''
+		manage_driveneestimator_subprocess( o_subprocess, o_multiprocessing_event )
+
 	except Exception as oex:
 
 		'''
@@ -778,6 +787,124 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	return
 #end run_driveneestimator_in_new_process
 
+def get_add_path_statment_for_popen():
+
+	s_path_append_statement=None
+
+	s_curr_mod_path = os.path.abspath(__file__)
+
+	#path only (stripped off "/utilities.py" )
+	#-- gives path to all negui mods:
+	s_mod_dir=os.path.dirname( s_curr_mod_path )
+
+	'''
+	Found that windows python would claim no such
+	module found in the import pgguiutilities 
+	statment, unless I replaced the windows os.sep
+	char with linux "/".
+	'''
+	if is_windows_platform():
+		s_mod_dir=fix_windows_path( s_mod_dir )
+	#end if windows platform
+
+
+	s_path_append_statement="import sys; sys.path.append( \"" \
+					+ s_mod_dir + "\" );"
+
+	return s_path_append_statement
+#end get_add_path_statment_for_popen
+
+def call_driveneestimator_using_subprocess( seq_arg_set ):
+
+	QUOTE="\""
+	s_path_statement=get_add_path_statment_for_popen()
+
+	s_import_statement="import pgdriveneestimator as pgd;"
+
+	s_arg_list=( QUOTE +"," + QUOTE ).join( seq_arg_set )
+	s_arg_list=QUOTE + s_arg_list + QUOTE
+
+	s_call_statement="pgd.mymain(" + s_arg_list + ");" 
+
+	s_command=s_path_statement + s_import_statement + s_call_statement
+	'''
+	We use psuti version of Popen.  Having struggled with NeEstimation hangs and orphan processes,
+	the psutil version seems better able to perform for this chore.  This from the docs for psutil
+	module:
+			"A more convenient interface to stdlib subprocess.Popen. It starts a sub process 
+			and you deal with it exactly as when using subprocess.Popen but in addition it also 
+			provides all the methods of psutil.Process class. For method names common to both 
+			classes such as send_signal(), terminate() and kill() psutil.Process implementation 
+			takes precedence. For a complete documentation refer to subprocess module documentation.
+			Unlike subprocess.Popen this class preemptively checks whether PID has been reused on 
+			send_signal(), terminate() and kill() so that you can't accidentally terminate another
+			process, fixing http://bugs.python.org/issue6973."
+'''
+	o_subprocess=psutil.Popen( [ PYEXE_FOR_POPEN, "-c", s_command ] )
+
+
+	return o_subprocess
+#end call_driveneestimator_using_subprocess
+
+def manage_driveneestimator_subprocess( o_subprocess, o_multiprocessing_event ):
+	if VERBOSE:
+		print( "In pgutilities.py, def manage_driveneestimator_subprocess, " \
+							+ "entered def with subprocess, " \
+							+ str( o_subprocess ) + ", and event, "  \
+							+ str( o_multiprocessing_event ) + "."  )
+	#end if VERBOSE
+
+	f_start_run=time.time()
+
+	SLEEPTIMELOOP=3
+
+	#For now we apply essentially
+	#no time limit
+	MAX_HOURS_PER_RUN=100000
+	TIMEOUT=60*60*MAX_HOURS_PER_RUN
+
+	while ( o_subprocess.poll() is None ) \
+						and ( time.time() - f_start_run ) < TIMEOUT:
+
+		if o_multiprocessing_event is not None:
+			if o_multiprocessing_event.is_set():
+
+				i_pid_subproc=o_subprocess.pid
+
+				#kill the child processes:
+				for o_proc in psutil.process_iter():
+					if o_proc.pid == i_pid_subproc:
+						for o_child_proc in o_proc.children():
+							o_child_proc.kill()
+						#end for each child
+				#end for each process
+
+				#With children killed, now we kill the parent:
+				o_subprocess.kill()
+
+				if VERBOSE:
+					print( "In pgutilities.py, def manage_driveneestimator_subprocess, " \
+								+ "after main Ne estimator subprocess kill(), " \
+								+ "result of calling process.is_running(): " \
+								+ str( o_subprocess.is_running() )  + "." )
+				#end if VERBOSE
+
+				o_multiprocessing_event.clear()
+				break;
+			#end if event is set
+		#end if we have multiproc evennt
+
+		time.sleep ( SLEEPTIMELOOP )
+		if VERBOSE:
+			print( "In pgutilities.py, def manage_driveneestimator_subprocess, " \
+						+ "Popen poll: " + str( o_subprocess.poll() ) ) 
+			print( "In pgutilities.py, def manage_driveneestimator_subprocess, " \
+						+ "in loop waiting for poll() is not None or timeout" )
+		#end if verbose
+	#end while running
+
+	return
+#end manage_driveneestimator_subprocess
 
 def run_plotting_program( s_type, s_estimates_table_file, s_plotting_config_file ):
  

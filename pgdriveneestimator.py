@@ -92,6 +92,8 @@ from multiprocessing import Pool
 import time
 import genepopindividualid as gpi
 import re
+import psutil
+
 '''
 In case of interrupted 
 multiprocessing runs.
@@ -1907,7 +1909,6 @@ def write_result_sets( lds_results, lv_sample_values, o_debug_mode, o_main_outfi
 
 def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_mode,
 												o_multiprocessing_event ):
-
 	if VERY_VERBOSE:
 		print ( "In pgdriveneestimator.py, def execute_ne." )
 	#end if very verbose
@@ -1948,10 +1949,12 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 		in Windows.
 		'''
 	
-		#for now giving each chunk at least 3 hours:
+		#for now giving each chunk at least 3 hours, as
+		#the upper limit on the variability of per-chunk processing time is
+		#hard to find:
 		MIN_ALLOWED_TIMEOUT=60*180
 		SLOWEST_PER_CALL_RATE=0.4
-		ELBOW_ROOM_FACTOR=6
+		ELBOW_ROOM_FACTOR=3
 
 		#computes the chunk size (number of calls to do_estimate per chunk):
 		seqdiv=divmod( len( llv_args_each_process ), o_process_pool._processes * 4 )
@@ -1975,18 +1978,25 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 
 			if VERY_VERBOSE:
 				print ("In pgdriveneestimator, def execute_ne_for_each_sample, looping while results not ready" )
+				print( "In pgdriveneestimator, def execute_ne_for_each_sample, with chunksize: " \
+																		+ str( o_mapresult._chunksize ) )
+				print ( "In pgdriveneestimator, def execute_ne_for_each_sample, remaining work chunks: " \
+																			+ str( o_mapresult._number_left ) )
+				print ( "In pgdriveneestimator, def execute_ne_for_each_sample, total completed calls: "  \
+									+ str( sum( [ ( o_res is not None ) for o_res in o_mapresult._value  ] ) ) )
 			#end if very verbose
 
 			i_updated_work_chunk_total=o_mapresult._number_left
-
 
 			if i_last_work_chunk_total != i_updated_work_chunk_total:
 
 				if VERY_VERBOSE:
 					f_elapsed=time.time()-f_chunk_progress_start_time
+				
 					print( "In pgdriveneestimator, def execute_ne_for_each_sample, chunk " \
 							+ str( i_last_work_chunk_total ) + " processed in " \
 							+ str( f_elapsed ) + " seconds." )
+
 				#end if very verbose
 
 				i_last_work_chunk_total=i_updated_work_chunk_total
@@ -2013,8 +2023,8 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 					indicate interrupted run.
 					'''
 					if VERY_VERBOSE:
-						print ( "===========" )
-						print ( "time out with chunk total: " + str( i_last_work_chunk_total ) )
+						print ( "In pgdriveneestimator, def execute_ne_for_each_sample, " 
+									+ "time out with chunk total: " + str( i_last_work_chunk_total ) )
 					#end if VERY_VERBOSE
 
 					b_run_was_interrupted=True
@@ -2072,6 +2082,7 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 			lds_results.append( ds_result )	
 		#end for each set of args
 	#end if multiprocess allowed, execute async, else serially
+
 	return b_run_was_interrupted, lds_results
 #end execute_ne_for_each_sample
 
@@ -2360,8 +2371,25 @@ def mymain( *q_args ):
 		raise Exception( "in pgdriveneestimator.py, def mymain(), " \
 							+ "did not find NeEstimator executable." )
 	#end if can't find executable
+	
+	##### temp revision to try running
+	# as popen subprocess (see pgutilities)
+	i_lenargs=len( q_args )
+	##strip off the last 3 items
+	seq_unaltered_args=q_args[0:IDX_DEBUG_MODE + 1 ]
+	
+	o_infile=open(  q_args[ IDX_MAIN_OUTFILE ], 'w' )
+	o_outfile=open( q_args[ IDX_SECONDARY_OUTFILE ], 'w' )
+	o_event=None
 
-	drive_estimator(  *( q_args ) )
+	seq_args_to_parse=seq_unaltered_args + ( o_infile, o_outfile, o_event )
+	drive_estimator( *seq_args_to_parse )
+
+	o_infile.close()
+	o_outfile.close()
+
+	##### temp rem out to try revised version
+#	drive_estimator(  *( q_args ) )
 
 	return
 #end mymain
