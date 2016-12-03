@@ -1,3 +1,4 @@
+import ConfigParser
 import csv
 import re
 
@@ -196,6 +197,18 @@ def configRead(filename):
     configDict["groupBy"] = groupBy
     configDict["fileOrding"] = fileOrder
     return configDict
+
+def readFileOrder(filename):
+    orderDict = {}
+    config = ConfigParser.ConfigParser()
+    config.readfp(open(filename))
+    if config.has_section("Order"):
+        orderItems = config.items("Order")
+
+
+
+
+
 
 
 file  = "neStatsOut.txt"
