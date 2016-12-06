@@ -1,5 +1,6 @@
 import ConfigParser
 import csv
+import os
 import re
 
 
@@ -47,12 +48,17 @@ def scrapeNE(filename, firstVal=0):
     popNum = 0
     for item in replicateData:
         sourceName = item['original_file']
+        #Strip extreanious Path and extension Data.
+        sourceName = os.path.basename(sourceName)
         pop = item['pop']
         popNum = int(pop)
         individualCount = int(item["census"])
         neEst = float(item['est_ne'])
         maxError = float(item['95ci_high'])
         minError = float(item['95ci_low'])
+        subpopReplicate = int(item['replicate_number'])
+
+        sourceName = (sourceName,subpopReplicate)
         # if neEst == "NaN":
         #    neEst = sys.maxint
         if not sourceName in dataDict:
@@ -85,7 +91,7 @@ def scrapeNE(filename, firstVal=0):
                 # print popKey
                 replicateVctr.append((popKey, replicateDict[popKey]))
                 individualCountVctr.append((popKey, individualCountDict[popKey]))
-                errorVctr.append((popKey,minRepDict[popKey],maxRepDict[popKey]))
+                errorVctr.append((popKey,(minRepDict[popKey],maxRepDict[popKey])))
         resultTable[replicate] = replicateVctr
         individualCountTable[replicate] = individualCountVctr
         errorTable[replicate] = errorVctr
@@ -111,6 +117,7 @@ def configRead(filename):
     sigSlope = 0
     fileOrder = None
     groupBy = "pop"
+    significantCycle = 1
 
     config = ConfigParser.ConfigParser()
     config.readfp(open(filename))
@@ -174,6 +181,10 @@ def configRead(filename):
     if config.has_section("data"):
         if config.has_option("data","startCollect"):
             startDataCollect = config.getint("data","startCollect")
+        if config.has_option("data","ordering"):
+            fileOrder = config.get("data","ordering")
+        if config.has_option("data", "OrderSignificantCycle"):
+            significantCycle = config.getint("data", "OrderSignificantCycle")
 
     if config.has_section("SubSample"):
         if config.has_option("SubSample", "GroupBy"):
@@ -196,6 +207,7 @@ def configRead(filename):
     configDict["sigSlope"] = sigSlope
     configDict["groupBy"] = groupBy
     configDict["fileOrding"] = fileOrder
+    configDict["orderingGen"]  = significantCycle
     return configDict
 
 def readFileOrder(filename):
@@ -204,7 +216,8 @@ def readFileOrder(filename):
     config.readfp(open(filename))
     if config.has_section("Order"):
         orderItems = config.items("Order")
-
+        for order in orderItems:
+            orderDict[order] = {}
 
 
 

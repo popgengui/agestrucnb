@@ -13,7 +13,8 @@ from numpy import mean, median, isnan
 import csv
 import sys
 import os
-from  FileIO import scrapeNE, configRead
+from  FileIO import scrapeNE, configRead, readFileOrder
+
 
 #function to perform the linear regression and store the results in a dictionary
 def lineRegress(linePoints):
@@ -96,8 +97,8 @@ def createScatterPlot(table,errorTable, title=None, xlab=None, yLab=None, dest="
     minErrorVctr = []
     maxErrorVctr = []
     for errorIdx in range(len(errorData)):
-        minError = errorData[errorIdx][1]
-        maxError = errorData[errorIdx][2]
+        minError = errorData[errorIdx][1][0]
+        maxError = errorData[errorIdx][1][1]
         dataVal = flatData[errorIdx][1]
         print minError, maxError, dataVal
         print "\n\n"
@@ -357,11 +358,12 @@ def neGraphMaker(pointsVctrs, expectedSlope = None,title = None, xlab = None, yL
 
 
 
+
 #master function to create a graph from neEstimation data.
 #neFile: filepath for the neEstimation output file desired.
 #configFile filepath to configureation file containting parameteres for the graph (see example.cfg and example1.cfg,
 #   this parameter and all feilds in the file are optional with what i considered the most relevant/base defaults)
-def neGrapher(neFile, configFile):
+def neGrapher(neFile, configFile=None):
 
     if not configFile:
         table , countsTable, errorTable= scrapeNE(neFile)
@@ -371,6 +373,10 @@ def neGrapher(neFile, configFile):
         return True
     configs = configRead(configFile)
     table,countsTable, errorTable = scrapeNE(neFile,configs["startData"])
+    if configs["ordering"]:
+        orderingTable = readFileOrder(configs["ordering"])
+        table = orderFiles(table,orderingTable,configs["orderingGen"])
+        errorTable = orderFiles(errorTable,orderingTable,configs["orderingGen"])
     print table
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
     createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
@@ -383,11 +389,10 @@ def neGrapher(neFile, configFile):
 #outFileName: resulting file location for file results, will overwrite existing file.
 #significantValue: value of comparison w/ regards to slope. should be 0 for every test, but can be changed if needed.
 #testFlag: flag that disables file write and prints stats to console instead, used for test functions
-def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,testFlag = False):
+def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,testFlag = False):
     tableFormat = "{:<30}{:<30}{:<50}{:<80}\n"
     confPercent = (1 - confidenceAlpha)*100
     tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)","Source File")
-    table, countsTable, errorTable = scrapeNE(neFile,firstVal)
     slopeVctr = []
     confidenceVctr = []
 
@@ -395,7 +400,7 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     for recordKey in table.keys():
         record = table[recordKey]
         slope, intercept, confidence  = slopeConfidence(confidenceAlpha,record)
-        tableString+=tableFormat.format(slope,intercept,confidence,recordKey)
+        tableString+=tableFormat.format(slope,intercept,confidence,recordKey[0])
         if isnan(slope):
             Uncountable +=1
         else:
@@ -443,10 +448,53 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
 
 def neStats(neFile, configFile = None, testFlag = False):
     if not  configFile:
-        return _neStatsHelper(neFile,0.05)
+        table, countsTable, errorTable = scrapeNE(neFile,)
+        return _neStatsHelper(table,neFile,0.05)
 
     configVals = configRead(configFile)
-    return _neStatsHelper(neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
+    neTable,countsTable, errorTable = scrapeNE(neFile,configVals["startData"])
+    if configVals["ordering"]:
+        neTable
+        orderingTable = readFileOrder(configVals["ordering"])
+        neTable = orderFiles(neTable,orderingTable,configVals["orderingGen"])
+
+    return _neStatsHelper(neTable,neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
+
+#gets teh minumum of the maximum of the number of subpops for the table
+def _getSubpopLimit(table):
+    identTuples = table.keys()
+    maxDict = {}
+    for ident in identTuples:
+        if ident[0] not in maxDict:
+            maxDict[ident[0]] = 0
+        maxDict[ident[0]] = max(maxDict[ident[0]],ident[1])
+    return(min(maxDict.values()))
+
+
+
+
+def orderFiles(table, orderDict,genNum = 1):
+    orderedTable = {}
+    subpopLimit = _getSubpopLimit(table)
+    for ordering in orderDict.keys():
+
+        for subpopNumber in range(0,subpopLimit+1):
+            orderedTable[(ordering,subpopNumber)]=[]
+            for entry in orderDict[ordering]:
+                entryList = table[(entry[1],subpopNumber)]
+                foundGen = None
+                for point in entryList:
+                    if point[0] == genNum:
+                        foundGen = point[1]
+                        break
+                if not foundGen:
+                    print "desired gen not found in"
+                    print entry[1]
+                    raise Exception("desired gen number "+str(genNum)+" not found in "+str(entry))
+                orderedTable[(ordering,subpopNumber)].append((entry[0], foundGen))
+    return orderedTable
+
+
 
 
 if __name__ == "__main__":
@@ -660,3 +708,16 @@ if __name__ == "__main__":
     neGrapher("testData.txt","example1.cfg")
     _neStatsHelper("testData.txt",0.1,testFlag=True)
     _neStatsHelper("testData.txt",0.05)
+
+    orderDict = {"foo":[(0,"biz"),(1,"baz"),(2,"bar")],"Flop":[(0,"biz"),(5,"boz")]}
+
+    orderTable ={("biz",0):[(1,5),(3,33)],("baz",0):[(1,10),(4,33)],("bar",0):[(1,15),(5,33)],("boz",0):[(1,25),(2,33)]}
+
+    print orderFiles(orderTable,orderDict)
+    ordered = orderFiles(orderTable,orderDict)
+    neGraphMaker(ordered)
+    try:
+        orderFiles(orderTable, orderDict, 3)
+    except Exception as e:
+        print e.message
+        print "exception check passed"
