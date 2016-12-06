@@ -214,17 +214,17 @@ def readFileOrder(filename):
     orderDict = {}
     config = ConfigParser.ConfigParser()
     config.readfp(open(filename))
+    tuplePattern = re.compile("\((\d*.\d*,.*?)\)")
     if config.has_section("Order"):
         orderItems = config.items("Order")
         for order in orderItems:
-            orderDict[order] = {}
+            orderName = order[0]
+            orderDict[orderName] = []
+            tupleList = tuplePattern.findall(order[1])
+            for tuple in tupleList:
+                tupleSplit = tuple.split(",")
+                ordinal = float(tupleSplit[0])
+                fileName = tupleSplit[1]
+                orderDict[orderName.append()]
 
 
-
-
-
-
-file  = "neStatsOut.txt"
-
-scrapePower(file)
-scrapeSlopes(file)

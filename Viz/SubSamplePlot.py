@@ -42,39 +42,39 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", so
         plt.close()
         plt.clf()
 
-    def createOneDimBoxPlot(table, title=None, xlab=None, yLab=None, dest="show", groupCrit="pop"):
+def createOneDimBoxPlot(table, title=None, xlab=None, yLab=None, dest="show", groupCrit="pop"):
 
-        flatData = [val for sublist in table for val in table[sublist]]
+    flatData = [val for sublist in table for val in table[sublist]]
 
-        plotData = []
-        goupBy(table,groupCrit)
+    plotData = []
+    goupBy(table,groupCrit)
 
-        unzippedX = [x[0] for x in flatData if x[0]]
-        print unzippedX
-        setX = set(unzippedX)
-        listX = list(setX)
-        listX.sort()
-        for x in listX:
-            ySet = [datum[1] for datum in flatData if datum[0] == x]
-            plotData.append(ySet)
-            # plotData = unzippedy
-        plotData.append([])
-        listX.append("$(Pop,Loci)$")
-        plt.boxplot(plotData, labels=listX)
-        plt.xticks(rotation=45)
-        if title:
-            plt.title(title)
-        if xlab:
-            plt.xlabel(xlab)
-        if yLab:
-            plt.ylabel(yLab)
-        plt.subplots_adjust(bottom=0.25)
-        plt.margins(0.15, 0.15)
+    unzippedX = [x[0] for x in flatData if x[0]]
+    print unzippedX
+    setX = set(unzippedX)
+    listX = list(setX)
+    listX.sort()
+    for x in listX:
+        ySet = [datum[1] for datum in flatData if datum[0] == x]
+        plotData.append(ySet)
+        # plotData = unzippedy
+    plotData.append([])
+    listX.append("$(Pop,Loci)$")
+    plt.boxplot(plotData, labels=listX)
+    plt.xticks(rotation=45)
+    if title:
+        plt.title(title)
+    if xlab:
+        plt.xlabel(xlab)
+    if yLab:
+        plt.ylabel(yLab)
+    plt.subplots_adjust(bottom=0.25)
+    plt.margins(0.15, 0.15)
 
-        if dest == "show":
-            plt.show()
-        else:
-            plt.savefig(dest, bbox_inches='tight')
+    if dest == "show":
+        plt.show()
+    else:
+        plt.savefig(dest, bbox_inches='tight')
         plt.close()
         plt.clf()
 
@@ -208,7 +208,7 @@ def goupBy(table, groupIdentifier):
 def subSamplePlotter(neFile, configFile = None):
     if configFile == None:
         table, popTable = neFileRead(neFile)
-        sortedTable = sortBy(table, "loci")
+        sortedTable = sortBy(table, "pop")
         if len(table.keys()) ==1:
             createBoxPlot(sortedTable,sortCrit = "loci")
 
@@ -222,11 +222,11 @@ def subSamplePlotter(neFile, configFile = None):
         table, popTable = neFileRead(neFile)
         sortedTable = sortBy(table, configs["sortBy"])
         if len(table.keys()) == 1:
-            createBoxPlot(sortedTable, title=configs["title"],xlab=configs["xlab"],yLab=configs["ylab"],dest=configs["dest"], sortCrit =configs["sortBy"])
+            createBoxPlot(sortedTable, title=configs["title"],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"], sortCrit =configs["sortBy"])
         else:
             for key in sortedTable.keys():
                 tempTable = {key: sortedTable[key]}
-                createBoxPlot(tempTable,title=configs["title"],xlab=configs["xlab"],yLab=configs["ylab"],dest=configs["dest"], sortCrit =configs["sortBy"])
+                createBoxPlot(tempTable,title=configs["title"],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"], sortCrit =configs["sortBy"])
 
 if __name__ == "__main__":
     subSamplePlotter("test.tsv")
