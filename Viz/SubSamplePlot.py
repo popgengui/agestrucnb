@@ -79,6 +79,23 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", so
         plt.clf()
 
 #reads in data fron neEst file outputs
+
+'''
+Ted added 2016_12_05, to allow for
+non-float values in the x-axis tuples.
+'''
+def return_float_or_string( v_val ):
+    f_val=None
+    v_return_val=None
+    try:
+        v_return_val=float( v_val )
+    except ValueError:
+        v_return_val=v_val
+    #end try to cast as float
+    return v_return_val
+#end return_float_if_convertable_else_string
+
+
 def neFileRead(filename, firstVal = 0):
     fileBuffer = open(filename, "rb")
     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
@@ -88,9 +105,25 @@ def neFileRead(filename, firstVal = 0):
     for item in replicateData:
         sourceName = item['original_file']
         pop =  item['sample_value']
-        popSample = float(pop)
+
+        '''
+        Ted revised 2016_12_05, to allow
+        non-float (string) pop sample values.
+        '''
+        popSample = return_float_or_string(pop)
+        #popSample = float(pop)
+
+        popSample = pop
         loci = item['loci_sample_value']
-        lociSample = float(loci)
+
+        '''
+        Ted revosed 2016_12_05, to allow
+        non-float (string) loci sample values.
+        '''
+        print( "new_version" )
+        lociSample = return_float_or_string(loci)
+        #lociSample = float(loci)
+
         individualCount = int(item["indiv_count"])
         neEst = float(item['est_ne'])
         #if neEst == "NaN":
