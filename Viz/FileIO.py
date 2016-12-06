@@ -116,7 +116,7 @@ def configRead(filename):
     statFileOut = "neStats.out"
     sigSlope = 0
     fileOrder = None
-    groupBy = "pop"
+    sortBy = "pop"
     significantCycle = 1
 
     config = ConfigParser.ConfigParser()
@@ -187,8 +187,8 @@ def configRead(filename):
             significantCycle = config.getint("data", "OrderSignificantCycle")
 
     if config.has_section("SubSample"):
-        if config.has_option("SubSample", "GroupBy"):
-            groupBy = config.get("SubSample", "GroupBy")
+        if config.has_option("SubSample", "sortBy"):
+            sortBy = config.get("SubSample", "sortBy")
 
 
 
@@ -205,7 +205,7 @@ def configRead(filename):
     configDict["startData"] = startDataCollect
     configDict["statsFilename"] = statFileOut
     configDict["sigSlope"] = sigSlope
-    configDict["groupBy"] = groupBy
+    configDict["sortBy"] = sortBy
     configDict["fileOrding"] = fileOrder
     configDict["orderingGen"]  = significantCycle
     return configDict
