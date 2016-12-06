@@ -706,8 +706,9 @@ if __name__ == "__main__":
     print configRead("example1.cfg")
     print "test master methods"
     neGrapher("testData.txt","example1.cfg")
-    _neStatsHelper("testData.txt",0.1,testFlag=True)
-    _neStatsHelper("testData.txt",0.05)
+    table, countsTable, errorTable = scrapeNE("testData.txt")
+    _neStatsHelper(table,"testData",0.1,testFlag=True)
+    _neStatsHelper(table,"testData",0.05)
 
     orderDict = {"foo":[(0,"biz"),(1,"baz"),(2,"bar")],"Flop":[(0,"biz"),(5,"boz")]}
 

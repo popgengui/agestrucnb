@@ -206,7 +206,7 @@ def configRead(filename):
     configDict["statsFilename"] = statFileOut
     configDict["sigSlope"] = sigSlope
     configDict["sortBy"] = sortBy
-    configDict["fileOrding"] = fileOrder
+    configDict["ordering"] = fileOrder
     configDict["orderingGen"]  = significantCycle
     return configDict
 

@@ -1,4 +1,4 @@
-File:testData.txt
+File:testData
 
 Max Regression Slope:		-63.2836363636
 Min Regression Slope:		-4732.86220779
