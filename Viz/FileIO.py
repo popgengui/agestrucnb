@@ -224,7 +224,8 @@ def readFileOrder(filename):
             for tuple in tupleList:
                 tupleSplit = tuple.split(",")
                 ordinal = float(tupleSplit[0])
-                fileName = tupleSplit[1]
-                orderDict[orderName.append()]
+                fileIdent = tupleSplit[1].strip()
+                orderDict[orderName].append((ordinal,fileIdent))
+    return orderDict
 
 

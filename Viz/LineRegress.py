@@ -100,8 +100,6 @@ def createScatterPlot(table,errorTable, title=None, xlab=None, yLab=None, dest="
         minError = errorData[errorIdx][1][0]
         maxError = errorData[errorIdx][1][1]
         dataVal = flatData[errorIdx][1]
-        print minError, maxError, dataVal
-        print "\n\n"
         minDelta = abs(dataVal - minError)
         maxDelta = abs(maxError - dataVal)
 
@@ -143,9 +141,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         errorSet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)
         # plotData = unzippedy
-    plt.boxplot(plotData)
-    #set xAxis
-    plt.xticks(range(len(listX)), listX)
+    plt.boxplot(plotData,labels=listX)
     if title:
         plt.title(title)
     if xlab:
@@ -262,7 +258,7 @@ def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
     xVctr = list(set(allpoints))
     if maxX - minX>1:
 
-        xVctr = range(minX,maxX)
+        xVctr = range(int(math.floor(minX)),int(math.ceil(maxX)))
 
     lineVctrs =[]
     colorVctr = []
@@ -478,7 +474,7 @@ def orderFiles(table, orderDict,genNum = 1):
     subpopLimit = _getSubpopLimit(table)
     for ordering in orderDict.keys():
 
-        for subpopNumber in range(0,subpopLimit+1):
+        for subpopNumber in range(1,subpopLimit+1):
             orderedTable[(ordering,subpopNumber)]=[]
             for entry in orderDict[ordering]:
                 entryList = table[(entry[1],subpopNumber)]
