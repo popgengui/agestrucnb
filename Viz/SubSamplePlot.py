@@ -14,6 +14,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", so
     unzippedX = [x[0] for x in flatData if x[0]]
     setX = set(unzippedX)
     listX = list(setX)
+    print listX
     if sortCrit == "pop":
         listX = sorted(listX,key=lambda tup: (tup[0],tup[1]))
     else:
@@ -113,7 +114,7 @@ def neFileRead(filename, firstVal = 0):
         popSample = return_float_or_string(pop)
         #popSample = float(pop)
 
-        popSample = pop
+        #popSample = pop
         loci = item['loci_sample_value']
 
         '''
@@ -207,14 +208,14 @@ def goupBy(table, groupIdentifier):
 def subSamplePlotter(neFile, configFile = None):
     if configFile == None:
         table, popTable = neFileRead(neFile)
-        sortedTable = sortBy(table, "loci")
+        sortedTable = sortBy(table, "pop")
         if len(table.keys()) ==1:
-            createBoxPlot(sortedTable,sortCrit = "loci")
+            createBoxPlot(sortedTable,sortCrit = "pop")
 
         else:
             for key in table.keys():
-                tempTable = {key:table[key]}
-
+                tempTable = {key:sortedTable[key]}
+                print tempTable
                 createBoxPlot(tempTable,)
     else:
         configs = configRead(configFile)
@@ -228,4 +229,4 @@ def subSamplePlotter(neFile, configFile = None):
                 createBoxPlot(tempTable,title=configs["title"],xlab=configs["xlab"],yLab=configs["ylab"],dest=configs["dest"], sortCrit =configs["sortBy"])
 
 if __name__ == "__main__":
-    subSamplePlotter("test.tsv")
+    subSamplePlotter("subTest.tsv")

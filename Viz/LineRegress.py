@@ -457,27 +457,35 @@ def neStats(neFile, configFile = None, testFlag = False):
     return _neStatsHelper(neTable,neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
 
 #gets teh minumum of the maximum of the number of subpops for the table
-def _getSubpopLimit(table):
+def _getSubpopLimit(table,itemList=None):
     identTuples = table.keys()
     maxDict = {}
     for ident in identTuples:
-        if ident[0] not in maxDict:
-            maxDict[ident[0]] = 0
-        maxDict[ident[0]] = max(maxDict[ident[0]],ident[1])
-    return(min(maxDict.values()))
+        if not itemList or ident in itemList:
+            if ident[0] not in maxDict:
+                maxDict[ident[0]] = 0
+            maxDict[ident[0]] = max(maxDict[ident[0]],ident[1])
+    return maxDict
 
 
 
 
 def orderFiles(table, orderDict,genNum = 1):
     orderedTable = {}
-    subpopLimit = _getSubpopLimit(table)
-    for ordering in orderDict.keys():
+    #get count of suppops
+    subpopLimits = _getSubpopLimit(table)
+    #get leastvalue
+    subpopLimit = min(subpopLimits.values())
+    #create randomized lists  for each file to
+    for ident in subpopLimits.keys():
+        SelectRandom.createOrdering(ident,subpopLimits,subpopLimit)
 
-        for subpopNumber in range(1,subpopLimit+1):
+    for ordering in orderDict.keys():
+       for subpopNumber in range(subpopLimit+1):
             orderedTable[(ordering,subpopNumber)]=[]
             for entry in orderDict[ordering]:
-                entryList = table[(entry[1],subpopNumber)]
+                entryNum = SelectRandom.getOrderingVal(entry[1],subpopNumber)
+                entryList = table[(entry[1],entryNum)]
                 foundGen = None
                 for point in entryList:
                     if point[0] == genNum:
@@ -490,7 +498,47 @@ def orderFiles(table, orderDict,genNum = 1):
                 orderedTable[(ordering,subpopNumber)].append((entry[0], foundGen))
     return orderedTable
 
+class SelectRandom:
+    orderingDict = {}
 
+    @staticmethod
+    def createOrdering(identifier,subpopLimits,selectedCount):
+        print identifier
+        print subpopLimits
+        print selectedCount
+        SelectRandom.orderingDict[identifier] = SelectRandom._createorderArray(subpopLimits[identifier],selectedCount)
+        print SelectRandom.orderingDict
+
+    @staticmethod
+    def _createorderArray(totalCount, selectedCount):
+        ordering  = random.choice(range(1,totalCount+1) , selectedCount+1)
+        return ordering
+
+    @staticmethod
+    def getOrderingVal(identifier,index):
+        return SelectRandom.orderingDict[identifier][index]
+
+
+def neRun(neFile,configFile):
+
+    if not configFile:
+        table , countsTable, errorTable= scrapeNE(neFile)
+        neGraphMaker(table)
+        createBoxPlot(table)
+        createScatterPlot(table)
+        return True
+    configs = configRead(configFile)
+    table,countsTable, errorTable = scrapeNE(neFile,configs["startData"])
+    if configs["ordering"]:
+        SelectRandom()
+        orderingTable = readFileOrder(configs["ordering"])
+        table = orderFiles(table,orderingTable,configs["orderingGen"])
+        errorTable = orderFiles(errorTable,orderingTable,configs["orderingGen"])
+    print table
+    neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
+    createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
+    createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
+    _neStatsHelper(table,neFile,)
 
 
 if __name__ == "__main__":
