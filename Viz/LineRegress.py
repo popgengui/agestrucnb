@@ -477,14 +477,15 @@ def orderFiles(table, orderDict,genNum = 1):
     #get leastvalue
     subpopLimit = min(subpopLimits.values())
     #create randomized lists  for each file to
-    for ident in subpopLimits.keys():
-        SelectRandom.createOrdering(ident,subpopLimits,subpopLimit)
 
     for ordering in orderDict.keys():
-       for subpopNumber in range(subpopLimit+1):
+        for ident in subpopLimits.keys():
+            SelectRandom.createOrdering((ident,ordering), subpopLimits, subpopLimit)
+
+        for subpopNumber in range(subpopLimit):
             orderedTable[(ordering,subpopNumber)]=[]
             for entry in orderDict[ordering]:
-                entryNum = SelectRandom.getOrderingVal(entry[1],subpopNumber)
+                entryNum = SelectRandom.getOrderingVal((entry[1],ordering),subpopNumber)
                 entryList = table[(entry[1],entryNum)]
                 foundGen = None
                 for point in entryList:
@@ -506,12 +507,18 @@ class SelectRandom:
         print identifier
         print subpopLimits
         print selectedCount
-        SelectRandom.orderingDict[identifier] = SelectRandom._createorderArray(subpopLimits[identifier],selectedCount)
-        print SelectRandom.orderingDict
+        if not identifier in SelectRandom.orderingDict:
+            SelectRandom.orderingDict[identifier] = SelectRandom._createorderArray(subpopLimits[identifier[0]],selectedCount)
+            print "New Entry"
+        else:
+            print "existing entry found"
 
     @staticmethod
+    def clearOrdering():
+        SelectRandom.orderingDict = {}
+    @staticmethod
     def _createorderArray(totalCount, selectedCount):
-        ordering  = random.choice(range(1,totalCount+1) , selectedCount+1)
+        ordering  = random.choice(range(1,totalCount+1) , selectedCount)
         return ordering
 
     @staticmethod
@@ -526,6 +533,7 @@ def neRun(neFile,configFile):
         neGraphMaker(table)
         createBoxPlot(table)
         createScatterPlot(table)
+        _neStatsHelper(table,0.5)
         return True
     configs = configRead(configFile)
     table,countsTable, errorTable = scrapeNE(neFile,configs["startData"])
@@ -538,7 +546,7 @@ def neRun(neFile,configFile):
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
     createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
     createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
-    _neStatsHelper(table,neFile,)
+    return _neStatsHelper(table,neFile,configs["alpha"], outFileName=configs["statsFilename"],significantValue=configs["sigSlope"],firstVal=configs["startData"])
 
 
 if __name__ == "__main__":
@@ -756,11 +764,16 @@ if __name__ == "__main__":
 
     orderDict = {"foo":[(0,"biz"),(1,"baz"),(2,"bar")],"Flop":[(0,"biz"),(5,"boz")]}
 
-    orderTable ={("biz",0):[(1,5),(3,33)],("baz",0):[(1,10),(4,33)],("bar",0):[(1,15),(5,33)],("boz",0):[(1,25),(2,33)]}
+    orderTable ={("biz",1):[(1,5),(3,33)],("biz",2):[(1,10),(6,67)],("baz",1):[(1,10),(4,33)],("baz",2):[(1,20),(4,88)],("baz",3):[(1,30),(4,99)],("bar",1):[(1,15),(5,33)],("boz",1):[(1,25),(2,33)]}
 
     print orderFiles(orderTable,orderDict)
     ordered = orderFiles(orderTable,orderDict)
+    ordered2 = orderFiles(orderTable,orderDict)
+    print ordered
+    print ordered2
+    print ordered == ordered2
     neGraphMaker(ordered)
+
     try:
         orderFiles(orderTable, orderDict, 3)
     except Exception as e:

@@ -210,7 +210,7 @@ def configRead(filename):
     configDict["orderingGen"]  = significantCycle
     return configDict
 
-def readFileOrder(filename):
+def readCFGFileOrder(filename):
     orderDict = {}
     config = ConfigParser.ConfigParser()
     config.readfp(open(filename))
@@ -228,4 +228,27 @@ def readFileOrder(filename):
                 orderDict[orderName].append((ordinal,fileIdent))
     return orderDict
 
+def readFileOrder(filename):
+    orderDict = {}
+    with open(filename) as fileBuffer:
+        tempLines = fileBuffer.readline()  + fileBuffer.readline()
+        print tempLines
+        dialect = csv.Sniffer().sniff(tempLines, delimiters=',|\t;')
+        print dialect
+        fileBuffer.seek(0)
+        orderData = csv.DictReader(fileBuffer, dialect=dialect, quotechar="\"")
+        for item in orderData:
+            orderName = item["Group Name"]
+            ordinal = float(item["Value"])
+            fileIdent = item["File"]
+            if not orderName in orderDict:
+                orderDict[orderName] = []
+            orderDict[orderName].append((ordinal, fileIdent))
 
+    print orderDict
+    return  orderDict
+
+
+if __name__ == "__main__":
+    readFileOrder("testOrderCSV.csv")
+    readFileOrder("testOrderTSV.tsv")
