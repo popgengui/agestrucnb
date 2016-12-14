@@ -153,7 +153,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
     if dest == "show":
         plt.show("box")
     else:
-        plt.savefig(dest, bbox_inches='tight')
+        plt.savefig(dest, bbox_inches='tight',sym='')
         plt.close()
 
 #method to get teh confidence interval around the Slope of the regression
@@ -544,7 +544,6 @@ def neRun(neFile,configFile):
         orderingTable = readFileOrder(configs["ordering"])
         table = orderFiles(table,orderingTable,configs["orderingGen"])
         errorTable = orderFiles(errorTable,orderingTable,configs["orderingGen"])
-    print table
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
     createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
     createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])

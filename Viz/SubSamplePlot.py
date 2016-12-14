@@ -25,7 +25,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", so
         # plotData = unzippedy
     plotData.append([])
     listX.append("$(Pop,Loci)$")
-    plt.boxplot(plotData, labels= listX)
+    plt.boxplot(plotData, labels= listX,sym='')
     plt.xticks(rotation=45)
     if title:
         plt.title(title)
@@ -105,6 +105,10 @@ def neFileRead(filename, firstVal = 0):
     popSample = 0
     for item in replicateData:
         sourceName = item['original_file']
+        cohort = int(item["pop"])
+
+
+        sourceName = (sourceName, cohort)
         pop =  item['sample_value']
 
         '''

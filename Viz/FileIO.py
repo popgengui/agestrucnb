@@ -38,7 +38,7 @@ def scrapeSlopes(fileName):
     print resultDict
     return slopeResults, resultDict
 
-def scrapeNE(filename, firstVal=0):
+def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0):
     fileBuffer = open(filename, "rb")
     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
     dataDict = {}
@@ -56,9 +56,10 @@ def scrapeNE(filename, firstVal=0):
         neEst = float(item['est_ne'])
         maxError = float(item['95ci_high'])
         minError = float(item['95ci_low'])
-        subpopReplicate = int(item['replicate_number'])
+        subpopReplicate = return_float_or_string(item['replicate_number'])
+        lociPopReplicate = return_float_or_string(item['loci_replicate_number'])
 
-        sourceName = (sourceName,subpopReplicate)
+        sourceName = (sourceName,subpopReplicate,lociPopReplicate)
         # if neEst == "NaN":
         #    neEst = sys.maxint
         if not sourceName in dataDict:
@@ -265,6 +266,23 @@ def readFileOrder(filename):
 
     print orderDict
     return  orderDict
+
+#reads in data fron neEst file outputs
+
+'''
+Ted added 2016_12_05, to allow for
+non-float values in the x-axis tuples.
+'''
+def return_float_or_string( v_val ):
+    f_val=None
+    v_return_val=None
+    try:
+        v_return_val=float( v_val )
+    except ValueError:
+        v_return_val=v_val
+    #end try to cast as float
+    return v_return_val
+#end return_float_if_convertable_else_string
 
 
 if __name__ == "__main__":
