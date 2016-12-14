@@ -468,6 +468,40 @@ class PGParamSet( object ):
 		#end if param is among the shortnames
 		return b_returnval
 	#emd property isInSet
+	
+	def getTypedParamValues( self, s_param ):
+
+		s_param_default_value=self.getDefaultValueForParam( s_param )
+		s_param_min_val=self.getParamMinForParam( s_param )
+		s_param_max_val=self.getParamMaxForParam( s_param )
+
+		#convert the value entries into proper types
+		dsv_param_vals_by_name={ "default":s_param_default_value, 
+											"min":s_param_min_val, 
+											"max":s_param_max_val }
+					
+		for s_param_value_name in dsv_param_vals_by_name:
+			try: 
+				s_string_form=dsv_param_vals_by_name[ s_param_value_name ] 
+				v_param_value=eval( s_string_form )
+				dsv_param_vals_by_name[ s_param_value_name ] = v_param_value
+
+			except Exception as oex:
+
+				s_msg="In PGParamSet instance, def "\
+						+ "getTypedParamSettings, " \
+						+ "for param " + s_param_value_name \
+						+ " value, there was an error trying to eval " \
+						+ "the extracted string form of the  value, "  \
+						+ s_string_form + ".  Exception raised: " \
+						+ str( oex ) + "."
+
+				raise Exception( s_msg )
+			#end try . . . except . . .
+		#end for each param value (default, min, max)
+
+		return dsv_param_vals_by_name
+	#end getTypedParamValues
 
 	def getAllParamSettings( self, s_param ):
 
@@ -489,29 +523,7 @@ class PGParamSet( object ):
 		v_param_default_value=None
 
 		#convert the value entries into proper types
-		dsv_param_vals_by_name={ "default":s_param_default_value, 
-											"min":s_param_min_val, 
-											"max":s_param_max_val }
-					
-		for s_param_value_name in dsv_param_vals_by_name:
-			try: 
-				s_string_form=dsv_param_vals_by_name[ s_param_value_name ] 
-				v_param_value=eval( s_string_form )
-				dsv_param_vals_by_name[ s_param_value_name ] = v_param_value
-
-			except Exception as oex:
-
-				s_msg="In PGParamSet instance, def "\
-						+ "getAllParamSettings, " \
-						+ "for param " + s_param_value_name \
-						+ " value, there was an error trying to eval " \
-						+ "the extracted string form of the  value, "  \
-						+ s_string_form + ".  Exception raised: " \
-						+ str( oex ) + "."
-
-				raise Exception( s_msg )
-			#end try . . . except . . .
-		#end for each param value (default, min, max)
+		dsv_param_vals_by_name=self.getTypedParamValues( s_param )
 
 		#Types that are lists have a type name of form list<type>, so we
 		#can (in future, if needed), know that the value should be a list

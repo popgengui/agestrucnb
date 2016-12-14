@@ -55,7 +55,7 @@ import pgparamset as pgps
 import pgdriveneestimator as pgdn
 
 #these are the lowest-level interface frames
-#that take input form user and update
+#that take input from the user and update
 #this gui's attributes:
 from pgguiutilities import KeyValFrame
 from pgguiutilities import KeyCategoricalValueFrame
@@ -347,6 +347,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		#end if very verbose
 
 		pgut.remove_files( ls_files_to_remove )
+
 		return
 	#end __remove_output_files
 
@@ -370,11 +371,12 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					#end if very verbose
 
 					self.__neest_multi_process_event.set()
-				except o_err as Exception:
+				except Exception as oex:
 					s_msg = "in PGGuiNeEstimator instance in def " \
 							+ "__cancel_neestimation, Exception after " \
 							+ "setting multi process event: " \
-							+ str( o_err ) + "."
+							+ str( oex ) + "."
+					PGGUIErrorMessage( self, s_msg )
 					sys.stderr.write( s_msg + "\n" )
 				#end try, except
 			#end if event is not none
@@ -405,16 +407,17 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 								+ "Terminating op_process " )
 					else:
 						print( "event now clear. Terminating op_process..." )
-					#end if op_process' eval in pgdriveneestimator did not clear the event, else did
+					#end if op_process management def in pgutilities.py not clear the event, else did
 				#end if very verbose
 
 				self.__op_process.terminate()
-			except o_err as Exception:
+			except Exception as oex:
 					s_msg = "in PGGuiNeEstimator instance in def " \
 							+ "__cancel_neestimation, Exception after " \
 							+ "terminating the process that starts " \
 							+ " the estimation: "  \
-							+ str( o_err ) + "."
+							+ str( oex ) + "."
+					PGGUIErrorMessage( self, s_msg )
 					sys.stderr.write( s_msg + "\n" )
 			#end try, except
 
@@ -833,11 +836,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	#end __init_file_info_interface
 
-	def __update_basename( self, s_val ):
-		self.__basename.set( s_val )
-		return
-	#end __update_basename
-
 	def __update_genepop_file_listbox( self ):
 		self.__genepop_files_listbox.config( state="normal" )
 
@@ -925,7 +923,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					+ s_param_default_value + ".  " \
 					+ "Exception raised: " \
 					+ str( oex ) + "."
-
+			PGGUIErrorMessage( self, s_msg )
 			raise Exception( s_msg )
 		#end try . . . except . . .
 
@@ -953,6 +951,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					+ " as a python type.  " \
 					+ "Exception raised: " \
 					+ str( oex ) + "."
+			PGGUIErrorMessage( self, s_msg )
 			raise Exception( oex )
 		#end try . . . except
 
@@ -973,13 +972,13 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		o_checker=ValueValidator( s_validity_expression, v_init_value )
 
 		if not o_checker.isValid():
-					s_msg="In PGGuiNeEstimator instance, " \
-								+ "def __create_validity_checker, " \
-								+ "invalid initial value when setting up, " \
-								+ "validator object.  Validation message: " \
-								+ o_checker.reportInvalidityOnly() + "."
-					raise Exception( s_msg )
-				#end if not valid default
+			s_msg="In PGGuiNeEstimator instance, " \
+						+ "def __create_validity_checker, " \
+						+ "invalid initial value when setting up, " \
+						+ "validator object.  Validation message: " \
+						+ o_checker.reportInvalidityOnly() + "."
+			PGGUIErrorMessage( self, s_msg )
+			raise Exception( s_msg )
 		#end if not valid init value, exception
 
 		return o_checker
@@ -1352,7 +1351,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 			if not( s_param_interface_section.startswith( s_section_keyname ) ):
 				continue
-			#end if param is to be suppressed, or is a sampling param
+			#end if param is not in the section as identified by the keyname
+			#passed by caller (or default param value).
 
 			if s_param_interface_section.startswith( s_section_keyname ):
 				s_this_param_sampling_scheme=s_param_interface_section.replace( s_section_keyname, "" )
@@ -1519,7 +1519,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				self.__interface_subframes[ VIZ_SUBFRAME_KEY ].destroy()
 		#end if subframe already exists, get rid of it.
 
-
 		o_params_subframe=LabelFrame( self,
 				padding=PARAMETERS_FRAME_PADDING,
 				relief=PARAMETERS_FRAME_STYLE,
@@ -1527,7 +1526,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		self.__interface_subframes[ VIZ_SUBFRAME_KEY ]= \
 										o_params_subframe
-
 		i_row=0
 
 		for s_param in ls_params:
@@ -1565,10 +1563,16 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			#need this check to see if it's a list. 
 			b_param_is_list=self.__param_set.paramIsList( s_param )
 		
-			#The name used in this PGGuiNeEstimator instance
+			#The name used in this PGGuiViz instance
 			#to hold the parameter value (as updated by
 			#the control frame (most often KeyValFrame).
 			s_attr_name=ATTRIBUTE_DEMANLGER + s_param
+
+		
+			if not ( s_param_interface_section == "VizAll" \
+						or s_param_interface_section == s_section_name  ):
+				continue
+			#end if param is not a viz param
 
 			'''
 			This will be passed to the entrybox or cbox, etc
@@ -1585,10 +1589,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				setattr( self, s_attr_name, v_param_default_value )
 				v_value_for_entry_control=v_param_default_value
 			#end if not has attr
-			if not ( s_param_interface_section == "VizAll" \
-						or s_param_interface_section == s_section_name  ):
-				continue
-			#end if param is to be suppressed, or is a sampling param
 
 			#we use the first entry in the list
 			#as the default value for the list editor
@@ -1975,10 +1975,10 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				#endif very verbose, pring
 
 				'''
-				After revisions to pgdriveneestimator.py (2016_11_26)
-				that check for a hung process pool, and in which
+				This test is added after revisions to pgdriveneestimator.py 
+				(2016_11_26) that check for a hung process pool, and in which
 				if the pool times out, pgdrive def "execute_ne_for_each_sample"
-				sets the multiprocessing event.  We testfor it here, and terminate 
+				sets the multiprocessing event.  We test for it here, and terminate 
 				the process if found.
 				'''
 				if self.__neest_multi_process_event is not None:
@@ -2069,7 +2069,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			#end if viz needs to be run	
 
 
-			self.__estimation_in_progress_is_in_progress = False
+			self.__estimation_in_progress = False
 			self.__run_state_message=""
 			self.__init_interface( b_force_disable = False )
 			self.__load_param_interface( b_force_disable = False )
@@ -2097,8 +2097,11 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 	#end __write_viz_config_file
 
 	def __run_viz_by_type( self, s_config_file ):
+
 		s_plotting_type=self.__viztype
+
 		ls_existing_outfiles=self.__get_existing_output_files()
+
 		s_estimates_table=None
 
 		for s_outfile in ls_existing_outfiles:
@@ -2114,26 +2117,36 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			raise Exception( s_msg )
 		#end if no estimates table
 
+		'''
+		2016_12_13
+		Unlike the call from the PGGuiViz class objects,
+		here we do not send in a multiprocessing event,
+		but let the process live or die as  it will.
+
+		This should be revised to handle this process
+		similarly to that which handles the ne estimation
+		process, but both becuse this is a much simpler
+		call (no multiprocess runs to do plotting), and
+		the additioon of more logic to cancel this
+		final task of our GUI object is not trivial.
+		'''
+		o_multiprocessing_event_for_plotting=None
 		o_plotting_process=multiprocessing.Process( \
-				target=pgut.run_plotting_program,
-							args=(  self.__viztype,
-								s_estimates_table,
-									s_config_file ) )
+				target=pgut.call_plotting_program_in_new_subprocess,
+								args=(  self.__viztype,
+									s_estimates_table,
+										s_config_file,
+										o_multiprocessing_event_for_plotting ) )
 		o_plotting_process.start()
 		
 		return
 	#end __run_viz_by_type
 
 	def runViz( self ):
-		##### temp
-		# 2016_11_29 I'm passing on this until I have
-		# better downstream implementation
-
-#		s_config_file_name=self.__write_viz_config_file()
-#		self.__run_viz_by_type( s_config_file_name )
-
+		s_config_file_name=self.__write_viz_config_file()
+		self.__run_viz_by_type( s_config_file_name )
 		return
-	#end runViz
+	#end runviz
 
 #end class PGGuiNeEstimator 
 

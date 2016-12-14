@@ -143,6 +143,14 @@ def configRead(filename):
             boxplotDest = config.get("destination","boxplotfile")
         if config.has_option("destination", "scatterfile"):
             scatterDest = config.get("destination","scatterfile")
+        '''
+        Ted added 2016_12_13 to make the destination option unigue for
+        the subsample plot.
+        '''
+        if config.has_option("destination", "whiskerplotfile"):
+            whiskerDest = config.get("destination","whiskerplotfile")
+        else:
+            whisderDest=None
     if config.has_section("comparison"):
         valueFlag = True
         setExpected = None
@@ -199,6 +207,16 @@ def configRead(filename):
     configDict["dest"] = regressionDest
     configDict["boxplot"] = boxplotDest
     configDict["scatter"] = scatterDest
+    ''' 
+    Ted added 2016_12_13, to give a unique name
+    (and entry in the config file), to the
+    plot file for the subsample plotter.
+    The value reverts to the regression destination 
+    if no whiskerplotfile option is in the config file.
+    The whisker item is accessed in SubSamplePlot.py, 
+    def subSamplePlotter
+    '''
+    configDict["whisker"] = whiskerDest if whiskerDest is not None else regressionDest
     configDict["xLims"] = xLims
     configDict["yLims"] = yLims
     configDict["alpha"] = alphaVal

@@ -20,16 +20,19 @@ from Tkinter import *
 from ttk import *
 import glob
 
-#currently local modules
 import pgmenubuilder as pgmb
-import pgguisimupop as pggs
 
-if NE_GUI_IS_IMPLEMENTED:
-	import pgguineestimator as pgne
-#end if ne estimation gui is ready
+
+#These classes provide the interfaces, 
+#each offered in the main "Add"
+#menu.
+import pgguisimupop as pggs
+import pgguiviz as pggv
+import pgguineestimator as pgne
 
 from pgguiutilities import FrameContainerScrolled
 from pgguiutilities import PGGUIYesNoMessage
+from pgguiutilities import PGGUIInfoMessage
 
 class PGHostNotebook( Notebook ):
 	'''
@@ -101,32 +104,71 @@ class PGHostNotebook( Notebook ):
 		'''
 		Add a tabbed frame that offers a PGGuiSimuPop interface
 		'''
-		if NE_GUI_IS_IMPLEMENTED:
-			o_container=Frame( self, padding=self.__container_padding )
 
-			o_canvas=Canvas( o_container )
+		o_container=Frame( self, padding=self.__container_padding )
 
-			o_pgg=pgne.PGGuiNeEstimator( o_container, 
-							self.__param_names_file_for_neestimation,
-							i_total_processes_for_est=self.__max_process_total )
+		o_canvas=Canvas( o_container )
 
-			o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
-			i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
+		o_pgg=pgne.PGGuiNeEstimator( o_container, 
+						self.__param_names_file_for_neestimation,
+						i_total_processes_for_est=self.__max_process_total )
 
-			s_tab_text="Nb Estimation " + str( self.__tab_count )
+		o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
+		i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
 
-			self.add( o_container, text=s_tab_text )
-			self.__tab_children.append( o_container )
-			self.__tab_count+=1
-			self.select( o_container )
+		s_tab_text="Nb Estimation " + str( self.__tab_count )
 
-			self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
-			self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+		self.add( o_container, text=s_tab_text )
+		self.__tab_children.append( o_container )
+		self.__tab_count+=1
+		self.select( o_container )
 
-		#end if NE_GUI_IS_IMPLEMENTED
+		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+
 		return
 
 	#end addPGGuiNeEstimation
+
+	def addPGGuiViz( self ):
+		'''
+		2016_12_12
+		Adds an interface to perform plotting programs on a table 
+		of Ne estimations.
+		'''
+		
+		o_container=Frame( self, padding=self.__container_padding )
+
+		o_canvas=Canvas( o_container )
+
+		'''
+		2016_12_13
+		Note that we load the param names file for ne estimation,
+		as the PGGuiViz object filters the param names for the
+		proper ones for the Viz functions.
+
+		Also note that we do not allow more than a single process
+		for plotting.
+		'''
+		o_pgg=pggv.PGGuiViz( o_container, 
+						self.__param_names_file_for_neestimation,
+						i_total_processes_for_viz=1 )
+
+		o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
+		i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
+
+		s_tab_text="Nb Vizualizations " + str( self.__tab_count )
+
+		self.add( o_container, text=s_tab_text )
+		self.__tab_children.append( o_container )
+		self.__tab_count+=1
+		self.select( o_container )
+
+		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+
+		return
+	#end addPGGuiViz
 
 	def exitNotebook( self ):
 		if self.__get_tab_count() > 0:
@@ -224,9 +266,9 @@ class PGHostNotebook( Notebook ):
 					self.forget( self.tabs()[ 0 ] )
 				#end while tabs exist
 				self.cleanupAllTabs()
-			#end if answer is do it
-
+			#end if do it
 		#end if we have at least one tab
+		return
 	#end removeAllTabs
 
 	def cleanupAllTabs( self ):
@@ -257,13 +299,11 @@ if __name__ == "__main__":
 	i_width=o_master.winfo_screenwidth()
 	i_height=o_master.winfo_screenheight()
 
-
 	f_width_proportion=0.75
 	f_height_proportion=0.5
 
 	i_geo_width=int( ( i_width * f_width_proportion ) * ( 1 - WINDOW_MARGIN ) )
 	i_geo_height=int( ( i_height * f_height_proportion ) * ( 1 - WINDOW_MARGIN ) )
-
 
 	o_host=PGHostNotebook( o_master, 
 			s_menu_config, 
@@ -280,10 +320,10 @@ if __name__ == "__main__":
 	o_master.title( "Age Structure Nb" )	
 	o_master.grid_rowconfigure( 0, weight=1 )
 	o_master.grid_columnconfigure( 0, weight=1 )
+
 	o_master.mainloop()
 
-
-	o_host.addPGGuiSimupop()
+#	o_host.addPGGuiSimupop()
 
 #end if main
 

@@ -31,9 +31,15 @@ class PGLineRegressConfigFileMaker( object ):
 	IDX_GUI_ATTRIB_CONFIG_FILE_PARAM=3
 
 
-	def __init__( self, o_gui_interface ):
+	def __init__( self, o_gui_interface, b_omit_x_range=True ):
+		'''
+		Param b_omit_x_range, if True, results in a config file
+		missing the xMin and xMax config options, to let (per Brian T)
+		matplot lib auto-set the x range.
+		'''
 
 		self.__interface=o_gui_interface
+		self.__omit_x_range=b_omit_x_range
 		self.__ds_interface_param_values_by_param_names_by_section={}
 		self.__mangled_attribute_prefix=None
 		self.__config_outfile_name=None
@@ -72,6 +78,7 @@ class PGLineRegressConfigFileMaker( object ):
 		for s_member_name in ls_interface_member_names:
 
 			if s_member_name.startswith( s_viz_prefix ):
+
 				#strip off the mangling:
 				s_member_name_unmangled=s_member_name.replace( self.__mangled_attribute_prefix, "" )
 
@@ -88,8 +95,21 @@ class PGLineRegressConfigFileMaker( object ):
 					self.__ds_interface_param_values_by_param_names_by_section[ s_viz_section_name ] = {}
 				#end if section name new to dict, add it
 
-				self.__ds_interface_param_values_by_param_names_by_section[ s_viz_section_name ] [ \
+				if s_viz_section_name == "destination":
+					if not ( v_value_this_param == "show" \
+											or v_value_this_param.endswith( ".png" ) \
+											or v_value_this_param.endswith( ".pdf" ) ) :
+						
+						v_value_this_param = v_value_this_param + ".png"
+					#end if not show, or already has png or pdf extension
+				#end if this is a destination option
+			
+				if not self.__omit_x_range \
+							or s_viz_param_name  not in [ "xMin", "xMax" ]:
+						self.__ds_interface_param_values_by_param_names_by_section[ s_viz_section_name ] [ \
 															s_viz_param_name ] = v_value_this_param
+				#end if we're not omitting x range options, or if the option is not an x range option
+
 
 			#end if the member is a viz param
 

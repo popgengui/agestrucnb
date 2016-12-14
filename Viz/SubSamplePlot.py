@@ -222,11 +222,17 @@ def subSamplePlotter(neFile, configFile = None):
         table, popTable = neFileRead(neFile)
         sortedTable = sortBy(table, configs["sortBy"])
         if len(table.keys()) == 1:
-            createBoxPlot(sortedTable, title=configs["title"],xlab=configs["xlab"],yLab=configs["ylab"],dest=configs["dest"], sortCrit =configs["sortBy"])
+            ''' 
+            2016_12_13, Ted replaced the configs[ "dest" ] reference to the new config option loaded with key "whisker".
+            '''
+            createBoxPlot(sortedTable, title=configs["title"],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["whisker"], sortCrit =configs["sortBy"])
         else:
             for key in sortedTable.keys():
                 tempTable = {key: sortedTable[key]}
-                createBoxPlot(tempTable,title=configs["title"],xlab=configs["xlab"],yLab=configs["ylab"],dest=configs["dest"], sortCrit =configs["sortBy"])
+                '''
+                2016_12_13, revised by Ted.  See similar replacement above, note configs[ "whisper" ] replaces configs[ "dest" ]
+                '''
+                createBoxPlot(tempTable,title=configs["title"],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["whisker"], sortCrit =configs["sortBy"])
 
 if __name__ == "__main__":
     subSamplePlotter("subTest.tsv")

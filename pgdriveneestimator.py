@@ -91,8 +91,6 @@ import os
 from multiprocessing import Pool
 import time
 import genepopindividualid as gpi
-import re
-import psutil
 
 '''
 In case of interrupted 
@@ -276,7 +274,6 @@ SAMPLE_SCHEME_PARAM_DELIMITER=","
 #hence this field is always 0:
 NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=[ "case_number" ]
 
-
 #For pgguineestimator.py to import and use to delete
 #any files left after user has cancelled a run:
 NE_ESTIMATOR_OUTPUT_FILE_TAGS=[ "NoDat.txt", "xTp.txt", "ne_run.txt" ]
@@ -295,6 +292,14 @@ GLOB_INTERMEDIATE_GENEPOP_FILE_TAGS="*_r_*_g_*"
 #input genepops and the Ne2L output files, we have
 #to replace the dots.  This is the replacement char
 INPUT_FILE_DOT_CHAR_REPLACEMENT="_"
+
+
+'''
+Main table formatting info:
+'''
+MAIN_TABLE_RUN_INFO_COLS=[ "original_file", "pop", "census",   "indiv_count", 
+							"sample_value", "replicate_number", "loci_sample_value", 
+							"loci_replicate_number","min_allele_freq" ] 
 
 def set_indices_ne_estimator_output_fields_to_skip():
 
@@ -466,7 +471,7 @@ class DebugMode( object ):
 					+ DebugMode.PRINT_REPLICATE_SELECTIONS 
 		else:
 			s_msg="in " + __filename__ + "DebugMode object, set_debug_mode: " \
-			+ "unknown value for mode: " + str ( i_mode ) 
+			+ "unknown value for mode: " + str ( self.__mode ) 
 			raise Exception( s_msg )
 		#end if mode 0, 1, 2, ...  or undefined
 
@@ -810,7 +815,7 @@ def raise_exception_if_non_single_pop_file( o_genepopfile ):
 		s_msg="In pgdriveneestimator.py:" + OUTPUT_ENDLINE
 		if i_total_pops < 1:
 			s_msg+="No \"pop\" entry found in file, " \
-					+ s_filename
+					+ o_genepopfile.original_file_name
 		else:
 			s_msg+="Current implementation of drive accepts genepop " \
 				+ "files with only a single pop."
@@ -905,16 +910,6 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 		ls_indiv_list=None
 
 		s_nodat_file=o_ne_estimator.output.getNoDatFileName()
-
-		#as of Fri May 13 20:06:14 MDT 2016 currently not able
-		#to parse nodat file,  so leave this rem'd out:
-	#	if s_nodat_file is not None:
-	#		s_nodat_info=o_ne_estimator.output.parsed_nodat_info
-	#		if s_nodat_info is not None:
-	#			s_stderr="\t".join( ls_runinfo + s_nodat_info ) 
-	#		#end if nodat info is not none
-	#		os.remove( s_nodat_file )
-		#end if nodat file is not none
 
 		if o_debug_mode.isSet( DebugMode.MAKE_INDIV_TABLE ):
 			ls_indiv_list = o_genepopfile.getListIndividuals( 
@@ -1227,14 +1222,6 @@ def get_cohorts_sampling_params( lv_sample_values ):
 	
 	f_max_age=float( ls_params[ IDX_MAX_AGE ] )
 
-	'''
-	Currently (2016_10_25), 
-	the mod pgopsimupop.py writes all fields
-	in the individual demography, to the *gen file,
-	as floats, except sex.  We assume age is an integer
-	(i.e a float with no decimal portion).
-	'''
-	i_max_age=int( round( f_max_age ) )
 	return ( o_genepop_indiv_fields,
 				f_max_age )
 
@@ -1642,10 +1629,8 @@ def get_subsample_genepop_file_name( s_original_genepop_file_name,
 	'''
 
 	if s_genepop_file_subsample.startswith(  "_" ):
-		s_path_seperator_this_os=os.path.sep
 		s_genepop_file_subsample="." + s_genepop_file_subsample[1:] 
 	#end if path was mangled by replace
-
 
 	return s_genepop_file_subsample
 #end get_subsample_genepop_file_name
@@ -1866,7 +1851,10 @@ def get_loci_subsample_tags_for_this_indiv_subsample( o_genepopfile,  s_indiv_sa
 
 def write_result_sets( lds_results, lv_sample_values, o_debug_mode, o_main_outfile, o_secondary_outfile ):
 
-	dddli_indiv_list=None
+	#Disabled call to update_indiv_list below,
+	#now makes this assignment unneeded.  May
+	#want to re-implement the idiv list table later.
+#	dddli_indiv_list=None
 
 	if o_debug_mode.isSet( DebugMode.MAKE_INDIV_TABLE ):
 		'''
@@ -2100,11 +2088,9 @@ def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outf
 		#end if field in estimatorfields
 	#end for each estimator fields
 
-	ls_run_fields=[ "original_file", "pop", "census",   "indiv_count", 
-							"sample_value", "replicate_number", "loci_sample_value", 
-							"loci_replicate_number","min_allele_freq" ] 
+	o_main_outfile.write( OUTPUT_DELIMITER.join( MAIN_TABLE_RUN_INFO_COLS + ls_reported_fields  ) + OUTPUT_ENDLINE )
 
-	o_main_outfile.write( OUTPUT_DELIMITER.join( ls_run_fields + ls_reported_fields  ) + OUTPUT_ENDLINE )
+	return
 #end write_header_main_table
 
 def get_sample_abbrevs_for_criteria( lds_results ):
@@ -2158,20 +2144,10 @@ def drive_estimator( *args ):
 
 	llv_args_each_process=[]
 
-	s_indiv_table_file=None
-	#these used soley
-	#to add header to output before 
-	#computing the first rep
-	#of the first subsample (if subsampled)
-	#for the first file:
-	i_filecount=0
-	i_proportion_count=0
-	i_replicate_count=0
-
-	#the counters will total
-	#this on the first call to estimator:
-	FIRST_RUN=3
-
+	#Was used in call to make indiv table file
+	#currently disabled:
+	#s_indiv_table_file=None
+	
 	write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outfile )
 
 	for s_filename in ls_files:
@@ -2182,8 +2158,6 @@ def drive_estimator( *args ):
 		#end if VERY_VERBOSE
 
 		o_genepopfile=gpf.GenepopFileManager( s_filename )
-
-		i_total_populations=o_genepopfile.pop_total
 
 		if VERY_VERBOSE:
 			print ( "in pgdriveneestimator, def drive_estimator, calling do_sample " \
@@ -2313,7 +2287,7 @@ def did_find_ne_estimator_executable():
  
 	#make sure the neestimator is in the user's PATH:
 	NEEST_EXEC_LINUX="Ne2L"
-	NEEST_EXEC_WIN="Ne2.ext"
+	NEEST_EXEC_WIN="Ne2.exe"
 	NEEST_EXEC_MAC="Ne2M"
 
 	s_neestimator_exec=None
@@ -2332,7 +2306,7 @@ def did_find_ne_estimator_executable():
 			raise Exception( s_msg )
 		#end if linux else mac else error
 	elif os.name == "nt":
-		s_neestimator_exec="Ne2.exe"
+		s_neestimator_exec=NEEST_EXEC_WIN
 	else:
 		s_msg="For this OS: %s, don't know the name of the appropriate NeEstimator executable." \
 		% os.name 
@@ -2365,31 +2339,55 @@ def mymain( *q_args ):
 		print( "In pgdriveneestimator, def mymain" )
 	#end if VERY_VERBOSE
 
-	b_exec_found=did_find_ne_estimator_executable()
-
 	if not did_find_ne_estimator_executable():
 		raise Exception( "in pgdriveneestimator.py, def mymain(), " \
 							+ "did not find NeEstimator executable." )
 	#end if can't find executable
 	
-	##### temp revision to try running
-	# as popen subprocess (see pgutilities)
-	i_lenargs=len( q_args )
-	##strip off the last 3 items
+	'''
+
+	We adapted this def to open and close the main and secondary 
+	output files, Originally it simply passed open file objects to def,
+	parse args.  Now we we check for string vs file for these
+	args, as the console version will still pass stdout and sterr
+	file objects, but the GUI will call with string filenames.  
+	We strip off the last 3 items, which
+	now need to be checked for type string file names and assume
+	file objects. We also pass along the last arg, the multiprocessing
+	event.  
+	'''
 	seq_unaltered_args=q_args[0:IDX_DEBUG_MODE + 1 ]
-	
-	o_infile=open(  q_args[ IDX_MAIN_OUTFILE ], 'w' )
-	o_outfile=open( q_args[ IDX_SECONDARY_OUTFILE ], 'w' )
+
+	v_main_outfile_arg= q_args[ IDX_MAIN_OUTFILE ]
+	v_secondary_outfile_arg=q_args[ IDX_SECONDARY_OUTFILE ]
+
+	'''
+	Note that we check for string type, and otherwise
+	assume open file objects. (In Linux sys.std{out,err} return
+	"file" as type, but in Windows they return iostream or
+	something similar, but not file object.
+	'''
+	if type( v_main_outfile_arg  ) == str:
+		o_main_outfile=open( v_main_outfile_arg, 'w' )
+		o_secondary_outfile=open( v_secondary_outfile_arg, 'w' )
+	else:
+		o_main_outfile=v_main_outfile_arg
+		o_secondary_outfile=v_secondary_outfile_arg
+	#end if passed non-file object, open file, else pass along file object
+
 	o_event=None
 
-	seq_args_to_parse=seq_unaltered_args + ( o_infile, o_outfile, o_event )
+	seq_args_to_parse=seq_unaltered_args + ( o_main_outfile, o_secondary_outfile, o_event )
+
 	drive_estimator( *seq_args_to_parse )
 
-	o_infile.close()
-	o_outfile.close()
+	if o_main_outfile != sys.stdout:
+		o_main_outfile.close()
+	#end if not stdout, close
 
-	##### temp rem out to try revised version
-#	drive_estimator(  *( q_args ) )
+	if o_secondary_outfile != sys.stderr:
+		o_secondary_outfile.close()
+	#end if not stderr, close file
 
 	return
 #end mymain
@@ -2405,14 +2403,12 @@ if __name__ == "__main__":
 	i_total_nonopt=len( LS_FLAGS_SHORT_REQUIRED )
 
 	for idx in range( i_total_nonopt ):
-
 		o_arglist.add_argument( \
 				LS_FLAGS_SHORT_REQUIRED[ idx ],
 				LS_FLAGS_LONG_REQUIRED[ idx ],
 				help=LS_ARGS_HELP_REQUIRED[ idx ],
 				required=True )
 	#end for each required argument
-
 
 	i_total_opt=len( LS_FLAGS_SHORT_OPTIONAL )
 

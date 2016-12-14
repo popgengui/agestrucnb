@@ -26,6 +26,7 @@ import inspect
 import time
 import multiprocessing
 import shutil
+
 '''
 psutil and signal are used below,
 as tools for cancelling the subprocess
@@ -839,7 +840,7 @@ def call_driveneestimator_using_subprocess( seq_arg_set ):
 			Unlike subprocess.Popen this class preemptively checks whether PID has been reused on 
 			send_signal(), terminate() and kill() so that you can't accidentally terminate another
 			process, fixing http://bugs.python.org/issue6973."
-'''
+	'''
 	o_subprocess=psutil.Popen( [ PYEXE_FOR_POPEN, "-c", s_command ] )
 
 
@@ -906,10 +907,11 @@ def manage_driveneestimator_subprocess( o_subprocess, o_multiprocessing_event ):
 	return
 #end manage_driveneestimator_subprocess
 
-def run_plotting_program( s_type, s_estimates_table_file, s_plotting_config_file ):
- 
-	if s_type == "Regression":
-		
+def call_plotting_program_in_new_subprocess( s_type, s_estimates_table_file, 
+														s_plotting_config_file, 
+														o_multiprocessing_event ):
+	try:
+
 		s_curr_mod_path = os.path.abspath(__file__)
 
 		#path only (stripped off "/utilities.py" )
@@ -920,36 +922,153 @@ def run_plotting_program( s_type, s_estimates_table_file, s_plotting_config_file
 		Found that windows python would claim no such
 		module found in the import pgguiutilities 
 		statment, unless I replaced the windows os.sep
-		char with linux "/".
+		char with linux "/". Also, note the conversion
+		of the ts and config file args, too.  In that
+		case, the Windows sep char will act like an escape
+		and was in some cases splitting the file path where
+		it encounted a \t or an \n.
 		'''
 		if is_windows_platform():
 			s_mod_dir=fix_windows_path( s_mod_dir )
+			s_estimates_table_file=fix_windows_path( s_estimates_table_file )
+			s_plotting_config_file=fix_windows_path( s_plotting_config_file )
 		#end if windows platform
 
-
-		s_path_append_statements="import sys; sys.path.append( \"" \
+		s_path_append_statement="import sys; sys.path.append( \"" \
 						+ s_mod_dir + "\" );"
 
-		s_import_statement="import Viz.GraphDrive;"
+		s_import_statement="import pgutilities as pgu;"
+
+		s_quoted_plot_type="\"" + s_type + "\""
 
 		s_quoted_ne_file="\"" + s_estimates_table_file + "\""
+
 		s_quoted_config_file="\"" + s_plotting_config_file + "\""
 
-		s_command_statements=\
-				"lr.neGrapher("  \
-				+  s_quoted_ne_file + "," + s_quoted_config_file + ");" \
-				+ "lr.neStats(" \
-				+ s_quoted_ne_file + "," +  s_quoted_config_file + ");"
+		s_command_statement=\
+				"pgu.run_plotting_program( " \
+				+ s_quoted_plot_type + "," \
+				+ s_quoted_ne_file + "," \
+				+ s_quoted_config_file + ");" \
+
+		s_python_command=s_path_append_statement + s_import_statement + s_command_statement
+
+		o_subprocess=subprocess.Popen( [ PYEXE_FOR_POPEN, "-c" , s_python_command ] )
+
+		manage_plotting_program_subprocess( o_subprocess, o_multiprocessing_event )
+
+	except Exception as oex:
+		show_error_in_messagebox_in_new_process( oex, s_msg_prefix="In pgutilities.py, " \
+						+ "def call_plotting_program_in_new_subprocess" )
+		raise( oex )
+	#end try...except
+	return	
+#enc call_plotting_program_in_new_subprocess
+
+
+def manage_plotting_program_subprocess( o_subprocess, o_multiprocessing_event ):
+	'''
+	This def is called by def call_plotting_program_in_new_subprocess,
+	and loops while waiting for either the death (presumably by completion
+	of the plotting taskes) of the subprocess that is executing def 
+	run_plotting_program, or finds a True value for the multiprocessing event 
+	"is_set()", in which case the plotting subprocess is killed.
+
+	The multiprocessing event is presumably set by the GUI, which itself
+	has called def call_plotting_program_in_new_subprocess, and indicates
+	a user or GUI-determined decision to cancel the plotting tasks.
+	'''
+
+	if VERBOSE:
+		print( "In pgutilities.py, def manage_plotting_program_subprocess, " \
+							+ "entered def with subprocess, " \
+							+ str( o_subprocess ) + ", and event, "  \
+							+ str( o_multiprocessing_event ) + "."  )
+	#end if VERBOSE
+
+	f_start_run=time.time()
+
+	SLEEPTIMELOOP=1
+
+	#For now we apply essentially
+	#no time limit
+	MAX_HOURS_PER_RUN=100000
+	TIMEOUT=60*60*MAX_HOURS_PER_RUN
+
+	while ( o_subprocess.poll() is None ) \
+						and ( time.time() - f_start_run ) < TIMEOUT:
+
+		if o_multiprocessing_event is not None:
+			if o_multiprocessing_event.is_set():
+
+				i_pid_subproc=o_subprocess.pid
+
+				#kill the child processes:
+				for o_proc in psutil.process_iter():
+					if o_proc.pid == i_pid_subproc:
+						for o_child_proc in o_proc.children():
+							o_child_proc.kill()
+						#end for each child
+				#end for each process
+
+				#With children killed, now we kill the parent:
+				o_subprocess.kill()
+
+				if VERBOSE:
+					print( "In pgutilities.py, def manage_plotting_program_subprocess, " \
+								+ "after  subprocess kill(), " \
+								+ "result of calling process.is_running(): " \
+								+ str( o_subprocess.is_running() )  + "." )
+				#end if VERBOSE
+
+				o_multiprocessing_event.clear()
+				break;
+			#end if event is set
+		#end if we have multiproc evennt
+
+		time.sleep ( SLEEPTIMELOOP )
+		if VERBOSE:
+			print( "In pgutilities.py, def manage_plotting_program_subprocess, " \
+						+ "Popen poll: " + str( o_subprocess.poll() ) ) 
+			print( "In pgutilities.py, def manage_plotting_program_subprocess, " \
+						+ "in loop waiting for poll() is not None or timeout" )
+		#end if verbose
+	#end while running
+
+	return
+#end manage_driveneestimator_subprocess
+
+def run_plotting_program( s_type, s_estimates_table_file, s_plotting_config_file ):
+
+	try:
+
+		if is_windows_platform():
+			s_estimates_table_file=fix_windows_path( s_estimates_table_file )
+			s_plotting_config_file=fix_windows_path( s_plotting_config_file )
+		#end if windows platform, fix path
+
+		if s_type == "Regression":
+
+			import Viz.LineRegress
 		
-		s_command_statements="GraphDrive.py"
-	
-		s_python_command=s_path_append_statements + s_import_statement + s_command_statements
-	
-		subprocess.Popen( [ PYEXE_FOR_POPEN, "-c" , s_python_command ] )
-		
-	else:
-		pass
-	#end if type is regression, else...
+			Viz.LineRegress.neGrapher( s_estimates_table_file, s_plotting_config_file )
+			Viz.LineRegress.neStats( s_estimates_table_file, s_plotting_config_file )
+		elif s_type == "Subsample":
+
+			import Viz.SubSamplePlot
+
+			Viz.SubSamplePlot.subSamplePlotter( s_estimates_table_file, s_plotting_config_file  )
+
+		else:
+			s_msg = "In pgutilities.py, def run_plotting_program, " \
+							+ "unknown plot type: " + s_type  + "."
+			raise Exception( s_msg )
+		#end if type is regression, else...
+	except Exception as oex:
+		show_error_in_messagebox_in_new_process( oex, s_msg_prefix="In pgutilities.py " \
+						+ "def, run_plotting_program" )
+		raise ( oex )
+	#end try...except
 	return
 #end run_plotting_program
 
@@ -997,6 +1116,7 @@ def show_error_in_messagebox_in_new_process( o_exception, s_msg_prefix=None ):
 	subprocess.Popen( [ PYEXE_FOR_POPEN, "-c" , s_command ] )
 
 #end show_error_in_messagebox_in_new_process
+
 if __name__ == "__main__":
 
     s_exec_name=sys.argv[ 1 ]
