@@ -26,6 +26,7 @@ def lineRegress(linePoints):
     result["r_val"] = r_value
     result["p_val"] = p_value
     result["std_err"] = std_err
+    print result
     return result
 
 #helper function to create lines from slope, intercept data
@@ -300,10 +301,11 @@ def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
     for statDict in LineStats:
         slope = statDict["slope"]
         intercept = statDict["intercept"]
-        linePoints  = _getGraphLine(slope, intercept, xVctr)
-        lineVctrs.append(linePoints)
-        colorVctr.append("b")
-        styleVctr.append("--")
+        if not isnan(slope):
+            linePoints  = _getGraphLine(slope, intercept, xVctr)
+            lineVctrs.append(linePoints)
+            colorVctr.append("b")
+            styleVctr.append("--")
     return lineVctrs, colorVctr,styleVctr
 
 #combines linear regression and create graph into one function
