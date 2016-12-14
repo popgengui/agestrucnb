@@ -150,7 +150,7 @@ def configRead(filename):
         if config.has_option("destination", "whiskerplotfile"):
             whiskerDest = config.get("destination","whiskerplotfile")
         else:
-            whisderDest=None
+            whiskerDest=None
     if config.has_section("comparison"):
         valueFlag = True
         setExpected = None
