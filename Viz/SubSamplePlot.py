@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from Viz.FileIO import configRead
 
 
-def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", sortCrit = "pop"):
+def createBoxPlot(table,title = None, subTitle = None,  xlab = None, yLab= None, dest = "show", sortCrit = "pop"):
 
     flatData = [val for sublist in table for val in table[sublist]]
 
@@ -28,13 +28,17 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", so
     plt.boxplot(plotData, labels= listX,sym='')
     plt.xticks(rotation=45)
     if title:
-        plt.title(title)
+        plt.suptitle(title)
+    if subTitle:
+        plt.title(subTitle, fontsize = 8)
     if xlab:
         plt.xlabel(xlab)
     if yLab:
         plt.ylabel(yLab)
     plt.subplots_adjust(bottom = 0.25)
     plt.margins(0.15,0.15)
+
+    
 
     if dest == "show":
         plt.show()
@@ -220,7 +224,7 @@ def subSamplePlotter(neFile, configFile = None):
             for key in table.keys():
                 tempTable = {key:sortedTable[key]}
                 print tempTable
-                createBoxPlot(tempTable,)
+                createBoxPlot(tempTable,subTitle=key)
     else:
         configs = configRead(configFile)
         table, popTable = neFileRead(neFile)
@@ -236,7 +240,7 @@ def subSamplePlotter(neFile, configFile = None):
                 '''
                 2016_12_13, revised by Ted.  See similar replacement above, note configs[ "whisper" ] replaces configs[ "dest" ]
                 '''
-                createBoxPlot(tempTable,title=configs["title"],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["whisker"], sortCrit =configs["sortBy"])
+                createBoxPlot(tempTable,title=configs["title"], subTitle=key,xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["whisker"], sortCrit =configs["sortBy"])
 
 if __name__ == "__main__":
     subSamplePlotter("subTest.tsv")
