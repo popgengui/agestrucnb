@@ -1,4 +1,5 @@
 import csv
+import os
 
 import matplotlib.pyplot as plt
 
@@ -109,6 +110,7 @@ def neFileRead(filename, firstVal = 0):
     popSample = 0
     for item in replicateData:
         sourceName = item['original_file']
+        sourceName = os.path.basename(sourceName)
         cohort = int(item["pop"])
 
 
