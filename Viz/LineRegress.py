@@ -142,7 +142,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         errorSet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)
         # plotData = unzippedy
-    plt.boxplot(plotData,labels=listX)
+    plt.boxplot(plotData,labels=listX,sym = '')
     if title:
         plt.title(title)
     if xlab:
@@ -153,7 +153,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
     if dest == "show":
         plt.show("box")
     else:
-        plt.savefig(dest, bbox_inches='tight',sym='')
+        plt.savefig(dest, bbox_inches='tight')
         plt.close()
 
 #method to get teh confidence interval around the Slope of the regression
