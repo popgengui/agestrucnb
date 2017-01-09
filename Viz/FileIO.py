@@ -296,6 +296,7 @@ def writeOutliers(fliersDict,outputName):
             keyStr.strip(",")
             keyStr+="\n"
         outliersFile.write(keyStr)
+        outliersFile.write("\n")
     outliersFile.close()
 
 
