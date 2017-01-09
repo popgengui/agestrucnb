@@ -3,10 +3,10 @@ import os
 
 import matplotlib.pyplot as plt
 
-from Viz.FileIO import configRead
+from Viz.FileIO import configRead, makeOutlierDict, writeOutliers
 
 
-def createBoxPlot(table,title = None, subTitle = None,  xlab = None, yLab= None, dest = "show", sortCrit = "pop"):
+def createBoxPlot(table,title = None, subTitle = None,  xlab = None, yLab= None, dest = "show", sortCrit = "pop",):
 
     flatData = [val for sublist in table for val in table[sublist]]
 
@@ -26,7 +26,13 @@ def createBoxPlot(table,title = None, subTitle = None,  xlab = None, yLab= None,
         # plotData = unzippedy
     plotData.append([])
     listX.append("$(Pop,Loci)$")
-    plt.boxplot(plotData, labels= listX,sym='')
+    boxpoints = plt.boxplot(plotData, labels= listX)
+    if len(boxpoints["fliers"]) >0:
+        outliers =  makeOutlierDict(boxpoints["fliers"])
+    plt.clf()
+    plt.boxplot(plotData, labels=listX, sym = "")
+    print "outiers"
+    print boxpoints["fliers"]
     plt.xticks(rotation=45)
     if title:
         plt.suptitle(title)
@@ -42,11 +48,13 @@ def createBoxPlot(table,title = None, subTitle = None,  xlab = None, yLab= None,
     
 
     if dest == "show":
-        plt.show()
+        plt.draw()
+        plt.close()
     else:
         plt.savefig(dest, bbox_inches='tight')
         plt.close()
         plt.clf()
+    return  outliers
 
     def createOneDimBoxPlot(table, title=None, xlab=None, yLab=None, dest="show", groupCrit="pop"):
 
@@ -213,20 +221,20 @@ def goupBy(table, groupIdentifier):
 
 
 
-
-
 def subSamplePlotter(neFile, configFile = None):
+    outliers ={}
     if configFile == None:
         table, popTable = neFileRead(neFile)
         sortedTable = sortBy(table, "pop")
         if len(table.keys()) ==1:
-            createBoxPlot(sortedTable,sortCrit = "pop")
+            outliers = {"":createBoxPlot(sortedTable,sortCrit = "pop")}
 
         else:
             for key in table.keys():
                 tempTable = {key:sortedTable[key]}
                 print tempTable
-                createBoxPlot(tempTable,subTitle=key)
+                outliers[key] = createBoxPlot(tempTable,subTitle=key)
+        writeOutliers(outliers, "outliers.txt")
     else:
         configs = configRead(configFile)
         table, popTable = neFileRead(neFile)
@@ -235,14 +243,19 @@ def subSamplePlotter(neFile, configFile = None):
             ''' 
             2016_12_13, Ted replaced the configs[ "dest" ] reference to the new config option loaded with key "whisker".
             '''
-            createBoxPlot(sortedTable, title=configs["title"],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["whisker"], sortCrit =configs["sortBy"])
+            outliers = {"": createBoxPlot(sortedTable, title=configs["title"],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["whisker"], sortCrit =configs["sortBy"])}
         else:
+            destCounter = 1
             for key in sortedTable.keys():
                 tempTable = {key: sortedTable[key]}
                 '''
                 2016_12_13, revised by Ted.  See similar replacement above, note configs[ "whisper" ] replaces configs[ "dest" ]
                 '''
-                createBoxPlot(tempTable,title=configs["title"], subTitle=key,xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["whisker"], sortCrit =configs["sortBy"])
-
+                dest = configs["whisker"]
+                if dest!="show" or dest!=None:
+                    dest= dest+"_"+destCounter
+                    destCounter+=1
+                outliers[key] = createBoxPlot(tempTable,title=configs["title"], subTitle=key,xlab=configs["xLab"],yLab=configs["yLab"],dest=dest, sortCrit =configs["sortBy"])
+        writeOutliers(outliers,configs["statsFilename"])
 if __name__ == "__main__":
     subSamplePlotter("subTest.tsv")

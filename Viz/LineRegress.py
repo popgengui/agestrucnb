@@ -13,7 +13,7 @@ from numpy import mean, median, isnan
 import csv
 import sys
 import os
-from  FileIO import scrapeNE, configRead, readFileOrder
+from  FileIO import scrapeNE, configRead, readFileOrder, makeOutlierDict, writeOutliers
 
 
 #function to perform the linear regression and store the results in a dictionary
@@ -26,7 +26,6 @@ def lineRegress(linePoints):
     result["r_val"] = r_value
     result["p_val"] = p_value
     result["std_err"] = std_err
-    print result
     return result
 
 #helper function to create lines from slope, intercept data
@@ -107,9 +106,9 @@ def createScatterPlot(table,errorTable, title=None, xlab=None, yLab=None, dest="
         minErrorVctr.append(minDelta)
         maxErrorVctr.append(maxDelta)
     errorArray = [minErrorVctr,maxErrorVctr]
-    print errorArray
     unzippedX, unzippedY = zip(*flatData)
-    plt.errorbar(unzippedX, unzippedY,errorArray, fmt = "o")
+    #plt.errorbar(unzippedX, unzippedY,errorArray, fmt = "o")
+    plt.scatter(unzippedX,unzippedY)
     plt.margins(0.15,0.15)
     if title:
         plt.title(title)
@@ -125,7 +124,7 @@ def createScatterPlot(table,errorTable, title=None, xlab=None, yLab=None, dest="
         plt.close()
 
  #method to create a boxplot of the outputNEs
-def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
+def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", outlierFile = "outliers.txt"):
     if dest == "none":
         return
     plt.figure("box")
@@ -142,7 +141,11 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         errorSet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)
         # plotData = unzippedy
-    plt.boxplot(plotData,labels=listX,sym = '')
+    plotstats = plt.boxplot(plotData,labels=listX)
+    if len(plotstats["fliers"])>0:
+        outliers = {"":makeOutlierDict(plotstats["fliers"])}
+    plt.clf()
+    plt.boxplot(plotData, labels=listX, sym = "")
     if title:
         plt.title(title)
     if xlab:
@@ -155,6 +158,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
     else:
         plt.savefig(dest, bbox_inches='tight')
         plt.close()
+    writeOutliers(outliers,outlierFile)
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -375,11 +379,13 @@ def neGrapher(neFile, configFile=None):
         orderingTable = readFileOrder(configs["ordering"])
         table = orderFiles(table,orderingTable,configs["orderingGen"])
         errorTable = orderFiles(errorTable,orderingTable,configs["orderingGen"])
-    print table
+    outlierFile = configs["statsFilename"]
+    outlierpath, outlierext =os.path.splitext(outlierFile)
+    outlierFile = outlierpath+".outliers"+outlierext
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
-    createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
+    outlierFlag = createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"],outlierFile=outlierFile)
     createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
-
+    return outlierFlag
 
 #master function for creating a table of confidence intervals form neEstimation data
 #neFile: filepath of neEstimation output file
@@ -452,7 +458,7 @@ def neStats(neFile, configFile = None, testFlag = False):
     configVals = configRead(configFile)
     neTable,countsTable, errorTable = scrapeNE(neFile,configVals["startData"])
     if configVals["ordering"]:
-        neTable
+
         orderingTable = readFileOrder(configVals["ordering"])
         neTable = orderFiles(neTable,orderingTable,configVals["orderingGen"])
 
@@ -506,9 +512,9 @@ class SelectRandom:
 
     @staticmethod
     def createOrdering(identifier,subpopLimits,selectedCount):
-        print identifier
-        print subpopLimits
-        print selectedCount
+        #print identifier
+        #print subpopLimits
+        #print selectedCount
         if not identifier in SelectRandom.orderingDict:
             SelectRandom.orderingDict[identifier] = SelectRandom._createorderArray(subpopLimits[identifier[0]],selectedCount)
             print "New Entry"
@@ -544,8 +550,12 @@ def neRun(neFile,configFile):
         orderingTable = readFileOrder(configs["ordering"])
         table = orderFiles(table,orderingTable,configs["orderingGen"])
         errorTable = orderFiles(errorTable,orderingTable,configs["orderingGen"])
+    outlierFile = configs["statsFilename"]
+    outlierpath, outlierext =os.path.splitext(outlierFile)
+    outlierFile = outlierpath+".outliers"+outlierext
+
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
-    createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
+    createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"],outlierFile=outlierFile)
     createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
     return _neStatsHelper(table,neFile,configs["alpha"], outFileName=configs["statsFilename"],significantValue=configs["sigSlope"],firstVal=configs["startData"])
 

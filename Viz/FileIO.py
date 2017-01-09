@@ -267,7 +267,37 @@ def readFileOrder(filename):
     print orderDict
     return  orderDict
 
-#reads in data fron neEst file outputs
+#
+def makeOutlierDict(fliersList):
+    fliersDict = {}
+    for item in fliersList:
+        xPoints = item.get_xdata()
+        yPoints = item.get_ydata()
+        if len(xPoints) >0:
+            xVal = xPoints[0]
+            fliersDict[xVal] = []
+            for yVal in yPoints:
+                fliersDict[xVal].append(yVal)
+    return fliersDict
+
+def writeOutliers(fliersDict,outputName):
+    outliersFile = open(outputName, "w")
+    for key in fliersDict.keys():
+        outliersFile.write("Key: "+str(key)+"\n")
+        keyStr = ""
+        keyDict = fliersDict[key]
+        keyList = fliersDict[key].keys()
+        keyList.sort()
+        for x in keyList:
+            keyStr += str(x)+": "
+            yPoints =  fliersDict[key][x]
+            for y in fliersDict[key][x]:
+                keyStr +=str(y)+ ", "
+            keyStr.strip(",")
+            keyStr+="\n"
+        outliersFile.write(keyStr)
+    outliersFile.close()
+
 
 '''
 Ted added 2016_12_05, to allow for
