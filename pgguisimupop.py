@@ -99,7 +99,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	MAX_CHARS_BASENAME=18
 
 	def __init__( self,  o_parent,  s_param_names_file=None, 
-							s_life_table_file_glob="resources/*life.table.info",
+							s_life_table_file_glob=None,
 							s_name="simupop_gui",
 							i_total_processes_for_sims=1 ):
 		'''
@@ -508,7 +508,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#end if the value is a string
 
 			if o_input.param_names is None:
-				s_msg=" In PGOpSimuPop, " \
+				s_msg=" In PGGuiSimuPop instance, " \
 						+ "def __load_values_into_interface, " \
 						+ "member __input has missing PGParamset " \
 						+ "instance."
@@ -516,7 +516,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#end of no param_set object
 
 			if not( o_input.param_names.isInSet( s_param ) ):
-					s_msg=" In PGOpSimuPop, " \
+					s_msg=" In PGGuiSimuPop instance, " \
 						+ "def __load_values_into_interface, " \
 						+ "member __input members PGParamset " \
 						+ "instance has no param, " + s_param + "."
@@ -728,7 +728,49 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		KeyListComboFrame control object resets
 		the attribute in the input object
 		automatically.
+
+		2017_01_05  We add code that tests for
+		the cull method value.  If it is 
+		"equal_sex_ratio", we disable the
+		"Probability male birth" text box,
+		to indicate that the sex birth ratio
+		will be set to 50/50 (i.e. the call
+		to InitSex in the simulation will be
+		maleProb=0.5).
 		'''
+		CBOX_EQUAL_SEX_RATIO_TEXT="equal_sex_ratio"
+
+		
+		if self.__input is not None:
+
+			b_have_cullmethod_attr=hasattr( self.__input, "cull_method" )
+			b_have_maleprob_attr=hasattr(  self.__input, "maleProb" )
+			b_have_access_to_control="maleProb" in self.__param_key_value_frames
+
+			if b_have_cullmethod_attr  \
+							and b_have_maleprob_attr \
+							and b_have_access_to_control:
+
+				o_this_kv=self.__param_key_value_frames[ "maleProb" ]
+
+				if self.__input.cull_method == CBOX_EQUAL_SEX_RATIO_TEXT:
+					o_this_kv.setStateControls( "disabled" )
+				else:
+					'''
+					If the control was initialized with "isenabled" as true,
+					and if the force_disable is also true, then the current
+					state of controls, if they are disabled, must be due to
+					a former change to equal sex ratio.  Now we have a different
+					cull setting, so we can, in that case, re-enable:
+					'''
+					if o_this_kv.is_enabled and not o_this_kv.force_disable:
+						o_this_kv.setStateControls( "enabled" )
+					#end if we should enable
+
+				#end if cull method is set to equal sex ratio, else not
+			#end if we have a cull_method attribute, a male prob attribute, 
+			#and access to the maleProb entry control
+		#end if we have an input object
 
 		if VERY_VERBOSE:
 			self.__test_value()
@@ -738,30 +780,41 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end __on_cull_method_selection_change
 
 	def load_config_file( self, event=None ):
-		s_current_value=self.__config_file.get()
-		s_config_file=tkfd.askopenfilename(  \
-				title='Load a configuration file' )
 
-		if pgut.dialog_returns_nothing( s_config_file ):
-			return
-		#end if no file selected, return
-
-		self.__config_file.set(s_config_file)
 		try:
-			self.__setup_input()
-		except Exception as oe:
-			if s_config_file != INIT_ENTRY_CONFIG_FILE: 
-				s_msg="Problem loading configuration.\n" \
-						+ "File: " + str( s_config_file ) + "\n\n" \
-						+ "Details: " \
-						+ "Exception: " + str( oe ) + "."
-				o_diag=PGGUIInfoMessage( self, s_msg )
-			#end if entry not None
-			return
-		#end try ... except
-		self.__init_interface()
-		self.__load_values_into_interface()
-		self.__set_controls_by_run_state( self.__get_run_state() )
+			s_current_value=self.__config_file.get()
+			s_config_file=tkfd.askopenfilename(  \
+					title='Load a configuration file' )
+
+			if pgut.dialog_returns_nothing( s_config_file ):
+				return
+			#end if no file selected, return
+
+			self.__config_file.set(s_config_file)
+			try:
+				self.__setup_input()
+			except Exception as oe:
+				if s_config_file != INIT_ENTRY_CONFIG_FILE: 
+					s_msg="Problem loading configuration.\n" \
+							+ "File: " + str( s_config_file ) + "\n\n" \
+							+ "Details: " \
+							+ "Exception: " + str( oe ) 
+					o_diag=PGGUIInfoMessage( self, s_msg )
+				#end if entry not None
+				return
+			#end try ... except
+
+			self.__init_interface()
+			self.__load_values_into_interface()
+			self.__set_controls_by_run_state( self.__get_run_state() )
+		except Exception as oex:
+			s_msg="In PGGuiSimuPop instance, def load_config_file " \
+					+ "an exception was raised: " + str( oex ) 
+
+			PGGUIErrorMessage( self, s_msg )
+
+			raise ( oex )
+
 		return
 	#end load_config_file
 
@@ -799,8 +852,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end updateN0EntryBox
 
 	def __get_life_table_file_list( self, s_glob_expression ):
-		self.__life_table_files = \
-			pgut.get_list_files_and_dirs_from_glob( s_glob_expression )
+		if s_glob_expression is not None:
+			self.__life_table_files = \
+				pgut.get_list_files_and_dirs_from_glob( s_glob_expression )
+		#end if we have a glob to get life table files	
 		return
 	#end def __get_life_table_file_list
 
@@ -833,12 +888,32 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#end if param_names_file is set
 
 		try:
-			#note that we can pass None value n for o_model_resources,
-			#and as long as the config file has evaluatable values for
+			#note that we can pass None value in for o_model_resources,
+			#and as long as the config file has evaluate-able values for
 			#all of its options, we still get a valid PGInputSimuPop object:
 			o_pgin=pgin.PGInputSimuPop( self.__config_file.get(), o_model_resources, o_param_names ) 
 			
 			o_pgin.makeInputConfig()
+
+			'''
+			We give the user an info box when the N0 value is not
+			calculated (i.e. we have no Nb/Nc and Nb value in a
+			section called "effective_size_info" in either the
+			configuration file or the life table (if life table is
+			available).
+			'''
+
+			b_using_effective_size_info = o_pgin.has_effective_size_info()
+
+			if not b_using_effective_size_info:
+				s_message="The loaded configuration info has no \"effective_size_info\" " \
+											+ "with values for Nb/Nc and Nb.\n" \
+											+ "As a result the N0 value is not calculated, " \
+											+ "and can be set directly in the N0 text box."
+
+				PGGUIInfoMessage( self, s_message )
+			#end not using effective size info
+
 		except Exception as exc:
 			self.__config_file.set("")
 			self.__input=None

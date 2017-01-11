@@ -2339,6 +2339,17 @@ def mymain( *q_args ):
 		print( "In pgdriveneestimator, def mymain" )
 	#end if VERY_VERBOSE
 
+	'''
+	To allow the pygenomics genomics.ne2.controller modules
+	Ne2 estimator class object to loop over the paths in the
+	PATH environmental variable, and be ensured that each
+	exists.
+	'''
+	pgut.remove_non_existent_paths_from_path_variable()
+
+	'''
+	Make sure we have the Ne2 executable.
+	'''
 	if not did_find_ne_estimator_executable():
 		raise Exception( "in pgdriveneestimator.py, def mymain(), " \
 							+ "did not find NeEstimator executable." )
@@ -2347,13 +2358,14 @@ def mymain( *q_args ):
 	'''
 
 	We adapted this def to open and close the main and secondary 
-	output files, Originally it simply passed open file objects to def,
+	output files. Originally, it simply passed open file objects to def,
 	parse args.  Now we we check for string vs file for these
 	args, as the console version will still pass stdout and sterr
 	file objects, but the GUI will call with string filenames.  
-	We strip off the last 3 items, which
-	now need to be checked for type string file names and assume
-	file objects. We also pass along the last arg, the multiprocessing
+	We strip off the last 3 items, which now need to be checked 
+	for type string file names and assume, if not string, then 
+	the objects passed are assumed to be (open-for-writing) 
+	file objects.  We also pass along the last arg, the multiprocessing
 	event.  
 	'''
 	seq_unaltered_args=q_args[0:IDX_DEBUG_MODE + 1 ]

@@ -30,7 +30,6 @@ sampscheme	Pop sampling scheme;Parameters;2;0;4;"None";str;None;None;Subsampling
 #Loci sampling scheme selector:
 locisampscheme	Loci sampling scheme;Parameters;2;0;5;"None";str;None;None;Loci sampling schemes:~~1. None.  Sample all loci in range (loci number start to end).  If range exceeds max, then random selection of max.~~    Error if range gives fewer than the min loci count.~~2. Percent:  For the set of loci in range, randomly select c percent.  Do this for each c in the percent list.~~    Error if percentage is fewer than the min loci value, randomly truncated to max loci value.~~3.Total: For the set of loci in range, randomly select c total loci. Do this for each total c in the list.~~    Error if range has fewer than c.;cboxreadonly;( "None","Percent","Total" );x in [ 'None','Percent','Total' ];_PGGuiNeEstimator__update_genepopfile_loci_sampling_params_interface
 scheme_none_dummy_param	none_dummy_param;suppress_and_set;4;0;5;"none";str;None;None;None;entry;None;None;None
-viztype	Visualization type;Parameters;2;0;6;"Regression";str;None;None;Visualization types:~~1. Regression.  ~~2. Subsampling;cboxreadonly;( "Regression","Subsample" );x in [ 'Regression','Subsample' ];_PGGuiNeEstimator__update_viz_params_interface
 #
 #Note that ther are more run modes but the following represent the most efficient run mode (no_debug), and the most verbose output (debug3).
 #These are, as of 2016_10_11, the best tested and so I offer only these in the interface.  (For details on other modes see the pgdriveneestimator.py
@@ -109,28 +108,3 @@ locischeme_percent_percentages	Percentages;LociSamplingPercent;4;0;5;[100.0];lis
 locischeme_total_totals	Totals;LociSamplingTotal;4;0;5;[10];listint;None;None;For each total c,  a random sample of c, in the range given by min- and max loci number.  These replace the max and min loci count parameters.;entry;None;type(x)==int and x >= 0;None
 locischeme_total_min_loci_count	Min loci count;suppress_and_set;4;0;3;1;int;None;None;Within the loci in range min to max, if the total is under this min, then an error occurs.;entry;None;type(x)==int and x>=0;None
 locischeme_total_max_loci_count	Max loci count;suppress_and_set;4;0;4;99999;int;None;None;Within the loci in range min to max, if the total exceeds this max, then randomly sample max loci.;entry;None;type(x)==int and x>=0;None
-#
-#Viz parameters --all viz types
-#
-viz_all_labels_title	Plot title;VizAll;5;0;1;"title text";str;None;None;Plot title text;entry;None;None;None
-viz_all_labels_xlab	x label;VizAll;5;0;2;"x label";str;None;None;Plot x label;entry;None;None;None
-viz_all_labels_ylab	y label;VizAll;5;0;3;"y label";str;None;None;Plot x label;entry;None;None;None
-#
-#Viz parameters--regression
-#
-viz_regress_destination_regressionfile	Regression file;VizRegress;5;0;4;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None
-viz_regress_destination_boxplotfile	Boxplot file;VizRegress;5;0;5;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None
-viz_regress_destination_scatterfile	Scatterplot file;VizRegress;5;0;6;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extenion .pdf or .png, or programs defaults to .png).;cboxnormal;( 'show', 'none' );None;None
-viz_regress_confidence_outputFilename	Stas output file;VizRegress;5;0;7;"stats_out.txt";str;None;None;File name for stats output;entry;None;None;None
-viz_regress_comparison_type	Line type;VizRegress;5;0;8;"auto";str;None;None;Line type;cboxreadonly;( "auto", "pop", "value", "None" );x in [ 'auto','pop','value', 'None' ];None
-viz_regress_comparison_expectedSlope	Expected slope;VizRegress;5;0;9;-0.1;float;None;None;Expected slope;entry;None;type(x)==float;None
-#Let matplotlib set the xrange:
-#viz_regress_limits_xMin	Min x value;VizRegress;5;0;10;0;int;None;None;Minimum value of x shown.;entry;None;type(x)==int;None
-#viz_regress_limits_xMax	Max x value;VizRegress;5;0;11;200;int;None;None;Maximum value of x shown.;entry;None;type(x)==int;None
-#
-viz_regress_data_startCollect	Start at generation;VizRegress;5;0;12;1;int;None;None;Generation at which to start using the data for plot and stats.;entry;None;type(x)==int;None
-viz_regress_confidence_alpha	Alpha for CIs;VizRegress;5;0;13;0.5;float;None;None;alpha value to be used for confidence intervals. E.g., for a 95% confidence interval, alpha should be set at 0.05. ;entry;None;type(x)==float;None
-#
-#Viz parameters--subsampled
-#
-viz_subsample_destination_whiskerplotfile	Whisker plot;VizSubsample;5;0;4;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None

@@ -13,6 +13,7 @@ import createtooltip as ctt
 import sys
 import tkMessageBox
 import pgutilities as pgut
+import tkSimpleDialog
 
 '''
 Fred Lundh's code from
@@ -668,6 +669,38 @@ class KeyValFrame( Frame ):
 		return i_len_entryvals == i_len_vals
 	#end __are_valid_lists
 
+	def setStateControls( self, s_state ):
+		'''
+		Set the state of all this objects
+		entry boxes and (if present) button
+		to the value passed.
+		'''
+		for o_entry_box in self.__entry_boxes:
+			o_entry_box.configure( state=s_state )
+		#end for each entry box
+
+		if self.__button_object is not None:
+			self.__button_object.configure( state=s_state )
+		#end if we have a button
+
+		return
+	#end disableControls
+
+	def getControlStates( self ):
+		ls_states=[]
+		for o_entry_box in self.__entry_boxes:
+			s_state=o_entry_box.cget( "state" )
+			ls_states.append( s_state )
+		#end for each entry box
+
+		if self.__button_object is not None:
+			s_button_state=self.__button_object.cget( state )
+			ls_states.apend( s_state )
+		#end if there is a button
+
+		return ls_states
+	#end 
+	
 	@property
 	def val( self ):
 		if self.__orig_value_is_list:
@@ -683,6 +716,16 @@ class KeyValFrame( Frame ):
 		del self.__value
 		return
 	#end val deleter
+
+	@property
+	def is_enabled( self ):
+		return self.__isenabled
+	#end property is_enabled
+
+	@property
+	def force_disable( self ):
+		return self.__force_disable
+	#end force_disable
 
 #end class KeyValFrame
 
@@ -771,6 +814,10 @@ class KeyCategoricalValueFrame( Frame ):
 		self.__force_disable=b_force_disable
 		self.__tooltip=self.__label_name if s_tooltip == "" else s_tooltip
 		self.__subframe=None
+
+		#To maintain a reference to the Radiobutton objects,
+		#this will be appended-to as they are created:
+		self.__radio_buttons=[]
 		self.__setup()
 	#end init
 
@@ -912,6 +959,8 @@ class KeyCategoricalValueFrame( Frame ):
 				o_defaul_button=o_radio_button
 			#end if this is the default button
 
+			self.__radio_buttons.append( o_radio_button )
+
 		#end for each index
 
 		self.__current_button_value.set( o_defaul_button.cget( "value" ) )
@@ -947,6 +996,38 @@ class KeyCategoricalValueFrame( Frame ):
 
 		return
 	#end __on_button_change
+
+	def setStateControls( self, s_state ):
+		'''
+		Set the state of all this objects
+		radio buttons.
+		'''
+		for o_radio_button in self.__radio_buttons:
+			o_radio_button.configure( state=s_state )
+		#end for each entry box
+
+		return
+	#end disableControls
+
+	def getControlStates( self ):
+		ls_states=[]
+		for o_radio_button in self.__radio_buttons:
+			s_state=o_radio_button.cget( "state" )
+			ls_states.append( s_state )
+		#end for each entry box
+
+		return ls_states
+	#end 
+
+	@property
+	def is_enabled( self ):
+		return self.__isenabled
+	#end property is_enabled
+
+	@property
+	def force_disable( self ):
+		return self.__force_disable
+	#end property force_disable
 
 	@property
 	def val( self ):
@@ -1161,7 +1242,7 @@ class KeyListComboFrame( Frame ):
 		o_combobox.grid( row = 0, column = 1, sticky=(NW) )
 		
 		#list items are zero-indexed, but clients pass a 1-indexed
-		#referenc to combobox choices
+		#reference to combobox choices
 		o_combobox.current( self.__default_choice_number - 1 )
 
 		self.__combobox_object=o_combobox
@@ -1229,6 +1310,39 @@ class KeyListComboFrame( Frame ):
 
 		return
 	#end __on_new_combobox_selection
+
+	def setStateControls( self, s_state ):
+		'''
+		Set the state of all this objects
+		radio buttons.
+		'''
+		if self.__combobox is not None:
+			self.__combobox.configure( state=s_state )
+		#end for each entry box
+
+		return
+	#end disableControls
+
+	def getControlStates( self ):
+		ls_states=[]
+
+		if self.__combobox is not None:
+			s_state=self.__combobox.cget( "state" )
+			ls_states.append( s_state )
+		#end for each entry box
+
+		return ls_states
+	#end 
+
+	@property
+	def is_enabled( self ):
+		return self.__isenabled
+	#end property is_enabled
+
+	@property
+	def force_disable( self ):
+		return self.__force_disable
+	#end force_disable
 
 	@property
 	def val( self ):
@@ -1507,6 +1621,7 @@ class FrameContainerVScroll( object ):
 
 class PGGUIErrorMessage( object ):
 	def __init__( self, o_parent=None, s_message="Unknown Error" ):
+		root=None
 		if o_parent is None:
 			root=Tk()
 			root.withdraw()
@@ -1514,30 +1629,213 @@ class PGGUIErrorMessage( object ):
 		else:
 			tkMessageBox.showerror(  parent=o_parent, title="Error", message=s_message )
 		#end if no parent, then make a parent and hide it, else just invode messagebox
+
+		if root is not None:
+			root.destroy()
+		#end if root was made
+
 		return
 	#end __init__
 #End class PGGUIErrorMessage
 
 class PGGUIWarningMessage( object ):
 	def __init__( self, o_parent, s_message ):
-		tkMessageBox.showinfo(  parent=o_parent, title="Warning", message=s_message, icon=tkMessageBox.WARNING )
+		root=None
+		if o_parent is None:
+			root=Tk()
+			root.withdraw()
+			tkMessageBox.showinfo( title="Warning", message=s_message, icon=tkMessageBox.WARNING )
+		else:
+			tkMessageBox.showinfo(  parent=o_parent, title="Warning", message=s_message, icon=tkMessageBox.WARNING )
+		#and if no parent
+
+		if root is not None:
+			root.destroy()
+		#end if root was made
+
 		return
 	#end __init__
 #End class PGGUIWarningMessage
 
 class PGGUIInfoMessage( object ):
 	def __init__( self, o_parent, s_message ):
-		tkMessageBox.showinfo(  parent=o_parent, title="Info", message=s_message, icon=tkMessageBox.INFO )
+		root=None
+		if o_parent is None:
+			root=Tk()
+			root.withdraw()
+			tkMessageBox.showinfo( title="Info", message=s_message, icon=tkMessageBox.INFO )
+		else:
+			tkMessageBox.showinfo(  parent=o_parent, title="Info", message=s_message, icon=tkMessageBox.INFO )
+		#end if no parent, then make a parent and hide it, else just invode messagebox
+
+		if root is not None:
+			root.destroy()
+		#end if root was made
+
 		return
 	#end __init__
 #End class PGGUIInfoMessage
 
-class PGGUIMessageAndActionOnCancel( object ):
-	def __init__( self, o_parent, s_message, def_on_cancel ):
-		o_msgbox=tkMessageBox.showinfo( parent=o_parent, title="Info", message=s_message, icon=tkMessageBox.INFO )
-		return
+class PGGUIMessageWaitForResultsAndActionOnCancel( tkSimpleDialog.Dialog ):
+
+	AFTERTIME=5
+	MAX_ELLIPSES=15
+
+	def __init__( self, o_parent, s_message="", s_title="Info", 
+									def_boolean_signaling_finish=None,
+									def_on_cancel=None ):
+
+		if o_parent is None:
+			s_msg="In PGGUIMessageWaitForResultsAndActionOnCancel instance, " \
+							+ "def __init__, " \
+							+ "param o_parent must be non-None."
+			raise Exception( s_msg )
+		#end if o_parent is None
+
+		#IF these are not assigned before we instantiate
+		#the parent, then they will not exist for the parent
+		#calls to defs "body" and "cancel":
+		self.__parent=o_parent
+		self.__def_on_cancel=def_on_cancel
+		self.__label_text=s_message
+		self.__title=s_title
+		self.__def_bool_is_finished=def_boolean_signaling_finish
+		self.__myc=PGGUIMessageWaitForResultsAndActionOnCancel
+		self.__parent_init( o_parent, s_title )
 	#end __init__
-#end class PGGUIInfoMessage
+
+	def __parent_init( self,  parent, title ):	
+
+		'''
+		This is the code for the __init__ of the
+		parent class (from http://effbot.org/tkinterbook/tkinter-dialog-windows.htm)
+		with an "after()" call inserted prior to window_wait(), in order to allow
+		the self-destruction after the child class' attribure __def_bool_is_finished
+		returns True.
+
+		I also made the default geometry bigger.
+		'''
+		XPACKPAD=150
+		YPACKPAD=050
+		XGEOPAD=350
+		YGEOPAD=150
+
+		Toplevel.__init__(self, parent)
+		self.transient(parent)
+
+		if title:
+			self.title(title)
+
+		self.parent = parent
+
+		self.result = None
+
+		body = Frame(self)
+		self.initial_focus = self.body(body)
+		body.pack(padx=XPACKPAD, pady=YPACKPAD)
+
+		self.buttonbox()
+
+		self.grab_set()
+
+		if not self.initial_focus:
+			self.initial_focus = self
+
+		self.protocol("WM_DELETE_WINDOW", self.cancel)
+
+		self.geometry("+%d+%d" % (parent.winfo_rootx()+150,
+								  parent.winfo_rooty()+150))
+		
+		self.initial_focus.focus_set()
+		
+		self.after( self.__myc.AFTERTIME, self.__check_if_finished )
+
+		self.wait_window(self)
+
+	#end __parent_init
+
+	def __update_label( self ):
+		return
+	#ene __update_label
+
+	def __check_if_finished( self ):
+		if self.__def_bool_is_finished is not None:
+			if self.__def_bool_is_finished() == True:
+				if self.parent is not None:
+					self.parent.focus_set()
+				#end if parent exists
+				self.destroy();
+			else:
+				'''
+				I need to implement the label update def
+				'''
+				self.__update_label()
+				self.after( self.__myc.AFTERTIME, self.__check_if_finished )
+			#end if finished, destroy self
+		#end if we have a def that returns True or False
+		return
+	#end __check_if_finished
+
+	def body( self, master ):
+		'''
+		Overrides the emtpy def of parent.  The parent class creates the frame
+		in its __init__ and then passes to this def as param master.
+		'''
+		self.__label=Label( master, text=self.__label_text )
+		self.__label.grid( row=0, padx=5, sticky=W )
+
+		return
+
+	#end bocy
+
+	def buttonbox(self):
+
+		'''
+		Overrides parent's add standard button box.
+		Parent class has an OK and a Cancel,
+		We just want Cancel. We also skip
+		the parent's "bind" of cancel to escapte key.
+
+		'''
+
+		box = Frame(self)
+
+		w = Button(box, text="Cancel", width=10, command=self.cancel)
+
+		w.pack(side=LEFT, padx=5, pady=5)
+
+		self.bind("<Return>", self.cancel )
+
+		box.pack()
+
+		return
+	#end buttonbox
+	
+	def cancel(self, event=None):
+
+		'''
+		Overrides parent version.  This
+		version calls the user-supplied def
+		(in not None) before the focus_set
+		and destroy of the parent's version.
+ 		'''
+
+		#Call clients supplied def if available:
+		if self.__def_on_cancel is not None:
+			self.__def_on_cancel()
+		#end if we have clients def to call
+
+		# put focus back to the parent window
+	
+		if self.parent is not None:
+			self.parent.focus_set()
+		#end if parent exists
+
+		self.destroy();
+		return
+	#end cancel
+
+#end class PGGUIMessageWaitForResultsAndActionOnCancel
 
 class PGGUIYesNoMessage( object ):
 	def __init__( self, o_parent, s_message ):
@@ -1936,6 +2234,13 @@ class ListEditingSubframe( Frame ):
 	def defaultvalue( self, v_value ):
 		self.__default_value=v_value
 #end class ListEditingSubframe
+
+def destroy_on_def_returning_true( o_object_to_destroy, def_that_returns_boolean ):
+	#Blocks execution until def returns true
+	pgut.return_when_def_is_true( def_that_returns_boolean, f_sleeptime_in_seconds=0.25 )
+	o_object_to_destroy.destroy()
+	return
+#end destroy_on_def_returning_true
 
 if __name__=="__main__":
 	import pgutilities as modut

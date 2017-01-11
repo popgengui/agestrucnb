@@ -120,7 +120,7 @@ class GenepopFileManager( object ):
 					self.__header_and_loci_byte_addresses[ \
 												IDX_LOCI_LINE ] 
 			o_orig_file.seek( l_byte_address )
-			s_loci_line=o_origfile.readline()
+			s_loci_line=o_orig_file.readline()
 			ls_loci=s_loci_line.split( "," )
 			i_loci_count=len( ls_loci )
 		else:
@@ -280,7 +280,7 @@ class GenepopFileManager( object ):
 		for s_subsample_tag in ls_individual_subsample_tags:
 			li_indiv_list=self.__get_list_indiv_numbers( i_pop_number=i_pop_number, 
 												s_indiv_subsample_tag=s_subsample_tag )
-			set_indivs=set_indiv.union( li_indiv_list )
+			set_indivs=set_indivs.union( li_indiv_list )
 		#end for each subsample, add new individuals
 		li_combined=list(set_indivs )
 		li_combined.sort()
@@ -325,7 +325,6 @@ class GenepopFileManager( object ):
 	#end __sample_individuals_randomly_from_one_pop
 
 	def __remove_n_individuals_randomly_from_one_pop( self, i_pop_number, i_n_to_remove ):
-		i_pop_size=self.__get_count_indiv( self.__pop_byte_addresses[ i_pop_number ] )
 		li_indiv_list=self.__get_list_indiv_numbers( i_pop_number=i_pop_number ) 		
 		random.shuffle( li_indiv_list ) 
 		li_shuffled_indiv_list_with_n_removed=li_indiv_list[ i_n_to_remove : ]
@@ -360,27 +359,7 @@ class GenepopFileManager( object ):
 
 		return li_pop_numbers
 	#end __get_pop_list
-
-	def __get_header_and_loci_entries_for_loci_subsample( self, s_loci_subsample_tag ):
-		if s_loci_subsample_tag is None:
-			li_header_and_loci_lines=self.__header_and_loci_byte_addresses.keys()
-		else:
-			l_header_address=self.__header_and_loci_byte_addresses[ 0 ]
-			li_header_and_loci_lines=[ l_header_address ] \
-					+ [ idx for idx in  self.__loci_subsamples[ s_loci_subsample_tag ] ]
-		#end if we include all loci, else subsample
-		
-		#write header and loci list:
-		for i_line_number in li_header_and_loci_lines:
-
-			o_origfile.seek( self.__header_and_loci_byte_addresses[ i_line_number ] )
-			o_newfile.write( o_origfile.readline() )
-		#end for each line in the header and loci section
-
-
-		return
-	#end __get_header_and_loci_entries_for_loci_subsample
-
+	
 	def __write_genepop_file_to_file_object( self, o_file_object, 
 			s_pop_subsample_tag=None,
 			s_indiv_subsample_tag=None, 
@@ -528,7 +507,7 @@ class GenepopFileManager( object ):
 					+ "invalid type passed. " \
 					+ "Expecting dictionary or list, " \
 					+ "but received type: " \
-					+ str( type( iter_pops_with_indiv_lists ) ) \
+					+ str( type( iter_indiv_list ) ) \
 					+ "."
 			raise Exception( s_msg )
 		#end if arg is dict, else list, else error
@@ -548,7 +527,7 @@ class GenepopFileManager( object ):
 	def __get_count_indiv_per_pop( self, s_indiv_subsample_tag=None, s_pop_subsample_tag=None ):
 
 		li_counts=[]
-		li_popnumbers=None
+
 		iter_pops_with_indiv_lists=None
 
 		li_pop_numbers=self.__get_pop_list( s_pop_subsample_tag ) 
@@ -1076,7 +1055,7 @@ class GenepopFileManager( object ):
 
 		for i_pop_number in self.__pop_byte_addresses:
 			
-			li_subsample=self.__sample_individuals_randomly_from_one_pop( i_pop_number, i_N )
+			li_subsample=self.__sample_individuals_randomly_from_one_pop( i_pop_number, i_n )
 
 			#we always include the "pop" entry, and we sort the subsample
 			self.__indiv_subsamples[ s_subsample_tag ][ i_pop_number]= \
@@ -1340,7 +1319,7 @@ class GenepopFileManager( object ):
 
 				for s_field_name in ls_field_names:
 					v_val_this_field=o_genepop_id_vals.getVal( s_field_name )
-					tv_vals_this_id += ( v_val, )
+					tv_vals_this_id += ( v_val_this_field, )
 				#end for each field, add to tuple
 
 				set_tuples_values.union( { tv_vals_this_id } )
@@ -1435,7 +1414,7 @@ class GenepopFileManager( object ):
 		li_population_numbers=self.__get_pop_list()	
 		self.__indiv_subsamples[ s_tag_for_combined_subsample ] = {}
 
-		for i_pop in li_pop_numbers:
+		for i_pop in li_population_numbers:
 			li_combined_indiv_list= \
 						self.__combine_individual_subsamples_for_one_pop( \
 															ls_subsample_tags,
@@ -1447,8 +1426,8 @@ class GenepopFileManager( object ):
 		return
 	#end combineIndividualSubsamples
 
-	def removeIndividualSubsamples( ls_subsample_tags ):
-		for s_subsample in ls_subsample_tags:
+	def removeIndividualSubsamples( self, ls_subsample_tags ):
+		for s_subsample_tag in ls_subsample_tags:
 			self.__remove_individual_subsample( s_subsample_tag )
 		#end for each subsample tag, remove
 		return

@@ -39,6 +39,8 @@ from Tkinter import *
 from ttk import *
 import tkFileDialog as tkfd
 
+import sys
+
 #need a seperate, non-blocking
 #process for the neestimations
 #(see def runEstimator)
@@ -58,7 +60,6 @@ import pgdriveneestimator as pgdn
 #that take input from the user and update
 #this gui's attributes:
 from pgguiutilities import KeyValFrame
-from pgguiutilities import KeyCategoricalValueFrame
 from pgguiutilities import KeyListComboFrame
 
 from pgguiutilities import FredLundhsAutoScrollbar
@@ -131,20 +132,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		#the KeyValFrame to set this
 		#directly:
 		self.output_base_name=""
-
-		'''
-		These assignments no longer
-		used. They are created as listed
-		in a param.names file. See 
-		def __load_param_interface"
-		'''
-
-#		self.__sampscheme=None
-#		self.__sampparam=None
-#		self.__minpopsize=None
-#		self.__minallelefreq=None		
-#		self.__replicates=None
-#		self.__runmode=None
 
 		#displays the current list of
 		#genepop files loaded and ready
@@ -230,33 +217,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		return
 
 	#end __on_click_run_or_cancel_neestimation_button
-
-	def __get_path_to_genepop_files( self ):
-
-		s_genepop_files=self.__genepopfiles.get()
-
-		ls_genepop_files=s_genepopfiles.split( DELIMITER_GENEPOP_FILES )
-
-		ls_paths=[]
-
-		for s_file in ls_genepop_files:
-			s_path_no_filename=pgut.get_dirname_from_filename( s_file )
-
-			ls_paths.append( s_path_no_filename )
-		#end for each genepop file, get path
-
-		set_uniq_paths=set( ls_paths )
-
-		if len( set_uniq_paths ) != 1:
-			s_msg="In PGGuiNeEstimator instance, def pgguineestimator, " \
-					+ "non-uniq path to genepop files.  List of paths: " \
-					+ str( ls_paths ) + "."
-			sys.stderr.write( s_msg + "\n" )
-		#end if nonuniq path
-
-		#we don't abort even in non-uniq paths, but simply return the first:
-		return ls_paths[0]
-	#end __get_path_to_genepop_files
 
 	def __convert_genepop_file_to_neestimator_basename( self, s_genepop_file ):
 
@@ -366,7 +326,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			#and if set will kill the process pool:
 			if self.__neest_multi_process_event is not None:
 				try:
-					if VERY_VERBOSE==TRUE:
+					if VERY_VERBOSE==True:
 						print( "in cancel_neestimation, setting event" )
 					#end if very verbose
 
@@ -447,7 +407,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		s_genepopfiles=self.__genepopfiles.get()	
 		
 		ls_genepopfiles=s_genepopfiles.split( DELIMITER_GENEPOP_FILES )
-		s_list_of_bad_filenames_with_messages=[]
 
 		for s_file in ls_genepopfiles:
 
@@ -637,7 +596,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__load_param_interface( b_force_disable=True )
 		self.__update_genepopfile_sampling_params_interface( b_force_disable=True )
 		self.__update_genepopfile_loci_sampling_params_interface( b_force_disable=True )
-		self.__update_viz_params_interface( b_force_disable=True )
 		self.__run_state_message="  " + ESTIMATION_RUNNING_MSG
 		self.__plotting_program_needs_to_be_run=True 
 		self.after( 500, self.__check_progress_operation_process )
@@ -718,8 +676,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		i_row += 1
 		
-		s_curr_config_file=self.__genepopfiles.get()
-
 		o_config_kv=KeyValFrame( s_name="Load genepop files", 
 						v_value=self.__genepopfiles.get(),
 						o_type=str,
@@ -1143,7 +1099,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					v_default_value=v_default_item_value,
 					o_master=o_params_subframe,
 					o_associated_attribute_object=self,
-					def_entry_change_command=self.__test_values,
+					def_entry_change_command=def_on_entry_change,
 					s_associated_attribute=s_attr_name,
 					i_entrywidth=i_width_this_entry,
 					i_labelwidth=LABEL_WIDTH,
@@ -1223,7 +1179,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 							s_label_justify='left',
 							s_tooltip=s_param_tooltip,
 							b_is_enabled=True,
-							b_force_disable=b_force_disable )
+							b_force_disable=b_force_disable,
+							s_state=s_state_this_cbox )
 
 			elif s_param_control_type=="radiobutton":
 				raise Exception( "radio button key val not yet implemented for neestimator gui" )
@@ -1447,7 +1404,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				s_msg="In PGGuiNeEstimator instance, " \
 						+ "def __load_genepopfile_sampling_params_interface " \
 						+ ", param " + s_param + " has control type, " \
-						+ s_control_type + ".  Currently only the Entry " \
+						+ s_param_control_type + ".  Currently only the Entry " \
 						+ "box is implemented for the genepop file sampling " \
 						+ "parameter interface."
 				raise Exception( s_msg )
@@ -1472,305 +1429,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		return
 	#end __load_genepopfile_sampling_params_interface
 
-	def __load_viz_params_interface( self, 
-							b_force_disable=False, ):
-		if VERY_VERBOSE:
-			print( "in __load_viz_params_interface")
-		#end if very verbose
-
-		PARAMETERS_FRAME_PADDING=30
-		PARAMETERS_FRAME_STYLE="groove"
-		PAD_LABEL_WIDTH=0
-		LABEL_WIDTH=self.__get_max_longname_length() \
-				+ PAD_LABEL_WIDTH
-		ENTRY_WIDTH_NON_STRING=7
-		PARAMETERS_CBOX_WIDTH=10
-		GRID_SPACE_HORIZ=10
-		VIZ_SUBFRAME_KEY="viz"
-
-		s_paramkey=None
-		PARAMETERS_FRAME_LABEL=None
-		s_section_name=None
-		if self.__viztype=="Regression":
-			PARAMETERS_FRAME_LABEL="Regression Plotting"
-			s_paramkey="viz_regress"
-			s_section_name="VizRegress" 
-		elif self.__viztype == "Subsample":
-			PARAMETERS_FRAME_LABEL="Subsample Plotting"
-			s_paramkey="viz_subsample"
-			s_section_name="VizSubsample"
-		else:
-			'''
-			As of 2016_11_24, we impmelent regression 
-			as fully as possible, subsample not ready,
-			and further types yet unknown:
-			'''
-			s_msg="In PGGuiNeEstimator instance, " \
-					+ "def __load_viz_params_interface, " \
-					+ "attribute __viztype has unknown value: " \
-					+ str( self.__viztype ) + "."
-			raise Exception( s_msg )
-		#end if viz type is Regresssion, else Subsample, else error
-
-		ls_params=self.__param_set.getShortnamesOrderedBySectionNumByParamNum()
-
-		if VIZ_SUBFRAME_KEY in self.__interface_subframes:
-				self.__interface_subframes[ VIZ_SUBFRAME_KEY ].grid_remove()
-				self.__interface_subframes[ VIZ_SUBFRAME_KEY ].destroy()
-		#end if subframe already exists, get rid of it.
-
-		o_params_subframe=LabelFrame( self,
-				padding=PARAMETERS_FRAME_PADDING,
-				relief=PARAMETERS_FRAME_STYLE,
-				text=PARAMETERS_FRAME_LABEL )
-
-		self.__interface_subframes[ VIZ_SUBFRAME_KEY ]= \
-										o_params_subframe
-		i_row=0
-
-		for s_param in ls_params:
-
-			'''
-			Tells which section (bordered) interface this param
-			entry box or combo box or radio button should
-			be placed.  As of 2016_09_15, all are in the "Regress" 
-			section. 			
-
-			This call returns
-			the values from the param tag,
-			but we'll only use the ones we
-			need (see below):
-			'''
-
-			( s_param_longname,
-				s_param_interface_section,
-				i_param_section_order_number,
-				i_param_column_number,
-				i_param_position_in_order,
-				v_param_default_value,
-				o_param_type,
-				v_param_min_value,
-				v_param_max_value,
-				s_param_tooltip,
-				s_param_control_type,
-				s_param_control_list,
-				s_param_validity_expression,
-				s_param_assoc_def ) = \
-						self.__param_set.getAllParamSettings( s_param )
-
-			#Note that the o_param_type returned from above call
-			#is, for list params, the list item type, so we
-			#need this check to see if it's a list. 
-			b_param_is_list=self.__param_set.paramIsList( s_param )
-		
-			#The name used in this PGGuiViz instance
-			#to hold the parameter value (as updated by
-			#the control frame (most often KeyValFrame).
-			s_attr_name=ATTRIBUTE_DEMANLGER + s_param
-
-		
-			if not ( s_param_interface_section == "VizAll" \
-						or s_param_interface_section == s_section_name  ):
-				continue
-			#end if param is not a viz param
-
-			'''
-			This will be passed to the entrybox or cbox, etc
-			Control class (most often KeyValFrame).  We
-			test use the current value if the attribure 
-			exists in this PGGuiNeEstimator instance, 
-			else use default (and create the new atttr):
-			'''
-			v_value_for_entry_control=None
-
-			if  hasattr( self, s_attr_name ):
-				v_value_for_entry_control=getattr( self, s_attr_name )
-			else:
-				setattr( self, s_attr_name, v_param_default_value )
-				v_value_for_entry_control=v_param_default_value
-			#end if not has attr
-
-			#we use the first entry in the list
-			#as the default value for the list editor
-			#(used by the KeyValFrame object):
-
-			if b_param_is_list:
-				i_len_default_list=len( v_param_default_value )
-				v_param_default_value=None if i_len_default_list == 0  else v_param_default_value[ 0 ]
-			#end if param is list
-
-			if VERY_VERBOSE:
-				print ( "in test, param name: " + s_param )
-				print ( "in test, param value type: " +	str( o_param_type ) )
-				print ( "in test, param value: " +	str(  v_param_default_value ) )
-			#end if VERY_VERBOSE
-
-			i_width_this_entry= len( v_param_default_value ) if o_param_type == str \
-					else ENTRY_WIDTH_NON_STRING
-
-			s_this_entry_justify="left" if o_param_type == str \
-					else "right"
-
-			o_this_keyval=None
-
-			v_default_item_value=v_param_default_value
-
-			if b_param_is_list and v_param_default_value is not None:
-				v_default_item_value=v_param_default_value[ 0 ]
-			#end if the param is a list
-		
-			o_validity_checker=None
-
-			if s_param_validity_expression != "None":
-				'''
-				Note that validity checker needs the "item" value,
-				always equal to the default value, except when
-				the latter is a list, in which case it is the first
-				list item in the default value
-				'''
-				o_validity_checker=self.__create_validity_checker( v_default_item_value, 
-																	s_param_validity_expression )
-			#end if expression is not "None"
-
-			if s_param_control_type=="entry":		
-				'''
-				Note that, unlike the interface presented
-				by PGGuiSimuPop, for the NeEstimator interface
-				we want to offer list editing, and so set
-				the KeyValFrame param b_use_list_editor to True.
-				(No list editor is used if tne param type is 
-				not a list )
-				'''	
-
-				#Default call when entry box changed:
-				def_on_entry_change=self.__test_values
-
-				if s_param_assoc_def != "None":
-					def_on_entry_change=getattr( self,  s_param_assoc_def )
-				#end if we have a named def in the param set
-
-				o_this_keyval=KeyValFrame( s_name=s_param_longname,
-					v_value=v_value_for_entry_control,
-					o_type=o_param_type,
-					v_default_value=v_default_item_value,
-					o_master=o_params_subframe,
-					o_associated_attribute_object=self,
-					def_entry_change_command=self.__test_values,
-					s_associated_attribute=s_attr_name,
-					i_entrywidth=i_width_this_entry,
-					i_labelwidth=LABEL_WIDTH,
-					b_is_enabled=True,
-					s_entry_justify=s_this_entry_justify,
-					s_label_justify='left',
-					s_tooltip=s_param_tooltip,
-					o_validity_tester=o_validity_checker,
-					b_force_disable=b_force_disable,
-					b_use_list_editor=True )
-
-			elif s_param_control_type.startswith("cbox"):
-				s_state_this_cbox=None
-				if s_param_control_type=="cboxnormal":
-					s_state_this_cbox="normal"
-				elif s_param_control_type=="cboxreadonly":
-					s_state_this_cbox="readonly"
-				else:
-					s_msg="In PGGuiNeEstimator instance, " \
-								+ "def __load_viz_params_interface, " \
-								+ "cbox control name not recognized: " \
-								+ s_param_control_type + "."
-					raise Exception ( s_msg )
-				#end if cbox with normal state, else readonly
-				qs_control_list=eval( s_param_control_list )
-
-				def_on_combo_choice_change=None
-			
-				#we need to have it call our sample scheme updating
-				#def when a new choice is made in the combobox		
-				#if none supplied we default to the test values def
-				if s_param_assoc_def == "None":
-					def_on_combo_choice_change=self.__test_values
-				else:
-					def_on_combo_choice_change=getattr( self,  s_param_assoc_def )
-				#end if def is "None"
-
-				#end if this is the genepop sample scheme combo box, else not
-
-				i_current_item_number=1
-				
-				'''
-				We select a combo box item number
-				different than default=1, if we
-				already have a current value for
-				this param (attribute in our self instance)
-				'''
-				
-				if hasattr( self, s_attr_name ): 
-
-					s_value=getattr( self, s_attr_name )
-
-					if s_value not in qs_control_list:
-						if o_validity_checker is not None:
-							o_validity_checker.value=s_value
-							if  not o_validity_checker.isValid():
-								s_msg=self.__validity_checker.reportInvalidityOnly()
-								PGGUIInfoMessage( self, s_msg + "\nResetting to default value." )
-								setattr( self, s_attr_name, v_default_item_value )
-							#end if invalid current value
-					else:
-						#KeyListComboFrame init expects 1-based value, so
-						#we increment the python, zero-based index
-						i_current_item_number=qs_control_list.index( s_value )
-						i_current_item_number +=1
-					#end if current value not in value list
-				#end if we have this attribute already
-
-				o_this_keyval=KeyListComboFrame( s_name=s_param_longname,
-							qs_choices=qs_control_list,
-							i_default_choice_number=i_current_item_number,
-							o_master=o_params_subframe,
-							s_associated_attribute=s_attr_name,
-							o_associated_attribute_object=self,
-							def_on_new_selection=def_on_combo_choice_change,
-							i_labelwidth=LABEL_WIDTH,
-							i_cbox_width=PARAMETERS_CBOX_WIDTH,
-							s_label_justify='left',
-							s_tooltip=s_param_tooltip,
-							b_is_enabled=True,
-							o_validity_tester=o_validity_checker,
-							s_state=s_state_this_cbox,
-							b_force_disable=b_force_disable )
-
-			elif s_param_control_type=="radiobutton":
-				raise Exception( "radio button key val not yet implemented for neestimator gui" )
-			else:
-				s_message="In PGGuiNeEstimator instance, " \
-						+ "def __load_viz_params_interface, " \
-						+ "unknownd control type read in " \
-						+ "from param set: " \
-						+ s_param_control_type + "."
-				raise Exception( s_message )
-			#end if control is entry, else cbox, else radiobutton, else unknown
-		
-			o_this_keyval.grid( row=i_row + ( i_param_position_in_order - 1 ), sticky=( NW ) )
-
-			#Keep a reference to this param frame frame keyed to its attribute name
-			self.__param_value_frames_by_attr_name[ s_attr_name ] = o_this_keyval
-
-		#end for each param
-
-		o_params_subframe.grid( row=ROW_NUM_VIZ_PARAMS_FRAME, 
-					column=COL_NUM_VIZ_PARAMS_FRAME,
-					sticky=(NW), padx=GRID_SPACE_HORIZ )
-
-		o_params_subframe.grid_columnconfigure(0, weight=1 )
-		o_params_subframe.grid_rowconfigure( 0, weight=1 )
-
-		self.grid_columnconfigure( 1, weight=1 )
-		self.grid_rowconfigure( 0, weight=1 )
-		return
-	#end __load_viz_params_interface
-
-
 	def __update_genepopfile_sampling_params_interface( self, b_force_disable=False ):
 		self.__load_genepopfile_sampling_params_interface( s_section_keyname="Sampling",
 																b_force_disable=b_force_disable )
@@ -1782,12 +1440,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 																b_force_disable=b_force_disable )
 		return
 	#end __update_genepopfile_loci_sampling_params_interface
-
-	def __update_viz_params_interface( self, b_force_disable=False ):
-		self.__load_viz_params_interface(	b_force_disable=b_force_disable )
-		return
-	#end __update_vis_params_interface
-
 
 	def __clear_grid_below_row(self, o_frame, i_row ):
 
@@ -1819,8 +1471,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			if s_key=="none":
 				i_frame_order_number=len( do_category_frames )
 			else:
-				s_frame_label=\
-						self.__param_set.getConfigSectionNameFromTag( s_key ) 
+				 
 				i_frame_order_number=int( \
 							self.__param_set.getSectionOrderFromTag( s_key ) )
 			#end if categore is "none" then place in last row
@@ -1863,20 +1514,38 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	def __load_genepop_files( self ):
 
-		s_current_value=self.__genepopfiles.get()
-
 		#dialog returns sequence:
-		q_genepop_filesconfig_file=tkfd.askopenfilenames(  \
+		tup_genepop_files=tkfd.askopenfilenames(  \
 				title='Load a genepop file' )
 
-		if len( q_genepop_filesconfig_file ) == 0:
+		if pgut.dialog_returns_nothing(  tup_genepop_files ):
 			return
 		#end if no files selected
+
+		'''
+		If the askopenfilenames dialog did  not return a tuple, 
+		then we assume it returned a unicode string,
+		#per the Windows bug noted at https://bugs.python.org/issue5712 
+		'''
+		##### temp add if True to test no matter return val
+		if True or type( tup_genepop_files ) != tuple:
+			tup_genepop_files=self.tk.splitlist( tup_genepop_files )
+	
+			#A test to fix path mangling downstream:
+			s_temp_tup=()
+			for s_path in tup_genepop_files:
+				s_path=pgut.fix_windows_path( s_path )
+				s_temp_tup+=( s_path, )
+			#end for each path
+
+			tup_genepop_files=s_temp_tup
+		#end if return val not a tuple
 
 		#string of files delimited, for member attribute 
 		#that has type tkinter.StringVar
 		s_genepop_files=DELIMITER_GENEPOP_FILES.join( \
-								q_genepop_filesconfig_file )
+								tup_genepop_files )
+
 		self.__genepopfiles.set(s_genepop_files)
 
 		self.__init_interface()
@@ -1900,7 +1569,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				title='Select a directory for file output' )
 		#if no dir selected, return	
 
-		if s_outputdir=="":
+		#If user clicks on the "Cancel" button,
+		#the message box returns an emtpy tuple.
+		if pgut.dialog_returns_nothing ( s_outputdir ):
 			return
 		#end if no dir selected
 		
@@ -2006,23 +1677,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					print( "checking and process not None but not alive" )
 				#end if very verbose, print
 
-				'''
-				Check to see if the viz plotting needs to be done:
-				'''
-				if self.__plotting_program_needs_to_be_run:
-					try:
-						self.runViz()
-					except Exception as oex:
-						#We let the viz fail, and let the GUI
-						#complete the reset of the run.
-						self.__plotting_program_needs_to_be_run=False
-						PGGUIErrorMessage( self, 
-									"Error running plotting program: " \
-											+ str( oex ) )
-						pass
-					#end try to run viz
-				#end if viz needs to be run	
-
 				self.__estimation_in_progress = False
 
 				'''
@@ -2040,7 +1694,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				self.__load_param_interface( b_force_disable = False )
 				self.__update_genepopfile_sampling_params_interface( b_force_disable = False )
 				self.__update_genepopfile_loci_sampling_params_interface( b_force_disable = False )
-				self.__update_viz_params_interface( b_force_disable = False )
 
 			#end if process alive else not
 
@@ -2050,24 +1703,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			if VERY_VERBOSE:	
 				print( "process found to be None" )
 			#endif very verbose, pring
-			'''
-			Check to see if the viz plotting needs to be done:
-			'''
-			if self.__plotting_program_needs_to_be_run:
-				try:
-					self.runViz()
-				except Exception as oex:
-					#We let the viz fail, let the user
-					#see the exception, then let the gui
-					#reset the run.
-					self.__plotting_program_needs_to_be_run=False
-					PGGUIErrorMessage( self,
-								"Error running plotting program: " \
-										+ str( oex ) )
-					pass
-				#end try to run viz
-			#end if viz needs to be run	
-
 
 			self.__estimation_in_progress = False
 			self.__run_state_message=""
@@ -2075,7 +1710,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			self.__load_param_interface( b_force_disable = False )
 			self.__update_genepopfile_sampling_params_interface( b_force_disable = False )
 			self.__update_genepopfile_loci_sampling_params_interface( b_force_disable = False )
-			self.__update_viz_params_interface( b_force_disable = False )
 
 			self.__set_controls_by_run_state( self.__get_run_state() )
 
@@ -2088,65 +1722,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__cancel_neestimation()
 		return
 	#end cleanup
-
-	def __write_viz_config_file( self ):
-		o_config_maker=PGLineRegressConfigFileMaker( self )
-		o_config_maker.writeConfigFile()
-		
-		return o_config_maker.config_file_name
-	#end __write_viz_config_file
-
-	def __run_viz_by_type( self, s_config_file ):
-
-		s_plotting_type=self.__viztype
-
-		ls_existing_outfiles=self.__get_existing_output_files()
-
-		s_estimates_table=None
-
-		for s_outfile in ls_existing_outfiles:
-			if s_outfile.endswith( ".tsv" ):
-				s_estimates_table=s_outfile
-			#end if outfile ends in tsv
-		#end for each outfile
-
-		if s_estimates_table==None:
-			s_msg="In PGGuiNeEstimator instance, " \
-					+ "def __run_viz_by_type " \
-					+ "could not find a *tsv file."
-			raise Exception( s_msg )
-		#end if no estimates table
-
-		'''
-		2016_12_13
-		Unlike the call from the PGGuiViz class objects,
-		here we do not send in a multiprocessing event,
-		but let the process live or die as  it will.
-
-		This should be revised to handle this process
-		similarly to that which handles the ne estimation
-		process, but both becuse this is a much simpler
-		call (no multiprocess runs to do plotting), and
-		the additioon of more logic to cancel this
-		final task of our GUI object is not trivial.
-		'''
-		o_multiprocessing_event_for_plotting=None
-		o_plotting_process=multiprocessing.Process( \
-				target=pgut.call_plotting_program_in_new_subprocess,
-								args=(  self.__viztype,
-									s_estimates_table,
-										s_config_file,
-										o_multiprocessing_event_for_plotting ) )
-		o_plotting_process.start()
-		
-		return
-	#end __run_viz_by_type
-
-	def runViz( self ):
-		s_config_file_name=self.__write_viz_config_file()
-		self.__run_viz_by_type( s_config_file_name )
-		return
-	#end runviz
 
 #end class PGGuiNeEstimator 
 

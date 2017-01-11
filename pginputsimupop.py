@@ -13,7 +13,6 @@ LAMBDA_IGNORE=1.0
 
 import os
 from ConfigParser import ConfigParser
-from ConfigParser import NoSectionError
 
 class PGInputSimuPop( object ):
 	'''
@@ -69,6 +68,7 @@ class PGInputSimuPop( object ):
 			self.__make_config_parser( s_config_file )
 		#end if we have a conf file
 
+		
 		return
 	#end def __init__
   
@@ -149,17 +149,23 @@ class PGInputSimuPop( object ):
 		if o_parser.has_option( "effective_size", "Nb" ):
 			s_nb_from_eff_size_section=o_parser.get( "effective_size", "Nb" )
 		else:
-			#Returns None is no such section/options in the life table config 
-			#parser
-			s_nb_from_eff_size_section=self.__resources.getLifeTableValue( \
-										self.model_name, "effective_size", "Nb" )
+
+			if self.__resources is not None:
+				#Returns None is no such section/options in the life table config 
+				#parser
+				s_nb_from_eff_size_section=self.__resources.getLifeTableValue( \
+											self.model_name, "effective_size", "Nb" )
+			#end if we have life tables, check
+
 		#end if not in config file, check life table
 
 		if o_parser.has_option( "effective_size", "NbNc" ):
 			s_nbnc_from_eff_size_section=o_parser.get( "effective_size" , "NbNc" )
 		else:
-			s_nbnc_from_eff_size_section=self.__resources.getLifeTableValue( \
-										self.model_name, "effective_size", "NbNc" )
+			if self.__resources is not None:
+				s_nbnc_from_eff_size_section=self.__resources.getLifeTableValue( \
+											self.model_name, "effective_size", "NbNc" )
+			#end if we have life tables, check
 		#end if NbNc not in  config file, check life table
 
 		if s_nb_from_eff_size_section is not None \
@@ -325,6 +331,7 @@ class PGInputSimuPop( object ):
 			self.__Nb_from_pop_section = None
 			self.NbVar = None
 		#end if config has Nb, else not
+
 		self.__update_attribute_config_file_info( "_PGInputSimuPop__Nb_from_pop_section", "pop", "Nb" )
 		self.__update_attribute_config_file_info( "NbVar", "pop", "NbVar" )
 
@@ -398,6 +405,7 @@ class PGInputSimuPop( object ):
 	#end __get_config
 
 	def __compute_n0_from_eff_size_info( self ):
+
 		'''
 		2016_11_04
 		Revising by incorporating Brian Trethway's new calc method 
@@ -427,6 +435,17 @@ class PGInputSimuPop( object ):
 		#end if one or more params missing
 
 		f_female_ratio = 1-self.maleProb
+
+		if self.NbNc <= 0.0:
+			s_msg=" In PGInputSimuPop instance, def __compute_n0_from_eff_size_info, " \
+									+ "N0 calculation requires an NbNc ratio " \
+									+ "greater than zero, current value: " \
+									+ str( self.NbNc ) + "."
+
+			raise Exception( s_msg )
+
+		#end if NbNc is zero raise error
+
 		f_Nc = self.__Nb_from_eff_size_info / self.NbNc
 
 		f_current_male_prop=self.maleProb
@@ -445,8 +464,17 @@ class PGInputSimuPop( object ):
 		#end for each age in male survival list
 
 		#calulate N0
+		if f_cum_pop_porp <= 0.0:
+			s_msg=" In PGInputSimuPop instance, def __compute_n0_from_eff_size_info, " \
+									+ "variable cum_pop_proportion expected to be " \
+									+ "greater than zero.  The current value: " \
+									+ str( f_cum_pop_porp ) + "." 
+
+			raise Exception( s_msg )
+		#end if invalid value for f_cum_pop_porp
+
 		i_n0 = int( round ( f_Nc/f_cum_pop_porp ) )
-			
+		
 		return i_n0
 	#end __compute_n0_from_eff_size_info
 
@@ -639,7 +667,7 @@ class PGInputSimuPop( object ):
 								+ "has more than one type.  The only valid " \
 								+ "case of such lists is those with int and float " \
 								+ "items.  This list, " + str( v_val ) \
-								+ " , with types, " + str( lo_types ) + "."
+								+ " , with types, " + str( ls_types ) + "."
 						raise Exception( s_msg )
 					#end if list is mix of ints and floats, make all floats, else error
 				#end if non-uniqe types in list
@@ -816,6 +844,22 @@ class PGInputSimuPop( object ):
 		#end if pop-section Nb, else effective size, else unknown
 		return i_returnval
 	#end properby Nb_for_restrict_generator
+
+	'''
+	This def helps clients to, for example,
+	give users GUI message needs
+	that the current conig no effective size info,
+	so that N0 will be set manually by the user,
+	instead of calculated using an Nb/Nc and Nb.
+	'''
+	def has_effective_size_info( self ):
+		b_returnval=False
+		s_nb_source=self.__get_nb_attribute_derivation()
+		if s_nb_source=="effective_size_section":
+			b_returnval=True
+		#end if nb is from effective_size_section
+		return b_returnval
+	#end property has_effective_size_info
 
 #end class PGInputSimuPop
 

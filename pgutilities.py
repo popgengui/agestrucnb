@@ -10,38 +10,38 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import os
 import sys
-import types
-import copy_reg
 import pgopsimupop as pgsim
 import pgsimupopresources as pgrec
 import pginputsimupop as pgin
 import pgoutputsimupop as pgout
 import pgparamset as pgpar
-import pgdriveneestimator as pgne
 
-import copy
 import subprocess
 import glob
 import inspect
 import time
 import multiprocessing
-import shutil
+
+#For writing a filtered
+#ne estimation table file.
+import tempfile
 
 '''
-psutil and signal are used below,
-as tools for cancelling the subprocess
+psutil is used as the preferred tool
+for cancelling the subprocess
 launched to do ne estimations. See def
 run_driveneestimator_in_new_process.
 '''
-import signal
 import psutil
 
-#for def do_simulation_reps_in_subprocesses,
-#used to detect windows, and 
-#correct strings that give file paths:
+'''
+Used to detect a Windows OS, and 
+correct strings that give file paths:
+'''
 import platform
 
 from pgutilityclasses import IndependantSubprocessGroup 
+from pgutilityclasses import NeEstimationTableFileManager 
 
 VERBOSE=False
 
@@ -141,9 +141,9 @@ def confirm_executable_is_in_path( s_exectuable_file_name ):
 
         s_paths=None
 
-        if os.name=="posix":
+        if os.name==IX_NAME:
             s_paths=os.environ.get( LINUX_PATH_VAR )
-        elif os.name=="nt":
+        elif os.name==WINDOWS_NAME:
             s_paths=os.environ.get( WINDOWS_PATH_VAR )
         else:
             raise Exception( "In def confirm_executable_is_in_path, Unrecognized OS name: " + os.name )
@@ -193,10 +193,10 @@ def manage_process_queue( o_queue_with_target_calls, o_queue_to_hold_results=Non
 #
 
 def prep_and_call_do_pgopsimupop_replicate( s_config_file, 
-						s_life_table_files, 
-						s_param_file, 
-						s_output_base_name, 
-						s_replicate_number ):
+											s_life_table_files, 
+											s_param_file, 
+											s_output_base_name, 
+											s_replicate_number ):
 	'''	
 	This def to be invoked in a subprocess.Popen command, as
 	instantiated in a PGGuiSimuPop instance in do_operation.
@@ -333,9 +333,9 @@ def remove_simulation_replicate_output_files( s_basename ):
 #end remove_simulation_replicate_output_files
 
 def get_class_names_immediate_parent( o_object ):
-		q_classes=inspect.getmro( o_object )
-		o_class_immediate_parent = q_classes[1] 
-		return str( o_class_immediate_parent )
+	q_classes=inspect.getmro( o_object )
+	o_class_immediate_parent = q_classes[1] 
+	return str( o_class_immediate_parent )
 #end get_class_name_immediate_parent
 
 def get_current_working_directory():
@@ -411,7 +411,7 @@ def get_platform():
 		s_platform_informal=SYS_LINUX
 	elif "windows" in s_os_platform_name.lower():
 		s_platform_informal=SYS_WINDOWS
-	elif "darwin" in s_os_plaform_name.lower():
+	elif "darwin" in s_os_platform_name.lower():
 		s_platform_informal=SYS_MAC
 	else:
 		s_msg="In pgutilitites, def get_platform, "  \
@@ -433,12 +433,12 @@ def fix_windows_path( s_path ):
 #end def fix_windows_path
 
 def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
-			i_input_reps, 
-			i_total_processes_for_sims,
-			s_temp_config_file_for_running_replicates,
-			ls_life_table_files,
-			s_param_names_file,
-			s_output_basename ):
+										i_input_reps, 
+										i_total_processes_for_sims,
+										s_temp_config_file_for_running_replicates,
+										ls_life_table_files,
+										s_param_names_file,
+										s_output_basename ):
 
 	'''
 	Failed to get independant initialization of population per-replicate
@@ -579,7 +579,7 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 			#end if event is set else not
 		#end while preplicates need to be started
 
-		#we don't want to return untill all processes are done.
+		#we don't want to return until all processes are done.
 		#meantime test for cancel-request
 		i_total_still_alive_after_creating_all=o_subprocess_group.getTotalAlive()
 
@@ -684,12 +684,7 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	pops per file using python.multiprocessing.Process objects.
 	'''
 
-	o_main_output=None
-	o_secondary_output=None
-
 	try:
-		o_main_output=None
-		o_secondary_output=None
 
 		s_os_plaform_name=platform.system()
 		
@@ -789,7 +784,14 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 #end run_driveneestimator_in_new_process
 
 def get_add_path_statment_for_popen():
-
+	'''
+	This def creates a string that is a
+	path path.append call that adds the 
+	absolute path of the current module
+	(used to add all the project modules
+	to the path, since we assume this module
+	is in the same directory as all of the files
+	'''
 	s_path_append_statement=None
 
 	s_curr_mod_path = os.path.abspath(__file__)
@@ -829,9 +831,9 @@ def call_driveneestimator_using_subprocess( seq_arg_set ):
 
 	s_command=s_path_statement + s_import_statement + s_call_statement
 	'''
-	We use psuti version of Popen.  Having struggled with NeEstimation hangs and orphan processes,
-	the psutil version seems better able to perform for this chore.  This from the docs for psutil
-	module:
+	We use psuti version of Popen.  Having struggled with NeEstimation hangs and orphan using
+	multiprocessing.Process objects, the psutil version seems better able to perform for this 
+	chore.  This from the docs for psutil module:
 			"A more convenient interface to stdlib subprocess.Popen. It starts a sub process 
 			and you deal with it exactly as when using subprocess.Popen but in addition it also 
 			provides all the methods of psutil.Process class. For method names common to both 
@@ -843,11 +845,16 @@ def call_driveneestimator_using_subprocess( seq_arg_set ):
 	'''
 	o_subprocess=psutil.Popen( [ PYEXE_FOR_POPEN, "-c", s_command ] )
 
-
 	return o_subprocess
 #end call_driveneestimator_using_subprocess
 
 def manage_driveneestimator_subprocess( o_subprocess, o_multiprocessing_event ):
+	'''
+	This def uses an absolute time out, and a looping check of the 
+	passed subprocess poll(). On each iteration it also checks
+	for a set()==True of the multiprocessing event, indicating a
+	request from the GUI to kill the process (and its children).
+	'''
 	if VERBOSE:
 		print( "In pgutilities.py, def manage_driveneestimator_subprocess, " \
 							+ "entered def with subprocess, " \
@@ -859,8 +866,20 @@ def manage_driveneestimator_subprocess( o_subprocess, o_multiprocessing_event ):
 
 	SLEEPTIMELOOP=3
 
-	#For now we apply essentially
-	#no time limit
+	'''
+	Originally, we used a MAX running time
+	limit when we were using a multiprocess.Process
+	to drive the pgdriveneestimator.py, but
+	found that long runs vs hands were very difficult
+	to distinguish between.  We've seen no hangs
+	since switching to a subprocess.  This fact,
+	plus the difficult in deciding when a run
+	has hung vs a very large data set, suggests
+	that we should, as of 2016_12_23, for now 
+	apply what amounts to no time limit.
+
+	'''
+
 	MAX_HOURS_PER_RUN=100000
 	TIMEOUT=60*60*MAX_HOURS_PER_RUN
 
@@ -907,10 +926,64 @@ def manage_driveneestimator_subprocess( o_subprocess, o_multiprocessing_event ):
 	return
 #end manage_driveneestimator_subprocess
 
+def get_subsample_value_filtered_ne_estimates_table_file( s_estimates_table_file,
+															s_pop_subsample_value,
+															s_loci_subsample_value ):
+	'''
+	If the value of sither param s_pop_subsample_value or s_loci_subsample_value is not 
+	None, these are used to filter the estimates table given by param s_estimates_table_file.
+
+	This def returns the name of a file that gives the filtered table.
+
+	Assumtions: Either s_pop_subsample_value or s_loci_subsample_value are non None,
+				otherwise, this def simply rewrites the original table file to the new
+				file name
+	'''
+	o_ne_estimates_file_manager=NeEstimationTableFileManager( s_estimates_table_file )
+
+	if s_pop_subsample_value is not None:
+		o_ne_estimates_file_manager.setFilter( 'sample_value', lambda x : x == s_pop_subsample_value ) 
+	#end if there is a pop subsample value
+
+	if s_loci_subsample_value is not None:
+		o_ne_estimates_file_manager.setFilter( 'loci_sample_value' , lambda x : x == s_loci_subsample_value )
+	#end if we have a loci subsample value
+
+	s_current_dir=os.path.abspath( os.curdir )
+
+	#Returns a duple, int file descriptor, and str file name:
+	tup_tempfile=tempfile.mkstemp( dir=s_current_dir )
+
+	s_temp_file_name=tup_tempfile[ 1 ]
+
+	o_tempfile=open( s_temp_file_name, 'w' )
+
+	o_ne_estimates_file_manager.writeFilteredTable( o_tempfile )
+
+	o_tempfile.close()
+
+	return s_temp_file_name
+#end get_subsample_value_filtered_ne_estimates_table_file
+
 def call_plotting_program_in_new_subprocess( s_type, s_estimates_table_file, 
 														s_plotting_config_file, 
+														s_pop_subsample_value,
+														s_loci_subsample_value,
 														o_multiprocessing_event ):
 	try:
+
+		s_temp_file_for_filtered_table=None
+
+		#If we've been passed any non-None subsample values, we
+		#need to use a filtered table file:
+		if [ s_pop_subsample_value, s_loci_subsample_value ] != [ None, None ]:
+
+			s_temp_file_for_filtered_table=get_subsample_value_filtered_ne_estimates_table_file( s_estimates_table_file,
+																			s_pop_subsample_value,
+																			s_loci_subsample_value )
+			#and we use the temp file as our table for plotting.
+			s_estimates_table_file=s_temp_file_for_filtered_table
+		#end if one or more of the subsample values is not None
 
 		s_curr_mod_path = os.path.abspath(__file__)
 
@@ -919,9 +992,9 @@ def call_plotting_program_in_new_subprocess( s_type, s_estimates_table_file,
 		s_mod_dir=os.path.dirname( s_curr_mod_path )
 
 		'''
-		Found that windows python would claim no such
+		I Found that windows python would claim no such
 		module found in the import pgguiutilities 
-		statment, unless I replaced the windows os.sep
+		statement, unless I replaced the windows os.sep
 		char with linux "/". Also, note the conversion
 		of the ts and config file args, too.  In that
 		case, the Windows sep char will act like an escape
@@ -957,6 +1030,13 @@ def call_plotting_program_in_new_subprocess( s_type, s_estimates_table_file,
 
 		manage_plotting_program_subprocess( o_subprocess, o_multiprocessing_event )
 
+		#We remove the temp file if we used one for filtered results:
+		if s_temp_file_for_filtered_table is not None:
+			##### temp rem out
+			#os.remove( s_temp_file_for_filtered_table )
+			pass
+		#end if we used a temp file
+
 	except Exception as oex:
 		show_error_in_messagebox_in_new_process( oex, s_msg_prefix="In pgutilities.py, " \
 						+ "def call_plotting_program_in_new_subprocess" )
@@ -964,7 +1044,6 @@ def call_plotting_program_in_new_subprocess( s_type, s_estimates_table_file,
 	#end try...except
 	return	
 #enc call_plotting_program_in_new_subprocess
-
 
 def manage_plotting_program_subprocess( o_subprocess, o_multiprocessing_event ):
 	'''
@@ -1116,6 +1195,107 @@ def show_error_in_messagebox_in_new_process( o_exception, s_msg_prefix=None ):
 	subprocess.Popen( [ PYEXE_FOR_POPEN, "-c" , s_command ] )
 
 #end show_error_in_messagebox_in_new_process
+
+def remove_non_existent_paths_from_path_variable():
+	'''
+	I needed to make PATH environmental variables
+	that have no (old paths to discarded locations)
+	non-existing paths.  The ne2.controller module's
+	ne estimator controller class in the pygenomics
+	package iterates over the PATH variable paths, 
+	and uses each path qua existing path without
+	checking whether it exists.
+	'''
+
+	ls_paths_that_exist=[]
+
+	IX_NAME="posix"
+	WINDOWS_NAME="nt"
+
+	LINUX_PATH_VAR="PATH"
+	WINDOWS_PATH_VAR="PATH"
+
+	s_paths=None
+
+	if os.name=="posix":
+		s_var_name=LINUX_PATH_VAR
+	elif os.name=="nt":
+		s_var_name=WINDOWS_PATH_VAR
+	else:
+		raise Exception( "In def confirm_executable_is_in_path, Unrecognized OS name: " + os.name )
+	#end if posix else if nt, else unknown
+
+	s_paths=os.environ.get( s_var_name )
+
+	ls_paths=s_paths.split( os.pathsep )
+	
+	for s_path in ls_paths:
+		if os.path.exists( s_path ):
+			ls_paths_that_exist.append( s_path )
+		#end if executable
+	#end for each path in PATH
+
+	#Reset the path variable to only those paths in its
+	#current set, that exist as real OS paths:
+	os.environ[  s_var_name ]=os.pathsep.join( ls_paths_that_exist )
+
+	return
+#end remove_non_existent_paths_from_path_variable
+
+def get_subsample_values_lists_from_tsv_file( s_tsv_file ):
+	'''
+	For the given tsv file giving an Ne estimate table output by
+	pgdriveneestimator.py, we return a dictionary with keys, 
+	"pop" and "loci", giving a list of string versions of the subsample
+	values for each.
+	'''
+	ls_pop_subsample_values=None
+	ls_loci_subsample_values=None
+	o_ne_file=NeEstimationTableFileManager( s_tsv_file )
+
+	ls_pop_subsample_values=o_ne_file.pop_sample_values
+	ls_loci_subsample_values=o_ne_file.loci_sample_values
+
+	return { "pop":ls_pop_subsample_values,
+				"loci":ls_loci_subsample_values }
+#end get_subsample_values_lists_from_tsv_file
+
+def return_when_def_is_true( def_with_boolean_return, dv_args=None, f_sleeptime_in_seconds=0.05 ):
+	'''
+	This def returns when the call to the def given by the first arg
+	returns True.
+
+	Param def_to_test, ref to ta def that returns True or false.
+	Param args, a dict of the arguments needed (keys are param
+		names, values are the args for each param).  If set to (default)
+		None, then no args are passed to the def.
+	Param i_sleeptime.  Sleep interval, in seconds, between calls to the arg.
+	'''
+
+	while not call_with_or_without_args( def_with_boolean_return, dv_args ):	
+		time.sleep( f_sleeptime_in_seconds )
+	#end while return is False
+
+	return
+
+#end return_when_def_is_true
+
+def call_with_or_without_args( def_to_call, dv_args ):
+	'''
+	Helper for def return_when_def_is_true.
+	This def checks dv_args and if its value is None,
+	it calls param def_to_call without any arguments,
+	otherside calls with dv_args as param list,
+	key=paramater name, value=paramater value.
+	'''
+
+	if dv_args is None:
+		return ( def_to_call() )
+	else:
+		return ( def_to_call( **dv_args ) )
+	#end if no args, else args present
+
+#end call_with_or_without_args
 
 if __name__ == "__main__":
 

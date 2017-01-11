@@ -1215,8 +1215,6 @@ class GenepopFileSamplerIndividualsAgeStructureRelateds( GenepopFileSampler ):
 
 				i_total_relateds_collected=len( li_relateds_collected )
 
-				i_total_indiv_with_relateds_removed=len( li_individuals_with_relateds_removed )
-
 				i_non_relateds_needed_to_make_total= i_target_total_indivs \
 													- i_total_relateds_collected
 				li_non_relateds_collected = []
@@ -1510,7 +1508,12 @@ class GenepopFileSamplerIndividualsByRemoval( GenepopFileSampler ):
 		i_size_largest_pop=max( self.filemanager.getIndividualCounts() )
 
 		for i_indiv in range( 1, i_size_largest_pop + 1 ):
-			s_indiv_subsample_tag=make_subsample_tag( 1, i_indiv, SCHEME_REMOVAL )
+			'''
+			As of 20161224, we subtract one from i_indiv in the call to
+			make_subsample_tag, so that replicate numbers for this series
+			will be zero-based, to match those of other schemes.
+			'''
+			s_indiv_subsample_tag=make_subsample_tag( 1, (i_indiv-1), SCHEME_REMOVAL )
 			self.filemanager.subsampleIndividualsLeaveNthOutFromPop( i_indiv, s_indiv_subsample_tag )
 		#end for each indiv, leave it out of sample
 		return
@@ -1638,7 +1641,7 @@ class GenepopFileSamplerIndividualsByCriteriaFactored( GenepopFileSampler ):
 			for idx in self.sampleparams.criteria.critera_count:
 
 				s_temp_subsample_name=s_subsample_tag + "temp_" + str( idx )
-				ls_temp_names_subsamples.append( s_temp_subsample )
+				ls_temp_names_subsamples.append( s_temp_subsample_name )
 
 				#make a new criteria object for the file manager,
 				#consisting of only the current criterion:
@@ -1731,8 +1734,7 @@ class GenepopFileSamplerIndividualsByCriteriaGrouped( object ):
 if __name__ == "__main__":
 
 	import sys
-	import MyUtilities.misc_utilities as modut
-	import genepopfilemanager as gpf	
+	import MyUtilities.misc_utilities as modut	
 	import test_code.testdefs as td
 
 	ls_args=[ "genepop file", "test number" ]

@@ -28,7 +28,7 @@ class GenepopIndivIdAgeStructure( object ):
 		self.__get_Fields( s_id )
 	#end __init__
 
-	def __get_fields( s_id ):
+	def __get_fields( self, s_id ):
 
 		s_errmsg="In GenepopIndivIdAgeStructure instance, " \
 							+ "def __get_fields, found Errors:\n"
@@ -251,9 +251,9 @@ class GenepopIndivCriterion( object ):
 
 	def make_test_variable( s_field_name ):
 
-		return FIELD_DELIMITER_FOR_TEST_EXPRESSION \
+		return GenepopIndivCriterion.FIELD_DELIMITER_FOR_TEST_EXPRESSION \
 				+ s_field_name \
-				+ FIELD_DELIMITER_FOR_TEST_EXPRESSION
+				+ GenepopIndivCriterion.FIELD_DELIMITER_FOR_TEST_EXPRESSION
 	#end make_test_variable
 
 	def __init__( self, s_criterion_name, 
@@ -512,7 +512,7 @@ class GenepopIndivCriteria( object ):
 			#end if idx in range, else exception
 		#end for each index
 
-		o_new_criteria_object=GenepopIndivCritera( lo_subset_of_criterion_objects )
+		o_new_criteria_object=GenepopIndivCriteria( lo_subset_of_criterion_objects )
 		
 		return o_new_criteria_object
 	#end def getSubsetOfCriteriaAsNewCriteriaObject
@@ -520,7 +520,7 @@ class GenepopIndivCriteria( object ):
 
 	def copy( self ):
 		lo_criterion_copy=[ o_criterion for o_criterion in self._criteria ]
-		o_copy=GenepopIndivCritera( lo_criterion_copy )
+		o_copy=GenepopIndivCriteria( lo_criterion_copy )
 		return o_copy
 	#end copy
 

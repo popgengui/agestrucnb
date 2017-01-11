@@ -264,9 +264,34 @@ class PGOpSimuPop( modop.APGOperation ):
 		nLoci=self.input.numMSats + self.input.numSNPs
 		startLambda=self.input.startLambda
 		lbd=self.input.lbd
-		##todo !! this is where you select sex proporotion(maleProp) or freqency(maleFreq)
-		#initOps = [sp.InitSex(maleProp=self.input.maleProb)]
-		initOps = [sp.InitSex(maleProp=0.5)]
+		
+		ldef_init_sex=[]
+
+		'''
+		This 2-cull-method selection for intializing sex ratios
+		was added 2017_01_05.  When the user selects
+		"equal_sex_ratio" in the interface (PGGuiSimuPop), we 
+		initialize always using "maleProp=0.5".  When the user
+		chooses the "survivial_rates" option, then the configuration
+		file param "maleProb" is accessed (its value also may have been 
+		reset in the interface), and the sex ratio is determined using 
+		Tiago's original assignment, "maleFreq=input.maleProb".
+		'''
+		if self.input.cull_method == \
+					pgin.PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS:
+			ldef_init_sex=[sp.InitSex(maleProp=0.5)]
+		elif self.input.cull_method == \
+					pgin.PGInputSimuPop.CONST_CULL_METHOD_SURVIVIAL_RATES:
+			ldef_init_sex=[ sp.InitSex(maleFreq=self.input.maleProb) ]
+		else:
+			s_msg="In PGOpSimuPop instance, def __createSinglePop, "  \
+						+ "there is an unknown value for the cull_method " \
+						+ "parameter: " + str( self.input.cull_method ) + "."
+			raise Exception( s_msg )
+		#end if equal sex ratio else
+
+		initOps=ldef_init_sex 
+
 		if startLambda < pgin.START_LAMBDA_IGNORE:
 			preOps = [sp.ResizeSubPops(proportions=(float(lbd), ),
 								begin=startLambda)]
@@ -738,6 +763,7 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __fitnessGenerator 
 
 	def __cull( self, pop ):
+
 		kills = []
 		for i in pop.individuals():
 			if i.age > 0 and i.age < self.input.ages - 1:
@@ -757,6 +783,7 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __cull
 	##Brian Trethewey addition for the immediate culling of a proportion of the adult population
 	def __equalSexCull(self, pop):
+
 		kills = []
 		cohortDict = {}
 		for i in pop.individuals():
@@ -870,7 +897,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		pop.removeIndividuals(IDs=kills)
 		return True
 
-# end __equalSexCull
+	# end __equalSexCull
 
 	def __harvest(self, pop):
 		kills = []

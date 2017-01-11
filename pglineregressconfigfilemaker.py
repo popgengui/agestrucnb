@@ -96,7 +96,17 @@ class PGLineRegressConfigFileMaker( object ):
 				#end if section name new to dict, add it
 
 				if s_viz_section_name == "destination":
-					if not ( v_value_this_param == "show" \
+					if v_value_this_param not in [ "show", "none" ]:
+						#returns a StrVal tkinter object
+
+						v_outdir=getattr( self.__interface, self.__mangled_attribute_prefix + "output_directory" )
+						s_outdir=v_outdir.get()
+						v_value_this_param = s_outdir + "/" + v_value_this_param
+						if pgut.is_windows_platform():
+							v_value_this_param=self.fix_windows_path( v_value_this_param )
+						#end if using Windows, fix the path
+
+					if not ( v_value_this_param in [ "show", "none" ] \
 											or v_value_this_param.endswith( ".png" ) \
 											or v_value_this_param.endswith( ".pdf" ) ) :
 						

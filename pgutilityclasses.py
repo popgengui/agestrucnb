@@ -10,6 +10,7 @@ __date__ = "20160702"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import sys
+import numpy
 
 class IndependantProcessGroup( object ):
 	'''
@@ -27,7 +28,6 @@ class IndependantProcessGroup( object ):
 	case will be to run y replicates using x processes, with
 	y>>x, then we need to manage the set of x processes, replacing
 	those finished with fresh processes.
-	
 	
 	All member processes are assumed to be completely 
 	independant of all others, so that any I/O messes 
@@ -779,7 +779,7 @@ class NeEstimatorLociSamplingSchemeParameterManager( object ):
 		return tuple( ls_sample_scheme_args_as_strings )
 
 	#end getSampleSchemeArgToDriver
-
+	
 #end class NeEstimatorLociSamplingSchemeParameterManager 
 
 
@@ -858,6 +858,322 @@ class ValueValidator( object ):
 	
 #end class ValueValidator
 
+
+class NeEstimationTableFileManager:
+	'''
+	Class to read and write the table 
+	files with Ne estimations generatted 
+	by pgdriveneestimator.py.
+
+	Motivation: Needed in order to filter the
+	table for plotting using Brian T's
+	line regresss program, when the table
+	has more than one subsample value for 
+	the "pop" sections and/or "loci" list. For example,
+	if the user has subsampled a genepop file
+	to get 95 and 85 percent fot individuals
+	per pop, and and also subsampled the loci
+	to get 95 and 85 percent of loci (however
+	many replicates in each), then the reaults
+	will need to be filtered to include only
+	rows whose pop subsdample value i and loci 
+	subsample value j are fixed, so that i,j
+	is 85,85 or 85,95 or 95,85 or 95,95.
+
+	The file is loaded into a numpy array,
+	and all fields are typed as bytes.
+	(There's a type problem if we type the array 
+	"str", so that  we get different types depending 
+	on py2 vs py3:
+
+	"if you create a NumPy array containing strings, 
+	the array will use the numpy.string_ type (or 
+	the numpy.unicode_ type in Python 3)." More precisely, 
+	the array will use a sub-datatype of np.string_
+
+	This class returns its items as strings, after
+	decoding the bytes using sys.stdout.encoding.
+	I think this gives items compatible with 
+	the string methods in both py2 and py3.
+	
+	'''
+
+	DELIM_TABLE="\t"
+	COL_NAME_POP_SAMPLE_VAL=b'sample_value'
+	COL_NAME_LOCI_SAMPLE_VAL=b'loci_sample_value'
+
+	ENCODING=sys.stdout.encoding
+
+	def __init__( self, s_file_name, 
+					i_header_is_first_n_lines=1,
+					i_col_names_line_num=1 ):
+		'''
+		param s_file_name gives the name
+		of a file output by pgdriveneestimator.py,
+		and is the main (*tsv) output file giving
+		Ne estimations and related quants.
+
+		param i_header_is_first_n_lines gives the number 
+		of lines at the beginning of the file that are
+		non-data.
+
+		param i_col_names_line_num gives the file's line number
+		that holds the delimited column names
+		'''
+
+		self.__filename=s_file_name
+		self.__header_line_tot=i_header_is_first_n_lines
+		self.__line_number_col_names=i_col_names_line_num
+		self.__myclassname=NeEstimationTableFileManager
+		self.__table_array=None
+		self.__load_file_into_array()
+				
+		'''
+		Dictionary of functions keyed to column numbers. Valid
+		values are None or a ref to a def that takes a single 
+		string value and returns a boolean.  This dictionary 
+		is used to write a filtered version of the input file 
+		that includes only lines that pass all filters (all 
+		return True). Users add these via def setFilter
+		below.
+		'''
+		self.__filters={}
+
+		return
+	#end __init__
+
+	def __load_file_into_array( self ):
+		self.__table_array=numpy.loadtxt( fname=self.__filename, dtype=bytes )
+		return
+	#end __load_file_into_array
+
+	def __get_col_nums_for_col_name( self, b_col_name ):
+		'''
+		param b_col_name is a bytes object, to be compared
+		to those read in to the first line of the table array.
+		'''
+		ar_col_names=self.__table_array[ self.__line_number_col_names - 1, : ]
+
+		#Returns a tuple of arrays, the first array being the
+		#index or indices in the bool array wherein ar_col_names has the match.
+		tup_ar_col_nums=numpy.where( ar_col_names==b_col_name )
+		ar_col_nums=tup_ar_col_nums[ 0 ]
+
+		return ar_col_nums
+	#end __get_col_nums_for_col_name
+
+	def __get_set_values_for_column( self, i_col_number ):
+		'''
+		This def returns a list givein the set (unique)
+		string-typed values for the column given by i_col_number.
+		'''
+		ar_table=self.__table_array
+		i_min_row=self.__header_line_tot
+
+		return set( ar_table[ i_min_row : , i_col_number ] )
+	#end __get_set_values_for_column
+
+	def __get_list_bytes_pop_sample_values( self ):
+		b_col_name=self.__myclassname.COL_NAME_POP_SAMPLE_VAL
+		ar_col_nums=self.__get_col_nums_for_col_name( b_col_name  )
+
+		if len( ar_col_nums ) != 1:
+			s_msg="In NeEstimationTableFileManager instance, " \
+							+ "def __get_list_pop_sample_values, " \
+							+ "in fetching column number for sample value " \
+							+ "from the file header, a non unique column " \
+							+ "number was returned, using sample value column " \
+							+ "name: " + str( b_col_name ) + ", and getting list of " \
+							+ "column numbers: " + str( ar_col_nums ) + "."
+			raise Exception( s_msg )
+		#end if non uniq col number
+
+		set_pop_sample_values=self.__get_set_values_for_column( ar_col_nums [ 0 ] )
+		
+		return list( set_pop_sample_values )
+
+	#end __get_list_pop_sample_values
+
+	def __get_list_bytes_loci_sample_values( self ):
+
+		b_col_name=self.__myclassname.COL_NAME_LOCI_SAMPLE_VAL
+
+		ar_col_nums=self.__get_col_nums_for_col_name( b_col_name  )
+
+		if len( ar_col_nums ) != 1:
+			s_msg="In NeEstimationTableFileManager instance, " \
+							+ "def __get_list_loci_sample_values, " \
+							+ "in fetching column number for sample value " \
+							+ "from the file header, a non unique column " \
+							+ "number was returned, using sample value column " \
+							+ "name: " + str( b_col_name ) + ", and getting list of " \
+							+ "column numbers: " + str( ar_col_nums ) + "."
+			raise Exception( s_msg )
+		#end if non uniq col number
+
+		set_loci_sample_values=self.__get_set_values_for_column( ar_col_nums [ 0 ] )
+		
+		return list( set_loci_sample_values )
+
+	#end __get_list_bytes_loci_sample_values
+
+	def __get_list_of_strings_from_list_of_bytes( self, lb_list ):
+
+
+		ls_as_strings=[ str(  b_val.decode( self.__myclassname.ENCODING )  )
+															for b_val in lb_list ]
+		return ls_as_strings
+	#end __get_list_of_strings_from_list_of_bytes
+
+	def __get_string_from_bytes_value( self, b_bytes ):
+		s_bytes=str( b_bytes.decode( self.__myclassname.ENCODING ) )
+		return s_bytes
+	#end __get_string_from_bytes_value
+
+	def __get_bytes_from_string_value( self, s_strval ):
+		b_strval=bytes( s_strval.encode( self.__myclassname.ENCODING ) )
+		return b_strval
+	#end __get_bytes_from_string_value
+		
+	def __write_filtered_table_to_open_file_object( self, o_open_file ):
+		'''
+		param dif_lambdas_by_col_num has keys that correspond to
+		column numbers in the table, and values that are refs to 
+		functions that take the column val as a single strin 
+		input and output a bool.
+		'''
+	
+		i_line_count=0
+		for ar_line in self.__table_array:
+			i_line_count+=1
+
+			#We do an "and" op to this bool
+			#with all non-None filters.
+			b_line_should_be_included=True
+
+			if i_line_count == 1:
+				'''
+				Header line, no tests needed, and our write flag
+				is already set to True, so pass
+				'''
+			else:
+				for i_colnum in self.__filters:
+					if self.__filters[ i_colnum ] is not None:
+						b_table_value=ar_line[ i_colnum ]
+						s_table_value=self.__get_string_from_bytes_value( b_table_value )
+						b_line_should_be_included &= self.__filters[ i_colnum ] ( s_table_value ) 
+					#end if non-None filter
+				#end for each filter
+
+			if b_line_should_be_included:
+
+				ls_line_as_list_of_strings= \
+						self.__get_list_of_strings_from_list_of_bytes( ar_line )
+
+				s_entry=self.__myclassname.DELIM_TABLE.join( \
+													ls_line_as_list_of_strings )
+
+				o_open_file.write( s_entry + "\n" )
+			#end if b_line_should_be_included
+
+		return
+	#end __write_filtered_table_to_open_file_object
+
+	def setFilter( self, s_column_name, def_filter ):
+		'''
+		param s_column_name, an item in the delimited header list of column
+			names.
+		param def_filter, a def that takes a single string arg and returns
+			a boolean.  The usual case, if filtering for one value, say, v1,
+			would be a def like, lambda x: x==v1. If def_filter is set to None, 
+			no filter will be applied to this column. Setting to None is the 
+			way to effectively remove a previously set filter.
+		'''
+		b_column_name=self.__get_bytes_from_string_value( s_column_name )
+		ar_col_numbers=self.__get_col_nums_for_col_name( b_column_name )
+		if len( ar_col_numbers ) != 1:
+			s_msg="In NeEstimationTableFileManager instance, " \
+							+ "def setFilter, " \
+							+ "in fetching column number for sample value " \
+							+ "from the file header, a non unique column " \
+							+ "number was returned, using column " \
+							+ "name: " + str( b_column_name ) + ", and getting list of " \
+							+ "column numbers: " + str( ar_col_numbers ) + "."
+			raise Exception( s_msg )
+		#end if non uniq col number
+
+		self.__filters[ ar_col_numbers[ 0 ] ] = def_filter
+	#end setFilter
+
+	def unsetAllFilters( self ):
+		self.__filters={}
+		return
+	#end clearFilters
+
+	def writeFilteredTable( self, o_fileobject ):
+		'''
+		param o_fileobject is an open and writeable File object
+		'''
+		self.__write_filtered_table_to_open_file_object( o_fileobject )
+
+		return
+	#end writeFilteredTableToFile
+
+	def getUniqueStringValuesForColumn( self, s_colname ):
+		b_column_name=self.__get_bytes_from_string_value( s_colname )
+		ar_col_numbers=self.__get_col_nums_for_col_name( b_column_name )
+		if len( ar_col_numbers ) != 1:
+			s_msg="In NeEstimationTableFileManager instance, " \
+							+ "def getValueSetForColumnName, " \
+							+ "in fetching column number for sample value " \
+							+ "from the file header, a non unique column " \
+							+ "number was returned, using column " \
+							+ "name: " + str( b_column_name ) + ", and getting list of " \
+							+ "column numbers: " + str( ar_col_numbers ) + "."
+			raise Exception( s_msg )
+		#end if non uniq col number
+
+		lb_column_values=list( self.__get_set_values_for_column( ar_col_numbers[ 0 ] ) )
+		ls_column_values=self.__get_list_of_strings_from_list_of_bytes( lb_column_values )
+
+		return ls_column_values
+
+	#end getUniqueStringValuesForColumn
+
+	'''
+	These two columns' value sets are given as properties because
+	these are the motivating-user-case fields needed to select one
+	value for each and write a so-filtered version of the tsv file.
+	'''
+
+	@property 
+	def pop_sample_values( self ):
+		lb_pop_sample_values=self.__get_list_bytes_pop_sample_values()
+		ls_pop_sample_values=self.__get_list_of_strings_from_list_of_bytes( lb_pop_sample_values )
+		return ls_pop_sample_values
+	#end property pop_sample_values
+	
+	@property
+	def loci_sample_values( self ):
+		lb_loci_sample_values=self.__get_list_bytes_loci_sample_values()
+		ls_loci_sample_values=self.__get_list_of_strings_from_list_of_bytes( lb_loci_sample_values )
+		return ls_loci_sample_values
+	#end property loci_sample_values
+
+	@property
+	def header( self ):
+
+		ls_header_as_strings=self.__get_list_of_strings_from_list_of_bytes(  \
+															self.__table_array[ 0, : ] )
+
+		s_header=self.__myclassname.DELIM_TABLE.join( ls_header_as_strings )
+
+		return s_header
+	#end property header
+
+
+#end class NeEstimationTableFileManager
+
 if __name__ == "__main__":
 
 #	import multiprocessing
@@ -902,7 +1218,7 @@ if __name__ == "__main__":
 	
 	p1=1
 	p2=-3333.12
-	p3="hello0000000000000000000000"
+	p3="test"
 
 	o1=FloatIntStringParamValidity( "p1", float, p1, 0, 10 )
 	o2=FloatIntStringParamValidity( "p2", int, p2, 0, 10 )

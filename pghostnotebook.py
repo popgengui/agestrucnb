@@ -14,14 +14,10 @@ NE_GUI_IS_IMPLEMENTED=True
 
 VERBOSE=False
 
-import sys
-import os
 from Tkinter import *
 from ttk import *
-import glob
 
 import pgmenubuilder as pgmb
-
 
 #These classes provide the interfaces, 
 #each offered in the main "Add"
@@ -32,40 +28,55 @@ import pgguineestimator as pgne
 
 from pgguiutilities import FrameContainerScrolled
 from pgguiutilities import PGGUIYesNoMessage
-from pgguiutilities import PGGUIInfoMessage
 
 class PGHostNotebook( Notebook ):
 	'''
 	Interface that uses tabbed windows to implement interfaces, one or more PGGuiSimupop and/or PGGuiNeEstimator
 	objects.
 	'''
-	def __init__( self, o_parent, s_menu_config, 
-					s_param_names_file_for_simulation, 
-					s_glob_life_tables=None, i_max_process_total=1, 
-					i_container_padding=10 ):
+	def __init__( self, 
+						o_parent, 
+						s_menu_config, 
+						s_param_names_file_for_simulation, 
+						s_param_names_file_for_neestimations, 
+						s_param_names_file_for_viz, 
+						s_glob_life_tables=None, 
+						i_max_process_total=1, 
+						i_container_padding=10 ):
 		'''
 		params 
 		o_parent, parent ttk.Frame object
 
 		s_menu_config, file for PGMenuBuilder object, gives the main menu
 
-		s_param_names_file_for_simulation, table file that lists the parameter names
-		   as read into a PGInputSimuPop object
+		s_param_names_file_for_simulation, table file that lists the parameter names 
+		as read into a PGInputSimuPop object
 
-		s_glob_life_tables, glob expression used by PGOpSimuPop objects to load all life tables
-			into memory
+		s_param_names_file_for_neestimations, table file that lists the parameter names 
+		as required by the PGGuiNeEstimator object
+
+		s_param_names_file_for_viz, table file that lists the parameter names 
+		as required by the PGGuiViz object
+
+		s_glob_life_tables, glob expression used by PGOpSimuPop objects to load all 
+		life tables into memory, if none, pgguisimupop's attribute pginputsimupop 
+		object tries to load params using config file only.
 
 		'''
 		Notebook.__init__( self, o_parent )
 		self.__parent=o_parent
 		self.__menu=pgmb.PGMenuBuilder( s_menu_config, self, o_parent )
+
 		self.__param_names_file_for_simulations=s_param_names_file_for_simulation
+		self.__param_names_file_for_neestimation=s_param_names_file_for_neestimations
+		self.__param_names_file_for_viz=s_param_names_file_for_viz
+
 		self.__tab_count=0
 		self.__tab_children=[]
 		self.__glob_life_tables=s_glob_life_tables
 		self.__max_process_total=i_max_process_total
 		self.__container_padding=i_container_padding
-		self.__param_names_file_for_neestimation=s_param_names_file_for_simulation.replace( "simupop", "neestimation" )
+			
 		#we collect references to the pggui* objects created
 		#and on delete, we clean up using these references:
 		self.__my_gui_objects_by_tab_text={}
@@ -151,7 +162,7 @@ class PGHostNotebook( Notebook ):
 		for plotting.
 		'''
 		o_pgg=pggv.PGGuiViz( o_container, 
-						self.__param_names_file_for_neestimation,
+						self.__param_names_file_for_viz,
 						i_total_processes_for_viz=1 )
 
 		o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
@@ -202,7 +213,7 @@ class PGHostNotebook( Notebook ):
 		'''
 
 		if self.index("end") > 0:
-			i_tab_index=self.index( "current" )
+			
 			s_text_this_tab=self.tab( "current", option="text" )
 			self.__scrolled_frame_objects_by_tab_text[ s_text_this_tab ].rebindScrollwheel()
 		#end if we have at least one tab
@@ -221,7 +232,7 @@ class PGHostNotebook( Notebook ):
 			b_do_it=o_msgbox.value
 
 			if b_do_it:
-				i_tab_index=self.index( "current" )
+
 				s_text_this_tab = self.tab( "current" , option="text" )
 				
 				if VERBOSE:
@@ -285,7 +296,11 @@ class PGHostNotebook( Notebook ):
 #end class PGHostNotebook
 
 if __name__ == "__main__":
-	
+	'''
+	For testing -- in normal operation, the class
+	PGHostNotebook should be instantiiated by client 
+	code (ex: negui.py).
+	'''
 	WINDOW_MARGIN=0.20
 	CONTAINER_PADDING=10
 
@@ -304,6 +319,8 @@ if __name__ == "__main__":
 
 	i_geo_width=int( ( i_width * f_width_proportion ) * ( 1 - WINDOW_MARGIN ) )
 	i_geo_height=int( ( i_height * f_height_proportion ) * ( 1 - WINDOW_MARGIN ) )
+
+	i_use_this_many_procs=1
 
 	o_host=PGHostNotebook( o_master, 
 			s_menu_config, 
