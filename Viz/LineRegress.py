@@ -259,7 +259,7 @@ def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
     xVals, yVals = zip(*allpoints)
 
     minX = min(xVals)
-    maxX = max(xVals)
+    maxX = max(xVals)+1
     xVctr = list(set(allpoints))
     if maxX - minX>1:
 
@@ -476,6 +476,31 @@ def _getSubpopLimit(table,itemList=None):
     return maxDict
 
 
+def _geLociVal(table):
+
+    identTuples = table.keys()
+    lociCounter ={}
+    for ident in identTuples:
+        if ident[2] not in lociCounter:
+            #initilize counter
+            lociCounter[ident[2]] = 0
+        lociCounter[ident[2]]+=1
+    sortedLociList = lociCounter.keys()
+    sortedLociList.sort()
+    lociSum = sum(lociCounter.values())
+    chanceList = [0]*len(sortedLociList)
+    chanceSum=0
+    for i in range(len(sortedLociList)):
+        lociChance  = lociCounter[sortedLociList[i]]/lociSum
+        chanceSum+=lociChance
+        chanceList[i]=chanceSum
+    randVal = random.rand()
+    i=0
+    while chanceList[i]<randVal and i< len(chanceList):
+        i+=1
+    selected = sortedLociList[i]
+    return selected
+
 
 
 def orderFiles(table, orderDict,genNum = 1):
@@ -484,17 +509,21 @@ def orderFiles(table, orderDict,genNum = 1):
     subpopLimits = _getSubpopLimit(table)
     #get leastvalue
     subpopLimit = min(subpopLimits.values())
+    # get loci value for key
+
+    lociVal = _geLociVal(table)
+
     #create randomized lists  for each file to
 
     for ordering in orderDict.keys():
         for ident in subpopLimits.keys():
             SelectRandom.createOrdering((ident,ordering), subpopLimits, subpopLimit)
 
-        for subpopNumber in range(subpopLimit):
+        for subpopNumber in range(int(subpopLimit)-1):
             orderedTable[(ordering,subpopNumber)]=[]
             for entry in orderDict[ordering]:
                 entryNum = SelectRandom.getOrderingVal((entry[1],ordering),subpopNumber)
-                entryList = table[(entry[1],entryNum)]
+                entryList = table[(entry[1],entryNum,lociVal)]
                 foundGen = None
                 for point in entryList:
                     if point[0] == genNum:
@@ -516,7 +545,7 @@ class SelectRandom:
         #print subpopLimits
         #print selectedCount
         if not identifier in SelectRandom.orderingDict:
-            SelectRandom.orderingDict[identifier] = SelectRandom._createorderArray(subpopLimits[identifier[0]],selectedCount)
+            SelectRandom.orderingDict[identifier] = SelectRandom._createorderArray(subpopLimits[identifier[0]],int(selectedCount))
             print "New Entry"
         else:
             print "existing entry found"
@@ -526,7 +555,7 @@ class SelectRandom:
         SelectRandom.orderingDict = {}
     @staticmethod
     def _createorderArray(totalCount, selectedCount):
-        ordering  = random.choice(range(1,totalCount+1) , selectedCount)
+        ordering  = random.choice(range(1,int(totalCount+1)) , selectedCount)
         return ordering
 
     @staticmethod
