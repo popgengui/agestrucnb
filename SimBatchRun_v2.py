@@ -10,13 +10,99 @@ an install with negui as a known path,
 and with neLineRegress as a subfolder
 within negui:
 '''
-import neLineRegress.LineRegress
-import neLineRegress.ResultScraper
+import Viz.LineRegress
+import Viz.ResultScraper
 
 
 #Ted added  2016_10_23, for making uniq file names.
 import random 
 import uuid
+
+'''
+-----Run constants-----
+Ted added these 2017_01_15 as constants for the 
+Simulation and NeEstimation run.  The only constant
+related to simulations is the number of processes
+used, as used in def runOneSimulationRep. 
+
+In this version (2017_01_15), in place of calling def "batch,"
+when this script is called as the __main__ script, then, for each
+set of params as given by the batch config, a string call to def
+"run" is added to a list of calls.   Each of these then are used
+in calls to "run" using independant python processes (see def 
+runDefCallsInSeparateProcesses). The command line -t value tells 
+the script how many such run calls to run in parallel.
+
+The NUM_PROCS constants can be reset using the optional params
+in the current, optional command line flags -s and -n. The 
+default values are 1, assuming that many calls to run will be made.
+
+run this script with -h to see the help notes on these.
+'''
+NUM_PROCS_FOR_SIM_REPS=2
+NUM_PROCS_FOR_NE_EST=2
+'''
+The followingare parameters Other parameters used 
+in the call to pgdriveneestimator.py. To see 
+other options and the param list, execute
+"python pgdriveneestimator.py -h", 
+for help with the parameter list.
+'''
+
+'''
+Default values
+put no limit on pop size, nor on the
+range of pops to be evaluated by
+NeEstimator:
+'''
+MINPOPSIZE="1"
+MAXPOPSIZE="99999"
+POPRANGE="1-99990"
+'''
+Default minimum allele frequence
+for NeEstimator:
+'''
+MINALLELEFREQ="0.01"
+'''
+Default number of replicates for
+Populatioin subsampling:
+'''
+REPLICATES=1
+
+'''
+Default loci subsampling scheme is "percent."
+'''
+LOCISCHEME="percent"
+
+'''
+Default is to use all of the loci.
+Set these to require at least locimin
+and at most locimax. Loci subsets are
+randomly selected when locimax is less 
+than the total available.
+'''
+LOCIMIN="1"
+LOCIMAX="99999"
+
+'''
+Default uses all loci.  To use a range of 
+the mth to the nth, as ordered in the 
+genepop file, set this as "m-n"
+'''
+LOCIRANGE="1-99999"
+
+'''
+Default uses only 1 replicate for each loci subsample value.
+'''
+LOCIREPLICATES="1"
+
+'''
+Default mode uses python multiprocessing (even if only 
+1 process is requested), and removes intermediate files.
+'''
+MODE="no_debug"
+
+'''----- end NeEstimation run constants.'''
 
 def readconfig(filename):
 
@@ -139,6 +225,10 @@ def readconfig(filename):
             paramList = re.split(delimiters,paramTemp)
             startPopulations = [int(value) for value in paramList]
 
+    '''
+    Not used, and not sure if it is synonymous with N0,
+    which is used and is the number of newborns.
+    '''
     ##read starting newborns (N0)
     if config.has_section("startNewborns"):
         if config.has_option("startNewborns", "values"):
@@ -147,6 +237,9 @@ def readconfig(filename):
             N0s = [int(value) for value in paramList]
 
     ##read starting newborns (N0)
+    '''
+    This value is used.
+    '''
     if config.has_section("N0"):
         if config.has_option("N0", "values"):
             paramTemp = config.get("N0", "values")
@@ -277,13 +370,14 @@ def getSimOutfileBasename(runFolder, replicateNumber):
 #Ted added 2016_10_18.
 def resetSimInputParams(o_simInput, lambdaVal, startLambda, startPop,N0,microSats,alleleCount,SNPs,mutationRate):
     '''
-    the o_simInput object will have
+    Since the o_simInput object will have
     parameter values as set in the config
-    file.  This def updates values as given
+    file, and new values are needed,   
+    this def updates values as given
     by the def parameters.  It changes the 
-    o_simInput object, and so returns None.
+    caller's value for param, o_simInput object, 
+    in place, and so returns None.
     '''
-        
     o_simInput.lbd=lambdaVal
     o_simInput.startLambda=startLambda
     o_simInput.popSize=startPop
@@ -361,9 +455,9 @@ def setupPyCommandForPopen( defName, defArgSequence ):
 #end setupPyCommandForPopen
 
 '''
-2016_10_18 Ted added the following def to do 1 of N sim reps, 
-as called from runSimulation.  The  params are identical to 
-those for runSimulation except:
+    2016_10_18 Ted added the following def to do 1 of N sim reps, 
+    as called from runSimulation.  The  params are identical to 
+    those for runSimulation except:
     --simRepNumber is int i in (1,2,3...N) of
     N replicates (instead of simReps=N, in the runSimulation param list).
     --outFileBaseName is the path and base name to the outfile location
@@ -475,7 +569,7 @@ def runDefCallsInSeparateProcesses( defName, defArgSets, processorCount=1, pyExe
 
 # Ted added 2016_10_18  new params "lifetable" and "process" 
 # and code to hook up with simulation-runs
-def runSimulation(species, lifetable, simparamset, outFolder,simReps,lambdaVal, startLambda, startPop,N0,microSats,alleleCount,SNPs,mutationRate, processorCount=1):
+def runSimulation(species, lifetable, simparamset, outFolder,simReps,lambdaVal, startLambda, startPop,N0,microSats,alleleCount,SNPs,mutationRate, processorCount=NUM_PROCS_FOR_SIM_REPS ):
 
     SINGLE_SIM_DEF_NAME="runOneSimulationRep"
 
@@ -546,14 +640,16 @@ def  getNeOutfileBaseName( runFolder ):
 def doNeEstimation( genepopFiles, runFolder, locisampling, popsampling, popSamplingScheme, popSamplingParams, processorCount ):
 
     '''
-    These are the command line args.  We're calling the module in the alternative method, by
-    importing pgdriveneestimator and then calling its "mymain" def, with the args values listed
-    in sequence:
-            usage: pgdriveneestimator.py [-h] -f GPFILES -s SCHEME -p PARAMS -m MINPOPSIZE
-                                 -a MAXPOPSIZE -r POPRANGE -e MINALLELEFREQ -c
-                                 REPLICATES -l LOCISCHEME -i LOCISCHEMEPARAMS -g
-                                 LOCIRANGE -x MAXTOTALLOCI [-o PROCESSES]
-                                 [-d MODE]
+    These are the command line args (as of 2017_01_15).  We're calling the module 
+    in the alternative method, by importing pgdriveneestimator and then calling 
+    its "mymain" def, with the args values listed in sequence:
+
+          usage: pgdriveneestimator.py [-h] -f GPFILES -s SCHEME -p PARAMS -m MINPOPSIZE
+                             -a MAXPOPSIZE -r POPRANGE -e MINALLELEFREQ -c
+                             REPLICATES -l LOCISCHEME -i LOCISCHEMEPARAMS -n
+                             MINTOTALLOCI -x MAXTOTALLOCI -g LOCIRANGE -q
+                             LOCIREPLICATES [-o PROCESSES] [-d MODE] 
+
     Since we're using the mymain call method instead of the terminal command, we
     also add the output file objects that are used instead of stdout and stderr.
     Finally, we add a None value for the MultiprocessingEvent argument, which is
@@ -562,15 +658,7 @@ def doNeEstimation( genepopFiles, runFolder, locisampling, popsampling, popSampl
     '''
     import pgdriveneestimator as pgdrive
 
-    MINPOPSIZE="1"
-    MAXPOPSIZE="99999"
-    POPRANGE="1-99990"
-    MINALLELEFREQ="0.01"
-    REPLICATES=1
-    LOCISCHEME="percent"
-    LOCIRANGE="1-99999"
-    MAXTOTALLOCI="99999"
-    MODE="no_debug"
+    
     MULTIPROCEVENT=None
 
     '''
@@ -582,7 +670,7 @@ def doNeEstimation( genepopFiles, runFolder, locisampling, popsampling, popSampl
     for the sampling params value will be correctly passed to pgdriveneestimator by appending 
     the proportion as a percent value.
     '''
-
+    
     popsamplingAsArg=str( popsampling )
 
     if popsampling>=0.0 and popsampling<=1.0:
@@ -606,8 +694,8 @@ def doNeEstimation( genepopFiles, runFolder, locisampling, popsampling, popSampl
 
     pgDriveArgs=( str(  genepopFiles  ), popSamplingScheme, popSamplingParams, 
                             MINPOPSIZE, MAXPOPSIZE, POPRANGE, MINALLELEFREQ, 
-                            REPLICATES, LOCISCHEME, locisamplingArg, LOCIRANGE,
-                            MAXTOTALLOCI, processorCount, MODE, objMainTableFile, 
+                            REPLICATES, LOCISCHEME, locisamplingArg, LOCIMIN, LOCIMAX,
+                            LOCIRANGE, LOCIREPLICATES,  processorCount, MODE, objMainTableFile, 
                             objMsgsFile, MULTIPROCEVENT )
     
     pgdrive.mymain( *pgDriveArgs ) 
@@ -615,16 +703,21 @@ def doNeEstimation( genepopFiles, runFolder, locisampling, popsampling, popSampl
     return mainTableFile
 #end doNeEstimation
 
-# Ted added 2 params on 2016_10_23 to specify pop sampling scheme, 
-#and added code to call pgdriveneestimator.py.
-def runNeEst(files,runFolder,locisampling, popsampling, popSamplingScheme, popSamplingParams, regressConfig, processorCount = 1 ):
+'''
+Ted added 2 params on 2016_10_23 to specify pop sampling scheme, 
+and added code to call pgdriveneestimator.py.
+Note that the "processorCount" parameter refers to the number 
+of processes to run in parallel
+'''
+def runNeEst(files,runFolder,locisampling, popsampling, popSamplingScheme, popSamplingParams, regressConfig, processorCount = NUM_PROCS_FOR_NE_EST ):
     statsFile = ""
     #create output folder
+
     #run neEstimator
     neFile = doNeEstimation( files, runFolder, locisampling, popsampling, popSamplingScheme, popSamplingParams, processorCount  )
     #run lineregress
-    configVals = LineRegress.neConfigRead(regressConfig)
-    statsFile =  LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statsFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
+    configVals = Viz.LineRegress.neConfigRead(regressConfig)
+    statsFile =  Viz.LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statsFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
 
     return statsFile
 
@@ -759,20 +852,36 @@ def batch(configFile,threads = 1):
                 neDict[ident] = neFile
                 statsDict[ident] = statsFile
 
-
-
-
-
-
 '''
 Ted added 2016_10_24, for testing.
 '''
 if __name__ == "__main__":
 
     import argparse as ap
-    REQUIRED_SHORT=[ "-c", "-t"  ]
-    REQUIRED_LONG=["--configfile", "--threads" ]
-    REQUIRED_HELP=[ "configuration file", "processes to run in parallel" ]
+
+    REQUIRED_SHORT=[ "-c", "-r" ] 
+    OPTIONAL_SHORT=["-s", "-n"  ]
+
+    REQUIRED_LONG=["--configfile", "--runthreads" ] 
+    OPTIONAL_LONG=[ "--simthreads", "--nethreads" ]
+
+    s_chelp="configuration file"
+    s_rhelp="Processes to run in parallel for calls to run.  " \
+                    + "Use available cores if you have lots of " \
+                    + "values in lists in your batch config file."
+    s_shelp="Optional, default is 1.  Processes to run in parallel for simulations.  " \
+                    + "For each process used according to  the -r value, this many will " \
+                    + "be allocated, one for each simulation replicate.  " \
+                    + "If run calls are few, and number of sim replicates " \
+                    + "are many, use one core for -r, and a higher number here."
+    s_nhelp="Optional, default is 1. Process to run in parallel for Ne estimations.  " \
+                    + "For each process used according to  the -r value, this many will " \
+                    + "be allocated for Ne estimation runs.  "  \
+                    + "If run calls are few, and total populations in the genepop " \
+                    + "files is many, use one core for -r, and a higher number here."
+
+    REQUIRED_HELP=[ s_chelp, s_rhelp ]
+    OPTIONAL_HELP=[ s_shelp, s_nhelp ] 
 
     o_parser=ap.ArgumentParser()
     o_arglist=o_parser.add_argument_group( "args" )
@@ -787,11 +896,28 @@ if __name__ == "__main__":
                 required=True )
     #end for each arg
 
+    i_total_opt=len( OPTIONAL_SHORT )
+
+    for idx in range( i_total_opt ):
+        o_parser.add_argument( \
+                OPTIONAL_SHORT[ idx ],
+                OPTIONAL_LONG[ idx ],
+                help=OPTIONAL_HELP[ idx ],
+                required=False )
+
 
     o_args=o_parser.parse_args()
 
     s_configfile=o_args.configfile
-    i_threads=int( o_args.threads )
+    i_run_threads=int( o_args.runthreads )
+
+    if o_args.simthreads is not None:
+        NUM_PROCS_FOR_SIM_REPS=o_args.simthreads    
+    #end if we have optional simthreads
+
+    if o_args.nethreads is not None:
+        NUM_PROCS_FOR_NE_EST=o_args.nethreads
+    #end if we have optional nethreads 
 
     configs  = readconfig(s_configfile)
     speciesFile = configs["species"]
@@ -814,7 +940,7 @@ if __name__ == "__main__":
         #end for each lambda
     #end for each N0 value
 
-    runDefCallsInSeparateProcesses( defName="run", defArgSets=list_of_arg_sets, processorCount=i_threads )
+    runDefCallsInSeparateProcesses( defName="run", defArgSets=list_of_arg_sets, processorCount=i_run_threads )
 
 
 #end if name is main
