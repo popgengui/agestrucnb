@@ -4,15 +4,22 @@ import re
 from itertools import product
 
 '''
-Ted added 2016_10_24 the neLineRegress 
-package name -- I'm running it from
-an install with negui as a known path, 
-and with neLineRegress as a subfolder
-within negui:
+Not sure about current import language for plotting
 '''
-import Viz.LineRegress
-import Viz.ResultScraper
 
+try:
+    import Viz.LineRegress
+except Exception as oex:
+    print( "Warning, unable to import Viz.LineRegress: "  \
+            +  "error: " + str( oex ) + "." )
+#end try ... except
+
+try:
+    import Viz.ResultScraper
+except Exception as oex:
+    print( "Warning, unable to import Viz.ResultScraper: "  \
+            +  "error: " + str( oex ) + "." )
+#end try...except
 
 #Ted added  2016_10_23, for making uniq file names.
 import random 
@@ -715,11 +722,17 @@ def runNeEst(files,runFolder,locisampling, popsampling, popSamplingScheme, popSa
 
     #run neEstimator
     neFile = doNeEstimation( files, runFolder, locisampling, popsampling, popSamplingScheme, popSamplingParams, processorCount  )
-    #run lineregress
-    configVals = Viz.LineRegress.neConfigRead(regressConfig)
-    statsFile =  Viz.LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statsFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
 
-    return statsFile
+    ##### temp rem out plotting calls
+    #run lineregress
+#    configVals = Viz.LineRegress.neConfigRead(regressConfig)
+#    statsFile =  Viz.LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statsFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
+#    return statsFile
+    #just a place holder as the call to this def
+    #asks for 2 items
+    return None, None
+    ##### end temp
+
 
 def gatherNe(fileName,firstVal):
     results, temp = ResultScraper.scrapeNE(fileName,firstVal)
