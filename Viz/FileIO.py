@@ -12,6 +12,7 @@ def scrapePower(fileName):
     #print matches.groups()
     powerResults = {"positive":int(matches.group("positive")),"neutral":int(matches.group("neutral")),"negative":int(matches.group("negative"))}
     #print results
+    statFile.close()
     return powerResults
 
 
@@ -36,6 +37,7 @@ def scrapeSlopes(fileName):
     upperCIArray = [dict['upperCI'] for dict in slopeResults]
     resultDict = {"slope":slopeArray,"intercept":interceptArray,"lowerCI":lowerCIArray,"upperCI":upperCIArray}
     print resultDict
+    statFile.close()
     return slopeResults, resultDict
 
 def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0):
@@ -96,6 +98,7 @@ def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0):
         resultTable[replicate] = replicateVctr
         individualCountTable[replicate] = individualCountVctr
         errorTable[replicate] = errorVctr
+    fileBuffer.close()
     return resultTable,individualCountTable, errorTable
 
 #Method to read in a graph config file and return a dictionary of
@@ -201,6 +204,7 @@ def configRead(filename):
 
 
 
+
     configDict["title"]=title
     configDict["xLab"] = xLab
     configDict["yLab"] = yLab
@@ -263,7 +267,6 @@ def readFileOrder(filename):
             if not orderName in orderDict:
                 orderDict[orderName] = []
             orderDict[orderName].append((ordinal, fileIdent))
-
     print orderDict
     return  orderDict
 

@@ -24,7 +24,6 @@ def readconfig(filename):
     lociSampling = [1.0]
     populationSampling = [1.0]
     simReps = [100]
-    firstGen= []
 
     ##SET FILE DELIMITERS
     delimiters = ',|\||\n|;'
@@ -124,10 +123,6 @@ def readconfig(filename):
             paramList = re.split(delimiters.paramTemp)
             simReps = [int(value) for value in paramList]
 
-    if config.has_section("firstGen"):
-        if config.has_option("firstGen", "values"):
-            paramTemp = config.get("firstGen", "values")
-            firstGen = int(paramTemp)
 
     ##create parameter dictionary for return
     paramDict = {"species":speciesFile,
@@ -142,8 +137,7 @@ def readconfig(filename):
                  "mutationRate":mutationRate,
                  "lociSampling":lociSampling,
                  "popSampling":populationSampling,
-                 "simReps":simReps,
-                 "firstGen":firstGen}
+                 "simReps":simReps}
     return paramDict
 
 def runSimulation(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate):
@@ -159,7 +153,7 @@ def runNeEst(files,runFolder,locisampling,popsampling,regressConfig):
     #run neEstimator
     neFile = ""
     #run lineregress
-    configVals = LineRegress.configRead(regressConfig)
+    configVals = ResultScraper.configRead(regressConfig)
     statsFile =  LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statsFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
     return statsFile
 
@@ -219,17 +213,18 @@ def runSamplingOnly(files,runFolder,locisampling,popsampling,regressConfig):
     neFile, statsFile = runNeEst(files,runFolder,locisampling,popsampling,regressConfig)
     return neFile,statsFile
 
-def collectStatsData(neDict, statsDict, outFolder,firstVal):
+def collectStatsData(neDict, statsDict, outFolder,regressConfig):
     slopesName = "slopes.csv"
     powerName = "power.csv"
     neName = "Ne.csv"
+    statConfig = ResultScraper.configRead(regressConfig)
 
     nePath = os.path.join(outFolder, neName)
     neOut = open(nePath, "w")
     neOut.write("parameters,replicate,Reproductive Cycle,Ne\n")
     for identifier in neDict:
         neFile = neDict[identifier]
-        neData = gatherNe(neFile, firstVal)
+        neData = gatherNe(neFile, statConfig["startData"])
         for datapoint in neData:
             print datapoint
             data = neData[datapoint]
@@ -255,6 +250,7 @@ def collectStatsData(neDict, statsDict, outFolder,firstVal):
             slopeOut.write(str(identifier)+ "," +dataPoint["slope"]+ "," +dataPoint["intercept"]+ "," +dataPoint["lowerCI"]+ "," +dataPoint["upperCI"]+"\n")
     powerOut.close()
     slopeOut.close()
+
 
 
 def batch(configFile,threads = 1):
@@ -292,7 +288,7 @@ def batch(configFile,threads = 1):
                 neDict[ident] = neFile
                 statsDict[ident] = statsFile
 
-    collectStatsData(neDict, statsDict, outFolder, configs["firstGen"])
+    collectStatsData(neDict, statsDict, outFolder, configs["regressConfig"])
 
 
 
