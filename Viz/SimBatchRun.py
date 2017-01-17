@@ -24,6 +24,7 @@ def readconfig(filename):
     lociSampling = [1.0]
     populationSampling = [1.0]
     simReps = [100]
+    firstGen= []
 
     ##SET FILE DELIMITERS
     delimiters = ',|\||\n|;'
@@ -123,8 +124,10 @@ def readconfig(filename):
             paramList = re.split(delimiters.paramTemp)
             simReps = [int(value) for value in paramList]
 
-
-
+    if config.has_section("firstGen"):
+        if config.has_option("firstGen", "values"):
+            paramTemp = config.get("firstGen", "values")
+            firstGen = int(paramTemp)
 
     ##create parameter dictionary for return
     paramDict = {"species":speciesFile,
@@ -139,7 +142,8 @@ def readconfig(filename):
                  "mutationRate":mutationRate,
                  "lociSampling":lociSampling,
                  "popSampling":populationSampling,
-                 "simReps":simReps}
+                 "simReps":simReps,
+                 "firstGen":firstGen}
     return paramDict
 
 def runSimulation(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate):
@@ -288,8 +292,7 @@ def batch(configFile,threads = 1):
                 neDict[ident] = neFile
                 statsDict[ident] = statsFile
 
-
-
+    collectStatsData(neDict, statsDict, outFolder, configs["firstGen"])
 
 
 
