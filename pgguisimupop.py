@@ -36,6 +36,7 @@ from pgutilityclasses import IndependantSubprocessGroup
 from pgutilityclasses import FloatIntStringParamValidity
 import pgutilities as pgut
 
+import sys
 import os
 import multiprocessing
 import subprocess
@@ -96,7 +97,15 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	RUN_READY=1
 	RUN_IN_PROGRESS=2
 
-	MAX_CHARS_BASENAME=18
+	'''
+	Note, 2017_01_15.  This max Was set to 18 to comply with 
+	a max 31 character limit of file length (18 + chars needed 
+	to add extensions) of the input genepop files and the derived 
+	intermediate input files to NeEstimator.  With changes to the 
+	NeEstimator file handling in pgdriveneestimator.py, we can 
+	remove this limit, but still impose, pro forma a large max.
+	'''
+	MAX_CHARS_BASENAME=500
 
 	def __init__( self,  o_parent,  s_param_names_file=None, 
 							s_life_table_file_glob=None,
@@ -478,6 +487,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		#make frames, one for each category of parameter
 		#(currently, "population", "configuration", "genome", "simulation"
+		self.__remove_current_category_frames()
 		self.__category_frames=self.__make_category_subframes( \
 				set( ls_sections ) )	
 
@@ -791,6 +801,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#end if no file selected, return
 
 			self.__config_file.set(s_config_file)
+
 			try:
 				self.__setup_input()
 			except Exception as oe:
@@ -998,9 +1009,12 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		as small as possble, to keep the resulting
 		genepop file name under 31 chars, as NeEstimation
 		currently can't handle input file names >31 chars.
+
+		2017_01_15, we now return the original default
+		with the dots.
 		'''
 		s_mytime=pgut.get_date_time_string_dotted()	
-		return "sim." + s_mytime.replace( ".", "" )
+		return "sim." + s_mytime
 	#end __get_default_output_base_name
 
 	def __get_default_output_directory( self ):
@@ -1268,6 +1282,31 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		return
 	#end show_input_config
 
+	def __remove_current_category_frames( self ):
+		'''
+		2017_01_16  This def was created to solve
+		the problem of the "Configuration Info" labeled
+		subframe in the interface showing its last position
+		when a config file with a shortere name is loaded
+		after a config file with a longer name was loaded.
+		This suggested that the old frame was persisiting.
+
+		These callsd to LabelFrame's destroy() def were originall
+		preceeded by a call to grid_remove(), in imitation of the
+		subframe removal code in def __load_genepopfile_sampling_params_interface
+		in pgguineestimator.py.  I found, however, that calls to grid_remove
+		for the subframe objectds in the self.__category_frames dict
+		resulted in an error stateing "bad window path."  
+		'''
+
+		if self.__category_frames is not None:
+			for s_key in self.__category_frames:
+				if self.__category_frames[ s_key ] is not None:
+					self.__category_frames[ s_key ].destroy()
+				#end if frame not none
+		#end if we have category frames
+		return
+	#end __remove_current_category_frames
 	def cleanup( self ):
 		self.__cancel_simulation()
 		self.__remove_temporary_config_file()

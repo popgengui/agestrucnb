@@ -11,6 +11,7 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 START_LAMBDA_IGNORE=99999
 LAMBDA_IGNORE=1.0
 
+import sys
 import os
 from ConfigParser import ConfigParser
 
@@ -67,7 +68,6 @@ class PGInputSimuPop( object ):
 			self.config_file=os.path.basename( s_config_file )
 			self.__make_config_parser( s_config_file )
 		#end if we have a conf file
-
 		
 		return
 	#end def __init__
@@ -188,7 +188,6 @@ class PGInputSimuPop( object ):
 		return ( i_nb, f_nbnc )
 	#end __get_effective_size_info_if_avail
 
-
 	def __get_config( self ):
 
 		DEFAULT_CULL_METHOD="survival_rates"
@@ -196,7 +195,6 @@ class PGInputSimuPop( object ):
 		config=self.__config_parser
 
 		s_model_name=config.get( "model", "name" )
-
 
 		self.model_name=s_model_name
 		
@@ -391,15 +389,12 @@ class PGInputSimuPop( object ):
 
 		self.__update_attribute_config_file_info( "N0", "pop", "N0" )
 
-
-
 		if config.has_option("sim", "cull_method"):
 			self.cull_method = config.get("sim", "cull_method")
 		else:
 			self.cull_method = DEFAULT_CULL_METHOD
 		#end if config has startSave
 		self.__update_attribute_config_file_info( "cull_method", "sim", "cull_method" )
-
 
 		return
 	#end __get_config
@@ -436,17 +431,26 @@ class PGInputSimuPop( object ):
 
 		f_female_ratio = 1-self.maleProb
 
-		if self.NbNc <= 0.0:
+		if self.NbNc < 0.0:
 			s_msg=" In PGInputSimuPop instance, def __compute_n0_from_eff_size_info, " \
 									+ "N0 calculation requires an NbNc ratio " \
-									+ "greater than zero, current value: " \
+									+ "greater than or equal to zero, current value: " \
 									+ str( self.NbNc ) + "."
 
 			raise Exception( s_msg )
 
 		#end if NbNc is zero raise error
 
-		f_Nc = self.__Nb_from_eff_size_info / self.NbNc
+		if self.NbNc != 0:
+
+			f_Nc = float( self.__Nb_from_eff_size_info ) / float( self.NbNc )
+		else:
+			f_Nc=0
+
+			s_msg="Warning:  in PGInputSimuPop instance, def __compute_n0_from_eff_size_info, " \
+					"NbNc value is zero, so Nc value is set to zero."
+			sys.stderr.write( s_msg + "\n" )
+		#end if NbNc is zero, then nc=nb/nbnc, else nc is zero
 
 		f_current_male_prop=self.maleProb
 		f_current_female_prop=f_female_ratio
@@ -798,6 +802,7 @@ class PGInputSimuPop( object ):
 			raise Exception( s_msg )
 		#end if source is pop section else if effective_size_section
 		#else error
+	#end Nb setter
 
 	@property
 	def Nb_for_restrict_generator( self ):
@@ -859,12 +864,10 @@ class PGInputSimuPop( object ):
 			b_returnval=True
 		#end if nb is from effective_size_section
 		return b_returnval
-	#end property has_effective_size_info
-
+	#end has_effective_size_info
 #end class PGInputSimuPop
 
 if __name__ == "__main__":
-	import sys
 	import pgutilities as pgut
 	import pgparamset as pgps
 	import pgsimupopresources as pgsr	

@@ -103,7 +103,7 @@ class PGLineRegressConfigFileMaker( object ):
 						s_outdir=v_outdir.get()
 						v_value_this_param = s_outdir + "/" + v_value_this_param
 						if pgut.is_windows_platform():
-							v_value_this_param=self.fix_windows_path( v_value_this_param )
+							v_value_this_param=pgut.fix_windows_path( v_value_this_param )
 						#end if using Windows, fix the path
 
 					if not ( v_value_this_param in [ "show", "none" ] \
