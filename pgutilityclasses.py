@@ -858,7 +858,6 @@ class ValueValidator( object ):
 	
 #end class ValueValidator
 
-
 class NeEstimationTableFileManager:
 	'''
 	Class to read and write the table 
@@ -906,7 +905,8 @@ class NeEstimationTableFileManager:
 
 	def __init__( self, s_file_name, 
 					i_header_is_first_n_lines=1,
-					i_col_names_line_num=1 ):
+					i_col_names_line_num=1,
+					s_tsv_file_delimiter="\t" ):
 		'''
 		param s_file_name gives the name
 		of a file output by pgdriveneestimator.py,
@@ -919,11 +919,17 @@ class NeEstimationTableFileManager:
 
 		param i_col_names_line_num gives the file's line number
 		that holds the delimited column names
+		
+		param s_tsv_file_delimiter gives the character that
+		delimits the columns in the tsv file. The default
+		is <tab>.
 		'''
 
 		self.__filename=s_file_name
 		self.__header_line_tot=i_header_is_first_n_lines
 		self.__line_number_col_names=i_col_names_line_num
+		self.__tsv_file_delimiter=s_tsv_file_delimiter
+
 		self.__myclassname=NeEstimationTableFileManager
 		self.__table_array=None
 		self.__load_file_into_array()
@@ -943,7 +949,11 @@ class NeEstimationTableFileManager:
 	#end __init__
 
 	def __load_file_into_array( self ):
-		self.__table_array=numpy.loadtxt( fname=self.__filename, dtype=bytes )
+
+		self.__table_array=numpy.loadtxt( fname=self.__filename, 
+														dtype=bytes, 
+														delimiter=self.__tsv_file_delimiter )
+
 		return
 	#end __load_file_into_array
 
