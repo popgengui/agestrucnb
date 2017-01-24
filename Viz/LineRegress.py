@@ -123,6 +123,30 @@ def createScatterPlot(table,errorTable, title=None, xlab=None, yLab=None, dest="
         plt.savefig(dest, bbox_inches='tight')
         plt.close()
 
+def createHzLinePlot(table, title=None, xlab="Heterozygosity", yLab=None, dest="show"):
+    if dest == "none":
+        return
+    plt.figure("Hz")
+    for key in table.keys():
+        
+
+    # plt.errorbar(unzippedX, unzippedY,errorArray, fmt = "o")
+    plt.plot(unzippedX, unzippedY)
+    plt.margins(0.15, 0.15)
+    if title:
+        plt.title(title)
+    if xlab:
+        plt.xlabel(xlab)
+    if yLab:
+        plt.ylabel(yLab)
+
+    if dest == "show":
+        plt.show("hz")
+    else:
+        plt.savefig(dest, bbox_inches='tight')
+        plt.close()
+
+
  #method to create a boxplot of the outputNEs
 def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", outlierFile = "outliers.txt"):
     if dest == "none":
@@ -159,6 +183,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", ou
         plt.savefig(dest, bbox_inches='tight')
         plt.close()
     writeOutliers(outliers,outlierFile)
+    return
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -586,8 +611,9 @@ def neRun(neFile,configFile):
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
     createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"],outlierFile=outlierFile)
     createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
-    return _neStatsHelper(table,neFile,configs["alpha"], outFileName=configs["statsFilename"],significantValue=configs["sigSlope"],firstVal=configs["startData"])
-
+    _neStatsHelper(table,neFile,configs["alpha"], outFileName=configs["statsFilename"],significantValue=configs["sigSlope"],firstVal=configs["startData"])
+    return createBoxPlot(table, title=configs['title'], xlab=configs["xLab"], yLab=configs["yLab"], dest=configs["boxplot"],
+                  outlierFile=outlierFile)
 
 if __name__ == "__main__":
     #Tests

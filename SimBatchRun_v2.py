@@ -3,6 +3,8 @@ import os
 import re
 from itertools import product
 
+from Viz import FileIO
+
 '''
 Not sure about current import language for plotting
 '''
@@ -15,7 +17,7 @@ except Exception as oex:
 #end try ... except
 
 try:
-    import Viz.ResultScraper
+    import Viz.FileIO
 except Exception as oex:
     print( "Warning, unable to import Viz.ResultScraper: "  \
             +  "error: " + str( oex ) + "." )
@@ -735,15 +737,15 @@ def runNeEst(files,runFolder,locisampling, popsampling, popSamplingScheme, popSa
 
 
 def gatherNe(fileName,firstVal):
-    results, temp = ResultScraper.scrapeNE(fileName,firstVal)
+    results, temp = FileIO.scrapeNE(fileName,firstVal)
     return results
 
 def gatherPower(filename):
-    powerData = ResultScraper.scrapePower(filename)
+    powerData = FileIO.scrapePower(filename)
     return powerData
 
 def gatherSlopes(filename):
-    slopeData = ResultScraper.scrapeSlopes(filename)
+    slopeData = FileIO.scrapeSlopes(filename)
     return slopeData
 
 

@@ -48,7 +48,7 @@ def createBoxPlot(table,title = None, subTitle = None,  xlab = None, yLab= None,
     
 
     if dest == "show":
-        plt.draw()
+        plt.show()
         plt.close()
     else:
         plt.savefig(dest, bbox_inches='tight')
@@ -252,8 +252,8 @@ def subSamplePlotter(neFile, configFile = None):
                 2016_12_13, revised by Ted.  See similar replacement above, note configs[ "whisper" ] replaces configs[ "dest" ]
                 '''
                 dest = configs["whisker"]
-                if dest!="show" or dest!=None:
-                    dest= dest+"_"+destCounter
+                if dest!="show" and dest!=None:
+                    dest= dest+"_"+str(destCounter)
                     destCounter+=1
                 outliers[key] = createBoxPlot(tempTable,title=configs["title"], subTitle=key,xlab=configs["xLab"],yLab=configs["yLab"],dest=dest, sortCrit =configs["sortBy"])
         writeOutliers(outliers,configs["statsFilename"])
