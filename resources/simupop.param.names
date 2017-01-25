@@ -19,50 +19,51 @@
 #		xii. IDX_TAG_FIELD_GUI_CONTROL_LIST=11
 #		xiii. IDX_TAG_FIELD_VALIDATION=12
 #		xiv. IDX_TAG_FIELD_ASSOC_DEF=13
+#		xv. IDX_TAG_FIELD_CONTROL_STATE=14
 #Many of the the above fields are not yet used by the interface (as of 2016_08_20 ). Note especially #that for the PGInputSimuPop and PGGuiSimuPop objects default values are 
 #not accessed from this file, rather from the config file that is loaded, and, in some 
 #cases from the code itself that reads in the config file and sets the input attribute 
 #values in PGInputSimuPop. Type checks using value ranges are also ignored by using 
 #None;None;None for the type, min, and max fields.
 #
-NbNc	Nb/Nc;Population;2;1;1;0.0;float;None;None;Nb/Nc, where Nc=No;entry;None;type(x)==float;updateN0EntryBox
-N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle (before lambda). If not editable then calculated using Nb, Nb/Nc, survival rates, and male birth probability.;entry;None;type(x)==int and x >= 0;None
-Nb	Nb;Population;0;0;1;0;int;None;None;"Nb";entry;None;type(x)==int and x>= 0;updateN0EntryBox
-NbVar	NbVar;suppress;0;0;1;0;int;None;None;"";entry;None;type(x)==int;None
-ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None;type(x)==int and x >= 0;None
-config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None;type(x)==str;None
-life_table_glob	Life Table File(s);Configuration Info;1;1;1;"none";str;None;None;Life table files;entry;None;type(x)=str;None
-dataDir	Data Directory;suppress;0;0;1;"";str;None;None;"";entry;None;type(x)==str;None
+NbNc	Nb/Nc;Population;2;1;1;0.0;float;None;None;Nb/Nc, where Nc=No;entry;None;type(x)==float;updateN0EntryBox;enabled
+N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle (before lambda). If not editable then calculated using Nb, Nb/Nc, survival rates, and male birth probability.;entry;None;type(x)==int and x >= 0;None;enabled
+Nb	Nb;Population;0;0;1;0;int;None;None;"Nb";entry;None;type(x)==int and x>= 0;updateN0EntryBox;enabled
+NbVar	NbVar;suppress;0;0;1;0;int;None;None;"";entry;None;type(x)==int;None;enabled
+ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None;type(x)==int and x >= 0;None;enabled
+config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None;type(x)==str;None;enabled
+life_table_glob	Life Table File(s);Configuration Info;1;1;1;"none";str;None;None;Life table files;entry;None;type(x)=str;None;enabled
+dataDir	Data Directory;suppress;0;0;1;"";str;None;None;"";entry;None;type(x)==str;None;enabled
 #suppressing the negative binomial switch as of 2016_08_24, as it is actually
 #a param treated as an internal flag, and depends solely on absense/presence of gamma lists (see below)
-doNegBinom	Use negative binomial;suppress;4;1;1;False;bool;None;None;Use Negative Binomial;boolradio;None;type(x)==bool;None
-fecundityFemale	Female relative fecundity;Population;2;1;1;None;listfloat;None;None;Female Relative Fecundity;entry;None;type(x)==float and x>=0 and x<=1.0;None
-fecundityMale	Male relative fecundity;Population;2;1;1;None;listfloat;None;None;Male Relative Fecundity;entry;None;type(x)==float and x>=0 and x <= 1.0;None
-forceSkip	Force skip;Population;2;1;1;None;int;None;None;Force Skip;entry;None;type(x)=int and x >= 0;None
-gens	Reproductive cycles;Population;2;1;1;1;int;None;None;Reproductive Cycles;entry;None;type(x)=int and x >= 0;None
-isMonog	Monogamous;Population;2;1;1;False;bool;None;None;Monogamous;entry;None;type(x)==bool;None
-lbd	Lambda (after burn-in);Simulation;4;1;1;1.0;float;None;None;Lambda after burn in;entry;None;type(x)==float and type(x)>=0;None
-litter	Litter;Population;2;1;1;None;listint;None;None;Litter;entry;None;type(int)==int;None
-maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;updateN0EntryBox
-model_name	Model;Configuration Info;1;1;1;"none";str;None;None;Model name;entry;None;entry;None;type(x)==str;None
-numSNPs	Number of SNPs;Genome;3;1;1;0;int;None;None;Number of SNPs;entry;None;type(x)==int and x >= 0;None
-mutFreq	Mutation frequency;Genome;3;1;1;0.0;float;None;None;Mutation Frequency;entry;None;type(x)==float;None
-numMSats	Number of microsatellites;Genome;3;1;1;0;int;None;None;Number of Microsats;entry;None;type(x)=int and x >= 0;None
-param_names	param names object;suppress;0;0;0;0;str;None;None;"";entry;None;type(x)==str;None
-popSize	Population size;Population;2;1;1;0;int;None;None;Populaion Size;entry;None;type(x)==int and x >= 0;None
-reps	Replicates;Simulation;4;1;1;1;int;None;None;Replicates;entry;None;type(x)==int and x>=1;None
-skip	Skip breeding probability;Simulation;4;1;1;None;listfloat;None;None;Skip breeding probability;entry;None;type(x)==float and x>=0.0 and x<=1.0;None
-startAlleles	Starting Msat allele total;Genome;3;1;1;0;int;None;None;Starting microsat allele total;entry;None;type(x)=int and x >= 0;None
-startLambda	Cycles of burn-in;Simulation;5;1;1;99999;int;None;None;Lambda burn-in (99999 means no burn-in.);entry;None;None;None
-startSave	Starting save;suppress;5;1;1;1;int;None;None;Starting Starting data save;entry;None;None;None
-survivalFemale	Female survival;Population;2;1;1;None;listfloat;None;None;Female Survival;entry;None;type(x)==float;updateN0EntryBox
-survivalMale	Male survival;Population;2;1;1;None;listfloat;None;None;Male Survival;entry;None;type(x)==float;updateN0EntryBox
-gammaAFemale	Female gamma A;Population;2;1;1;None;listfloat;None;None;Female Gamma A;entry;None;type(x)==float;None
-gammaBFemale	Female gamma B;Population;2;1;1;None;listfloat;None;None;Female Gamma B;entry;None;type(x)==float;None
-gammaAMale	Male gamma A;Population;2;1;1;None;listfloat;None;None;Male Gamma A;entry;None;type(x)==float;None
-gammaBMale	Male gamma B;Population;2;1;1;None;listfloat;None;None;Male Gamma B;entry;None;type(x)==float;None
+doNegBinom	Use negative binomial;suppress;4;1;1;False;bool;None;None;Use Negative Binomial;boolradio;None;type(x)==bool;None;enabled
+fecundityFemale	Female relative fecundity;Population;2;1;1;None;listfloat;None;None;Female Relative Fecundity;entry;None;type(x)==float and x>=0 and x<=1.0;None;enabled
+fecundityMale	Male relative fecundity;Population;2;1;1;None;listfloat;None;None;Male Relative Fecundity;entry;None;type(x)==float and x>=0 and x <= 1.0;None;enabled
+forceSkip	Force skip;Population;2;1;1;None;int;None;None;Force Skip;entry;None;type(x)=int and x >= 0;None;disabled
+gens	Reproductive cycles;Population;2;1;1;1;int;None;None;Reproductive Cycles;entry;None;type(x)=int and x >= 0;None;enabled
+isMonog	Monogamous;Population;2;1;1;False;bool;None;None;Monogamous=1 or Non-monogamous=0;entry;None;type(x)==bool;None;enabled
+lbd	Lambda (after burn-in);Simulation;4;1;1;1.0;float;None;None;Lambda after burn in;entry;None;type(x)==float and type(x)>=0;None;enabled
+litter	Litter;Population;2;1;1;None;listint;None;None;Litter;entry;None;type(int)==int;None;disabled
+maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth.  If cull method is equal_sex_ratio, this value is forced to 0.5.;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;updateN0EntryBox;enabled
+model_name	Model;Configuration Info;1;1;1;"none";str;None;None;Model name;entry;None;entry;None;type(x)==str;None;enabled
+numSNPs	Number of SNPs;Genome;3;1;1;0;int;None;None;Number of SNPs;entry;None;type(x)==int and x >= 0;None;enabled
+mutFreq	Mutation frequency;Genome;3;1;1;0.0;float;None;None;Mutation Frequency;entry;None;type(x)==float;None;enabled
+numMSats	Number of microsatellites;Genome;3;1;1;0;int;None;None;Number of Microsats;entry;None;type(x)=int and x >= 0;None;enabled
+param_names	param names object;suppress;0;0;0;0;str;None;None;"";entry;None;type(x)==str;None;enabled
+popSize	Population size;Population;2;1;1;0;int;None;None;Populaion Size;entry;None;type(x)==int and x >= 0;None;enabled
+reps	Replicates;Simulation;4;1;1;1;int;None;None;Replicates;entry;None;type(x)==int and x>=1;None;enabled
+skip	Skip breeding probability;Simulation;4;1;1;None;listfloat;None;None;Skip breeding probability;entry;None;type(x)==float and x>=0.0 and x<=1.0;None;disabled
+startAlleles	Starting Msat allele total;Genome;3;1;1;0;int;None;None;Starting microsat allele total;entry;None;type(x)=int and x >= 0;None;enabled
+startLambda	Cycles of burn-in;Simulation;5;1;1;99999;int;None;None;Lambda burn-in (99999 means no burn-in.);entry;None;None;None;enabled
+startSave	Starting save;suppress;5;1;1;1;int;None;None;Starting Starting data save;entry;None;None;None;enabled
+survivalFemale	Female survival;Population;2;1;1;None;listfloat;None;None;Female Survival;entry;None;type(x)==float;updateN0EntryBox;enabled
+survivalMale	Male survival;Population;2;1;1;None;listfloat;None;None;Male Survival;entry;None;type(x)==float;updateN0EntryBox;enabled
+gammaAFemale	Female gamma A;Population;2;1;1;None;listfloat;None;None;Female Gamma A;entry;None;type(x)==float;None;enabled
+gammaBFemale	Female gamma B;Population;2;1;1;None;listfloat;None;None;Female Gamma B;entry;None;type(x)==float;None;enabled
+gammaAMale	Male gamma A;Population;2;1;1;None;listfloat;None;None;Male Gamma A;entry;None;type(x)==float;None;enabled
+gammaBMale	Male gamma B;Population;2;1;1;None;listfloat;None;None;Male Gamma B;entry;None;type(x)==float;None;enabled
 #this is a dummy entry, for an Nb param value that is assigned, checked and calculated within the input object, and accessed only
 #by the pgopsimupop object:
-Nb_for_restrict_generator	Nb derived from supplied params, for generator assignment;suppress;0;0;0;0;int;None;None;"";entry;None;type(x)==int;None
-cull_method	Cull method;Simulation;6;1;1;"survival_rates";str;None;None;Method of culling individuals after each reproductive cycle.;cboxreadonly;( "survival_rates", "equal_sex_ratio" );x in [ 'survival_rates', 'equal_sex_ratio' ];onCullMethodSelectionChange
-harvest	Harvest;Simulation;7;1;1;None;liststr;None;None;For each cycle-number:proportion numeric pair N:i, with population size p, remove i*p individuals at cycle N;entry;None; [ type(eval(i) for i in x.split( ":" ) ] == [ int, float ];onHarvestInputChange
+Nb_for_restrict_generator	Nb derived from supplied params, for generator assignment;suppress;0;0;0;0;int;None;None;"";entry;None;type(x)==int;None;enabled
+cull_method	Cull method;Simulation;6;1;1;"survival_rates";str;None;None;Method of culling individuals after each reproductive cycle.~~1. Survival rates:  cull using age-specified survival rates.~~2. Equal sex ratio:  cull uses survival rates and forces an approx. equal sex ratio.;cboxreadonly;( "survival_rates", "equal_sex_ratio" );x in [ 'survival_rates', 'equal_sex_ratio' ];onCullMethodSelectionChange;enabled
+harvest	Harvest;Simulation;7;1;1;None;liststr;None;None;For each cycle-number:proportion numeric pair N:i, with population size p, remove i*p individuals at cycle N;entry;None; [ type(eval(i) for i in x.split( ":" ) ] == [ int, float ];onHarvestInputChange;enabled

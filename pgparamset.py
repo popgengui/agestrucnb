@@ -59,7 +59,7 @@ class PGParamSet( object ):
 	IDX_PARAM_TAG=1
 	PARAM_FIELDS_TOTAL=2
 
-	TAG_FIELDS_TOTAL=14
+	TAG_FIELDS_TOTAL=15
 
 	'''
 	Below indices refer to the semicolon delimited
@@ -156,6 +156,13 @@ class PGParamSet( object ):
 	when a param value changes.
 	'''
 	IDX_TAG_FIELD_ASSOC_DEF=13
+	
+	'''
+	Added 20170123, this field determines whether
+	the gui control associated with this parameter
+	is enabled or disabled.
+	'''
+	IDX_TAG_FIELD_CONTROL_STATE=14
 
 	COMMENT_CHAR="#"
 
@@ -320,6 +327,12 @@ class PGParamSet( object ):
 		return s_def
 	#end getAssocDefFromTag
 
+	def getControlStateFromTag( self, s_tag ):
+		s_def=self.__get_tag_field( s_tag,
+					PGParamSet.IDX_TAG_FIELD_CONTROL_STATE )
+		return s_def
+	#end getControlStateFromTag
+
 	def getConfigSectionNameForParam( self, s_name ):
 		s_tag=self.tag( s_name )
 		s_section_name = self.__get_tag_field( s_tag, 
@@ -418,6 +431,13 @@ class PGParamSet( object ):
 		return s_def
 	#end getAssocDefForParam
 
+	def getControlStateForParam( self, s_name ):
+		s_tag=self.tag( s_name )
+		s_def=self.__get_tag_field( s_tag, 
+				PGParamSet.IDX_TAG_FIELD_CONTROL_STATE )
+		return s_def
+	#end getControlStateForParam
+
 	def tag( self, s_name ):
 		'''
 		param s_name can be either among the 
@@ -440,7 +460,6 @@ class PGParamSet( object ):
 	#end tag
 
 	def __set_parameter( self, s_shortname, s_tag=None ):
-		
 		
 		if s_shortname in self.__tags_by_shortname:
 			s_errmsg="In PGParamSet instance, def __set_parameter, " \
@@ -519,6 +538,7 @@ class PGParamSet( object ):
 		s_param_control_list=self.getControlListForParam( s_param )
 		s_param_validity_expression=self.getValidationForParam( s_param )
 		s_param_assoc_def=self.getAssocDefForParam( s_param )
+		s_param_control_state=self.getControlStateForParam( s_param )
 
 		v_param_default_value=None
 
@@ -565,7 +585,8 @@ class PGParamSet( object ):
 						s_param_control_type,
 						s_param_control_list,
 						s_param_validity_expression,
-						s_param_assoc_def )
+						s_param_assoc_def,
+						s_param_control_state )
 		
 		if len( qv_return_values ) != PGParamSet.TAG_FIELDS_TOTAL:
 			s_msg = "In PGParamSet instance, def getAllParamSettings, " \

@@ -419,6 +419,7 @@ class PGGuiViz( pgg.PGGuiApp ):
 			s_param_assoc_def=self.__param_set.getAssocDefForParam( VIZ_TYPE_PARAM_NAME )
 			s_param_longname=self.__param_set.getLongnameForParam( VIZ_TYPE_PARAM_NAME )
 			s_param_tooltip=self.__param_set.getToolTipForParam( VIZ_TYPE_PARAM_NAME )
+			s_param_control_state=self.__param_set.getControlStateForParam( VIZ_TYPE_PARAM_NAME )
 
 			s_attr_name=ATTRIBUTE_DEMANLGER + VIZ_TYPE_PARAM_NAME
 
@@ -508,7 +509,7 @@ class PGGuiViz( pgg.PGGuiApp ):
 						i_cbox_width=PARAMETERS_CBOX_WIDTH,
 						s_label_justify='left',
 						s_tooltip=s_param_tooltip,
-						b_is_enabled=True,
+						b_is_enabled=( s_param_control_state == "enabled" ),
 						o_validity_tester=o_validity_checker,
 						s_state=s_state_this_cbox,
 						b_force_disable=b_force_disable )
@@ -710,7 +711,8 @@ class PGGuiViz( pgg.PGGuiApp ):
 					s_param_control_type,
 					s_param_control_list,
 					s_param_validity_expression,
-					s_param_assoc_def ) = \
+					s_param_assoc_def,
+					s_param_control_state ) = \
 							self.__param_set.getAllParamSettings( s_param )
 
 				#Note that the o_param_type returned from above call
@@ -815,7 +817,7 @@ class PGGuiViz( pgg.PGGuiApp ):
 						s_associated_attribute=s_attr_name,
 						i_entrywidth=i_entry_width_this_param,
 						i_labelwidth=i_max_label_width,
-						b_is_enabled=True,
+						b_is_enabled= ( s_param_control_state == "enabled" ),
 						s_entry_justify=s_this_entry_justify,
 						s_label_justify='left',
 						s_tooltip=s_param_tooltip,
@@ -923,7 +925,7 @@ class PGGuiViz( pgg.PGGuiApp ):
 								i_cbox_width=PARAMETERS_CBOX_WIDTH,
 								s_label_justify='left',
 								s_tooltip=s_param_tooltip,
-								b_is_enabled=True,
+								b_is_enabled=( s_param_control_state == "enabled" ),
 								o_validity_tester=o_validity_checker,
 								s_state=s_state_this_cbox,
 								b_force_disable=b_force_disable )
