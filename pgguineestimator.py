@@ -855,75 +855,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	#end __get_max_longname_length
 
-	def __get_param_settings( self, s_param ):
-
-		s_param_interface_section=self.__param_set.getConfigSectionNameForParam( s_param )
-		i_param_position_in_order=int( self.__param_set.getParamOrderNumberForParam( s_param ) )
-		s_param_type=self.__param_set.getParamTypeForParam( s_param )
-		s_param_default_value=self.__param_set.getDefaultValueForParam( s_param )
-		s_param_longname=self.__param_set.getLongnameForParam(  s_param )
-		s_param_tooltip=self.__param_set.getToolTipForParam( s_param )
-		s_param_control_type=self.__param_set.getGUIControlForParam( s_param )
-		s_param_control_list=self.__param_set.getControlListForParam( s_param )
-		s_param_validity_expression=self.__param_set.getValidationForParam( s_param )
-
-		v_param_default_value=None
-		try: 
-			v_param_default_value=eval( s_param_default_value )
-		except Exception as oex:
-			s_msg="In PGGuiNeEstimator instance, def "\
-					+ "__get_param_settings, " \
-					+ "for param " + s_param \
-					+ "there was an error trying to eval " \
-					+ "the default value, "  \
-					+ s_param_default_value + ".  " \
-					+ "Exception raised: " \
-					+ str( oex ) + "."
-			PGGUIErrorMessage( self, s_msg )
-			raise Exception( s_msg )
-		#end try . . . except . . .
-
-		#Types that are lists have a type name of form list<type>, so we
-		#can (in future, if needed), know that the value should be a list
-		#of items.  For now we just extract the python type of list items,
-		#so the KeyValFrame object can test for type:
-
-		b_param_is_list=s_param_type.startswith( "list" )
-
-		if b_param_is_list:
-			s_param_type=s_param_type.replace("list", "" )
-		#end if type is list, we extract the list item type
-		o_param_type=None
-
-		try:
-			o_param_type=eval( s_param_type )
-		except Exception as oex:
-			s_msg="In PGGuiNeEstimator instance, def " \
-					+ "__get_param_settings," \
-					+ "trying to extract the param type " \
-					+ "for param " + s_param \
-					+ ", unable to eval " \
-					+ s_param_type \
-					+ " as a python type.  " \
-					+ "Exception raised: " \
-					+ str( oex ) + "."
-			PGGUIErrorMessage( self, s_msg )
-			raise Exception( oex )
-		#end try . . . except
-
-		return ( s_param_interface_section, 
-					i_param_position_in_order, 
-					o_param_type, 
-					v_param_default_value,
-					b_param_is_list,
-					s_param_longname,
-					s_param_tooltip,
-					s_param_control_type,
-					s_param_control_list,
-					s_param_validity_expression )
-
-	#end __get_param_settings
-
 	def __create_validity_checker( self, v_init_value, s_validity_expression ):
 		o_checker=ValueValidator( s_validity_expression, v_init_value )
 
@@ -996,7 +927,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				s_param_control_type,
 				s_param_control_list,
 				s_param_validity_expression,
-				s_param_assoc_def ) = \
+				s_param_assoc_def,
+				s_param_control_state ) = \
 						self.__param_set.getAllParamSettings( s_param )
 
 			#Note that the o_param_type returned from above call
@@ -1103,7 +1035,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					s_associated_attribute=s_attr_name,
 					i_entrywidth=i_width_this_entry,
 					i_labelwidth=LABEL_WIDTH,
-					b_is_enabled=True,
+					b_is_enabled=( s_param_control_state == "enabled" ),
 					s_entry_justify=s_this_entry_justify,
 					s_label_justify='left',
 					s_tooltip=s_param_tooltip,
@@ -1178,7 +1110,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 							i_cbox_width=PARAMETERS_CBOX_WIDTH,
 							s_label_justify='left',
 							s_tooltip=s_param_tooltip,
-							b_is_enabled=True,
+							b_is_enabled=( s_param_control_state == "enabled" ),
 							b_force_disable=b_force_disable,
 							s_state=s_state_this_cbox )
 
@@ -1301,7 +1233,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				s_param_control_type,
 				s_param_control_list,
 				s_param_validity_expression,
-				s_param_assoc_def ) = \
+				s_param_assoc_def,
+				s_param_control_state ) = \
 						self.__param_set.getAllParamSettings( s_param )
 
 			b_param_is_list=self.__param_set.paramIsList( s_param )
@@ -1393,7 +1326,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					s_associated_attribute=s_attr_name,
 					i_entrywidth=i_width_this_entry,
 					i_labelwidth=LABEL_WIDTH,
-					b_is_enabled=True,
+					b_is_enabled=( s_param_control_state == "enabled" ),
 					s_entry_justify=s_this_entry_justify,
 					s_label_justify='left',
 					s_tooltip=s_param_tooltip,

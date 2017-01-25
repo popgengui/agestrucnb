@@ -435,7 +435,6 @@ class PGOpSimuPop( modop.APGOperation ):
 				#len( skip ) == 0:
 				i_len_skip=0 if self.input.skip is None \
 									else len( self.input.skip )
-
 				if diff > i_len_skip:
 					available = True
 				else:

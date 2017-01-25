@@ -555,11 +555,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				s_param_control_type,
 				s_param_control_list,
 				s_param_validity_expression,
-				s_param_assoc_def ) = \
+				s_param_assoc_def,
+				s_param_control_state ) = \
 						o_input.param_names.getAllParamSettings( s_param )
 				#end if param is in paramset
-
-
 
 			#if no specific def is to be called on value change
 			#then we default to the def that shows current param vals:
@@ -594,7 +593,17 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				i_len_labelname=len( s_longname ) if s_longname is not None else len( s_param )
 				i_width_labelname=LABEL_WIDTH[ i_len_labelname ]
 
-				b_allow_entry_change = True
+				'''
+				As of 2017_01_23, the param set (PGParamSet instance
+				now includeds a control state (see above, call to 
+				getAllParamSettings), set either to enabled
+				or disabled.  Hence we default to its setting, 
+				though we keep the tests below that can change it, 
+				in case these are conditions not anticipated by 
+				the resource/simupop.param.names file that gives 
+				the ParamSet object its parameter settings.
+				'''
+				b_allow_entry_change = ( s_param_control_state == "enabled" )
 
 				if s_section_name == CONFIG_INFO_SECTION_NAME:
 					b_allow_entry_change=False

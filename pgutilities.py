@@ -1032,9 +1032,7 @@ def call_plotting_program_in_new_subprocess( s_type, s_estimates_table_file,
 
 		#We remove the temp file if we used one for filtered results:
 		if s_temp_file_for_filtered_table is not None:
-			##### temp rem out
-			#os.remove( s_temp_file_for_filtered_table )
-			pass
+			os.remove( s_temp_file_for_filtered_table )
 		#end if we used a temp file
 
 	except Exception as oex:
@@ -1043,7 +1041,7 @@ def call_plotting_program_in_new_subprocess( s_type, s_estimates_table_file,
 		raise( oex )
 	#end try...except
 	return	
-#enc call_plotting_program_in_new_subprocess
+#end call_plotting_program_in_new_subprocess
 
 def manage_plotting_program_subprocess( o_subprocess, o_multiprocessing_event ):
 	'''
@@ -1129,9 +1127,15 @@ def run_plotting_program( s_type, s_estimates_table_file, s_plotting_config_file
 		if s_type == "Regression":
 
 			import Viz.LineRegress
-		
-			Viz.LineRegress.neGrapher( s_estimates_table_file, s_plotting_config_file )
-			Viz.LineRegress.neStats( s_estimates_table_file, s_plotting_config_file )
+			
+			'''
+			2017_01_23 We use the newer def "runNe", which Brian T created
+			to replace the double call, to neGrapher and neStats, 
+			formerly required to get plots and then a stats file.
+			'''
+#			Viz.LineRegress.neGrapher( s_estimates_table_file, s_plotting_config_file )
+#			Viz.LineRegress.neStats( s_estimates_table_file, s_plotting_config_file )
+			Viz.LineRegress.neRun( s_estimates_table_file, s_plotting_config_file )
 		elif s_type == "Subsample":
 
 			import Viz.SubSamplePlot

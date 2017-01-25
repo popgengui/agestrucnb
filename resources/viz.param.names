@@ -1,26 +1,26 @@
-viztype	Visualization type;Parameters;2;0;6;"Regression";str;None;None;Visualization types:~~1. Regression.  ~~2. Subsampling;cboxreadonly;( "Regression","Subsample" );x in [ 'Regression','Subsample' ];_PGGuiNeEstimator__update_viz_params_interface
+viztype	Visualization type;Parameters;2;0;6;"Regression";str;None;None;Visualization types:~~1. Regression.  ~~2. Subsampling;cboxreadonly;( "Regression","Subsample" );x in [ 'Regression','Subsample' ];_PGGuiNeEstimator__update_viz_params_interface;enabled
 #
 #Viz parameters --all viz types
 #
-viz_all_labels_title	Plot title;VizAll;5;0;1;"title text";str;None;None;Plot title text;entry;None;None;None
-viz_all_labels_xlab	x label;VizAll;5;0;2;"x label";str;None;None;Plot x label;entry;None;None;None
-viz_all_labels_ylab	y label;VizAll;5;0;3;"y label";str;None;None;Plot x label;entry;None;None;None
+viz_all_labels_title	Plot title;VizAll;5;0;1;"title text";str;None;None;Plot title text;entry;None;None;None;enabled
+viz_all_labels_xlab	x label;VizAll;5;0;2;"x label";str;None;None;Plot x label;entry;None;None;None;enabled
+viz_all_labels_ylab	y label;VizAll;5;0;3;"y label";str;None;None;Plot x label;entry;None;None;None;enabled
 #
 #Viz parameters--regression
 #
-viz_regress_destination_regressionfile	Regression file;VizRegress;5;0;4;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None
-viz_regress_destination_boxplotfile	Boxplot file;VizRegress;5;0;5;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None
-viz_regress_destination_scatterfile	Scatterplot file;VizRegress;5;0;6;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extenion .pdf or .png, or programs defaults to .png).;cboxnormal;( 'show', 'none' );None;None
-viz_regress_confidence_outputFilename	Stas output file;VizRegress;5;0;7;"stats_out.txt";str;None;None;File name for stats output;entry;None;None;None
-viz_regress_comparison_type	Line type;VizRegress;5;0;8;"auto";str;None;None;Line type;cboxreadonly;( "auto", "pop", "value", "None" );x in [ 'auto','pop','value', 'None' ];None
-viz_regress_comparison_expectedSlope	Expected slope;VizRegress;5;0;9;-0.1;float;None;None;Expected slope;entry;None;type(x)==float;None
+viz_regress_destination_regressionfile	Regression file;VizRegress;5;0;4;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None;enabled
+viz_regress_destination_boxplotfile	Boxplot file;VizRegress;5;0;5;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None;enabled
+viz_regress_destination_scatterfile	Scatterplot file;VizRegress;5;0;6;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extenion .pdf or .png, or programs defaults to .png).;cboxnormal;( 'show', 'none' );None;None;enabled
+viz_regress_confidence_outputFilename	Stas output file;VizRegress;5;0;7;"stats_out.txt";str;None;None;File name for stats output;entry;None;None;None;enabled
+viz_regress_comparison_type	Line type;VizRegress;5;0;8;"auto";str;None;None;Line type;cboxreadonly;( "auto", "pop", "value", "None" );x in [ 'auto','pop','value', 'None' ];None;enabled
+viz_regress_comparison_expectedSlope	Expected slope;VizRegress;5;0;9;-0.1;float;None;None;Expected slope;entry;None;type(x)==float;None;enabled
 #Let matplotlib set the xrange:
 #viz_regress_limits_xMin	Min x value;VizRegress;5;0;10;0;int;None;None;Minimum value of x shown.;entry;None;type(x)==int;None
 #viz_regress_limits_xMax	Max x value;VizRegress;5;0;11;200;int;None;None;Maximum value of x shown.;entry;None;type(x)==int;None
 #
-viz_regress_data_startCollect	Start at generation;VizRegress;5;0;12;1;int;None;None;Generation at which to start using the data for plot and stats.;entry;None;type(x)==int;None
-viz_regress_confidence_alpha	Alpha for CIs;VizRegress;5;0;13;0.05;float;None;None;alpha value to be used for confidence intervals. E.g., for a 95% confidence interval, alpha should be set at 0.05. ;entry;None;type(x)==float;None
+viz_regress_data_startCollect	Start at generation;VizRegress;5;0;12;1;int;None;None;Generation at which to start using the data for plot and stats.;entry;None;type(x)==int;None;enabled
+viz_regress_confidence_alpha	Alpha for CIs;VizRegress;5;0;13;0.05;float;None;None;alpha value to be used for confidence intervals. E.g., for a 95% confidence interval, alpha should be set at 0.05. ;entry;None;type(x)==float;None;enabled
 #
 #Viz parameters--subsampled
 #
-viz_subsample_destination_whiskerplotfile	Whisker plot;VizSubsample;5;0;4;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None
+viz_subsample_destination_whiskerplotfile	Whisker plot;VizSubsample;5;0;4;"show";str;None;None;show (plot), none (no plot), or save plot to file name~~(use extension .pdf or .png, or program defaults to .png).;cboxnormal;( 'show', 'none' );None;None;enabled
