@@ -128,10 +128,10 @@ def createHzLinePlot(table, title=None, xlab="Heterozygosity", yLab=None, dest="
         return
     plt.figure("Hz")
     for key in table.keys():
-        
+        pass
 
     # plt.errorbar(unzippedX, unzippedY,errorArray, fmt = "o")
-    plt.plot(unzippedX, unzippedY)
+    #plt.plot(unzippedX, unzippedY)
     plt.margins(0.15, 0.15)
     if title:
         plt.title(title)
