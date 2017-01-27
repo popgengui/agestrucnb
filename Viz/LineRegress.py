@@ -407,6 +407,7 @@ def neGrapher(neFile, configFile=None):
     outlierFile = configs["statsFilename"]
     outlierpath, outlierext =os.path.splitext(outlierFile)
     outlierFile = outlierpath+".outliers"+outlierext
+    #TODO this is where converting the x values to a enviromental variable should occur.
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
     outlierFlag = createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"],outlierFile=outlierFile)
     createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
