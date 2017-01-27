@@ -833,20 +833,26 @@ def get_pops_in_file_outside_valid_size_range( o_genepopfile,
 	checks size of every pop in the file
 	in case we need to skip some pops and 
 	accept others.
+
+	Returns a list of pop numbers, 1-based
+	indexed (as caller expects).
 	'''
 
 	li_popsizes=o_genepopfile.getIndividualCounts()
 
-	li_pops_too_small = []
+	li_pops_outside_valid_size_range = []
 	for idx_pop in range( len ( li_popsizes ) ):
 		i_size_of_pop=li_popsizes[ idx_pop ] 
+
 		if i_size_of_pop < i_min_pop_size \
 				or i_size_of_pop > i_max_pop_size:
-			li_pops_too_small.append( idx_pop )
+		
+			li_pops_outside_valid_size_range.append( idx_pop + 1 )
+
 		#end if subsample size too small
 	#end for each pop number
-	return li_pops_too_small
-#end get_pops_in_file_too_small_to_run
+	return li_pops_outside_valid_size_range
+#end get_pops_in_file_outside_valid_range
 
 def do_estimate( ( o_genepopfile, o_ne_estimator, 
 					s_sample_param_val, s_loci_sample_value,
