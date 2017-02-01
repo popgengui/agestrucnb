@@ -368,6 +368,7 @@ class PGOpSimuPop( modop.APGOperation ):
 				curr += 1
 		#end for i in pop
 
+		#todo apply NB change here!!
 		if gen >= self.input.startLambda:
 			self.__current_N0=self.__current_N0 * self.input.lbd
 		#endif gen >= start lambda
@@ -899,6 +900,9 @@ class PGOpSimuPop( modop.APGOperation ):
 	# end __equalSexCull
 
 	def __harvest(self, pop):
+		gen = pop.dvars().gen
+		if self.input.harvest == None or self.input.harvest[gen] == 0:
+			return True
 		kills = []
 		cohortDict = {}
 		for i in pop.individuals():
@@ -927,7 +931,6 @@ class PGOpSimuPop( modop.APGOperation ):
 			print maleCount
 			print femaleCount
 			print"\n"
-			gen = pop.dvars().gen
 
 			#determine harvest rate for this generation
 

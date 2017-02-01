@@ -796,17 +796,18 @@ def runSamplingOnly(files,runFolder,locisampling,popsampling,regressConfig):
     neFile, statsFile = runNeEst(files,runFolder,locisampling,popsampling,popSamplingScheme, popSamplingParams, regressConfig)
     return neFile,statsFile
 
-def collectStatsData(neDict, statsDict, outFolder,firstVal):
+def collectStatsData(neDict, statsDict, outFolder,regressConfig):
     slopesName = "slopes.csv"
     powerName = "power.csv"
     neName = "Ne.csv"
+    statConfig = ResultScraper.configRead(regressConfig)
 
+    nePath = os.path.join(outFolder, neName)
+    neOut = open(nePath, "w")
+    neOut.write("parameters,replicate,Reproductive Cycle,Ne\n")
     for identifier in neDict:
         neFile = neDict[identifier]
-        neData = gatherNe(neFile, firstVal)
-        nePath = os.path.join(outFolder, neName)
-        neOut = open(nePath, "w")
-        neOut.write("parameters,replicate,Reproductive Cycle,Ne\n")
+        neData = gatherNe(neFile, statConfig["startData"])
         for datapoint in neData:
             print datapoint
             data = neData[datapoint]
@@ -815,12 +816,24 @@ def collectStatsData(neDict, statsDict, outFolder,firstVal):
                 neOut.write(str(identifier) + "," + str(datapoint) + "," + str(point[0]) + "," + str(point[1]) + "\n")
     neOut.close()
 
+    #compile stats file
+    slopePath = os.path.join(outFolder, slopesName)
+    powerPath = os.path.join(outFolder, powerName)
+    powerOut = open(powerPath, "w")
+    powerOut.write("parameters,Positive Slopes,Neutral Slopes, Negative Slopes, Total\n")
+    slopeOut = open(slopePath, "w")
+    slopeOut.write("parameters,Slope,Intercept,CI Slope Min,CI Slope Max\n")
     for identifier in statsDict:
         statsFile = statsDict[identifier]
-        slopePath =os.path.join(outFolder, slopesName)
-        powerPath = os.path.join(outFolder, powerName)
-        powerOut = open(powerPath,"w")
-        slopeOut = open(slopePath,"w")
+        power = gatherPower(statsFile)
+        slopes = gatherSlopes(statsFile)
+        sumPower = sum(power.values())
+        powerOut.write(str(identifier)+ "," +str(power["positive"])+ "," +str(power["neutral"])+ "," +str(power["negative"])+ "," +str(sumPower)+"\n")
+        for dataPoint in slopes:
+            slopeOut.write(str(identifier)+ "," +dataPoint["slope"]+ "," +dataPoint["intercept"]+ "," +dataPoint["lowerCI"]+ "," +dataPoint["upperCI"]+"\n")
+    powerOut.close()
+    slopeOut.close()
+
 
 
 
@@ -846,7 +859,7 @@ def batch(configFile,threads = 1):
     if len(configs["simReps"])==1 and len(configs["startPops"])==1 and len(configs["N0"])==1 and len(configs["microsats"])==1 and len(configs["alleleCount"])==1 and len(configs["SNPs"])==1 and len(configs["mutationRate"])==1:
         if threads == 1:
             neFiles = []
-            simFiles = runSimulation(runParams[0],runParams[1],runParams[2],runParams[3],runParams[4],runParams[5],runParams[6],runParams[7],runParams[8],runParams[9])
+            simFiles = runSimulation(runParams[0],runParams[1],runParams[2],runParams[3],runParams[4],runParams[5],runParams[6],runParams[7],runParams[8],runParams[9],)
             neDict = {}
             statsDict ={}
             for paramset in runParams:
@@ -857,6 +870,8 @@ def batch(configFile,threads = 1):
                 neFile, statsFile = run(*runParams)
                 neDict[ident] = neFile
                 statsDict[ident] = statsFile
+        else:
+            runDefCallsInSeparateProcesses(defName="run", defArgSets=list_of_arg_sets, processorCount=i_run_threads)
     else:
         if threads ==1:
             neDict = {}
@@ -866,6 +881,9 @@ def batch(configFile,threads = 1):
                 neFile, statsFile = run(*runParams)
                 neDict[ident] = neFile
                 statsDict[ident] = statsFile
+        else:
+            runDefCallsInSeparateProcesses(defName="run", defArgSets=list_of_arg_sets, processorCount=i_run_threads)
+
 
 '''
 Ted added 2016_10_24, for testing.
