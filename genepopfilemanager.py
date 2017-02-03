@@ -63,6 +63,8 @@ class GenepopFileManager( object ):
 
 	def __init__( self, s_filename ):
 		self.__filename=s_filename
+		self.__loci_count=None
+
 		self.__setup_addresses( s_filename )
 		self.__init_subsamples()
 		self.__get_loci_count()
@@ -344,7 +346,7 @@ class GenepopFileManager( object ):
 		li_pop_numbers=None
 
 		if s_pop_subsample_tag is None:
-			li_pop_numbers=self.__pop_byte_addresses.keys()
+			li_pop_numbers=list( self.__pop_byte_addresses.keys() )
 		else:
 			li_pop_numbers=self.__pop_subsamples[ s_pop_subsample_tag ]
 		#end if no pop subsample tag else use subsample
@@ -421,9 +423,11 @@ class GenepopFileManager( object ):
 		for i_pop_number in li_pop_numbers:
 
 			li_indiv_list=None
+			i_tot_indiv=None
 
 			if s_indiv_subsample_tag is None:
 				li_indiv_list=self.__pop_byte_addresses[ i_pop_number ].keys()
+				i_tot_indiv=self.__get_count_indiv( li_indiv_list )
 			else:
 				ddli_subsamples=self.__indiv_subsamples
 				if s_indiv_subsample_tag not in ddli_subsamples:
@@ -439,12 +443,12 @@ class GenepopFileManager( object ):
 				
 					raise Exception( s_msg )
 				#end if no such pop for this subsample
+				li_indiv_list=ddli_subsamples[ s_indiv_subsample_tag ][ i_pop_number ] 
 				i_tot_indiv=self.__get_count_indiv( \
 						ddli_subsamples[ s_indiv_subsample_tag ] [ i_pop_number ] )
 			#end if no subsample, else subsample
 
 			if i_tot_indiv >= i_min_pop_size:
-				li_indiv_list=ddli_subsamples[ s_indiv_subsample_tag ][ i_pop_number ] 
 
 				for i_indiv_number in li_indiv_list:
 
@@ -474,7 +478,7 @@ class GenepopFileManager( object ):
 
 						o_newfile.write( s_id + "," + s_loci + UNIX_ENDLINE )
 					#end if no loci subsample, simply print orig entry, else get loci subsample
-				#end for each item number
+				#end for each individual number
 			#end if num individuals in this pop at or over min
 		#end for each pop number
 		
@@ -612,6 +616,17 @@ class GenepopFileManager( object ):
 		return li_indiv_numbers [ 1 : ]
 	#end __get_list_indiv_numbers
 
+	def __get_list_loci_numbers( self, s_loci_subsample_tag=None ):
+		li_loci_numbers=None
+		if s_loci_subsample_tag is None:
+			li_loci_numbers=range( 1, self.__loci_count + 1 )
+		else:
+			li_loci_numbers=self.__loci_subsamples[ s_loci_subsample_tag ]
+		#end if we have no loci subsample tag, else we have one	
+
+		return li_loci_numbers
+	#end __get_list_loci_numbers
+		
 	def __get_individual_id( self, o_orig_file, l_address ):
 		'''
 		param o_filehandle is a file object open with 'rb' for reading
@@ -834,13 +849,14 @@ class GenepopFileManager( object ):
 		genepop file listed in order l_1, l_2, l_3...l_N.
 
 		param i_min_loci_position : integer giving lower index for range of loci numbers
-		param i_min_loci_position : integer giving upper index for range of loci numbers
+		param i_max_loci_position : integer giving upper index for range of loci numbers
 		param i_min_total: sample at least this many loci, or throw error
 		param i_max_total: sample at most this many loci, randomly select if range exceeds
 		param b_truncate_max_to_total : boolean, if True, then, when the param i_max_loci_position
-			                            exceeds N, we set it to N.  If false then we keep the max
-										position, in order to throw an error if it exceeds N
-										(see def __get_range_loci_nums).
+			                            exceeds the total available loci, N, we set it to N.  
+										If false then we keep the max position, in order to 
+										throw an error if it exceeds N (see def __get_range_loci_nums), 
+										default is True.
 
 		'''
 
@@ -1482,28 +1498,197 @@ class GenepopFileManager( object ):
 		self.__init_subsamples()
 		return
 	#end original_file_name (setter)
+
+	def __get_allele_counts( self, s_pop_subsample_tag=None, 
+										s_indiv_subsample_tag=None, 
+										s_loci_subsample_tag=None,
+										b_skip_loci_with_parial_data=True ):
+		
+		'''
+		For each pop in the file (or as filtered by pop subsample tag), count the
+		alleles.  When a loci has no data for an individual, counts are unchanged.
+		When a loci has partial, the flag param is used do either leave unchanged
+		or count the non-missing allele (see comment below).
+		param tags give keys to subsamples of pops, individuals, or loci.
+		param b_skip_loci_with_parial_data is meant to imitate the Genepop program,
+			  which, when computing allele frequencies on diploid entries, apparently 
+			  skips non-zero alleles when the other is zero (missing).  Default 
+			  True will imitate, false will only skip alleles when both alleles are
+			  zero (missing).
+		'''
+
+		MISSING_ALLELE=0
+
+		#For assertion messages:
+		s_location_msg="in GenepopFileManager instance " \
+								+ "def __get_allele_counts, "
+		li_pop_nums=None
+		li_indiv_nums=None
+		li_loci_nums=None
+
+		dddi_allele_counts_by_pop_by_loci={}
+
+		o_this_genepop_file=open( self.__filename, 'r' )
+
+		li_pop_nums=self.__get_pop_list( s_pop_subsample_tag )
+		li_loci_nums=self.__get_list_loci_numbers( s_loci_subsample_tag )
+		i_total_loci=len( li_loci_nums )
+
+		for i_pop_number in li_pop_nums:
+
+			dddi_allele_counts_by_pop_by_loci[ i_pop_number ] = { i_loci_number : {} 
+																	for i_loci_number in li_loci_nums }
+
+			li_indiv_nums=self.__get_list_indiv_numbers( i_pop_number, s_indiv_subsample_tag )
+
+			for i_indiv_number in li_indiv_nums:
+
+				s_loci_as_genepop_entry=self.__get_loci_for_indiv( o_this_genepop_file, 
+																	i_pop_number, 
+																		i_indiv_number, 
+																		s_loci_subsample_tag )
+
+				ls_loci_list=s_loci_as_genepop_entry.split()
+				assert i_total_loci == len( ls_loci_list ), s_location_msg \
+											+ "individual loci list total, " \
+											+ str( len( ls_loci_list ) ) \
+											+ ", differs from expected total loci, " \
+											+ str( i_total_loci ) \
+											+ "using loci subsample with tag: " \
+											+ str( s_loci_subsample_tag ) + "." 
+
+
+				for idx in range( i_total_loci ):
+
+					s_this_loci=ls_loci_list[ idx ]
+					i_this_loci_number=li_loci_nums[ idx ]
+
+					#The sub-dictionary that holds running allele counts for this pop and loci:
+					ddi_alleles_this_pop_and_loci= \
+								dddi_allele_counts_by_pop_by_loci[i_pop_number ][ i_this_loci_number ]
+					i_char_count=len( s_this_loci )
+
+					#If loci entry diploid, then it will have at least 4 characters,
+					#and no more than 6:
+					assert i_char_count > 3 and i_char_count <= 6, s_location_msg \
+										+ "loci entry, " + s_this_loci + ", " \
+										+ "has character count: " \
+										+  str( i_char_count ) + ".  " \
+										+ "Current version requires diploid loci."
+										
+					#If the loci entry is diploid, then its length must be halvable:
+					assert i_char_count % 2 == 0,  s_location_msg \
+										+ "loci entry, " + s_this_loci \
+										+ ", character count not divisible by two."
+
+					i_chars_per_allele=i_char_count/2
+					
+					try:
+						i_allele_1=int( s_this_loci[ 0:i_chars_per_allele ] )
+						i_allele_2=int( s_this_loci[ i_chars_per_allele:i_char_count ] )
+					except ValueError as ove:
+						raise Exception( s_location_msg  \
+										+ "loci entry, " + s_this_loci \
+										+ ", can't be converted " \
+										+ "into 2 integers. Error: " + str( ove ) )
+					#end try...except
+
+					li_alleles=[ i_allele_1, i_allele_2 ]
+
+					if sum( li_alleles ) == MISSING_ALLELE \
+							or ( ( MISSING_ALLELE in li_alleles ) \
+									and b_skip_loci_with_parial_data ):
+						continue
+					#end if missing all data, or missing at least one and flag says skip.
+						
+					for i_this_allele in li_alleles:
+						if i_this_allele != MISSING_ALLELE:
+							if i_this_allele not in ddi_alleles_this_pop_and_loci:
+								ddi_alleles_this_pop_and_loci[ i_this_allele ] = 1
+								
+							else:
+								ddi_alleles_this_pop_and_loci[ i_this_allele ] += 1
+							#end if allele already recorded, else not
+						#end if not a missing allele --(zero allele (missing data) is
+						#possible when the b_skip_loci_with_parial_data flag is False.
+					#end for each allele
+				#end for each loci
+			#end for each individual
+		#end for each pop
+				
+		return dddi_allele_counts_by_pop_by_loci
+
+	#end __get_allele_counts
+
+	def getAlleleCounts( self, s_pop_subsample_tag = None, 
+									s_indiv_subsample_tag = None, 
+									s_loci_subsample_tag = None,
+									b_skip_loci_with_parial_data=True ):
+
+		dddi_allele_counts_by_pop_by_loci=self.__get_allele_counts( s_pop_subsample_tag,
+																		s_indiv_subsample_tag,
+																		s_loci_subsample_tag,
+																		b_skip_loci_with_parial_data )
+
+		return dddi_allele_counts_by_pop_by_loci
+	#end
 #end class GenepopFileManager
 
 if __name__ == "__main__":
 	#test the code
-	mydir=os.path.sep + os.path.join( "home","ted","documents","source_code","python","negui","temp_data","genepop_from_brian_20160506" )
-	restag="py" + str( sys.version_info.major ) + "test"
-	filecount=0
-	for myfile in [ "AlpowaCreekBY2006_14.txt", "AsotinCreekBY2006_104.txt", "BigCreekBY2006_29.txt" ]:
-		filecount+=1
-		mygpfile=mydir + os.path.sep + myfile
-	
-		o_gp=GenepopFileManager( mygpfile )
-		lf_props=[ 0.10, 0.20, 0.30 ]	
-		for f_prop in lf_props:
-			o_gp.subsampleIndividualsRandomly( f_prop, s_subsample_tag=str( f_prop ) )
-		#end for each proportion
-
-		s_newfile="_".join( [ mygpfile, restag, str( filecount ) ] )
-		o_gp.writeGenePopFile( s_newfile  )
-		for s_tag in o_gp.indiv_subsample_tags:
-			o_gp.writeGenePopFile( s_newfile + s_tag, s_indiv_subsample_tag=s_tag )
-		#end for each proportion
+#	mydir=os.path.sep + os.path.join( "home","ted","documents","source_code","python","negui","temp_data","genepop_from_brian_20160506" )
+#	restag="py" + str( sys.version_info.major ) + "test"
+#	filecount=0
+#	for myfile in [ "AlpowaCreekBY2006_14.txt", "AsotinCreekBY2006_104.txt", "BigCreekBY2006_29.txt" ]:
+#		filecount+=1
+#		mygpfile=mydir + os.path.sep + myfile
+#	
+#		o_gp=GenepopFileManager( mygpfile )
+#		lf_props=[ 0.10, 0.20, 0.30 ]	
+#		for f_prop in lf_props:
+#			o_gp.subsampleIndividualsRandomly( f_prop, s_subsample_tag=str( f_prop ) )
+#		#end for each proportion
+#
+#		s_newfile="_".join( [ mygpfile, restag, str( filecount ) ] )
+#		o_gp.writeGenePopFile( s_newfile  )
+#		for s_tag in o_gp.indiv_subsample_tags:
+#			o_gp.writeGenePopFile( s_newfile + s_tag, s_indiv_subsample_tag=s_tag )
+#		#end for each proportion
 	#end for each file
+
+	#testing new allele counts defs
+	
+	import sys
+
+	f_genepopfile=None
+	if len( sys.argv ) == 2:
+		f_genepopfile=sys.argv[ 1 ]
+	#end if
+
+	MINLOCINUM=20
+	MAXLOCINUM=21
+	LOCILIST=[ 3,5 ]
+
+	MININDIV=44
+	MAXINDIV=45
+
+	MINPOPNUM=24
+	MAXPOPNUM=24
+
+
+	opg=GenepopFileManager( f_genepopfile )
+
+	li_pop_numbers=list(  range( MINPOPNUM, MAXPOPNUM + 1 ) )
+	li_indiv_numbers=list( range( MININDIV, MAXINDIV + 1 ) ) 
+
+	opg.subsamplePopulationsByList( li_pop_numbers , "popsamp" )
+	opg.subsampleIndividualsByNumberList( { ipopnum : li_indiv_numbers  for ipopnum in li_pop_numbers }	, "indivsamp" )
+	opg.subsampleLociByRangeAndMax( MINLOCINUM, MAXLOCINUM, "locisamp" )
+
+	dddi_allelecounts=opg.getAlleleCounts( "popsamp", "indivsamp", "locisamp" )
+
+	print( dddi_allelecounts )
+
+	
 #end if main
 
