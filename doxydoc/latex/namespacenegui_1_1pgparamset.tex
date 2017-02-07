@@ -5,15 +5,6 @@
 \item 
 class \hyperlink{classnegui_1_1pgparamset_1_1PGParamSet}{P\+G\+Param\+Set}
 \end{DoxyCompactItemize}
-\subsection*{Variables}
-\begin{DoxyCompactItemize}
-\item 
-string {\bfseries mytestfile} = \char`\"{}resources/simupop.\+param.\+names\char`\"{}\hypertarget{namespacenegui_1_1pgparamset_a1cd4bee064476d7d9a0d584745c5357f}{}\label{namespacenegui_1_1pgparamset_a1cd4bee064476d7d9a0d584745c5357f}
-
-\item 
-{\bfseries o\+\_\+p} = \hyperlink{classnegui_1_1pgparamset_1_1PGParamSet}{P\+G\+Param\+Set}( mytestfile )\hypertarget{namespacenegui_1_1pgparamset_aff6bbb0931ed54d22d751c75b88d51ed}{}\label{namespacenegui_1_1pgparamset_aff6bbb0931ed54d22d751c75b88d51ed}
-
-\end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
@@ -26,5 +17,19 @@ each with a more user-friendly
 name.  These long names (attribute longname) are used
 for example, as labels in the gui interface
 that allows  users to set the parameters.
-\end{DoxyVerb}
+
+2016_09_08
+Over last few weeks have added fields to the "tag"
+column in the paramset files, read by objects of
+this class.  There are now many sub-fields inside
+the tag that are used to get a default value, 
+type the value, add a tool tip, and give a max
+and min value for validation.
+
+Sat Sep 24 20:02:31 MDT 2016
+Have collapsed the "longname" item into the tag,
+so that now the file should contain only two
+tab-delimited fields, the parameter name, 
+and the tag of semi-colon delimited fields,
+one of which is now the longname.\end{DoxyVerb}
  

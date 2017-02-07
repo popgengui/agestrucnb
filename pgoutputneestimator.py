@@ -48,7 +48,8 @@ class PGOutputNeEstimator( object ):
 
 		if len( ls_existing_files ) > 0:
 			s_msg="In " + type( self ).__name__ \
-				+ " object instance. Can't create object because " \
+				+ " object instance, def __validate_filenames, " \
+				+ "Can't create NeEstimator output files because " \
 				+ "the following files already exist:\n  " \
 				+ "\n  ".join( ls_existing_files) + "."
 			raise Exception( s_msg )

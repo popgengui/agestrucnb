@@ -3,7 +3,6 @@ Description
 Implements abstract class AGPOperation for simuPop simulations,
 as coded by Tiago Antao's sim.py modlule.  See class description.
 '''
-
 __filename__ = "pgopsimupop.py"
 __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -53,6 +52,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS="numMSats"
 	INPUT_ATTRIBUTE_NUMBER_OF_SNPS="numSNPs"
+	DELIMITER_INDIV_ID=";"
 
 	def __init__(self, o_input, o_output, b_compress_output=True, 
 									b_remove_db_gen_sim_files=False,
@@ -96,6 +96,18 @@ class PGOpSimuPop( modop.APGOperation ):
 		#unless we reseed the numpy random number generator 
 		#for each "process:"
 		numpy.random.seed()
+		'''
+		With introduction of the N0 as 
+		calculated by other parameters,
+		I chose to keep it unaltered in 
+		the input object (see N0 property
+		in the PGInputSimuPop class), and
+		to accomodate lambda adustments,
+		to use this attribute as the 
+		N0 accessor in the simulation operations.
+		We initiallize to the input object's value:
+		'''
+		self.__current_N0=self.input.N0
 		
 		return
 	#end __init__
@@ -126,7 +138,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def doOp( self ):
 		if self.__is_prepared:
-			
+
 			#if client has not indicated otherwise,
 			#we write the current param set to
 			#write the configutation file on which
@@ -252,9 +264,34 @@ class PGOpSimuPop( modop.APGOperation ):
 		nLoci=self.input.numMSats + self.input.numSNPs
 		startLambda=self.input.startLambda
 		lbd=self.input.lbd
-		##todo !! this is where you select sex proporotion(maleProp) or freqency(maleFreq)
-		#initOps = [sp.InitSex(maleProp=self.input.maleProb)]
-		initOps = [sp.InitSex(maleProp=0.5)]
+		
+		ldef_init_sex=[]
+
+		'''
+		This 2-cull-method selection for intializing sex ratios
+		was added 2017_01_05.  When the user selects
+		"equal_sex_ratio" in the interface (PGGuiSimuPop), we 
+		initialize always using "maleProp=0.5".  When the user
+		chooses the "survivial_rates" option, then the configuration
+		file param "maleProb" is accessed (its value also may have been 
+		reset in the interface), and the sex ratio is determined using 
+		Tiago's original assignment, "maleFreq=input.maleProb".
+		'''
+		if self.input.cull_method == \
+					pgin.PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS:
+			ldef_init_sex=[sp.InitSex(maleProp=0.5)]
+		elif self.input.cull_method == \
+					pgin.PGInputSimuPop.CONST_CULL_METHOD_SURVIVIAL_RATES:
+			ldef_init_sex=[ sp.InitSex(maleFreq=self.input.maleProb) ]
+		else:
+			s_msg="In PGOpSimuPop instance, def __createSinglePop, "  \
+						+ "there is an unknown value for the cull_method " \
+						+ "parameter: " + str( self.input.cull_method ) + "."
+			raise Exception( s_msg )
+		#end if equal sex ratio else
+
+		initOps=ldef_init_sex 
+
 		if startLambda < pgin.START_LAMBDA_IGNORE:
 			preOps = [sp.ResizeSubPops(proportions=(float(lbd), ),
 								begin=startLambda)]
@@ -331,11 +368,12 @@ class PGOpSimuPop( modop.APGOperation ):
 				curr += 1
 		#end for i in pop
 
+		#todo apply NB change here!!
 		if gen >= self.input.startLambda:
-			self.input.N0 = self.input.N0 * self.input.lbd
+			self.__current_N0=self.__current_N0 * self.input.lbd
 		#endif gen >= start lambda
 
-		v_return_value = self.input.N0 + curr
+		v_return_value = self.__current_N0 + curr
 
 		if VERBOSE:
 			print( "in __calcDemo, with args, %s %s %s %s, returning %s "
@@ -398,7 +436,6 @@ class PGOpSimuPop( modop.APGOperation ):
 				#len( skip ) == 0:
 				i_len_skip=0 if self.input.skip is None \
 									else len( self.input.skip )
-
 				if diff > i_len_skip:
 					available = True
 				else:
@@ -529,7 +566,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			#end if fecs
 		#end for ind in pop
 
-		kbar = 2.0 * self.input.N0 / len(cofs)
+		kbar = 2.0 * self.__current_N0 / len(cofs)
 		Vk = numpy.var(cofs)
 		nb = (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
 		#print len(pair), kbar, Vk, (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
@@ -556,7 +593,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			gen = self.__litterSkipGenerator(pop, subPop)
 			#print 1, pop.dvars().gen, nb
 
-			for i in range(self.input.N0):
+			for i in range(self.__current_N0):
 				pair.append(gen.next())
 			#end for i in range
 
@@ -566,7 +603,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			nb = self.__calcNb(pop, pair)
 
-			if abs(nb - self.input.Nb) <= self.input.NbVar:
+			if abs(nb - self.input.Nb_for_restrict_generator ) <= self.input.NbVar:
 				nbOK = True
 			else:
 				for male, female in pair:
@@ -726,9 +763,9 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __fitnessGenerator 
 
 	def __cull( self, pop ):
+
 		kills = []
 		for i in pop.individuals():
-
 			if i.age > 0 and i.age < self.input.ages - 1:
 				if i.sex() == 1:
 					cut = self.input.survivalMale[int(i.age) - 1]
@@ -744,10 +781,9 @@ class PGOpSimuPop( modop.APGOperation ):
 		pop.removeIndividuals(IDs=kills)
 		return True
 	#end __cull
-
-
 	##Brian Trethewey addition for the immediate culling of a proportion of the adult population
 	def __equalSexCull(self, pop):
+
 		kills = []
 		cohortDict = {}
 		for i in pop.individuals():
@@ -767,25 +803,32 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			#setup data and seperate males and females
 			cohort = cohortDict[cohortKey]
-			print(cohortKey)
+
 			cohortTotal = len(cohort)
 			cohortMales = [x for x in cohort if x.sex()==1]
 			maleCount = len(cohortMales)
 			cohortFemales = [x for x in cohort if x.sex() == 2]
 			femaleCount = len(cohortFemales)
-			print cohortTotal
-			print maleCount
-			print femaleCount
-			print"\n"
+
+			if VERBOSE:
+				print(cohortKey)
+				print cohortTotal
+				print maleCount
+				print femaleCount
+				print"\n"
+			#end if verbose
 
 			#determine survival rate of this cohort
 			survivalRate =(self.input.survivalMale[int(cohortKey) - 1]+self.input.survivalFemale[int(cohortKey) - 1])/2
-			print survivalRate
 			survivorCount = numpy.round(cohortTotal * survivalRate)
 			cullCount = cohortTotal  - survivorCount
-			print survivorCount
-			print cullCount
-			print "\n\n"
+			
+			if VERBOSE:
+				print survivalRate
+				print survivorCount
+				print cullCount
+				print "\n\n"
+			#end if verbose
 
 			#choose which sex to kill first
 			#flag is one and 0 for easy switching
@@ -826,102 +869,103 @@ class PGOpSimuPop( modop.APGOperation ):
 				#sample by gender
 				if len(maleCullOrder)>len(femaleCullOrder):
 					lottoInd = maleCullOrder.pop()
-					print "MaleChosen "+str(lottoInd.ind_id)
+					if VERBOSE:
+						print "MaleChosen "+str(lottoInd.ind_id)
+					#end if VERBOSE
 				else:
 					lottoInd = femaleCullOrder.pop()
-					print "FemaleChosen "+str(lottoInd.ind_id)
+					if VERBOSE:
+						print "FemaleChosen "+str(lottoInd.ind_id)
+					#end if VERBOSE
 				#if not already "dead"
 				if not lottoInd.ind_id in cohortKills:
 					lotteryCount +=1
-					print "Dead "+str(lotteryCount)
+					if VERBOSE:
+						print "Dead "+str(lotteryCount)
+					#end if VERBOSE
+
 					kills.append(lottoInd.ind_id)
 					killChoiceFlag = abs(killChoiceFlag-1)
-
 
 			#kills.extend(cohortKills)
 			# endif age>0 andage<.....
 		# end for i in pop
-		print kills
+		if VERBOSE:
+			print kills
+		#end if VERBOSE
+
+		pop.removeIndividuals(IDs=kills)
+		return True
+
+	# end __equalSexCull
+
+	def __harvest(self, pop):
+		gen = pop.dvars().gen
+		if self.input.harvest == None or self.input.harvest[gen] == 0:
+			return True
+		kills = []
+		cohortDict = {}
+		for i in pop.individuals():
+			indAge = i.age
+
+			if not indAge in cohortDict:
+				cohortDict[indAge] = []
+			cohortDict[indAge].append(i)
+
+		for cohortKey in cohortDict:
+			## !! Cohort 0 does not get culled!!
+			# if cohortKey == 0.0:
+			#	continue
+
+			cohortKills = []
+
+			# setup data and seperate males and females
+			cohort = cohortDict[cohortKey]
+			print(cohortKey)
+			cohortTotal = len(cohort)
+			cohortMales = [x for x in cohort if x.sex() == 1]
+			maleCount = len(cohortMales)
+			cohortFemales = [x for x in cohort if x.sex() == 2]
+			femaleCount = len(cohortFemales)
+			print cohortTotal
+			print maleCount
+			print femaleCount
+			print"\n"
+
+			#determine harvest rate for this generation
+
+			harvestRate = (self.input.harvest[gen])
+			print harvestRate
+			maleHarvest = numpy.round(maleCount * harvestRate)
+			femaleHarvest = numpy.round(femaleCount * harvestRate)
+			print "\n\n"
+
+			# choose which sex to kill first
+			# flag is one and 0 for easy switching
+			# killChoiceFlag = round(random.random())
+			# if femaleCount > maleCount:
+			# 	killChoiceFlag = 0
+			# if maleCount > femaleCount:
+			# 	killChoiceFlag = 1
+
+
+			#sample  harvest
+			maleHarvestList = numpy.sample(cohortMales,maleHarvest)
+			femaleHarvestList = numpy.sample(cohortFemales,femaleHarvest)
+			for ind in maleHarvestList:
+				print "Dead " + str(ind.ind_id)
+				kills.append(ind.ind_id)
+			for ind in femaleHarvestList:
+				print "Dead " + str(ind.ind_id)
+				kills.append(ind.ind_id)
+
+				# kills.extend(cohortKills)
+				# endif age>0 andage<.....
+		# end for i in pop
 		pop.removeIndividuals(IDs=kills)
 		return True
 
 # end __equalSexCull
-
-		def __harvest(self, pop):
-			gen = pop.dvars().gen
-			if self.input.harvest == None or self.input.harvest[gen] == 0.0:
-				return True
-			kills = []
-			cohortDict = {}
-			for i in pop.individuals():
-				indAge = i.age
-
-				if not indAge in cohortDict:
-					cohortDict[indAge] = []
-				cohortDict[indAge].append(i)
-
-			for cohortKey in cohortDict:
-				## !! Cohort 0 does not get harvested!!
-				# if cohortKey == 0.0:
-				#	continue
-
-				cohortKills = []
-
-				# setup data and seperate males and females
-				cohort = cohortDict[cohortKey]
-				print(cohortKey)
-				cohortTotal = len(cohort)
-				cohortMales = [x for x in cohort if x.sex() == 1]
-				maleCount = len(cohortMales)
-				cohortFemales = [x for x in cohort if x.sex() == 2]
-				femaleCount = len(cohortFemales)
-				print cohortTotal
-				print maleCount
-				print femaleCount
-				print"\n"
-
-				# reduce newborns
-				self.__current_N0 = self.__current_N0 * 1 - harvestRate
-
-				# determine harvest rate for this generation
-
-				harvestRate = (self.input.harvest[gen])
-				# todo change Nb to reflect harvest
-				print harvestRate
-				# reduce newborns
-				self.__current_N0 = self.__current_N0 * (1 - harvestRate)
-
-				print harvestRate
-				maleHarvest = numpy.round(maleCount * harvestRate)
-				femaleHarvest = numpy.round(femaleCount * harvestRate)
-				print "\n\n"
-
-				# choose which sex to kill first
-				# flag is one and 0 for easy switching
-				# killChoiceFlag = round(random.random())
-				# if femaleCount > maleCount:
-				# 	killChoiceFlag = 0
-				# if maleCount > femaleCount:
-				# 	killChoiceFlag = 1
-
-
-				# sample  harvest
-				maleHarvestList = numpy.sample(cohortMales, maleHarvest)
-				femaleHarvestList = numpy.sample(cohortFemales, femaleHarvest)
-				for ind in maleHarvestList:
-					print "Dead " + str(ind.ind_id)
-					kills.append(ind.ind_id)
-				for ind in femaleHarvestList:
-					print "Dead " + str(ind.ind_id)
-					kills.append(ind.ind_id)
-
-				# kills.extend(cohortKills)
-				# endif age>0 andage<.....
-			# end for i in pop
-			pop.removeIndividuals(IDs=kills)
-			return True
-
-	# end _harvest
 
 
 
@@ -967,23 +1011,38 @@ class PGOpSimuPop( modop.APGOperation ):
 			create the genepop.  It may be that we'll just keep this original 
 			filter on the gen, and create the genepop using the indiv list to 
 			get the individual ids, and this gen output to lookup genotypes.
+			
+
+			As of 2016_09_01, combining the age, sex, and parantage info into the indiv id
+			for the first (indiv id) field in the *gen file.  Note above that this info
+			is also written to the *sim file.  Putting it in the gen file will allow
+			the gen file to be the sole source for writing  gen2genepop conversion
+			in instances of type PGOutputSimuPop.  Also, we will again eliminate
+			the filter used in writing the gen file indivs/cycle, and to 
+			apply age or other filter conditions downstream from this output (using
+			instances of class objects in new module genepopindividualid.py). Hence,
+			once again we rem out the original filter on age for the gen-file indiv/generation
 			'''
-			if i.age == 1 or gen == 0:
+#			if i.age == 1 or gen == 0:
 
-				self.output.err.write("%d %d " % (i.ind_id, gen))
+			s_id_fields=PGOpSimuPop.DELIMITER_INDIV_ID.join( [ \
+						str( i.ind_id ), str( i.sex() ), str( i.father_id ),
+						str( i.mother_id ), str( i.age ) ] )
 
-				for pos in range(len(i.genotype(0))):
-					a1 = self.__zeroC(i.allele(pos, 0))
-					a2 = self.__zeroC(i.allele(pos, 1))
-					self.output.err.write(a1 + a2 + " ")
-				#end for pos in range
+			self.output.err.write("%s %d " % (s_id_fields, gen))
 
-				self.output.err.write("\n")
+			for pos in range(len(i.genotype(0))):
+				a1 = self.__zeroC(i.allele(pos, 0))
+				a2 = self.__zeroC(i.allele(pos, 1))
+				self.output.err.write(a1 + a2 + " ")
+			#end for pos in range
+
+			self.output.err.write("\n")
 			
 			#end if age == 1 or gen == 0
 
 			'''
-			End of change to Tiago's code (removing the if statement ).
+			End of change to Tiago's code.
 			'''
 
 
@@ -1077,7 +1136,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		mateOp = sp.HeteroMating( [ 
 					sp.HomoMating(
 					sp.PyParentsChooser(self.__fitnessGenerator if self.input.doNegBinom
-					else (self.__litterSkipGenerator if self.input.Nb is None else
+					else (self.__litterSkipGenerator if self.input.Nb_for_restrict_generator is None else
 					self.__restrictedGenerator)),
 					sp.OffspringGenerator(numOffspring=1, ops=[
 					sp.MendelianGenoTransmitter(), sp.IdTagger(),
@@ -1086,8 +1145,26 @@ class PGOpSimuPop( modop.APGOperation ):
 					sp.CloneMating(subPops=mySubPops, weight=-1)],
 					subPopSize=self.__calcDemo )
 
-		agePostOps = [ sp.PyOperator(func=self.__outputMega), 
-					sp.PyOperator(func=self.__equalSexCull) ]
+		#Code added 2016_11_01, with new input value "cull_method", we
+		#choose our culling def ref accordingly
+		def_for_culling=None
+
+		if self.input.cull_method == pgin.PGInputSimuPop.CONST_CULL_METHOD_SURVIVIAL_RATES:
+			def_for_culling=self.__cull
+		elif self.input.cull_method == pgin.PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS:
+			def_for_culling=self.__equalSexCull
+		else:
+			s_msg="In PGOpSimuPop instance, def __createAge, " \
+						+ "input object's value for cull_method " \
+						+ "is unknown: " + self.input.cull_method \
+						+ "."
+			raise Exception( s_msg )
+		#end if cull method survival rates, equal sex,  else unkown
+
+		#Code revised 2016_11_01 to use the above def_for_culling
+		#reference, to assign user-input method:
+		agePostOps = [ sp.PyOperator( func=self.__outputMega ), 
+					sp.PyOperator( func=def_for_culling ) ]
 
 		pop.setVirtualSplitter(sp.InfoSplitter(field='age',
 			   cutoff=range(1, self.input.ages)))

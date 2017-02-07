@@ -1,0 +1,39 @@
+#This file profides parameter names and default values for Brian Tretheway's Nb regression program.  
+#As of 2016_11_15 I have them in this separate file.  I may simply add these to the neestimation.param.names file as a new section (subframe) "Regression", or the like
+#Copied from the neestimator.param.names file, these are the columns/fields:
+#	1.  Actual variable name, ususally the original used in Tiago's cfg object (see his sim.py)
+#	2.  Formatting and default value fields, semi-colon-delimited
+#	    ( many fields currently (20160820) not used).  Field types:
+#	    	i.   IDX_TAG_FIELD_LONGNAME=0
+#		ii.   IDX_TAG_FIELD_CONFIG_SECTION=1
+#		iii.  IDX_TAG_FIELD_PLACEMENT_ORDER=2
+#		iv. IDX_TAG_FIELD_COLUMN_NUMBER=3
+#		v.  IDX_TAG_FIELD_PARAM_ORDER=4
+#		vi.   IDX_TAG_FIELD_DEFAULT_VALUE=5
+#		vii.  IDX_TAG_FIELD_PARAM_TYPE=6
+#		viii. IDX_TAG_FIELD_MIN_VALUE=7
+#		viv.IDX_TAG_FIELD_MAX_VALUE=8
+#		x. IDX_TAG_FIELD_TOOL_TIP=9
+#		xi. IDX_TAG_FIELD_GUI_CONTROL=10
+#		xii. IDX_TAG_FIELD_GUI_CONTROL_LIST=11
+#		xiii. IDX_TAG_FIELD_VALIDATION=12
+#		xiv. IDX_TAG_FIELD_ASSOC_DEF=13
+#
+#
+#--------all parameters are in the Regression section:
+#
+title	Plot title;Regress;1;0;1;"title text";str;None;None;Plot title text;entry;None;None;None
+xlab	x label;Regress;1;0;2;"x label";str;None;None;Plot x label;entry;None;None;None
+ylab	y label;Regress;1;0;3;"y label";str;None;None;Plot x label;entry;None;None;None
+ylab	y label;Regress;1;0;4;"y label";str;None;None;Plot x label;entry;None;None;None
+desttype	Print to;Regress;1;0;5;"show";str;None;None;Print to (show == print to screen);cbox;( "show","pdf","png" );x in [ 'show','pdf','png' ];updateDesttype
+regressionfile	Regression file;Regress;1;0;6;"test.pdf";str;None;None;File name, regression file;entry;None;None;None
+boxplotfile	Boxplot file;Regress;1;0;7;"boxplot.pdf";str;None;None;File name, boxplot file;entry;None;None;None
+scatterfile	Scatter plot file;Regress;1;0;8;"scatterplot.pdf";str;None;None;File name, Scatter plot file.;entry;None;None;None
+outputFilename	Stas output file file;Regress;1;0;9;"statsOoutTest.txt";str;None;None;File name, boxplot file;entry;None;None;None
+type	Line type;Regress;1;0;9;"auto";str;None;None;Line type;cbox;( "auto", "pop", "value", "None" );x in [ 'auto','pop','value', 'None' ];updateLineType
+expectedslope	Expected slope;Regress;1;0;10;-0.1;float;None;None;Expected slope;entry;None;type(x)==float;None
+xMin	Min x value;Regress;1;0;11;0;int;None;None;Minimum value of x shown.;entry;None;type(x)==int;None
+xMax	Max x value;Regress;1;0;12;200;int;None;None;Maximum value of x shown.;entry;None;type(x)==int;None
+startCollect Stat at Generation ;Regress;1;0;13;0;int;None;None;Generation at which to start using the data for plot and stats.;entry;None;type(x)==int;None
+alpha	Alpha for CIs;Regress;1;0;14;0.5;float;None;None;alpha value to be used for confidence intervals this should be a value less than 0.5;entry;None;type(x)==float;None

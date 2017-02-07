@@ -35,7 +35,7 @@ objects.
 \end{DoxyVerb}
  
 
-Definition at line 35 of file pghostnotebook.\+py.
+Definition at line 34 of file pghostnotebook.\+py.
 
 
 
@@ -65,40 +65,45 @@ s_glob_life_tables, glob expression used by PGOpSimuPop objects to load all life
     into memory\end{DoxyVerb}
  
 
-Definition at line 43 of file pghostnotebook.\+py.
+Definition at line 42 of file pghostnotebook.\+py.
 
 
 \begin{DoxyCode}
-43                     i\_container\_padding=10 ):
-44         \textcolor{stringliteral}{'''}
-45 \textcolor{stringliteral}{        params }
-46 \textcolor{stringliteral}{        o\_parent, parent ttk.Frame object}
-47 \textcolor{stringliteral}{}
-48 \textcolor{stringliteral}{        s\_menu\_config, file for PGMenuBuilder object, gives the main menu}
-49 \textcolor{stringliteral}{}
-50 \textcolor{stringliteral}{        s\_param\_names\_file\_for\_simulation, table file that lists the parameter names}
-51 \textcolor{stringliteral}{           as read into a PGInputSimuPop object}
-52 \textcolor{stringliteral}{}
-53 \textcolor{stringliteral}{        s\_glob\_life\_tables, glob expression used by PGOpSimuPop objects to load all life tables}
-54 \textcolor{stringliteral}{            into memory}
-55 \textcolor{stringliteral}{}
-56 \textcolor{stringliteral}{        '''}
-57         Notebook.\_\_init\_\_( self, o\_parent )
-58         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_ae3a4078b5e41c208da268dfee99bb622}{\_\_parent}=o\_parent
-59         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_add1ab1bb7f792ff733e8236fed00218c}{\_\_menu}=pgmb.PGMenuBuilder( s\_menu\_config, self, o\_parent )
-60         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a9b145ef56ff954c480d856859fcda86e}{\_\_param\_names\_file\_for\_simulations}=
+42                     i\_container\_padding=10 ):
+43         \textcolor{stringliteral}{'''}
+44 \textcolor{stringliteral}{        params }
+45 \textcolor{stringliteral}{        o\_parent, parent ttk.Frame object}
+46 \textcolor{stringliteral}{}
+47 \textcolor{stringliteral}{        s\_menu\_config, file for PGMenuBuilder object, gives the main menu}
+48 \textcolor{stringliteral}{}
+49 \textcolor{stringliteral}{        s\_param\_names\_file\_for\_simulation, table file that lists the parameter names}
+50 \textcolor{stringliteral}{           as read into a PGInputSimuPop object}
+51 \textcolor{stringliteral}{}
+52 \textcolor{stringliteral}{        s\_glob\_life\_tables, glob expression used by PGOpSimuPop objects to load all life tables}
+53 \textcolor{stringliteral}{            into memory}
+54 \textcolor{stringliteral}{}
+55 \textcolor{stringliteral}{        '''}
+56         Notebook.\_\_init\_\_( self, o\_parent )
+57         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_ae3a4078b5e41c208da268dfee99bb622}{\_\_parent}=o\_parent
+58         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_add1ab1bb7f792ff733e8236fed00218c}{\_\_menu}=pgmb.PGMenuBuilder( s\_menu\_config, self, o\_parent )
+59         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a9b145ef56ff954c480d856859fcda86e}{\_\_param\_names\_file\_for\_simulations}=
       s\_param\_names\_file\_for\_simulation
-61         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count}=0
-62         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_aa3a7876014bd06be174732b7d814bfa8}{\_\_tab\_children}=[]
-63         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af63d9ae9cde1ec2155d4dc81934d00c7}{\_\_glob\_life\_tables}=s\_glob\_life\_tables
-64         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a14287e3e1cf5c33d9be0ff28d031fc04}{\_\_max\_process\_total}=i\_max\_process\_total
-65         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a790570fc06951c4ccc142a26c01668ef}{\_\_container\_padding}=i\_container\_padding
-66         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a38f70ee82a0a2852953b964623a4c871}{\_\_param\_names\_file\_for\_neestimation}=
+60         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count}=0
+61         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_aa3a7876014bd06be174732b7d814bfa8}{\_\_tab\_children}=[]
+62         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af63d9ae9cde1ec2155d4dc81934d00c7}{\_\_glob\_life\_tables}=s\_glob\_life\_tables
+63         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a14287e3e1cf5c33d9be0ff28d031fc04}{\_\_max\_process\_total}=i\_max\_process\_total
+64         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a790570fc06951c4ccc142a26c01668ef}{\_\_container\_padding}=i\_container\_padding
+65         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a38f70ee82a0a2852953b964623a4c871}{\_\_param\_names\_file\_for\_neestimation}=
       s\_param\_names\_file\_for\_simulation.replace( \textcolor{stringliteral}{"simupop"}, \textcolor{stringliteral}{"neestimation"} )
-67         \textcolor{comment}{#we collect references to the pggui* objects created}
-68         \textcolor{comment}{#and on delete, we clean up using these references:}
-69         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af4966fb6fc80c08cd38bf21b2c723364}{\_\_my\_gui\_objects\_by\_tab\_text}=\{\}
-70         \textcolor{keywordflow}{return}
+66         \textcolor{comment}{#we collect references to the pggui* objects created}
+67         \textcolor{comment}{#and on delete, we clean up using these references:}
+68         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af4966fb6fc80c08cd38bf21b2c723364}{\_\_my\_gui\_objects\_by\_tab\_text}=\{\}
+69         \textcolor{comment}{#This allows direct access to the rebindScrollwheel def}
+70         \textcolor{comment}{#in the FrameContainerScrolled instance in each gui interface:}
+71         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a5f9ed267b317c56e1da89ef894a2b52a}{\_\_scrolled\_frame\_objects\_by\_tab\_text}=\{\}
+72 
+73         self.bind( \textcolor{stringliteral}{"<<NotebookTabChanged>>"}, self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a99ba479345963ce240e76542c58a7247}{\_\_on\_tab\_change} )
+74         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 
@@ -114,35 +119,40 @@ Definition at line 43 of file pghostnotebook.\+py.
 \end{DoxyVerb}
  
 
-Definition at line 97 of file pghostnotebook.\+py.
+Definition at line 100 of file pghostnotebook.\+py.
 
 
 \begin{DoxyCode}
-97     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a9242f6b6eff030ac5de8db425e1585f9}{addPGGuiNeEstimation}( self ):
-98         \textcolor{stringliteral}{'''}
-99 \textcolor{stringliteral}{        Add a tabbed frame that offers a PGGuiSimuPop interface}
-100 \textcolor{stringliteral}{        '''}
-101         \textcolor{keywordflow}{if} NE\_GUI\_IS\_IMPLEMENTED:
-102             o\_container=Frame( self, padding=self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a790570fc06951c4ccc142a26c01668ef}{\_\_container\_padding} )
-103 
-104             o\_canvas=Canvas( o\_container )
-105 
-106             o\_pgg=pgne.PGGuiNeEstimator( o\_container, 
-107                             self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a38f70ee82a0a2852953b964623a4c871}{\_\_param\_names\_file\_for\_neestimation} )
+100     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a9242f6b6eff030ac5de8db425e1585f9}{addPGGuiNeEstimation}( self ):
+101         \textcolor{stringliteral}{'''}
+102 \textcolor{stringliteral}{        Add a tabbed frame that offers a PGGuiSimuPop interface}
+103 \textcolor{stringliteral}{        '''}
+104         \textcolor{keywordflow}{if} NE\_GUI\_IS\_IMPLEMENTED:
+105             o\_container=Frame( self, padding=self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a790570fc06951c4ccc142a26c01668ef}{\_\_container\_padding} )
+106 
+107             o\_canvas=Canvas( o\_container )
 108 
-109             o\_scan=FrameContainerScrolled( o\_container, o\_pgg, o\_canvas, 
-110             i\_scroll\_direction=FrameContainerScrolled.SCROLLVERTICAL)
-111 
-112             s\_tab\_text=\textcolor{stringliteral}{"Ne Estimation "} + str( self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count} )
-113             self.add( o\_container, text=s\_tab\_text )
-114             self.\_\_tab\_children.append( o\_container )
-115             self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count}+=1
-116             self.select( o\_container )
+109             o\_pgg=pgne.PGGuiNeEstimator( o\_container, 
+110                             self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a38f70ee82a0a2852953b964623a4c871}{\_\_param\_names\_file\_for\_neestimation},
+111                             i\_total\_processes\_for\_est=self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a14287e3e1cf5c33d9be0ff28d031fc04}{\_\_max\_process\_total} )
+112 
+113             o\_scan=FrameContainerScrolled( o\_container, o\_pgg, o\_canvas, 
+114             i\_scroll\_direction=FrameContainerScrolled.SCROLLVERTICAL)
+115 
+116             s\_tab\_text=\textcolor{stringliteral}{"Nb Estimation "} + str( self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count} )
 117 
-118             self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af4966fb6fc80c08cd38bf21b2c723364}{\_\_my\_gui\_objects\_by\_tab\_text}[ s\_tab\_text ] = o\_pgg 
-119         \textcolor{comment}{#end if NE\_GUI\_IS\_IMPLEMENTED}
-120         \textcolor{keywordflow}{return}
-121 
+118             self.add( o\_container, text=s\_tab\_text )
+119             self.\_\_tab\_children.append( o\_container )
+120             self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count}+=1
+121             self.select( o\_container )
+122 
+123             self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af4966fb6fc80c08cd38bf21b2c723364}{\_\_my\_gui\_objects\_by\_tab\_text}[ s\_tab\_text ] = o\_pgg 
+124             self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a5f9ed267b317c56e1da89ef894a2b52a}{\_\_scrolled\_frame\_objects\_by\_tab\_text}[ s\_tab\_text ] = 
+      o\_scan
+125 
+126         \textcolor{comment}{#end if NE\_GUI\_IS\_IMPLEMENTED}
+127         \textcolor{keywordflow}{return}
+128 
 \end{DoxyCode}
 \index{negui\+::pghostnotebook\+::\+P\+G\+Host\+Notebook@{negui\+::pghostnotebook\+::\+P\+G\+Host\+Notebook}!add\+P\+G\+Gui\+Simupop@{add\+P\+G\+Gui\+Simupop}}
 \index{add\+P\+G\+Gui\+Simupop@{add\+P\+G\+Gui\+Simupop}!negui\+::pghostnotebook\+::\+P\+G\+Host\+Notebook@{negui\+::pghostnotebook\+::\+P\+G\+Host\+Notebook}}
@@ -155,32 +165,34 @@ Definition at line 97 of file pghostnotebook.\+py.
 \end{DoxyVerb}
  
 
-Definition at line 73 of file pghostnotebook.\+py.
+Definition at line 77 of file pghostnotebook.\+py.
 
 
 \begin{DoxyCode}
-73     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af595ed4592e623ef403a5e9e7c1e930e}{addPGGuiSimupop}( self ):
-74         \textcolor{stringliteral}{'''}
-75 \textcolor{stringliteral}{        Add a tabbed frame that offers a PGGuiSimuPop interface}
-76 \textcolor{stringliteral}{        '''}
-77         o\_container=Frame( self, padding=self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a790570fc06951c4ccc142a26c01668ef}{\_\_container\_padding} )
-78         o\_canvas=Canvas( o\_container )
-79 
-80         o\_pgg=pggs.PGGuiSimuPop( o\_container, 
-81                         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a9b145ef56ff954c480d856859fcda86e}{\_\_param\_names\_file\_for\_simulations}, 
-82                         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af63d9ae9cde1ec2155d4dc81934d00c7}{\_\_glob\_life\_tables}, 
-83                         i\_total\_processes\_for\_sims=self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a14287e3e1cf5c33d9be0ff28d031fc04}{\_\_max\_process\_total} )
-84 
-85         o\_scan=FrameContainerScrolled( o\_container, o\_pgg, o\_canvas, 
-86         i\_scroll\_direction=FrameContainerScrolled.SCROLLVERTICAL)
+77     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af595ed4592e623ef403a5e9e7c1e930e}{addPGGuiSimupop}( self ):
+78         \textcolor{stringliteral}{'''}
+79 \textcolor{stringliteral}{        Add a tabbed frame that offers a PGGuiSimuPop interface}
+80 \textcolor{stringliteral}{        '''}
+81         o\_container=Frame( self, padding=self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a790570fc06951c4ccc142a26c01668ef}{\_\_container\_padding} )
+82         o\_canvas=Canvas( o\_container )
+83         o\_pgg=pggs.PGGuiSimuPop( o\_container, 
+84                         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a9b145ef56ff954c480d856859fcda86e}{\_\_param\_names\_file\_for\_simulations}, 
+85                         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af63d9ae9cde1ec2155d4dc81934d00c7}{\_\_glob\_life\_tables}, 
+86                         i\_total\_processes\_for\_sims=self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a14287e3e1cf5c33d9be0ff28d031fc04}{\_\_max\_process\_total} )
 87 
-88         s\_tab\_text=\textcolor{stringliteral}{"Simulation "} + str( self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count} )
-89         self.add( o\_container, text=s\_tab\_text )
-90         self.\_\_tab\_children.append( o\_container )
-91         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count}+=1
-92         self.select( o\_container )
-93         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af4966fb6fc80c08cd38bf21b2c723364}{\_\_my\_gui\_objects\_by\_tab\_text}[ s\_tab\_text ] = o\_pgg 
-94         \textcolor{keywordflow}{return}
+88         o\_scan=FrameContainerScrolled( o\_container, o\_pgg, o\_canvas, 
+89                             i\_scroll\_direction=FrameContainerScrolled.SCROLLVERTICAL)
+90         
+91         s\_tab\_text=\textcolor{stringliteral}{"Simulation "} + str( self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count} )
+92         self.add( o\_container, text=s\_tab\_text )
+93         self.\_\_tab\_children.append( o\_container )
+94         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a84a7417cc57500cbe5c230449ba464b3}{\_\_tab\_count}+=1
+95         self.select( o\_container )
+96         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_af4966fb6fc80c08cd38bf21b2c723364}{\_\_my\_gui\_objects\_by\_tab\_text}[ s\_tab\_text ] = o\_pgg 
+97         self.\hyperlink{classnegui_1_1pghostnotebook_1_1PGHostNotebook_a5f9ed267b317c56e1da89ef894a2b52a}{\_\_scrolled\_frame\_objects\_by\_tab\_text}[ s\_tab\_text ] = 
+      o\_scan
+98         self.enable\_traversal()
+99 
 \end{DoxyCode}
 
 

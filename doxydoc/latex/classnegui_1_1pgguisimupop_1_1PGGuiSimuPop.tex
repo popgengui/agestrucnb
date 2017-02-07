@@ -11,8 +11,12 @@ Inheritance diagram for negui.\+pgguisimupop.\+P\+G\+Gui\+Simu\+Pop\+:\begin{fig
 \item 
 def \hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_aa159ead5d8fbd28d693c9021db12b95e}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+parent, s\+\_\+param\+\_\+names\+\_\+file=None, s\+\_\+life\+\_\+table\+\_\+file\+\_\+glob=\char`\"{}resources/$\ast$life.\+table.\+info\char`\"{}, s\+\_\+name=\char`\"{}simupop\+\_\+gui\char`\"{}, i\+\_\+total\+\_\+processes\+\_\+for\+\_\+sims=1)
 \item 
+def \hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad1d590f23bbaf0eda730d488ea74c1ba}{on\+Cull\+Method\+Selection\+Change} (self)
+\item 
 def {\bfseries load\+\_\+config\+\_\+file} (self, event=None)\hypertarget{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a9ae755614518ece6584d83aff129f4d5}{}\label{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a9ae755614518ece6584d83aff129f4d5}
 
+\item 
+def \hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ac193cf44f5e4f1e5b146a43e9563d7b0}{update\+N0\+Entry\+Box} (self)
 \item 
 def {\bfseries select\+\_\+output\+\_\+directory} (self, event=None)\hypertarget{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a4d88e502ff12249698177dbb4336715d}{}\label{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a4d88e502ff12249698177dbb4336715d}
 
@@ -77,7 +81,7 @@ do_sim_replicate.py, which then calls another def in
 pgutilities.py, which builds and runs a PGOpSimuPop object.\end{DoxyVerb}
  
 
-Definition at line 58 of file pgguisimupop.\+py.
+Definition at line 60 of file pgguisimupop.\+py.
 
 
 
@@ -100,76 +104,74 @@ object
 \end{DoxyVerb}
  
 
-Definition at line 102 of file pgguisimupop.\+py.
+Definition at line 104 of file pgguisimupop.\+py.
 
 
 \begin{DoxyCode}
-102                             i\_total\_processes\_for\_sims=1 ):
-103         \textcolor{stringliteral}{'''}
-104 \textcolor{stringliteral}{        param s\_param\_names\_file is the file that contains short and long param}
-105 \textcolor{stringliteral}{        names, used to make the PGParamSet object  member of the PGInputSimuPop }
-106 \textcolor{stringliteral}{        object}
-107 \textcolor{stringliteral}{        '''}
-108 
-109         \textcolor{comment}{#note this call to super does not work -- a look as stackoverflow}
-110         \textcolor{comment}{#chatter about this indicates that because PGGUIApp inherits Frame,}
-111         \textcolor{comment}{#that Frame must be an "old-style" class (does not inherit from "object")}
-112         \textcolor{comment}{#--rem out super( PGGuiSimuPop, self ).\_\_init\_\_( o\_parent )}
-113         \textcolor{comment}{#instead of call to "super":}
-114         pgg.PGGuiApp.\_\_init\_\_( self, s\_name, o\_parent )
-115         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_accf4b1e619efda180dcd4795425f88c8}{\_\_config\_file}=StringVar()
-116         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a8c3dba3a47984c6174e659458da1d4c6}{\_\_output\_directory}=StringVar()
-117         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a1871547ce6fe9a86b10a30f3d7b41cdd}{\_\_life\_table\_files}=[]
-118         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a12344f4fdce230b8fbb699dbd74c95a2}{\_\_get\_life\_table\_file\_list}( s\_life\_table\_file\_glob )
-119 
-120         \textcolor{comment}{#we use the tkinter traceable variable}
-121         \textcolor{comment}{#so that, when loaded into an entry box}
-122         \textcolor{comment}{#we can auto update the value as it is }
-123         \textcolor{comment}{#user-edited:}
-124         self.\_\_output\_directory.set( self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_abba3f28989d693eadf8d8dd181502d06}{\_\_get\_default\_output\_directory}() )
-125 
-126         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_aa5f9f17f0527c20e5556b574a3f97300}{output\_base\_name}=self.
-      \hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a55130312327d03aa8e37d827a46929db}{\_\_get\_default\_output\_base\_name}() 
+104                             i\_total\_processes\_for\_sims=1 ):
+105         \textcolor{stringliteral}{'''}
+106 \textcolor{stringliteral}{        param s\_param\_names\_file is the file that contains short and long param}
+107 \textcolor{stringliteral}{        names, used to make the PGParamSet object  member of the PGInputSimuPop }
+108 \textcolor{stringliteral}{        object}
+109 \textcolor{stringliteral}{        '''}
+110 
+111         \textcolor{comment}{#note this call to super does not work -- a look as stackoverflow}
+112         \textcolor{comment}{#chatter about this indicates that because PGGUIApp inherits Frame,}
+113         \textcolor{comment}{#that Frame must be an "old-style" class (does not inherit from "object")}
+114         \textcolor{comment}{#--rem out super( PGGuiSimuPop, self ).\_\_init\_\_( o\_parent )}
+115         \textcolor{comment}{#instead of call to "super":}
+116         pgg.PGGuiApp.\_\_init\_\_( self, s\_name, o\_parent )
+117         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_accf4b1e619efda180dcd4795425f88c8}{\_\_config\_file}=StringVar()
+118         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a8c3dba3a47984c6174e659458da1d4c6}{\_\_output\_directory}=StringVar()
+119         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a1871547ce6fe9a86b10a30f3d7b41cdd}{\_\_life\_table\_files}=[]
+120         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a12344f4fdce230b8fbb699dbd74c95a2}{\_\_get\_life\_table\_file\_list}( s\_life\_table\_file\_glob )
+121 
+122         \textcolor{comment}{#we use the tkinter traceable variable}
+123         \textcolor{comment}{#so that, when loaded into an entry box}
+124         \textcolor{comment}{#we can auto update the value as it is }
+125         \textcolor{comment}{#user-edited:}
+126         self.\_\_output\_directory.set( self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_abba3f28989d693eadf8d8dd181502d06}{\_\_get\_default\_output\_directory}() )
 127 
-128         \textcolor{comment}{#the PGOpSimuPop object:}
-129         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a53d091be0140a85e8c45a76c0b89c370}{\_\_param\_names\_file}=s\_param\_names\_file
-130 
-131         \textcolor{comment}{#input object used to make the}
-132         \textcolor{comment}{#operation object type PGOpSimuPop}
-133         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a0b9f7d933b428393d34105828600a007}{\_\_input}=\textcolor{keywordtype}{None}
-134         \textcolor{comment}{#output object used to}
-135         \textcolor{comment}{#name and create the simulation}
-136         \textcolor{comment}{#output files}
-137         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a30f6eabf78230001520f90cb36de339f}{\_\_output}=\textcolor{keywordtype}{None}
-138 
-139         \textcolor{comment}{#when commanded to run the simulation(s)}
-140         \textcolor{comment}{#a temporary configuration file}
-141         \textcolor{comment}{#is created and used by each process}
-142         \textcolor{comment}{#that is simulating.  We then want to}
-143         \textcolor{comment}{#delete the file when the gui had }
-144         \textcolor{comment}{#ascertained that the sim is or sims}
-145         \textcolor{comment}{#are done, so we need instance-level}
-146         \textcolor{comment}{#access to the file name}
-147         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a60c4be477f462c6981a08c479c20a893}{\_\_temp\_config\_file\_for\_running\_replicates}=\textcolor{keywordtype}{None}
-148 
-149         \textcolor{comment}{#simulations performed on separate}
-150         \textcolor{comment}{#process -- this ref to it will}
-151         \textcolor{comment}{#enable checking whether in progress}
-152         \textcolor{comment}{#or finished.  See def runSimulation:}
-153         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_acdcfde3516741c64806c6881f65c6f4e}{\_\_op\_process}=\textcolor{keywordtype}{None}
-154         \textcolor{comment}{#we set this before spawning \_\_op\_process,}
-155         \textcolor{comment}{#so that on cancel-sim, we can}
-156         \textcolor{comment}{#notify op\_process and it can }
-157         \textcolor{comment}{#clean up its subprocesses and }
-158         \textcolor{comment}{#output:}
-159         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a02ccc7da9aec67e8e13e083001aba15b}{\_\_sim\_multi\_process\_event}=\textcolor{keywordtype}{None}
-160 
-161         \textcolor{comment}{#we have a default output name,}
-162         \textcolor{comment}{#so we can init the output}
-163         \textcolor{comment}{#immediately}
-164         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a23913431472d154054d66ab5e72daf0e}{\_\_setup\_output}()
-165 
-166 
+128         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_aa5f9f17f0527c20e5556b574a3f97300}{output\_base\_name}=self.
+      \hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a55130312327d03aa8e37d827a46929db}{\_\_get\_default\_output\_base\_name}() 
+129 
+130         \textcolor{comment}{#the PGOpSimuPop object:}
+131         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a53d091be0140a85e8c45a76c0b89c370}{\_\_param\_names\_file}=s\_param\_names\_file
+132 
+133         \textcolor{comment}{#input object used to make the}
+134         \textcolor{comment}{#operation object type PGOpSimuPop}
+135         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a0b9f7d933b428393d34105828600a007}{\_\_input}=\textcolor{keywordtype}{None}
+136         \textcolor{comment}{#output object used to}
+137         \textcolor{comment}{#name and create the simulation}
+138         \textcolor{comment}{#output files}
+139         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a30f6eabf78230001520f90cb36de339f}{\_\_output}=\textcolor{keywordtype}{None}
+140 
+141         \textcolor{comment}{#when commanded to run the simulation(s)}
+142         \textcolor{comment}{#a temporary configuration file}
+143         \textcolor{comment}{#is created and used by each process}
+144         \textcolor{comment}{#that is simulating.  We then want to}
+145         \textcolor{comment}{#delete the file when the gui had }
+146         \textcolor{comment}{#ascertained that the sim is or sims}
+147         \textcolor{comment}{#are done, so we need instance-level}
+148         \textcolor{comment}{#access to the file name}
+149         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a60c4be477f462c6981a08c479c20a893}{\_\_temp\_config\_file\_for\_running\_replicates}=\textcolor{keywordtype}{None}
+150 
+151         \textcolor{comment}{#simulations performed on separate}
+152         \textcolor{comment}{#process -- this ref to it will}
+153         \textcolor{comment}{#enable checking whether in progress}
+154         \textcolor{comment}{#or finished.  See def runSimulation:}
+155         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_acdcfde3516741c64806c6881f65c6f4e}{\_\_op\_process}=\textcolor{keywordtype}{None}
+156         \textcolor{comment}{#we set this before spawning \_\_op\_process,}
+157         \textcolor{comment}{#so that on cancel-sim, we can}
+158         \textcolor{comment}{#notify op\_process and it can }
+159         \textcolor{comment}{#clean up its subprocesses and }
+160         \textcolor{comment}{#output:}
+161         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a02ccc7da9aec67e8e13e083001aba15b}{\_\_sim\_multi\_process\_event}=\textcolor{keywordtype}{None}
+162 
+163         \textcolor{comment}{#we have a default output name,}
+164         \textcolor{comment}{#so we can init the output}
+165         \textcolor{comment}{#immediately}
+166         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a23913431472d154054d66ab5e72daf0e}{\_\_setup\_output}()
 167 
 168         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a5064bac64c69bd13fe1366b21f1f7ad9}{\_\_simulation\_is\_in\_progress}=\textcolor{keyword}{False}
 169 
@@ -183,12 +185,112 @@ Definition at line 102 of file pgguisimupop.\+py.
 177 
 178         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a67da63f36462b56bd1f47206d8f91c7b}{\_\_category\_frames}=\textcolor{keywordtype}{None}
 179 
-180         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a3ac3a7a5a800876180133b4cc41ca63c}{\_\_run\_state\_message}=\textcolor{stringliteral}{""}
-181         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad38b601eabe45f6c35525b060f0343ea}{\_\_init\_interface}()
-182         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a2c5268e62f40c2548d1475959aa60ca9}{\_\_set\_controls\_by\_run\_state}( self.
+180         \textcolor{comment}{#we also hold refernces to the keyvalue}
+181         \textcolor{comment}{#frames that hold param values.  This}
+182         \textcolor{comment}{#allows us to communicate with the entry}
+183         \textcolor{comment}{#boxes via param name.}
+184         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a272523ce4bad4d1073c506e858c59996}{\_\_param\_key\_value\_frames}=\textcolor{keywordtype}{None}
+185 
+186 
+187         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a3ac3a7a5a800876180133b4cc41ca63c}{\_\_run\_state\_message}=\textcolor{stringliteral}{""}
+188         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad38b601eabe45f6c35525b060f0343ea}{\_\_init\_interface}()
+189         self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a2c5268e62f40c2548d1475959aa60ca9}{\_\_set\_controls\_by\_run\_state}( self.
       \hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_aef182e14bccdbabf372a6344bc6f8786}{\_\_get\_run\_state}() )
-183     
-184         \textcolor{keywordflow}{return}
+190     
+191         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop@{negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop}!on\+Cull\+Method\+Selection\+Change@{on\+Cull\+Method\+Selection\+Change}}
+\index{on\+Cull\+Method\+Selection\+Change@{on\+Cull\+Method\+Selection\+Change}!negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop@{negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop}}
+\subsubsection[{\texorpdfstring{on\+Cull\+Method\+Selection\+Change(self)}{onCullMethodSelectionChange(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgguisimupop.\+P\+G\+Gui\+Simu\+Pop.\+on\+Cull\+Method\+Selection\+Change (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad1d590f23bbaf0eda730d488ea74c1ba}{}\label{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad1d590f23bbaf0eda730d488ea74c1ba}
+\begin{DoxyVerb}Not implemented, 2016_11_01.  May
+not need to add any code here, since
+KeyListComboFrame control object resets
+the attribute in the input object
+automatically.
+\end{DoxyVerb}
+ 
+
+Definition at line 724 of file pgguisimupop.\+py.
+
+
+\begin{DoxyCode}
+724     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ad1d590f23bbaf0eda730d488ea74c1ba}{onCullMethodSelectionChange}( self ):
+725         \textcolor{stringliteral}{'''}
+726 \textcolor{stringliteral}{        Not implemented, 2016\_11\_01.  May}
+727 \textcolor{stringliteral}{        not need to add any code here, since}
+728 \textcolor{stringliteral}{        KeyListComboFrame control object resets}
+729 \textcolor{stringliteral}{        the attribute in the input object}
+730 \textcolor{stringliteral}{        automatically.}
+731 \textcolor{stringliteral}{        '''}
+732 
+733         \textcolor{keywordflow}{if} VERY\_VERBOSE:
+734             self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a1a916d4c19afe08b2c7772d099c71f3f}{\_\_test\_value}()
+735         \textcolor{comment}{#end if very verbose}
+736 
+737         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+\index{negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop@{negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop}!update\+N0\+Entry\+Box@{update\+N0\+Entry\+Box}}
+\index{update\+N0\+Entry\+Box@{update\+N0\+Entry\+Box}!negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop@{negui\+::pgguisimupop\+::\+P\+G\+Gui\+Simu\+Pop}}
+\subsubsection[{\texorpdfstring{update\+N0\+Entry\+Box(self)}{updateN0EntryBox(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgguisimupop.\+P\+G\+Gui\+Simu\+Pop.\+update\+N0\+Entry\+Box (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ac193cf44f5e4f1e5b146a43e9563d7b0}{}\label{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ac193cf44f5e4f1e5b146a43e9563d7b0}
+\begin{DoxyVerb}N0 parameter updates differently according to
+whether it is simply taken from a config file's
+pop section, or, alternatively, calculated from
+params Nb,Nb/Nc as given by an "effective_size"
+section in a life table or config file, and also
+using input params maleProb, survivalMale, and
+survivalFemale.  In the latter
+case, the keyvalue frame will be disabled and its entrybox
+will be manually updated from this def.  
+\end{DoxyVerb}
+ 
+
+Definition at line 768 of file pgguisimupop.\+py.
+
+
+\begin{DoxyCode}
+768     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_ac193cf44f5e4f1e5b146a43e9563d7b0}{updateN0EntryBox}( self ):
+769         \textcolor{stringliteral}{'''}
+770 \textcolor{stringliteral}{        N0 parameter updates differently according to}
+771 \textcolor{stringliteral}{        whether it is simply taken from a config file's}
+772 \textcolor{stringliteral}{        pop section, or, alternatively, calculated from}
+773 \textcolor{stringliteral}{        params Nb,Nb/Nc as given by an "effective\_size"}
+774 \textcolor{stringliteral}{        section in a life table or config file, and also}
+775 \textcolor{stringliteral}{        using input params maleProb, survivalMale, and}
+776 \textcolor{stringliteral}{        survivalFemale.  In the latter}
+777 \textcolor{stringliteral}{        case, the keyvalue frame will be disabled and its entrybox}
+778 \textcolor{stringliteral}{        will be manually updated from this def.  }
+779 \textcolor{stringliteral}{        '''}
+780         \textcolor{keywordflow}{if} self.\_\_input.N0IsCalculatedFromEffectiveSizeInfo():
+781             \textcolor{stringliteral}{'''}
+782 \textcolor{stringliteral}{            Nb is a property, calculated or just returned}
+783 \textcolor{stringliteral}{            depending on its source (effec size or hus a value}
+784 \textcolor{stringliteral}{            given in the pop section). The property def in}
+785 \textcolor{stringliteral}{            our \_\_input member will test the state and calculate}
+786 \textcolor{stringliteral}{            N0 accordingly:}
+787 \textcolor{stringliteral}{            '''}
+788 
+789             i\_current\_n0\_val=self.\_\_input.N0
+790 
+791             self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a272523ce4bad4d1073c506e858c59996}{\_\_param\_key\_value\_frames}[ \textcolor{stringliteral}{"N0"} ].manuallyUpdateValue( 
+      i\_current\_n0\_val )
+792         \textcolor{comment}{#end if N0 is calc'd from effective size info}
+793 
+794         \textcolor{keywordflow}{if} VERY\_VERBOSE:
+795             self.\hyperlink{classnegui_1_1pgguisimupop_1_1PGGuiSimuPop_a1a916d4c19afe08b2c7772d099c71f3f}{\_\_test\_value}()
+796         \textcolor{comment}{#end if very verbose, show param values}
+797 
+798         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 

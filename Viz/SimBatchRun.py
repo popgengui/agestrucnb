@@ -124,8 +124,6 @@ def readconfig(filename):
             simReps = [int(value) for value in paramList]
 
 
-
-
     ##create parameter dictionary for return
     paramDict = {"species":speciesFile,
                  "outputFolder":outFolder,
@@ -155,7 +153,7 @@ def runNeEst(files,runFolder,locisampling,popsampling,regressConfig):
     #run neEstimator
     neFile = ""
     #run lineregress
-    configVals = LineRegress.neConfigRead(regressConfig)
+    configVals = ResultScraper.configRead(regressConfig)
     statsFile =  LineRegress._neStatsHelper(neFile, configVals["alpha"], outFileName=statsFile,significantValue=configVals["sigSlope"],firstVal=configVals["startData"])
     return statsFile
 
@@ -215,17 +213,18 @@ def runSamplingOnly(files,runFolder,locisampling,popsampling,regressConfig):
     neFile, statsFile = runNeEst(files,runFolder,locisampling,popsampling,regressConfig)
     return neFile,statsFile
 
-def collectStatsData(neDict, statsDict, outFolder,firstVal):
+def collectStatsData(neDict, statsDict, outFolder,regressConfig):
     slopesName = "slopes.csv"
     powerName = "power.csv"
     neName = "Ne.csv"
+    statConfig = ResultScraper.configRead(regressConfig)
 
     nePath = os.path.join(outFolder, neName)
     neOut = open(nePath, "w")
     neOut.write("parameters,replicate,Reproductive Cycle,Ne\n")
     for identifier in neDict:
         neFile = neDict[identifier]
-        neData = gatherNe(neFile, firstVal)
+        neData = gatherNe(neFile, statConfig["startData"])
         for datapoint in neData:
             print datapoint
             data = neData[datapoint]
@@ -251,9 +250,6 @@ def collectStatsData(neDict, statsDict, outFolder,firstVal):
             slopeOut.write(str(identifier)+ "," +dataPoint["slope"]+ "," +dataPoint["intercept"]+ "," +dataPoint["lowerCI"]+ "," +dataPoint["upperCI"]+"\n")
     powerOut.close()
     slopeOut.close()
-
-
-
 
 
 
@@ -292,8 +288,7 @@ def batch(configFile,threads = 1):
                 neDict[ident] = neFile
                 statsDict[ident] = statsFile
 
-
-
+    collectStatsData(neDict, statsDict, outFolder, configs["regressConfig"])
 
 
 

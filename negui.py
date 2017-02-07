@@ -3,7 +3,7 @@
 '''
 Description
 
-Provisional driver for the negui program
+Driver for the negui program
 '''
 
 __filename__ ="negui.py"
@@ -12,12 +12,22 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 from Tkinter import *
 from ttk import *
-import sys
+
 import os
+import glob
+import atexit
+
+import setup_negui_environment as sne
 import pghostnotebook as pgn
 import pgutilities as pgut
-import atexit
 from pgguiutilities import PGGUIYesNoMessage
+from pgguiutilities import PGGUIErrorMessage
+from pgguiutilities import PGGUIWarningMessage
+
+PARAM_NAME_FILES=[ "simupop.param.names", "neestimation.param.names", "viz.param.names" ]
+PARAM_FILE_KEYS_BY_FILE_NAME = { "simupop.param.names":"sim", 
+									"neestimation.param.names":"ne", 
+										"viz.param.names":"viz" }
 
 def cleanup_gui( o_host ):
 	o_host.cleanupAllTabs()
@@ -25,40 +35,131 @@ def cleanup_gui( o_host ):
 	return
 #end cleanup_gui
 
+def confirm_resources( s_life_table_glob, s_menu_config, s_param_name_file_dir ):
 
-if __name__ == "__main__":
+	ls_msgs=[]
+
+	b_found_life_tables=False
+	b_found_menu_config=False
+	b_found_param_names_files=False
+
+	ls_lifetables=glob.glob( s_life_table_glob )
+	
+	if len( ls_lifetables ) > 0 :
+		b_found_life_tables=True
+	else:
+		ls_msgs.append( "No life table files found." )
+	#end if at least one life table
+
+	if os.path.exists( s_menu_config ):
+		b_found_menu_config=True
+	else:
+		ls_msgs.append( "No menu configuration file found." )
+	#end if menu config file exists
+
+	i_num_param_files=len( PARAM_NAME_FILES )
+
+	if os.path.exists( s_param_name_file_dir ):
+		i_number_found=0
+		for s_param_file in PARAM_NAME_FILES:
+			s_path_to_this_file=os.sep.join( [ s_param_name_file_dir, s_param_file ] )
+			if os.path.exists( s_path_to_this_file ):
+				i_number_found+=1
+			else:
+				ls_msgs.append( "Paramater names file, " + s_param_file + ", not found." )
+			#end if path exists
+		#end for each param names file prefix
+
+		if i_number_found == i_num_param_files:
+			b_found_param_names_files=True
+		#end if found at least the expected param files		
+	else:
+		ls_msgs.append( "No paramater name files found." )
+	#end if param name file path exists		
+			
+	return { "life_tables":b_found_life_tables,
+					"menu_file": b_found_menu_config,
+					"param_name_files":b_found_param_names_files,
+					"msgs":ls_msgs }
+#end confirm_resources
+
+def get_param_file_names( s_param_name_file_dir ):
+	ds_param_file_names={}
+
+	for s_filename in PARAM_NAME_FILES:
+		s_full_path=os.sep.join( [ s_param_name_file_dir, s_filename ] )
+		ds_param_file_names[ PARAM_FILE_KEYS_BY_FILE_NAME[ s_filename ] ] = s_full_path
+	#end for each file name
+
+	return ds_param_file_names
+#end get_param_file_names
+
+def negui_main():
+
+	'''
+	Note, 2016_12_29: I removed all optional arguments for negui.py, by now
+	unnecessary.  The optional args were and int giving total processes (now
+	defaulting to 1 process, and settable in the indivudual interfaces), and
+	a default life table file, which I've discarded in favor of always loading
+	all life tables.
+	'''
 
 	WINDOW_MARGIN=0.20
 	CONTAINER_PADDING=10
-
-
-	ls_optional_args=[  "number of processes to use for replicate simulations" ]
-
-	s_usage=pgut.do_usage_check( sys.argv, [], ls_optional_arg_descriptions=ls_optional_args )
-
-	if s_usage:
-		print( s_usage )
-		sys.exit()
-	#end if usage
-
+	
 	s_my_mod_path=os.path.abspath( __file__ )
 	
 	s_my_mod_dir=os.path.dirname( s_my_mod_path )
 
-	if len( sys.argv ) == 2:
-		i_total_simultaneous_processes=int( sys.argv[1] )
-	else:
-		i_total_simultaneous_processes=1
-	#end if sys args exits
+	i_total_simultaneous_processes=1
 
 	s_default_life_tables = s_my_mod_dir + "/resources/*life.table.info"
 	s_menu_config=s_my_mod_dir + "/resources/menu_main_interface.txt" 
-	s_param_name_file=s_my_mod_dir + "/resources/simupop.param.names"
+	s_param_name_file_dir=s_my_mod_dir + "/resources"
+
+	db_found_files=confirm_resources( s_default_life_tables, 
+												s_menu_config, 
+												s_param_name_file_dir )
+
+	#The program can't run without these files:
+	if not ( db_found_files[ "menu_file" ] and db_found_files[ "param_name_files" ] ):
+		s_msg="In negui, def negui_main, " \
+				+ "there were resource files not found: " \
+				+ "\n".join( db_found_files[ "msgs" ] )
+		
+		PGGUIErrorMessage( None, s_msg )
+		raise Exception( s_msg )
+	#end if required file not found
+
+	'''
+	The program can run without life table files loaded,
+	but we'll send a warning to the console that all
+	needed params need to be supplied by the config file.
+	'''
+	if not db_found_files[ "life_tables" ]:
+		s_msg="In negui, def negui_main, " \
+						+ "warning: " \
+						+ "\n".join( db_found_files[ "msgs" ]  )
+
+		PGGUIWarningMessage( None, s_msg )
+		sys.stderr.write( s_msg + "\n" )
+
+		s_default_life_tables=None
+	#end if param names
+
+	ds_param_file_names=get_param_file_names( s_param_name_file_dir )
 
 	if pgut.is_windows_platform():
-		s_default_life_tables=pgut.fix_windows_path( s_default_life_tables )
+		if s_default_life_tables is not None:
+			s_default_life_tables=pgut.fix_windows_path( s_default_life_tables )
+		#end if life table files exist
 		s_menu_config=pgut.fix_windows_path( s_menu_config )
-		s_param_name_file=pgut.fix_windows_path( s_param_name_file )
+
+		for s_filekey in ds_param_file_names:
+			ds_param_file_names[ s_filekey ] = \
+					pgut.fix_windows_path( \
+							ds_param_file_names[ s_filekey ] )
+		#end for each param file
 	#end if windows, fix paths
 
 	o_master=Tk()
@@ -71,7 +172,9 @@ if __name__ == "__main__":
 
 	o_host=pgn.PGHostNotebook( o_master, 
 			s_menu_config, 
-			s_param_name_file, 
+			ds_param_file_names[ "sim" ], 
+			ds_param_file_names[ "ne" ], 
+			ds_param_file_names[ "viz" ], 
 			s_glob_life_tables=s_default_life_tables,
 			i_max_process_total=i_total_simultaneous_processes )
 
@@ -86,6 +189,7 @@ if __name__ == "__main__":
 	o_master.grid_columnconfigure( 0, weight=1 )
 
 	atexit.register( cleanup_gui, o_host )
+
 
 	def ask_before_exit():
 		s_msg="Exiting will kill any unfinished analyses " \
@@ -103,5 +207,12 @@ if __name__ == "__main__":
 	o_master.protocol( "WM_DELETE_WINDOW", ask_before_exit )
 
 	o_master.mainloop()
+
+	return
+#end def negui_main
+
+if __name__ == "__main__":
+	
+	negui_main()	
 
 #end if __main__

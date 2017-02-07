@@ -2,24 +2,109 @@
 #for the AgeStructureNe GUI tab page that sets up and runs SimuPOP simulations
 #Columns give:
 #	1.  Actual variable name, ususally the original used in Tiago's cfg object (see his sim.py)
-#	2.  Name used for the label in the interface
-#	3.  Formatting and default value fields, semi-colon-delimited
+#	2.  Formatting and default value fields, semi-colon-delimited
 #	    ( many fields currently (20160820) not used).  Field types:
-#		i.   IDX_TAG_FIELD_CONFIG_SECTION=0
-#		ii.  IDX_TAG_FIELD_PLACEMENT_ORDER=1
-#		iii. IDX_TAG_FIELD_COLUMN_NUMBER=2
-#		iv.  IDX_TAG_FIELD_PARAM_ORDER=3
-#		v.   IDX_TAG_FIELD_DEFAULT_VALUE=4
-#		vi.  IDX_TAG_FIELD_PARAM_TYPE=5
-#		vii. IDX_TAG_FIELD_MIN_VALUE=6
-#		viii.IDX_TAG_FIELD_MAX_VALUE=7
-#		viv. IDX_TAG_FIELD_TOOL_TIP=8
-sampscheme	Subsampling scheme	suppress;1;1;1;"percent";None;None;None;Subsampling scheme
-sampparam	Subsampling parameter values	Parameters;1;1;1;[100];None;None;None;Subsampling parameter values
-minpopsize	Minimum Population Size	Parameters;1;1;1;1;None;None;None;Minimum population size
-minallelefreq	Minimum Allele Frequency	Parameters;1;1;1;0.01;None;None;None;Minimum allele frequency
-#for current use, no subsampling is done, therefore no replicate NeEstimator runs
-#would be of use
-replicates	Replicates	suppress;1;1;1;1;None;None;None;Replicates
-processes	Number of Processes	Parameters;1;1;1;1;None;None;None;Processes
-runmode	Run Mode	suppress;1;1;1;"default";None;None;None;Run mode
+#	    	i.   IDX_TAG_FIELD_LONGNAME=0
+#		ii.   IDX_TAG_FIELD_CONFIG_SECTION=1
+#		iii.  IDX_TAG_FIELD_PLACEMENT_ORDER=2
+#		iv. IDX_TAG_FIELD_COLUMN_NUMBER=3
+#		v.  IDX_TAG_FIELD_PARAM_ORDER=4
+#		vi.   IDX_TAG_FIELD_DEFAULT_VALUE=5
+#		vii.  IDX_TAG_FIELD_PARAM_TYPE=6
+#		viii. IDX_TAG_FIELD_MIN_VALUE=7
+#		viv.IDX_TAG_FIELD_MAX_VALUE=8
+#		x. IDX_TAG_FIELD_TOOL_TIP=9
+#		xi. IDX_TAG_FIELD_GUI_CONTROL=10
+#		xii. IDX_TAG_FIELD_GUI_CONTROL_LIST=11
+#		xiii. IDX_TAG_FIELD_VALIDATION=12
+#		xiv. IDX_TAG_FIELD_ASSOC_DEF=13
+#
+#-----Main parameter section-----:
+#
+#processes	Number of Processes;Parameters;1;1;1;1;int;None;None;Processes;entry;None;None;None
+minallelefreq	Minimum Allele Frequency;Parameters;2;0;1;0.01;float;None;None;Minimum allele frequency;entry;None;type(x)==float and x>=0 and x<=1.0;None;enabled
+replicates	Pop sampling replicates;Parameters;2;0;2;1;int;None;None;Replicates;entry;None;type(x)==int and x >=1;None;enabled
+loci_replicates	Loci sampling replicates;Parameters;2;0;3;1;int;None;None;Loci subsampling replicates.  For each individual subsample replicate, do this many loci sampling replicates.;entry;None;type(x)==int and x >=1;None;enabled
+#pop sampling scheme selector--Note for tthe tooltip text field, that double tildes ("~~") will be replaced by newlines for the tooltip window:
+sampscheme	Pop sampling scheme;Parameters;2;0;4;"None";str;None;None;Subsampling schemes:~~1. None: All individuals within pop size (as set below).~~2. Percent: Randomly sample p percent of individuals from each pop (repeated for each p value in the list).~~3. Remove-N: randomly remove N individuals from each pop, repeated for each N value in the list.~~4.  Individual Criteria: for sim results only, sample any (contiguous) range of ages.~~5.  Cohorts: for sim results only, sample evenly by age, at the number given by the smallest cohort.~~6. Relateds: sample sibling pairs, per-pop totaling the given percentage of individuals.;cboxreadonly;( "None" , "Percent", "Remove-N", "Indiv Criteria", "Cohorts", "Relateds" );x in [ 'None', 'Percent', 'Remove-N', 'Indiv Criteria', 'Cohorts', 'Relateds' ];_PGGuiNeEstimator__update_genepopfile_sampling_params_interface;enabled
+#Loci sampling scheme selector:
+locisampscheme	Loci sampling scheme;Parameters;2;0;5;"None";str;None;None;Loci sampling schemes:~~1. None.  Sample all loci in range (loci number start to end).  If range exceeds max, then random selection of max.~~    Error if range gives fewer than the min loci count.~~2. Percent:  For the set of loci in range, randomly select c percent.  Do this for each c in the percent list.~~    Error if percentage is fewer than the min loci value, randomly truncated to max loci value.~~3.Total: For the set of loci in range, randomly select c total loci. Do this for each total c in the list.~~    Error if range has fewer than c.;cboxreadonly;( "None","Percent","Total" );x in [ 'None','Percent','Total' ];_PGGuiNeEstimator__update_genepopfile_loci_sampling_params_interface;enabled
+scheme_none_dummy_param	none_dummy_param;suppress_and_set;4;0;5;"none";str;None;None;None;entry;None;None;None;enabled
+#
+#Note that ther are more run modes but the following represent the most efficient run mode (no_debug), and the most verbose output (debug3).
+#These are, as of 2016_10_11, the best tested and so I offer only these in the interface.  (For details on other modes see the pgdriveneestimator.py
+#module
+#
+#Changing this setting, but saving current, while trying to solve multi-process bug.
+#
+#runmode	Run Mode;suppress_and_set;2;0;7;'no_debug';str;None;None;Use no_debug to run for a single *tsv table output.  Use debug3 to get more output, including all intermediate files which include:~~    --genepopfiles for each subsample/pop combination.~~    --NeEstimator output files.~~    --In the msgs file, a table giving individual membership (by number as ordered in the pop section) in each sample.~~  Note that debug3 may have a long run time, as it does not use multiple processes (processess input value ignored, defaults to 1).;cboxreadonly;( 'no_debug', 'debug3' );x in [ 'no_debug' , 'debug3' ];None
+#
+runmode	Run Mode;Parameters;2;0;7;'parallel';str;None;None;In serial mode:~~   All estimations run in a single process.~~   The total processes value, set above, is ignored.~~   This mode is offered temporarily while a bug in the parallel mode, causing occasional failures to complete, is being solved.~~   This mode is recommened as the reliable method.~~In parallel mode:~~   Estimations are performed in parallel using the number of processes indicated by the Total-processes setting above.~~   In this version the parallel mode sometimes fails to complete, and so should be used under caution.  There may be no results or incomplete results.;cboxreadonly;( 'serial', 'parallel' );x in [ 'serial' , 'parallel' ];None;enabled
+#
+#----- Pop sampling scheme parameters -----
+#
+#Sampling scheme params, all sampling schemes:
+#
+scheme_all_min_pop_number	Pop number start;SamplingAll;3;0;1;1;int;None;None;Exclude the first min - 1 "pop" sections in the file;entry;None;type(x)==int and x >= 1;None;enabled
+scheme_all_max_pop_number	Pop number end;SamplingAll;3;0;2;99999;int;None;None;Exclude the "pop" sections from max + 1 to the last pop section in the file.;entry;None;type(x)==int and x >= 1;None;enabled
+#
+#"None" sampling scheme still reqires a minimum and maximum pop size:
+#
+scheme_none_min_pop_size	Min Pop Size;SamplingNone;3;0;3;1;int;None;None;For each pop, total individuals must be at least this value, or the pop will be excluded.;entry;None;type(x)==int and x >= 0;None;enabled
+scheme_none_max_pop_size	Max Pop Size;SamplingNone;3;0;4;99999;int;None;None;For each pop, total individuals must not exceed this value, or the pop will be excluded.;entry;None;type(x)==int and x >= 0;None;enabled
+#
+#Genepop file sampling scheme params, Percent:
+#
+scheme_percent_min_pop_size	Min Pop Size;SamplingPercent;3;0;6;1;int;None;None;For each pop, at least this many indiv must be in the pop before sampling the by percentages.;entry;None;type(x)==int and x >=1;None;enabled
+scheme_percent_max_pop_size	Max Pop Size;SamplingPercent;3;0;7;99999;int;None;None;For each pop, at most this many indiv can be in the pop before sampling the by percentages.;entry;None;type(x)==int and x >= 0;None;enabled
+scheme_percent_percentages	Percentages;SamplingPercent;3;0;8;[100.0];listfloat;None;None;For each percentage value c, an estimate is performed on each pop, selecting a random sampling of c percent of individuals;entry;None;type(x)==float and x >= 0.0 and x <= 100.0;None;enabled
+#
+#Genepop file sampling scheme params, Remove-N scheme:
+#
+scheme_removen_min_pop_size	Min pop;SamplingRemove-N;3;0;6;1;int;None;None;Pop must have at least this many individuals before sampling..;entry;None;type(x)==int and x >= 0;None;enabled
+scheme_removen_max_pop_size	Max pop;SamplingRemove-N;3;0;7;99999;int;None;None;Pop can have at most this many individuals before remove-N sampling.;entry;None;type(x)==int and x >= 0;None;enabled
+scheme_removen_n	N's for Remove-N;SamplingRemove-N;3;0;8;[1];listint;None;None;For each N value, and for each pop, an estimate is performed on the pop with N individuals randomly removed.;entry;None;type(x)==int and x >= 0;None;enabled
+#
+#genepop file sampling scheme params, Indiv Criteria:
+#
+scheme_crit_min_pop_size	Min Pop Size;SamplingIndiv Criteria;3;0;6;1;int;None;None;For each pop, after sampling, at least this many indiv must be in the pop.;entry;None;type(x)==int and x >= 0;None;enabled
+scheme_crit_max_pop_size	Max Pop Size;SamplingIndiv Criteria;3;0;7;99999;int;None;None;For each pop, after sampling, at most this many indiv can be in the pop.;entry;None;type(x)==int and x >= 0;None;enabled
+scheme_crit_min_age	Indiv min age;SamplingIndiv Criteria;3;0;8;0.0;float;None;None;Exclude individuals under this minimum age;entry;None;type(x)==float and x >= 0.0;None;enabled
+scheme_crit_max_age	Indiv max age;SamplingIndiv Criteria;3;0;9;99999.0;float;None;None;Exclude individuals this max age;entry;None;type(x)==float and x >= 0.0;None;enabled
+#
+#genepop file samplng scheme params, Cohorts
+#
+scheme_cohort_max_age	Indiv max age;SamplingCohorts;3;0;6;1.0;float;None;None;Exclude individuals over this max age;entry;None;type(x)==float and x >= 0.0;None;enabled
+scheme_cohort_min_indiv_per_gen	Indiv min per pop;SamplingCohorts;3;0;7;1;int;None;None;For each pop, at least this many indiv must remain after evenly sampling cohorts.;entry;None;type(x)==int and x >= 0;None;enabled
+scheme_cohort_max_indiv_per_gen	Indiv max per pop;SamplingCohorts;3;0;8;99999;int;None;None;For each pop, keep at most this many after evenly sampling cohorts, randomly remove the excess.;entry;None;type(x) == int and x >= 0;None;enabled
+scheme_cohort_percentages	Percentages;SamplingCohorts;3;0;9;[100.0];listfloat;None;None;For each percentage value c, an estimate is performed on each cohort sample, having selected a random c percent of individuals from the cohort(s);entry;None;type(x)==float and x >= 0.0 and x <= 100.0;None;enabled
+#
+#genepop file sampling scheme params, Relateds
+#
+scheme_relateds_percent_relateds	Percent relateds per pop;SamplingRelateds;3;0;6;100.0;float;None;None;For each pop, sample siblings until this percent of the total pop is reached;entry;None;type(x)==float and x >= 0.0 and x <= 100.0;None;enabled
+scheme_relateds_min_indiv_per_gen	Indiv min per pop;SamplingRelateds;3;0;7;1;int;None;None;For each pop, the number of sibling individuals sampled plus the number remaining must equal at least this many;entry;None;type(x)==int and x >= 0;None;enabled
+scheme_relateds_max_indiv_per_gen	Indiv max per pop;SamplingRelateds;3;0;8;99999;int;None;None;For each pop, the number of siblings sampled plus the number remaining will not exceed this number (remaining individuals will be randomly sampled to reach this max).;entry;None;type(x)==int and x >= 0;None;enabled
+#
+#----- Loci sampling scheme params ----- 
+#
+#Loci Sampling -- all schemes:
+locischeme_all_min_loci_number	Loci number start;LociSamplingAll;4;0;1;1;int;None;None;Exclude the first min - 1 loci in the file;entry;None;type(x)==int and x>=1;None;enabled
+locischeme_all_max_loci_number	Loci number end;LociSamplingAll;4;0;2;99999;int;None;None;Exclude the loci from max + 1 to the last loci listed in the file.;entry;None;type(x)==int and x>=1;None;enabled
+#
+#Loci scheme "None" -- no interface control, just a placeholder string:
+#
+locischeme_none_min_loci_count	Min loci count;LociSamplingNone;4;0;3;1;int;None;None;Within the loci in range min to max, if the total is under this min, then an error occurs.;entry;None;type(x)==int and x>=0;None;enabled
+locischeme_none_max_loci_count	Max loci count;LociSamplingNone;4;0;4;99999;int;None;None;Within the loci in range min to max, if the total exceeds this max, then randomly sample max loci.;entry;None;type(x)==int and x>=0;None;enabled
+locischeme_none_dummy_param	none_dummy_param;suppress_and_set;4;0;5;"none";str;None;None;None;entry;None;None;None;enabled
+#
+#Loci scheme "Percent":
+#
+locischeme_percent_min_loci_count	Min loci count;LociSamplingPercent;4;0;3;1;int;None;None;Within the loci in range min to max, if the total is under this min, then an error occurs.;entry;None;type(x)==int and x>=0;None;enabled
+locischeme_percent_max_loci_count	Max loci count;LociSamplingPercent;4;0;4;99999;int;None;None;Within the loci in range min to max, if the total exceeds this max, then randomly sample max loci.;entry;None;type(x)==int and x>=0;None;enabled
+locischeme_percent_percentages	Percentages;LociSamplingPercent;4;0;5;[100.0];listfloat;None;None;For each percentage value c,  a random sample of c percent of total loci, in the range given by min- and max loci number.  The max loci count param is ignored. The min loci count param is applied.;entry;None;type(x)==float and x >= 0.0 and x <= 100.0;None;enabled
+#
+#Loci scheme "Totals"
+#
+locischeme_total_totals	Totals;LociSamplingTotal;4;0;5;[10];listint;None;None;For each total c,  a random sample of c, in the range given by min- and max loci number.  These replace the max and min loci count parameters.;entry;None;type(x)==int and x >= 0;None;enabled
+locischeme_total_min_loci_count	Min loci count;suppress_and_set;4;0;3;1;int;None;None;Within the loci in range min to max, if the total is under this min, then an error occurs.;entry;None;type(x)==int and x>=0;None;enabled
+locischeme_total_max_loci_count	Max loci count;suppress_and_set;4;0;4;99999;int;None;None;Within the loci in range min to max, if the total exceeds this max, then randomly sample max loci.;entry;None;type(x)==int and x>=0;None;enabled

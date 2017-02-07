@@ -5,7 +5,8 @@ Overview
 
 	Our goal is a front end that incorporates the population
 	genetics functions provided by Tiago Antao's python program at
-	https://github.com/tiagoantao/AgeStructureNe.git.  
+	https://github.com/tiagoantao/AgeStructureNe.git. We further plan
+	to add analysis tools for the Ne estimation results.
 
 	This project will proceed by iterative implementation, to provide several
 	analyses performed by Tiago's code, along with some added analyses.
@@ -23,6 +24,10 @@ Overview
 Current python version
 ----------------------
 	python 2.7
+
+	For ease of meeting the dependancy simuPOP, the anaconda python 
+	distribution is recommended by the simuPOP installation page 
+	(see dependancies, below).
 
 
 OS-comaptibility
@@ -42,12 +47,16 @@ Current dependencies
 	pygenomics python modules should be installed using the supplied
 	setup.py, so that they can be imported by your python interpereter.
 
-	
 	2.  SimuPOP, http://simupop.sourceforge.net The SimuPOP modules should
-	be installed using setup.py (or pip), so that they can be accessed
-	by your python interpreter. 
+	be installed into your default python package location so that they will
+	automatically  be accessed by your python interpreter. Pip is a
+	recommended tool that ships with most python distributions.  To install SimuPop
+	using pip, simply open a terminal (in any of the Operating systems), and issue
+	command "pip install simupop."  Below are some software packages that SimuPop
+	needs in order to be installed.  Note that these are often already present in
+	many python distributions, according to the OS in which thay are installed:
 
-		i. VC++ Library, 2008 (Windows only).  Installation of SimuPOP
+		i. VC++ Library, 2008 (Windows only).  We found that the installation of SimuPOP
 		on Windows (10 and 7) did not work without installing the Microsoft VC++
 		Redistributable 2008 library, as noted in the SimuPOP installation web page.
 		Note that the link on the Simupop installation web page points to the Microsoft
@@ -55,20 +64,29 @@ Current dependencies
 		actually need the x64 verion at
 		https://www.microsoft.com/en-us/download/details.aspx?id=15336
 
-		ii.  SWIG.  Before python will install simuPOP you'll need the SWIG
-		tool at http://www.swig.org/download.html. (This tool makes C and C++ code in
-		simuPOP python compatible). You can try to install simuPOP first, and install
-		SWIG if you get a message that SWIG is missing.
+		ii.  SWIG.  On one linux machine tested we found that, before
+		python would install simuPOP we needed the SWIG tool at
+		http://www.swig.org/download.html. (This tool makes C and C++ code in simuPOP
+		python compatible). Since we found that most of our python installations will
+		had have the necessary SWIG resources, it's be best to try to install simuPOP
+		first, and install SWIG if you get a message that it is missing missing.
 
-		iii. Python compiler for Windows. Windows users
-		may also need to install the windows python compiler.  Simupop, if it's
-		installation fails for lack of this compiler, will give you the correct web
-		address from which to download and intall it.
+		iii. Python compiler for Windows. On two of our platforms that
+		had 32-bit Windows versions we also needed to install the windows python
+		compiler.  Simupop, if it's installation fails for lack of this compiler, will
+		give you the correct web address from which to download and intall it.
+				
+		iv. numpy, often included in science-centered python installations, if you can
+			execute the terminal command, 
+				''python -c "import numpy"''
+		without an ImportError, you have the package.  If you see an ImportError
+		message then you can install numpy with the python "pip" program, or via
+		your python distribution's package manager (for example, the "apt" package
+		manager on Ubuntu and Debian Linux distributions).
 
-	4.  NeEstimator,
-	http://www.molecularfisherieslaboratory.com.au/neestimator-software.
-	Our program will look for the executable Ne2L (Linux) Ne2.exe (Windows), Ne2M
-	(Mac OSX) in your PATH variable.
+		v. For the modules that perform a regression plot on the Ne estimation table output,
+			you'll also need the python packages scipy" and "matplotlib," available through
+			the same sources as noted above for numpy
 
 Installation.  
 ------------

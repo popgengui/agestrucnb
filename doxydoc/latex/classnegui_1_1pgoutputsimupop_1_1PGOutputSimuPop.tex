@@ -278,29 +278,39 @@ Definition at line 207 of file pgoutputsimupop.\+py.
 291             
 292             ls\_line = s\_line.rstrip().split(\textcolor{stringliteral}{" "})
 293 
-294             i\_id = int(float(ls\_line[IDX\_GEN\_INDIV]))
-295             i\_gen = int(float(ls\_line[IDX\_GEN\_GENERATION]))
-296             idx\_first\_allele\_in\_line=( idx\_allele\_start + IDX\_FIRST\_ALLELE ) - 1
-297             idx\_last\_allele\_in\_line=( idx\_allele\_stop  + IDX\_FIRST\_ALLELE ) - 1 
-298             ls\_alleles = ls\_line[ idx\_first\_allele\_in\_line : idx\_last\_allele\_in\_line + 1 ]
-299 
-300             \textcolor{keywordflow}{if} i\_currgen \textcolor{keywordflow}{is} \textcolor{keywordtype}{None} \textcolor{keywordflow}{or} ( b\_pop\_per\_gen == \textcolor{keyword}{True} \textcolor{keywordflow}{and} i\_currgen != i\_gen ):
-301                     o\_genepopfile.write( \textcolor{stringliteral}{"pop\(\backslash\)n"} )
-302                     i\_currgen=i\_gen
-303                 \textcolor{comment}{#end if new generation (== new population )}
-304                 \textcolor{comment}{#end if we should make a new population for each generation}
-305 
-306             o\_genepopfile.write( str( i\_id ) + \textcolor{stringliteral}{","} +  \textcolor{stringliteral}{" "}.join( ls\_alleles ) + \textcolor{stringliteral}{"\(\backslash\)n"}  )
-307 
-308         \textcolor{comment}{#end for each line in gen file}
-309 
-310         o\_genfile.close()
-311         o\_genepopfile.close()
+294             \textcolor{stringliteral}{'''}
+295 \textcolor{stringliteral}{            As of 2016\_09\_01, we are no longer typing the id as an int, since}
+296 \textcolor{stringliteral}{            we changed the indiv id string that is written to the gen file,}
+297 \textcolor{stringliteral}{            (see pgopsimupop.py def \_\_outputAge )}
+298 \textcolor{stringliteral}{            to be a (currenly semicolon) delimited list of the indiv age,sex,etc)}
+299 \textcolor{stringliteral}{            '''}
+300             s\_id = ls\_line[IDX\_GEN\_INDIV]
+301 
+302             i\_gen = int(float(ls\_line[IDX\_GEN\_GENERATION]))
+303             idx\_first\_allele\_in\_line=( idx\_allele\_start + IDX\_FIRST\_ALLELE ) - 1
+304             idx\_last\_allele\_in\_line=( idx\_allele\_stop  + IDX\_FIRST\_ALLELE ) - 1 
+305             ls\_alleles = ls\_line[ idx\_first\_allele\_in\_line : idx\_last\_allele\_in\_line + 1 ]
+306 
+307             \textcolor{keywordflow}{if} i\_currgen \textcolor{keywordflow}{is} \textcolor{keywordtype}{None} \textcolor{keywordflow}{or} ( b\_pop\_per\_gen == \textcolor{keyword}{True} \textcolor{keywordflow}{and} i\_currgen != i\_gen ):
+308                     o\_genepopfile.write( \textcolor{stringliteral}{"pop\(\backslash\)n"} )
+309                     i\_currgen=i\_gen
+310                 \textcolor{comment}{#end if new generation (== new population )}
+311                 \textcolor{comment}{#end if we should make a new population for each generation}
 312 
-313         s\_final\_name=s\_temp\_file\_name.replace( s\_temp\_file\_name, s\_genepop\_filename )
-314         os.rename( o\_genepopfile.name, s\_final\_name )
-315 
-316         \textcolor{keywordflow}{return}
+313             o\_genepopfile.write( str( s\_id ) + \textcolor{stringliteral}{","} +  \textcolor{stringliteral}{" "}.join( ls\_alleles ) + \textcolor{stringliteral}{"\(\backslash\)n"}  )
+314 
+315         \textcolor{comment}{#end for each line in gen file}
+316 
+317         o\_genfile.close()
+318         o\_genepopfile.close()
+319 
+320         s\_final\_name=s\_temp\_file\_name.replace( s\_temp\_file\_name, s\_genepop\_filename )
+321 
+322         \textcolor{comment}{#change to shutil.move from os.rename -- threw errors (in docker install) when}
+323         \textcolor{comment}{#renaming across volumes:}
+324         shutil.move( o\_genepopfile.name, s\_final\_name )
+325 
+326         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 

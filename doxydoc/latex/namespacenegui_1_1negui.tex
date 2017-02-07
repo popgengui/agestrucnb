@@ -18,10 +18,34 @@ float {\bfseries W\+I\+N\+D\+O\+W\+\_\+\+M\+A\+R\+G\+IN} = 0.\+20\hypertarget{na
 int {\bfseries C\+O\+N\+T\+A\+I\+N\+E\+R\+\_\+\+P\+A\+D\+D\+I\+NG} = 10\hypertarget{namespacenegui_1_1negui_a697772153f0161816728f03911a53ed4}{}\label{namespacenegui_1_1negui_a697772153f0161816728f03911a53ed4}
 
 \item 
-list {\bfseries ls\+\_\+optional\+\_\+args} = \mbox{[} \char`\"{}number of processes to use for replicate simulations\char`\"{} \mbox{]}\hypertarget{namespacenegui_1_1negui_a0e9000340ecb28a76174866dbd51c619}{}\label{namespacenegui_1_1negui_a0e9000340ecb28a76174866dbd51c619}
+list {\bfseries L\+S\+\_\+\+F\+L\+A\+G\+S\+\_\+\+S\+H\+O\+R\+T\+\_\+\+O\+P\+T\+I\+O\+N\+AL} = \mbox{[} \char`\"{}-\/p\char`\"{}, \char`\"{}-\/l\char`\"{} \mbox{]}\hypertarget{namespacenegui_1_1negui_ae53d15f57c250565845a17a425a90afa}{}\label{namespacenegui_1_1negui_ae53d15f57c250565845a17a425a90afa}
 
 \item 
-{\bfseries s\+\_\+usage} = pgut.\+do\+\_\+usage\+\_\+check( sys.\+argv, \mbox{[}$\,$\mbox{]}, ls\+\_\+optional\+\_\+arg\+\_\+descriptions=ls\+\_\+optional\+\_\+args )\hypertarget{namespacenegui_1_1negui_a3655412177f9ff140033a529e87bcf06}{}\label{namespacenegui_1_1negui_a3655412177f9ff140033a529e87bcf06}
+list {\bfseries L\+S\+\_\+\+F\+L\+A\+G\+S\+\_\+\+L\+O\+N\+G\+\_\+\+O\+P\+T\+I\+O\+N\+AL} = \mbox{[} \char`\"{}-\/-\/processes\char`\"{}, \char`\"{}-\/-\/lifetable\char`\"{} \mbox{]}\hypertarget{namespacenegui_1_1negui_a46e303892af9fa268c656af527ac1568}{}\label{namespacenegui_1_1negui_a46e303892af9fa268c656af527ac1568}
+
+\item 
+string {\bfseries s\+\_\+help\+\_\+processes\+\_\+option} = \char`\"{}Number of processes to use in the simulation (1 used per replicate, one process \char`\"{}\hypertarget{namespacenegui_1_1negui_aa0b1d5dce29751ae81f30927168edc3c}{}\label{namespacenegui_1_1negui_aa0b1d5dce29751ae81f30927168edc3c}
+
+\item 
+string {\bfseries s\+\_\+help\+\_\+lifetable\+\_\+option} = \char`\"{}life table file or pattern to match multiple life table files (use quotes). \char`\"{}\hypertarget{namespacenegui_1_1negui_afffa3d3a92fb8773a23551764f8f8eaa}{}\label{namespacenegui_1_1negui_afffa3d3a92fb8773a23551764f8f8eaa}
+
+\item 
+list {\bfseries L\+S\+\_\+\+A\+R\+G\+S\+\_\+\+H\+E\+L\+P\+\_\+\+O\+P\+T\+I\+O\+N\+AL} = \mbox{[} s\+\_\+help\+\_\+processes\+\_\+option , s\+\_\+help\+\_\+lifetable\+\_\+option \mbox{]}\hypertarget{namespacenegui_1_1negui_a212525736c85a79708529d797635af9e}{}\label{namespacenegui_1_1negui_a212525736c85a79708529d797635af9e}
+
+\item 
+{\bfseries o\+\_\+parser} = ap.\+Argument\+Parser()\hypertarget{namespacenegui_1_1negui_a0238cdb30b4db858939b3a3547a01291}{}\label{namespacenegui_1_1negui_a0238cdb30b4db858939b3a3547a01291}
+
+\item 
+{\bfseries i\+\_\+total\+\_\+options} = len( L\+S\+\_\+\+F\+L\+A\+G\+S\+\_\+\+S\+H\+O\+R\+T\+\_\+\+O\+P\+T\+I\+O\+N\+AL )\hypertarget{namespacenegui_1_1negui_a755d148e355ee43be3122668737cca98}{}\label{namespacenegui_1_1negui_a755d148e355ee43be3122668737cca98}
+
+\item 
+{\bfseries help}\hypertarget{namespacenegui_1_1negui_ab2f52d57c94461393fe55c281d73c2eb}{}\label{namespacenegui_1_1negui_ab2f52d57c94461393fe55c281d73c2eb}
+
+\item 
+{\bfseries required}\hypertarget{namespacenegui_1_1negui_a997e18ffce4f999fc997cf56e330ca14}{}\label{namespacenegui_1_1negui_a997e18ffce4f999fc997cf56e330ca14}
+
+\item 
+{\bfseries o\+\_\+args} = o\+\_\+parser.\+parse\+\_\+args()\hypertarget{namespacenegui_1_1negui_a13daffa2de8e8d9b13b95a03859f0f17}{}\label{namespacenegui_1_1negui_a13daffa2de8e8d9b13b95a03859f0f17}
 
 \item 
 {\bfseries s\+\_\+my\+\_\+mod\+\_\+path} = os.\+path.\+abspath( \+\_\+\+\_\+file\+\_\+\+\_\+ )\hypertarget{namespacenegui_1_1negui_ac3d503277c8f4b646ff8bc4a88922931}{}\label{namespacenegui_1_1negui_ac3d503277c8f4b646ff8bc4a88922931}
@@ -30,7 +54,7 @@ list {\bfseries ls\+\_\+optional\+\_\+args} = \mbox{[} \char`\"{}number of proce
 {\bfseries s\+\_\+my\+\_\+mod\+\_\+dir} = os.\+path.\+dirname( s\+\_\+my\+\_\+mod\+\_\+path )\hypertarget{namespacenegui_1_1negui_af56cb9927731f0b94f9bf9744ae41e4f}{}\label{namespacenegui_1_1negui_af56cb9927731f0b94f9bf9744ae41e4f}
 
 \item 
-{\bfseries i\+\_\+total\+\_\+simultaneous\+\_\+processes} = int( sys.\+argv\mbox{[}1\mbox{]} )\hypertarget{namespacenegui_1_1negui_ab356fd36c69789db2b3bc1a0793d937d}{}\label{namespacenegui_1_1negui_ab356fd36c69789db2b3bc1a0793d937d}
+int {\bfseries i\+\_\+total\+\_\+simultaneous\+\_\+processes} = 1\hypertarget{namespacenegui_1_1negui_ac3d7219be606c9a080eeb9b3121c1c85}{}\label{namespacenegui_1_1negui_ac3d7219be606c9a080eeb9b3121c1c85}
 
 \item 
 string {\bfseries s\+\_\+default\+\_\+life\+\_\+tables} = s\+\_\+my\+\_\+mod\+\_\+dir+\char`\"{}/resources/$\ast$life.\+table.\+info\char`\"{}\hypertarget{namespacenegui_1_1negui_aebe3cdf18a6fb06977342427f5bdf539}{}\label{namespacenegui_1_1negui_aebe3cdf18a6fb06977342427f5bdf539}
@@ -94,5 +118,5 @@ Provisional driver for the negui program
 \end{DoxyCode}
 
 
-Definition at line 72 of file negui.\+py.
+Definition at line 102 of file negui.\+py.
 

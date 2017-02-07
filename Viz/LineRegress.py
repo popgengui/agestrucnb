@@ -7,11 +7,14 @@
 import ConfigParser
 
 from numpy import array, math
-from scipy import stats
+from scipy import stats, random
 import matplotlib.pyplot as plt
 from numpy import mean, median, isnan
 import csv
 import sys
+import os
+from  FileIO import scrapeNE, configRead, readFileOrder, makeOutlierDict, writeOutliers
+
 
 #function to perform the linear regression and store the results in a dictionary
 def lineRegress(linePoints):
@@ -81,20 +84,32 @@ def createGraph(lineArray, title = None, xlab = None, yLab= None, colorVctr = No
             plt.show()
         else:
             plt.savefig(dest, bbox_inches='tight')
-        plt.close()
-        plt.clf()
+            plt.close()
 
 # method to create a scatterPlot of the outputNEs
-def createScatterPlot(table, title=None, xlab=None, yLab=None, dest="show"):
+def createScatterPlot(table,errorTable, title=None, xlab=None, yLab=None, dest="show"):
     if dest =="none":
         return
     plt.figure("scatter")
     flatData = [val for sublist in table for val in table[sublist]]
+    errorData = [val for sublist in errorTable for val in errorTable[sublist]]
 
-    plotData = []
+    minErrorVctr = []
+    maxErrorVctr = []
+    for errorIdx in range(len(errorData)):
+        minError = errorData[errorIdx][1][0]
+        maxError = errorData[errorIdx][1][1]
+        dataVal = flatData[errorIdx][1]
+        minDelta = abs(dataVal - minError)
+        maxDelta = abs(maxError - dataVal)
 
+        minErrorVctr.append(minDelta)
+        maxErrorVctr.append(maxDelta)
+    errorArray = [minErrorVctr,maxErrorVctr]
     unzippedX, unzippedY = zip(*flatData)
-    plt.scatter(unzippedX, unzippedY)
+    #plt.errorbar(unzippedX, unzippedY,errorArray, fmt = "o")
+    plt.scatter(unzippedX,unzippedY)
+    plt.margins(0.15,0.15)
     if title:
         plt.title(title)
     if xlab:
@@ -106,11 +121,34 @@ def createScatterPlot(table, title=None, xlab=None, yLab=None, dest="show"):
         plt.show("scatter")
     else:
         plt.savefig(dest, bbox_inches='tight')
-    plt.clf()
-    plt.close("scatter")
+        plt.close()
+
+def createHzLinePlot(table, title=None, xlab="Heterozygosity", yLab=None, dest="show"):
+    if dest == "none":
+        return
+    plt.figure("Hz")
+    for key in table.keys():
+        pass
+
+    # plt.errorbar(unzippedX, unzippedY,errorArray, fmt = "o")
+    #plt.plot(unzippedX, unzippedY)
+    plt.margins(0.15, 0.15)
+    if title:
+        plt.title(title)
+    if xlab:
+        plt.xlabel(xlab)
+    if yLab:
+        plt.ylabel(yLab)
+
+    if dest == "show":
+        plt.show("hz")
+    else:
+        plt.savefig(dest, bbox_inches='tight')
+        plt.close()
+
 
  #method to create a boxplot of the outputNEs
-def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
+def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", outlierFile = "outliers.txt"):
     if dest == "none":
         return
     plt.figure("box")
@@ -124,11 +162,14 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
     listX.sort()
     for x in listX:
         ySet = [datum[1] for datum in flatData if datum[0] == x]
+        errorSet = [datum[1] for datum in flatData if datum[0] == x]
         plotData.append(ySet)
         # plotData = unzippedy
-    plt.boxplot(plotData)
-    #set xAxis
-    plt.xticks(range(len(listX)), listX)
+    plotstats = plt.boxplot(plotData,labels=listX)
+    if len(plotstats["fliers"])>0:
+        outliers = {"":makeOutlierDict(plotstats["fliers"])}
+    plt.clf()
+    plt.boxplot(plotData, labels=listX, sym = "")
     if title:
         plt.title(title)
     if xlab:
@@ -140,8 +181,9 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
         plt.show("box")
     else:
         plt.savefig(dest, bbox_inches='tight')
-    plt.clf()
-    plt.close("box")
+        plt.close()
+    writeOutliers(outliers,outlierFile)
+    return
 
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
@@ -149,11 +191,11 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show"):
 #linePoints: list of touples defining the x and y coordinates of a point
 #returns 3 variables, the slope of the regression, the intercept of the regression, and a touple containing the upper and lower bounds of the confidence interval of the slope
 def slopeConfidence(alpha, linePoints):
-    if len(linePoints)<2:
+    if len(linePoints)<=2:
         return "Error: not enough points for calculation"
-    if len(linePoints)==2:
-        regression = lineRegress(linePoints)
-        return regression["slope"], regression["intercept"],(regression["slope"],regression["slope"])
+    #if len(linePoints)==2:
+    #    regression = lineRegress(linePoints)
+    #    return regression["slope"], regression["intercept"],(regression["slope"],regression["slope"])
     #get linear regression for points
     regression = lineRegress(linePoints)
     #get Tscore
@@ -242,11 +284,11 @@ def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
     xVals, yVals = zip(*allpoints)
 
     minX = min(xVals)
-    maxX = max(xVals)
+    maxX = max(xVals)+1
     xVctr = list(set(allpoints))
     if maxX - minX>1:
 
-        xVctr = range(minX,maxX)
+        xVctr = range(int(math.floor(minX)),int(math.ceil(maxX)))
 
     lineVctrs =[]
     colorVctr = []
@@ -288,10 +330,11 @@ def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
     for statDict in LineStats:
         slope = statDict["slope"]
         intercept = statDict["intercept"]
-        linePoints  = _getGraphLine(slope, intercept, xVctr)
-        lineVctrs.append(linePoints)
-        colorVctr.append("b")
-        styleVctr.append("--")
+        if not isnan(slope):
+            linePoints  = _getGraphLine(slope, intercept, xVctr)
+            lineVctrs.append(linePoints)
+            colorVctr.append("b")
+            styleVctr.append("--")
     return lineVctrs, colorVctr,styleVctr
 
 #combines linear regression and create graph into one function
@@ -299,157 +342,80 @@ def neGraphMaker(pointsVctrs, expectedSlope = None,title = None, xlab = None, yL
     lines, colors, styles = _NeRegressionGraphCalc(pointsVctrs, expectedSlope,countTable)
     createGraph(lines, colorVctr=colors, styleVctr=styles, title=title, xlab=xlab,yLab=yLab, dest=dest, xLim = xLim, yLim = yLim)
 
-#reads in data fron neEst file outputs
-def neFileRead(filename, firstVal = 0):
-    fileBuffer = open(filename, "rb")
-    replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
-    dataDict = {}
-    popDict={}
-    popNum = 0
-    for item in replicateData:
-        sourceName = item['original_file']
-        pop =  item['pop']
-        popNum = int(pop)
-        individualCount = int(item["indiv_count"])
-        neEst = float(item['est_ne'])
-        #if neEst == "NaN":
-        #    neEst = sys.maxint
-        if  not sourceName in dataDict:
-            dataDict[sourceName] = {}
-            popDict[sourceName] = {}
-        dataDict[sourceName][popNum] = neEst
-        popDict[sourceName][popNum]=individualCount
-    replicateKeys = dataDict.keys()
-    resultTable = {}
-    individualCountTable = {}
-    for replicate in replicateKeys:
-        replicateVctr = []
-        individualCountVctr = []
-        replicateDict = dataDict[replicate]
-        individualCountDict = popDict[replicate]
-        popKeys = replicateDict.keys()
-        popKeys.sort()
-        for popKey in popKeys:
-            if popKey >=firstVal:
-                #print popKey
-                replicateVctr.append((popKey,replicateDict[popKey]))
-                individualCountVctr.append((popKey,individualCountDict[popKey]))
-        resultTable[replicate] = replicateVctr
-        individualCountTable[replicate] = individualCountVctr
-    return resultTable,individualCountTable
+# #reads in data fron neEst file outputs
+# def neFileRead(filename, firstVal = 0):
+#     fileBuffer = open(filename, "rb")
+#     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
+#     dataDict = {}
+#     popDict={}
+#     popNum = 0
+#     for item in replicateData:
+#         sourceName = item['original_file']
+#         sourceName = os.path.basename(sourceName)
+#
+#         pop =  item['pop']
+#         popNum = int(pop)
+#         individualCount = int(item["census"])
+#         neEst = float(item['est_ne'])
+#         #if neEst == "NaN":
+#         #    neEst = sys.maxint
+#         if  not sourceName in dataDict:
+#             dataDict[sourceName] = {}
+#             popDict[sourceName] = {}
+#         dataDict[sourceName][popNum] = neEst
+#         popDict[sourceName][popNum]=individualCount
+#     replicateKeys = dataDict.keys()
+#     resultTable = {}
+#     individualCountTable = {}
+#     for replicate in replicateKeys:
+#         replicateVctr = []
+#         individualCountVctr = []
+#         replicateDict = dataDict[replicate]
+#         individualCountDict = popDict[replicate]
+#         popKeys = replicateDict.keys()
+#         popKeys.sort()
+#         for popKey in popKeys:
+#             if popKey >=firstVal:
+#                 #print popKey
+#                 replicateVctr.append((popKey-firstVal,replicateDict[popKey]))
+#                 individualCountVctr.append((popKey-firstVal,individualCountDict[popKey]))
+#         resultTable[replicate] = replicateVctr
+#         individualCountTable[replicate] = individualCountVctr
+#     return resultTable,individualCountTable
 
 
-#Method to read in a graph config file and return a dictionary of
-def neConfigRead(filename):
-    configDict = {}
-    title =  None
-    xLab = None
-    yLab = None
-    setExpected = None
-    boxplotDest = "show"
-    destType = "show"
-    regressionDest = "show"
-    scatterDest = "show"
-    xLims =None
-    yLims = None
-    autoFlag = False
-    startDataCollect = 0
-    alphaVal = 0.05
-    statFileOut = "neStats.out"
-    sigSlope = 0
 
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(filename))
-    if config.has_section("labels"):
-        if config.has_option("labels", "title"):
-            title = config.get("labels", "title")
-        if config.has_option("labels", "xLab"):
-            xLab = config.get("labels", "xLab")
-        if config.has_option("labels", "yLab"):
-            yLab = config.get("labels", "yLab")
-    if config.has_section("destination"):
-        destType = config.get("destination","desttype")
-        if destType=="none":
-            destType = "none"
-            regressionDest = "none"
-            boxplotDest = "none"
-            scatterDest = "none"
-        if destType != "show" or "none":
-            regressionDest = config.get("destination","regressionfile")
-            boxplotDest = config.get("destination","boxplotfile")
-            scatterDest = config.get("destination","scatterfile")
-    if config.has_section("comparison"):
-        valueFlag = True
-        setExpected = None
-        if config.has_option("comparison", "type"):
-            comparisonType = config.get("comparison", "type")
-            if comparisonType == "auto"  or comparisonType == "Auto"or comparisonType == "pop" or comparisonType == "Pop":
-                setExpected = comparisonType
-                valueFlag = False
-            elif comparisonType == "None" or comparisonType == "none":
-                valueFlag = False
-        if  valueFlag:
-            if config.has_option("comparison", "lambda"):
-                lambdaValue = config.getfloat("comparison", "lambda")
-                setExpected = lambdaValue-1
-            if config.has_option("comparison", "expectedSlope"):
-                expectedSlope = config.getfloat("comparison", "expectedSlope")
-                setExpected =  expectedSlope
-
-    if config.has_section("limits"):
-        if config.has_option("limits", "xMin") and config.has_option("limits", "xMax"):
-            xMin = config.getfloat("limits", "xMin")
-            xMax = config.getfloat("limits", "xMax")
-            xLims = (xMin, xMax)
-        if config.has_option("limits", "yMin")and config.has_option("limits", "yMax"):
-            yMin = config.getfloat("limits", "yMin")
-            yMax = config.getfloat("limits", "yMax")
-            yLims = (yMin, yMax)
-    if config.has_section("confidence"):
-        if config.has_option("confidence","alpha"):
-            alphaVal = config.getfloat("confidence", "alpha")
-        if config.has_option("confidence","outputFilename"):
-            statFileOut = config.get("confidence","outputFilename")
-        if config.has_option("confidence", "significantSlope"):
-            sigSlope = config.getfloat("confidence", "significantSlope")
-
-    if config.has_section("data"):
-        if config.has_option("data","startCollect"):
-            startDataCollect = config.getint("data","startCollect")
-
-    configDict["title"]=title
-    configDict["xLab"] = xLab
-    configDict["yLab"] = yLab
-    configDict["expected"] = setExpected
-    configDict["dest"] = regressionDest
-    configDict["boxplot"] = boxplotDest
-    configDict["scatter"] = scatterDest
-    configDict["xLims"] = xLims
-    configDict["yLims"] = yLims
-    configDict["alpha"] = alphaVal
-    configDict["startData"] = startDataCollect
-    configDict["statsFilename"] = statFileOut
-    configDict["sigSlope"] = sigSlope
-    return configDict
 
 #master function to create a graph from neEstimation data.
 #neFile: filepath for the neEstimation output file desired.
 #configFile filepath to configureation file containting parameteres for the graph (see example.cfg and example1.cfg,
 #   this parameter and all feilds in the file are optional with what i considered the most relevant/base defaults)
-def neGrapher(neFile, configFile):
+def neGrapher(neFile, configFile=None):
 
     if not configFile:
-        table , countsTable= neFileRead(neFile)
+        table , countsTable, errorTable= scrapeNE(neFile)
         neGraphMaker(table)
         createBoxPlot(table)
         createScatterPlot(table)
         return True
-    configs = neConfigRead(configFile)
-    table,countsTable = neFileRead(neFile,configs["startData"])
+    configs = configRead(configFile)
+    table,countsTable, errorTable = scrapeNE(neFile,configs["startData"])
+    if configs["ordering"]:
+        orderingTable = readFileOrder(configs["ordering"])
+        table = orderFiles(table,orderingTable,configs["orderingGen"])
+        errorTable = orderFiles(errorTable,orderingTable,configs["orderingGen"])
+    outlierFile = configs["statsFilename"]
+    outlierpath, outlierext =os.path.splitext(outlierFile)
+    outlierFile = outlierpath+".outliers"+outlierext
+    #TODO this is where converting the x values to a enviromental variable should occur.
+    #table = _enviromentalFactor(table, envFactors)
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
-    createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"])
-    createScatterPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
+    outlierFlag = createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"],outlierFile=outlierFile)
+    createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
+    return outlierFlag
 
+def _enviromentalFactor(table, factorTable):
+    pass
 
 #master function for creating a table of confidence intervals form neEstimation data
 #neFile: filepath of neEstimation output file
@@ -457,11 +423,10 @@ def neGrapher(neFile, configFile):
 #outFileName: resulting file location for file results, will overwrite existing file.
 #significantValue: value of comparison w/ regards to slope. should be 0 for every test, but can be changed if needed.
 #testFlag: flag that disables file write and prints stats to console instead, used for test functions
-def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,testFlag = False):
+def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,testFlag = False):
     tableFormat = "{:<30}{:<30}{:<50}{:<80}\n"
     confPercent = (1 - confidenceAlpha)*100
     tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)","Source File")
-    table, countsTable = neFileRead(neFile,firstVal)
     slopeVctr = []
     confidenceVctr = []
 
@@ -469,7 +434,7 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
     for recordKey in table.keys():
         record = table[recordKey]
         slope, intercept, confidence  = slopeConfidence(confidenceAlpha,record)
-        tableString+=tableFormat.format(slope,intercept,confidence,recordKey)
+        tableString+=tableFormat.format(slope,intercept,confidence,recordKey[0])
         if isnan(slope):
             Uncountable +=1
         else:
@@ -517,11 +482,143 @@ def _neStatsHelper(neFile,confidenceAlpha, outFileName = "neStatsOut.txt", signi
 
 def neStats(neFile, configFile = None, testFlag = False):
     if not  configFile:
-        return _neStatsHelper(neFile,0.05)
+        table, countsTable, errorTable = scrapeNE(neFile,)
+        return _neStatsHelper(table,neFile,0.05)
 
-    configVals = neConfigRead(configFile)
-    return _neStatsHelper(neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
+    configVals = configRead(configFile)
+    neTable,countsTable, errorTable = scrapeNE(neFile,configVals["startData"])
+    if configVals["ordering"]:
 
+        orderingTable = readFileOrder(configVals["ordering"])
+        neTable = orderFiles(neTable,orderingTable,configVals["orderingGen"])
+
+    return _neStatsHelper(neTable,neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
+
+#gets teh minumum of the maximum of the number of subpops for the table
+def _getSubpopLimit(table,itemList=None):
+    identTuples = table.keys()
+    maxDict = {}
+    for ident in identTuples:
+        if not itemList or ident in itemList:
+            if ident[0] not in maxDict:
+                maxDict[ident[0]] = 0
+            maxDict[ident[0]] = max(maxDict[ident[0]],ident[1])
+    return maxDict
+
+
+def _geLociVal(table):
+
+    identTuples = table.keys()
+    lociCounter ={}
+    for ident in identTuples:
+        if ident[2] not in lociCounter:
+            #initilize counter
+            lociCounter[ident[2]] = 0
+        lociCounter[ident[2]]+=1
+    sortedLociList = lociCounter.keys()
+    sortedLociList.sort()
+    lociSum = sum(lociCounter.values())
+    chanceList = [0]*len(sortedLociList)
+    chanceSum=0
+    for i in range(len(sortedLociList)):
+        lociChance  = lociCounter[sortedLociList[i]]/lociSum
+        chanceSum+=lociChance
+        chanceList[i]=chanceSum
+    randVal = random.rand()
+    i=0
+    while chanceList[i]<randVal and i< len(chanceList):
+        i+=1
+    selected = sortedLociList[i]
+    return selected
+
+
+
+def orderFiles(table, orderDict,genNum = 1):
+    orderedTable = {}
+    #get count of suppops
+    subpopLimits = _getSubpopLimit(table)
+    #get leastvalue
+    subpopLimit = min(subpopLimits.values())
+    # get loci value for key
+
+    lociVal = _geLociVal(table)
+
+    #create randomized lists  for each file to
+
+    for ordering in orderDict.keys():
+        for ident in subpopLimits.keys():
+            SelectRandom.createOrdering((ident,ordering), subpopLimits, subpopLimit)
+
+        for subpopNumber in range(int(subpopLimit)-1):
+            orderedTable[(ordering,subpopNumber)]=[]
+            for entry in orderDict[ordering]:
+                entryNum = SelectRandom.getOrderingVal((entry[1],ordering),subpopNumber)
+                entryList = table[(entry[1],entryNum,lociVal)]
+                foundGen = None
+                for point in entryList:
+                    if point[0] == genNum:
+                        foundGen = point[1]
+                        break
+                if not foundGen:
+                    print "desired gen not found in"
+                    print entry[1]
+                    raise Exception("desired gen number "+str(genNum)+" not found in "+str(entry))
+                orderedTable[(ordering,subpopNumber)].append((entry[0], foundGen))
+    return orderedTable
+
+class SelectRandom:
+    orderingDict = {}
+
+    @staticmethod
+    def createOrdering(identifier,subpopLimits,selectedCount):
+        #print identifier
+        #print subpopLimits
+        #print selectedCount
+        if not identifier in SelectRandom.orderingDict:
+            SelectRandom.orderingDict[identifier] = SelectRandom._createorderArray(subpopLimits[identifier[0]],int(selectedCount))
+            print "New Entry"
+        else:
+            print "existing entry found"
+
+    @staticmethod
+    def clearOrdering():
+        SelectRandom.orderingDict = {}
+    @staticmethod
+    def _createorderArray(totalCount, selectedCount):
+        ordering  = random.choice(range(1,int(totalCount+1)) , selectedCount)
+        return ordering
+
+    @staticmethod
+    def getOrderingVal(identifier,index):
+        return SelectRandom.orderingDict[identifier][index]
+
+
+def neRun(neFile,configFile):
+
+    if not configFile:
+        table , countsTable, errorTable= scrapeNE(neFile)
+        neGraphMaker(table)
+        createBoxPlot(table)
+        createScatterPlot(table)
+        _neStatsHelper(table,0.5)
+        return True
+    configs = configRead(configFile)
+    table,countsTable, errorTable = scrapeNE(neFile,configs["startData"])
+    if configs["ordering"]:
+        SelectRandom()
+        orderingTable = readFileOrder(configs["ordering"])
+        table = orderFiles(table,orderingTable,configs["orderingGen"])
+        errorTable = orderFiles(errorTable,orderingTable,configs["orderingGen"])
+    outlierFile = configs["statsFilename"]
+    outlierpath, outlierext =os.path.splitext(outlierFile)
+    outlierFile = outlierpath+".outliers"+outlierext
+
+    neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
+    createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"],outlierFile=outlierFile)
+    createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
+    _neStatsHelper(table,neFile,configs["alpha"], outFileName=configs["statsFilename"],significantValue=configs["sigSlope"],firstVal=configs["startData"])
+    return createBoxPlot(table, title=configs['title'], xlab=configs["xLab"], yLab=configs["yLab"], dest=configs["boxplot"],
+                  outlierFile=outlierFile)
 
 if __name__ == "__main__":
     #Tests
@@ -700,11 +797,11 @@ if __name__ == "__main__":
     testArray.sort()
     print  testArray
 
-    table, countsTable = neFileRead("testData.txt")
+    table, countsTable, errorTable = scrapeNE("testData.txt")
 
     print table
     print countsTable
-
+    print errorTable
 
 
 
@@ -717,20 +814,39 @@ if __name__ == "__main__":
     configwrite.set("labels", "yLab", "yLabel")
     configwrite.add_section("destination")
     configwrite.set("destination","desttype", "show")
-    configwrite.set("destination","regressionfile", "test.pdf")
+    configwrite.set("destination","regressionfile", "test.png")
     configwrite.set("destination","boxplotfile", "box.pdf")
     configwrite.set("destination","scatterfile", "show")
     configwrite.add_section("comparison")
     configwrite.set("comparison", "type", "pop")
     configwrite.set("comparison", "expectedSlope", -0.1)
     configwrite.add_section("data")
-    configwrite.set("data", "startCollect", 2)
+    configwrite.set("data", "startCollect",11)
     configwrite.add_section("confidence")
-    configwrite.set("confidence","alpha",0.1)
+    configwrite.set("confidence","alpha",0.05)
     configwrite.write(open("example1.cfg","w"))
 
-    print neConfigRead("example1.cfg")
+    print configRead("example1.cfg")
     print "test master methods"
     neGrapher("testData.txt","example1.cfg")
-    _neStatsHelper("testData.txt",0.1,testFlag=True)
-    _neStatsHelper("testData.txt",0.05)
+    table, countsTable, errorTable = scrapeNE("testData.txt")
+    _neStatsHelper(table,"testData",0.1,testFlag=True)
+    _neStatsHelper(table,"testData",0.05)
+
+    orderDict = {"foo":[(0,"biz"),(1,"baz"),(2,"bar")],"Flop":[(0,"biz"),(5,"boz")]}
+
+    orderTable ={("biz",1):[(1,5),(3,33)],("biz",2):[(1,10),(6,67)],("baz",1):[(1,10),(4,33)],("baz",2):[(1,20),(4,88)],("baz",3):[(1,30),(4,99)],("bar",1):[(1,15),(5,33)],("boz",1):[(1,25),(2,33)]}
+
+    print orderFiles(orderTable,orderDict)
+    ordered = orderFiles(orderTable,orderDict)
+    ordered2 = orderFiles(orderTable,orderDict)
+    print ordered
+    print ordered2
+    print ordered == ordered2
+    neGraphMaker(ordered)
+
+    try:
+        orderFiles(orderTable, orderDict, 3)
+    except Exception as e:
+        print e.message
+        print "exception check passed"

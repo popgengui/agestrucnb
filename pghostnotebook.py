@@ -14,20 +14,17 @@ NE_GUI_IS_IMPLEMENTED=True
 
 VERBOSE=False
 
-import sys
-import os
 from Tkinter import *
 from ttk import *
-import glob
 
-#currently local modules
-import pgutilities as pgut
 import pgmenubuilder as pgmb
-import pgguisimupop as pggs
 
-if NE_GUI_IS_IMPLEMENTED:
-	import pgguineestimator as pgne
-#end if ne estimation gui is ready
+#These classes provide the interfaces, 
+#each offered in the main "Add"
+#menu.
+import pgguisimupop as pggs
+import pgguiviz as pggv
+import pgguineestimator as pgne
 
 from pgguiutilities import FrameContainerScrolled
 from pgguiutilities import PGGUIYesNoMessage
@@ -37,36 +34,57 @@ class PGHostNotebook( Notebook ):
 	Interface that uses tabbed windows to implement interfaces, one or more PGGuiSimupop and/or PGGuiNeEstimator
 	objects.
 	'''
-	def __init__( self, o_parent, s_menu_config, 
-					s_param_names_file_for_simulation, 
-					s_glob_life_tables=None, i_max_process_total=1, 
-					i_container_padding=10 ):
+	def __init__( self, 
+						o_parent, 
+						s_menu_config, 
+						s_param_names_file_for_simulation, 
+						s_param_names_file_for_neestimations, 
+						s_param_names_file_for_viz, 
+						s_glob_life_tables=None, 
+						i_max_process_total=1, 
+						i_container_padding=10 ):
 		'''
 		params 
 		o_parent, parent ttk.Frame object
 
 		s_menu_config, file for PGMenuBuilder object, gives the main menu
 
-		s_param_names_file_for_simulation, table file that lists the parameter names
-		   as read into a PGInputSimuPop object
+		s_param_names_file_for_simulation, table file that lists the parameter names 
+		as read into a PGInputSimuPop object
 
-		s_glob_life_tables, glob expression used by PGOpSimuPop objects to load all life tables
-			into memory
+		s_param_names_file_for_neestimations, table file that lists the parameter names 
+		as required by the PGGuiNeEstimator object
+
+		s_param_names_file_for_viz, table file that lists the parameter names 
+		as required by the PGGuiViz object
+
+		s_glob_life_tables, glob expression used by PGOpSimuPop objects to load all 
+		life tables into memory, if none, pgguisimupop's attribute pginputsimupop 
+		object tries to load params using config file only.
 
 		'''
 		Notebook.__init__( self, o_parent )
 		self.__parent=o_parent
 		self.__menu=pgmb.PGMenuBuilder( s_menu_config, self, o_parent )
+
 		self.__param_names_file_for_simulations=s_param_names_file_for_simulation
+		self.__param_names_file_for_neestimation=s_param_names_file_for_neestimations
+		self.__param_names_file_for_viz=s_param_names_file_for_viz
+
 		self.__tab_count=0
 		self.__tab_children=[]
 		self.__glob_life_tables=s_glob_life_tables
 		self.__max_process_total=i_max_process_total
 		self.__container_padding=i_container_padding
-		self.__param_names_file_for_neestimation=s_param_names_file_for_simulation.replace( "simupop", "neestimation" )
+			
 		#we collect references to the pggui* objects created
 		#and on delete, we clean up using these references:
 		self.__my_gui_objects_by_tab_text={}
+		#This allows direct access to the rebindScrollwheel def
+		#in the FrameContainerScrolled instance in each gui interface:
+		self.__scrolled_frame_objects_by_tab_text={}
+
+		self.bind( "<<NotebookTabChanged>>", self.__on_tab_change )
 		return
 	#end __init__
 
@@ -76,50 +94,92 @@ class PGHostNotebook( Notebook ):
 		'''
 		o_container=Frame( self, padding=self.__container_padding )
 		o_canvas=Canvas( o_container )
-
 		o_pgg=pggs.PGGuiSimuPop( o_container, 
 						self.__param_names_file_for_simulations, 
 						self.__glob_life_tables, 
 						i_total_processes_for_sims=self.__max_process_total )
 
 		o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
-		i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
-
+							i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
+		
 		s_tab_text="Simulation " + str( self.__tab_count )
 		self.add( o_container, text=s_tab_text )
 		self.__tab_children.append( o_container )
 		self.__tab_count+=1
 		self.select( o_container )
 		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
-		return
-	#end addPGGuiSimupop
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+		self.enable_traversal()
 
 	def addPGGuiNeEstimation( self ):
 		'''
 		Add a tabbed frame that offers a PGGuiSimuPop interface
 		'''
-		if NE_GUI_IS_IMPLEMENTED:
-			o_container=Frame( self, padding=self.__container_padding )
 
-			o_canvas=Canvas( o_container )
+		o_container=Frame( self, padding=self.__container_padding )
 
-			o_pgg=pgne.PGGuiNeEstimator( o_container, 
-							self.__param_names_file_for_neestimation )
+		o_canvas=Canvas( o_container )
 
-			o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
-			i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
+		o_pgg=pgne.PGGuiNeEstimator( o_container, 
+						self.__param_names_file_for_neestimation,
+						i_total_processes_for_est=self.__max_process_total )
 
-			s_tab_text="Nb Estimation " + str( self.__tab_count )
-			self.add( o_container, text=s_tab_text )
-			self.__tab_children.append( o_container )
-			self.__tab_count+=1
-			self.select( o_container )
+		o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
+		i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
 
-			self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
-		#end if NE_GUI_IS_IMPLEMENTED
+		s_tab_text="Nb Estimation " + str( self.__tab_count )
+
+		self.add( o_container, text=s_tab_text )
+		self.__tab_children.append( o_container )
+		self.__tab_count+=1
+		self.select( o_container )
+
+		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+
 		return
 
 	#end addPGGuiNeEstimation
+
+	def addPGGuiViz( self ):
+		'''
+		2016_12_12
+		Adds an interface to perform plotting programs on a table 
+		of Ne estimations.
+		'''
+		
+		o_container=Frame( self, padding=self.__container_padding )
+
+		o_canvas=Canvas( o_container )
+
+		'''
+		2016_12_13
+		Note that we load the param names file for ne estimation,
+		as the PGGuiViz object filters the param names for the
+		proper ones for the Viz functions.
+
+		Also note that we do not allow more than a single process
+		for plotting.
+		'''
+		o_pgg=pggv.PGGuiViz( o_container, 
+						self.__param_names_file_for_viz,
+						i_total_processes_for_viz=1 )
+
+		o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
+		i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
+
+		s_tab_text="Nb Vizualizations " + str( self.__tab_count )
+
+		self.add( o_container, text=s_tab_text )
+		self.__tab_children.append( o_container )
+		self.__tab_count+=1
+		self.select( o_container )
+
+		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+
+		return
+	#end addPGGuiViz
 
 	def exitNotebook( self ):
 		if self.__get_tab_count() > 0:
@@ -144,6 +204,23 @@ class PGHostNotebook( Notebook ):
 		return len( self.tabs() )
 	#end __get_tab_count
 
+	def __on_tab_change( self, event ):
+		'''
+		As of 2016_11_13, on tab change our only
+		action is to rebind the mouse scrollwheel
+		to the canvas inside the FrameContainerScrolled
+		instance associated with each GUI interface.
+		'''
+
+		if self.index("end") > 0:
+			
+			s_text_this_tab=self.tab( "current", option="text" )
+			self.__scrolled_frame_objects_by_tab_text[ s_text_this_tab ].rebindScrollwheel()
+		#end if we have at least one tab
+
+		return
+	#end __on_tab_change
+
 	def removeCurrentTab( self ):
 		if self.__get_tab_count() > 0:
 			s_msg="If you're currently running a program in this tab, " \
@@ -155,8 +232,8 @@ class PGHostNotebook( Notebook ):
 			b_do_it=o_msgbox.value
 
 			if b_do_it:
-				i_tab_index=self.index( "current" )
-				s_text_this_tab = self.tab( "current" , option="text"	 )
+
+				s_text_this_tab = self.tab( "current" , option="text" )
 				
 				if VERBOSE:
 					print( "removing gui with tab text: " + s_text_this_tab )
@@ -200,11 +277,10 @@ class PGHostNotebook( Notebook ):
 					self.forget( self.tabs()[ 0 ] )
 				#end while tabs exist
 				self.cleanupAllTabs()
-			#end if answer is do it
-
+			#end if do it
 		#end if we have at least one tab
+		return
 	#end removeAllTabs
-
 
 	def cleanupAllTabs( self ):
 		for o_gui in self.__my_gui_objects_by_tab_text.values():
@@ -220,7 +296,11 @@ class PGHostNotebook( Notebook ):
 #end class PGHostNotebook
 
 if __name__ == "__main__":
-	
+	'''
+	For testing -- in normal operation, the class
+	PGHostNotebook should be instantiiated by client 
+	code (ex: negui.py).
+	'''
 	WINDOW_MARGIN=0.20
 	CONTAINER_PADDING=10
 
@@ -234,13 +314,13 @@ if __name__ == "__main__":
 	i_width=o_master.winfo_screenwidth()
 	i_height=o_master.winfo_screenheight()
 
-
 	f_width_proportion=0.75
 	f_height_proportion=0.5
 
 	i_geo_width=int( ( i_width * f_width_proportion ) * ( 1 - WINDOW_MARGIN ) )
 	i_geo_height=int( ( i_height * f_height_proportion ) * ( 1 - WINDOW_MARGIN ) )
 
+	i_use_this_many_procs=1
 
 	o_host=PGHostNotebook( o_master, 
 			s_menu_config, 
@@ -257,10 +337,10 @@ if __name__ == "__main__":
 	o_master.title( "Age Structure Nb" )	
 	o_master.grid_rowconfigure( 0, weight=1 )
 	o_master.grid_columnconfigure( 0, weight=1 )
+
 	o_master.mainloop()
 
-
-	o_host.addPGGuiSimupop()
+#	o_host.addPGGuiSimupop()
 
 #end if main
 

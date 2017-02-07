@@ -27,13 +27,16 @@ import pgparamset as pgps
 import pgoutputsimupop as pgout
 
 from pgguiutilities import KeyValFrame
+from pgguiutilities import KeyListComboFrame
 from pgguiutilities import KeyCategoricalValueFrame
 from pgguiutilities import PGGUIInfoMessage
 from pgguiutilities import PGGUIYesNoMessage
+from pgguiutilities import PGGUIErrorMessage
 from pgutilityclasses import IndependantSubprocessGroup
 from pgutilityclasses import FloatIntStringParamValidity
 import pgutilities as pgut
 
+import sys
 import os
 import multiprocessing
 import subprocess
@@ -94,10 +97,18 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	RUN_READY=1
 	RUN_IN_PROGRESS=2
 
-	MAX_CHARS_BASENAME=18
+	'''
+	Note, 2017_01_15.  This max Was set to 18 to comply with 
+	a max 31 character limit of file length (18 + chars needed 
+	to add extensions) of the input genepop files and the derived 
+	intermediate input files to NeEstimator.  With changes to the 
+	NeEstimator file handling in pgdriveneestimator.py, we can 
+	remove this limit, but still impose, pro forma a large max.
+	'''
+	MAX_CHARS_BASENAME=500
 
 	def __init__( self,  o_parent,  s_param_names_file=None, 
-							s_life_table_file_glob="resources/*life.table.info",
+							s_life_table_file_glob=None,
 							s_name="simupop_gui",
 							i_total_processes_for_sims=1 ):
 		'''
@@ -163,8 +174,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#immediately
 		self.__setup_output()
 
-
-
 		self.__simulation_is_in_progress=False
 
 		self.__total_processes_for_sims=i_total_processes_for_sims
@@ -176,6 +185,13 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#(not yet implemented, 2016_08_05
 
 		self.__category_frames=None
+
+		#we also hold refernces to the keyvalue
+		#frames that hold param values.  This
+		#allows us to communicate with the entry
+		#boxes via param name.
+		self.__param_key_value_frames=None
+
 
 		self.__run_state_message=""
 		self.__init_interface()
@@ -211,7 +227,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		'''
 		
-		ENTRY_WIDTH=50
+		ENTRY_WIDTH=70
 		LABEL_WIDTH=20
 		LOCATIONS_FRAME_PADDING=30
 		LOCATIONS_FRAME_LABEL="Load/Run"
@@ -236,9 +252,11 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					int, self.__total_processes_for_sims, 
 					1, i_tot_procs )
 
-		o_tot_process_kv=KeyValFrame( "Processes", 
-						self.__total_processes_for_sims,
-						o_run_sub_subframe,
+		o_tot_process_kv=KeyValFrame( s_name="Processes", 
+						v_value=self.__total_processes_for_sims,
+						o_type=int,
+						v_default_value="",
+						o_master=o_run_sub_subframe,
 						o_associated_attribute_object=self,
 						s_associated_attribute="_PGGuiSimuPop" \
 									+ "__total_processes_for_sims",
@@ -267,9 +285,11 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		v_config_file_val="None" if s_curr_config_file == "" else s_curr_config_file
 
-		o_config_kv=KeyValFrame( "Load Configuration File:", 
-						v_config_file_val,
-						o_file_locations_subframe,
+		o_config_kv=KeyValFrame( s_name="Load Configuration File:", 
+						v_value=v_config_file_val,
+						v_default_value="",
+						o_type=str,
+						o_master=o_file_locations_subframe,
 						i_entrywidth=ENTRY_WIDTH,
 						i_labelwidth=LABEL_WIDTH,
 						b_is_enabled=False,
@@ -283,9 +303,11 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		i_row+=1
 
-		o_outdir_kv=KeyValFrame( "Select Output directory", 
-					self.__output_directory.get(), 
-					o_file_locations_subframe,
+		o_outdir_kv=KeyValFrame( s_name="Select output directory", 
+					v_value=self.__output_directory.get(), 
+					v_default_value="",
+					o_type=str,
+					o_master=o_file_locations_subframe,
 					i_entrywidth=ENTRY_WIDTH,
 					i_labelwidth=LABEL_WIDTH,
 					b_is_enabled=False,
@@ -305,6 +327,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		
 		self.__outbase_kv=KeyValFrame( s_name="Output files base name: ", 
 					v_value=self.output_base_name, 
+					o_type=str,
+					v_default_value="",
 					o_master=o_file_locations_subframe, 
 					o_associated_attribute_object=self,
 					s_associated_attribute="output_base_name",
@@ -430,27 +454,40 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		LENSMALL=20
 
 		LABEL_WIDTH = [ WIDTHSMALL if i<LENSMALL else WIDTHBIG for i in range( MAXLABELLEN ) ] 
-		
-		#for parameters with this tag, we set enabled 
+		PARAMETERS_CBOX_WIDTH=15
+
+		'''
+		When we look for config file attributes
+		in the PGInputSimuPop member, that are o
+		settable input parameters, we want
+		to ignore constants, declared
+		in the object with this prefix
+		'''
+		PREFIX_FOR_INPUT_CONSTANTS="CONST_"
+
+		#for parameters in this section, we set enabled 
 		#flag to false for the KeyValFrame entry box:
-		CONFIG_INFO_TAG_KEYWORD="Configuration Info"
+		CONFIG_INFO_SECTION_NAME="Configuration Info"
+
+		self.__param_key_value_frames={}
 
 		i_row=0
 
 		o_input=self.__input
 		
-		ls_input_params=[ s_param for s_param in dir( o_input ) if not( s_param.startswith( "_" ) )  ]
-
+		ls_input_params=[ s_param for s_param in dir( o_input ) if not( s_param.startswith( "_" ) ) \
+											and not( s_param.startswith( PREFIX_FOR_INPUT_CONSTANTS ) )  ]
 		ls_tags=o_input.param_names.tags
 
-		ls_sections=[  o_input.param_names.getConfigSectionNameFromTag( \
-											s_tag )  for s_tag in ls_tags ]
+		ls_sections=[  o_input.param_names\
+					.getConfigSectionNameFromTag( s_tag )  for s_tag in ls_tags ]
 
 		#clear existing category frames (if any): 
 		self.__clear_grid_below_row( self, 1 )
 
 		#make frames, one for each category of parameter
 		#(currently, "population", "configuration", "genome", "simulation"
+		self.__remove_current_category_frames()
 		self.__category_frames=self.__make_category_subframes( \
 				set( ls_sections ) )	
 
@@ -459,12 +496,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			PADPIX=0
 
 			i_row+=1
-			s_longname=None
-			s_nametag=None
-			s_tooltip=""
-			i_len_labelname=None
 
-			o_def_to_run_on_value_change=None
+			i_len_labelname=None
 
 			if VERBOSE == True:
 				o_def_to_run_on_value_change=self.__test_value
@@ -484,26 +517,74 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#end if method, skip
 			#end if the value is a string
 
-			if o_input.param_names is not None:
-				#returns None if this param has no longname,
-				#and the KeyValFrame will ignore s_label_name if
-				#its value is None, using instead the param name 
-				#as given by s_param
-				s_longname=o_input.param_names.longname( s_param )
-				s_nametag=o_input.param_names.tag( s_param )
-				s_tooltip=o_input.param_names.getToolTipForParam( s_param )
-				s_section_name= \
-						o_input.param_names.getConfigSectionNameFromTag( s_nametag )
-			#end if we have a set of param names
+			if o_input.param_names is None:
+				s_msg=" In PGGuiSimuPop instance, " \
+						+ "def __load_values_into_interface, " \
+						+ "member __input has missing PGParamset " \
+						+ "instance."
+				raise Exception( s_msg )
+			#end of no param_set object
 
-			#if not in the param names file, we don't want to suppress it,
+			if not( o_input.param_names.isInSet( s_param ) ):
+					s_msg=" In PGGuiSimuPop instance, " \
+						+ "def __load_values_into_interface, " \
+						+ "member __input members PGParamset " \
+						+ "instance has no param, " + s_param + "."
+					raise Exception( s_msg )
+			#end if param not in param_names objectd
+
+			b_param_is_in_param_set=True
+			
+			'''
+			This call requires we get all
+			the values from the param tag,
+			but we'll only use the ones we
+			need (see below):
+			'''
+
+			( s_longname,
+				s_section_name,
+				i_param_section_order_number,
+				i_param_column_number,
+				i_param_position_in_order,
+				v_default_value,
+				o_param_type,
+				v_min_value,
+				v_max_value,
+				s_tooltip,
+				s_param_control_type,
+				s_param_control_list,
+				s_param_validity_expression,
+				s_param_assoc_def,
+				s_param_control_state ) = \
+						o_input.param_names.getAllParamSettings( s_param )
+				#end if param is in paramset
+
+			#if no specific def is to be called on value change
+			#then we default to the def that shows current param vals:
+			def_to_call_on_change=self.__test_value
+
+			if s_param_assoc_def != "None":
+				try:
+					
+					def_to_call_on_change=getattr( self, s_param_assoc_def )
+
+				except:
+					s_msg="In PGGuiSimuPop instance, def __load_values_into_interface, " \
+								+ "for param, " + s_param \
+								+ ", unable to find input def for param's associated def string: " \
+								+ s_param_assoc_def + "."
+					raise Exception( s_msg )
+			#end if s_associated_def not None
+
+
 			#If it is in the param names we don't suppress as long as the
 			#param is not tagged as "suppress"
-			if s_nametag is None or s_section_name != "suppress":
+			if s_section_name != "suppress":
 
 				o_frame_for_this_param=None
 
-				if s_nametag is None or s_section_name not in self.__category_frames:
+				if s_section_name not in self.__category_frames:
 					o_frame_for_this_param=self.__category_frames[ "none" ]
 				else:
 					o_frame_for_this_param=self.__category_frames[ s_section_name ]
@@ -512,36 +593,106 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				i_len_labelname=len( s_longname ) if s_longname is not None else len( s_param )
 				i_width_labelname=LABEL_WIDTH[ i_len_labelname ]
 
-				b_allow_entry_change = True
+				'''
+				As of 2017_01_23, the param set (PGParamSet instance
+				now includeds a control state (see above, call to 
+				getAllParamSettings), set either to enabled
+				or disabled.  Hence we default to its setting, 
+				though we keep the tests below that can change it, 
+				in case these are conditions not anticipated by 
+				the resource/simupop.param.names file that gives 
+				the ParamSet object its parameter settings.
+				'''
+				b_allow_entry_change = ( s_param_control_state == "enabled" )
 
-				if s_nametag is not None:
-					if CONFIG_INFO_TAG_KEYWORD in s_nametag:
+				if s_section_name == CONFIG_INFO_SECTION_NAME:
+					b_allow_entry_change=False
+				#end if input param is type config info, disable
+
+				s_attribute_to_update=s_param
+
+				if s_param == "N0":
+					if o_input.N0IsCalculatedFromEffectiveSizeInfo():
 						b_allow_entry_change=False
-					#end if input param is type config info, disable
-				#end if nametag exists
+						s_attribute_to_update=None	
+					#end if we're calculating N0
+				#end if param is "N0"
 
-				#we send in the input object to the KeyValFrame (or KeyCategoricalValueFrame 
+				#we send in the input object to the KeyValFrame (or similar class)
 				#instance so it will be the object whose attribute (with name s_param)
 				#is reset when user resets the value in the KeyValFrame:
-				if type( v_val ) != bool:
+				if s_param_control_type == "entry":
 
 					i_entry_width=len(v_val) if type( v_val ) == str else 7
+
 					s_entry_justify='left' if type( v_val ) == str else 'right' 
 
-					
-					o_kv=KeyValFrame( s_param, v_val, o_frame_for_this_param, 
-							o_associated_attribute_object=self.__input,
-							s_associated_attribute=s_param,
-							def_entry_change_command=self.__test_value,
-							i_labelwidth=i_width_labelname,	
-							s_label_name=s_longname,
-							i_entrywidth = i_entry_width,
-							s_entry_justify=s_entry_justify,
-							b_is_enabled=b_allow_entry_change,
-							b_force_disable=b_force_disable,
-							s_tooltip=s_tooltip )
-						
-				else:
+					o_kv=KeyValFrame( s_name=s_param, 
+								v_value=v_val, 
+								v_default_value=v_default_value,
+								o_type=o_param_type,
+								o_master=o_frame_for_this_param, 
+								o_associated_attribute_object=self.__input,
+								s_associated_attribute=s_attribute_to_update,
+								def_entry_change_command=def_to_call_on_change,
+								i_labelwidth=i_width_labelname,	
+								s_label_name=s_longname,
+								i_entrywidth = i_entry_width,
+								s_entry_justify=s_entry_justify,
+								b_is_enabled=b_allow_entry_change,
+								b_force_disable=b_force_disable,
+								s_tooltip=s_tooltip )
+				#cbox types are specified as cboxreadonly or cboxnormal, so we test for prefix:	
+				elif s_param_control_type.startswith( "cbox" ):
+					'''
+					As of 2016_11_25, there are two types of combobox
+					'''
+					s_state_this_cbox=None
+					if s_param_control_type == "cboxnormal":
+						s_state_this_cbox="normal"
+					elif s_param_control_type == "cboxreadonly":
+						s_state_this_cbox="readonly"
+					else:
+						s_msg="In PGGuiSimuPop, def __load_values_into_interface, " \
+									+ "unknown cbox control type: " \
+									+ s_param_control_type + "."
+						raise Exception( s_msg )
+					#end if normal, else readonly cbox
+
+					qs_control_list=eval( s_param_control_list )
+
+					i_current_item_number=None
+
+					if v_val not in qs_control_list:
+						s_msg="Current value for parameter " \
+							 	+ s_param + " is not found " \
+								+ "among the values listed as valid: " \
+								+ str( qs_control_list ) + ""
+						raise Exception( s_msg )
+					else:
+						#KeyListComboFrame init expects 1-based value, so
+						#we increment the python, zero-based index
+						i_current_item_number=qs_control_list.index( v_val )
+						i_current_item_number +=1
+					#end if v_val not in value list
+
+					o_kv=KeyListComboFrame( s_name=s_param,
+								qs_choices=qs_control_list,
+								i_default_choice_number=i_current_item_number,
+								o_master=o_frame_for_this_param,
+								s_associated_attribute=s_attribute_to_update,
+								o_associated_attribute_object=self.__input,
+								def_on_new_selection=def_to_call_on_change,
+								i_labelwidth=i_width_labelname,
+								i_cbox_width=PARAMETERS_CBOX_WIDTH,
+								s_label_justify='left',
+								s_label_name=s_longname,
+								s_tooltip=s_tooltip,
+								b_is_enabled=True,
+								s_state=s_state_this_cbox,
+								b_force_disable=b_force_disable )
+
+				elif s_param_control_type == "boolradio":
 
 					#we construct a KeyCategoricalValueFrame
 					#instance, and set the default button to
@@ -559,7 +710,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							o_master=o_frame_for_this_param, 
 							s_associated_attribute=s_param,
 							o_associated_attribute_object=self.__input,
-							def_on_button_change=self.__test_value,
+							def_on_button_change=def_to_call_on_change,
 							i_labelwidth=i_width_labelname,
 							s_label_name=s_longname,
 							b_buttons_in_a_row = True,
@@ -567,51 +718,164 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							b_force_disable=b_force_disable,
 							s_tooltip=s_tooltip )
 
+				else:
+					s_msg="In PGGuiSimuPop instance, def " \
+							+ "__load_values_into_interface, " \
+							+ "unknown control type spcified: " \
+							+ s_param_control_type + "."
+					raise Exception( s_msg )
+
+				#end if control type entry, else combobox, else bool radio button, else unknown
+
 				o_kv.grid( row=i_row, sticky=(NW) )
-			#end if param has non-boolean value else boolean
+				self.__param_key_value_frames[ s_param ] = o_kv
+
+			#end if section name not "suppress"
 		#end for each input param
 
 		self.__place_category_frames( self.__category_frames )
-
-		#end for each param
-
 		self.grid_columnconfigure( 0, weight=1 )
 		self.grid_rowconfigure( 0, weight=1 )
 
 		return
 	#end __load_values_into_interface
 
+	def onCullMethodSelectionChange( self ):
+		'''
+		Not implemented, 2016_11_01.  May
+		not need to add any code here, since
+		KeyListComboFrame control object resets
+		the attribute in the input object
+		automatically.
+
+		2017_01_05  We add code that tests for
+		the cull method value.  If it is 
+		"equal_sex_ratio", we disable the
+		"Probability male birth" text box,
+		to indicate that the sex birth ratio
+		will be set to 50/50 (i.e. the call
+		to InitSex in the simulation will be
+		maleProb=0.5).
+		'''
+		CBOX_EQUAL_SEX_RATIO_TEXT="equal_sex_ratio"
+
+		
+		if self.__input is not None:
+
+			b_have_cullmethod_attr=hasattr( self.__input, "cull_method" )
+			b_have_maleprob_attr=hasattr(  self.__input, "maleProb" )
+			b_have_access_to_control="maleProb" in self.__param_key_value_frames
+
+			if b_have_cullmethod_attr  \
+							and b_have_maleprob_attr \
+							and b_have_access_to_control:
+
+				o_this_kv=self.__param_key_value_frames[ "maleProb" ]
+
+				if self.__input.cull_method == CBOX_EQUAL_SEX_RATIO_TEXT:
+					o_this_kv.setStateControls( "disabled" )
+				else:
+					'''
+					If the control was initialized with "isenabled" as true,
+					and if the force_disable is also true, then the current
+					state of controls, if they are disabled, must be due to
+					a former change to equal sex ratio.  Now we have a different
+					cull setting, so we can, in that case, re-enable:
+					'''
+					if o_this_kv.is_enabled and not o_this_kv.force_disable:
+						o_this_kv.setStateControls( "enabled" )
+					#end if we should enable
+
+				#end if cull method is set to equal sex ratio, else not
+			#end if we have a cull_method attribute, a male prob attribute, 
+			#and access to the maleProb entry control
+		#end if we have an input object
+
+		if VERY_VERBOSE:
+			self.__test_value()
+		#end if very verbose
+
+		return
+	#end __on_cull_method_selection_change
+
 	def load_config_file( self, event=None ):
-		s_current_value=self.__config_file.get()
-		s_config_file=tkfd.askopenfilename(  \
-				title='Load a configuration file' )
 
-		if pgut.dialog_returns_nothing( s_config_file ):
-			return
-		#end if no file selected, return
-
-		self.__config_file.set(s_config_file)
 		try:
-			self.__setup_input()
-		except Exception as oe:
-			if s_config_file != INIT_ENTRY_CONFIG_FILE: 
-				s_msg="Problem loading configuration.\n" \
-						+ "File: " + str( s_config_file ) + "\n\n" \
-						+ "Details:\n\n" \
-						+ "Exception: " + str( oe ) + "."
-				o_diag=PGGUIInfoMessage( self, s_msg )
-			#end if entry not None
-			return
-		#end try ... except
-		self.__init_interface()
-		self.__load_values_into_interface()
-		self.__set_controls_by_run_state( self.__get_run_state() )
+			s_current_value=self.__config_file.get()
+			s_config_file=tkfd.askopenfilename(  \
+					title='Load a configuration file' )
+
+			if pgut.dialog_returns_nothing( s_config_file ):
+				return
+			#end if no file selected, return
+
+			self.__config_file.set(s_config_file)
+
+			try:
+				self.__setup_input()
+			except Exception as oe:
+				if s_config_file != INIT_ENTRY_CONFIG_FILE: 
+					s_msg="Problem loading configuration.\n" \
+							+ "File: " + str( s_config_file ) + "\n\n" \
+							+ "Details: " \
+							+ "Exception: " + str( oe ) 
+					o_diag=PGGUIInfoMessage( self, s_msg )
+				#end if entry not None
+				return
+			#end try ... except
+
+			self.__init_interface()
+			self.__load_values_into_interface()
+			self.__set_controls_by_run_state( self.__get_run_state() )
+		except Exception as oex:
+			s_msg="In PGGuiSimuPop instance, def load_config_file " \
+					+ "an exception was raised: " + str( oex ) 
+
+			PGGUIErrorMessage( self, s_msg )
+
+			raise ( oex )
+
 		return
 	#end load_config_file
 
+	def updateN0EntryBox( self ):
+		'''
+		N0 parameter updates differently according to
+		whether it is simply taken from a config file's
+		pop section, or, alternatively, calculated from
+		params Nb,Nb/Nc as given by an "effective_size"
+		section in a life table or config file, and also
+		using input params maleProb, survivalMale, and
+		survivalFemale.  In the latter
+		case, the keyvalue frame will be disabled and its entrybox
+		will be manually updated from this def.  
+		'''
+		if self.__input.N0IsCalculatedFromEffectiveSizeInfo():
+			'''
+			Nb is a property, calculated or just returned
+			depending on its source (effec size or hus a value
+			given in the pop section). The property def in
+			our __input member will test the state and calculate
+			N0 accordingly:
+			'''
+
+			i_current_n0_val=self.__input.N0
+
+			self.__param_key_value_frames[ "N0" ].manuallyUpdateValue( i_current_n0_val )
+		#end if N0 is calc'd from effective size info
+
+		if VERY_VERBOSE:
+			self.__test_value()
+		#end if very verbose, show param values
+
+		return
+	#end updateN0EntryBox
+
 	def __get_life_table_file_list( self, s_glob_expression ):
-		self.__life_table_files = \
-			pgut.get_list_files_and_dirs_from_glob( s_glob_expression )
+		if s_glob_expression is not None:
+			self.__life_table_files = \
+				pgut.get_list_files_and_dirs_from_glob( s_glob_expression )
+		#end if we have a glob to get life table files	
 		return
 	#end def __get_life_table_file_list
 
@@ -634,7 +898,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		o_model_resources=None
 		o_param_names=None
 		o_pgin=None
-
+	
 		if len( self.__life_table_files ) > 0:
 			o_model_resources=pgsr.PGSimuPopResources( self.__life_table_files )
 		#end if we have a file list
@@ -644,11 +908,32 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#end if param_names_file is set
 
 		try:
-			#note that we can pass None value n for o_model_resources,
-			#and as long as the config file has evaluatable values for
+			#note that we can pass None value in for o_model_resources,
+			#and as long as the config file has evaluate-able values for
 			#all of its options, we still get a valid PGInputSimuPop object:
 			o_pgin=pgin.PGInputSimuPop( self.__config_file.get(), o_model_resources, o_param_names ) 
+			
 			o_pgin.makeInputConfig()
+
+			'''
+			We give the user an info box when the N0 value is not
+			calculated (i.e. we have no Nb/Nc and Nb value in a
+			section called "effective_size_info" in either the
+			configuration file or the life table (if life table is
+			available).
+			'''
+
+			b_using_effective_size_info = o_pgin.has_effective_size_info()
+
+			if not b_using_effective_size_info:
+				s_message="The loaded configuration info has no \"effective_size_info\" " \
+											+ "with values for Nb/Nc and Nb.\n" \
+											+ "As a result the N0 value is not calculated, " \
+											+ "and can be set directly in the N0 text box."
+
+				PGGUIInfoMessage( self, s_message )
+			#end not using effective size info
+
 		except Exception as exc:
 			self.__config_file.set("")
 			self.__input=None
@@ -733,9 +1018,12 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		as small as possble, to keep the resulting
 		genepop file name under 31 chars, as NeEstimation
 		currently can't handle input file names >31 chars.
+
+		2017_01_15, we now return the original default
+		with the dots.
 		'''
 		s_mytime=pgut.get_date_time_string_dotted()	
-		return "sim." + s_mytime.replace( ".", "" )
+		return "sim." + s_mytime
 	#end __get_default_output_base_name
 
 	def __get_default_output_directory( self ):
@@ -893,91 +1181,97 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end __output_files_exist_with_current_output_basename
 
 	def runSimulation( self ):
-		if self.__output is None \
-			or self.__input is None:
-			s_msg="Simulation not ready to run.  Input or Output parameters " \
-					+ "have not been set" 
-			sys.stderr.write( s_msg + "\n" )
-			PGGUIInfoMessage( self, s_msg )
-			return	
-		#end if output or input is None
+		try:
 
-		self.__setup_op()
+			if self.__output is None \
+				or self.__input is None:
+				s_msg="Simulation not ready to run.  Input or Output parameters " \
+						+ "have not been set" 
+				sys.stderr.write( s_msg + "\n" )
+				PGGUIInfoMessage( self, s_msg )
+				return	
+			#end if output or input is None
 
-		'''
-		this check was added in case a user completed a simulation,
-		then accidentally hit "run simulation" button again without
-		changing anything in the interface, and then (very quickly) 
-		hit the "cancel simulation" button -- initiating a file removal
-		before the program has reached the point at which which the
-		PGOutputSimuPop object could abort the run by throwing an 
-		exception that the output files already exist.
-		The following check is meant to halt the sim before any
-		separate processes are even started (and so no multiprocessing
-		event will cause cancel prompt and cleanup on "yes" ).
-		'''
-		if self.__output_files_exist_with_current_output_basename():
-			s_msg="The program can't start the simulation. Output files " \
-					+ "already exist with current " \
-					+ "path and basename: " + self.__output.basename + ".  " \
-					+ "\nTo start a new simulation please do one of the following:\n" \
-					+ "1. Remove or rename the output files.\n" \
-					+ "2. Rename the output files base name or output directory." 
+			self.__setup_op()
 
-			sys.stderr.write( s_msg + "\n" )
+			'''
+			this check was added in case a user completed a simulation,
+			then accidentally hit "run simulation" button again without
+			changing anything in the interface, and then (very quickly) 
+			hit the "cancel simulation" button -- initiating a file removal
+			before the program has reached the point at which which the
+			PGOutputSimuPop object could abort the run by throwing an 
+			exception that the output files already exist.
+			The following check is meant to halt the sim before any
+			separate processes are even started (and so no multiprocessing
+			event will cause cancel prompt and cleanup on "yes" ).
+			'''
+			if self.__output_files_exist_with_current_output_basename():
+				s_msg="The program can't start the simulation. Output files " \
+						+ "already exist with current " \
+						+ "path and basename: " + self.__output.basename + ".  " \
+						+ "\nTo start a new simulation please do one of the following:\n" \
+						+ "1. Remove or rename the output files.\n" \
+						+ "2. Rename the output files base name or output directory." 
+
+				sys.stderr.write( s_msg + "\n" )
+				
+				PGGUIInfoMessage( self, s_msg )
+				return
+			#end if output files exist	
+
+			#input file to reaplace the orig config file
+			#as well as the attr/value dict originally passed to each 
+			#process.  We need to set this temp file name attribute
+			#in this instance before spawning a multiprocessing.process
+			#in do_operation, else it will not appear during call backs
+			#to __check_progress_operation_process, in which we delete
+			#the temp file when sim processes are finished
+			self.__temp_config_file_for_running_replicates=str( uuid.uuid4() ) 
 			
-			PGGUIInfoMessage( self, s_msg )
-			return
-		#end if output files exist	
+			self.__input.writeInputParamsAsConfigFile( \
+				self.__temp_config_file_for_running_replicates )
 
-		#input file to reaplace the orig config file
-		#as well as the attr/value dict originally passed to each 
-		#process.  We need to set this temp file name attribute
-		#in this instance before spawning a multiprocessing.process
-		#in do_operation, else it will not appear during call backs
-		#to __check_progress_operation_process, in which we delete
-		#the temp file when sim processes are finished
-		self.__temp_config_file_for_running_replicates=str( uuid.uuid4() ) 
-		
-		self.__input.writeInputParamsAsConfigFile( \
-			self.__temp_config_file_for_running_replicates )
+			#we pass a ref to this object to the target (def in pgutilities, do_simulation_reps_in_subprocesses) 
+			#for op_process, #Then, from this object instance can call "set()" on the event, 
+			#after, for example #an __on_click_run_or_cancel_simulation_button->__cancel_simulation()
+			#sequence, so that the event will to pass True and then the ref in
+			#op_process will return True when the op_process interrog 
+			#o_event.is_set()  and it can accordingly clean
+			#up its collection of subprocess.Popen processes 
+			self.__sim_multi_process_event=multiprocessing.Event()
 
-		#we pass a ref to this object to the target (def in pgutilities, do_operation_outside) 
-		#for op_process, #Then, from this object instance can call "set()" on the event, 
-		#after, for example #an __on_click_run_or_cancel_simulation_button->__cancel_simulation()
-		#sequence, so that the event will to pass True and then the ref in
-		#op_process will return True when the op_process interrog 
-		#o_event.is_set()  and it can accordingly clean
-		#up its collection of subprocess.Popen processes 
-		self.__sim_multi_process_event=multiprocessing.Event()
+			#our sim run(s) should not block the main gui, so we
+			#run it(them) in one or more python.subprocesses:
+			self.__op_process=multiprocessing.Process( target=pgut.do_simulation_reps_in_subprocesses, 
+						 args=( self.__sim_multi_process_event, 
+							self.__input.reps, 
+							self.__total_processes_for_sims,
+							self.__temp_config_file_for_running_replicates,
+							self.__life_table_files,
+							self.__param_names_file,
+							self.__output.basename ) ) 
 
-		#our sim run(s) should not block the main gui, so we
-		#run it(them) in a new python.multiprocessing.process:
-		self.__op_process=multiprocessing.Process( target=pgut.do_operation_outside, 
-					 args=( self.__sim_multi_process_event, 
-						self.__input.reps, 
-						self.__total_processes_for_sims,
-						self.__temp_config_file_for_running_replicates,
-						self.__life_table_files,
-						self.__param_names_file,
-						self.__output.basename ) ) 
+			self.__op_process.start()
 
-		self.__op_process.start()
+			self.__simulation_is_in_progress=True
 
-		self.__simulation_is_in_progress=True
+			#Need some padding in front, or
+			#it's too close to the run button:
+			self.__run_state_message="  " + SIM_RUNNING_MSG
 
-		#Need some padding in front, or
-		#it's too close to the run button:
-		self.__run_state_message="  " + SIM_RUNNING_MSG
+			self.__set_controls_by_run_state( self.__get_run_state() )
 
-		self.__set_controls_by_run_state( self.__get_run_state() )
+			self.__init_interface( b_force_disable=True )
+			self.__load_values_into_interface( b_force_disable=True )
 
-		self.__init_interface( b_force_disable=True )
-		self.__load_values_into_interface( b_force_disable=True )
-
-		self.after( 500, 
-				self.__check_progress_operation_process )
-
+			self.after( 500, 
+					self.__check_progress_operation_process )
+		except Exception as oex:
+			PGGUIErrorMessage( o_parent=self, s_message= \
+					oex.__class__.__name__ + ", " + str( oex ) )
+			raise oex 
+		#end try . . . except
 		return
 	#end runSimulation
 
@@ -997,7 +1291,33 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		return
 	#end show_input_config
 
+	def __remove_current_category_frames( self ):
+		'''
+		2017_01_16  This def was created to solve
+		the problem of the "Configuration Info" labeled
+		subframe in the interface showing its last position
+		when a config file with a shortere name is loaded
+		after a config file with a longer name was loaded.
+		This suggested that the old frame was persisiting.
+
+		These callsd to LabelFrame's destroy() def were originall
+		preceeded by a call to grid_remove(), in imitation of the
+		subframe removal code in def __load_genepopfile_sampling_params_interface
+		in pgguineestimator.py.  I found, however, that calls to grid_remove
+		for the subframe objectds in the self.__category_frames dict
+		resulted in an error stateing "bad window path."  
+		'''
+
+		if self.__category_frames is not None:
+			for s_key in self.__category_frames:
+				if self.__category_frames[ s_key ] is not None:
+					self.__category_frames[ s_key ].destroy()
+				#end if frame not none
+		#end if we have category frames
+		return
+	#end __remove_current_category_frames
 	def cleanup( self ):
 		self.__cancel_simulation()
 		self.__remove_temporary_config_file()
+	#end cleanup
 #end class PGGuiSimuPop

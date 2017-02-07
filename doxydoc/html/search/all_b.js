@@ -1,28 +1,6 @@
 var searchData=
 [
-  ['apgoperation',['apgoperation',['../namespacenegui_1_1apgoperation.html',1,'negui']]],
-  ['createtooltip',['createtooltip',['../namespacenegui_1_1createtooltip.html',1,'negui']]],
-  ['do_5fsim_5freplicate',['do_sim_replicate',['../namespacenegui_1_1do__sim__replicate.html',1,'negui']]],
-  ['genepopfilemanager',['genepopfilemanager',['../namespacenegui_1_1genepopfilemanager.html',1,'negui']]],
-  ['genepopfilesampler',['genepopfilesampler',['../namespacenegui_1_1genepopfilesampler.html',1,'negui']]],
-  ['indiv',['indiv',['../namespacenegui_1_1indiv.html',1,'negui']]],
-  ['negui',['negui',['../namespacenegui_1_1negui.html',1,'negui']]],
-  ['pgdriveneestimator',['pgdriveneestimator',['../namespacenegui_1_1pgdriveneestimator.html',1,'negui']]],
-  ['pgguiapp',['pgguiapp',['../namespacenegui_1_1pgguiapp.html',1,'negui']]],
-  ['pgguineestimator',['pgguineestimator',['../namespacenegui_1_1pgguineestimator.html',1,'negui']]],
-  ['pgguisimupop',['pgguisimupop',['../namespacenegui_1_1pgguisimupop.html',1,'negui']]],
-  ['pgguiutilities',['pgguiutilities',['../namespacenegui_1_1pgguiutilities.html',1,'negui']]],
-  ['pghostnotebook',['pghostnotebook',['../namespacenegui_1_1pghostnotebook.html',1,'negui']]],
-  ['pginputneestimator',['pginputneestimator',['../namespacenegui_1_1pginputneestimator.html',1,'negui']]],
-  ['pginputsimupop',['pginputsimupop',['../namespacenegui_1_1pginputsimupop.html',1,'negui']]],
-  ['pgmenubuilder',['pgmenubuilder',['../namespacenegui_1_1pgmenubuilder.html',1,'negui']]],
-  ['pgopneestimator',['pgopneestimator',['../namespacenegui_1_1pgopneestimator.html',1,'negui']]],
-  ['pgopsimupop',['pgopsimupop',['../namespacenegui_1_1pgopsimupop.html',1,'negui']]],
-  ['pgoutputneestimator',['pgoutputneestimator',['../namespacenegui_1_1pgoutputneestimator.html',1,'negui']]],
-  ['pgoutputsimupop',['pgoutputsimupop',['../namespacenegui_1_1pgoutputsimupop.html',1,'negui']]],
-  ['pgparamset',['pgparamset',['../namespacenegui_1_1pgparamset.html',1,'negui']]],
-  ['pgsimupopresources',['pgsimupopresources',['../namespacenegui_1_1pgsimupopresources.html',1,'negui']]],
-  ['pgutilities',['pgutilities',['../namespacenegui_1_1pgutilities.html',1,'negui']]],
-  ['pgutilityclasses',['pgutilityclasses',['../namespacenegui_1_1pgutilityclasses.html',1,'negui']]],
-  ['temp',['temp',['../namespacenegui_1_1temp.html',1,'negui']]]
+  ['master',['master',['../classnegui_1_1pgguiapp_1_1PGGuiApp.html#a0af5ea1a1b6d1565002150d7b53efbdc',1,'negui::pgguiapp::PGGuiApp']]],
+  ['menu',['menu',['../classnegui_1_1pgmenubuilder_1_1PGMenuBuilder.html#ae45f68f11cc8fa8c39d8b93a15238c83',1,'negui::pgmenubuilder::PGMenuBuilder']]],
+  ['mymain',['mymain',['../namespacenegui_1_1pgdriveneestimator.html#a9195d73a2642b87625772820ffff8023',1,'negui::pgdriveneestimator']]]
 ];
