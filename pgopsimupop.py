@@ -108,6 +108,8 @@ class PGOpSimuPop( modop.APGOperation ):
 		We initiallize to the input object's value:
 		'''
 		self.__current_N0=self.input.N0
+		#used for Nb lambda Calculations
+		self.__current_Nb = self.input.Nb
 		
 		return
 	#end __init__
@@ -585,7 +587,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			print ( "in __restrictedGenerator with " \
 					+ "args, pop: %s, subpop: %s"
-							% ( str( pop ), sr( subPop ) ) )
+							% ( str( pop ), str( subPop ) ) )
 		#end if VERBOSE
 
 		while not nbOK:
@@ -901,7 +903,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __harvest(self, pop):
 		gen = pop.dvars().gen
-		if self.input.harvest == None or self.input.harvest[gen] == 0:
+		if self.input.harvest == None or self.input.harvest[gen] == 0.0:
 			return True
 		kills = []
 		cohortDict = {}
@@ -913,11 +915,14 @@ class PGOpSimuPop( modop.APGOperation ):
 			cohortDict[indAge].append(i)
 
 		for cohortKey in cohortDict:
-			## !! Cohort 0 does not get culled!!
+			## !! Cohort 0 does not get harvested!!
 			# if cohortKey == 0.0:
 			#	continue
 
 			cohortKills = []
+
+
+
 
 			# setup data and seperate males and females
 			cohort = cohortDict[cohortKey]
@@ -932,9 +937,17 @@ class PGOpSimuPop( modop.APGOperation ):
 			print femaleCount
 			print"\n"
 
+			#reduce newborns
+			self.__current_N0 = self.__current_N0 *1-
+
 			#determine harvest rate for this generation
 
 			harvestRate = (self.input.harvest[gen])
+			#todo change Nb to reflect harvest
+			print harvestRate
+			# reduce newborns
+			self.__current_N0 = self.__current_N0 * (1 - harvestRate)
+
 			print harvestRate
 			maleHarvest = numpy.round(maleCount * harvestRate)
 			femaleHarvest = numpy.round(femaleCount * harvestRate)
@@ -965,7 +978,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		pop.removeIndividuals(IDs=kills)
 		return True
 
-# end __equalSexCull
+# end _harvest
 
 
 
