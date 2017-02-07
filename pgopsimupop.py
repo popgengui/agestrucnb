@@ -847,73 +847,81 @@ class PGOpSimuPop( modop.APGOperation ):
 
 # end __equalSexCull
 
-	def __harvest(self, pop):
-		gen = pop.dvars().gen
-		if  gen  not in self.input.harvest:
-			return True
-		kills = []
-		cohortDict = {}
-		for i in pop.individuals():
-			indAge = i.age
+		def __harvest(self, pop):
+			gen = pop.dvars().gen
+			if self.input.harvest == None or self.input.harvest[gen] == 0.0:
+				return True
+			kills = []
+			cohortDict = {}
+			for i in pop.individuals():
+				indAge = i.age
 
-			if not indAge in cohortDict:
-				cohortDict[indAge] = []
-			cohortDict[indAge].append(i)
+				if not indAge in cohortDict:
+					cohortDict[indAge] = []
+				cohortDict[indAge].append(i)
 
-		for cohortKey in cohortDict:
-			## !! Cohort 0 does not get culled!!
-			# if cohortKey == 0.0:
-			#	continue
+			for cohortKey in cohortDict:
+				## !! Cohort 0 does not get harvested!!
+				# if cohortKey == 0.0:
+				#	continue
 
-			cohortKills = []
+				cohortKills = []
 
-			# setup data and seperate males and females
-			cohort = cohortDict[cohortKey]
-			print(cohortKey)
-			cohortTotal = len(cohort)
-			cohortMales = [x for x in cohort if x.sex() == 1]
-			maleCount = len(cohortMales)
-			cohortFemales = [x for x in cohort if x.sex() == 2]
-			femaleCount = len(cohortFemales)
-			print cohortTotal
-			print maleCount
-			print femaleCount
-			print"\n"
+				# setup data and seperate males and females
+				cohort = cohortDict[cohortKey]
+				print(cohortKey)
+				cohortTotal = len(cohort)
+				cohortMales = [x for x in cohort if x.sex() == 1]
+				maleCount = len(cohortMales)
+				cohortFemales = [x for x in cohort if x.sex() == 2]
+				femaleCount = len(cohortFemales)
+				print cohortTotal
+				print maleCount
+				print femaleCount
+				print"\n"
 
-			#determine harvest rate for this generation
+				# reduce newborns
+				self.__current_N0 = self.__current_N0 * 1 - harvestRate
 
-			harvestRate = (self.input.harvest[gen])
-			print harvestRate
-			maleHarvest = numpy.round(maleCount * harvestRate)
-			femaleHarvest = numpy.round(femaleCount * harvestRate)
-			print "\n\n"
+				# determine harvest rate for this generation
 
-			# choose which sex to kill first
-			# flag is one and 0 for easy switching
-			# killChoiceFlag = round(random.random())
-			# if femaleCount > maleCount:
-			# 	killChoiceFlag = 0
-			# if maleCount > femaleCount:
-			# 	killChoiceFlag = 1
+				harvestRate = (self.input.harvest[gen])
+				# todo change Nb to reflect harvest
+				print harvestRate
+				# reduce newborns
+				self.__current_N0 = self.__current_N0 * (1 - harvestRate)
+
+				print harvestRate
+				maleHarvest = numpy.round(maleCount * harvestRate)
+				femaleHarvest = numpy.round(femaleCount * harvestRate)
+				print "\n\n"
+
+				# choose which sex to kill first
+				# flag is one and 0 for easy switching
+				# killChoiceFlag = round(random.random())
+				# if femaleCount > maleCount:
+				# 	killChoiceFlag = 0
+				# if maleCount > femaleCount:
+				# 	killChoiceFlag = 1
 
 
-			#sample  harvest
-			maleHarvestList = numpy.sample(cohortMales,maleHarvest)
-			femaleHarvestList = numpy.sample(cohortFemales,femaleHarvest)
-			for ind in maleHarvestList:
-				print "Dead " + str(ind.ind_id)
-				kills.append(ind.ind_id)
-			for ind in femaleHarvestList:
-				print "Dead " + str(ind.ind_id)
-				kills.append(ind.ind_id)
+				# sample  harvest
+				maleHarvestList = numpy.sample(cohortMales, maleHarvest)
+				femaleHarvestList = numpy.sample(cohortFemales, femaleHarvest)
+				for ind in maleHarvestList:
+					print "Dead " + str(ind.ind_id)
+					kills.append(ind.ind_id)
+				for ind in femaleHarvestList:
+					print "Dead " + str(ind.ind_id)
+					kills.append(ind.ind_id)
 
 				# kills.extend(cohortKills)
 				# endif age>0 andage<.....
-		# end for i in pop
-		pop.removeIndividuals(IDs=kills)
-		return True
+			# end for i in pop
+			pop.removeIndividuals(IDs=kills)
+			return True
 
-# end __equalSexCull
+	# end _harvest
 
 
 
