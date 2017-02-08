@@ -8,6 +8,9 @@ ne.py code and his other utilitites.
 __filename__ = "pgopneestimator.py"
 __date__ = "20160502"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
+import sys
+
+sys.path.append("/home/sinless/myPyLibs/pygenomics")
 
 from genomics.popgen.ne2.controller import NeEstimator2Controller
 from genomics.popgen import ne2

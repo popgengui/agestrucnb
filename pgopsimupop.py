@@ -860,7 +860,6 @@ class PGOpSimuPop( modop.APGOperation ):
 			# 	print "female "+str(female.ind_id)
 			# print "\n\n\n"
 
-
 			#Lottery Loop
 			lotteryCount = 0
 			maleCullOrder =list(cohortMales)
