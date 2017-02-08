@@ -94,8 +94,11 @@ class PGLineRegressConfigFileMaker( object ):
 				if s_viz_section_name not in self.__ds_interface_param_values_by_param_names_by_section:
 					self.__ds_interface_param_values_by_param_names_by_section[ s_viz_section_name ] = {}
 				#end if section name new to dict, add it
-
-				if s_viz_section_name == "destination":
+				
+				#If its an output file (either one of the plot file names in the "destination" section
+				#or the stats out file, whose param name is "outputFileName" (different section in the
+				#Vis config file -- the "confidence" section).
+				if s_viz_section_name == "destination" or s_viz_param_name == "outputFileName":
 					if v_value_this_param not in [ "show", "none" ]:
 						#returns a StrVal tkinter object
 
@@ -119,7 +122,6 @@ class PGLineRegressConfigFileMaker( object ):
 						self.__ds_interface_param_values_by_param_names_by_section[ s_viz_section_name ] [ \
 															s_viz_param_name ] = v_value_this_param
 				#end if we're not omitting x range options, or if the option is not an x range option
-
 
 			#end if the member is a viz param
 

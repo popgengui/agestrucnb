@@ -29,7 +29,7 @@
 NbNc	Nb/Nc;Population;2;1;1;0.0;float;None;None;Nb/Nc, where Nc=No;entry;None;type(x)==float;updateN0EntryBox;enabled
 N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle (before lambda). If not editable then calculated using Nb, Nb/Nc, survival rates, and male birth probability.;entry;None;type(x)==int and x >= 0;None;enabled
 Nb	Nb;Population;0;0;1;0;int;None;None;"Nb";entry;None;type(x)==int and x>= 0;updateN0EntryBox;enabled
-NbVar	NbVar;suppress;0;0;1;0;int;None;None;"";entry;None;type(x)==int;None;enabled
+NbVar	Nb Tolerance;Population;0;0;1;0.05;float;None;None;The calculated population Nb, for each generation, must be within this percent of the expected Nb;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;None;enabled
 ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None;type(x)==int and x >= 0;None;enabled
 config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None;type(x)==str;None;enabled
 life_table_glob	Life Table File(s);Configuration Info;1;1;1;"none";str;None;None;Life table files;entry;None;type(x)=str;None;enabled
@@ -65,5 +65,5 @@ gammaBMale	Male gamma B;Population;2;1;1;None;listfloat;None;None;Male Gamma B;e
 #this is a dummy entry, for an Nb param value that is assigned, checked and calculated within the input object, and accessed only
 #by the pgopsimupop object:
 Nb_for_restrict_generator	Nb derived from supplied params, for generator assignment;suppress;0;0;0;0;int;None;None;"";entry;None;type(x)==int;None;enabled
-cull_method	Cull method;Simulation;6;1;1;"survival_rates";str;None;None;Method of culling individuals after each reproductive cycle.~~1. Survival rates:  cull using age-specified survival rates.~~2. Equal sex ratio:  cull uses survival rates and forces an approx. equal sex ratio.;cboxreadonly;( "survival_rates", "equal_sex_ratio" );x in [ 'survival_rates', 'equal_sex_ratio' ];onCullMethodSelectionChange;enabled
+cull_method	Cull method;Simulation;6;1;1;"equal_sex_ratio";str;None;None;Method of culling individuals after each reproductive cycle.~~1. Survival rates:  cull using age-specified survival rates.~~2. Equal sex ratio:  cull uses survival rates and forces an approx. equal sex ratio.;cboxreadonly;( "survival_rates", "equal_sex_ratio" );x in [ 'survival_rates', 'equal_sex_ratio' ];onCullMethodSelectionChange;enabled
 harvest	Harvest;Simulation;7;1;1;None;liststr;None;None;For each cycle-number:proportion numeric pair N:i, with population size p, remove i*p individuals at cycle N;entry;None; [ type(eval(i) for i in x.split( ":" ) ] == [ int, float ];onHarvestInputChange;enabled

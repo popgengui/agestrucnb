@@ -34,6 +34,7 @@ from pgguiutilities import PGGUIYesNoMessage
 from pgguiutilities import PGGUIErrorMessage
 from pgutilityclasses import IndependantSubprocessGroup
 from pgutilityclasses import FloatIntStringParamValidity
+from pgutilityclasses import ValueValidator
 import pgutilities as pgut
 
 import sys
@@ -617,7 +618,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 						s_attribute_to_update=None	
 					#end if we're calculating N0
 				#end if param is "N0"
-
+				
 				#we send in the input object to the KeyValFrame (or similar class)
 				#instance so it will be the object whose attribute (with name s_param)
 				#is reset when user resets the value in the KeyValFrame:
@@ -626,7 +627,15 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					i_entry_width=len(v_val) if type( v_val ) == str else 7
 
 					s_entry_justify='left' if type( v_val ) == str else 'right' 
-
+					'''
+					2017_02_07
+					Still need to implement the
+					validity checker arg, as done in
+					pgguineestimator.py, but we are
+					currently not presenting the litter skip
+					lists as lists, which makes the 
+					validity expression fail for such params.
+					'''
 					o_kv=KeyValFrame( s_name=s_param, 
 								v_value=v_val, 
 								v_default_value=v_default_value,
@@ -640,6 +649,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 								i_entrywidth = i_entry_width,
 								s_entry_justify=s_entry_justify,
 								b_is_enabled=b_allow_entry_change,
+								o_validity_tester=None,
 								b_force_disable=b_force_disable,
 								s_tooltip=s_tooltip )
 				#cbox types are specified as cboxreadonly or cboxnormal, so we test for prefix:	
@@ -1320,4 +1330,28 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.__cancel_simulation()
 		self.__remove_temporary_config_file()
 	#end cleanup
+
+	
+	def __create_validity_checker( self, v_init_value, s_validity_expression ):
+		'''
+		2017_02_07
+		This def added as I incrementally bring the param handling in this interface 
+		closer to that used in pgguisimupop.py.  This will allow the application of
+		test expressions in the simupop.param.names resources file, to the params.
+		'''
+		o_checker=ValueValidator( s_validity_expression, v_init_value )
+
+		if not o_checker.isValid():
+			s_msg="In PGGuiNeEstimator instance, " \
+						+ "def __create_validity_checker, " \
+						+ "invalid initial value when setting up, " \
+						+ "validator object.  Validation message: " \
+						+ o_checker.reportInvalidityOnly() + "."
+			PGGUIErrorMessage( self, s_msg )
+			raise Exception( s_msg )
+		#end if not valid init value, exception
+
+		return o_checker
+	#end __create_validity_checker
+
 #end class PGGuiSimuPop

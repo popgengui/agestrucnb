@@ -10,6 +10,7 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 START_LAMBDA_IGNORE=99999
 LAMBDA_IGNORE=1.0
+DEFAULT_NB_VAR=0.05
 
 import sys
 import os
@@ -324,10 +325,29 @@ class PGInputSimuPop( object ):
 			#end if an Nb val was found in the pop section, error
 
 			self.__Nb_from_pop_section = None if v_nb_val is None else config.getint("pop", "Nb")
-			self.NbVar = None if v_nbvar_val is None else config.getfloat("pop", "NbVar")
+			self.NbVar = DEFAULT_NB_VAR if v_nbvar_val is None else config.getfloat("pop", "NbVar")
+			##### temp
+			'''
+			2017_02_07
+			We are revising to try to use a targeted Nb, but instead of NbVar being a fixed int, 
+			we want to use a float f, 0.0 <= f <= 1.0.  We want to warn users when we've loaded
+			an NbVar from the original configuration files, that uses an integer, for the original
+			tolerance test that simply took the abs(diff) between the calc'd Nb and the target 
+			Nb - NbVar.  Thus some config files may load inappropriatly large NbVar values:
+			'''
+			if self.NbVar > 1.0:
+				s_msg="Warning:  in PGInputSimuPop instance, def get_config, Nb tolerance value is, " \
+														+ str( self.NbVar ) + ".  The simulation " \
+														+ "expects the value to be between 0.0 and 1.0." \
+														+ "To compute an Nb tolerance as a proportion of your " \
+														+ "target Nb.  Large values will allow generations with widely " \
+														+ "varying Nb." 
+
+				sys.stderr.write( s_msg + "\n" )
+			##### end temp
 		else:
 			self.__Nb_from_pop_section = None
-			self.NbVar = None
+			self.NbVar = DEFAULT_NB_VAR
 		#end if config has Nb, else not
 
 		self.__update_attribute_config_file_info( "_PGInputSimuPop__Nb_from_pop_section", "pop", "Nb" )

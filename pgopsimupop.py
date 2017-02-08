@@ -96,6 +96,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		#unless we reseed the numpy random number generator 
 		#for each "process:"
 		numpy.random.seed()
+
 		'''
 		With introduction of the N0 as 
 		calculated by other parameters,
@@ -108,11 +109,107 @@ class PGOpSimuPop( modop.APGOperation ):
 		We initiallize to the input object's value:
 		'''
 		self.__current_N0=self.input.N0
-		#used for Nb lambda Calculations
-		self.__current_Nb = self.input.Nb
-		
+
+		##### temp
+		'''
+		2017_02_06, we add these attributes to implement,
+		per recent meeting with Robin Waples, the 
+		restrictedGenerator def to obtain generations
+		whose Nb is within a tolerance of a target
+		value.  These are set in
+		the def createAge.
+		'''
+		self.__targetNb=None
+		self.__toleranceNb=None
+		PGOpSimuPop.VALUE_TO_IGNORE=99999
+
+
+		'''
+		2017_02_07
+		Also implementing the harvest def, which
+		will use the lambda parameter (lbd) to
+		either skip harvest (lambda in [1.0, infinity), 
+		or lambda in [-infinity, 0.0], or lambda is None.
+		'''
+		self.__harvest_rate_by_generation=None
+
+		'''
+		Applied when user specifies lambda > 1.0.  See
+		def __make_harvest_list
+		'''
+		self.__lambda_for_newborns=None
+		##### end temp
+
+		##### temp files, used for testing
+		self.__file_for_nb_records=open( self.output.basename + "_nb_values_calc_by_gen.csv", 'w' )
+		self.__file_for_age_counts=open( self.output.basename + "_age_counts_by_gen.csv", 'w' )
+		##### end temp file for testing
+
+
 		return
 	#end __init__
+
+	##### temp test
+
+	def __make_harvest_list( self ):
+		'''
+		2017_02_07.  Added to implement the __harvest def.
+		'''
+
+		s_errmsg="In PGOpSimuPop, def __make_harvest_list, "
+
+		assert self.input.PopSize, \
+					s_errmsg + "no parameter popSize found."
+
+		assert self.input.lbd, \
+				s_errmsg + "no parameter lbd found."
+
+		v_lambda=self.input.lbd
+
+		b_use_harvest=( v_lambda is not None \
+							and v_lamda > 0.00 \
+							and v_lambda <= 1.0 )
+
+		if b_use_harvest:
+
+			i_first_pop_after_burnin=0
+
+			assert type( self.input.startLambda ) == int, \
+								s_errmsg + "paramater startLambda is not an integer."
+
+
+			if self.input.startLambda > 0 \
+					and self.input.startLambda != PGInputSimuPop.START_LAMBDA_IGNORE:
+
+				i_first_pop_after_burnin=self.input.startLambda	+ 1
+			#end if our burn in is not 0
+
+
+			'''	
+			Make a harvest dictionary, keys are generation numbers,
+			values are, in the simplest case, uniform for each 
+			generation (we will likely also implement non-uniform 
+			lambda enforcement). 
+			'''
+			#First we set the burnin generations to 
+			#to lambda=0.0 (so that def __harvest will return without applying
+			#any decline):
+			self.__harvest_rate_by_generation={ i_gen:0.0 for i_gen \
+												in range( 0, i_first_pop_after_burnin ) }
+
+			#Then we add the post-burn-in generations, which will reduced using lambda:	
+			self.__harvest_rate_by_generation.update( { si_gen:v_lambda for i_gen \
+												in range( i_first_pop_after_burnin, 
+																self.input.popSize ) } )
+		else:
+			if v_lambda > 1.0:
+				self.__lambda_for_newborns=v_lambda
+			#end if lambda > 1.0
+		#end if we are to use harvest, else test for newborn-lambda
+
+		return
+
+	#end def __make_harvest_list
 
 	def prepareOp( self, s_tag_out="" ):
 
@@ -572,10 +669,18 @@ class PGOpSimuPop( modop.APGOperation ):
 		Vk = numpy.var(cofs)
 		nb = (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
 		#print len(pair), kbar, Vk, (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
+	
 		return nb
 	#end __calcNb
 
 	def __restrictedGenerator( self, pop, subPop ):
+
+
+
+		##### temp
+		print ( "---------------" )
+		print( "in restrictGen" )
+		#####
 		
 		"""No monogamy, skip or litter"""
 		nbOK = False
@@ -587,25 +692,84 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			print ( "in __restrictedGenerator with " \
 					+ "args, pop: %s, subpop: %s"
-							% ( str( pop ), str( subPop ) ) )
+							% ( str( pop ), sr( subPop ) ) )
 		#end if VERBOSE
 
 		while not nbOK:
+
+			##### temp
+			print ( "---------------" )
+			print( "in restrictGen, while not nbOK" )
+			#####
 			pair = []
 			gen = self.__litterSkipGenerator(pop, subPop)
 			#print 1, pop.dvars().gen, nb
 
-			for i in range(self.__current_N0):
-				pair.append(gen.next())
+
+			##### temp rem out
+			'''
+			2017_02_06
+			Now testing with goal of using this generator 
+			for all sims.  Need to cast __current_N0 as 
+			an int for this arg.
+			'''
+
+			for i in range( int( round( self.__current_N0 ) ) ):
+				pair.append( gen.next() )
 			#end for i in range
 
-			if pop.dvars().gen < 10:
+			##### temp revision
+			'''
+			Testing this def as now always used
+			to get the next gen.  Hence we change
+			the gen number after which we apply our
+			nb test, to the gen post burn in
+			'''
+			#### temp rem out original:
+#			if pop.dvars().gen < 10:
+			first_gen_to_include = 0 \
+					if self.input.startLambda >= PGOpSimuPop.VALUE_TO_IGNORE \
+					else self.input.startLambda
+
+			if pop.dvars().gen < first_gen_to_include:
 				break
 			#end if pop.dvars
 
 			nb = self.__calcNb(pop, pair)
 
-			if abs(nb - self.input.Nb_for_restrict_generator ) <= self.input.NbVar:
+
+
+
+			##### temp revision
+			'''
+			2017_02_06
+			After meeting with Robin Waples, we now default
+			to using this generator, and have added attributes
+			to this PGOpSimuPop object to supply the target Nb
+			and its tolerance value (rather than using the
+			original input.* attributes (see def createAge
+			for the initializatio of these values).
+			'''
+			##### temp rem out original test:
+#			if abs(nb - self.input.Nb_for_restrict_generator ) <= self.input.NbVar:
+
+			if abs(nb - self.__targetNb ) <= self.__toleranceNb:
+
+				##### temp 
+				'''
+				For comparing Nb values as calculated
+				(and accepted) on the pops as generated by simuPop, 
+				to those created downstream by NeEstimator.
+				'''
+
+				s_thisNb=str( nb )
+				s_thisgen=str( pop.dvars().gen ) 
+				self.__file_for_nb_records.write( \
+						"\t".join( [ s_thisgen, s_thisNb ] ) \
+						+ "\n" )
+
+				##### end temp
+
 				nbOK = True
 			else:
 				for male, female in pair:
@@ -780,9 +944,12 @@ class PGOpSimuPop( modop.APGOperation ):
 				#end if random.random...
 			#endif age>0 andage<.....
 		#end for i in pop
+
 		pop.removeIndividuals(IDs=kills)
+
 		return True
 	#end __cull
+
 	##Brian Trethewey addition for the immediate culling of a proportion of the adult population
 	def __equalSexCull(self, pop):
 
@@ -902,7 +1069,8 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __harvest(self, pop):
 		gen = pop.dvars().gen
-		if self.input.harvest == None or self.input.harvest[gen] == 0.0:
+		if self.__harvest_rate_by_generation == None \
+					or self.__harvest_rate_by_generation[gen] == 0:
 			return True
 		kills = []
 		cohortDict = {}
@@ -914,14 +1082,11 @@ class PGOpSimuPop( modop.APGOperation ):
 			cohortDict[indAge].append(i)
 
 		for cohortKey in cohortDict:
-			## !! Cohort 0 does not get harvested!!
+			## !! Cohort 0 does not get culled!!
 			# if cohortKey == 0.0:
 			#	continue
 
 			cohortKills = []
-
-
-
 
 			# setup data and seperate males and females
 			cohort = cohortDict[cohortKey]
@@ -936,17 +1101,9 @@ class PGOpSimuPop( modop.APGOperation ):
 			print femaleCount
 			print"\n"
 
-			#reduce newborns
-			self.__current_N0 = self.__current_N0 *1-
-
 			#determine harvest rate for this generation
 
-			harvestRate = (self.input.harvest[gen])
-			#todo change Nb to reflect harvest
-			print harvestRate
-			# reduce newborns
-			self.__current_N0 = self.__current_N0 * (1 - harvestRate)
-
+			harvestRate = ( self.__harvest_rate_by_generation[gen] )
 			print harvestRate
 			maleHarvest = numpy.round(maleCount * harvestRate)
 			femaleHarvest = numpy.round(femaleCount * harvestRate)
@@ -977,9 +1134,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		pop.removeIndividuals(IDs=kills)
 		return True
 
-# end _harvest
-
-
+	# end __equalSexCull
 
 	def __zeroC( self, v ):
 		a = str(v)
@@ -996,6 +1151,12 @@ class PGOpSimuPop( modop.APGOperation ):
 		#end if gen < startSave
 
 		rep = pop.dvars().rep
+
+		##### temp
+		'''
+		Testing age counts per gen
+		'''
+		totals_by_age={}
 
 		for i in pop.individuals():
 			self.output.out.write("%d %d %d %d %d %d %d\n" % (gen, rep, i.ind_id, i.sex(),
@@ -1057,8 +1218,35 @@ class PGOpSimuPop( modop.APGOperation ):
 			End of change to Tiago's code.
 			'''
 
+			##### temp for testing
+			'''
+			2017_02_07.  We are testing the effects of
+			the using the culls __equalSexCull and __harvest.
+			'''
+			if int( i.age ) in totals_by_age:
+				totals_by_age[ int(i.age) ] += 1
+			else:
+				totals_by_age[ int( i.age ) ] = 1
+			##### end temp
 
 		#end for i in pop
+
+		##### temp
+
+		for i_thisage in totals_by_age:
+			'''
+			2017_02_07.  To test age structure per gen.
+			'''
+			s_entry=str( gen )  + "\t" + str( i_thisage ) \
+							+ "\t"  + str( totals_by_age[ i_thisage ] )
+
+			print( "-------------" )
+			print( "in outputAge, writing entry, " + s_entry )
+
+			self.__file_for_age_counts.write(  s_entry + "\n" )
+		#end for each age
+
+		##### end temp
 
 		return True
 	#end __outputAge
@@ -1145,17 +1333,78 @@ class PGOpSimuPop( modop.APGOperation ):
 			mySubPops.append((0, age + 1))
 		#end for age in range
 
-		mateOp = sp.HeteroMating( [ 
-					sp.HomoMating(
-					sp.PyParentsChooser(self.__fitnessGenerator if self.input.doNegBinom
-					else (self.__litterSkipGenerator if self.input.Nb_for_restrict_generator is None else
-					self.__restrictedGenerator)),
-					sp.OffspringGenerator(numOffspring=1, ops=[
-					sp.MendelianGenoTransmitter(), sp.IdTagger(),
-					sp.PedigreeTagger()],
-					sexMode=(sp.PROB_OF_MALES, self.input.maleProb)), weight=1),
-					sp.CloneMating(subPops=mySubPops, weight=-1)],
-					subPopSize=self.__calcDemo )
+		##### temp
+		'''
+		2017_02_06
+		After meeting with Robin Waples, we decided to make the
+		Nb-tolerance used in the __restrictedGenerator part of
+		all simulations.  To that end we now use the Nb available
+		as part of the N0 caluclation, and call the restrictedGenerator.
+
+		We apply our own tolerance value, currently hidden from the user.
+		We'll create new attributes for our self object, and intitialize
+		a target Nb with the input objects Nb property, with will 
+		usually be the Nb used in the N0 caluclation, unless there is no
+		"effective size" section in the config file (hence no Nb/Nc and its
+		related Nb), so that the only source of an Nb is the "pop" section 
+		of the configuration file (see property "Nb" in the PGInputSimuPop 
+		object).
+		'''
+
+		self.__targetNb=self.input.Nb
+
+		f_nbvar=PGInputSimuPop.DEFAULT_NB_VAR if self.input.NbVar is None \
+															else self.input.NbVar 
+
+
+		self.__toleranceNb=self.__targetNb * f_nbvar
+		##### temp
+		print( "------------------------" )
+		print( "TOL: " + str( self.__toleranceNb ) )
+		#####
+		self.__selected_generator=None
+
+		'''
+		Select a generator based on the input parameters,
+		and whether we have a target Nb:
+		'''
+		if( self.input.doNegBinom ):
+			self.__selected_generator = self.__fitnessGenerator
+		elif self.__targetNb is not None:
+			self.__selected_generator = self.__restrictedGenerator
+		else:
+			self.__selected_generator = self.__litterSkipGenerator 
+		#end if we want fitness gen,else restricted, else litter skip
+
+		mateOp = sp.HeteroMating( [ sp.HomoMating(
+									sp.PyParentsChooser( self.__selected_generator ),
+									sp.OffspringGenerator(numOffspring=1, 
+									ops=[ sp.MendelianGenoTransmitter(), sp.IdTagger(),
+										sp.PedigreeTagger()],
+									sexMode=(sp.PROB_OF_MALES, self.input.maleProb)), weight=1),
+									sp.CloneMating(subPops=mySubPops, weight=-1) ],
+								subPopSize=self.__calcDemo )
+
+		##### end temp code addition
+
+		##### temp rem out
+		'''
+		2017_02_06
+		This is the origial assignment of mateOP before changing the code used to select
+		the generator def.
+		'''
+#		mateOp = sp.HeteroMating( [ 
+#					sp.HomoMating(
+#					sp.PyParentsChooser(self.__fitnessGenerator if self.input.doNegBinom
+#					else (self.__litterSkipGenerator if self.input.Nb_for_restrict_generator is None else
+#					self.__restrictedGenerator)),
+#					sp.OffspringGenerator(numOffspring=1, ops=[
+#					sp.MendelianGenoTransmitter(), sp.IdTagger(),
+#					sp.PedigreeTagger()],
+#					sexMode=(sp.PROB_OF_MALES, self.input.maleProb)), weight=1),
+#					sp.CloneMating(subPops=mySubPops, weight=-1)],
+#					subPopSize=self.__calcDemo )
+		##### end temp rem out original
 
 		#Code added 2016_11_01, with new input value "cull_method", we
 		#choose our culling def ref accordingly
@@ -1175,8 +1424,19 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		#Code revised 2016_11_01 to use the above def_for_culling
 		#reference, to assign user-input method:
+
+		##### temp rem out original agePostOps assignment
+		'''
+		2017_02_07.  We're adding the def __harvest as a post op.
+
+		'''
+#		agePostOps = [ sp.PyOperator( func=self.__outputMega ), 
+#					sp.PyOperator( func=def_for_culling ) ]
+		
 		agePostOps = [ sp.PyOperator( func=self.__outputMega ), 
-					sp.PyOperator( func=def_for_culling ) ]
+							sp.PyOperator( func=def_for_culling ),
+							sp.PyOperator( func=self.__harvest ) ]
+
 
 		pop.setVirtualSplitter(sp.InfoSplitter(field='age',
 			   cutoff=range(1, self.input.ages)))
