@@ -143,6 +143,15 @@ class PGOpSimuPop( modop.APGOperation ):
 		##### temp files, used for testing
 		self.__file_for_nb_records=open( self.output.basename + "_nb_values_calc_by_gen.csv", 'w' )
 		self.__file_for_age_counts=open( self.output.basename + "_age_counts_by_gen.csv", 'w' )
+		DEFAULT_AGES=50
+		self.__total_ages_for_age_file=DEFAULT_AGES if self.input.ages is None \
+																else self.input.ages
+
+		s_header="\t".join( [ "generation" ] \
+						+ [ "age" + str( idx ) for idx \
+							in range( 1, self.__total_ages_for_age_file + 1 ) ] )
+
+		self.__file_for_age_counts.write( s_header + "\n" )
 		##### end temp file for testing
 
 
@@ -675,18 +684,10 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __restrictedGenerator( self, pop, subPop ):
 
-
-
-		##### temp
-		print ( "---------------" )
-		print( "in restrictGen" )
-		#####
-		
 		"""No monogamy, skip or litter"""
 		nbOK = False
 		nb = None
 		attempts = 0
-
 
 		if VERY_VERBOSE:
 
@@ -697,10 +698,6 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		while not nbOK:
 
-			##### temp
-			print ( "---------------" )
-			print( "in restrictGen, while not nbOK" )
-			#####
 			pair = []
 			gen = self.__litterSkipGenerator(pop, subPop)
 			#print 1, pop.dvars().gen, nb
@@ -1233,18 +1230,27 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		##### temp
 
-		for i_thisage in totals_by_age:
-			'''
-			2017_02_07.  To test age structure per gen.
-			'''
-			s_entry=str( gen )  + "\t" + str( i_thisage ) \
-							+ "\t"  + str( totals_by_age[ i_thisage ] )
+		'''
+		2017_02_07.  To test age structure per gen.
+		'''
+		ls_entry=[ str( gen ) ]
+		
+		
+		for idx in range( self.__total_ages_for_age_file ):
+			i_thisage=idx+1
+			if i_thisage in totals_by_age: 
+				s_this_val=str( totals_by_age[ i_thisage ]  )
+			else:
+				s_this_val=str(0)
+			#end if age has a total
 
-			print( "-------------" )
-			print( "in outputAge, writing entry, " + s_entry )
+			ls_entry.append( s_this_val )
 
-			self.__file_for_age_counts.write(  s_entry + "\n" )
-		#end for each age
+		#end for each possible age
+
+		s_entry="\t".join( ls_entry )
+
+		self.__file_for_age_counts.write(  s_entry + "\n" )
 
 		##### end temp
 
