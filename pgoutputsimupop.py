@@ -204,7 +204,8 @@ class PGOutputSimuPop( object ):
 	#derived from Tiao's code in ne2.py:
 	def gen2Genepop( self, idx_allele_start, idx_allele_stop, 
 			b_do_compress=True, 
-			b_pop_per_gen=False ):
+			b_pop_per_gen=False,
+			f_nbne_ratio=None ):
 
 		'''
 		reads the *.gen file from the simuPop output
@@ -227,6 +228,13 @@ class PGOutputSimuPop( object ):
 
 		param optional b_pop_per_gen, if true, will insert a "Pop" line between the
 		generations, as given by the 2nd field in the gen file
+
+		2017_02_12.  In implementing a bias adjustment in the NeEstimator's ldne-based
+		Nb estimates, calculated in pgdriveneestimator.py, We add to this def an arg 
+		"f_nbne_ratio", defalut None.  If arg is non-None, we append to the header line 
+		text, "nbne=str(f_nbne_ratio)". When the GUI interface for the Nb estimation reads
+		in genepop files, it will check for they key=value string and then, if present,
+		pass the value on to the calls that eventually invoke the pgdriveneestimator.
 		'''
 
 		o_genfile=None
@@ -276,9 +284,13 @@ class PGOutputSimuPop( object ):
 		#end if compress else don't
 
 		#write header and loci list:
+		s_header="genepop from simupop run data file " + self.__genfile
 
-		o_genepopfile.write( "genepop from simupop run data file " \
-				+ self.__genfile + "\n" )
+		if f_nbne_ratio is not None:
+			s_header += ", nbne=" + str( f_nbne_ratio )
+		#end if caller passed and nb/ne ratio value
+
+		o_genepopfile.write(  s_header + "\n" )
 
 		for i_locus in range( i_num_loci ):
 		    o_genepopfile.write("l" + str(i_locus) + "\n" )

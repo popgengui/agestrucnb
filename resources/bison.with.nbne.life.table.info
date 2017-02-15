@@ -1,0 +1,28 @@
+[model]
+name=bison
+[resources]
+ages = 20
+survivalFemale = [0.804, 0.819, 0.829, 0.835, 0.837, 0.836, 0.831, 0.822, 0.809, 0.791, 0.767, 0.736, 0.698, 0.65, 0.593, 0.527, 0, 0]
+survivalMale = [0.796, 0.791, 0.785, 0.78, 0.774, 0.768, 0.762, 0.756, 0.75, 0.744, 0.737, 0.731, 0.725, 0.718, 0.711, 0.704, 0.697, 0.69]
+fecFemale = [0, 0.08, 0.75, 0.93, 0.93, 0.93, 0.93, 0.93, 0.92, 0.92, 0.92, 0.92, 0.92, 0.8, 0.8, 0.5, 0.5, 0, 0]
+fecMale = [0, 0, 0, 0.11, 0.36, 0.76, 1.09, 1.33, 1.5, 1.59, 1.59, 1.52, 1.36, 1.13, 0.82, 0.42, 0, 0, 0]
+
+[meta]
+name = 
+
+[gammaAFemale]
+1 = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+
+[gammaBFemale]
+1 = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+
+[gammaAMale]
+4 = [9.0, 9.0, 9.0, 0.046, 0.152, 0.322, 0.461, 0.562, 0.632, 0.67, 0.676, 0.639, 0.575, 0.48, 0.349, 0.179, 9.0, 9.0, 9.0]
+
+[gammaBMale]
+4 = [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0]
+
+[effective_size]
+Nb = 395
+NbNc = 0.625
+NbNe = 0.966

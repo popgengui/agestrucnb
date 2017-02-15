@@ -1030,8 +1030,9 @@ class NeEstimationTableFileManager:
 	def __get_list_of_strings_from_list_of_bytes( self, lb_list ):
 
 
-		ls_as_strings=[ str(  b_val.decode( self.__myclassname.ENCODING )  )
-															for b_val in lb_list ]
+		ls_as_strings=[ str(  \
+				b_val.decode( self.__myclassname.ENCODING )  )
+											for b_val in lb_list ]
 		return ls_as_strings
 	#end __get_list_of_strings_from_list_of_bytes
 
@@ -1184,59 +1185,139 @@ class NeEstimationTableFileManager:
 
 #end class NeEstimationTableFileManager
 
+class LDNENbBiasAdjustor( object ):
+	'''
+	Wrapper around the bias adjustment as given in 
+	Waples, etal., "Effects of Overlapping Generations on Linkage 
+	Disequilibrium Estimates of Effective Population Size Genetics." 
+	Available at: 
+	http://www.genetics.org/content/early/2014/04/08/genetics.114.164822.
+	'''
+	def __init__( self, v_original_nb=None, f_nbne_ratio=None ):
+
+		o_nbne_type=type( f_nbne_ratio ) 
+
+		b_nb_is_numeric=self.__is_numeric_type( v_original_nb )
+		b_nbne_ratio_is_numeric=self.__is_numeric_type( f_nbne_ratio )
+
+		b_type_nb_correct = b_nb_is_numeric or i_original_nb is None 
+
+		#We accept int for the ratio (will cast as float
+		#when applying a bias adjustment.
+		b_type_nbne_correct = b_nbne_ratio_is_numeric or f_nbne_ratio is  None 
+
+		assert (  b_type_nb_correct and b_type_nbne_correct ), \
+					"In LDNENbBiasAdjustor instance , " \
+							+ "def __init__," \
+							+ "type mismatch in nb or nb/ne values: " \
+							+ "nb type: " + str( type( i_original_nb ) ) \
+							+ "nb/ne type: " + str( type( f_nbne_ratio ) ) \
+							+ "."
+
+		self.__original_nb=v_original_nb
+		self.__nbne_ratio=f_nbne_ratio
+		self.__adjusted_nb=None
+		self.__do_bias_adjustment()		
+
+		return
+	#end __init__
+
+	def __is_numeric_type( self, v_value ):
+		o_val_type=type( v_value )
+		return ( o_val_type in [ int, float ] )
+	#end __is_numeric_type
+
+
+	def __do_bias_adjustment( self ):
+
+		f_const_term1=1.26
+		f_const_term2=0.323
+
+		if self.__original_nb is None \
+				or self.__nbne_ratio is None:
+			self.__adjusted_nb = None 
+		else:
+
+			f_numerator = float( self.__original_nb )
+			f_denominator = f_const_term1  - ( f_const_term2 * self.__nbne_ratio )
+			f_float_tol=1e-90
+
+			assert f_denominator  > f_float_tol, \
+					"In LDNENbBiasAdjustor instance, " \
+							+ "def __do_bias_adjustment, " \
+							+ "the bias adjustment calculation " \
+							+ "is undefined (denoninator term is zero)."
+
+			self.__adjusted_nb = f_numerator / f_denominator
+		#end if no original nb or no nb/ne ratio, else compute
+
+		return
+
+	#end __do_bias_adjustment
+
+	@property 
+	def adjusted_nb( self ):
+		return self.__adjusted_nb
+	#end adjusted_nb
+
+	@property 
+	def original_nb( self ):
+		return self.__original_nb
+	#end adjusted_nb
+
+	@original_nb.setter
+	def original_nb( self, v_nb ):
+		assert self.__is_numeric_type( v_nb ) or v_nb is None, \
+			"in LDNENbBiasAdjustor instance, " \
+						+ "def original_nb setter " \
+						+ "expecting nb value to be type " \
+						+ "numeric or None, type passed: " + str( type( v_nb ) )
+
+		self.__original_nb=v_nb
+		self.__do_bias_adjustment()
+		return
+	#end original
+
+	@property
+	def nbne_ratio( self ):
+		return self.__nbne_ratio
+	#end nbne_ratio
+
+	@nbne_ratio.setter
+	def nbne_ratio( self, f_nbne_ratio ):
+		b_is_numeric=type( f_nbne_ratio ) == int \
+						or type( f_nbne_ratio == float )
+
+		assert self.__is_numeric_type( f_nbne_ratio ) or f_nbne_ratio is None, \
+			"in LDNENbBiasAdjustor instance, " \
+						+ "def nbne_ratio setter " \
+						+ "expecting nb value to be a numeric type " \
+						+ "or None.  Type passed: " + str( type( f_nbne_ratio ) )
+
+		self.__nbne_ratio=f_nbne_ratio
+		self.__do_bias_adjustment()
+
+		return
+	#end setter nbne_ratio	
+
+#end class LDNENbBiasAdjustor
+
 if __name__ == "__main__":
+#	
+#	p1=1
+#	p2=-3333.12
+#	p3="test"
+#
+#	o1=FloatIntStringParamValidity( "p1", float, p1, 0, 10 )
+#	o2=FloatIntStringParamValidity( "p2", int, p2, 0, 10 )
+#	o3=FloatIntStringParamValidity( "p3", str, p3, 0, 10 )
+#
+#	for o in [ o1, o2, o3 ]:
+#		print( o.isValid() )
+#		print( o.reportValidity() )
 
-#	import multiprocessing
-#	import time
-#
-#	i_num_reps=30
-#
-#	i_num_processes=30
-#
-#	SLEEPTIMEDEF=1
-#	SLEEPTIMEPROCCHECK=0.1
-#
-#	o_myprocs=independantProcessGroup()
-#
-#	def target_def( i_rep_number ):
-#		print( "executing for rep: " + str( i_rep_number ) )
-#		time.sleep( SLEEPTIMEDEF )
-#		return
-#	#end target_def
-#
-#	i_living_procs=0
-#	i_total_replicates_started=0
-#
-#	while i_total_replicates_started < i_num_reps:
-#
-#		i_living_procs=o_myprocs.getTotalAlive()
-#
-#		while i_living_procs == i_num_processes:
-##			time.sleep( SLEEPTIMEPROCCHECK )
-#			i_living_procs=o_myprocs.getTotalAlive()
-#		#end while living procs is max
-#
-#		i_num_procs_to_add=i_num_processes - i_living_procs
-#
-#		for idx in range( i_num_procs_to_add ):
-#			o_process=multiprocessing.Process( target=target_def, args=( i_total_replicates_started, ) )
-#			o_process.start()
-#			o_myprocs.addProcess( o_process )
-#			i_total_replicates_started+=1
-#		#end for each index, num procs to add
-#	#end for each replicate
-	
-	p1=1
-	p2=-3333.12
-	p3="test"
+	o_lc=LDNENbBiasCorrector( 200, 0.78 )
+	print( o_lc.corrected_nb )
 
-	o1=FloatIntStringParamValidity( "p1", float, p1, 0, 10 )
-	o2=FloatIntStringParamValidity( "p2", int, p2, 0, 10 )
-	o3=FloatIntStringParamValidity( "p3", str, p3, 0, 10 )
-
-	for o in [ o1, o2, o3 ]:
-		print( o.isValid() )
-		print( o.reportValidity() )
-	pass
 #end if main
 

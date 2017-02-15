@@ -1,0 +1,16 @@
+[model]
+name=snake
+[resources]
+ages = 9
+survivalFemale = [0.486, 0.485, 0.48, 0.5, 0.5, 0.5, 0.333]
+survivalMale = [0.486, 0.485, 0.48, 0.5, 0.5, 0.5, 0.333]
+fecFemale = [1.03, 2.81, 3.25, 3.52, 3.67, 3.75, 3.81, 3.84]
+fecMale = [1.03, 2.81, 3.25, 3.52, 3.67, 3.75, 3.81, 3.84]
+
+[meta]
+name = 
+
+[effective_size]
+Nb = 608
+NbNc = 0.785
+NbNe = 1.357

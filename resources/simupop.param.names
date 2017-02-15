@@ -1,4 +1,4 @@
-#his file provides paramater names and other values used to load an interface
+#This file provides paramater names and other values used to load an interface
 #for the AgeStructureNe GUI tab page that sets up and runs SimuPOP simulations
 #Columns give:
 #	1.  Actual variable name, ususally the original used in Tiago's 
@@ -27,8 +27,9 @@
 #None;None;None for the type, min, and max fields.
 #
 NbNc	Nb/Nc;Population;2;1;1;0.0;float;None;None;Nb/Nc, where Nc=No;entry;None;type(x)==float;updateN0EntryBox;enabled
+NbNe	Nb/Ne;Population;0;0;1;0.0;float;None;None;Nb/Ne ratio.  This value is passed to the Nb estimation function for use in a LDNE bias correction (Waples etal., 2014). The entry is ignored if set to zero.;entry;None;type(x)==float or type(x) == int;None;enabled
 N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle (before lambda). If not editable then calculated using Nb, Nb/Nc, survival rates, and male birth probability.;entry;None;type(x)==int and x >= 0;None;enabled
-Nb	Nb;Population;0;0;1;0;int;None;None;"Nb";entry;None;type(x)==int and x>= 0;updateN0EntryBox;enabled
+Nb	Nb;Population;2;0;1;0;int;None;None;"Nb";entry;None;type(x)==int and x>= 0;updateN0EntryBox;enabled
 NbVar	Nb Tolerance;Population;0;0;1;0.05;float;None;None;The calculated population Nb, for each generation, must be within this percent of the expected Nb;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;None;enabled
 ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None;type(x)==int and x >= 0;None;enabled
 config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None;type(x)==str;None;enabled

@@ -669,6 +669,7 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 										i_loci_replicates,
 										i_num_processes,
 										s_runmode,
+										s_nbne_ratio,
 										s_outfile_basename,
 										s_file_delimiter="," ):
 	'''
@@ -736,7 +737,7 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 						+ qs_sample_scheme_args \
 						+ ( str( f_min_allele_freq ), str( i_replicates ) ) \
 						+ qs_loci_sampling_scheme_args \
-						+ ( str( i_loci_replicates ), str( i_num_processes ), s_runmode ) 
+						+ ( str( i_loci_replicates ), str( i_num_processes ), s_runmode, s_nbne_ratio ) 
 
 		s_main_output_filename=s_outfile_basename + "." \
 				+ NE_ESTIMATION_MAIN_TABLE_FILE_EXT

@@ -1,0 +1,16 @@
+[model]
+name=surchin
+[resources]
+ages = 6
+survivalFemale = [0.323, 0.231, 0.176, 0.141]
+survivalMale = [0.323, 0.231, 0.176, 0.141]
+fecFemale = [2.64, 4.47, 4.88, 4.97, 4.99]
+fecMale = [2.64, 4.47, 4.88, 4.97, 4.99]
+
+[meta]
+name = Sea urchin
+
+[effective_size]
+Nb = 0.0
+NbNc = 0.0
+NbNe = 1.266

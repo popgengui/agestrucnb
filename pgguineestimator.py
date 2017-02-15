@@ -526,6 +526,27 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		return b_valid
 	#end __validate_run
+	
+	def __get_nbne_ratio_as_string_for_call_to_estimator( self ):
+		'''
+		2017_02_13, implementing a bias adjustment in Nb estimations
+		(via LDNE), taht uses new parameter Nb/Ne ratio.  This new parm
+		in our Nb estimation interface is used only if the value
+		is not found in the genepop file header (via parse code in 
+		pgdriveneestimator.py).
+		'''
+		s_value="none"
+		f_real_tol=1e-90
+		'''
+		If the value is non-zero, then we return it's string value, 
+		otherwise we return "None".
+		'''
+		if self.__nbne > f_real_tol:
+			s_value=str( self.__nbne )
+		#end if non-zero
+		
+		return s_value
+	#end __get_nbne_ratio_as_string_for_call_to_estimator
 
 	def runEstimator( self ):
 
@@ -571,6 +592,11 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		qs_loci_sample_scheme_args=o_loci_sampling_args.getSampleSchemeArgsForDriver()
 
+		'''
+		2017_02_13. New param nbne ratio needs processing to get correct value.
+		'''
+		s_nbne_ratio=self.__get_nbne_ratio_as_string_for_call_to_estimator()
+
 		self.__neest_multi_process_event=multiprocessing.Event()
 
 		self.__op_process=multiprocessing.Process( \
@@ -586,6 +612,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 							self.__loci_replicates,
 							self.__processes,
 							self.__runmode,
+							s_nbne_ratio,
 							self.__output_directory.get() \
 									+ "/" \
 									+ self.output_base_name ) )

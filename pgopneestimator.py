@@ -238,6 +238,17 @@ class PGOpNeEstimator( APGOperation ):
 
 	#end deliver results 
 
+	def getOutputColumnNumberForFieldName( self, s_field_name ):
+		'''
+		2017_02_11. In implementing a bias adjustment to NeEstimator
+		ldne estimates, in pgdriveneestimator, we need a way to
+		easily get the Nb (i.e. Nb when Ne calculated on a cohort),
+		value from this object, since we want to keep the PGOutputNeEstimator
+		objecte well hidden inside this "Op" object.
+		'''
+		return self.output.getColumnNumberForFieldName (s_field_name )
+	#end def getColumnNumberForFieldName
+
 #end class PGOpNeEstimator 
 
 if __name__ == "__main__":

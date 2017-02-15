@@ -1,0 +1,20 @@
+[model]
+name=ecology
+[resources]
+
+[gammaAFemale]
+3 = [0.318, 0.636, 0.954, 1.271]
+
+[gammaBFemale]
+3 = [2.0, 2.0, 2.0, 2.0]
+
+[gammaAMale]
+3 = [0.136, 0.272, 0.409, 0.545]
+
+[gammaBMale]
+3 = [2.0, 2.0, 2.0, 2.0]
+
+[effective_size]
+Nb = 0.0
+NbNc = 0.0
+NbNe = 0.0

@@ -140,53 +140,44 @@ class PGInputSimuPop( object ):
 	#end __update_attribute_config_file_info
 
 	def __get_effective_size_info_if_avail( self ):
+
 		o_parser=self.__config_parser
 
-		i_nb=None
-		f_nbnc=None
-		s_nb_from_eff_size_section=None 
-		s_nbnc_from_eff_size_section=None
+		dv_values={ "Nb":None, "NbNc":None, "NbNe":None }
+		do_types_by_name={ "Nb":int, "NbNc":float, "NbNe":float }
 
-		if o_parser.has_option( "effective_size", "Nb" ):
-			s_nb_from_eff_size_section=o_parser.get( "effective_size", "Nb" )
-		else:
+		for s_this_option in dv_values:
 
-			if self.__resources is not None:
-				#Returns None is no such section/options in the life table config 
-				#parser
-				s_nb_from_eff_size_section=self.__resources.getLifeTableValue( \
-											self.model_name, "effective_size", "Nb" )
-			#end if we have life tables, check
+			s_this_value=None
+			v_this_value=None
 
-		#end if not in config file, check life table
+			if o_parser.has_option( "effective_size", s_this_option ):
+				s_this_value=o_parser.get( "effective_size", s_this_option )
+			else:
+				if self.__resources is not None:
+					#Returns None is no such section/options in the life table config 
+					#parser
+					s_this_value=self.__resources.getLifeTableValue( \
+												self.model_name, "effective_size", s_this_option )
+				#end if we have life tables, check
+			#end if not in config file, check life table
 
-		if o_parser.has_option( "effective_size", "NbNc" ):
-			s_nbnc_from_eff_size_section=o_parser.get( "effective_size" , "NbNc" )
-		else:
-			if self.__resources is not None:
-				s_nbnc_from_eff_size_section=self.__resources.getLifeTableValue( \
-											self.model_name, "effective_size", "NbNc" )
-			#end if we have life tables, check
-		#end if NbNc not in  config file, check life table
-
-		if s_nb_from_eff_size_section is not None \
-				and  s_nbnc_from_eff_size_section is not None:
-			try:
-				i_nb=int( s_nb_from_eff_size_section )
-				f_nbnc=float( s_nbnc_from_eff_size_section )
-			#probably ValueError, but we want
-			#To add our custom message to any error:
-			except Exception as oex:
-				s_msg="In PGInputSimuPop instance, def __get_effective_size_info_if_avail, " \
-						+ "there wasd an error converting Nb and NbNc config file entries into " \
-						+ "numeric types. The config parser has these values for it's effective  "\
-						+ "size info: Nb=" + s_nb_from_eff_size_section \
-						+ " and NbNc= " + s_nbnc_from_eff_size_section  + "."
-				raise Exception( s_msg )
-		#end try...except
-
-		#end if both params not None, then convert to numerics
-		return ( i_nb, f_nbnc )
+			if s_this_value is not None:
+				try:
+					v_this_value=do_types_by_name[ s_this_option ] ( s_this_value )
+				except Exception as oex:
+					s_msg="In PGInputSimuPop instance, def __get_effective_size_info_if_avail, " \
+							+ "there was an error converting the value, " \
+							+ str( s_this_value  ) + ", for " + s_this_option \
+							+ ", into its proper type, " + str( do_types_by_name[ s_this_option ] ) \
+							+ "."
+					raise Exception( s_msg )
+				#end try...except
+			#end if value not None
+			
+			dv_values[ s_this_option ] = v_this_value
+		#end for each option in effective size section
+		return ( dv_values[ "Nb" ], dv_values[ "NbNc" ], dv_values[ "NbNe" ] )
 	#end __get_effective_size_info_if_avail
 
 	def __get_config( self ):
@@ -336,11 +327,12 @@ class PGInputSimuPop( object ):
 			Nb - NbVar.  Thus some config files may load inappropriatly large NbVar values:
 			'''
 			if self.NbVar > 1.0:
-				s_msg="Warning:  in PGInputSimuPop instance, def get_config, Nb tolerance value is, " \
+				s_msg="Warning:  in PGInputSimuPop instance, def get_config, Nb tolerance value looks excessive at, " \
 														+ str( self.NbVar ) + ".  The simulation " \
-														+ "expects the value to be between 0.0 and 1.0." \
-														+ "To compute an Nb tolerance as a proportion of your " \
-														+ "target Nb.  Large values will allow generations with widely " \
+														+ "expects the value to be between 0.0 and 1.0, " \
+														+ "to compute an Nb tolerance as a proportion of your " \
+														+ "target Nb, less than or equal to your target Nb. " \
+														+ "Large values will allow generations with widely " \
 														+ "varying Nb." 
 
 				sys.stderr.write( s_msg + "\n" )
@@ -390,7 +382,7 @@ class PGInputSimuPop( object ):
 		#from a life table or config file section "effective_size",
 		#will be used to calculate N0.  Otherwise the NO from the "pop" section
 		#will be used.
-		i_nb_from_eff_size_info, f_nbnc_ratio_from_eff_size_info= \
+		i_nb_from_eff_size_info, f_nbnc_ratio_from_eff_size_info, f_nbne_from_eff_size_info= \
 								self.__get_effective_size_info_if_avail()
 		
 		if i_nb_from_eff_size_info is not None \
@@ -407,7 +399,13 @@ class PGInputSimuPop( object ):
 			self.__update_attribute_config_file_info( "NbNc", "effective_size", "NbNc" )
 		#end if we compute N0, else use given 	
 
+		if f_nbne_from_eff_size_info is not None:
+			self.NbNe=f_nbne_from_eff_size_info
+			self.__update_attribute_config_file_info( "NbNe", "effective_size", "NbNe" )
+		#end if we have an nb/ne ratio value
+
 		self.__update_attribute_config_file_info( "N0", "pop", "N0" )
+
 
 		if config.has_option("sim", "cull_method"):
 			self.cull_method = config.get("sim", "cull_method")

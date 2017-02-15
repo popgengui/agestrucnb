@@ -53,6 +53,12 @@ class PGOpSimuPop( modop.APGOperation ):
 	INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS="numMSats"
 	INPUT_ATTRIBUTE_NUMBER_OF_SNPS="numSNPs"
 	DELIMITER_INDIV_ID=";"
+	'''
+	2017_02_13. For the restrictedGenerator, the maximum
+	number of tries to obtain a pop with and Nb within tolerance
+	of a target.
+	'''
+	MAX_TRIES_AT_NB=100
 
 	def __init__(self, o_input, o_output, b_compress_output=True, 
 									b_remove_db_gen_sim_files=False,
@@ -311,7 +317,8 @@ class PGOpSimuPop( modop.APGOperation ):
 			self.output.gen2Genepop( 1, 
 					i_total_loci, 
 					b_pop_per_gen=True,
-					b_do_compress=False )
+					b_do_compress=False,
+					f_nbne_ratio=self.input.NbNe )
 		#end if no loci reported
 	#end __write_genepop_file
 
@@ -777,9 +784,22 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			#end for abs( nb ... else not
 
-			if attempts > 100:
-				print( "out", pop.dvars().gen )
-				sys.exit(-1)
+			if attempts > PGOpSimuPop.MAX_TRIES_AT_NB:
+				s_msg="In PGOpSimuPop instance, " \
+							+ "def __restrictedGenerator, " \
+							+ "for generation, " + str( pop.dvars().gen ) \
+							+ ", after " + str( PGOpSimuPop.MAX_TRIES_AT_NB ) \
+							+ " tries, the simulation did generate a " \
+							+ "population with an Nb value inside " \
+							+ "the tolerance.  Target Nb: " \
+							+ str( self.__targetNb ) \
+							+ ", and tolerance at +/- " \
+							+ str( self.__toleranceNb ) + "."
+				raise Exception( s_msg )
+				##### temp rem out
+				#Using above Exception instead of this message.
+	#			print( "out", pop.dvars().gen )
+	#			sys.exit(-1)
 			#end if attempts > 100
 		#end while not nbOK
 

@@ -1632,6 +1632,23 @@ class GenepopFileManager( object ):
 
 		return dddi_allele_counts_by_pop_by_loci
 	#end
+	
+
+	@property
+	def header( self ):
+		'''
+		This getter was added 2017_02_12 to allow clients to get
+		the header string, and so look for an Nb/Ne value in the 
+		header text.  The current implementation of storing this
+		value for the Nb estimation, is to put it in the header line
+		as the final text, reading "nbne=<value>".  See 
+		pgdriveneestimator.py, def 
+		get_nbne_ratio_from_genepop_file_header.
+		'''
+		o_origfile=open( self.__filename, 'r' )
+		o_origfile.seek( self.__header_and_loci_byte_addresses[0] )
+		s_line_stripped=( o_origfile.readline() ).strip()
+		return s_line_stripped
 #end class GenepopFileManager
 
 if __name__ == "__main__":

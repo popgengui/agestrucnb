@@ -91,7 +91,8 @@ import os
 from multiprocessing import Pool
 import time
 import genepopindividualid as gpi
-
+#See the def get_nbne_ratio_from_genepop_file_header:
+import re
 '''
 In case of interrupted 
 multiprocessing runs.
@@ -114,6 +115,7 @@ import genepopfilesampler as gps
 import pgopneestimator as pgne
 import pginputneestimator as pgin
 import pgoutputneestimator as pgout
+from pgutilityclasses import LDNENbBiasAdjustor
 import pgutilities as pgut
 
 VERBOSE=False
@@ -127,7 +129,11 @@ spacer2="   "
 spacer3="  "
 
 LS_FLAGS_SHORT_REQUIRED=[ "-f",  "-s", "-p", "-m", "-a", "-r", "-e", "-c", "-l", "-i",  "-n", "-x", "-g","-q" ]
-LS_FLAGS_LONG_REQUIRED=[ "--gpfiles", "--scheme", "--params", "--minpopsize", "--maxpopsize", "--poprange", "--minallelefreq", "--replicates", "--locischeme", "--locischemeparams",  "--mintotalloci", "--maxtotalloci", "--locirange", "--locireplicates" ]
+
+LS_FLAGS_LONG_REQUIRED=[ "--gpfiles", "--scheme", "--params", "--minpopsize", "--maxpopsize", "--poprange", 
+						"--minallelefreq", "--replicates", "--locischeme", "--locischemeparams",  "--mintotalloci", 
+																"--maxtotalloci", "--locirange", "--locireplicates" ]
+
 LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes. " \
 						+ "(Example: \"mydir/*txt\")",
 				"\"none\", \"percent\", \"remove\", \"criteria\", \"cohorts\", \"cohortsperc\", or \"relateds\", " \
@@ -139,9 +145,12 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 						 + spacer + "For \"none\", any value (it will be ignored)." \
 						 + spacer + "For \"percent\", a list of integers, percentages." \
 						 + spacer + "For \"remove\", a list of integers, total indiv. to remove." \
-						 + spacer + "For \"criteria\", \"cohorts\", and \"relateds\", 3 parts (the whole surrounded by quotes):" \
-						 + spacer2 + "(1) Semicolon-delimited field names (ex, for the AgeStructureNe genpop output: \"id;sex;father;mother;age\")."\
-						 + spacer2 + "(2) Semicolon-delimited field (python) types (ex, for the AgeStructureNe genepop: \"floatint;float;float;float\")." \
+						 + spacer + "For \"criteria\", \"cohorts\", and \"relateds\", 3 parts " \
+						 					+ "(the whole surrounded by quotes):" \
+						 + spacer2 + "(1) Semicolon-delimited field names (ex, for the AgeStructureNe " \
+						 					+ "genpop output: \"id;sex;father;mother;age\")."\
+						 + spacer2 + "(2) Semicolon-delimited field (python) types (ex, for the " \
+						 					+ "AgeStructureNe genepop: \"floatint;float;float;float\")." \
 						 + spacer2 + "(3) A set of parameters for the given sampling scheme:" \
 						 + spacer3 + "i. \"critera\": semicolon-delimited test expressions " \
 								   + "(ex: \"age<5;sex==1\")." \
@@ -168,25 +177,31 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 				+ "Under the loci scheme \"none\", the value for max total loci "\
 				+ "(see below ) will result in a random sample of the max " \
 				+ "value when the range exceeds it.",  
-		"Sampling scheme paramaters, for \"none\", any string (required as place-holder); for \"percent\","  \
+		"Sampling scheme paramaters, for \"none\", any string (required as place-holder); " \
+				+ "for \"percent\","  \
 				+ "a comma-delimited list of numeric values (int or float) p, with 0<=p<=100; " \
 				+ "for \"total\", a comma-delimited list of integers, each giving a number of " \
 				+ "loci to randomly sample from each pop.", 
 		"Integer, minimum number of loci required for sample.",
 		"Integer, maximum number of loci, randomly selected among i-j, if max is less than (j-i)+1." ,
 		"Loci range (hyphenated pair of integers), include loci numbers i-j as ordrered in the file.",
-		"Integer, Number of loci sampling replicates (value of 1 means one loci subsample per loci sampling param, per individual replicate)." ]
+		"Integer, Number of loci sampling replicates (value of 1 means one loci subsample " \
+								+ "per loci sampling param, per individual replicate)." ]
 
-LS_FLAGS_SHORT_OPTIONAL=[  "-o", "-d" ]
-LS_FLAGS_LONG_OPTIONAL=[ "--processes", "--mode" ]
+LS_FLAGS_SHORT_OPTIONAL=[  "-o", "-d", "-b" ]
+
+LS_FLAGS_LONG_OPTIONAL=[ "--processes", "--mode", "--nbneratio" ]
+
 LS_ARGS_HELP_OPTIONAL=[  "total processes to use (single integer) Default is 1 process.",
 				"\"no_debug\", \"debug1\", \"debug2\", \"debug3\", \"testserial\", \"testmulti\"" \
-				+ ".  Indicates a run mode. The default is \"no_debug\", which runs multiplexed with standard output.  " \
+				+ ".  Indicates a run mode. The default is \"no_debug\", which runs multiplexed " \
+				+ "with standard output.  " \
 				+ "Other modes except \"testmulti\", run non-parallelized, with increasing output.  " \
 				+ "Debug 3, for example, adds to the output a table listing, for each indiv. " \
 				+ "in each file, which replicate Ne estimates include the individual.  It also preserves " \
-				+ "the intermediate genepop and NeEstimator output files" ]
-
+				+ "the intermediate genepop and NeEstimator output files",
+				"An Nb/Ne ratio, if supplied, then used in a bias adjustment to the LDNE " \
+				+ "estimates (after Waples, 2014)" ]
 
 #Indices into the args as passed as list/sequence to def parse_args:
 IDX_GENEPOP_FILES=0
@@ -205,9 +220,17 @@ IDX_LOCI_RANGE=12
 IDX_LOCI_SAMPLE_REPLICATES=13
 IDX_PROCESSES=14
 IDX_DEBUG_MODE=15
-IDX_MAIN_OUTFILE=16
-IDX_SECONDARY_OUTFILE=17
-IDX_MULTIPROCESSING_EVENT=18
+IDX_NBNE_RATIO=16
+IDX_MAIN_OUTFILE=17
+IDX_SECONDARY_OUTFILE=18
+IDX_MULTIPROCESSING_EVENT=19
+
+
+#Def mymain uses this index to test and pass
+#the correct file/multiprocessing_event information
+#to parse args:
+IDX_LAST_CONSOLE_ARG=IDX_NBNE_RATIO
+
 
 #these args are used by callers who import this mod
 #and call mymain directly -- users of the console
@@ -224,6 +247,7 @@ HIDDEN_ARGS=[ "file_object_main", "file_object_secondary", "multiprocessing_even
 #code when python calls it as __main__:
 DEFAULT_NUM_PROCESSES="1"
 DEFAULT_DEBUG_MODE="no_debug"
+DEFAULT_NBNE_VAL="None"
 
 #in order to properly name the subsampled
 #files with replicate number, sample parameter
@@ -300,6 +324,14 @@ Main table formatting info:
 MAIN_TABLE_RUN_INFO_COLS=[ "original_file", "pop", "census",   "indiv_count", 
 							"sample_value", "replicate_number", "loci_sample_value", 
 							"loci_replicate_number","min_allele_freq" ] 
+'''
+2017_02_11.  A field appened to the NeEstimator columns (as named 
+by the constants in class PGOutputNeEstimator), since we do the
+ldne bias adjustement in this module:
+'''
+COL_NAME_NBNE_RATIO_FOR_BIAS_ADJUST="nbne"
+COL_NAME_BIAS_ADJUSTED_LDNE="ne_est_adj"
+COL_NAME_NEESTIMATOR_NE_ESTIMATE="est_ne"
 
 def set_indices_ne_estimator_output_fields_to_skip():
 
@@ -337,7 +369,7 @@ class ArgSet( object ):
 						"loci_sampling_values", "loci_min_total",
 						"loci_max_total", "loci_num_range", 
 						"loci_sampling_replicates", "total_cpu_processes",
-						"debug_mode", "output_file",
+						"debug_mode", "nbne_ratio", "output_file",
 						"secondary_output_file" ]
 		
 		#we make a copy of the arg values:
@@ -623,7 +655,6 @@ def get_genepop_file_list( s_genepop_files_arg ):
 
 def parse_args( *args ):
 
-	
 	ls_files=get_genepop_file_list( args[ IDX_GENEPOP_FILES ] )
 
 	ls_invalid_file_names_and_messages=get_invalid_file_names( ls_files )
@@ -746,6 +777,20 @@ def parse_args( *args ):
 	i_min_total_loci=int( args[ IDX_LOCI_MIN_TOTAL ] )
 	i_max_total_loci=int( args[ IDX_LOCI_MAX_TOTAL ] )
 	i_loci_repliates=int( args[ IDX_LOCI_SAMPLE_REPLICATES ] )
+	s_nbne_ratio=args[ IDX_NBNE_RATIO ]
+	if s_nbne_ratio.lower() == "none":
+		f_nbne_ratio=None
+	else:
+		try:
+			f_nbne_ratio=float( args[ IDX_NBNE_RATIO ] )
+		except ValueError as ve:
+			s_msg="In pgdriveneestimator.py, def parse_args, " \
+						+ "the value for the nb/ne ratio cannot " \
+						+ "be cast as a float type.  Value: " \
+						+ s_nbne_ratio + "."
+			raise Exeption( s_msg )
+		#end try ... except
+	#end if nb/ne ratio value is none else cast as float
 
 	return( ls_files, s_sample_scheme, lv_sample_values, 
 								i_min_pop_size, 
@@ -765,7 +810,8 @@ def parse_args( *args ):
 								o_debug_mode, 
 								o_main_outfile, 
 								o_secondary_outfile,
-								o_multiprocessing_event )
+								o_multiprocessing_event,
+								f_nbne_ratio )
 	
 #end parse_args
 
@@ -854,15 +900,138 @@ def get_pops_in_file_outside_valid_size_range( o_genepopfile,
 	return li_pops_outside_valid_size_range
 #end get_pops_in_file_outside_valid_range
 
+def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator, o_genepopfile, 
+													lv_results_list, f_nbne_ratio_from_args ):
+	'''
+	2017_02_11.  Implementing a bias adjustment to the NeEstimator's
+	LDNE estimate.  We test for an nb/ne ratio,
+	and, if found, we compute a bias adjustment.  We look both in the
+	header of the genepop file, and the value of the arg f_nbne_ratio,
+	which was passed to this module by clients, either via calling
+	mymain, or calling this module directly from the command line
+	(see below, toplevel conditional, if __name__ == "__main__" ).
+	'''
+
+	s_bias_adjusted_value="None"
+
+	v_nbne_ratio_to_use_for_adjustment=None	
+
+	f_nbne_ratio_from_genepop_file_header = \
+				get_nbne_ratio_from_genepop_file_header( o_genepopfile )
+
+
+	if f_nbne_ratio_from_genepop_file_header is not None:
+		v_nbne_ratio_to_use_for_adjustment=f_nbne_ratio_from_genepop_file_header
+	elif f_nbne_ratio_from_args is not None:
+		v_nbne_ratio_to_use_for_adjustment=f_nbne_ratio_from_args
+	#end if we have a ratio from the genepop file header, else check the value passed 
+	#as arguement to this def
+
+	if v_nbne_ratio_to_use_for_adjustment is not None:
+		i_col_ne_est=\
+				o_ne_estimator.getOutputColumnNumberForFieldName( \
+											COL_NAME_NEESTIMATOR_NE_ESTIMATE )
+		f_this_ne=float( lv_results_list[ i_col_ne_est ] )
+		f_adj_estimate=do_ldne_bias_adjustment( f_this_ne, v_nbne_ratio_to_use_for_adjustment )
+		s_bias_adjusted_value=str( f_adj_estimate ) 
+
+	#end if we have a nb/ne ratio, do bias adjustment 
+	return str( v_nbne_ratio_to_use_for_adjustment ), s_bias_adjusted_value
+#end get_string_values_ldne_ratio_and_bias_adjustment
+
+def get_nbne_ratio_from_genepop_file_header( o_genepopfile ):
+	'''
+	2017_02_13.  In searching for an Nb/Ne ratio value in the
+	genepop file header text, we assume it is in the form, 
+	"nbne=<float>", or possibly "nbne=<int>", where <float>
+	or <int> are numbers.  We also assume it is the final
+	text in the header line.
+	'''
+	v_value=None
+	s_keyval_splitter="="
+	s_header_text=o_genepopfile.header
+	s_nbne_regex="nbne=[0-9,\.]+"
+	f_reltol=1e-90
+
+	ls_matches=re.findall( s_nbne_regex, s_header_text )
+
+	'''
+	We do not expect groups of matches from 
+	the header, and so reject any non-list
+	(such as the resulting tuple for groups)
+	returned from re.findall.
+	'''
+	if type( ls_matches ) != list:
+		s_msg="In pgdriveneestimator.py, " \
+					+ "def get_nbne_ratio_from_genepop_file_header, " \
+					+ "expecting a list to be returned from call to " \
+					+ "re.findall.  Returned:  " + str( ls_matches ) \
+					+ "."
+		raise Exception( s_msg )
+	#end if return is not a list, exception
+
+	i_total_matches=len( ls_matches )
+	
+	if i_total_matches > 0:
+		if i_total_matches > 1:
+			s_msg="In pgdriveneestimator.py, " \
+					+ "def get_nbne_ratio_from_genepop_file_header, " \
+					+ "the program cannot correctly parse the " \
+					+ "genepop file header to find the nb/ne ratio.  " \
+					+ "It expects either no entry " \
+					+ "or one key=value entry at the end of the header " \
+					+ "text.  Header text: \"" + s_header_text + "\"."
+			raise Exception( s_msg )
+		else:
+			ls_keyval=( ls_matches[ 0 ].split( s_keyval_splitter ) )
+			try:
+				s_val=ls_keyval[ 1 ]
+				v_value=float( s_val )
+				#We retain the intitialized None value,
+				#unless ratio > 0.0
+				if v_value <= f_reltol:
+					v_value=None
+				#end if value > zero
+			except:
+				s_msg="In pgdriveneestimator.py, " \
+							+ "def get_nbne_ratio_from_genepop_file_header, " \
+							+ "The program cannot parse and type the Nb/Ne ratio value from " \
+							+ "the genepop file entry, " + str( ls_matches[ 0 ] ) + "."
+				raise Exception( s_msg )
+			#end try ... except
+		#end if more than one match, else one
+	#end if total matches > 0
+
+	##### temp
+	print( "-----------------" )
+	print( "header text: " + s_header_text )
+	print( "matches: " + str( ls_matches ) )
+	print( "from header: " + str( v_value ) )
+	##### end temp
+	return v_value
+#end def get_nbne_ratio_from_genepop_file_header
+
+def do_ldne_bias_adjustment( f_ldne_estimate, f_nbne_ratio ):
+	'''
+	2017_02_11. Implements, through the LDNENbBiasAdjustor
+	class, the bias adjustment to LDNE estimates
+	via eq (8) in Waples 2014 (see class description).
+	'''
+	o_adjustor=LDNENbBiasAdjustor( f_ldne_estimate, f_nbne_ratio )
+	return o_adjustor.adjusted_nb
+#end def do_ldne_bias_adjustment
+
 def do_estimate( ( o_genepopfile, o_ne_estimator, 
 					s_sample_param_val, s_loci_sample_value,
 					f_min_allele_freq, s_subsample_tag, 
 					s_loci_sample_tag, s_population_number, 
 					s_census, i_replicate_number, 
 					s_loci_replicate_number, o_debug_mode, 
-						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP) ):
+						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+						f_nbne_ratio ) ):
 
 	try:
+
 		s_genepop_file_subsample=o_ne_estimator.input.genepop_file
 
 		o_genepopfile.writeGenePopFile( s_genepop_file_subsample, 
@@ -892,7 +1061,9 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 		ls_stdout=[]
 
 		for lv_output in llv_output:
+
 			ls_fields_to_report=[]	
+
 			ls_output_vals_as_strings=[ str( v_val ) for v_val in lv_output ]
 
 			for idx in range( len( ls_output_vals_as_strings ) ):
@@ -900,6 +1071,22 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 					ls_fields_to_report.append( ls_output_vals_as_strings[ idx ] )
 				#end if idx is not for a field we're skipping
 			#end for each field's index
+
+			'''
+			2017_02_11.  Add the bias adjusted value (or None if we have no nb/ne ratio,
+			either a value given in the header of the genepop file (see def 
+			get_string_values_ldne_ratio_and_bias_adjustment), and, if not present there, then 
+			the value passed into our def call "f_nbne_ratio".
+			'''
+			s_ratio_used_for_adjustment, s_bias_adjusted_value=\
+						get_string_values_ldne_ratio_and_bias_adjustment( \
+																o_ne_estimator,
+																o_genepopfile,
+																lv_output,
+																f_nbne_ratio )
+
+			ls_fields_to_report.append( s_ratio_used_for_adjustment )
+			ls_fields_to_report.append( s_bias_adjusted_value )
 
 			ls_stdout.append( OUTPUT_DELIMITER.join(  ls_runinfo + ls_fields_to_report )  )
 
@@ -1138,7 +1325,7 @@ def parse_sampling_list_that_uses_indiv_id_fields( ls_sampling_list_items ):
 	i_tot_sampling_items=len( ls_sampling_list_items )
 
 	if i_tot_sampling_items < MIN_NUM_SAMPLING_ITEMS:
-		s_msg = "In pgdriveneestimatory.py, def parse_sampling_list_that_uses_indiv_id_fields, " \
+		s_msg = "In pgdriveneestimator.py, def parse_sampling_list_that_uses_indiv_id_fields, " \
 					+ "for the sampling criteria list, expecting at 3 items " \
 					+ "(field names, field types, and one or more " \
 					+ "parameters.  Found list: " \
@@ -1649,7 +1836,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 											o_debug_mode,
 											llv_args_each_process,
 											IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
-											o_secondary_outfile ):
+											o_secondary_outfile,
+											f_nbne_ratio ):
 	'''		
 	This def creates ne-estimator caller object and adds it to list of args for a single call
 	to def do_estimate.  The call is then appended to llv_args_each_process
@@ -1805,7 +1993,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 									s_replicate_number, 
 									s_loci_replicate_number,
 									o_debug_mode,
-									IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP ]
+									IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+									f_nbne_ratio ]
 
 				llv_args_each_process.append( lv_these_args )
 			#end for each population
@@ -2094,6 +2283,14 @@ def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outf
 		#end if field in estimatorfields
 	#end for each estimator fields
 
+	'''
+	2017_02_11 we add a column for the bias adjusted ldne estimate, just implemented.
+	(See below def do_ldne_bias_adjustment ).
+	'''
+
+	ls_reported_fields.append( COL_NAME_NBNE_RATIO_FOR_BIAS_ADJUST )
+	ls_reported_fields.append( COL_NAME_BIAS_ADJUSTED_LDNE )
+
 	o_main_outfile.write( OUTPUT_DELIMITER.join( MAIN_TABLE_RUN_INFO_COLS + ls_reported_fields  ) + OUTPUT_ENDLINE )
 
 	return
@@ -2137,7 +2334,8 @@ def drive_estimator( *args ):
 				o_debug_mode, 
 				o_main_outfile, 
 				o_secondary_outfile, 
-				o_multiprocessing_event ) = parse_args( *args )
+				o_multiprocessing_event,
+				f_nbne_ratio ) = parse_args( *args )
 
 	o_process_pool=None
 
@@ -2200,7 +2398,8 @@ def drive_estimator( *args ):
 												o_debug_mode,
 												llv_args_each_process,
 												IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
-												o_secondary_outfile )
+												o_secondary_outfile,
+												f_nbne_ratio )
 		
 	#end for each genepop file, sample, add an ne-estimator object, and setup call to estimator 
 
@@ -2362,7 +2561,6 @@ def mymain( *q_args ):
 	#end if can't find executable
 	
 	'''
-
 	We adapted this def to open and close the main and secondary 
 	output files. Originally, it simply passed open file objects to def,
 	parse args.  Now we we check for string vs file for these
@@ -2374,7 +2572,7 @@ def mymain( *q_args ):
 	file objects.  We also pass along the last arg, the multiprocessing
 	event.  
 	'''
-	seq_unaltered_args=q_args[0:IDX_DEBUG_MODE + 1 ]
+	seq_unaltered_args=q_args[0:IDX_LAST_CONSOLE_ARG + 1 ]
 
 	v_main_outfile_arg= q_args[ IDX_MAIN_OUTFILE ]
 	v_secondary_outfile_arg=q_args[ IDX_SECONDARY_OUTFILE ]
@@ -2393,6 +2591,13 @@ def mymain( *q_args ):
 		o_secondary_outfile=v_secondary_outfile_arg
 	#end if passed non-file object, open file, else pass along file object
 
+	'''
+	2017_02_12.  Having replaced the use of the python multiprocessing.Process
+	object with a Popen call when calling this def from the pgutilities.py, we
+	no longer have the multiprocessing event available.  For now, rather than
+	removing this arg, the former multiprocessing event to allow communication
+	between pgutilities.py and this code, we simply default this arg to None:
+	'''
 	o_event=None
 
 	seq_args_to_parse=seq_unaltered_args + ( o_main_outfile, o_secondary_outfile, o_event )
@@ -2464,6 +2669,12 @@ if __name__ == "__main__":
 		ls_args_passed.append( o_args.mode )
 	#end if no mode passed
 
+	if o_args.nbneratio is None:
+		ls_args_passed.append( DEFAULT_NBNE_VAL )
+	else:
+		ls_args_passed.append( o_args.nbneratio )
+	#end if nn nb/ne ratio passed
+
 	#now we add the default output file objects and 
 	#mp event args hidden from console user, set by
 	#users who import this mod and call mymain:
@@ -2471,5 +2682,5 @@ if __name__ == "__main__":
 
 	mymain( *( ls_args_passed ) )
 
-#end if main
+#end if __name__ == "__main__"
 

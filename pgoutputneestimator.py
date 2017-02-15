@@ -20,7 +20,7 @@ class PGOutputNeEstimator( object ):
 	OUTPUT_TIAGO_ABBREVS = [ "ne","neci05" , "neci975", "or2", "sr2", "indep", "hmean" ]
 
 
-	def __init__( self, s_input_file, s_run_output_filename ):
+	def __init__( self, s_input_file, s_run_output_filename, o_bias_adjustor=None ):
 		#we use the name of the input file to check for NoDat file
 		#because NeEstimator uses it to name the file
 		self.__run_input_file=s_input_file
@@ -384,6 +384,23 @@ class PGOutputNeEstimator( object ):
 	def __saveNoDatInfo( self ):
 		return
 	#end __saveNoDatInfo
+
+	def getColumnNumberForFieldName( self, s_name ):
+		i_column_number=None
+		
+		try:
+			i_column_number=PGOutputNeEstimator.OUTPUT_FIELDS.index( s_name )
+		except ValueError as ve:
+			s_msg="In PGOutputNeEstimator instance, " \
+						+ "def getColumnNumberForFieldName, " \
+						+ "no column named " + str( s_name ) \
+						+ "."
+			raise Exception( s_msg )
+			
+		#end try, except
+
+		return i_column_number
+	#end
 
 	@property
 	def parsed_output( self ):
