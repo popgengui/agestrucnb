@@ -1122,10 +1122,10 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			harvestRate = ( self.__harvest_rate_by_generation[gen] )
 			#reduce expected NB
-			self.__targetNb =self.__targetNb *((1-harvestRate)*self.input.nbnc*self.input.nbne)
+			self.__targetNb =self.__targetNb *(1-harvestRate)
 
 			#reduce N0
-			self.__current_N0 = self.__current_N0 *(1-harvestRate)
+			#self.__current_N0 = recalcN0(self.__targetNb)
 
 			print harvestRate
 			maleHarvest = numpy.round(maleCount * harvestRate)
