@@ -932,7 +932,8 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator, o_genepopf
 	i_col_ne_est=\
 				o_ne_estimator.getOutputColumnNumberForFieldName( \
 											COL_NAME_NEESTIMATOR_NE_ESTIMATE )
-	f_this_ne=lv_results_list[ i_col_ne_est ]
+
+	f_this_ne=float( lv_results_list[ i_col_ne_est ] )
 
 	if f_nbne_ratio_from_genepop_file_header is not None:
 		v_nbne_ratio_to_use_for_adjustment=f_nbne_ratio_from_genepop_file_header
@@ -942,7 +943,6 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator, o_genepopf
 	#as arguement to this def
 
 	if v_nbne_ratio_to_use_for_adjustment is not None:
-		f_this_ne=f_this_ne
 		f_adj_estimate=do_ldne_bias_adjustment( f_this_ne, v_nbne_ratio_to_use_for_adjustment )
 		s_bias_adjusted_value=str( f_adj_estimate ) 
 	else:

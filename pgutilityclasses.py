@@ -1200,7 +1200,7 @@ class LDNENbBiasAdjustor( object ):
 		b_nb_is_numeric=self.__is_numeric_type( v_original_nb )
 		b_nbne_ratio_is_numeric=self.__is_numeric_type( f_nbne_ratio )
 
-		b_type_nb_correct = b_nb_is_numeric or i_original_nb is None 
+		b_type_nb_correct = b_nb_is_numeric or v_original_nb is None 
 
 		#We accept int for the ratio (will cast as float
 		#when applying a bias adjustment.
@@ -1210,7 +1210,7 @@ class LDNENbBiasAdjustor( object ):
 					"In LDNENbBiasAdjustor instance , " \
 							+ "def __init__," \
 							+ "type mismatch in nb or nb/ne values: " \
-							+ "nb type: " + str( type( i_original_nb ) ) \
+							+ "nb type: " + str( type( v_original_nb ) ) \
 							+ "nb/ne type: " + str( type( f_nbne_ratio ) ) \
 							+ "."
 
