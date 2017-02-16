@@ -1121,12 +1121,6 @@ class PGOpSimuPop( modop.APGOperation ):
 			#determine harvest rate for this generation
 
 			harvestRate = ( self.__harvest_rate_by_generation[gen] )
-			#reduce expected NB
-			self.__targetNb =self.__targetNb *(1-harvestRate)
-
-			#reduce N0
-			#self.__current_N0 = recalcN0(self.__targetNb)
-
 			print harvestRate
 			maleHarvest = numpy.round(maleCount * harvestRate)
 			femaleHarvest = numpy.round(femaleCount * harvestRate)

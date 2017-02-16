@@ -919,6 +919,20 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator, o_genepopf
 	f_nbne_ratio_from_genepop_file_header = \
 				get_nbne_ratio_from_genepop_file_header( o_genepopfile )
 
+	'''
+	We need the original Ne (Nb)  estimate
+	in order to do the bias adjustment, or,
+	if we cannot do the bias adjustment, 
+	(that is, we don't have an Nb/Ne ratio),
+	then to write the original to the ne_est_adj
+	column.  This allows the Viz plotter to
+	use just the one column to plot the estimate,
+	whether or not a bias adjustment was performed.
+	'''
+	i_col_ne_est=\
+				o_ne_estimator.getOutputColumnNumberForFieldName( \
+											COL_NAME_NEESTIMATOR_NE_ESTIMATE )
+	f_this_ne=lv_results_list[ i_col_ne_est ]
 
 	if f_nbne_ratio_from_genepop_file_header is not None:
 		v_nbne_ratio_to_use_for_adjustment=f_nbne_ratio_from_genepop_file_header
@@ -928,12 +942,20 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator, o_genepopf
 	#as arguement to this def
 
 	if v_nbne_ratio_to_use_for_adjustment is not None:
-		i_col_ne_est=\
-				o_ne_estimator.getOutputColumnNumberForFieldName( \
-											COL_NAME_NEESTIMATOR_NE_ESTIMATE )
-		f_this_ne=float( lv_results_list[ i_col_ne_est ] )
+		f_this_ne=f_this_ne
 		f_adj_estimate=do_ldne_bias_adjustment( f_this_ne, v_nbne_ratio_to_use_for_adjustment )
 		s_bias_adjusted_value=str( f_adj_estimate ) 
+	else:
+		'''
+		2017_02_15.  Instead of writing "None" when we have no bias
+		adjustment, we'll enter the original estimate.  This allows
+		Brian T to find the Nb (Ne) values to plot in the new 
+		ne_est_adj column instead of the original est_ne column.  
+		By using original estimates when no bias adjustment was done,
+		he does not have to use conditional language to find 
+		his Ne estimate.
+		'''
+		s_bias_adjusted_value=str( f_this_ne )
 
 	#end if we have a nb/ne ratio, do bias adjustment 
 	return str( v_nbne_ratio_to_use_for_adjustment ), s_bias_adjusted_value
@@ -1002,12 +1024,6 @@ def get_nbne_ratio_from_genepop_file_header( o_genepopfile ):
 		#end if more than one match, else one
 	#end if total matches > 0
 
-	##### temp
-	print( "-----------------" )
-	print( "header text: " + s_header_text )
-	print( "matches: " + str( ls_matches ) )
-	print( "from header: " + str( v_value ) )
-	##### end temp
 	return v_value
 #end def get_nbne_ratio_from_genepop_file_header
 
