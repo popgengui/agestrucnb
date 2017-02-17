@@ -130,7 +130,8 @@ def get_ne_per_generation( s_genepop_file,
 	return df_ne_by_generation
 #end get_ne_per_generation
 
-def get_expected_heterozygosity_per_generation( df_mean_het_by_gen, df_ne_by_gen ):
+def get_expected_heterozygosity_per_generation( df_mean_het_by_gen, 
+														df_ne_by_gen ):
 
 	'''
 	From Brian H, the iterative caluclation:
@@ -164,21 +165,31 @@ def get_expected_heterozygosity_per_generation( df_mean_het_by_gen, df_ne_by_gen
 	f_ht0=df_mean_het_by_gen[ i_lowest_gen_number ]
 
 	#Value for the initial generation is the observed:
-	df_expected_het_per_gene[ li_gen_numbers_for_ne [ 0 ]] =  f_ht0	
-	f_calc_coefficient = 1 - 1 / ( 2*ne0 )
+	df_expected_het_per_gen[ li_gen_numbers_for_ne [ 0 ]] =  f_ht0	
+	f_calc_coefficient = 1 - 1 / ( 2*f_ne0 )
 
-	for idx in range ( 1 , i_total_gen_numbers + 1 ):
+	##### temp
+	print( "------------------" )
+	print( "li_gen_numbers_for_ne: " + str( li_gen_numbers_for_ne ) )
+	#####
+
+	for idx in range ( 1 , i_total_gen_numbers ):
+		##### temp
+		print( "---------------" )
+		print( "idx: " + str( idx ) )
+		#####
+
 		i_this_generation_number=li_gen_numbers_for_ne[ idx ]
 		i_last_generation_number=li_gen_numbers_for_ne[ idx-1 ]
 		f_het_value_last_gen=df_expected_het_per_gen[ i_last_generation_number ]
 
 		f_expected_het_for_this_gen = f_het_value_last_gen * f_calc_coefficient
 			
-		df_expected_het_per_gene[ i_this_generation_number ] = \
+		df_expected_het_per_gen[ i_this_generation_number ] = \
 					f_expected_het_for_this_gen
 	#end for each index into list generation numbers
 
-	return df_expected_het_per_gene
+	return df_expected_het_per_gen
 #end get_expected_heterozygosity_per_generation
 														
 
@@ -234,6 +245,7 @@ def convert_mean_hets_to_het_loss( df_mean_het_by_gen ):
 	print( "------------------" )
 	print( "df_mean_het_by_gen: " + str( df_mean_het_by_gen ) )
 	print( "------------------" )
+	##### end temp
 
 	df_mean_het_loss_by_gen={}
 
@@ -268,7 +280,6 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 		and that they are numerical.
 		--that the axis scales for dict1 and dict2 are similar for keys(),
 		and similar for values().
-
 	'''
 
 	FONTSIZE=12
@@ -332,7 +343,7 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 
 	o_fig=None
 
-	if s_plot_file is not None:
+	if s_plot_file_name is not None:
 		pt.savefigure( s_file_name )
 	#end if no plot file
 	return
@@ -461,13 +472,53 @@ def get_expected_vs_observed_heterozygosity( s_ne_tsv_file,
 	'''
 	
 
+	ddf_mean_het_by_gp_file_by_gen, ddf_ne_by_gp_file_by_gen = \
+			get_mean_hets_and_ne_for_generations( s_ne_tsv_file, 
+												i_initial_generation_number,
+												i_final_generation_number, 
+												i_min_loci_number, 
+												i_max_loci_number )
 
+	for s_gp_file_name in ddf_mean_het_by_gp_file_by_gen:
 
+		df_observed_het_by_gen=ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name ]
 
-	return
+		df_expected_het_by_gen=\
+			get_expected_heterozygosity_per_generation( df_observed_het_by_gen,
+															ddf_ne_by_gp_file_by_gen[ s_gp_file_name ] )
+	
+		if b_plot == True:
+			
+			f_ne0=ddf_ne_by_gp_file_by_gen[ s_gp_file_name ][ i_initial_generation_number ]
+			f_he0=ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name ][ i_initial_generation_number ]
+
+			s_title="Expected vs. observed heterozygosity" \
+				+ "\nNe of initial cycle (after burn-in): " + str( f_ne0 ) \
+				+ "\nMean He of initial cycle (after burn-in): " + str( round( f_he0, 4) ) \
+				+ "."
+
+			s_het_label="observed"
+			s_expected_label="expected"
+
+			s_xaxis_label="cycle number"
+			s_yaxis_label="heterozygosity"
+					
+			
+			plot_two_dicts_similarly_scaled( df_observed_het_by_gen, 
+							df_expected_het_by_gen, 
+							s_data1_label=s_het_label,
+							s_data2_label=s_expected_label,
+							s_xaxis_label=s_xaxis_label,
+							s_yaxis_label=s_yaxis_label,
+							s_title=s_title )
+		#end if plot
+
+	#end for each genepop file named in the tsv file
+
+	return { "mean_hets" : ddf_mean_het_by_gp_file_by_gen, 
+					"nes": ddf_ne_by_gp_file_by_gen  }
 #end get_expected_vs_observed_heterozygosity
 		
-
 def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file, 
 															i_initial_generation_number, 
 															i_final_generation_number,
@@ -531,11 +582,19 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 												i_min_loci_number, 
 												i_max_loci_number )
 
+	#Two dicts for the return value:
+	ddf_observed_het_loss_by_file={}
+	ddf_expected_het_loss_by_file={}
+
 	for s_gp_file_name in ddf_mean_het_by_gp_file_by_gen:
 
 		df_mean_het_loss_by_gen=convert_mean_hets_to_het_loss( ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name]  )
 		df_expected_het_loss_by_gen=get_expected_het_loss_per_generation( ddf_ne_by_gp_file_by_gen[ s_gp_file_name ] )
-		
+	
+		#Add to the dicts that get returned:
+		ddf_observed_het_loss_by_file[ s_gp_file_name ] = df_mean_het_loss_by_gen
+		ddf_expected_het_loss_by_file[ s_gp_file_name ] = df_expected_het_loss_by_gen
+
 		##### temp
 		print( "-----------------" )
 		print( "df_mean_het_loss_by_gen: " + str( df_mean_het_loss_by_gen ) )
@@ -551,17 +610,14 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 
 		if b_plot == True:
 			
-			s_title="Expected het loss compared with" \
-				+ "\nper-generation calculated Het loss, " \
-				+ "\nNe of initial generation: " + str( f_ne0 ) \
-				+ "."
-			s_het_label="mean het"
+			s_title="Percent expected vs observed loss of heterozygosity" \
+				+ "\nNe of initial cycle (after burn-in): " + str( f_ne0 ) \
+
+			s_het_label="observed"
 			s_expected_label="expected"
 
-			s_xaxis_label="generation"
+			s_xaxis_label="cycle number"
 			s_yaxis_label="percent heterozygosity loss"
-
-
 					
 			##### temp
 			print( "---------------" )
@@ -580,8 +636,8 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 
 	#end for each genepop file named in the tsv file
 
-	return { "mean_het_by_gen" : df_mean_het_by_gen, 
-					"expected_het_loss_by_gen" : df_expected_het_loss_by_gen }
+	return { "observed_het_loss" : ddf_observed_het_loss_by_file, 
+					"expected_het_loss" : ddf_expected_het_loss_by_file }
 
 #end get_expected_vs_observed_loss_heterozygosity
 
