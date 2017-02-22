@@ -15,8 +15,8 @@
 
 #requires gnuplot program.
 
-numrequiredargs="6"
-numwithopt="7"
+numrequiredargs="7"
+numwithopt="8"
 
 mys=$( basename $0 )
 
@@ -28,8 +28,9 @@ then
 	echo "       <file, *.tsv,  with NeEstimator Nb values> "
 	echo "       <int, number of generations> "
 	echo "       <int, min value for Nb axis (y-axis)"
+	echo "       <int, max value for Nb axis (y-axis)"
 	echo "       <int, target Nb>"
-	echo "       <title>"
+	echo "       <title> (use \"newline\" to break the title into multiple lines)"
 	echo "       optional, <term name> (default is \"qt\", but try \"wxt\" or \"x11 (linux)\" if no qt)"
 
 	exit 0
@@ -40,17 +41,16 @@ mytable="$1"
 mytsv="$2"
 total_gens="$3"
 minyval="$4"
-target_nb="$5"
-mytitle="$6"
+maxyval="$5"
+target_nb="$6"
+mytitle="$7"
 
 if [ "$#" -eq "${numwithopt}" ]
 then
-	const_term="$7"
+	const_term="$8"
 else
 	const_term="qt"
 fi
-
-
 
 const_pad_right=0
 const_term="qt"
@@ -60,11 +60,17 @@ const_size="size ${const_width}, ${const_height}"
 const_tsv_gen_col="2"
 const_tsv_nb_col="11"
 
+#global replacement of newline with 
+#literal newline (i.e. 2-line substitution
+#breaks title into multi lines:
+mynewtitle=${mytitle//newline/
+}
+
 gnuplot_statements="set term ${const_term} ${const_size}; \
-			set xlabel 'generation'; \
+			set xlabel 'reproductive cycle'; \
 			set ylabel 'Nb'; \
-			set title '${mytitle}'; \
-			set yrange [ ${minyval} : ]; \
+			set title '${mynewtitle}'; \
+			set yrange [ ${minyval} : ${maxyval} ]; \
 			set xrange [ 0 : ${total_gens} + ${const_pad_right} ]; \
 			set arrow 1 from 0,${target_nb} to ${total_gens},${target_nb} nohead; \
 			set label 'expected' at 0,${target_nb} offset 0.5,1; \

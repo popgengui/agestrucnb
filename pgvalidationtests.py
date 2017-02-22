@@ -617,7 +617,7 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 			s_expected_label="expected"
 
 			s_xaxis_label="cycle number"
-			s_yaxis_label="percent heterozygosity loss"
+			s_yaxis_label="percent heterozygosity remaining"
 					
 			##### temp
 			print( "---------------" )

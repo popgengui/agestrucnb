@@ -33,7 +33,7 @@ then
 	echo "       <int, min value for Nb axis (y-axis)"
 	echo "       <int, max value for Nb axis (y-axis)"
 	echo "       <int, target Nb>"
-	echo "       <title>"
+	echo "       <title> (use \"newline\" to break the title into multiple lines.)"
 	echo "       optional, <term name> (default is \"qt\", but try \"wxt\" or \"x11 (linux)\" if no qt)"
 
 	exit 0
@@ -67,8 +67,13 @@ const_tsv_nb_col="11"
 const_tsv_adj_nb_col="19"
 const_lw=1
 
+#2-line substitution breaks
+#title into multi lines:
+mytitle="${mytitle//newline/
+}"
+
 gnuplot_statements="set term ${const_term} ${const_size}; \
-			set xlabel 'generation'; \
+			set xlabel 'reproductive cycle'; \
 			set ylabel 'Nb'; \
 			set title '${mytitle}'; \
 			set yrange [ ${minyval} : ${maxyval} ]; \

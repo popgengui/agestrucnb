@@ -1354,9 +1354,6 @@ class PGGuiViz( pgg.PGGuiApp ):
 		self.__subsample_fetcher_map_result=self.__subsample_fetcher_process_pool.map_async( \
 					pgut.get_subsample_values_lists_from_tsv_file,
 					[ s_tsv_file ] )
-#		self, o_parent, s_message="", s_title="Info", 
-#									def_boolean_signaling_finish=None,
-#									def_on_cancel=None ):
 
 		PGGUIMessageWaitForResultsAndActionOnCancel( \
 										o_parent=self,
@@ -1364,11 +1361,11 @@ class PGGuiViz( pgg.PGGuiApp ):
 										s_title="Loading File info",										
 										def_boolean_signaling_finish=self.__subsample_fetcher_map_result.ready,
 										def_on_cancel=self.__on_cancel_get_subsample_values )
-
 		
 		if self.__subsample_fetcher_map_result is not None:
 			self.__assign_subsample_process_results_and_reset_subsample_attributes( self.__subsample_fetcher_map_result )
 		#end if results exist
+
 		return
 
 	#end get_subsample_values_lists_from_tsv_file_using_separate_process
@@ -1388,7 +1385,6 @@ class PGGuiViz( pgg.PGGuiApp ):
 
 		s_tsv_file=self.__tsv_file.get()
 
-		
 		s_basename=pgut.get_basename_from_path( s_tsv_file ) 
 
 		self.__tsv_file_listbox.insert( END, s_basename )

@@ -2543,6 +2543,46 @@ def did_find_ne_estimator_executable():
 	return b_found
 #end did_find_ne_estimator_executable
 
+def mymainlongfilelist( *q_args ):
+	'''
+	2017_02_21.  This def is added as an alternative call
+	for pgutilitites run_driveneestimator_in_new_process
+	and its call to call_driveneestimator_using_subprocess,
+	to solve a Windows problem.  When calling with a long
+	list of (many hundreds) of genepop files, we saw a limit
+	of Windows ability to correctly make the call via pOpen, 
+	due to a limit on the number of characters it can handle
+	in a command.  Now the above pgutilities defs will have
+	tested the command lenght.  If it exceeds a threshold,
+	the comma-delimited list of genepop files will be
+	written to a temporary file.  This def will read in
+	the list from that file, delete the file, and then
+	call mymain with the now normalized arg 1.
+
+	We assume the list is formatted as it is when mymain
+	is called directly, and, further, that it is in a single,
+	first line in the file.
+	'''
+
+	s_temp_file_with_genepop_file_list=q_args[ IDX_GENEPOP_FILES ]
+
+	o_temp_file_with_genepop_file=open( s_temp_file_with_genepop_file_list )
+
+	#Thie file's single line should give the correct first argument of
+	#a list of genepop files, so that mymain can pass it to parse_args 
+	#so that it is parsed into a list of file names.
+	s_genepop_file_list=o_temp_file_with_genepop_file.readline().strip()
+	q_corrected_args=( s_genepop_file_list, ) + q_args[ 1 : ]
+
+	o_temp_file_with_genepop_file.close()
+
+	mymain( *q_corrected_args )
+
+	return
+
+#end mymainlongfilelist
+
+
 def mymain( *q_args ):
 
 	'''
