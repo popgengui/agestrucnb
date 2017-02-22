@@ -486,7 +486,7 @@ def get_expected_vs_observed_heterozygosity( s_ne_tsv_file,
 
 			f_he0=ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name ][ i_initial_generation_number ]
 
-			s_title="Expected vs. observed heterozygosity" \
+			s_title="Expected vs. theoretical heterozygosity" \
 				+ "\nNe (mean of estimates in plotted cycles, or supplied in command): " + str( f_ne0 ) \
 				+ "\nMean He of initial cycle (after burn-in): " + str( round( f_he0, 4) ) \
 				+ "."
@@ -606,7 +606,7 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 
 		if b_plot == True:
 			
-			s_title="Percent expected vs observed loss of heterozygosity" \
+			s_title="Percent expected vs theoretical retained heterozygosity" \
 				+ "\nNe (mean of estimates in plotted cycles, or supplied in command): " + str( f_ne0 ) \
 
 			s_het_label="expected under HW by allele freqs"
