@@ -492,7 +492,7 @@ def get_expected_vs_observed_heterozygosity( s_ne_tsv_file,
 				+ "."
 
 			s_het_label="expected under HW, given allele freqs"
-			s_expected_label="theoretical, Hz_i=Hz_{i-1} - ( 1 - 1/(2Ne) )"
+			s_expected_label="theoretical, Hz_i=Hz_{i-1} X ( 1 - 1/(2Ne) )"
 
 			s_xaxis_label="cycle number"
 			s_yaxis_label="heterozygosity"
