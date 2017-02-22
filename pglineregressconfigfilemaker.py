@@ -98,7 +98,9 @@ class PGLineRegressConfigFileMaker( object ):
 				#If its an output file (either one of the plot file names in the "destination" section
 				#or the stats out file, whose param name is "outputFileName" (different section in the
 				#Vis config file -- the "confidence" section).
-				if s_viz_section_name == "destination" or s_viz_param_name == "outputFileName":
+
+				if s_viz_section_name == "destination" or s_viz_param_name == "outputFilename":
+
 					if v_value_this_param not in [ "show", "none" ]:
 						#returns a StrVal tkinter object
 
@@ -109,13 +111,15 @@ class PGLineRegressConfigFileMaker( object ):
 							v_value_this_param=pgut.fix_windows_path( v_value_this_param )
 						#end if using Windows, fix the path
 
-					if not ( v_value_this_param in [ "show", "none" ] \
-											or v_value_this_param.endswith( ".png" ) \
-											or v_value_this_param.endswith( ".pdf" ) ) :
-						
-						v_value_this_param = v_value_this_param + ".png"
-					#end if not show, or already has png or pdf extension
-				#end if this is a destination option
+					if s_viz_section_name == "destination":
+						if not ( v_value_this_param in [ "show", "none" ] \
+												or v_value_this_param.endswith( ".png" ) \
+												or v_value_this_param.endswith( ".pdf" ) ) :
+							
+							v_value_this_param = v_value_this_param + ".png"
+						#end if not show, or already has png or pdf extension
+					#end if this is a plotted file without a known image file ext, default to png
+				#end if this is a destination, or stats out "outputFileName" option
 			
 				if not self.__omit_x_range \
 							or s_viz_param_name  not in [ "xMin", "xMax" ]:

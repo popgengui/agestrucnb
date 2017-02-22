@@ -1485,21 +1485,25 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		'''
 		If the askopenfilenames dialog did  not return a tuple, 
 		then we assume it returned a unicode string,
-		#per the Windows bug noted at https://bugs.python.org/issue5712 
-		'''
-		##### temp add if True to test no matter return val
-		if True or type( tup_genepop_files ) != tuple:
-			tup_genepop_files=self.tk.splitlist( tup_genepop_files )
-	
-			#A test to fix path mangling downstream:
-			s_temp_tup=()
-			for s_path in tup_genepop_files:
-				s_path=pgut.fix_windows_path( s_path )
-				s_temp_tup+=( s_path, )
-			#end for each path
+		per the Windows bug noted at https://bugs.python.org/issue5712 
 
-			tup_genepop_files=s_temp_tup
-		#end if return val not a tuple
+		Revision 2017_02_15, removed an if statement, which was 
+		processing all tup_genepop_files returned from the askopenfilenames
+		call.  It was an or statement starting with "If True"
+		added as temp code.  The temp code was never removed, because
+		as both tuples and unicode strings are properly processed 
+		with the splitlist operation and the path correction for windows.
+		'''
+		tup_genepop_files=self.tk.splitlist( tup_genepop_files )
+
+		#A test to fix path mangling downstream:
+		s_temp_tup=()
+		for s_path in tup_genepop_files:
+			s_path=pgut.fix_windows_path( s_path )
+			s_temp_tup+=( s_path, )
+		#end for each path
+
+		tup_genepop_files=s_temp_tup
 
 		#string of files delimited, for member attribute 
 		#that has type tkinter.StringVar

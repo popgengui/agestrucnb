@@ -55,7 +55,7 @@ def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0):
         pop = item['pop']
         popNum = int(pop)
         individualCount = int(item["census"])
-        neEst = float(item['est_ne'])
+        neEst = float(item['ne_est_adj'])
         maxError = float(item['95ci_high'])
         minError = float(item['95ci_low'])
         subpopReplicate = return_float_or_string(item['replicate_number'])

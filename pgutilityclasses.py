@@ -898,6 +898,7 @@ class NeEstimationTableFileManager:
 	'''
 
 	DELIM_TABLE="\t"
+	COL_NAME_FILE_NAME=b'original_file'
 	COL_NAME_POP_SAMPLE_VAL=b'sample_value'
 	COL_NAME_LOCI_SAMPLE_VAL=b'loci_sample_value'
 
@@ -957,10 +958,15 @@ class NeEstimationTableFileManager:
 		return
 	#end __load_file_into_array
 
-	def __get_col_nums_for_col_name( self, b_col_name ):
+	def __get_col_nums_for_col_name( self, b_col_name, b_enforce_uniq=True ):
 		'''
 		param b_col_name is a bytes object, to be compared
 		to those read in to the first line of the table array.
+		
+		2017_02_16.  param b_enforce_uniq, when True employes an assert statment
+		that the tup[0] returned by numpy.where (i.e. the tuple with
+		indices for true values for the conditional) has exactly one
+		item, indicating a single column number that matches the b_col_name arg.
 		'''
 		ar_col_names=self.__table_array[ self.__line_number_col_names - 1, : ]
 
@@ -968,6 +974,15 @@ class NeEstimationTableFileManager:
 		#index or indices in the bool array wherein ar_col_names has the match.
 		tup_ar_col_nums=numpy.where( ar_col_names==b_col_name )
 		ar_col_nums=tup_ar_col_nums[ 0 ]
+
+		if b_enforce_uniq:
+				s_msg="In NeEstimationTableFileManager instance, " \
+							+ "def __get_col_nums_for_col_name, " \
+							+ "non-unique column number for match for " \
+							+ "column name, " + str( b_col_name ) + "."
+				
+				assert len( ar_col_nums ) == 1, s_msg
+		#end if we are to enforce a unique column number
 
 		return ar_col_nums
 	#end __get_col_nums_for_col_name
@@ -983,58 +998,26 @@ class NeEstimationTableFileManager:
 		return set( ar_table[ i_min_row : , i_col_number ] )
 	#end __get_set_values_for_column
 
-	def __get_list_bytes_pop_sample_values( self ):
-		b_col_name=self.__myclassname.COL_NAME_POP_SAMPLE_VAL
-		ar_col_nums=self.__get_col_nums_for_col_name( b_col_name  )
-
-		if len( ar_col_nums ) != 1:
-			s_msg="In NeEstimationTableFileManager instance, " \
-							+ "def __get_list_pop_sample_values, " \
-							+ "in fetching column number for sample value " \
-							+ "from the file header, a non unique column " \
-							+ "number was returned, using sample value column " \
-							+ "name: " + str( b_col_name ) + ", and getting list of " \
-							+ "column numbers: " + str( ar_col_nums ) + "."
-			raise Exception( s_msg )
-		#end if non uniq col number
-
-		set_pop_sample_values=self.__get_set_values_for_column( ar_col_nums [ 0 ] )
-		
-		return list( set_pop_sample_values )
-
-	#end __get_list_pop_sample_values
-
-	def __get_list_bytes_loci_sample_values( self ):
-
-		b_col_name=self.__myclassname.COL_NAME_LOCI_SAMPLE_VAL
+	def __get_set_bytes_values_for_column_name( self, b_col_name ):
 
 		ar_col_nums=self.__get_col_nums_for_col_name( b_col_name  )
 
 		if len( ar_col_nums ) != 1:
 			s_msg="In NeEstimationTableFileManager instance, " \
-							+ "def __get_list_loci_sample_values, " \
-							+ "in fetching column number for sample value " \
-							+ "from the file header, a non unique column " \
+							+ "def __get_set_bytes_values_for_col_name, " \
+							+ "in fetching column number for name, " + str( b_col_name ) \
+							+ " from the file header, a non unique column " \
 							+ "number was returned, using sample value column " \
-							+ "name: " + str( b_col_name ) + ", and getting list of " \
-							+ "column numbers: " + str( ar_col_nums ) + "."
+							+ "list of column numbers found for this column name: " \
+							+ str( ar_col_nums ) + "."
 			raise Exception( s_msg )
 		#end if non uniq col number
 
-		set_loci_sample_values=self.__get_set_values_for_column( ar_col_nums [ 0 ] )
+		set_values=self.__get_set_values_for_column( ar_col_nums [ 0 ] )
 		
-		return list( set_loci_sample_values )
+		return list( set_values )
 
-	#end __get_list_bytes_loci_sample_values
-
-	def __get_list_of_strings_from_list_of_bytes( self, lb_list ):
-
-
-		ls_as_strings=[ str(  \
-				b_val.decode( self.__myclassname.ENCODING )  )
-											for b_val in lb_list ]
-		return ls_as_strings
-	#end __get_list_of_strings_from_list_of_bytes
+	#end def __get_set_bytes_values_for_col_name
 
 	def __get_string_from_bytes_value( self, b_bytes ):
 		s_bytes=str( b_bytes.decode( self.__myclassname.ENCODING ) )
@@ -1045,16 +1028,61 @@ class NeEstimationTableFileManager:
 		b_strval=bytes( s_strval.encode( self.__myclassname.ENCODING ) )
 		return b_strval
 	#end __get_bytes_from_string_value
-		
-	def __write_filtered_table_to_open_file_object( self, o_open_file ):
-		'''
-		param dif_lambdas_by_col_num has keys that correspond to
-		column numbers in the table, and values that are refs to 
-		functions that take the column val as a single strin 
-		input and output a bool.
-		'''
-	
+
+	def __get_list_of_strings_from_list_of_bytes( self, lb_list ):
+		ls_as_strings=[ str(  \
+				b_val.decode( self.__myclassname.ENCODING )  )
+											for b_val in lb_list ]
+		return ls_as_strings
+	#end __get_list_of_strings_from_list_of_bytes
+
+	def __get_list_bytes_pop_sample_values( self ):
+		b_col_name=self.__myclassname.COL_NAME_POP_SAMPLE_VAL
+		set_pop_sample_values=self.__get_set_bytes_values_for_column_name( b_col_name )
+		return list( set_pop_sample_values )
+	#end __get_list_pop_sample_values
+
+	def __get_list_bytes_loci_sample_values( self ):
+		b_col_name=self.__myclassname.COL_NAME_LOCI_SAMPLE_VAL
+		set_loci_sample_values=self.__get_set_bytes_values_for_column_name( b_col_name )
+		return list( set_loci_sample_values )
+	#end __get_list_bytes_loci_sample_values
+
+	def __get_list_bytes_file_names( self ):
+		b_col_name=self.__myclassname.COL_NAME_FILE_NAME
+		set_file_names=self.__get_set_bytes_values_for_column_name( b_col_name )
+		return list( set_file_names )
+	#end __get_list_bytes_file_names
+
+	def __get_list_of_column_numbers_for_list_of_column_names( self, ls_col_names ):
+
+		li_column_numbers=[]
+		for s_column_name in ls_col_names:
+			b_column_name=self.__get_bytes_from_string_value( s_column_name )
+			#Default 2nd arg for this call ensures we get back only one
+			#column number in the returned array:
+			ar_col_nums=self.__get_col_nums_for_col_name( b_column_name )
+			i_col_num=ar_col_nums[ 0 ]
+			li_column_numbers.append( i_col_num )
+		#end for each column name
+		return li_column_numbers
+	#end __get_list_of_column_numbers_for_list_of_column_names
+
+	def __get_filtered_table_as_list_of_strings( self, 
+								ls_exclusive_cols=None ):
+
+		ls_entries=[]
+
 		i_line_count=0
+
+		li_exclusive_col_nums=None
+
+		if ls_exclusive_cols is not None:
+			li_exclusive_col_nums= \
+					self.__get_list_of_column_numbers_for_list_of_column_names( \
+														ls_exclusive_cols )
+		#end if we have exclusive col names
+
 		for ar_line in self.__table_array:
 			i_line_count+=1
 
@@ -1064,9 +1092,11 @@ class NeEstimationTableFileManager:
 
 			if i_line_count == 1:
 				'''
-				Header line, no tests needed, and our write flag
-				is already set to True, so pass
+				Header line, no tests needed, and our write flag,
+				b_line_should_be_included is already set to True, 
+				so pass
 				'''
+				pass
 			else:
 				for i_colnum in self.__filters:
 					if self.__filters[ i_colnum ] is not None:
@@ -1077,15 +1107,31 @@ class NeEstimationTableFileManager:
 				#end for each filter
 
 			if b_line_should_be_included:
-
 				ls_line_as_list_of_strings= \
 						self.__get_list_of_strings_from_list_of_bytes( ar_line )
 
+				#If we are to collect only a subset of the columns,
+				#reduce the list:
+				if li_exclusive_col_nums is not None:
+					ls_line_as_list_of_strings=[ ls_line_as_list_of_strings[ i ] \
+														for i in li_exclusive_col_nums ]
+				#end if we have exlcusive col nums
+
 				s_entry=self.__myclassname.DELIM_TABLE.join( \
 													ls_line_as_list_of_strings )
+				ls_entries.append( s_entry )
+			#end if line should be included, append to list
+		#end for each line in array
+		return ls_entries
+	#end def __get_filtered_table_as_list_of_strings
 
-				o_open_file.write( s_entry + "\n" )
-			#end if b_line_should_be_included
+	def __write_filtered_table_to_open_file_object( self, o_open_file ):
+
+		ls_entries=self.__get_filtered_table_as_list_of_strings()
+
+		for s_entry in ls_entries:
+			o_open_file.write( s_entry + "\n" )
+		#end for each string entry
 
 		return
 	#end __write_filtered_table_to_open_file_object
@@ -1130,6 +1176,18 @@ class NeEstimationTableFileManager:
 		return
 	#end writeFilteredTableToFile
 
+	def getFilteredTableAsList( self, ls_exclusive_inclusion_cols=None ):
+		'''
+		This def returns a list of strings, each a tab-delmited set of values
+		corresponding to the tsv file, with all currentfilters in self.__filters
+		applied.  If ls_exclusive_inclusion_cols is not None than it will return
+		only those columns named in the list (column names that match those in 
+		the header (line 1) of the tsv file.
+		'''
+		ls_filtered_table=self.__get_filtered_table_as_list_of_strings( ls_exclusive_inclusion_cols )
+		return ls_filtered_table
+	#end getFilteredTableAsList
+
 	def getUniqueStringValuesForColumn( self, s_colname ):
 		b_column_name=self.__get_bytes_from_string_value( s_colname )
 		ar_col_numbers=self.__get_col_nums_for_col_name( b_column_name )
@@ -1173,15 +1231,18 @@ class NeEstimationTableFileManager:
 
 	@property
 	def header( self ):
-
 		ls_header_as_strings=self.__get_list_of_strings_from_list_of_bytes(  \
 															self.__table_array[ 0, : ] )
-
 		s_header=self.__myclassname.DELIM_TABLE.join( ls_header_as_strings )
-
 		return s_header
 	#end property header
 
+	@property 
+	def file_names(self ):
+		lb_file_names=self.__get_list_bytes_file_names()
+		ls_file_names=self.__get_list_of_strings_from_list_of_bytes( lb_file_names )
+		return ls_file_names
+	#end property file_names
 
 #end class NeEstimationTableFileManager
 
@@ -1200,7 +1261,7 @@ class LDNENbBiasAdjustor( object ):
 		b_nb_is_numeric=self.__is_numeric_type( v_original_nb )
 		b_nbne_ratio_is_numeric=self.__is_numeric_type( f_nbne_ratio )
 
-		b_type_nb_correct = b_nb_is_numeric or i_original_nb is None 
+		b_type_nb_correct = b_nb_is_numeric or v_original_nb is None 
 
 		#We accept int for the ratio (will cast as float
 		#when applying a bias adjustment.
@@ -1210,7 +1271,7 @@ class LDNENbBiasAdjustor( object ):
 					"In LDNENbBiasAdjustor instance , " \
 							+ "def __init__," \
 							+ "type mismatch in nb or nb/ne values: " \
-							+ "nb type: " + str( type( i_original_nb ) ) \
+							+ "nb type: " + str( type( v_original_nb ) ) \
 							+ "nb/ne type: " + str( type( f_nbne_ratio ) ) \
 							+ "."
 
@@ -1226,7 +1287,6 @@ class LDNENbBiasAdjustor( object ):
 		o_val_type=type( v_value )
 		return ( o_val_type in [ int, float ] )
 	#end __is_numeric_type
-
 
 	def __do_bias_adjustment( self ):
 

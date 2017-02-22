@@ -143,7 +143,7 @@ def neFileRead(filename, firstVal = 0):
         #lociSample = float(loci)
 
         individualCount = int(item["indiv_count"])
-        neEst = float(item['est_ne'])
+        neEst = float(item['ne_est_adj'])
         #if neEst == "NaN":
         #    neEst = sys.maxint
         if  not sourceName in dataDict:

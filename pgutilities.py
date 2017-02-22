@@ -753,15 +753,52 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 		seq_arg_set += ( s_main_output_filename,
 								s_secondary_output_filename )
 
-		o_subprocess=call_driveneestimator_using_subprocess( seq_arg_set )
+		'''
+		2017_02_20.  We check the set of arguments for total command length.
+		So that it will not be mis-processed by Windows,
+		and generate a WindowsError "The parameter is incorrect,"  
+		we call a def to correct the command, if it is too long.  In any case
+		it sends us the name of the correct def to call in in pgdriveneestimator.py 
+		(mymain or mymainlongfilelist), and a (possibly altered), final arg set
+		tuple.  It also returns the name of the temp file (None if no file written),
+		so that we can remove it after the subprocess has completed.
+		'''
+		seq_final_arg_set, s_pgdriveneestimator_main_def_to_call, s_temp_file_for_long_genepop_file_list =\
+				replace_genepop_file_list_arg_with_file_name_if_list_too_long( seq_arg_set,
+																				s_main_output_filename )
+
+		o_subprocess=call_driveneestimator_using_subprocess( seq_final_arg_set, 
+											s_main_def_to_call=s_pgdriveneestimator_main_def_to_call )
 
 		'''
 		This def loops while calling poll() and tests timeout value, currently
 		(2016_12_02)large enough to be irrelevant.  It also checks for the 
-		callers multiprocesssing.event.set(), and kills the subprocess
+		callers multiprocessing.event.set(), and kills the subprocess
 		and its children in event.set(), then calls even.clear():
 		'''
 		manage_driveneestimator_subprocess( o_subprocess, o_multiprocessing_event )
+
+		if s_temp_file_for_long_genepop_file_list is not None:
+			try:
+				'''
+				02/21/2017 I have not yet been able to figure out why 
+				Windows claims the file is being used by another process.
+				This stop-gap will at least inform the user of the file
+				and that it is temporary, but failed to disappear. Note 
+				that we avoid throwing an exception, so that the GUI can
+				finish up as though an Nb estimation process completed
+				normally.
+				'''
+				os.remove( s_temp_file_for_long_genepop_file_list )
+			except Exception as oex:
+				s_msg="Warning:  a temporary file, " + s_temp_file_for_long_genepop_file_list \
+								+ ", was created to handle a large list of genepop files.  The program " \
+								+ "was not able to remove the file, and raised an exception with a message: " \
+								+ str( oex ) + ".  The file is not needed and can be deleted." 
+				show_warning_in_messagebox_in_new_process( s_msg )	
+			#end try...except
+		#end if we've made a file to hold a very long list of genepop files
+
 
 	except Exception as oex:
 
@@ -784,14 +821,115 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	return
 #end run_driveneestimator_in_new_process
 
+
+def replace_genepop_file_list_arg_with_file_name_if_list_too_long( seq_arg_set,
+																s_main_output_filename ):
+	'''
+	2017_02_20.  We found a limitiation in Windows ability to invoke a 
+	pOpen command if the command exceeds some N number of characters,
+	N seemingly on the order of 10^4.  Exceeded, the "long" command 
+	fails and windows throws a WindowsError with the usual non-informative
+	message, in this case "The parameter is incorrect."
+
+	We test our command length.  We assume the first argumane, the list
+	of genepop files, is the the longest by far, and so we write the
+	list string to a temp file, and use the file name as the first argument,
+	in place of the list string.  We signal the change by returning the name
+	of the (new) def in module pgdriveneestimator.py that will expect the
+	tempfile name, and process the first arg accordingly.
+
+	arg s_main_output_filename is used to get the output file directory path,
+	so that, if we need to write a temporary file, we can do so in the output
+	directory, rather than the current.
+
+	We assume:
+		--the s_main_output_filename argument has an absolute path.	
+		--even if we're in a windows environment, that the path in the 
+		s_main_output_filename uses unix path separators (see the windows 
+		path fix in def fix_windows_path(), which is called in def 
+		run_driveneestimator_in_new_process.
+	'''
+
+	GENEPOP_FILE_LIST_ARG_INDEX=0
+	
+	'''
+	This threshold may need to be adjusted upwards.
+	Tests in Windows 10 showed the command fails if
+	its length is over N characters, with N somethere
+	in the range 30,000 to 32,000.
+	'''
+	MAX_CHARS_IN_COMMAND_WITHOUT_REDUCING=3e4
+
+	ALTERNATE_DEF_FOR_LONG_FILELIST="mymainlongfilelist"
+	DEFAULT_DEF_TO_CALL="mymain"
+
+	s_def_in_pgdriveneestimator_to_call=None
+
+	'''
+	We pass this back to caller,
+	so that caller can delete the temp
+	file after the call to 
+	pgdriveneestimator:
+	'''
+	s_temp_file_name=None
+
+	s_path_separator="/"
+
+	i_tot_chars_in_current_command=sum( [ len( s_arg ) for s_arg in seq_arg_set ] )
+
+	seq_new_arg_set=None
+
+	if i_tot_chars_in_current_command > MAX_CHARS_IN_COMMAND_WITHOUT_REDUCING:
+
+		s_output_directory=os.path.dirname( s_main_output_filename )
+
+		#Returns a duple, int file descriptor, and str file name:
+		tup_tempfile=tempfile.mkstemp( dir=s_output_directory )
+
+		s_temp_file_name=tup_tempfile[ 1 ]
+
+		if is_windows_platform():
+			s_temp_file_name=fix_windows_path( s_temp_file_name )
+		#end if windows, standardize the path
+
+
+		o_temp_file=open( s_temp_file_name, 'w' )
+
+		o_temp_file.write( seq_arg_set[ 0 ] + "\n" )
+
+		o_temp_file.close()
+		
+		#Replace the current genepopfile list argument
+		#with the temp file name.
+
+		#We take this step in case the genepop file list
+		#Is moved from its position as the first argument
+		#to pgdriveneestimator.mymain().
+		#As arg[0], this assigns an emtpy tuple:
+		tup_args_before_genepop_file_list=seq_arg_set[ 0 : GENEPOP_FILE_LIST_ARG_INDEX ]
+		tup_args_after_genepop_file_list=seq_arg_set[ GENEPOP_FILE_LIST_ARG_INDEX + 1 : ]
+		seq_new_arg_set=tup_args_before_genepop_file_list \
+									+ ( s_temp_file_name, ) \
+									+ tup_args_after_genepop_file_list
+
+		s_def_in_pgdriveneestimator_to_call=ALTERNATE_DEF_FOR_LONG_FILELIST
+	else:
+		seq_new_arg_set=seq_arg_set
+		s_def_in_pgdriveneestimator_to_call=DEFAULT_DEF_TO_CALL 
+	#end if the command arg is too long, else not
+		
+	return seq_new_arg_set, s_def_in_pgdriveneestimator_to_call, s_temp_file_name
+#end def replace_genepop_file_list_arg_with_file_name_if_list_too_long
+
 def get_add_path_statment_for_popen():
 	'''
 	This def creates a string that is a
-	path path.append call that adds the 
-	absolute path of the current module
-	(used to add all the project modules
+	path path.append statement.  It uses the 
+	absolute path of the current module.
+	It is used to add all the project modules
 	to the path, since we assume this module
-	is in the same directory as all of the files
+	is in the same directory as all of the 
+	project files.
 	'''
 	s_path_append_statement=None
 
@@ -818,7 +956,16 @@ def get_add_path_statment_for_popen():
 	return s_path_append_statement
 #end get_add_path_statment_for_popen
 
-def call_driveneestimator_using_subprocess( seq_arg_set ):
+def call_driveneestimator_using_subprocess( seq_arg_set, s_main_def_to_call="mymain" ):
+
+	'''
+	2017_02_20.  We add param s_main_def_to_call to resolve
+	a bug in windows, whereby if the genepop file list is too long,
+	windows can't correctly invoke the command.  In such cases
+	we write the file list to a temp file, and call mymainlongfilelist instead
+	of mymain.  We retain the former in case a more graceful handling of
+	the long command string becomes possible.
+	'''
 
 	QUOTE="\""
 	s_path_statement=get_add_path_statment_for_popen()
@@ -828,11 +975,15 @@ def call_driveneestimator_using_subprocess( seq_arg_set ):
 	s_arg_list=( QUOTE +"," + QUOTE ).join( seq_arg_set )
 	s_arg_list=QUOTE + s_arg_list + QUOTE
 
-	s_call_statement="pgd.mymain(" + s_arg_list + ");" 
+	
+
+	s_call_statement="pgd." + s_main_def_to_call \
+								+ "(" + s_arg_list + ");" 
 
 	s_command=s_path_statement + s_import_statement + s_call_statement
+
 	'''
-	We use psuti version of Popen.  Having struggled with NeEstimation hangs and orphan using
+	We use psutil version of Popen.  Having struggled with NeEstimation hangs and orphan using
 	multiprocessing.Process objects, the psutil version seems better able to perform for this 
 	chore.  This from the docs for psutil module:
 			"A more convenient interface to stdlib subprocess.Popen. It starts a sub process 
@@ -1200,6 +1351,40 @@ def show_error_in_messagebox_in_new_process( o_exception, s_msg_prefix=None ):
 	subprocess.Popen( [ PYEXE_FOR_POPEN, "-c" , s_command ] )
 
 #end show_error_in_messagebox_in_new_process
+
+def show_warning_in_messagebox_in_new_process( s_warning_msg):
+	
+	s_curr_mod_path = os.path.abspath(__file__)
+
+	#path only (stripped off "/utilities.py" )
+	#-- gives path to all negui mods:
+	s_mod_dir=os.path.dirname( s_curr_mod_path )
+
+	'''
+	Found that windows python would claim no such
+	module found in the import pgguiutilities 
+	statment, unless I replaced the windows os.sep
+	char with linux "/".
+	'''
+	if is_windows_platform():
+		s_mod_dir=fix_windows_path( s_mod_dir )
+	#end if windows platform
+
+
+	s_path_append_statements="import sys; sys.path.append( \"" \
+						+ s_mod_dir + "\" );"
+
+	s_import_statement="from pgguiutilities import PGGUIWarningMessage;"
+
+	s_gui_statement="PGGUIWarningMessage( o_parent=None,  s_message=\"" + s_warning_msg  + "\" )"
+
+
+	s_command=s_path_append_statements + s_import_statement + s_gui_statement
+
+	subprocess.Popen( [ PYEXE_FOR_POPEN, "-c" , s_command ] )
+
+#end show_warning_in_messagebox_in_new_process
+
 
 def remove_non_existent_paths_from_path_variable():
 	'''

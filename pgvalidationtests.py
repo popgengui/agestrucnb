@@ -60,10 +60,6 @@ def get_mean_het_per_generation( o_gp_file,
 		#end if only limit is on min loci number
 		v_loci_subsample_tag="loci_sub"
 
-		##### temp
-		print( "subsampling loci with min: " + str( i_min_loci_number ) )
-		print( "subsampling loci with max: " + str( i_max_loci_number ) )
-		#####
 
 		o_gp_file.subsampleLociByRangeAndMax( i_min_loci_number,
 												i_max_loci_number, 
@@ -85,12 +81,9 @@ def get_mean_het_per_generation( o_gp_file,
 	df_mean_het_by_pop={ i_pop : np.mean( list(  \
 							ddf_het_by_pop_by_loci[ i_pop ].values() ) ) \
 							for i_pop in ddf_het_by_pop_by_loci }
-	##### temp
-	print( "--------------" )
-	print( "df_mean_het_by_pop: " + str( df_mean_het_by_pop ) )
-	#####
 
 	return df_mean_het_by_pop
+
 #end get_mean_het_per_generation
 
 def get_ne_per_generation( s_genepop_file, 
@@ -130,7 +123,9 @@ def get_ne_per_generation( s_genepop_file,
 	return df_ne_by_generation
 #end get_ne_per_generation
 
-def get_expected_heterozygosity_per_generation( df_mean_het_by_gen, df_ne_by_gen ):
+def get_expected_heterozygosity_per_generation( df_mean_het_by_gen, 
+														df_ne_by_gen,
+														f_expected_ne=None ):
 
 	'''
 	From Brian H, the iterative caluclation:
@@ -160,29 +155,42 @@ def get_expected_heterozygosity_per_generation( df_mean_het_by_gen, df_ne_by_gen
 
 	i_total_gen_numbers=len( df_ne_by_gen.keys() )
 	i_lowest_gen_number=min( df_ne_by_gen.keys() )
-	f_ne0=df_ne_by_gen[ i_lowest_gen_number ]
+
+	f_ne0=f_expected_ne if f_expected_ne is not None  \
+					else np.mean( list( df_ne_by_gen.values() ) )
+
 	f_ht0=df_mean_het_by_gen[ i_lowest_gen_number ]
 
 	#Value for the initial generation is the observed:
-	df_expected_het_per_gene[ li_gen_numbers_for_ne [ 0 ]] =  f_ht0	
-	f_calc_coefficient = 1 - 1 / ( 2*ne0 )
+	df_expected_het_per_gen[ li_gen_numbers_for_ne [ 0 ]] =  f_ht0	
+	f_calc_coefficient = 1 - 1 / ( 2*f_ne0 )
 
-	for idx in range ( 1 , i_total_gen_numbers + 1 ):
+	##### temp
+	print( "------------------" )
+	print( "li_gen_numbers_for_ne: " + str( li_gen_numbers_for_ne ) )
+	#####
+
+	for idx in range ( 1 , i_total_gen_numbers ):
+		##### temp
+		print( "---------------" )
+		print( "idx: " + str( idx ) )
+		#####
+
 		i_this_generation_number=li_gen_numbers_for_ne[ idx ]
 		i_last_generation_number=li_gen_numbers_for_ne[ idx-1 ]
 		f_het_value_last_gen=df_expected_het_per_gen[ i_last_generation_number ]
 
 		f_expected_het_for_this_gen = f_het_value_last_gen * f_calc_coefficient
 			
-		df_expected_het_per_gene[ i_this_generation_number ] = \
+		df_expected_het_per_gen[ i_this_generation_number ] = \
 					f_expected_het_for_this_gen
 	#end for each index into list generation numbers
 
-	return df_expected_het_per_gene
+	return df_expected_het_per_gen
 #end get_expected_heterozygosity_per_generation
 														
 
-def get_expected_het_loss_per_generation( df_ne_by_gen_number ):
+def get_expected_het_loss_per_generation( df_ne_by_gen_number,f_expected_ne = None ):
 	'''
 
 	The calculation for expected loss of heterozygosity is from
@@ -198,7 +206,8 @@ def get_expected_het_loss_per_generation( df_ne_by_gen_number ):
 
 	i_min_gen_number=min( li_sorted_gen_numbers )
 
-	f_ne_for_initial_pop=df_ne_by_gen_number[ i_min_gen_number ]	
+	f_ne_for_initial_pop=f_expected_ne if f_expected_ne is not None \
+			else np.mean( list( df_ne_by_gen_number.values() ) )	
 
 	f_one_over_2Ne=1.0/( 2.0*f_ne_for_initial_pop )
 
@@ -230,10 +239,6 @@ def get_expected_het_loss_per_generation( df_ne_by_gen_number ):
 #end get_expected_het_loss_per_generation
 
 def convert_mean_hets_to_het_loss( df_mean_het_by_gen ):
-	##### temp
-	print( "------------------" )
-	print( "df_mean_het_by_gen: " + str( df_mean_het_by_gen ) )
-	print( "------------------" )
 
 	df_mean_het_loss_by_gen={}
 
@@ -268,11 +273,11 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 		and that they are numerical.
 		--that the axis scales for dict1 and dict2 are similar for keys(),
 		and similar for values().
-
 	'''
 
+	PLOTLINEWIDTH=2.0
 	FONTSIZE=12
-	PLOTFONTSIZE=10
+	PLOTFONTSIZE=12
 
 	f_y_limits_units=(1/10.0)
 	f_x_limits_units=(1/60.0 )
@@ -313,26 +318,20 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 				
 	o_fig=pt.figure()
 	o_subplt=o_fig.add_subplot(111)
-	o_subplt.plot( d_dict1.keys(), list( d_dict1.values() ) )
-	o_subplt.text( v_max_x_value - f_label_x_coord_offset , 
-							v_max_y_value_dict1 + f_label_y_coord_offset,
-									s_data1_label, fontsize=PLOTFONTSIZE ) 
-
-	o_subplt.plot( d_dict2.keys(), list( d_dict2.values() ) )
-	o_subplt.text( v_max_x_value_dict2 - f_label_x_coord_offset, 
-							v_rightmnost_dict2_yval + f_label_y_coord_offset, 
-										s_data2_label, fontsize=PLOTFONTSIZE )
+	o_subplt.plot( d_dict1.keys(), list( d_dict1.values() ), linewidth=PLOTLINEWIDTH )
+	o_subplt.plot( d_dict2.keys(), list( d_dict2.values() ), linewidth=PLOTLINEWIDTH )
 
 	o_subplt.set_ybound( lower=lf_ylimits[0], upper=lf_ylimits[ 1 ] )
 	o_subplt.set_xlabel( s_xaxis_label, fontsize=FONTSIZE )
 	o_subplt.set_ylabel( s_yaxis_label, fontsize=FONTSIZE )
 	o_subplt.set_title( s_title, fontsize=FONTSIZE )
+	o_subplt.legend( [ s_data1_label , s_data2_label ], frameon=False, fontsize=PLOTFONTSIZE )
 
 	pt.show()
 
 	o_fig=None
 
-	if s_plot_file is not None:
+	if s_plot_file_name is not None:
 		pt.savefigure( s_file_name )
 	#end if no plot file
 	return
@@ -414,6 +413,7 @@ def get_expected_vs_observed_heterozygosity( s_ne_tsv_file,
 											i_final_generation_number,
 											i_min_loci_number=None,
 											i_max_loci_number=None,
+											f_expected_ne=None,
 											b_plot=True, 
 											s_plot_file=None,
 											s_plot_type="png" ):
@@ -461,18 +461,64 @@ def get_expected_vs_observed_heterozygosity( s_ne_tsv_file,
 	'''
 	
 
+	ddf_mean_het_by_gp_file_by_gen, ddf_ne_by_gp_file_by_gen = \
+			get_mean_hets_and_ne_for_generations( s_ne_tsv_file, 
+												i_initial_generation_number,
+												i_final_generation_number, 
+												i_min_loci_number, 
+												i_max_loci_number )
+
+	for s_gp_file_name in ddf_mean_het_by_gp_file_by_gen:
+
+		df_observed_het_by_gen=ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name ]
+
+		df_expected_het_by_gen=\
+			get_expected_heterozygosity_per_generation( df_observed_het_by_gen,
+															ddf_ne_by_gp_file_by_gen[ s_gp_file_name ],
+															f_expected_ne )
 
 
+	
+		if b_plot == True:
+			
+			f_ne0=f_expected_ne if f_expected_ne is not None \
+					else np.mean(  list( ddf_ne_by_gp_file_by_gen[ s_gp_file_name ].values() ) )			
 
-	return
+			f_he0=ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name ][ i_initial_generation_number ]
+
+			s_title="Expected vs. theoretical heterozygosity" \
+				+ "\nNe (mean of estimates in plotted cycles, or supplied in command): " + str( f_ne0 ) \
+				+ "\nMean He of initial cycle (after burn-in): " + str( round( f_he0, 4) ) \
+				+ "."
+
+			s_het_label="expected under HW, given allele freqs"
+			s_expected_label="theoretical, Hz_i=Hz_{i-1} X ( 1 - 1/(2Ne) )"
+
+			s_xaxis_label="cycle number"
+			s_yaxis_label="heterozygosity"
+					
+			
+			plot_two_dicts_similarly_scaled( df_observed_het_by_gen, 
+							df_expected_het_by_gen, 
+							s_data1_label=s_het_label,
+							s_data2_label=s_expected_label,
+							s_xaxis_label=s_xaxis_label,
+							s_yaxis_label=s_yaxis_label,
+							s_title=s_title )
+		#end if plot
+
+	#end for each genepop file named in the tsv file
+
+	return { "mean_hets" : ddf_mean_het_by_gp_file_by_gen, 
+					"nes": ddf_ne_by_gp_file_by_gen  }
 #end get_expected_vs_observed_heterozygosity
 		
-
 def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file, 
 															i_initial_generation_number, 
 															i_final_generation_number,
 															i_min_loci_number=None,
 															i_max_loci_number=None,
+															f_expected_ne = None,
 															b_plot=True, 
 															s_plot_file=None,
 															s_plot_type="png" ):
@@ -531,17 +577,26 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 												i_min_loci_number, 
 												i_max_loci_number )
 
+	#Two dicts for the return value:
+	ddf_observed_het_loss_by_file={}
+	ddf_expected_het_loss_by_file={}
+
 	for s_gp_file_name in ddf_mean_het_by_gp_file_by_gen:
 
 		df_mean_het_loss_by_gen=convert_mean_hets_to_het_loss( ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name]  )
-		df_expected_het_loss_by_gen=get_expected_het_loss_per_generation( ddf_ne_by_gp_file_by_gen[ s_gp_file_name ] )
-		
+		df_expected_het_loss_by_gen=get_expected_het_loss_per_generation( ddf_ne_by_gp_file_by_gen[ s_gp_file_name ], f_expected_ne )
+	
+		#Add to the dicts that get returned:
+		ddf_observed_het_loss_by_file[ s_gp_file_name ] = df_mean_het_loss_by_gen
+		ddf_expected_het_loss_by_file[ s_gp_file_name ] = df_expected_het_loss_by_gen
+
 		##### temp
 		print( "-----------------" )
 		print( "df_mean_het_loss_by_gen: " + str( df_mean_het_loss_by_gen ) )
 		#####
 
-		f_ne0=ddf_ne_by_gp_file_by_gen[ s_gp_file_name ] [ i_initial_generation ]
+		f_ne0=f_expected_ne if f_expected_ne is not None \
+				else np.mean( ddf_ne_by_gp_file_by_gen[ s_gp_file_name ].values() ) 
 
 		df_expected_as_perc={ i_gen: 100 * ( 1.0 - df_expected_het_loss_by_gen[ i_gen ] ) for i_gen in df_expected_het_loss_by_gen } 
 		df_het_loss_as_perc={ i_gen: 100 * ( 1.0 - df_mean_het_loss_by_gen[ i_gen ] ) for i_gen in df_mean_het_loss_by_gen }	
@@ -551,17 +606,14 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 
 		if b_plot == True:
 			
-			s_title="Expected het loss compared with" \
-				+ "\nper-generation calculated Het loss, " \
-				+ "\nNe of initial generation: " + str( f_ne0 ) \
-				+ "."
-			s_het_label="mean het"
-			s_expected_label="expected"
+			s_title="Percent expected vs theoretical retained heterozygosity" \
+				+ "\nNe (mean of estimates in plotted cycles, or supplied in command): " + str( f_ne0 ) \
 
-			s_xaxis_label="generation"
-			s_yaxis_label="percent heterozygosity loss"
+			s_het_label="expected under HW by allele freqs"
+			s_expected_label="theoretical: loss_cycle_i = 1 - ( 1 - 1/2Ne )^i"
 
-
+			s_xaxis_label="cycle number"
+			s_yaxis_label="percent heterozygosity retained"
 					
 			##### temp
 			print( "---------------" )
@@ -580,8 +632,8 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 
 	#end for each genepop file named in the tsv file
 
-	return { "mean_het_by_gen" : df_mean_het_by_gen, 
-					"expected_het_loss_by_gen" : df_expected_het_loss_by_gen }
+	return { "observed_het_loss" : ddf_observed_het_loss_by_file, 
+					"expected_het_loss" : ddf_expected_het_loss_by_file }
 
 #end get_expected_vs_observed_loss_heterozygosity
 
@@ -603,6 +655,13 @@ if __name__ == "__main__":
 						"String, [ 'hetloss' | 'het'  ], to compare expected vs observed loss of " \
 						+ "heterozygosity, or expected vs observed heterozygosity" ]
 
+	LS_OPTIONAL_ARGS_SHORT=[ "-e" ]
+	LS_OPTIONAL_ARGS_LONG=[ "--expectedne" ]
+	LS_OPTIONAL_ARGS_HELP=[ "float, Ne value to use for the calculation of the expected heterozygosity " \
+								+ "( 1-( 1-1/(2Ne) )^{repro_cycle_number}), and loss of heterozygosity, " \
+								+ "( Hz_repro_cycle_i=Hz_repro_cycle_i-1 * ( 1 - 1/( 2Ne ) ) )." ]
+						
+
 
 	ddefs_by_test_name={ "hetloss" : get_expected_vs_observed_loss_heterozygosity, 
 									"het":get_expected_vs_observed_heterozygosity }
@@ -612,6 +671,7 @@ if __name__ == "__main__":
 	o_arglist=o_parser.add_argument_group( "args" )
 
 	i_total_nonopt=len( LS_ARGS_SHORT )
+	i_total_opt=len( LS_OPTIONAL_ARGS_SHORT )
 
 	for idx in range( i_total_nonopt ):
 		o_arglist.add_argument( \
@@ -619,6 +679,14 @@ if __name__ == "__main__":
 				LS_ARGS_LONG[ idx ],
 				help=LS_ARGS_HELP[ idx ],
 				required=True )
+	#end for each required argument
+
+	for idx in range( i_total_opt ):
+		o_arglist.add_argument( \
+				LS_OPTIONAL_ARGS_SHORT[ idx ],
+				LS_OPTIONAL_ARGS_LONG[ idx ],
+				help=LS_OPTIONAL_ARGS_HELP[ idx ],
+				required=False )
 	#end for each required argument
 
 	o_args=o_parser.parse_args()
@@ -644,7 +712,13 @@ if __name__ == "__main__":
 
 	#end if non-valid test name
 
-	r_def_to_call( s_tsv_file, i_initial_generation, i_final_generation, i_min_loci, i_max_loci )
+	if o_args.expectedne is not None:
+		f_expected_ne=float( o_args.expectedne )
+	else:
+		f_expected_ne=None
+	#end if caller passed an expected Ne value
+
+	r_def_to_call( s_tsv_file, i_initial_generation, i_final_generation, i_min_loci, i_max_loci, f_expected_ne )
 
 #end if main
 
