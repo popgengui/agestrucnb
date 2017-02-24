@@ -5,9 +5,17 @@ We needed a suite of tests to validate the simulation and nb output.
 The first of these requested by Gordon is a comparison of expected
 hegerozygosity, calculated from the Ne value, for the tth generation
 as ( 1-2/Ne )**t, vs  the "observed" 
-loss of heterozygosity, calculated for each gen as the mean ( 1-He ), with
+loss of heterozygosity, calculated for each generation as the mean ( 1-He ), with
 He_l = sum_i_l=1 to n_l (i_l**2), with i_l=allele freq of the ith of n alleles 
 for the lth loci.
+
+
+2017_02_22
+We've clarified that we will add a cycles/generation ratio to our input values
+in order to correctly implement the theoretical vs expected values. Note that
+plotting for most of our model species by sim breeding cycles, implying a 1/1
+breeding cycle per generation ratio for measuring heterozygosity, shows 
+inaccurate declines, expected vs theoretical.
 '''
 
 __filename__ = "pgvalidationtests.py"
@@ -30,16 +38,16 @@ except ImportError as oie:
 #end
 
 
-def get_mean_het_per_generation( o_gp_file, 
-								i_initial_generation, 
-								i_final_generation,
+def get_mean_het_per_cycle( o_gp_file, 
+								i_initial_cycle, 
+								i_final_cycle,
 								i_min_loci_number=None, 
 								i_max_loci_number=None ):
 
 	MAX_POSSIBLE_LOCI=int( 1e32 )
 
 	li_pop_subsample=list( \
-				range( i_initial_generation, i_final_generation + 1  ) )
+				range( i_initial_cycle, i_final_cycle + 1  ) )
 
 	o_gp_file.subsamplePopulationsByList( li_pop_subsample, "pop_sub" )
 
@@ -84,14 +92,13 @@ def get_mean_het_per_generation( o_gp_file,
 
 	return df_mean_het_by_pop
 
-#end get_mean_het_per_generation
+#end get_mean_het_per_cycle
 
-def get_ne_per_generation( s_genepop_file, 
+def get_ne_per_cycle( s_genepop_file, 
 									o_tsv_file,
-									i_initial_generation_number,
-									i_final_generation_number ):
-
-	df_ne_by_generation=None
+									i_initial_cycle_number,
+									i_final_cycle_number ):
+	df_ne_by_cycle=None
 
 	o_tsv_file.unsetAllFilters()
 
@@ -105,27 +112,32 @@ def get_ne_per_generation( s_genepop_file,
 	(class NeEstimationTableFileManager) object's setFilter.  
 	All filers must take one string arg and return a boolean
 	'''
-	def gen_range_check( s_gen_number_as_string ):
-		i_this_gen=int( s_gen_number_as_string )
-		b_return_val= i_this_gen >= i_initial_generation_number \
-							and i_this_gen <= i_final_generation_number
+	def cycle_range_check( s_cycle_number_as_string ):
+		i_this_cycle=int( s_cycle_number_as_string )
+		b_return_val= i_this_cycle >= i_initial_cycle_number \
+							and i_this_cycle <= i_final_cycle_number
+
 		return b_return_val
 	#end def gen_range_check
 
-	o_tsv_file.setFilter( "pop" , gen_range_check )
+	o_tsv_file.setFilter( "pop" , cycle_range_check )
 
 	ls_pop_and_ne=o_tsv_file.getFilteredTableAsList( [ "pop", "est_ne" ] )
 
+
 	#The zeroth item in the ls_pop_and_ne list is the header, so we
 	#process the entries with indices 1 through the last.
-	df_ne_by_generation={ int( s_vals.split()[0] ):float( s_vals.split()[1] ) \
+	df_ne_by_cycle={ int( s_vals.split()[0] ):float( s_vals.split()[1] ) \
 												for s_vals in ls_pop_and_ne[ 1 : ] } 
-	return df_ne_by_generation
-#end get_ne_per_generation
+	
+	return df_ne_by_cycle
+#end get_ne_per_cycle
 
-def get_expected_heterozygosity_per_generation( df_mean_het_by_gen, 
-														df_ne_by_gen,
-														f_expected_ne=None ):
+def get_theoretical_heterozygosity_per_generation( df_mean_het_by_cycle, 
+														df_ne_by_cycle,
+														f_cycles_per_generation,
+														f_theoretical_ne=None ):
+	f_reltol=1e-80
 
 	'''
 	From Brian H, the iterative caluclation:
@@ -133,81 +145,93 @@ def get_expected_heterozygosity_per_generation( df_mean_het_by_gen,
 	initial population.
 	'''
 
-	df_expected_het_per_gen={}
+	df_theoretical_het_per_generation={}
 
-	li_gen_numbers_for_ne=df_ne_by_gen.keys()
-	li_gen_numbers_for_het=df_mean_het_by_gen.keys()
+	li_cycle_numbers_for_ne=df_ne_by_cycle.keys()
+	li_cycle_numbers_for_het=df_mean_het_by_cycle.keys()
 
-	li_gen_numbers_for_ne.sort()
-	li_gen_numbers_for_het.sort()
+	li_cycle_numbers_for_ne.sort()
+	li_cycle_numbers_for_het.sort()
 
-	if li_gen_numbers_for_ne != li_gen_numbers_for_het:
+	i_cycles_per_generation=int( round( f_cycles_per_generation ) )
+
+	if li_cycle_numbers_for_ne != li_cycle_numbers_for_het:
 
 		s_msg="In pgvalidationtests.py, " \
-						+ "def get_expected_heterozygosity_per_generation " \
-						+ "Ne values dict has keys (generation numbers) " \
+						+ "def get_theoretical_heterozygosity_per_generation, " \
+						+ "Ne values dict has keys (cycle numbers) " \
 						+ "that do not equal those in the Het values dict. " \
-					 	+ "Ne dict keys: " + str( list( df_ne_by_gen.keys() ) ) \
-						+ ", Het dict keys: " + str( list( df_mean_het_by_gen ) ) \
+					 	+ "Ne dict keys: " + str( list( df_ne_by_cycle.keys() ) ) \
+						+ ", Het dict keys: " + str( list( df_mean_het_by_cycle ) ) \
 						+ "."
 		raise Exception( s_msg )
 	#end if non-equal key sets
 
-	i_total_gen_numbers=len( df_ne_by_gen.keys() )
-	i_lowest_gen_number=min( df_ne_by_gen.keys() )
+	i_total_cycle_numbers=len( df_ne_by_cycle.keys() )
+	i_lowest_cycle_number=min( df_ne_by_cycle.keys() )
 
-	f_ne0=f_expected_ne if f_expected_ne is not None  \
-					else np.mean( list( df_ne_by_gen.values() ) )
+	f_ne0=f_theoretical_ne if f_theoretical_ne is not None  \
+					else np.mean( list( df_ne_by_cycle.values() ) )
 
-	f_ht0=df_mean_het_by_gen[ i_lowest_gen_number ]
+	f_ht0=df_mean_het_by_cycle[ i_lowest_cycle_number ]
+	
+	'''
+	The initial generation has the het
+	value caluclated by mean sum of squared
+	allele frequencies over all loci, so 
+	that for gen 1, the theoretical and the
+	expected match:
+	'''
+	i_generation_number= 1
 
-	#Value for the initial generation is the observed:
-	df_expected_het_per_gen[ li_gen_numbers_for_ne [ 0 ]] =  f_ht0	
-	f_calc_coefficient = 1 - 1 / ( 2*f_ne0 )
+	df_theoretical_het_per_generation[ 1 ] =  f_ht0	
 
-	##### temp
-	print( "------------------" )
-	print( "li_gen_numbers_for_ne: " + str( li_gen_numbers_for_ne ) )
-	#####
+	f_calc_coefficient = 1 if f_ne0 <= f_reltol else 1 - 1 / ( 2*f_ne0 )
 
-	for idx in range ( 1 , i_total_gen_numbers ):
-		##### temp
-		print( "---------------" )
-		print( "idx: " + str( idx ) )
-		#####
+	'''
+	We use cycles per generation to
+	itereate the correct number of times in the calculation
+	'''
 
-		i_this_generation_number=li_gen_numbers_for_ne[ idx ]
-		i_last_generation_number=li_gen_numbers_for_ne[ idx-1 ]
-		f_het_value_last_gen=df_expected_het_per_gen[ i_last_generation_number ]
+	
+	for idx in range ( i_cycles_per_generation, i_total_cycle_numbers, i_cycles_per_generation ):
 
-		f_expected_het_for_this_gen = f_het_value_last_gen * f_calc_coefficient
+		
+		i_generation_number+=1
+		i_this_cycle_number=li_cycle_numbers_for_ne[ idx ]
+	
+		f_het_value_last_generation=df_theoretical_het_per_generation[ i_generation_number - 1 ]
+
+		f_theoretical_het_for_this_generation = f_het_value_last_generation * f_calc_coefficient
 			
-		df_expected_het_per_gen[ i_this_generation_number ] = \
-					f_expected_het_for_this_gen
-	#end for each index into list generation numbers
+		df_theoretical_het_per_generation[ i_generation_number ] = \
+									f_theoretical_het_for_this_generation
+	#end for each index into list cycle numbers
 
-	return df_expected_het_per_gen
-#end get_expected_heterozygosity_per_generation
+	return df_theoretical_het_per_generation
+#end get_theoretical_heterozygosity_per_generation
 														
 
-def get_expected_het_loss_per_generation( df_ne_by_gen_number,f_expected_ne = None ):
+def get_theoretical_het_loss_per_generation( df_ne_by_cycle_number, f_cycles_per_generation, f_theoretical_ne = None ):
 	'''
 
-	The calculation for expected loss of heterozygosity is from
+	This calculation for theoretical loss of heterozygosity is from
 	From http://labs.russell.wisc.edu/peery/files/2011/12/Primer-in-Population-Genetics.pdf
 
-	This def also returns the Ne value for the initial generation.
+	This def also returns the Ne value for the initial cycle.
 	'''
 
-	df_expected_het_loss_by_generation={}
+	df_theoretical_het_loss_by_generation={}
 
-	li_sorted_gen_numbers=df_ne_by_gen_number.keys()
-	li_sorted_gen_numbers.sort()
+	i_cycles_per_generation=int( round( f_cycles_per_generation ) )
 
-	i_min_gen_number=min( li_sorted_gen_numbers )
+	li_sorted_cycle_numbers=df_ne_by_cycle_number.keys()
+	li_sorted_cycle_numbers.sort()
 
-	f_ne_for_initial_pop=f_expected_ne if f_expected_ne is not None \
-			else np.mean( list( df_ne_by_gen_number.values() ) )	
+	i_min_gen_number=min( li_sorted_cycle_numbers )
+
+	f_ne_for_initial_pop=f_theoretical_ne if f_theoretical_ne is not None \
+			else np.mean( list( df_ne_by_cycle_number.values() ) )	
 
 	f_one_over_2Ne=1.0/( 2.0*f_ne_for_initial_pop )
 
@@ -215,28 +239,32 @@ def get_expected_het_loss_per_generation( df_ne_by_gen_number,f_expected_ne = No
 
 	'''
 	We want zero loss of het in the
-	first generation, so the counter,
+	first cycle, so the counter,
 	which gives the exponent in the 
 	loss calculation, will be at zero
-	for the first (initial) generation. 
+	for the first (initial) cycle. 
 	'''
-	i_gen_count = -1
+	i_generation_count = -1
 
-	for i_gen in li_sorted_gen_numbers:
-		i_gen_count += 1
+	i_generation_number=0
+
+	for i_gen in range( 0, len( li_sorted_cycle_numbers ), i_cycles_per_generation ):
+
+		i_generation_count += 1
+		i_generation_number+=1
 
 		'''
 		We raise ( 1 - 1/2Ne ) to  t = gen_counter, subtract
 		that value from 1:
 		'''
-		f_loss_this_gen=1 - (  ( f_one_minus_one_over_2Ne )**i_gen_count  )
+		f_loss_this_gen=1 - (  ( f_one_minus_one_over_2Ne )**i_generation_count  )
 
-		df_expected_het_loss_by_generation[ i_gen ] = f_loss_this_gen
-	#end for each generation
+		df_theoretical_het_loss_by_generation[ i_generation_number ] = f_loss_this_gen
+	#end for each cycle
 	
-	return  df_expected_het_loss_by_generation
+	return  df_theoretical_het_loss_by_generation
 
-#end get_expected_het_loss_per_generation
+#end get_theoretical_het_loss_per_generation
 
 def convert_mean_hets_to_het_loss( df_mean_het_by_gen ):
 
@@ -278,6 +306,15 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 	PLOTLINEWIDTH=2.0
 	FONTSIZE=12
 	PLOTFONTSIZE=12
+	LINEPOINTTYPE1="o-"
+	LINEPOINTTYPE2="^-"
+
+	MAX_TOT_VALS_FOR_POINTS=65
+
+	if len( d_dict1 ) > MAX_TOT_VALS_FOR_POINTS:
+		LINEPOINTTYPE1="-"
+		LINEPOINTTYPE2="-"
+	#end if too many gens to show points, just show line
 
 	f_y_limits_units=(1/10.0)
 	f_x_limits_units=(1/60.0 )
@@ -318,8 +355,8 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 				
 	o_fig=pt.figure()
 	o_subplt=o_fig.add_subplot(111)
-	o_subplt.plot( d_dict1.keys(), list( d_dict1.values() ), linewidth=PLOTLINEWIDTH )
-	o_subplt.plot( d_dict2.keys(), list( d_dict2.values() ), linewidth=PLOTLINEWIDTH )
+	o_subplt.plot( d_dict1.keys(), list( d_dict1.values() ), LINEPOINTTYPE1, linewidth=PLOTLINEWIDTH )
+	o_subplt.plot( d_dict2.keys(), list( d_dict2.values() ), LINEPOINTTYPE2, linewidth=PLOTLINEWIDTH )
 
 	o_subplt.set_ybound( lower=lf_ylimits[0], upper=lf_ylimits[ 1 ] )
 	o_subplt.set_xlabel( s_xaxis_label, fontsize=FONTSIZE )
@@ -337,9 +374,17 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 	return
 #end plot_two_dicts_similarly_scaled
 
-def get_mean_hets_and_ne_for_generations( s_ne_tsv_file, 
-								i_initial_generation_number,
-								i_final_generation_number, 
+def has_requested_cycle_range( o_tsv_file, i_initial_cycle_number, i_final_cycle_number ):
+	'''
+	This is not yet implemented, so returns True in all cases.
+	'''
+	b_has_range=True
+	return b_has_range
+#end has_requested_cycle_range
+
+def get_mean_hets_and_ne_for_cycles( s_ne_tsv_file, 
+								i_initial_cycle_number,
+								i_final_cycle_number, 
 								i_min_loci_number, 
 								i_max_loci_number ):
 
@@ -347,6 +392,11 @@ def get_mean_hets_and_ne_for_generations( s_ne_tsv_file,
 	ddf_ne_by_gp_file_by_gen={}
 
 	o_tsv_file=pguc.NeEstimationTableFileManager( s_ne_tsv_file )
+
+	#Test the tsv file for the requested cycle range:
+	b_has_cycles=has_requested_cycle_range( o_tsv_file, 
+										i_initial_cycle_number, 
+											i_final_cycle_number )
 
 	'''
 	The file_names property of the tsv file manager object
@@ -359,33 +409,33 @@ def get_mean_hets_and_ne_for_generations( s_ne_tsv_file,
 
 		o_this_gp_file=gpm.GenepopFileManager( s_genepop_file )
 
-		i_total_generations=o_this_gp_file.pop_total
+		i_total_cycles=o_this_gp_file.pop_total
 
-		if i_final_generation_number > i_total_generations:
+		if i_final_cycle_number > i_total_cycles:
 			s_msg="In pgvalidationtests, def "  \
-					+ "get_mean_hets_and_ne_for_generations, " \
-					+ "arg value for final generation number, " \
-					+ str( i_final_generation_number ) \
-					+ ", it greater than the available number of generations, " \
-					+ str( i_total_generations ) + "."
+					+ "get_mean_hets_and_ne_for_cycles, " \
+					+ "arg value for final cycle number, " \
+					+ str( i_final_cycle_number ) \
+					+ ", it greater than the available number of cycles, " \
+					+ str( i_total_cycles ) + "."
 			raise Exception ( s_msg )
 		#end if requested final gen is too large
 
-		if i_initial_generation_number < 1 \
-					or i_initial_generation_number > i_total_generations:
+		if i_initial_cycle_number < 1 \
+					or i_initial_cycle_number > i_total_cycles:
 			s_msg="In pgvalidationtests, def "  \
-					+ "get_mean_hets_and_ne_for_generations, " \
-					+ "arg value for initial generation number, " \
-					+ str( i_final_generation_number ) \
+					+ "get_mean_hets_and_ne_for_cycles, " \
+					+ "arg value for initial cycle number, " \
+					+ str( i_final_cycle_number ) \
 					+ ", it outside the valid range, 1 - " \
-					+ str( i_total_generations ) + "."
+					+ str( i_total_cycles ) + "."
 			raise Exception ( s_msg )
 		#end if requested final gen is too large
 
-		i_actual_final_gen=min( i_final_generation_number, i_total_generations )
+		i_actual_final_gen=min( i_final_cycle_number, i_total_cycles )
 
-		df_mean_het_by_gen=get_mean_het_per_generation( o_this_gp_file, 
-															i_initial_generation_number, 
+		df_mean_het_by_gen=get_mean_het_per_cycle( o_this_gp_file, 
+															i_initial_cycle_number, 
 															i_actual_final_gen, 
 															i_min_loci_number, 
 															i_max_loci_number )
@@ -393,9 +443,9 @@ def get_mean_hets_and_ne_for_generations( s_ne_tsv_file,
 		ddf_mean_het_by_gp_file_by_gen[ s_genepop_file ]=df_mean_het_by_gen
 
 
-		df_ne_by_gen=get_ne_per_generation( s_genepop_file, 
+		df_ne_by_gen=get_ne_per_cycle( s_genepop_file, 
 													o_tsv_file,
-													i_initial_generation_number,
+													i_initial_cycle_number,
 													i_actual_final_gen )
 
 		ddf_ne_by_gp_file_by_gen[ s_genepop_file ] = df_ne_by_gen
@@ -404,30 +454,55 @@ def get_mean_hets_and_ne_for_generations( s_ne_tsv_file,
 
 	return ddf_mean_het_by_gp_file_by_gen, ddf_ne_by_gp_file_by_gen
 
-#end get_mean_hets_and_ne_for_generations	
+#end get_mean_hets_and_ne_for_cycles	
 
+def get_per_generation_het_from_per_cycle_het( df_het_by_cycle, f_cycles_per_generation ):
 
+	df_het_by_generation={}
+
+	i_cycles_per_generation=int( round( f_cycles_per_generation ) )
+
+	i_cycles_per_generation=int( round( f_cycles_per_generation ) )
+
+	li_sorted_cycle_numbers=list( df_het_by_cycle.keys()  )
+
+	li_sorted_cycle_numbers.sort()
+
+	i_generation_number=0
+	for idx in range( 0, len( li_sorted_cycle_numbers ), i_cycles_per_generation ):
+		i_generation_number += 1
+		
+		df_het_by_generation[ i_generation_number ] = \
+				df_het_by_cycle[ li_sorted_cycle_numbers[ idx ] ]
+	#end for each index in the cycle numbers list
+
+	return df_het_by_generation
+
+#end get_per_generation_het_from_per_cycle_het
 
 def get_expected_vs_observed_heterozygosity( s_ne_tsv_file, 
-											i_initial_generation_number, 
-											i_final_generation_number,
+											i_initial_cycle_number, 
+											i_final_cycle_number,
+											f_cycles_per_generation,
 											i_min_loci_number=None,
 											i_max_loci_number=None,
-											f_expected_ne=None,
+											f_theoretical_ne=None,
 											b_plot=True, 
 											s_plot_file=None,
 											s_plot_type="png" ):
 
 	'''
-	This def is designed to use the the Ne estimation value, and the heterozygosity
-	(as for the ith generation,
-	chosen after the burn-in period, for simuPOP generated
-	genepop files, as the value to use in the caluculation 1 - ( 1 - 1/(2Ne) )**t
-	to calculate the expected loss of heterozygosity from the ith generation 
-	(pop section) to the jth.  This is then compared to the loss as computed by
-	Het=sum_1_to_L(  1 - sum_1_to_A( allele-frequency_ij ** 2 ) )/L, in a generation
-	(pop section) with L loci, and each loci with some total alleles A, i=ith loci,
-	j=jth allele.
+	This def is designed to use either a user-supplied theoretical Ne, or to
+	use the mean estimates in the tsv file for the theoretical Ne, and, for
+	the initial heterozygosity the mean HW expected via allele frequencies
+	for the first (initial) cycle.  The theoretical het for the ith generation
+	is calculated as
+		Hz_i=Hz_{i-1} X ( 1 - 1/(2Ne) )
+
+	For the expected het for each cycle:
+			sum_1_to_L(  1 - sum_1_to_A( allele-frequency_ij ** 2 ) )/L, in a cycle
+			(pop section) with L loci, and each loci with some total alleles A, i=ith loci,
+			j=jth allele.
 
 	Assumption:  that the (genepop) file(s) named in column one of the s_ne_tsv_file 
 			argument exist and have either absolute paths (the current
@@ -440,13 +515,16 @@ def get_expected_vs_observed_heterozygosity( s_ne_tsv_file,
 		via the negui interface or the command line use of pgdriveneestimator.py 
 		itself, on genepop files generated by the negui implementation of
 		the AgeStructureNe simulation driver.
-	param i_initial_generation_number, integer giving the ith pop section,
-		where i is the poplulation (generation) that gives the initital Ne value on which
+	param i_initial_cycle_number, integer giving the ith pop section,
+		where i is the poplulation (cycle) that gives the initital Ne value on which
 		to base the expected loss of het, that is the Ne value in ( 1-2/Ne )^t for
-		each subsequent generation t.
-	param i_final_generation_number, if not None, then an integer giving the highest pop section
-		(generation) value to analyze.  If None, then analyze all pop sections with numbers 
-		>= i_initial_generation_number
+		each subsequent cycle t.
+	param i_final_cycle_number, if not None, then an integer giving the highest pop section
+		(cycle) value to analyze.  If None, then analyze all pop sections with numbers 
+		>= i_initial_cycle_number
+	param f_cycles_per_generation.  gives the number of breeding cycles per generation, so
+		that theoretical interations are done per generation (not per cycle, unless 
+		cycles per generation is 1.0
 	param i_min_loci_number, if not none than the He calculation will not use any of the loci
 			in the range 1 to i, where i_min_loci_number is i + 1.
 	param i_ma_loci_number, if not none than the He calculation will not use any of the N loci
@@ -461,76 +539,84 @@ def get_expected_vs_observed_heterozygosity( s_ne_tsv_file,
 	'''
 	
 
-	ddf_mean_het_by_gp_file_by_gen, ddf_ne_by_gp_file_by_gen = \
-			get_mean_hets_and_ne_for_generations( s_ne_tsv_file, 
-												i_initial_generation_number,
-												i_final_generation_number, 
+	ddf_mean_het_by_gp_file_by_cycle, ddf_ne_by_gp_file_by_cycle = \
+			get_mean_hets_and_ne_for_cycles( s_ne_tsv_file, 
+												i_initial_cycle_number,
+												i_final_cycle_number, 
 												i_min_loci_number, 
 												i_max_loci_number )
 
-	for s_gp_file_name in ddf_mean_het_by_gp_file_by_gen:
+	for s_gp_file_name in ddf_mean_het_by_gp_file_by_cycle:
 
-		df_observed_het_by_gen=ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name ]
+		df_het_per_cycle=ddf_mean_het_by_gp_file_by_cycle[ s_gp_file_name ]
 
-		df_expected_het_by_gen=\
-			get_expected_heterozygosity_per_generation( df_observed_het_by_gen,
-															ddf_ne_by_gp_file_by_gen[ s_gp_file_name ],
-															f_expected_ne )
+		df_expected_het_by_gen=get_per_generation_het_from_per_cycle_het( df_het_per_cycle, 
+																			f_cycles_per_generation )
 
-
-	
-		if b_plot == True:
+		df_theoretical_het_by_gen=\
+			get_theoretical_heterozygosity_per_generation( df_het_per_cycle,
+															ddf_ne_by_gp_file_by_cycle[ s_gp_file_name ],
+															f_cycles_per_generation,
+															f_theoretical_ne )
+		if b_plot == True and b_can_plot == True:
 			
-			f_ne0=f_expected_ne if f_expected_ne is not None \
-					else np.mean(  list( ddf_ne_by_gp_file_by_gen[ s_gp_file_name ].values() ) )			
+			f_ne0=f_theoretical_ne if f_theoretical_ne is not None \
+					else np.mean(  list( ddf_ne_by_gp_file_by_cycle[ s_gp_file_name ].values() ) )			
 
-			f_he0=ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name ][ i_initial_generation_number ]
+			f_he0=ddf_mean_het_by_gp_file_by_cycle[ s_gp_file_name ][ i_initial_cycle_number ]
 
 			s_title="Expected vs. theoretical heterozygosity" \
-				+ "\nNe (mean of estimates in plotted cycles, or supplied in command): " + str( f_ne0 ) \
-				+ "\nMean He of initial cycle (after burn-in): " + str( round( f_he0, 4) ) \
-				+ "."
+				+ "\nSim cycles: " \
+				+ str( i_initial_cycle_number ) \
+				+ "-" + str( i_final_cycle_number ) + "." \
+				+ ".  Ne for theoretical: " + str( f_ne0 ) \
+				+ ".  Hz of initial gen: " \
+				+ str( round( f_he0, 4) ) \
+				+ "\nCycles per generation: " \
+				+ str ( int ( round( f_cycles_per_generation ) ) ) + "."
 
-			s_het_label="expected under HW, given allele freqs"
-			s_expected_label="theoretical, Hz_i=Hz_{i-1} X ( 1 - 1/(2Ne) )"
+			s_het_label="expected under HW, using allele freqs"
+			s_theoretical_label="theoretical, Hz_i = Hz_{i-1} X ( 1 - 1/(2Ne) )"
 
-			s_xaxis_label="cycle number"
+			s_xaxis_label="generation"
 			s_yaxis_label="heterozygosity"
-					
 			
-			plot_two_dicts_similarly_scaled( df_observed_het_by_gen, 
-							df_expected_het_by_gen, 
-							s_data1_label=s_het_label,
-							s_data2_label=s_expected_label,
-							s_xaxis_label=s_xaxis_label,
-							s_yaxis_label=s_yaxis_label,
-							s_title=s_title )
-		#end if plot
+			plot_two_dicts_similarly_scaled( df_expected_het_by_gen, 
+										df_theoretical_het_by_gen, 
+										s_data1_label=s_het_label,
+										s_data2_label=s_theoretical_label,
+										s_xaxis_label=s_xaxis_label,
+										s_yaxis_label=s_yaxis_label,
+										s_title=s_title )
+		#end if plot is true
 
 	#end for each genepop file named in the tsv file
 
-	return { "mean_hets" : ddf_mean_het_by_gp_file_by_gen, 
-					"nes": ddf_ne_by_gp_file_by_gen  }
+	return { "mean_hets" : ddf_mean_het_by_gp_file_by_cycle, 
+					"nes": ddf_ne_by_gp_file_by_cycle  }
 #end get_expected_vs_observed_heterozygosity
 		
 def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file, 
-															i_initial_generation_number, 
-															i_final_generation_number,
+															i_initial_cycle_number, 
+															i_final_cycle_number,
+															f_cycles_per_generation,
 															i_min_loci_number=None,
 															i_max_loci_number=None,
-															f_expected_ne = None,
+															f_theoretical_ne= None,
 															b_plot=True, 
 															s_plot_file=None,
 															s_plot_type="png" ):
 
 	'''
-	This def is designed to use the the Ne estimation value for the ith generation,
-	chosen after the burn-in period, for simuPOP generated
-	genepop files, as the value to use in the caluculation 1 - ( 1 - 1/(2Ne) )**t
-	to calculate the expected loss of heterozygosity from the ith generation 
-	(pop section) to the jth.  This is then compared to the loss as computed by
+	This def is designed to use a theoretical Ne value, either as passed by
+	caller, or the mean of estimates in the tsv file for the cycles initaial to final.
+	to use in the caluculation,
+			1 - ( 1 - 1/(2Ne) )**t
+	for the tth generation This is then compared to the loss as computed by
 	Het=sum_i_to_L(  1 - sum_j_to_A( allele-frequency ** 2 ) )/L, in a generation
-	(pop section) with L loci, and each loci with some total alleles A.
+	(pop section, for a cycle that is the first in a generation series, as given
+	by cycles per generation, starting with the initial, its individuals with
+	L loci, and each loci having some L alleles.
 
 	Assumption:  that the (genepop) file(s) named in column one of the s_ne_tsv_file 
 			argument exist and have either absolute paths (the current
@@ -543,13 +629,14 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 		via the negui interface or the command line use of pgdriveneestimator.py 
 		itself, on genepop files generated by the negui implementation of
 		the AgeStructureNe simulation driver.
-	param i_initial_generation_number, integer giving the ith pop section,
-		where i is the poplulation (generation) that gives the initital Ne value on which
+	param i_initial_cycle_number, integer giving the ith pop section,
+		where i is the poplulation (cycle) that gives the initital Ne value on which
 		to base the expected loss of het, that is the Ne value in ( 1-2/Ne )^t for
-		each subsequent generation t.
-	param i_final_generation_number, if not None, then an integer giving the highest pop section
-		(generation) value to analyze.  If None, then analyze all pop sections with numbers 
-		>= i_initial_generation_number
+		each subsequent cycle t.
+	param i_final_cycle_number, if not None, then an integer giving the highest pop section
+		(cycle) value to analyze.  If None, then analyze all pop sections with numbers 
+		>= i_initial_cycle_number
+	param f_cycles_per_generation, number of breeding cycles comprising a generation.
 	param i_min_loci_number, if not none than the He calculation will not use any of the loci
 			in the range 1 to i, where i_min_loci_number is i + 1.
 	param i_ma_loci_number, if not none than the He calculation will not use any of the N loci
@@ -562,7 +649,6 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 			to be written is given by this extension, defaulting to png.
 
 	'''
-
 
 	'''
 	The file_names property of the tsv file manager object
@@ -570,70 +656,71 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 	of file names in column 1 of the tsv file:
 	'''
 
-	ddf_mean_het_by_gp_file_by_gen, ddf_ne_by_gp_file_by_gen = \
-			get_mean_hets_and_ne_for_generations( s_ne_tsv_file, 
-												i_initial_generation_number,
-												i_final_generation_number, 
+	ddf_mean_het_by_gp_file_by_cycle, ddf_ne_by_gp_file_by_cycle = \
+			get_mean_hets_and_ne_for_cycles( s_ne_tsv_file, 
+												i_initial_cycle_number,
+												i_final_cycle_number, 
 												i_min_loci_number, 
 												i_max_loci_number )
 
 	#Two dicts for the return value:
-	ddf_observed_het_loss_by_file={}
 	ddf_expected_het_loss_by_file={}
+	ddf_theoretical_het_loss_by_file={}
 
-	for s_gp_file_name in ddf_mean_het_by_gp_file_by_gen:
+	for s_gp_file_name in ddf_mean_het_by_gp_file_by_cycle:
 
-		df_mean_het_loss_by_gen=convert_mean_hets_to_het_loss( ddf_mean_het_by_gp_file_by_gen[ s_gp_file_name]  )
-		df_expected_het_loss_by_gen=get_expected_het_loss_per_generation( ddf_ne_by_gp_file_by_gen[ s_gp_file_name ], f_expected_ne )
+		df_mean_het_loss_by_cycle=convert_mean_hets_to_het_loss( ddf_mean_het_by_gp_file_by_cycle[ s_gp_file_name]  )
+		df_mean_het_loss_by_generation=get_per_generation_het_from_per_cycle_het( df_mean_het_loss_by_cycle, 
+																						f_cycles_per_generation )
+		df_theoretical_het_loss_by_generation=get_theoretical_het_loss_per_generation( \
+															ddf_ne_by_gp_file_by_cycle[ s_gp_file_name ], 
+																						f_cycles_per_generation,
+																						f_theoretical_ne )
 	
 		#Add to the dicts that get returned:
-		ddf_observed_het_loss_by_file[ s_gp_file_name ] = df_mean_het_loss_by_gen
-		ddf_expected_het_loss_by_file[ s_gp_file_name ] = df_expected_het_loss_by_gen
+		ddf_expected_het_loss_by_file[ s_gp_file_name ] = df_mean_het_loss_by_generation
 
-		##### temp
-		print( "-----------------" )
-		print( "df_mean_het_loss_by_gen: " + str( df_mean_het_loss_by_gen ) )
-		#####
+		ddf_theoretical_het_loss_by_file[ s_gp_file_name ] = df_theoretical_het_loss_by_generation
 
-		f_ne0=f_expected_ne if f_expected_ne is not None \
+		f_ne0=f_theoretical_ne if f_theoretical_ne is not None \
 				else np.mean( ddf_ne_by_gp_file_by_gen[ s_gp_file_name ].values() ) 
 
-		df_expected_as_perc={ i_gen: 100 * ( 1.0 - df_expected_het_loss_by_gen[ i_gen ] ) for i_gen in df_expected_het_loss_by_gen } 
-		df_het_loss_as_perc={ i_gen: 100 * ( 1.0 - df_mean_het_loss_by_gen[ i_gen ] ) for i_gen in df_mean_het_loss_by_gen }	
+		df_theoretical_as_perc={ i_gen: 100 * ( 1.0 - df_theoretical_het_loss_by_generation[ i_gen ] ) \
+																			for i_gen in df_theoretical_het_loss_by_generation } 
+		df_expected_as_perc={ i_gen: 100 * ( 1.0 - df_mean_het_loss_by_generation[ i_gen ] )  \
+															for i_gen in df_mean_het_loss_by_generation }	
 
-		df_het_loss_as_perc_sorted= { i_key : df_het_loss_as_perc[ i_key ] for i_key in sorted( df_het_loss_as_perc ) }
-		df_expected_as_perc_sorted = { i_key : df_expected_as_perc[ i_key ] for i_key in sorted( df_expected_as_perc ) }
+		df_expected_as_perc_sorted= { i_key : df_expected_as_perc[ i_key ] for i_key in sorted( df_expected_as_perc ) }
+		df_theoretical_as_perc_sorted = { i_key : df_theoretical_as_perc[ i_key ] for i_key in sorted( df_theoretical_as_perc ) }
 
-		if b_plot == True:
+		if b_plot == True and b_can_plot == True:
 			
 			s_title="Percent expected vs theoretical retained heterozygosity" \
-				+ "\nNe (mean of estimates in plotted cycles, or supplied in command): " + str( f_ne0 ) \
+				+ "\nSim cycles: " \
+				+ str( i_initial_cycle_number ) \
+				+ "-" + str( i_final_cycle_number ) + "." \
+				+ ".  Ne for theoretical: " + str( f_ne0 ) \
+				+ "\nCycles per generation: " \
+				+ str( int( round( f_cycles_per_generation ) ) )
 
-			s_het_label="expected under HW by allele freqs"
-			s_expected_label="theoretical: loss_cycle_i = 1 - ( 1 - 1/2Ne )^i"
+			s_expected_label="expected under HW, using allele frequencies"
+			s_theoretical_label="theoretical: loss_gen_i =  1 - ( 1 - 1/2Ne )^i"
 
-			s_xaxis_label="cycle number"
+			s_xaxis_label="generation"
 			s_yaxis_label="percent heterozygosity retained"
 					
-			##### temp
-			print( "---------------" )
-			print( "df_het_loss_as_perc_sorted: " + str( df_het_loss_as_perc_sorted ) )
-			print( "df_het_loss_as_perc_sorted.keys: " + str( df_het_loss_as_perc.keys() ) )
-			print( "df_het_loss_as_perc_sorted.values: " + str( df_het_loss_as_perc.values() ) )
-			#####
-			
-			plot_two_dicts_similarly_scaled( df_het_loss_as_perc_sorted, 
-							df_expected_as_perc_sorted, 
-							s_data1_label=s_het_label,
-							s_data2_label=s_expected_label,
+			plot_two_dicts_similarly_scaled( df_expected_as_perc_sorted, 
+							df_theoretical_as_perc_sorted, 
+							s_data1_label=s_expected_label,
+							s_data2_label=s_theoretical_label,
 							s_xaxis_label=s_xaxis_label,
 							s_yaxis_label=s_yaxis_label,
 							s_title=s_title )
 
 	#end for each genepop file named in the tsv file
 
-	return { "observed_het_loss" : ddf_observed_het_loss_by_file, 
-					"expected_het_loss" : ddf_expected_het_loss_by_file }
+	return { "expected_het_loss" : ddf_expected_het_loss_by_file, 
+					"theoretical_het_loss" : ddf_theoretical_het_loss_by_file }
 
 #end get_expected_vs_observed_loss_heterozygosity
 
@@ -641,14 +728,15 @@ if __name__ == "__main__":
 
 	import argparse	as ap
 
-	LS_ARGS_SHORT=[ "-t", "-i" , "-f"  , "-n", "-m", "-s"  ]
-	LS_ARGS_LONG=[ "--tsvfile" , "--initialgen", "--finalgen", "--minloci", "--maxloci", "--test" ]
+	LS_ARGS_SHORT=[ "-t", "-i" , "-f" , "-g", "-n", "-m", "-s"  ]
+	LS_ARGS_LONG=[ "--tsvfile" , "--initialcycle", "--finalcycle", "--cyclespergen", "--minloci", "--maxloci", "--test" ]
 	LS_ARGS_HELP=[ "names tsv file of ne estimations as generated " \
 						+ "from negui interface or console command using pgdriveneestimator.py",
-						"Integer The ith generation (pop section in the source genepop file.  This " \
+						"Integer The ith cycle (pop section in the source genepop file.  This " \
 						+	"number will be the initial pop used to get Ne for " \
 						+"the expected het loss calculation).",
-						"Integer, the jth generation, to be the last generation analyzed.", 
+						"Integer, the jth cycle, to be the last cycle analyzed.", 
+						"Numeric (int or float) breeding cycles per cycle",
 						"Integer i giving the min value for a range of loci (as ordered in " \
 						+ "the genepop file), the ith to the jth", 
 						"Integer j giving the max value for a range of loci, the ith to the jth",
@@ -693,8 +781,10 @@ if __name__ == "__main__":
 
 	s_tsv_file=o_args.tsvfile
 
-	i_initial_generation=int( o_args.initialgen )
-	i_final_generation=int( o_args.finalgen )
+	i_initial_cycle=int( o_args.initialcycle )
+	i_final_cycle=int( o_args.finalcycle )
+
+	f_cycles_per_generation=float( o_args.cyclespergen )
 	i_min_loci=int( o_args.minloci )
 	i_max_loci=int( o_args.maxloci )
 	s_test_name=o_args.test 
@@ -718,7 +808,11 @@ if __name__ == "__main__":
 		f_expected_ne=None
 	#end if caller passed an expected Ne value
 
-	r_def_to_call( s_tsv_file, i_initial_generation, i_final_generation, i_min_loci, i_max_loci, f_expected_ne )
+	r_def_to_call( s_tsv_file, 
+					i_initial_cycle, 
+					i_final_cycle, 
+					f_cycles_per_generation, 
+					i_min_loci, i_max_loci, f_expected_ne )
 
 #end if main
 
