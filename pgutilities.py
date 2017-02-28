@@ -268,7 +268,14 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	o_resources=pgrec.PGSimuPopResources( ls_life_table_files )
 	o_paramset=pgpar.PGParamSet( s_param_name_file )
 	o_input=pgin.PGInputSimuPop( s_configuration_file, o_resources, o_paramset ) 
+	
 	o_input.makeInputConfig()
+
+	##### temp 
+	print( "-----------------" )
+	print( "in pgutilities,def do_pgopsimupop_replicate_from_files" )
+	print( "input value for harvestrate: " + str( o_input.harvestrate ) )
+	#####
 
 	b_write_conf_file=False
 
@@ -854,9 +861,9 @@ def replace_genepop_file_list_arg_with_file_name_if_list_too_long( seq_arg_set,
 	
 	'''
 	This threshold may need to be adjusted upwards.
-	Tests in Windows 10 showed the command fails if
-	its length is over N characters, with N somethere
-	in the range 30,000 to 32,000.
+	Inexact tests in Windows 10 showed the command 
+	fails if its length is over N characters, with 
+	N somethere in the range 29,000 to 32,000.
 	'''
 	MAX_CHARS_IN_COMMAND_WITHOUT_REDUCING=3e4
 
@@ -895,7 +902,7 @@ def replace_genepop_file_list_arg_with_file_name_if_list_too_long( seq_arg_set,
 
 		o_temp_file=open( s_temp_file_name, 'w' )
 
-		o_temp_file.write( seq_arg_set[ 0 ] + "\n" )
+		o_temp_file.write( seq_arg_set[ GENEPOP_FILE_LIST_ARG_INDEX ] + "\n" )
 
 		o_temp_file.close()
 		

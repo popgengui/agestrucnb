@@ -283,6 +283,17 @@ class PGInputSimuPop( object ):
 		self.__update_attribute_config_file_info( "startLambda", "pop", "startLambda" )
 		self.__update_attribute_config_file_info( "lbd", "pop", "lambda" )
 
+		if config.has_option("pop", "harvestrate" ):
+			self.harvestrate = config.getfloat( "pop", "harvestrate" )
+		else:
+			##### temp
+			print( "--------------" )
+			print("setting harvestrate to zero" )
+			#####
+			self.harvestrate = 0.0
+		#end if harvestrate,else not
+		self.__update_attribute_config_file_info( "harvestrate", "pop", "harvestrate" )
+
 		if config.has_option("pop", "Nb"):
 			''''
 			minimal change to Tiagos code so we can read in a "None" value
@@ -327,13 +338,11 @@ class PGInputSimuPop( object ):
 			Nb - NbVar.  Thus some config files may load inappropriatly large NbVar values:
 			'''
 			if self.NbVar > 1.0:
-				s_msg="Warning:  in PGInputSimuPop instance, def get_config, Nb tolerance value looks excessive at, " \
-														+ str( self.NbVar ) + ".  The simulation " \
-														+ "expects the value to be between 0.0 and 1.0, " \
-														+ "to compute an Nb tolerance as a proportion of your " \
-														+ "target Nb, less than or equal to your target Nb. " \
-														+ "Large values will allow generations with widely " \
-														+ "varying Nb." 
+				s_msg="Warning:  in PGInputSimuPop instance, def get_config, Nb tolerance value looks high at " \
+														+ str( self.NbVar ) + ".  " \
+														+ "This will allow generations with " \
+														+ "Nb values varying substantially " \
+														+ "(i.e by at or more than the target Nb value)." 
 
 				sys.stderr.write( s_msg + "\n" )
 			##### end temp
@@ -416,6 +425,33 @@ class PGInputSimuPop( object ):
 
 		return
 	#end __get_config
+
+	def __reset_start_lambda_using_ages( self ):
+		'''
+		Added 2017_02_25, to enable a default start lambda 
+		(the burn-in cycles total) that is compatible with
+		the new default use of the PGOpSimuPop __restrictedGenerator,
+		which applies a test for an Nb tolerance.  Any reasonable
+		tolerance will not be reached in the pre-burnin cycles, so that
+		the default of 0 burnin cycles (startLambda=99999) is now
+		likely to make the simulation fail due to being unable to
+		reach an Nb within target, in the pre-burn-in cycles.  Using
+		the total age classes as the total burn-in cycles should
+		allow the Nb to stabalize within a reasonable tolerance before
+		the tolerance test is applied.
+
+		This def is called by def self.makeInputConfig 
+		'''
+		s_errmsg="In PGInputSimuPop instance " \
+						+ "def __reset_start_lambda_using_ages, " \
+						+ "a reset of the start lambda (burn-in setting) " \
+						+ "failed.  No \"ages\" parameter was found."
+		assert self.ages, s_errmsg 
+
+		self.startLambda=self.ages
+				 
+		return
+	#end __reset_start_lambda_using_ages
 
 	def __compute_n0_from_eff_size_info( self ):
 
@@ -625,6 +661,12 @@ class PGInputSimuPop( object ):
 	def makeInputConfig( self ):
 		self.__get_config()
 		self.__make_params_whose_values_are_lists_have_uniform_item_types()
+		'''
+		Added 2017_02_25, to enable a default start lambda 
+		(the burn-in cycles total) that is compatible with
+		the new default use of the PGOpSimuPop __restrictedGenerator.
+		'''
+		self.__reset_start_lambda_using_ages()
 		return
 	#end makeInputConfig
 
@@ -748,7 +790,17 @@ class PGInputSimuPop( object ):
 		s_nb_source=self.__get_nb_attribute_derivation()
 
 		if s_nb_source=="pop_section":
-			return self.__N0_from_pop_section
+			'''
+			2017_02_25.  With further revisions to PGOpSimuPop,
+			we no longer allow N0 to be taken from the
+			\"pop\" section.
+			'''
+			s_msg="In PGInputSimuPop instance, property N0.getter, " \
+						+ "the program no longer allows the N0 value " \
+						+ "to be derived from the original setting in " \
+						+ "the \"pop\" section of the configuration " \
+						+ "file."
+			raise Exception( s_msg )
 		elif s_nb_source=="effective_size_section":			
 			return self.__compute_n0_from_eff_size_info()
 		else:
@@ -764,7 +816,13 @@ class PGInputSimuPop( object ):
 		s_nb_source=self.__get_nb_attribute_derivation()	
 
 		if s_nb_source=="pop_section":
-			self.__N0_from_pop_section=v_value
+			s_msg="In PGInputSimuPop instance, property N0.setter, " \
+						+ "the program no longer allows the N0 value " \
+						+ "to be derived from the original setting in " \
+						+ "the \"pop\" section of the configuration " \
+						+ "file."
+			raise Exception( s_msg )
+
 		elif s_nb_source=="effective_size_section":
 			''' 
 			If we have effective size info, and the 
@@ -791,6 +849,12 @@ class PGInputSimuPop( object ):
 		s_nb_source=self.__get_nb_attribute_derivation()
 
 		if s_nb_source=="pop_section":
+			s_msg="In PGInputSimuPop instance, property Nb.getter, " \
+						+ "the program no longer allows the Nb value " \
+						+ "to be derived from the original setting in " \
+						+ "the \"pop\" section of the configuration " \
+						+ "file."
+			raise Exception( s_msg )
 			return self.__Nb_from_pop_section
 		elif s_nb_source=="effective_size_section": 			
 			return self.__Nb_from_eff_size_info
@@ -809,8 +873,21 @@ class PGInputSimuPop( object ):
 		s_nb_source=self.__get_nb_attribute_derivation()
 
 		if s_nb_source=="pop_section":
-
-			self.__Nb_from_pop_section=v_value
+			'''
+			2017_02_25.  With further revisions in
+			PGOpSimuPop, this Nb value, from the
+			original pop sections in Tiago's original,
+			is now obsolete, since Nb is now a value
+			correlated with the Nb/Nc and Nb/Ne ratios
+			in our new "effective size" sections in the
+			life tables.
+			'''
+			s_msg="In PGInputSimuPop instance, property Nb.setter, " \
+						+ "the program no longer allows the Nb value " \
+						+ "to be derived from the original settings int " \
+						+ "the \"pop\" section of the configuration " \
+						+ "file."
+			raise Exception( s_msg )
 		elif s_nb_source=="effective_size_section":
 			self.__Nb_from_eff_size_info=v_value
 		else:
@@ -823,7 +900,7 @@ class PGInputSimuPop( object ):
 	#end Nb setter
 
 	@property
-	def Nb_for_restrict_generator( self ):
+	def Nb_orig_from_pop_section( self ):
 		'''
 		This Nb val is the original value
 		(originally the sole "Nb" attribute
@@ -850,7 +927,7 @@ class PGInputSimuPop( object ):
 			i_returnval=self.__Nb_from_pop_section
 		elif s_nb_source=="effective_size_section":
 			if self.__Nb_from_pop_section is not None:
-				s_msg="In PGInputSimuPop instance, property Nb_for_restrict_generator, " \
+				s_msg="In PGInputSimuPop instance, property Nb_orig_from_pop_section, " \
 						+ "Nb was derived from an \"effective_size\" section, " \
 						+ "found in the life table or config file, " \
 						+ "but there is also an Nb value in the \"pop\" section " \
@@ -861,12 +938,12 @@ class PGInputSimuPop( object ):
 			#end if we have a non-None value in pop section, error
 			i_returnval=self.__Nb_from_pop_section
 		else:
-			s_msg="In PGInputSimuPop instance, property Nb_for_restrict_generator, " \
+			s_msg="In PGInputSimuPop instance, property Nb_orig_from_pop_section, " \
 					+ "unknown string value returned form call to __get_nb_attribute_derivation." 
 			raise Exception( s_msg )
 		#end if pop-section Nb, else effective size, else unknown
 		return i_returnval
-	#end properby Nb_for_restrict_generator
+	#end properby Nb_orig_from_pop_section
 
 	'''
 	This def helps clients to, for example,

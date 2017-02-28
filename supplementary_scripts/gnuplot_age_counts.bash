@@ -22,7 +22,7 @@ then
 	echo "args: "
 	echo "       <file with age-counts-table> "
 	echo "       <int, number of age classes in table> "
-	echo "       <int, number of generations> "
+	echo "       <int, number of cycles> "
 	echo "       <title>"
 	echo "       optional, <term name> (default is \"qt\", but try \"wxt\" or \"x11 (linux)\" if no qt)"
 
@@ -55,7 +55,7 @@ gnuplot_statements="set term ${const_term} ${const_size}; \
 			set style histogram rowstacked; \
 			set boxwidth 0.6 relative; \
 			set style fill solid 0.5 border; \
-			set xlabel 'generation'; \
+			set xlabel 'cycle'; \
 			set ylabel 'count' ; \
 			set title '${mytitle}'; \
 			set xrange [ 0 : ${total_gens} + ${const_pad_right} ]; \

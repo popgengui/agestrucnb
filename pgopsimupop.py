@@ -116,7 +116,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		self.__current_N0=self.input.N0
 
-		##### temp
 		'''
 		2017_02_06, we add these attributes to implement,
 		per recent meeting with Robin Waples, the 
@@ -136,17 +135,19 @@ class PGOpSimuPop( modop.APGOperation ):
 		will use the lambda parameter (lbd) to
 		either skip harvest (lambda in [1.0, infinity), 
 		or lambda in [-infinity, 0.0], or lambda is None.
-		'''
-		self.__harvest_rate_by_generation=None
-
-		'''
+		Also using a decline rate for newborns, 
 		Applied when user specifies lambda > 1.0.  See
 		def __make_harvest_list
 		'''
 		self.__lambda_for_newborns=None
-		##### end temp
+		self.__harvest_rate_by_generation=None
 
-		##### temp files, used for testing
+		'''
+		Set up the harvest list or newborn lambda.
+		'''
+		self.__make_harvest_list()
+
+
 		self.__file_for_nb_records=open( self.output.basename + "_nb_values_calc_by_gen.csv", 'w' )
 		self.__file_for_age_counts=open( self.output.basename + "_age_counts_by_gen.csv", 'w' )
 		DEFAULT_AGES=50
@@ -158,32 +159,40 @@ class PGOpSimuPop( modop.APGOperation ):
 							in range( 1, self.__total_ages_for_age_file + 1 ) ] )
 
 		self.__file_for_age_counts.write( s_header + "\n" )
-		##### end temp file for testing
-
 
 		return
 	#end __init__
 
-	##### temp test
-
 	def __make_harvest_list( self ):
+
 		'''
-		2017_02_07.  Added to implement the __harvest def.
+		2017_02_07.  Added to implement the __harvest def,
+		and, if the new harvestrate value is > 1.0, to be
+		used as the old lambda was used, to redice the N0
+		pop in def __createAge.
+
+		This def assumes that the attributes __harvestrate
+		and __lambda_for_newborns are both present and set
+		to None.
 		'''
 
 		s_errmsg="In PGOpSimuPop, def __make_harvest_list, "
 
-		assert self.input.PopSize, \
-					s_errmsg + "no parameter popSize found."
+		assert hasattr( self.input, "popSize" ), \
+					s_errmsg + "no popSize setting found."
 
-		assert self.input.lbd, \
-				s_errmsg + "no parameter lbd found."
+		assert hasattr( self.input, "harvestrate" ), \
+				s_errmsg + "no harvest rate setting found."
 
-		v_lambda=self.input.lbd
+		v_harvest_rate=self.input.harvestrate
 
-		b_use_harvest=( v_lambda is not None \
-							and v_lamda > 0.00 \
-							and v_lambda <= 1.0 )
+		b_use_harvest=( v_harvest_rate is not None \
+							and v_harvest_rate > 0.00 \
+							and v_harvest_rate <= 1.0 )
+
+		b_use_lambda_for_newborns=( v_harvest_rate is not None \
+							and v_harvest_rate > 1.0 )
+
 
 		if b_use_harvest:
 
@@ -194,8 +203,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 
 			if self.input.startLambda > 0 \
-					and self.input.startLambda != PGInputSimuPop.START_LAMBDA_IGNORE:
-
+					and self.input.startLambda != pgin.START_LAMBDA_IGNORE:
 				i_first_pop_after_burnin=self.input.startLambda	+ 1
 			#end if our burn in is not 0
 
@@ -213,14 +221,14 @@ class PGOpSimuPop( modop.APGOperation ):
 												in range( 0, i_first_pop_after_burnin ) }
 
 			#Then we add the post-burn-in generations, which will reduced using lambda:	
-			self.__harvest_rate_by_generation.update( { si_gen:v_lambda for i_gen \
+			self.__harvest_rate_by_generation.update( { i_gen:v_harvest_rate for i_gen \
 												in range( i_first_pop_after_burnin, 
 																self.input.popSize ) } )
-		else:
-			if v_lambda > 1.0:
-				self.__lambda_for_newborns=v_lambda
-			#end if lambda > 1.0
-		#end if we are to use harvest, else test for newborn-lambda
+			self.__lambda_for_newborns=None
+
+		elif b_use_lambda_for_newborns:
+			self.__lambda_for_newborns=v_harvest_rate
+		#end if we are to use harvest, else if we are to use newborn lambda
 
 		return
 
@@ -484,8 +492,20 @@ class PGOpSimuPop( modop.APGOperation ):
 		#end for i in pop
 
 		#todo apply NB change here!!
-		if gen >= self.input.startLambda:
-			self.__current_N0=self.__current_N0 * self.input.lbd
+
+		'''
+		2017_02_25.  We are now using a harvest rate
+		instead of the old input.lbd lambda.  In this
+		new scenario, we only adjust the number of newborns
+		created if our harvest rate is above 1.0, the only
+		case in which our new attribute __lambda_for_newborns
+		should be non-None.  See def __make_harvest_list. 
+		'''
+		b_apply_lambda=self.__lambda_for_newborns is not None \
+							and self.__lambda_for_newborns > 1.0
+
+		if b_apply_lambda and gen >= self.input.startLambda: 
+			self.__current_N0=self.__current_N0 * self.__lambda_for_newborns
 		#endif gen >= start lambda
 
 		v_return_value = self.__current_N0 + curr
@@ -662,6 +682,8 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __calcNb( self, pop, pair ):
 
+		reltol=1e-90
+
 		fecms = self.input.fecundityMale
 		fecfs = self.input.fecundityFemale
 		cofs = []
@@ -683,6 +705,10 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		kbar = 2.0 * self.__current_N0 / len(cofs)
 		Vk = numpy.var(cofs)
+
+		assert kbar>reltol, "In PGOpSimuPop instance, def __calcNb, " \
+								+ "divisor, kbar, is too close to zero."
+
 		nb = (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
 		#print len(pair), kbar, Vk, (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
 	
@@ -729,22 +755,17 @@ class PGOpSimuPop( modop.APGOperation ):
 			the gen number after which we apply our
 			nb test, to the gen post burn in
 			'''
-			#### temp rem out original:
-#			if pop.dvars().gen < 10:
+
 			first_gen_to_include = 0 \
 					if self.input.startLambda >= PGOpSimuPop.VALUE_TO_IGNORE \
 					else self.input.startLambda
 
 			if pop.dvars().gen < first_gen_to_include:
 				break
-			#end if pop.dvars
+			#end if gen number is larger than our burn-in threshold.
 
 			nb = self.__calcNb(pop, pair)
 
-
-
-
-			##### temp revision
 			'''
 			2017_02_06
 			After meeting with Robin Waples, we now default
@@ -754,8 +775,8 @@ class PGOpSimuPop( modop.APGOperation ):
 			original input.* attributes (see def createAge
 			for the initializatio of these values).
 			'''
-			##### temp rem out original test:
-#			if abs(nb - self.input.Nb_for_restrict_generator ) <= self.input.NbVar:
+			#from the original code using the original param values:
+#			if abs(nb - self.input.Nb_orig_from_pop_section ) <= self.input.NbVar:
 
 			if abs(nb - self.__targetNb ) <= self.__toleranceNb:
 
@@ -1085,18 +1106,100 @@ class PGOpSimuPop( modop.APGOperation ):
 	# end __equalSexCull
 
 	def __harvest(self, pop):
+
 		gen = pop.dvars().gen
+
+		##### temp
+		print( "-----------------" )
+		print( "in harvest with gen num: " + str( gen ) )
+		##### 
+
 		if self.__harvest_rate_by_generation == None \
 					or self.__harvest_rate_by_generation[gen] == 0:
+
+			##### temp
+			print( "leaving harvest without culling." )
+			#####
 			return True
+		#end if no harvest needed
+
+
+
+		'''
+		2017_02_27.  On a guess that we don't want these to be recalculated
+		for each cohort, I moved these adjustments for Nb and N0 out of the
+		loop that iterates over cohorts.
+		'''
+
+		#determine harvest rate for this generation
+		harvestRate = ( self.__harvest_rate_by_generation[gen] )
+		#reduce expected NB
+		self.__targetNb =self.__targetNb *(1-harvestRate)
+		
+
+		'''
+		2017_02_26.  No explicit call to a recalc fx is needed.  The assignment 
+		of the Nb to the input object, and the subsequent assignment that gets the N0
+		from the input object will result in the input object recalculating N0 using its 
+		just-updated Nb value, before delivering it to this objects current_N0 attribute.
+		'''
+		#reduce N0
+		# TODO self.__current_N0 = recalcN0(self.__targetNb)
+		self.input.Nb=self.__targetNb
+		self.__current_N0=self.input.N0
+
+		# change rate to correct for nb/bc differenece
+
+		'''
+		?????
+		Couple of questions for Brian T.
+		Not sure whether this statement means to
+		increase harvestRate by harvestRate/nbnc,
+		or to reassign harvestRate=harvestRate/nbnc.
+
+		Further, need to confirm that nb/nc is not
+		assumed to have changed (i.e. that it is a constant
+		supplied by the life table, and does not change.
+		?????
+		'''
+		#TODO harvestRate + harvestRate/self.input.nbnc
+
+			
+		print harvestRate
+
 		kills = []
 		cohortDict = {}
+
+		'''
+		2017_02_27.  This counter allows
+		a check, before culling, that
+		the resulting pop size will not be
+		zero, which will result in an error condition
+		at next call to evolve().  See exception
+		test below.
+		'''
+		i_current_pop_size=0
 		for i in pop.individuals():
+
+			i_current_pop_size+=1
+
 			indAge = i.age
 
 			if not indAge in cohortDict:
 				cohortDict[indAge] = []
 			cohortDict[indAge].append(i)
+		#end for each individual
+
+		##### temp
+		print ("in harvest with: " )
+		print ("    harvest rate: " + str( harvestRate ) )
+		print( "    indiv count: " + str( i_current_pop_size ) ) 
+		print ("    harvest rate: " + str( harvestRate ) )
+		print ("    new targetNb: " + str( self.__targetNb ) )
+		print ("    new current N0: " + str( self.__current_N0 ) )
+		#####
+
+
 
 		for cohortKey in cohortDict:
 			## !! Cohort 0 does not get culled!!
@@ -1107,34 +1210,30 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			# setup data and seperate males and females
 			cohort = cohortDict[cohortKey]
-			print(cohortKey)
 			cohortTotal = len(cohort)
 			cohortMales = [x for x in cohort if x.sex() == 1]
 			maleCount = len(cohortMales)
 			cohortFemales = [x for x in cohort if x.sex() == 2]
 			femaleCount = len(cohortFemales)
-			print cohortTotal
-			print maleCount
-			print femaleCount
-			print"\n"
 
-			#determine harvest rate for this generation
+#			print(cohortKey)
+#			print cohortTotal
+#			print maleCount
+#			print femaleCount
+#			print"\n"
 
-			harvestRate = ( self.__harvest_rate_by_generation[gen] )
-			#reduce expected NB
-			self.__targetNb =self.__targetNb *(1-harvestRate)
-
-			#reduce N0
-			# TODO self.__current_N0 = recalcN0(self.__targetNb)
-
-			# change rate to correct for nb/bc differenece
-
-			#TODO harvestRate + harvestRate/self.input.nbnc
-
-			print harvestRate
-			maleHarvest = numpy.round(maleCount * harvestRate)
-			femaleHarvest = numpy.round(femaleCount * harvestRate)
-			print "\n\n"
+			'''
+			2017_02_26. Adding int() because round returns a float,
+			which results in a type error in call to random.sample below.
+			'''
+			maleHarvest = int( numpy.round(maleCount * harvestRate) )
+			femaleHarvest = int( numpy.round(femaleCount * harvestRate) )
+			##### temp
+#			print ("maleCount: " + str( maleCount ) )
+#			print ("femaleCount: " + str( femaleCount ) )
+#			print ("maleHarvest: " + str(maleHarvest) )
+#			print ("femaleHarvest: " + str(femaleHarvest) )
+#			print "\n\n"
 
 			# choose which sex to kill first
 			# flag is one and 0 for easy switching
@@ -1144,24 +1243,45 @@ class PGOpSimuPop( modop.APGOperation ):
 			# if maleCount > femaleCount:
 			# 	killChoiceFlag = 1
 
-
+			'''
+			2017_02_26 Correction to the following two lines.  I think numpy.sample is
+			supposed to be random.sample
+			'''
 			#sample  harvest
-			maleHarvestList = numpy.sample(cohortMales,maleHarvest)
-			femaleHarvestList = numpy.sample(cohortFemales,femaleHarvest)
+			#maleHarvestList = numpy.sample(cohortMales,maleHarvest)
+			#femaleHarvestList = numpy.sample(cohortFemales,femaleHarvest)
+			maleHarvestList = random.sample(cohortMales,maleHarvest)
+			femaleHarvestList = random.sample(cohortFemales,femaleHarvest)
+
 			for ind in maleHarvestList:
-				print "Dead " + str(ind.ind_id)
+#				print "Dead " + str(ind.ind_id)
 				kills.append(ind.ind_id)
 			for ind in femaleHarvestList:
-				print "Dead " + str(ind.ind_id)
+#				print "Dead " + str(ind.ind_id)
 				kills.append(ind.ind_id)
 
 				# kills.extend(cohortKills)
 				# endif age>0 andage<.....
 		# end for i in pop
-		pop.removeIndividuals(IDs=kills)
-		return True
 
-	# end __equalSexCull
+		##### temp
+		print( "-----------------" )
+		print( "in __harvest, removing " \
+						+ str( len( kills ) ) \
+						+ " individuals " )
+		#####	
+
+		if len( kills ) == i_current_pop_size: 	
+			s_msg="In PGOpSimuPop instance, def __harvest, " \
+						+ "Error: harvest will cull the entire " \
+						+ "current population."
+			raise Exception( s_msg )
+		#end if  kill list is entire pop
+
+		pop.removeIndividuals(IDs=kills)
+		
+		return True
+	# end __harvest
 
 	def __zeroC( self, v ):
 		a = str(v)
@@ -1394,10 +1514,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 
 		self.__toleranceNb=self.__targetNb * f_nbvar
-		##### temp
-		print( "------------------------" )
-		print( "TOL: " + str( self.__toleranceNb ) )
-		#####
+
 		self.__selected_generator=None
 
 		'''
@@ -1432,7 +1549,7 @@ class PGOpSimuPop( modop.APGOperation ):
 #		mateOp = sp.HeteroMating( [ 
 #					sp.HomoMating(
 #					sp.PyParentsChooser(self.__fitnessGenerator if self.input.doNegBinom
-#					else (self.__litterSkipGenerator if self.input.Nb_for_restrict_generator is None else
+#					else (self.__litterSkipGenerator if self.input.Nb_orig_from_pop_section is None else
 #					self.__restrictedGenerator)),
 #					sp.OffspringGenerator(numOffspring=1, ops=[
 #					sp.MendelianGenoTransmitter(), sp.IdTagger(),
@@ -1495,20 +1612,50 @@ if __name__ == "__main__":
 	import pgparamset as pgps
 	import pgutilities	 as pgut
 	import time
+	import argparse	as ap
 
-	ls_args=[ "lifetable file", "configuration file", "output base" ]
+	LS_ARGS_SHORT=[ "-l", "-c" , "-p" , "-o"  ]
+	LS_ARGS_LONG=[ "--lifetable" , "--configfile", "--paramnamesfile", "--outputbase" ]
+	LS_ARGS_HELP=[ "life table file",
+						"configuration file",
+						"param names file (usually: resources/simupop.param.names)",
+						"output files base name" ]
 
-	s_usage=pgut.do_usage_check( sys.argv, ls_args )
+	LS_OPTIONAL_ARGS_SHORT=[ "-s" ]
+	LS_OPTIONAL_ARGS_LONG=[ "--paramresets" ]
+	LS_OPTIONAL_ARGS_HELP=[ "string, comma-delimted list of param name=value pairs, used to reset paramater values"]
 
-	if s_usage:
-		print( s_usage )
-		sys.exit()
-	#end if usage
+	DELIMIT_RESETS=","
+	DELIMIT_NAME_VAL_PAIRS="="
+	o_parser=ap.ArgumentParser()
 
-	s_lifetable_file=sys.argv[ 1 ]
-	s_conf_file=sys.argv[ 2 ]
-	s_outbase=sys.argv[ 3 ]
-	PARAM_NAMES_FILE="resources/simupop.param.names"
+	o_arglist=o_parser.add_argument_group( "args" )
+
+	i_total_nonopt=len( LS_ARGS_SHORT )
+	i_total_opt=len( LS_OPTIONAL_ARGS_SHORT )
+
+	for idx in range( i_total_nonopt ):
+		o_arglist.add_argument( \
+				LS_ARGS_SHORT[ idx ],
+				LS_ARGS_LONG[ idx ],
+				help=LS_ARGS_HELP[ idx ],
+				required=True )
+	#end for each required argument
+
+	for idx in range( i_total_opt ):
+		o_arglist.add_argument( \
+				LS_OPTIONAL_ARGS_SHORT[ idx ],
+				LS_OPTIONAL_ARGS_LONG[ idx ],
+				help=LS_OPTIONAL_ARGS_HELP[ idx ],
+				required=False )
+	#end for each required argument
+
+	o_args=o_parser.parse_args()
+
+	s_lifetable_file=o_args.lifetable	
+	s_conf_file=o_args.configfile
+	s_outbase=o_args.outputbase
+	PARAM_NAMES_FILE=o_args.paramnamesfile
 
 	o_param_names=pgps.PGParamSet( PARAM_NAMES_FILE )
 	o_resources=pgrec.PGSimuPopResources([ s_lifetable_file ] )
@@ -1517,7 +1664,18 @@ if __name__ == "__main__":
 	
 	o_input.makeInputConfig()
 
-	o_op=PGOpSimuPop( o_input, o_output )
+	if o_args.paramresets:
+		ls_resets=o_args.paramresets.split( DELIMIT_RESETS )
+		for s_reset in ls_resets:
+			ls_name_val=s_reset.split( DELIMIT_NAME_VAL_PAIRS )
+			s_param_name=ls_name_val[ 0 ]
+			v_val=eval( ls_name_val[ 1 ] )
+			setattr( o_input, s_param_name, v_val )
+		#end for each param reset
+	#end if caller has param resets
+
+	o_op=PGOpSimuPop( o_input, o_output, b_remove_db_gen_sim_files=True )
+
 	o_op.prepareOp()
 	o_op.doOp()
 #end if
