@@ -1606,13 +1606,27 @@ class PGOpSimuPop( modop.APGOperation ):
 
 if __name__ == "__main__":
 
-	import pginputsimupop as pgin
-	import pgoutputsimupop as pgout
-	import pgsimupopresources as pgrec
-	import pgparamset as pgps
-	import pgutilities	 as pgut
+	try:
+		import pginputsimupop as pgin
+		import pgoutputsimupop as pgout
+		import pgsimupopresources as pgrec
+		import pgparamset as pgps
+		import pgutilities	 as pgut
+	except ImportError as ie:
+		s_my_mod_path=os.path.abspath( __file__ )
+
+		sys.path.append( s_my_mod_path )
+		import pginputsimupop as pgin
+		import pgoutputsimupop as pgout
+		import pgsimupopresources as pgrec
+		import pgparamset as pgps
+		import pgutilities	 as pgut
+	#end try to get pgmods
+
 	import time
 	import argparse	as ap
+
+
 
 	LS_ARGS_SHORT=[ "-l", "-c" , "-p" , "-o"  ]
 	LS_ARGS_LONG=[ "--lifetable" , "--configfile", "--paramnamesfile", "--outputbase" ]
