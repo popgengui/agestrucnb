@@ -1143,6 +1143,8 @@ class PGOpSimuPop( modop.APGOperation ):
 		from the input object will result in the input object recalculating N0 using its 
 		just-updated Nb value, before delivering it to this objects current_N0 attribute.
 		'''
+
+		## sounds good i just want N0 to be recalculated and didnt know what def you had for it
 		#reduce N0
 		# TODO self.__current_N0 = recalcN0(self.__targetNb)
 		self.input.Nb=self.__targetNb
@@ -1162,7 +1164,9 @@ class PGOpSimuPop( modop.APGOperation ):
 		supplied by the life table, and does not change.
 		?????
 		'''
-		#TODO harvestRate + harvestRate/self.input.nbnc
+
+		## good catch ted, that's what i get for late night coding again should be assignment, and nb/nc should be a constant
+		#TODO harvestRate = harvestRate/self.input.nbnc
 
 			
 		print harvestRate
