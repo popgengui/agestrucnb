@@ -1133,6 +1133,13 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		#determine harvest rate for this generation
 		harvestRate = ( self.__harvest_rate_by_generation[gen] )
+
+		if harvestRate > 1:
+			self.__targetNb = self.__targetNb*harvestRate
+			self.input.Nb=self.__targetNb
+			self.__current_N0=self.input.N0
+			return True
+
 		#reduce expected NB
 		self.__targetNb =self.__targetNb *(1-harvestRate)
 		
