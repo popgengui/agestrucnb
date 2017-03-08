@@ -533,6 +533,13 @@ class PGInputSimuPop( object ):
 
 		i_n0 = int( round ( f_Nc/f_cum_pop_porp ) )
 		
+		##### temp
+		print( "--------------" )
+		print( "in PGInputSimuPop, def __compute_n0_from_eff_size_info, " \
+					+ "using nb, " + str( self.__Nb_from_eff_size_info ) \
+					+ ", returning recomputed N0: " + str( i_n0 ) )
+		##### end temp
+					
 		return i_n0
 	#end __compute_n0_from_eff_size_info
 

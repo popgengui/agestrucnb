@@ -193,6 +193,19 @@ class PGOpSimuPop( modop.APGOperation ):
 		b_use_lambda_for_newborns=( v_harvest_rate is not None \
 							and v_harvest_rate > 1.0 )
 
+		s_msg="In PGOpSimuPop instance, " \
+					+ "def __make_harvest_list, " \
+					+ "the program found an invalid " \
+					+ "state.  Both newborn increase and " \
+					+ "harvesting are indicated."
+
+
+		##### temp
+		print( "in __make_harvest_list" )
+		print( "b_use_harvest: " + str( b_use_harvest ) )
+		print( "b_use_lambda_for_newborns "+ str( b_use_lambda_for_newborns ) )
+		#####
+		assert (b_use_harvest and b_use_lambda_for_newborns) == False, s_msg
 
 		if b_use_harvest:
 
@@ -500,14 +513,12 @@ class PGOpSimuPop( modop.APGOperation ):
 		created if our harvest rate is above 1.0, the only
 		case in which our new attribute __lambda_for_newborns
 		should be non-None.  See def __make_harvest_list. 
+
+		2017_03_02. We are now applying the newborns increase
+		(a "negative" lambda,i.e., harvest rate greater than 1.0)
+		in the def, __harvest, and so have deleted code that 
+		tests-for and applies the attribute,__lambda_for_newborns.
 		'''
-		b_apply_lambda=self.__lambda_for_newborns is not None \
-							and self.__lambda_for_newborns > 1.0
-
-		if b_apply_lambda and gen >= self.input.startLambda: 
-			self.__current_N0=self.__current_N0 * self.__lambda_for_newborns
-		#endif gen >= start lambda
-
 		v_return_value = self.__current_N0 + curr
 
 		if VERBOSE:
@@ -682,6 +693,15 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __calcNb( self, pop, pair ):
 
+		
+		'''
+		2017_03_02 This float tolerance is added
+		in order to test the kbar value before using 
+		it as a divisor (below).  This to control
+		the error messaging when our new __harvest
+		def creates a population that causes a 
+		zero value for kbar.
+		'''
 		reltol=1e-90
 
 		fecms = self.input.fecundityMale
@@ -810,7 +830,7 @@ class PGOpSimuPop( modop.APGOperation ):
 							+ "def __restrictedGenerator, " \
 							+ "for generation, " + str( pop.dvars().gen ) \
 							+ ", after " + str( PGOpSimuPop.MAX_TRIES_AT_NB ) \
-							+ " tries, the simulation did generate a " \
+							+ " tries, the simulation did not generate a " \
 							+ "population with an Nb value inside " \
 							+ "the tolerance.  Target Nb: " \
 							+ str( self.__targetNb ) \
@@ -1103,46 +1123,54 @@ class PGOpSimuPop( modop.APGOperation ):
 		pop.removeIndividuals(IDs=kills)
 		return True
 
-	# end __equalSexCull
+	#end __equalSexCull
 
 	def __harvest(self, pop):
+
+		f_reltol=float( 1e-90 )
 
 		gen = pop.dvars().gen
 
 		##### temp
 		print( "-----------------" )
-		print( "in harvest with gen num: " + str( gen ) )
+		print( "in harvest with:" )
+		print( "    gen num: " + str( gen ) )
 		##### 
+		
+		b_do_newborns_increase=( self.__lambda_for_newborns is not None \
+												and	gen < self.startLambda )
 
-		if self.__harvest_rate_by_generation == None \
-					or self.__harvest_rate_by_generation[gen] == 0:
+		b_use_harvest_list=( self.__harvest_rate_by_generation is not None \
+										and self.__harvest_rate_by_generation[gen] > f_reltol )
 
+		if not( b_do_newborns_increase or b_use_harvest_list):
 			##### temp
-			print( "leaving harvest without culling." )
+			print( "leaving harvest without harvesting pop or augmenting N0." )
 			#####
 			return True
 		#end if no harvest needed
 
-
-
-		'''
-		2017_02_27.  On a guess that we don't want these to be recalculated
-		for each cohort, I moved these adjustments for Nb and N0 out of the
-		loop that iterates over cohorts.
-		'''
+		##### temp
+		print ("    current Nb: " + str( self.__targetNb ) )
+		#####
 
 		#determine harvest rate for this generation
-		harvestRate = ( self.__harvest_rate_by_generation[gen] )
+		harvestRate = ( self.__harvest_rate_by_generation[gen] ) if b_use_harvest_list \
+							else self.__lambda_for_newborns
 
-		if harvestRate > 1:
-			self.__targetNb = self.__targetNb*harvestRate
-			self.input.Nb=self.__targetNb
-			self.__current_N0=self.input.N0
-			return True
-
-		#reduce expected NB
-		self.__targetNb =self.__targetNb *(1-harvestRate)
+		#reduce expected NB by 1-harvest rate, except when using an increase-for-newborns,
+		#which, though user-entered as a rate > 1.0, is literally a negative harvest rate, 
+		#and will proportionally increase the Nb:
+		self.__targetNb =self.__targetNb *(1-harvestRate) if b_use_harvest_list \
+												else self.__targetNb * harvestRate
 		
+		##### temp
+		print ("    harvest rate: " + str( harvestRate ) )
+		print ("    new targetNb: " + str( self.__targetNb ) )
+		print ("    new current N0: " + str( self.__current_N0 ) )
+		#####
+
+	
 
 		'''
 		2017_02_26.  No explicit call to a recalc fx is needed.  The assignment 
@@ -1150,33 +1178,23 @@ class PGOpSimuPop( modop.APGOperation ):
 		from the input object will result in the input object recalculating N0 using its 
 		just-updated Nb value, before delivering it to this objects current_N0 attribute.
 		'''
-
-		## sounds good i just want N0 to be recalculated and didnt know what def you had for it
 		#reduce N0
 		# TODO self.__current_N0 = recalcN0(self.__targetNb)
 		self.input.Nb=self.__targetNb
 		self.__current_N0=self.input.N0
 
+
+
+		#If we did the newborn N0 adjustment, we do not harvest.
+		if b_do_newborns_increase:
+			##### temp
+			print ("returning after adjusting newborn N0" )
+			#####
+			return
+		#end if this simulatiuon only adjusts N0 for newborns
+
 		# change rate to correct for nb/bc differenece
-
-		'''
-		?????
-		Couple of questions for Brian T.
-		Not sure whether this statement means to
-		increase harvestRate by harvestRate/nbnc,
-		or to reassign harvestRate=harvestRate/nbnc.
-
-		Further, need to confirm that nb/nc is not
-		assumed to have changed (i.e. that it is a constant
-		supplied by the life table, and does not change.
-		?????
-		'''
-
-		## good catch ted, that's what i get for late night coding again should be assignment, and nb/nc should be a constant
-		#TODO harvestRate = harvestRate/self.input.nbnc
-
-			
-		print harvestRate
+#		harvestRate = harvestRate/self.input.NbNc
 
 		kills = []
 		cohortDict = {}
@@ -1200,18 +1218,10 @@ class PGOpSimuPop( modop.APGOperation ):
 				cohortDict[indAge] = []
 			cohortDict[indAge].append(i)
 		#end for each individual
-
+		
 		##### temp
-		print ("in harvest with: " )
-		print ("    harvest rate: " + str( harvestRate ) )
-		print( "    indiv count: " + str( i_current_pop_size ) ) 
-		print ("    harvest rate: " + str( harvestRate ) )
-		print ("    new targetNb: " + str( self.__targetNb ) )
-		print ("    new current N0: " + str( self.__current_N0 ) )
-		#####
-
-
-
+		print( "    current pop size: " + str( i_current_pop_size ) )
+		##### end temp
 		for cohortKey in cohortDict:
 			## !! Cohort 0 does not get culled!!
 			# if cohortKey == 0.0:
@@ -1240,6 +1250,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			maleHarvest = int( numpy.round(maleCount * harvestRate) )
 			femaleHarvest = int( numpy.round(femaleCount * harvestRate) )
 			##### temp
+#			print ("cohort: " + str( cohortKey ) )
 #			print ("maleCount: " + str( maleCount ) )
 #			print ("femaleCount: " + str( femaleCount ) )
 #			print ("maleHarvest: " + str(maleHarvest) )
@@ -1625,7 +1636,6 @@ if __name__ == "__main__":
 		import pgutilities	 as pgut
 	except ImportError as ie:
 		s_my_mod_path=os.path.abspath( __file__ )
-
 		sys.path.append( s_my_mod_path )
 		import pginputsimupop as pgin
 		import pgoutputsimupop as pgout
