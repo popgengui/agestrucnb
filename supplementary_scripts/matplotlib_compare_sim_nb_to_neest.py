@@ -1,4 +1,4 @@
-#usr/bin/env python
+#!/usr/bin/env python
 
 #Adapted for python from script gnuplot_compare_sim_nb_to_neest.bash.  
 
@@ -143,15 +143,14 @@ def mymain ( mytable, mytsv ):
 
 if __name__=="__main__":
 
-	numrequiredargs=9
-	numwithopt=10
+	numrequiredargs=10
 
 	mys=os.path.basename( __file__ )
 
-
 	numargspassed=len( sys.argv ) - 1
 
-	if numargspassed != numrequiredargs and numargspassed != numwithopt:
+	if numargspassed != numrequiredargs:
+
 		print( "usage: " +  mys  )
 		print( "args: " )
 		print( "       <file with nb values table> " )
@@ -161,9 +160,9 @@ if __name__=="__main__":
 		print( "       <int, max value for cycle axis (x-axis)" )
 		print( "       <int, min value for Nb axis (y-axis)" )
 		print( "       <int, max value for Nb axis (y-axis)" )
+		print( "       <True|False, use bias adjusted estimate" )
 		print( "       <int, target Nb>" )
 		print( "       <title> (use \"newline\" to break the title into multiple lines)" )
-		print( "       optional, <term name> (default is \"qt\", but try \"wxt\" or \"x11 (linux)\" if no qt)" )
 
 		sys.exit()
 
@@ -176,12 +175,13 @@ if __name__=="__main__":
 	maxxval=float( sys.argv[ 5 ] )
 	minyval=float( sys.argv[ 6 ] )
 	maxyval=float( sys.argv[ 7 ] )
-	target_nb=float( sys.argv[ 8 ] )
-	mytitle=sys.argv[ 9 ]
+	use_bias_adjusted_ldne=bool( sys.argv[ 8 ] )
+	target_nb=float( sys.argv[ 9 ] )
+	mytitle=sys.argv[ 10 ]
 
-
-	const_tsv_gen_col=int(1)
-	const_tsv_nb_col=int(10)
+	const_tsv_gen_col=1
+	const_tsv_nb_col=10
+	cont_tsv_nb_adjusted_col=18
 
 	#global replacement of newline with 
 	#literal newline (i.e. 2-line substitution

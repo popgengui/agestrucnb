@@ -35,6 +35,8 @@ from pgguiutilities import PGGUIErrorMessage
 from pgutilityclasses import IndependantSubprocessGroup
 from pgutilityclasses import FloatIntStringParamValidity
 from pgutilityclasses import ValueValidator
+from pgutilityclasses import NbAdjustmentRangeAndRate
+
 import pgutilities as pgut
 
 import sys
@@ -140,7 +142,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#the PGOpSimuPop object:
 		self.__param_names_file=s_param_names_file
 
-		#input object used to make the
+		#input object PGInputSimuPop used to make the
 		#operation object type PGOpSimuPop
 		self.__input=None
 		#output object used to
@@ -619,13 +621,31 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					#end if we're calculating N0
 				#end if param is "N0"
 				
+				if s_param_validity_expression != "None":
+					'''
+					Note that validity checker needs the "item" value,
+					always equal to the default value, except when
+					the latter is a list, in which case it is the first
+					list item in the default value
+					'''
+
+					o_validity_checker=self.__create_validity_checker( v_default_value, 
+																		s_param_validity_expression )
+				#end if expression is not "None"
+
 				#we send in the input object to the KeyValFrame (or similar class)
 				#instance so it will be the object whose attribute (with name s_param)
 				#is reset when user resets the value in the KeyValFrame:
 				if s_param_control_type == "entry":
-
-					i_entry_width=len(v_val) if type( v_val ) == str else 7
-
+					
+					if type( v_val ) == str:
+						i_entry_width=len( v_val )
+					elif s_param == "nbadjustment":
+						i_entry_width=len( v_val ) + 10
+					else:
+						i_entry_width=7
+					#end if string param type, else nbadjustment list, else other
+						
 					s_entry_justify='left' if type( v_val ) == str else 'right' 
 					'''
 					2017_02_07
@@ -635,7 +655,13 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					currently not presenting the litter skip
 					lists as lists, which makes the 
 					validity expression fail for such params.
+
+					2017_03_09. Now using the validity checker,
+					having changed many of the list param
+					expressions to "x is None or ([valid type and range])".
+					See the file simupop.param.names in the resources dir.
 					'''
+
 					o_kv=KeyValFrame( s_name=s_param, 
 								v_value=v_val, 
 								v_default_value=v_default_value,
@@ -649,9 +675,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 								i_entrywidth = i_entry_width,
 								s_entry_justify=s_entry_justify,
 								b_is_enabled=b_allow_entry_change,
-								o_validity_tester=None,
+								o_validity_tester=o_validity_checker,
 								b_force_disable=b_force_disable,
-								s_tooltip=s_tooltip )
+								s_tooltip=s_tooltip,
+								b_use_list_editor=True if s_param=="nbadjustment" else False )
 				#cbox types are specified as cboxreadonly or cboxnormal, so we test for prefix:	
 				elif s_param_control_type.startswith( "cbox" ):
 					'''
@@ -1331,25 +1358,139 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.__remove_temporary_config_file()
 	#end cleanup
 
-	
+	def validateNbAdjustment( self, s_adjustment ):
+
+		'''
+		2017_03_08. This def is created to handle the PGInputSimuPop
+		parameter nbadjustment, which requires a more elaborate
+		validation than do the others that can be validated using
+		a simple boolean statement.
+		We test the user's entry into the list of strings that give
+		the cycle range and adjustment rate by creating an 
+		NbAdjustmentRangeAndRate object, solely to test it using
+		that objects validation code.  See the class description
+		and code for NbAdjustmentRangeAndRate in module pgutilityclasses.
+		'''
+
+		##### temp
+		print( "--------------------------" )
+		print( "in pgguisimupop, validateNbAdjustment" )
+		#####
+
+		try:
+
+			if self.__input is None:
+				##### temp
+				print( "returning false on no input object" )
+				#####
+				return False
+			#end if no input object
+
+			i_lowest_cycle_number=1
+			i_highest_cycle_number=self.__input.gens
+
+			if i_highest_cycle_number < i_lowest_cycle_number:
+				##### temp
+				print( "returning false on cycle number test" )
+				#####
+				return False
+			#end if gens is zero (number of cycles is zero)
+			
+			try:
+
+				o_rangeandrate=NbAdjustmentRangeAndRate( i_lowest_cycle_number,
+														i_highest_cycle_number,
+														s_adjustment )
+			except Exception as oex:
+
+				s_msg="In PGGuiSimuPop instance, def validateNbAdjustment, " \
+								+ "there was and exception creating a cycle range " \
+								+ "and rate entry. The entry was: " \
+								+ s_adjustment + "." \
+								+ "Correct format is min-max:rate, where " \
+								+ "min is a starting cycle number, " \
+								+ "max is an ending cycle number, " \
+								+ "and rate is the proportion by which to " \
+								+ "multiply Nb and the age/class individual counts " \
+								+ "to be applied for each cycle in the range." 
+
+				PGGUIInfoMessage( self, s_msg )
+
+				return False
+			#end try...except
+		except Exception as oex:
+			raise Exception( "In PGGuiSimuPop, def validateNbAdjustment, " \
+										+ "there was an exception: " \
+										+ str( oex ) + "." )
+		#end try...except
+		
+		##### temp
+		print( "in pgguisimupop, def validateNbAdjustment, returning true" )
+		#####
+
+		return True
+	#end validateNbAdjustment
+
 	def __create_validity_checker( self, v_init_value, s_validity_expression ):
 		'''
-		2017_02_07
-		This def added as I incrementally bring the param handling in this interface 
+		2017_02_07. This def added as I incrementally bring the param handling in this interface 
 		closer to that used in pgguisimupop.py.  This will allow the application of
 		test expressions in the simupop.param.names resources file, to the params.
+		
+		2017_03_08. To accomodate the new pginputsimupop attribite nbadjustment, a list
+		of strings that requrire a more complicated validity test than do the other params
+		that require a simple boolean expression, we have revised class ValueValudator
+		(in module pgutilityclasses) to use either a ref to a def, or the (original)
+		string boolean expression, as the validator.
 		'''
-		o_checker=ValueValidator( s_validity_expression, v_init_value )
 
-		if not o_checker.isValid():
-			s_msg="In PGGuiNeEstimator instance, " \
-						+ "def __create_validity_checker, " \
-						+ "invalid initial value when setting up, " \
-						+ "validator object.  Validation message: " \
-						+ o_checker.reportInvalidityOnly() + "."
+		o_checker=None
+		try:
+
+			##### temp
+			print( "-------------" )
+			print( "testing for attribute arg: " + s_validity_expression )
+			#####
+
+			#We assume the expression arg is a string boolean expression:
+			v_validity_expression=s_validity_expression
+
+			#We reassign to a ref to a def is its an existing
+			if hasattr( self, s_validity_expression ):
+
+				##### temp 
+				print( "---------------" )
+				print( "setting valid express to attr, " + s_validity_expression )
+				#####
+
+				v_validity_expression=getattr( self, s_validity_expression )
+
+				if not callable( v_validity_expression ):
+					s_msg="In PGGuiNeEstimator instance, " \
+							+ "def __create_validity_checker, " \
+							+ "the validity expression argument " \
+							+ "evaluated to a non-callable attribute: " \
+							+ str( v_validity_expression ) + "/"
+					raise Exception( s_msg )
+				#end if not callable
+			#end if expression is an attribute of this object
+					
+			o_checker=ValueValidator( v_validity_expression, v_init_value )
+
+			if not o_checker.isValid():
+				s_msg="In PGGuiNeEstimator instance, " \
+							+ "def __create_validity_checker, " \
+							+ "invalid initial value when setting up, " \
+							+ "validator object.  Validation message: " \
+							+ o_checker.reportInvalidityOnly() + "."
+				PGGUIErrorMessage( self, s_msg )
+				raise Exception( s_msg )
+			#end if not valid init value, exception
+		except Exception as oex:
+			s_msg=str( oex )	
 			PGGUIErrorMessage( self, s_msg )
-			raise Exception( s_msg )
-		#end if not valid init value, exception
+			raise ( oex )
+		#end try...except
 
 		return o_checker
 	#end __create_validity_checker

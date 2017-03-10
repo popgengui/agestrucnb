@@ -270,13 +270,7 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	o_input=pgin.PGInputSimuPop( s_configuration_file, o_resources, o_paramset ) 
 	
 	o_input.makeInputConfig()
-
-	##### temp 
-	print( "-----------------" )
-	print( "in pgutilities,def do_pgopsimupop_replicate_from_files" )
-	print( "input value for harvestrate: " + str( o_input.harvestrate ) )
-	#####
-
+	
 	b_write_conf_file=False
 
 	#we only write the configuraton file if the replicate number is 1:

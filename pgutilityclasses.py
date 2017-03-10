@@ -787,50 +787,79 @@ class ValueValidator( object ):
 
 	'''
 	Class to evaluate a value by applying
-	a client-supplied def. On __init__ a
-	lambda operation is created by 
-	concatenating "lambda x: "
+	a client-supplied def.  The def can be
+	supplied either:
+	---1. as reference to a function.
+	---2. as a string expression
+	that will be made into a lambda operation
+	by concatenating "lambda x: "
 	with the string. 
 	
 	Class created to use a PGParamSet instance "validation"
 	value, from its tag item that
-	gives an expression in x that evals to T/F, 
-	for example, type(x)==int and x <= 1".
+	supplies either a function name for a def that 
+	takes a single arg and retirns (evals to) True or False, 
+	or a string expression in "x" that does the same
+	for example, "type(x)==float and x <= 1.0"
 
-	Note that def names and signatures are made
+	Note that this class' def names and signatures are made
 	to match relevant ones in class FloatIntStringParamValidity,
 	since, as of 2016_10_03, we are calling them in the KeyValFrame
 	class (see def __reset_value) as defined in mod pgguiutilities.py
 	'''
 
-	def __init__( self, s_boolean_expression_in_x, v_value=None ):
+	def __init__( self, v_bool_expression_or_function_ref, v_value=None ):
 
-		s_lambda="lambda x: " + s_boolean_expression_in_x
+		if callable( v_bool_expression_or_function_ref ):
+			self.__validator=v_bool_expression_or_function_ref
+		elif type( v_bool_expression_or_function_ref ) == str:
+			s_lambda="lambda x: "  \
+						+ v_bool_expression_or_function_ref
 
-		try:
-			self.__validator=eval( s_lambda  )
-		except Exception as oex:
+			try:
+				self.__validator=eval( s_lambda  )
+			except Exception as oex:
+				s_msg="In ValueValidator instance, def __init__, " \
+							+ "failed to eval expression: " \
+							+ s_lambda + ".  Exception raised: " \
+							+ str( oex ) + "."
+				raise Exception( s_msg )
+			#end try to eval, except . . .
+		else:	
 			s_msg="In ValueValidator instance, def __init__, " \
-						+ "failed to eval expression: " \
-						+ s_lambda + ".  Exception raised: " \
-						+ str( oex ) + "."
+							+ "the class expects " \
+							+ "a validator argument to be either " \
+							+ "a function or a string boolean expression in x."	\
+							+ "Argument, " + str( v_bool_expression_or_function_ref ) \
+							+ "is of type: " + str( type( v_bool_expression_or_function_ref ) ) \
+							+ "."
 			raise Exception( s_msg )
-		#end try to eval, except . . .
 
-		self.__expression=s_boolean_expression_in_x
+		#end if function else bool expression else eror
+
+		self.__expression=str( v_bool_expression_or_function_ref )
 		self.__value=v_value
 		return
 	#end __init__
 
 	def isValid( self ):
+		
 		try:
 			b_result=self.__validator( self.__value )
 		except:
 			s_msg="In ValueValidator instance, " \
 						+ "def isValid, " \
-						+ "call to __validator failed."
+						+ "call to __validator, " \
+						+ str( self.__expression ) + " failed."
 			raise Exception( s_msg )
 		#end try . . . except . . .
+		if b_result not in [ True, False ]:	
+			s_msg="In ValueValidator instance, " \
+						+ "def isValid, " \
+						+ "call to __validator, \"" \
+						+ self.__expression + "\" failed."
+			raise Exception( s_msg )
+		#if validator expression returned non-boolean value
 		return b_result
 	#end def validate
 
@@ -1361,6 +1390,161 @@ class LDNENbBiasAdjustor( object ):
 	#end setter nbne_ratio	
 
 #end class LDNENbBiasAdjustor
+
+class NbAdjustmentRangeAndRate( object ):
+
+	'''
+	2017_03_07.  Class to convert a string of the form m[-n]:r
+	into two integers giving a start and end cycle number,
+	and a float giving a rate for reducing/augmenting
+	Nb (and Nc) by that rate over the given range of simulation 
+	(breeding) cycles.  If string has form m:r, then the range 
+	is restricted to the nth cycle.  Otherwise, given m-n:r, 
+	the cycle range is set as cycles m to n.
+
+	'''
+	def __init__( self,
+				i_min_valid_cycle, 
+				i_max_valid_cycle, 
+				s_range_as_string=None ):
+
+		self.__min_valid_cycle=i_min_valid_cycle
+		self.__max_valid_cycle=i_max_valid_cycle
+
+		self.__start_cycle=None
+		self.__end_cycle=None
+		self.__rate=None
+		
+		if s_range_as_string is not None:
+			self.__set_range_and_rate_from_string( s_range_as_string )
+		#end if we have a string giving range and rate
+		return
+	#end __init__
+
+	def __set_range_and_rate_from_string( self, s_string ):
+		'''
+		See comments at class declaration.
+		'''
+		INDEX_RANGE=0
+		INDEX_RATE=1
+
+		INDEX_START=0
+		INDEX_END=1
+
+		DELIMIT_RANGE_RATE=":"
+		DELIMIT_RANGE="-"
+
+		ls_range_and_rate=s_string.split( DELIMIT_RANGE_RATE )
+
+		if len( ls_range_and_rate ) != 2:
+
+			s_msg="In pgutilityclasses, class NbAdjustmentRangeAndRate, " \
+								+ "instance, the range/rate string, " \
+								+ s_string + ", cannot be parsed to yield a " \
+								+ "a rate and a cycle range."
+			raise Exception( s_msg )
+		#end if invalid range and rate list len
+
+		ls_range=ls_range_and_rate[ INDEX_RANGE ].split( DELIMIT_RANGE )
+		i_total_range_items=len( ls_range )
+
+		if i_total_range_items < 1 \
+					or i_total_range_items > 2:
+
+			s_msg="In pgutilityclasses, class NbAdjustmentRangeAndRate, " \
+								+ "instance, the range/rate string, " \
+								+ s_string + ", cannot be parsed to yield a " \
+								+ "cycle range."
+			raise Exception( s_msg )
+		#end if invalid range list
+
+		try:
+			self.__rate=float( ls_range_and_rate[ INDEX_RATE ] )
+			i_start=int( ls_range[ INDEX_START ] )
+
+			#We keep this value only if there is no
+			#second int in the range list:
+			i_end=int( ls_range [ INDEX_START ] )
+			if i_total_range_items == 2:
+				i_end=int( ls_range[ INDEX_END ] )
+			#end if there are 2 ints fo range
+
+			##### temp
+			print( "-------------")
+			print( "in try having already typed the numbers" )
+			#####
+
+			if self.isValidRange( i_start, i_end ):
+				self.__start_cycle=i_start
+				self.__end_cycle=i_end
+			else:
+				s_msg="In pgutilityclasses, class NbAdjustmentRangeAndRate, " \
+								+ "instance, the range values, start-end: " \
+								+ str( i_start ) + "-" + str( i_end ) \
+								+ "is not valid." 
+				raise Exception( s_msg )
+			#end if range is valid
+		except ValueError as ve:
+			s_msg="In pgutilityclasses, class NbAdjustmentRangeAndRate, " \
+								+ "instance, the range/rate string, " \
+								+ s_string + ", cannot be parsed to yield a " \
+								+ "cycle rate and range."
+			
+			raise Exception( s_msg )
+		except Exception as oex:
+			#####  temp
+			print("------------------" )
+			print( "caught general exception" )
+			print( "message: " + str(oex) )
+			#####
+			raise oex 
+		#end try...except 
+
+		##### temp
+		print( "returning from __set_range_and_rate_from_string" )
+		#####
+
+		return
+	#end __set_range_and_rate_from_string
+
+	def isValidRange( self, i_start, i_end ):
+		b_increasing=i_start<=i_end
+		b_in_range=self.isValidCycleNumber( i_start ) \
+						and self.isValidCycleNumber( i_end )
+		##### temp
+		print( "in isValidRange returning: " + str( b_increasing and b_in_range ) )
+		#####
+
+		return b_increasing and b_in_range
+	#end isValidRange
+	
+	def isValidCycleNumber( self, i_number ):
+		return ( i_number >= self.__min_valid_cycle \
+					and i_number <= self.__max_valid_cycle )
+	#end isValidCycleNumber
+
+	def setRangeAndRate( self, s_string ):
+		self.__set_range_and_rate_from_string( s_string )
+		return
+	#end setRangeAndRate
+
+	@property
+	def start_cycle( self ): 
+		return self.__start_cycle
+	#end property start_cycle
+
+	@property
+	def end_cycle( self ): 
+		return self.__end_cycle
+	#end property end_cycle
+
+	@property
+	def rate( self ):
+		return self.__rate
+	#end property rate
+
+
+#end class NbAdjustmentRangeAndRate
 
 if __name__ == "__main__":
 #	

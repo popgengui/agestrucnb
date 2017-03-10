@@ -295,6 +295,8 @@ class KeyValFrame( Frame ):
 			elif self.__validity_tester is not None:
 
 				v_val_to_test=o_type( o_entryval.get() )
+				##### temp
+				print("------------")
 				self.__validity_tester.value=v_val_to_test			
 
 				if not self.__validity_tester.isValid():
@@ -495,8 +497,15 @@ class KeyValFrame( Frame ):
 		#end if not enabled
 
 		#we want black foreground, even when disabled:
+
+		##### temp
+		if self.__name == "nbadjustment" :
+			print( "------------" )
+			print( "in keyval, setting width to " + str( self.__entrywidth ) )
+		#####
 		o_entry = Entry( self.__subframe, 
 				textvariable=o_strvar,
+				
 				width=self.__entrywidth,
 				state=s_enabled,
 				foreground="black",

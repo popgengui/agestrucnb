@@ -15,6 +15,7 @@ DEFAULT_NB_VAR=0.05
 import sys
 import os
 from ConfigParser import ConfigParser
+from pgutilityclasses import NbAdjustmentRangeAndRate
 
 class PGInputSimuPop( object ):
 	'''
@@ -62,14 +63,14 @@ class PGInputSimuPop( object ):
 		#in the orig config file in def get_config, or by adding the parameter
 		#in def addParameter:
 		self.__config_file_option_name_by_attribute_name={}		
-		self.__config_file_section_name_by_attribute_name={}
 
+		self.__config_file_section_name_by_attribute_name={}
 		if s_config_file is not None:
 			self.__full_config_file_name=s_config_file
 			self.config_file=os.path.basename( s_config_file )
 			self.__make_config_parser( s_config_file )
 		#end if we have a conf file
-		
+	
 		return
 	#end def __init__
   
@@ -107,8 +108,6 @@ class PGInputSimuPop( object ):
 				if v_value is None:
 					v_value=self.__resources.getLifeTableValue( s_model_name, 'resources', s_dict_name )
 				#end if we got none returned when we tried to name the section, then  use 'resources'
-
-
 			else:
 				raise Exception ( "input object for PGInputSimuPop has no resources, " \
 						"but the value in the configuration file parser , " \
@@ -139,6 +138,47 @@ class PGInputSimuPop( object ):
 		return
 	#end __update_attribute_config_file_info
 
+	def makePerCycleNbAdjustmentList( self ):
+		'''
+		2017_03_09. This def converts the input param list of range strings 
+		of form min-max:rate, into a list of floats, such that list indexes 
+		that range from min-1 to max-1 have value rate.  The latter list is
+		returned.
+
+		This def is called from class PGOpSimuPop object instances
+		in their prepareOp def, for use in their def __harvest.
+		'''
+
+		lf_rates=None
+
+		try:
+			lf_rates=[ 0.0 for idx in range( self.gens ) ]
+			
+			for s_rate_and_range in self.nbadjustment:
+
+				o_raterange=NbAdjustmentRangeAndRate( 1, self.gens, s_rate_and_range )
+
+				#we use the list indexes and cycle number minus 1	
+				for idx in range( o_raterange.start_cycle - 1, o_raterange.end_cycle ):
+					lf_rates[ idx ] = o_raterange.rate
+				#end for each idx in range
+			#end for each range and rate setting
+
+		except Exception as oex:
+
+			s_msg="In PGInputSimuPop instance, def " \
+						+ "__update_attribute_nb_adjustement_by_cycle, " \
+						+ "an exception was raised evaluating the nbadjustment " \
+						+ "list: " + str( self.nbadjustment ) \
+						+ "Exception message: " + str( oex )
+
+			raise Exception( s_msg )
+
+		#end try ... except
+
+		return  lf_rates
+	#end makePerCycleNbAdjustmentList
+			
 	def __get_effective_size_info_if_avail( self ):
 
 		o_parser=self.__config_parser
@@ -283,17 +323,6 @@ class PGInputSimuPop( object ):
 		self.__update_attribute_config_file_info( "startLambda", "pop", "startLambda" )
 		self.__update_attribute_config_file_info( "lbd", "pop", "lambda" )
 
-		if config.has_option("pop", "harvestrate" ):
-			self.harvestrate = config.getfloat( "pop", "harvestrate" )
-		else:
-			##### temp
-			print( "--------------" )
-			print("setting harvestrate to zero" )
-			#####
-			self.harvestrate = 0.0
-		#end if harvestrate,else not
-		self.__update_attribute_config_file_info( "harvestrate", "pop", "harvestrate" )
-
 		if config.has_option("pop", "Nb"):
 			''''
 			minimal change to Tiagos code so we can read in a "None" value
@@ -328,7 +357,7 @@ class PGInputSimuPop( object ):
 
 			self.__Nb_from_pop_section = None if v_nb_val is None else config.getint("pop", "Nb")
 			self.NbVar = DEFAULT_NB_VAR if v_nbvar_val is None else config.getfloat("pop", "NbVar")
-			##### temp
+
 			'''
 			2017_02_07
 			We are revising to try to use a targeted Nb, but instead of NbVar being a fixed int, 
@@ -345,7 +374,7 @@ class PGInputSimuPop( object ):
 														+ "(i.e by at or more than the target Nb value)." 
 
 				sys.stderr.write( s_msg + "\n" )
-			##### end temp
+			# end if NbVar > 1
 		else:
 			self.__Nb_from_pop_section = None
 			self.NbVar = DEFAULT_NB_VAR
@@ -422,6 +451,30 @@ class PGInputSimuPop( object ):
 			self.cull_method = DEFAULT_CULL_METHOD
 		#end if config has startSave
 		self.__update_attribute_config_file_info( "cull_method", "sim", "cull_method" )
+
+		'''
+		2017_03_07.  Adding list of strings of form m-n:r, that gives a range of
+		cycles, m to n, for eacho f which to use pgopsimupop def __harvest to
+		adjust Nb and Nc (the census) by proportion r.
+		'''
+		if config.has_option( "sim", "nbadjustment" ):
+			'''
+			We expect a config entry that will eval as a list of strings.
+			'''
+			self.nbadjustment=eval( config.get( "sim", "nbadjustment" ) )
+		else:
+
+			s_msg="In PGInputSimuPop instance, " \
+					+ "def __get_config, " \
+					+ "the program cannot find the attribute \"gens\", " \
+					+ "giving the total cycles to be simulated."
+			assert self.gens, s_msg
+
+			self.nbadjustment=[ "1-" + str( self.gens ) + ":0.0" ]
+		#end if the config file has an nbadjustment list else make one
+
+		self.__update_attribute_config_file_info( "nbadjustment", "sim" , "nbadjustment" )
+
 
 		return
 	#end __get_config
@@ -533,13 +586,6 @@ class PGInputSimuPop( object ):
 
 		i_n0 = int( round ( f_Nc/f_cum_pop_porp ) )
 		
-		##### temp
-		print( "--------------" )
-		print( "in PGInputSimuPop, def __compute_n0_from_eff_size_info, " \
-					+ "using nb, " + str( self.__Nb_from_eff_size_info ) \
-					+ ", returning recomputed N0: " + str( i_n0 ) )
-		##### end temp
-					
 		return i_n0
 	#end __compute_n0_from_eff_size_info
 
@@ -951,6 +997,7 @@ class PGInputSimuPop( object ):
 		#end if pop-section Nb, else effective size, else unknown
 		return i_returnval
 	#end properby Nb_orig_from_pop_section
+
 
 	'''
 	This def helps clients to, for example,

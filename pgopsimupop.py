@@ -128,26 +128,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__toleranceNb=None
 		PGOpSimuPop.VALUE_TO_IGNORE=99999
 
-
-		'''
-		2017_02_07
-		Also implementing the harvest def, which
-		will use the lambda parameter (lbd) to
-		either skip harvest (lambda in [1.0, infinity), 
-		or lambda in [-infinity, 0.0], or lambda is None.
-		Also using a decline rate for newborns, 
-		Applied when user specifies lambda > 1.0.  See
-		def __make_harvest_list
-		'''
-		self.__lambda_for_newborns=None
-		self.__harvest_rate_by_generation=None
-
-		'''
-		Set up the harvest list or newborn lambda.
-		'''
-		self.__make_harvest_list()
-
-
 		self.__file_for_nb_records=open( self.output.basename + "_nb_values_calc_by_gen.csv", 'w' )
 		self.__file_for_age_counts=open( self.output.basename + "_age_counts_by_gen.csv", 'w' )
 		DEFAULT_AGES=50
@@ -160,95 +140,23 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		self.__file_for_age_counts.write( s_header + "\n" )
 
+		'''
+		See the call to input.makePerCycleNbAdjustmentList in prepareOp.  This list 
+		is used by def __harvest
+		'''
+		self.__nb_and_census_adjustment_by_cycle=None
 		return
 	#end __init__
 
-	def __make_harvest_list( self ):
-
-		'''
-		2017_02_07.  Added to implement the __harvest def,
-		and, if the new harvestrate value is > 1.0, to be
-		used as the old lambda was used, to redice the N0
-		pop in def __createAge.
-
-		This def assumes that the attributes __harvestrate
-		and __lambda_for_newborns are both present and set
-		to None.
-		'''
-
-		s_errmsg="In PGOpSimuPop, def __make_harvest_list, "
-
-		assert hasattr( self.input, "popSize" ), \
-					s_errmsg + "no popSize setting found."
-
-		assert hasattr( self.input, "harvestrate" ), \
-				s_errmsg + "no harvest rate setting found."
-
-		v_harvest_rate=self.input.harvestrate
-
-		b_use_harvest=( v_harvest_rate is not None \
-							and v_harvest_rate > 0.00 \
-							and v_harvest_rate <= 1.0 )
-
-		b_use_lambda_for_newborns=( v_harvest_rate is not None \
-							and v_harvest_rate > 1.0 )
-
-		s_msg="In PGOpSimuPop instance, " \
-					+ "def __make_harvest_list, " \
-					+ "the program found an invalid " \
-					+ "state.  Both newborn increase and " \
-					+ "harvesting are indicated."
-
-
-		##### temp
-		print( "in __make_harvest_list" )
-		print( "b_use_harvest: " + str( b_use_harvest ) )
-		print( "b_use_lambda_for_newborns "+ str( b_use_lambda_for_newborns ) )
-		#####
-		assert (b_use_harvest and b_use_lambda_for_newborns) == False, s_msg
-
-		if b_use_harvest:
-
-			i_first_pop_after_burnin=0
-
-			assert type( self.input.startLambda ) == int, \
-								s_errmsg + "paramater startLambda is not an integer."
-
-
-			if self.input.startLambda > 0 \
-					and self.input.startLambda != pgin.START_LAMBDA_IGNORE:
-				i_first_pop_after_burnin=self.input.startLambda	+ 1
-			#end if our burn in is not 0
-
-
-			'''	
-			Make a harvest dictionary, keys are generation numbers,
-			values are, in the simplest case, uniform for each 
-			generation (we will likely also implement non-uniform 
-			lambda enforcement). 
-			'''
-			#First we set the burnin generations to 
-			#to lambda=0.0 (so that def __harvest will return without applying
-			#any decline):
-			self.__harvest_rate_by_generation={ i_gen:0.0 for i_gen \
-												in range( 0, i_first_pop_after_burnin ) }
-
-			#Then we add the post-burn-in generations, which will reduced using lambda:	
-			self.__harvest_rate_by_generation.update( { i_gen:v_harvest_rate for i_gen \
-												in range( i_first_pop_after_burnin, 
-																self.input.popSize ) } )
-			self.__lambda_for_newborns=None
-
-		elif b_use_lambda_for_newborns:
-			self.__lambda_for_newborns=v_harvest_rate
-		#end if we are to use harvest, else if we are to use newborn lambda
-
-		return
-
-	#end def __make_harvest_list
-
 	def prepareOp( self, s_tag_out="" ):
-
+		'''
+		2017_03_08.  This call converts the list
+		of cycle range and rate entries in the 
+		listu attribite nbadjustment into a list
+		of per-cycle rate adjustments, used by
+		this objects def __harvest.
+		'''
+		self.__nb_and_census_adjustment_by_cycle=self.input.makePerCycleNbAdjustmentList()
 		self.__createSinglePop()
 		self.__createGenome()
 		self.__createAge()	
@@ -1137,13 +1045,9 @@ class PGOpSimuPop( modop.APGOperation ):
 		print( "    gen num: " + str( gen ) )
 		##### 
 		
-		b_do_newborns_increase=( self.__lambda_for_newborns is not None \
-												and	gen < self.startLambda )
 
-		b_use_harvest_list=( self.__harvest_rate_by_generation is not None \
-										and self.__harvest_rate_by_generation[gen] > f_reltol )
-
-		if not( b_do_newborns_increase or b_use_harvest_list):
+		if self.__nb_and_census_adjustment_by_cycle is None \
+					or self.__nb_and_census_adjustment_by_cycle[ gen ] < f_reltol:
 			##### temp
 			print( "leaving harvest without harvesting pop or augmenting N0." )
 			#####
@@ -1155,19 +1059,16 @@ class PGOpSimuPop( modop.APGOperation ):
 		#####
 
 		#determine harvest rate for this generation
-		harvestRate = ( self.__harvest_rate_by_generation[gen] ) if b_use_harvest_list \
-							else self.__lambda_for_newborns
+		harvestRate = self.__nb_and_census_adjustment_by_cycle[ gen ]
 
 		#reduce expected NB by 1-harvest rate, except when using an increase-for-newborns,
 		#which, though user-entered as a rate > 1.0, is literally a negative harvest rate, 
 		#and will proportionally increase the Nb:
-		self.__targetNb =self.__targetNb *(1-harvestRate) if b_use_harvest_list \
+		self.__targetNb =self.__targetNb *(1-harvestRate) if harvestRate < 1.0 \
 												else self.__targetNb * harvestRate
 		
 		##### temp
 		print ("    harvest rate: " + str( harvestRate ) )
-		print ("    new targetNb: " + str( self.__targetNb ) )
-		print ("    new current N0: " + str( self.__current_N0 ) )
 		#####
 
 	
@@ -1183,14 +1084,18 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.input.Nb=self.__targetNb
 		self.__current_N0=self.input.N0
 
+		##### temp
+		print ("    new targetNb: " + str( self.__targetNb ) )
+		print ("    new current N0: " + str( self.__current_N0 ) )
+		##### end temp
 
 
 		#If we did the newborn N0 adjustment, we do not harvest.
-		if b_do_newborns_increase:
+		if harvestRate >= 1.0:
 			##### temp
 			print ("returning after adjusting newborn N0" )
 			#####
-			return
+			return True
 		#end if this simulatiuon only adjusts N0 for newborns
 
 		# change rate to correct for nb/bc differenece
@@ -1222,6 +1127,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		##### temp
 		print( "    current pop size: " + str( i_current_pop_size ) )
 		##### end temp
+
 		for cohortKey in cohortDict:
 			## !! Cohort 0 does not get culled!!
 			# if cohortKey == 0.0:
