@@ -16,7 +16,7 @@ except ImportError as oie:
 #end try, except
 
 def mymain( s_ages_file ):
-	df = pd.read_csv( "test.nbadjust.bn2_age_counts_by_gen.csv", index_col='generation', sep="\t" )
+	df = pd.read_csv( s_ages_file, index_col='generation', sep="\t" )
 	df.plot( kind='bar', stacked=True )	
 	pt.show()
 	return
@@ -24,6 +24,7 @@ def mymain( s_ages_file ):
 
 if __name__ == "__main__":
 	import argparse	as ap 
+
 	LS_ARGS_SHORT=[ "-f" ] 
 	LS_ARGS_LONG=[ "--agesfile" ] 
 	LS_ARGS_HELP=[ "file output by simiulatuo run with extension, \"_age_counts_by_gen.csv\""]
