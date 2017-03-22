@@ -77,9 +77,17 @@ do
 		myid=$( echo "$myline" | cut -d "," -f 1 )
 		myloci=$( echo "$myline" | cut -d "," -f 2 )
 
+		#Have revised my own genepop format to put a leading space after
+		#comma to delimit id from loci 1.  This means we need to trim it
+		#so cut won't consider a leading space (else you get 1 less loci than
+		#desired, and loci 1 becomes loci 2:
+		myloci=$( echo "${myloci}" | awk '{ sub( /^\s/, "" ); print }' )
+
 		lociinrange=$( echo "$myloci" \
 				| cut -d " " -f ${idxlocistart}-${idxlociend} )
-		echo "${myid},${lociinrange}"
+
+		#add the space that should lead the loci:
+		echo "${myid}, ${lociinrange}"
 
 	fi	
 		
