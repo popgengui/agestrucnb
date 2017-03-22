@@ -16,7 +16,7 @@ except ImportError as oie:
 #end try, except
 
 def mymain( s_ages_file ):
-	df = pd.read_csv( "test.nbadjust.bn2_age_counts_by_gen.csv", index_col='generation', sep="\t" )
+	df = pd.read_csv( s_ages_file, index_col='generation', sep="\t" )
 	df.plot( kind='bar', stacked=True )	
 	pt.show()
 	return
