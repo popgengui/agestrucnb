@@ -10,17 +10,42 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 from os import path
 from genomics.popgen import ne2
 
+
+'''
+A value to use in teh parsed output instead 
+of pythons None.
+'''
+MISSING_DATA_ENTRY="NA"
+
+'''
+2017_03_20.  Adding support for LDNe2, using
+the already created pgldneoutputparser module.
+Note that we also renamve some defs in this class
+to better specify their source, for example:
+__get_parsed_output_data -> __get_ne_estimator_parsed_output_data
+'''
+import pgldne2outputparser as pgldne
+ESTIMATOR_NEESTIMATOR="Ne2"
+ESTIMATOR_LDNE="LDNe2"
+
+
 class PGOutputNeEstimator( object ):
 
-	OUTPUT_FIELDS = [ "est_type", "case_number", "est_ne","95ci_low","95ci_high","overall_rsquared",
+	'''
+	Object manages output from the PGOpNeEstimator object
+	'''
+
+	OUTPUT_FIELDS = [ "est_type", "case_number", "est_ne","95ci_low","95ci_high", "overall_rsquared",
 					"expected_rsquared","indep_comparisons","harmon_mean_samp_size" ]
 
 	NODAT_FIELDS = [ "Individual", "Locus", "Genotype", "NumberLociMissingData" ]
 
 	OUTPUT_TIAGO_ABBREVS = [ "ne","neci05" , "neci975", "or2", "sr2", "indep", "hmean" ]
 
+	def __init__( self, s_input_file, s_run_output_filename, 
+										o_bias_adjustor=None, 
+										s_estimator_to_use=ESTIMATOR_NEESTIMATOR ):
 
-	def __init__( self, s_input_file, s_run_output_filename, o_bias_adjustor=None ):
 		#we use the name of the input file to check for NoDat file
 		#because NeEstimator uses it to name the file
 		self.__run_input_file=s_input_file
@@ -31,10 +56,17 @@ class PGOutputNeEstimator( object ):
 		#It is set after NeEstimator generates 
 		#the output file and user calls def parseOutput
 		self.__parsed_output=None
+
 		#Ne Estimator will generate a "*NoDat.txt"
 		#file if it encounters incomplete, missing,
 		#or all-zero loci values.  See def parseNoDat:
 		self.__parsed_nodat_output=None
+
+		'''
+		2017_03_20.  New attribute for support for LDNe2.
+		'''
+		self.__estimator=s_estimator_to_use
+
 		self.__validate_filenames()
 	#end __init__
 
@@ -56,7 +88,7 @@ class PGOutputNeEstimator( object ):
 		return
 	#end __validate_filenames
 
-	def __get_parsed_output_data( self ):
+	def __get_ne_estimator_parsed_output_data( self ):
 
 		if not path.exists( self.__run_output_file ):
 			raise Exception( "in " + type( self ).__name__ + " instance:" \
@@ -71,28 +103,76 @@ class PGOutputNeEstimator( object ):
 		ddv_results=self.__ne2_record_object_to_dictionary( o_record )
 
 		return ddv_results
-	#end __get_parsed_output_data
+	#end __get_ne_estimator_parsed_output_data
 
-	def parseOutput( self ):
+	def __convert_parsed_ldne_output_to_this_class_parsed_output( self , ldv_parsed_ldne_output ):
+
+		llv_converted_output=[]
+
 		'''
-		Fri Jul 22 18:07:53 MDT 2016 -- See 
-		def __ne2_record_object_to_dictionary for details on the
-		ddv_results fetched below to unwrap the parsed results,
-		and the current limitation to estimation type LD
-
-		We assume that for the estimated ne value,
-		and its associated CI values, that a value of None in
-		the dict returned by ne2.parse def (see above 
-		__get_parsed_output_data, reflects
-		an "Infinite" value in the origina Ne estimator output
-		and so convert it to "Inf,"  convenient for use in R,
-		for example, as R uses Inf for Infinity
+		These must be in the correct order, as give in OUTPUT_FIELDS,
+		so that this class' attribute __parsed_output will list them
+		in the correct order.  Note, however that the first 2 values 
+		are prepended below as constants
 		'''
 
-		MISSING_DATA_ENTRY="NA"
+		OUTPUTFIELDS_NEEST_TO_LDNE={ "est_ne":"ne_estimate",
+										"95ci_low":"ci_jackknife_low",
+										"95ci_high":"ci_jackknife_hi", 
+										"overall_rsquared":"r_squared",
+										"expected_rsquared":"exp_r_squared",
+										"indep_comparisons":"indep_alleles",
+										"harmon_mean_samp_size":"weighted_h_mean" }
+		
+
+		for dv_this_parsed_ldne_result in ldv_parsed_ldne_output:
+
+
+			'''
+			These fields, the first 2 values, "esttype", and "case_number",
+			are in the output fields, but not in the LDNE2 output, 
+			so we supply values.
+			'''
+			lv_converted_output_this_result=[ "ld", "0" ]
+
+			for s_this_class_field_name in PGOutputNeEstimator.OUTPUT_FIELDS[ 2 : ]:
+
+				s_ldne_field_name=OUTPUTFIELDS_NEEST_TO_LDNE[ s_this_class_field_name ]
+
+				v_val=dv_this_parsed_ldne_result[ s_ldne_field_name ]
+
+				v_processed_val=v_val if v_val is not None else MISSING_DATA_ENTRY
+
+				lv_converted_output_this_result.append(  v_processed_val  )
+
+			#end for each output field
+			llv_converted_output.append( lv_converted_output_this_result )
+		#end for each row of ldne results
+
+		return llv_converted_output
+	#end __convert_parsed_ldne_output_to_this_class_parsed_output
+	
+	def __set_parsed_output_attribute_using_ldne_data(self):
+		o_parser=pgldne.PGLDNe2OutputParser( self.__run_output_file )
+		ldv_temp_parsed_output=o_parser.parsed_output
+		llv_converted_output = \
+				self.__convert_parsed_ldne_output_to_this_class_parsed_output( \
+															ldv_temp_parsed_output )
+		'''
+		Since the default estimator, NeEstimator, can deliver ldne plus other kinds
+		of estimations, the default parsed-data format is a list of lists, so we
+		wrap our ldne output in a list:
+		'''
+		self.__parsed_output=llv_converted_output
+		return
+	#end def __set_parsed_output_attribute_using_ldne_data
+
+
+	def __set_parsed_output_attribute_using_ne_estimator_data(self):
+
 		INFINITE_VALUE="Inf"
 
-		ddv_results=self.__get_parsed_output_data()
+		ddv_results=self.__get_ne_estimator_parsed_output_data()
 
 		self.__parsed_output=[]
 
@@ -119,7 +199,42 @@ class PGOutputNeEstimator( object ):
 				i_estimate_count+=1
 			#end for each case
 		#end for each estimation type
-		    
+	#end def __set_parsed_output_attribute_using_ne_estimator_data
+
+	def parseOutput( self ):
+		'''
+		Fri Jul 22 18:07:53 MDT 2016 -- See 
+		def __ne2_record_object_to_dictionary for details on the
+		ddv_results fetched below to unwrap the parsed results,
+		and the current limitation to estimation type LD
+
+		We assume that for the estimated ne value,
+		and its associated CI values, that a value of None in
+		the dict returned by ne2.parse def (see above 
+		__get_parsed_output_data, reflects
+		an "Infinite" value in the origina Ne estimator output
+		and so convert it to "Inf,"  convenient for use in R,
+		for example, as R uses Inf for Infinity
+		
+		2017_03_20.  We revise this def to allow getting parsed 
+		data from an LDNe2 run, rather than an NeEstimator run. We 
+		move the original code that is processing the ne estimator
+		data as retrived using pygenomics.genomics.popgen.ne code,
+		to a new def specified for the ne-estimator, 
+		__set_parsed_output_using_ne_estimator_data.
+		This also involves renaming some existing defs, for example:
+			__get_parsed_output_data -> __get_ne_estimator_parsed_output_data
+		'''
+		if self.__estimator==ESTIMATOR_NEESTIMATOR:
+			self.__set_parsed_output_attribute_using_ne_estimator_data()
+		elif self.__estimator==ESTIMATOR_LDNE:
+			self.__set_parsed_output_attribute_using_ldne_data()
+		else:
+			s_msg="In PGOutputNeEstimator instance, def parseOutput, " \
+							+ "The estimator program name is unknown: " \
+							+ self.__estimator
+			raise Exception( s_msg )
+		#end if neestimator, else ldne
 		return
 	#end parseOutput
 
@@ -133,25 +248,23 @@ class PGOutputNeEstimator( object ):
 		for each type.  Hopefully this def can be the sole 
 		target of change if the pygenomics, genomics.popgen.ne2 
 		parsing code get revised
-'''
+		'''
 
-	#as of Fri Jul 22 17:50:22 MDT 2016 -- these are the attributes that
-	#store NeEstimator output via the pygenomics modules (c.f. __init__.py)
-	#genomics.popgen.ne2.  So far we only accept results of type "ld" (because
-	#each estimation type has its unique fields, and as such need to be
-	#known to be selected for inclusion in this objects output tabular strings.)
-	#Here are the Record object attributes used to store NeEstimator output data, 
-	#from __init__.py: #	self.freqs_used = []
-	#   self.ld = []
-	#   self.het = []
-	#   self.coanc = []
-	#   self.temporal = []
-	#note that for now we require "freqs.used" attribute have a single value, 
-	#as this is currently the use case for LD NeEstimation, that we parse only for one
-	#Ne estimate per population, corresponding to a single minimum allele frequency.
+		#as of Fri Jul 22 17:50:22 MDT 2016 -- these are the attributes that
+		#store NeEstimator output via the pygenomics modules (c.f. __init__.py)
+		#genomics.popgen.ne2.  So far we only accept results of type "ld" (because
+		#each estimation type has its unique fields, and as such need to be
+		#known to be selected for inclusion in this objects output tabular strings.)
+		#Here are the Record object attributes used to store NeEstimator output data, 
+		#from __init__.py: #	self.freqs_used = []
+		#   self.ld = []
+		#   self.het = []
+		#   self.coanc = []
+		#   self.temporal = []
+		#note that for now we require "freqs.used" attribute have a single value, 
+		#as this is currently the use case for LD NeEstimation, that we parse only for one
+		#Ne estimate per population, corresponding to a single minimum allele frequency.
 
-
-		
 		MAX_ALLOWABLE_NUMBER_FREQS_USED=1
 		PARSABLE_ESTIMATION_TYPES=[ "ld" ]
 		ds_record_attribute_names=[ "ld", "het", "coanc", "temporal" ]
@@ -322,7 +435,7 @@ class PGOutputNeEstimator( object ):
 		to the ddv_results dictionary, and current limitations
 		for parsing NeEstimator output.
 		'''
-		ddv_results=self.__get_parsed_output_data()
+		ddv_results=self.__get_ne_estimator_parsed_output_data()
 
 		mNes = []
 		mOr2s = []
@@ -437,7 +550,7 @@ class PGOutputNeEstimator( object ):
 	#end run_output_file
 
 	@run_output_file.setter
-	def ouput_file( self, s_name ):
+	def output_file( self, s_name ):
 		self.__run_output_file=s_name
 		return
 	#end run_output_file

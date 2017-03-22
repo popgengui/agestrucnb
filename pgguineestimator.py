@@ -273,8 +273,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		#produced during a previous run:
 		for s_genepop_file in ls_genepop_files:	
 
-			for s_tag in pgdn.NE_ESTIMATOR_OUTPUT_FILE_TAGS \
-					+ [ pgdn.NE_ESTIMATOR_OUTPUT_FILES_GENERAL_TAG + "*" ]: \
+			for s_tag in pgdn.NE_ESTIMATOR_AND_LDNE_OUTPUT_FILE_TAGS \
+					+ [ pgdn.NE_ESTIMATOR_AND_LDNE_OUTPUT_FILES_GENERAL_TAG + "*" ]: 
 
 				s_reformatted_filename = \
 						self.__convert_genepop_file_to_neestimator_basename ( \
@@ -283,7 +283,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				#with ne-estimator file tag.   (Wildcard
 				#is needed because pgdriveneestimator.py
 				#will have added sample/replicate/popnun fields
-				#to the ouput file basename:
+				#to the output file basename:
 				s_glob=s_reformatted_filename + "*" + s_tag 
 
 				ls_nefiles=pgut.get_list_files_and_dirs_from_glob( s_glob )

@@ -11,6 +11,8 @@ import random
 from genepopindividualid import GenepopIndivIdVals
 from genepopindividualid import GenepopIndividualId
 
+COMMA_DELIMITED_LOCI_LIST_HAS_LEADING_SPACE=True
+
 class GenepopFileManager( object ):
 
 	'''
@@ -476,7 +478,13 @@ class GenepopFileManager( object ):
 														i_indiv_number=i_indiv_number, 
 														s_loci_subsample_tag=s_loci_subsample_tag )
 
-						o_newfile.write( s_id + "," + s_loci + UNIX_ENDLINE )
+						if COMMA_DELIMITED_LOCI_LIST_HAS_LEADING_SPACE:
+							s_line_to_write = s_id + ", " + s_loci
+						else:
+							s_line_to_write = s_id + "," + s_loci
+						#end if we should insert a leading space in the loci list
+
+						o_newfile.write( s_line_to_write + UNIX_ENDLINE )
 					#end if no loci subsample, simply print orig entry, else get loci subsample
 				#end for each individual number
 			#end if num individuals in this pop at or over min

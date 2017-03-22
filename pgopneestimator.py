@@ -10,11 +10,16 @@ __date__ = "20160502"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 import sys
 
-sys.path.append("/home/sinless/myPyLibs/pygenomics")
-
 from genomics.popgen.ne2.controller import NeEstimator2Controller
 from genomics.popgen import ne2
 
+'''
+2017_03_16.  New class to allow using LDNe2 instead 
+of NeEstimator (see defs below that select estimator
+program baseed on new class __init__ param 
+"s_estimator_name."
+'''
+import pgldne2controller as pgldne
 
 from apgoperation import APGOperation
 
@@ -34,14 +39,45 @@ import shutil
 #so we can copy renamed input files
 import glob
 
+'''
+2017_03_15. Adding constants to distinguish 
+the use of NeEstimator vs LDNe in order to 
+get the ldne estimation.
+'''
+
+NEESTIMATOR="Ne2"
+LDNE_ESTIMATION="LDNe2"
+
+'''
+This allows pgdriveneestimator to get the correct 
+executable name, to test for its presence before
+running.  
+'''
+
+LDNE_EXEC_BY_OS=pgldne.EXEC_NAMES_BY_OS.copy()
+LDNE_DEFAULT_LOC_IN_DIST=pgldne.DEFAULT_LOC_INSIDE_DIST
+
+'''
+2017_03_19. Depending on the estimator, we call the 
+applicable def:
+'''
+
+RUN_DEF_BY_ESTIMATOR={ NEESTIMATOR:NeEstimator2Controller.run,
+						LDNE_ESTIMATION:pgldne.PGLDNe2Controller.runWithNeEstimatorParams }
+
 class PGOpNeEstimator( APGOperation ):
 	'''
 	For the Ne-estimation gui, the operation object
 	that takes simupop-operation results (from the pgopsimupop
 	object), and performes and ldne analysis using Tiago Antao's
 	ne.py code and his other utilitites.
+
+	2017_03_15. We are revising this class to add the option to use
+	the program LDNe (beta version) instead of NeEstimator.  New
+	__init__ parameter tells the object which program is to be used.
+	
 	'''
-	def __init__( self, o_input=None, o_output=None  ):
+	def __init__( self, o_input=None, o_output=None, s_estimator_name=NEESTIMATOR ):
 
 		super( PGOpNeEstimator, self ).__init__( o_input, o_output )
 
@@ -49,6 +85,15 @@ class PGOpNeEstimator( APGOperation ):
 		self.__outdir=None
 		self.__infile=None
 		self.__outfile=None
+
+		if s_estimator_name not in [ NEESTIMATOR, LDNE_ESTIMATION ]:
+			s_msg="In PGOpNeEstimator instance, def __init__, " \
+						+ "caller passed unknown estimator name: " \
+						+ s_estimator_name + "."
+			raise Exception( s_msg )
+		else:
+			self.__estimator_to_use=s_estimator_name
+		#end if unknown name else known
 
 		return
 	#end __init__
@@ -125,11 +170,9 @@ class PGOpNeEstimator( APGOperation ):
 		NUMBER_SUBDIRS_EXPECTED=0
 		SUSPICOUSLY_HIGH_FILE_COUNT=4
 
-
 		tup_path_head_tail =  os.path.split( s_temp_dir )
 		
 		s_dir_name=tup_path_head_tail[ 1 ]
-
 
 		if not( s_dir_name.startswith( CORRECT_TMP_DIR_PREFIX ) ):
 				s_msg = "in PGOpNeEstimator instance, " \
@@ -157,7 +200,6 @@ class PGOpNeEstimator( APGOperation ):
 		else:
 				shutil.rmtree( s_temp_dir )
 		#end if high file or subdir count, error, else remove 
-
 
 		return
 	#end __remove_temporary_directory_and_all_its_contents
@@ -191,9 +233,36 @@ class PGOpNeEstimator( APGOperation ):
 		return
 	#end __copy_results_to_orig_dir
 
-	def doOp( self ): 
+	def __get_op_neestimator( self ):
+		o_op_object=None
+		o_op_object=NeEstimator2Controller()
+		return o_op_object
+	#end def __get_op_neestimator
 
-		ne2c=NeEstimator2Controller()
+	def __get_op_ldne( self ):
+		'''
+		2017_03_15.  Not yet implemented.
+		'''
+		o_op_object=None
+		o_op_object=pgldne.PGLDNe2Controller()
+		return o_op_object
+	#end __get_op_ldne
+
+	def doOp( self ): 
+		'''
+		2017_03_15.  Adding an option to use the LDNe program
+		instead of NeEstimator.
+		'''
+		if self.__estimator_to_use == NEESTIMATOR:
+			o_op_object=self.__get_op_neestimator()
+		elif self.__estimator_to_use == LDNE_ESTIMATION:
+			o_op_object=self.__get_op_ldne()
+		else:
+			s_msg="In PGOpNeEstimator instance, def doOp, " \
+						+ "Unknown estimator name: " \
+						+ self.__estimator_to_use + "."
+			raise Exception( s_msg )
+		#end if NeEstimator, else LDNe, else unknown
 
 		#This gives our instance attributes
 		#values for dirnames and filenames
@@ -209,7 +278,16 @@ class PGOpNeEstimator( APGOperation ):
 		#run estimator -- give it full path to currdir:
 		s_currdir=os.path.abspath( os.curdir )
 
-		ne2c.run( s_currdir, s_temp_in, s_currdir, s_temp_out, **( self.input.run_params  ) )
+		'''
+		2017_03_20.  Signature of the NeEstimator2Controller.run and our
+		PGLDNe2Controller.runWithNeEstimatorParams is the same.
+		We call the def with our estimator controller instance as the first
+		arg.  
+		'''
+		RUN_DEF_BY_ESTIMATOR[ self.__estimator_to_use ]( o_op_object,
+														s_currdir, s_temp_in, 
+														s_currdir, s_temp_out, 
+													**( self.input.run_params  ) )
 
 		self.__copy_results_to_orig_dir( s_temp_out )
 			
@@ -235,7 +313,6 @@ class PGOpNeEstimator( APGOperation ):
 		abstract base class requres this def
 		'''
 		return self.output.parsed_output
-
 	#end deliver results 
 
 	def getOutputColumnNumberForFieldName( self, s_field_name ):

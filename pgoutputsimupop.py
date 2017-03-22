@@ -7,7 +7,6 @@ __filename__ = "pgoutputsimupop.py"
 __date__ = "20160327"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-
 import os
 import shutil
 import bz2
@@ -22,15 +21,29 @@ FILE_EXISTS_UNCOMPRESSED=1
 FILE_EXISTS_AS_BZ2=2
 FILE_EXISTS_AS_BOTH_UNCOMPRESSED_AND_BZ2=3
 
+'''
+2017_03_20.  Until now the default way to join the alleles with the
+individual id was simply to separate with a comma.  NeEstimator2 was
+robust to this and correctly parsed.  However, now that we are also
+using LDNe2 to get ldne estimates, it is necessary to put a space
+after the comma, or the latter executable throws and error.  Also,
+note that the comma plus space is the usual way to separate, and
+though not specified in the file spec, it is the only way, now that
+I've encountered the error, that other genepop files I've looked at
+are formatted. We use a switch here in case there are any problems
+with my code reading with the space, and I need to review changes.
+'''
+IN_POP_SECTIONS_SEPARATE_FIRST_LOCI_FROM_COMMA_WITH_SPACE=True
+
 class PGOutputSimuPop( object ):
 	'''
 	Object meant to fetch parameter values and prepare them for 
 	use in a simuPop simulation.  
 
 	Object to be passed to a PGOpSimuPop object, which is, in turn,
-	passed to a PGGuiSimuPop object, so that the widgets can then access
-	defs in this input object, in order to, for example, show or allow
-	changes in parameter values for users before they run the simulation.
+	is passed to a PGGuiSimuPop object, or created in pgutilities,
+	to run parallel replicates.  This object writes and manages the
+	output of the simupop simulation. 
 	'''
 	
 	DICT_OUTPUT_FILE_EXTENSIONS={ "simfile":"sim",
@@ -321,8 +334,26 @@ class PGOutputSimuPop( object ):
 				    i_currgen=i_gen
 			    #end if new generation (== new population )
 		    	#end if we should make a new population for each generation
+			#end if no curr gen or new gen and we write pop per gen
+			
+			'''
+			2017_03_20.  Until now the default way to join the alleles with the
+			individual id was simply to separate with a comma.  NeEstimator2 was
+			robust to this and correctly parsed.  However, now that we are also
+			using LDNe2 to get ldne estimates, it is necessary to put a space
+			after the comma, or the latter executable throws and error.  Also,
+			note that the comma plus space is the usual way to separate, and
+			though not specified in the file spec, it is the only way, now that
+			I've encountered the error, that other genepop files I've looked at
+			are formatted.
+			'''
+			if IN_POP_SECTIONS_SEPARATE_FIRST_LOCI_FROM_COMMA_WITH_SPACE==True:
+				s_delimit_indiv_from_loci=", "
+			else:
+				s_delimit_indiv_from_loci=","
+			#end if we aret to separate first loci from indiv with comma and space
 
-			o_genepopfile.write( str( s_id ) + "," +  " ".join( ls_alleles ) + "\n"  )
+			o_genepopfile.write( str( s_id ) + s_delimit_indiv_from_loci +  " ".join( ls_alleles ) + "\n"  )
 
 		#end for each line in gen file
 

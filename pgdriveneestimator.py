@@ -93,6 +93,7 @@ import time
 import genepopindividualid as gpi
 #See the def get_nbne_ratio_from_genepop_file_header:
 import re
+
 '''
 In case of interrupted 
 multiprocessing runs.
@@ -120,6 +121,18 @@ import pgutilities as pgut
 
 VERBOSE=False
 VERY_VERBOSE=False
+
+'''
+2017_03_16.  We are adding, as the default
+LDNE-estimation program to use, LDNe2,
+leaving NeEstimator as an alternative,
+re-selecting using these constants.
+'''
+
+NEESTIMATOR=pgne.NEESTIMATOR
+LDNE2=pgne.LDNE_ESTIMATION
+
+ESTIMATOR_TO_USE=LDNE2
 
 #arguments passed either at command line
 #or from python using def mymain, having
@@ -298,11 +311,19 @@ SAMPLE_SCHEME_PARAM_DELIMITER=","
 #hence this field is always 0:
 NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=[ "case_number" ]
 
-#For pgguineestimator.py to import and use to delete
-#any files left after user has cancelled a run:
-NE_ESTIMATOR_OUTPUT_FILE_TAGS=[ "NoDat.txt", "xTp.txt", "ne_run.txt" ]
+'''
+These lists of file tags are for pgguineestimator.py 
+to import and use to delete any files left after user 
+has cancelled a run before it completes.  
 
-NE_ESTIMATOR_OUTPUT_FILES_GENERAL_TAG="_g_[0-9]" 
+2017_03_21.  We add the x.txt extension used by
+LDNe2 to tag its tabular output file, which is the
+output file currently used for parsing results when
+LDNe2 is the selected estimator.
+'''
+NE_ESTIMATOR_AND_LDNE_OUTPUT_FILE_TAGS=[ "NoDat.txt", "xTp.txt", "ne_run.txt", "x.txt" ]
+
+NE_ESTIMATOR_AND_LDNE_OUTPUT_FILES_GENERAL_TAG="_g_[0-9]" 
 
 #for users, namely instances of PGGuiNeEstimator,
 #to be able to use their genpop file basename,
@@ -1050,6 +1071,7 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 
 		s_genepop_file_subsample=o_ne_estimator.input.genepop_file
 
+
 		o_genepopfile.writeGenePopFile( s_genepop_file_subsample, 
 								s_indiv_subsample_tag=s_subsample_tag,
 								s_pop_subsample_tag=s_population_number,
@@ -1151,10 +1173,21 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 					o_ne_estimator.output.run_output_file \
 					+ "*x??.txt" )
 
+			'''
+			2017_03_21. To accomodate the use of the  LDNe2 estimator, 
+			to cleanup we add to glob the LDNe2 tabular output
+			file extention, "x.txt".
+			'''
+			ls_extra_files+=glob.glob( \
+					o_ne_estimator.output.run_output_file \
+					+ "x.txt" )
+
 			for o_extra_file in ls_extra_files:
 				os.remove( o_extra_file )
 			#end for each nextpfile
 		#end if debug mode says remove nodats
+
+		
 	except Exception as oex:
 		print ( "Exception in do_estimate: " + str( oex ) )
 		raise oex
@@ -1993,9 +2026,13 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 
 				o_neinput.run_params={ "crits":[ f_min_allele_freq ]  }
 
-				o_neoutput=pgout.PGOutputNeEstimator( s_genepop_file_subsample, s_run_output_file )	
-
-				o_ne_estimator=pgne.PGOpNeEstimator( o_neinput, o_neoutput ) 
+				o_neoutput=pgout.PGOutputNeEstimator( s_genepop_file_subsample, 
+														s_run_output_file, 
+														s_estimator_to_use=ESTIMATOR_TO_USE )	
+				
+				o_ne_estimator=pgne.PGOpNeEstimator( o_neinput, 
+														o_neoutput, 
+														s_estimator_name=ESTIMATOR_TO_USE ) 
 				
 				lv_these_args = [ o_genepopfile,  
 									o_ne_estimator, 
@@ -2503,9 +2540,30 @@ def drive_estimator( *args ):
 	return
 #end drive_estimator
 
+def did_find_ldne2_executable():
+
+	b_found = False
+
+	s_platform=pgut.get_platform()
+
+	s_dist_path=os.path.dirname( os.path.abspath(  __file__ ) )
+
+	s_path_inside_dist=pgne.LDNE_DEFAULT_LOC_IN_DIST
+
+	s_exec=pgne.LDNE_EXEC_BY_OS[ s_platform ]
+
+	s_ldne_path=s_dist_path + os.sep \
+					+ s_path_inside_dist + os.sep \
+					+ s_exec
+	
+	b_found=pgut.confirm_executable_is_in_path( s_ldne_path )
+
+	return b_found
+#end did_find_ldne_executable
+
 def did_find_ne_estimator_executable():
 	b_found=False
- 
+
 	#make sure the neestimator is in the user's PATH:
 	NEEST_EXEC_LINUX="Ne2L"
 	NEEST_EXEC_WIN="Ne2.exe"
@@ -2609,11 +2667,29 @@ def mymain( *q_args ):
 	pgut.remove_non_existent_paths_from_path_variable()
 
 	'''
-	Make sure we have the Ne2 executable.
+	New code to confirm the selected executable,
+	Now that we are using LDNe2 by default,
+	with Ne2 as the alternative, as indicated by the
+	flag constant.
 	'''
-	if not did_find_ne_estimator_executable():
-		raise Exception( "in pgdriveneestimator.py, def mymain(), " \
-							+ "did not find NeEstimator executable." )
+	b_found_executable=False
+
+	if ESTIMATOR_TO_USE==LDNE2:
+		b_found_executable = did_find_ldne2_executable()
+	elif ESTIMATOR_TO_USE==NEESTIMATOR:
+		b_found_executable = did_find_ne_estimator_executable()
+	else:
+		s_msg = "In pgdriveneestimator.py, def mymain(), " \
+						+ "checking for selected estimator executable. " \
+						+ "The selected estimator program is unknown: " \
+						+ str( ESTIMATOR_TO_USE ) + "."
+		raise Exception( s_msg )
+	#dnd if using ldne, else neestimator else unknown
+	
+	if not b_found_executable:
+		s_msg = "In pgdriveneestimator.py, def mymain(), " \
+							+ "did not find NeEstimator executable." 
+		raise Exception(s_msg )
 	#end if can't find executable
 	
 	'''
