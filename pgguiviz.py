@@ -67,8 +67,8 @@ import pgparamset as pgps
 #these are the lowest-level interface frames
 #that take input from user and update
 #this gui's attributes:
-from pgguiutilities import KeyValFrame
-from pgguiutilities import KeyListComboFrame
+from pgkeyvalueframe import KeyValFrame
+from pgkeylistcomboframe import KeyListComboFrame
 
 from pgguiutilities import FredLundhsAutoScrollbar
 from pgguiutilities import PGGUIInfoMessage

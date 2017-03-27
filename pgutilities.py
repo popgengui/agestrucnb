@@ -40,6 +40,11 @@ correct strings that give file paths:
 '''
 import platform
 
+'''
+2017_03_27.  See def remove_directory_and_all_contents
+'''
+import shutil
+
 from pgutilityclasses import IndependantSubprocessGroup 
 from pgutilityclasses import NeEstimationTableFileManager 
 
@@ -289,10 +294,26 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 
 	o_output=pgout.PGOutputSimuPop( s_outfile_basename )
 
+	'''
+	2017_03_26. Note the added param in the init of
+	the PGOpSimuPop object.  Module pgopsimupop now has a mod-level def
+	to import and the pgguiutilities.PGGUI* classes and 
+	set a flag so that exeptions and other info during the
+	simulation will raise a message window.  Note that 
+	when I tried to make the import of the PGGUI* message
+	classed the default for pgopsimupop.py, then an import
+	error was raised when I tried to start the main program
+	(negui.py).  There must be some recursive import problem.
+	Note that the import works file in this context, when
+	the pgopsimupop.py module is imported in this separate
+	python instance.
+	'''
+
 	o_new_pgopsimupop_instance=pgsim.PGOpSimuPop( o_input,
 			o_output, 
 			b_remove_db_gen_sim_files=REMOVE_NON_GENEPOP_SIM_OUTPUT_FILES,
-			b_write_input_as_config_file=b_write_conf_file )
+			b_write_input_as_config_file=b_write_conf_file,
+			b_do_gui_messaging=True )
 
 	o_new_pgopsimupop_instance.prepareOp( s_tag_out  )
 
@@ -398,6 +419,27 @@ def remove_files( ls_files ):
 	#end for each file
 	return i_total_removed
 #end remove files
+
+def remove_directory_and_all_contents( s_directory ):
+	try:
+		if os.path.exists( s_directory ):
+			shutil.rmtree( s_directory )
+		else:
+			raise( Exception( "Directory path: " \
+					+ s_directory \
+					+ "  does not exist." ) )
+		#end if path exists, remove, else exception
+
+	except Exception as oex:
+		s_msg="In module pgutilities.py, " \
+				+ "def remove_directory_and_all_contents, " \
+				+ "an exception was raised, with message: " \
+				+ str( oex ) 
+		raise Exception( oex )
+	#end try...except
+	return
+#end def remove_directory_and_all_contents
+
 def get_separator_character_for_current_os():
 	return os.path.sep
 #end get_separator_character_for_current_os
@@ -672,6 +714,7 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 										s_runmode,
 										s_nbne_ratio,
 										s_outfile_basename,
+										s_temporary_directory_for_estimator,
 										s_file_delimiter="," ):
 	'''
 	Similar to def above, "do_simulation_reps_in_subprocesses," this def is called from a
@@ -749,10 +792,20 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 		if is_windows_platform():
 			s_main_output_filename=fix_windows_path( s_main_output_filename )
 			s_secondary_output_filename=fix_windows_path( s_secondary_output_filename )
+			s_temporary_directory_for_estimator=fix_windows_path( s_temporary_directory_for_estimator )
 		#end if windows, fix paths
 
+		'''
+		2017_03_27.  The call now has an appended argument that
+		gives the name of a temporary directory inside of which
+		the pgdriveneestimator def do_estimate will write intermediate
+		genepop files.  This name will be knowsn to the caller to
+		run_driveneestimator_in_new_process, and so can delete
+		its contents after the estimation code is run.
+		'''
 		seq_arg_set += ( s_main_output_filename,
-								s_secondary_output_filename )
+								s_secondary_output_filename, 
+								s_temporary_directory_for_estimator )
 
 		'''
 		2017_02_20.  We check the set of arguments for total command length.
@@ -776,6 +829,7 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 		(2016_12_02)large enough to be irrelevant.  It also checks for the 
 		callers multiprocessing.event.set(), and kills the subprocess
 		and its children in event.set(), then calls even.clear():
+		self.__temporary_directory_for_estimator=None
 		'''
 		manage_driveneestimator_subprocess( o_subprocess, o_multiprocessing_event )
 
@@ -799,7 +853,6 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 				show_warning_in_messagebox_in_new_process( s_msg )	
 			#end try...except
 		#end if we've made a file to hold a very long list of genepop files
-
 
 	except Exception as oex:
 

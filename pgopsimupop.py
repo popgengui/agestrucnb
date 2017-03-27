@@ -8,7 +8,11 @@ __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 VERBOSE=False
-VERY_VERBOSE=False
+VERY_VERBOSE=True
+VERY_VERY_VERBOSE=False
+
+USE_GUI_MESSAGING=False
+
 
 #if True, then invokes ncurses debugger
 DO_PUDB=False
@@ -30,6 +34,21 @@ import numpy
 import copy
 import os
 
+
+'''
+2017_03_26. This mod-level def
+to import and the pgguiutilities.PGGUI* classes and 
+set a flag so that exeptions and other info during the
+simulation will raise a message window, is needed because 
+when I tried to make the import of the PGGUI* message
+classed the default for this module, then an import
+error was raised when I tried to start the main program
+(negui.py).  There must be some recursive import problem.
+Note that the import works when this module is imported
+in a separate process (see pgutilities def 
+"do_pgopsimupop_replicate_from_files" )
+
+'''
 class PGOpSimuPop( modop.APGOperation ):
 	'''
 	This class inherits its basic interface from class APGOperation, with its 3
@@ -62,7 +81,8 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __init__(self, o_input, o_output, b_compress_output=True, 
 									b_remove_db_gen_sim_files=False,
-									b_write_input_as_config_file=True):  
+									b_write_input_as_config_file=True,
+									b_do_gui_messaging=False ):  
 		'''
 			o_input, a PGInputSimuPop object
 			o_output, a PGOutputSimuPop object
@@ -83,8 +103,24 @@ class PGOpSimuPop( modop.APGOperation ):
 				to prevent writing identical configuration files
 				for replicate runs of the simulation, and thus
 				reduce the number of output files. 
-
+			b_do_gui_messaging.  This param was added 2017_03_26,
+				to allow for message windows to pass exception and
+				other info to gui users during the simulations,
+				which are run in a python process separate from 
+				that of the main program.  We could not leave the
+				module-level GUI imports and USE_GUI_MESSAGING
+				flag active by default, because the main gui 
+				program negui.py throws an import error if this module,
+				which is also used by the main interface,
+				tries to import the PGGUI* classes.  
 		'''
+
+		self.__guiinfo=None
+		self.__guierr=None
+
+		if b_do_gui_messaging:
+			self.__activate_gui_messaging()
+		#end if we are to use gui messaging
 
 		super( PGOpSimuPop, self ).__init__( o_input, o_output )
 
@@ -130,7 +166,9 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		self.__file_for_nb_records=open( self.output.basename + "_nb_values_calc_by_gen.csv", 'w' )
 		self.__file_for_age_counts=open( self.output.basename + "_age_counts_by_gen.csv", 'w' )
+
 		DEFAULT_AGES=50
+
 		self.__total_ages_for_age_file=DEFAULT_AGES if self.input.ages is None \
 																else self.input.ages
 
@@ -145,8 +183,35 @@ class PGOpSimuPop( modop.APGOperation ):
 		is used by def __harvest
 		'''
 		self.__nb_and_census_adjustment_by_cycle=None
+
+
 		return
 	#end __init__
+
+	def __activate_gui_messaging(self):
+
+		'''
+		2017_03_26. To be called only when the instance
+		is in a new process, not that of the main program.
+
+		These PGGUI* classes, if imported by this mod by
+		default, cause an import error, possibly due to 
+		recursive imports and/or TKinter threading conflicts.
+		However, we can use these classes when this object is 
+		run in a new python process -- see the creation of this
+		object in pgutilities def do_pgopsimupop_replicate_from_files.
+		'''
+
+		from pgguiutilities import PGGUIInfoMessage as guiinfo
+		from pgguiutilities import PGGUIErrorMessage as guierr
+
+		self.use_gui_messaging=True
+		self.__guiinfo=guiinfo
+		self.__guierr=guierr
+		return
+
+	#end if use gui messaging
+
 
 	def prepareOp( self, s_tag_out="" ):
 		'''
@@ -156,69 +221,84 @@ class PGOpSimuPop( modop.APGOperation ):
 		of per-cycle rate adjustments, used by
 		this objects def __harvest.
 		'''
-		self.__nb_and_census_adjustment_by_cycle=self.input.makePerCycleNbAdjustmentList()
-		self.__createSinglePop()
-		self.__createGenome()
-		self.__createAge()	
-		
-		s_basename_without_replicate_number=self.output.basename	
-		
-		if VERY_VERBOSE==True:
-			print( "resetting output basename with tag: " + s_tag_out )
-		#end if VERY_VERBOSE
+		try:
+			self.__nb_and_census_adjustment_by_cycle=self.input.makePerCycleNbAdjustmentList()
+			self.__createSinglePop()
+			self.__createGenome()
+			self.__createAge()	
+			
+			s_basename_without_replicate_number=self.output.basename	
+			
+			if VERY_VERBOSE==True:
+				print( "resetting output basename with tag: " + s_tag_out )
+			#end if VERY_VERBOSE
 
-		self.output.basename=s_basename_without_replicate_number + s_tag_out
+			self.output.basename=s_basename_without_replicate_number + s_tag_out
 
-		self.output.openOut()
-		self.output.openErr()
-		self.output.openMegaDB()
+			self.output.openOut()
+			self.output.openErr()
+			self.output.openMegaDB()
 
-		self.__createSim()
-		self.__is_prepared=True
+			self.__createSim()
+			self.__is_prepared=True
+
+		except Exception as oex:
+			if self.__guierr is not None:
+				self.__guierr( None, str( oex ) )
+			#end if using gui messaging
+			raise oex
+		#end try...except
 
 		return
 	#end prepareOp
 
 	def doOp( self ):
-		if self.__is_prepared:
+		try:
+			if self.__is_prepared:
 
-			#if client has not indicated otherwise,
-			#we write the current param set to
-			#write the configutation file on which
-			#this run is based:
-			if self.__write_input_as_config_file:
-				self.output.openConf()
-				self.input.writeInputParamsToFileObject( self.output.conf ) 
-				self.output.conf.close()
-			#end if client wants this run to include
-			#a configuration file (if many replicates,
-			#this may be set to False for all but first)
+				#if client has not indicated otherwise,
+				#we write the current param set to
+				#write the configutation file on which
+				#this run is based:
+				if self.__write_input_as_config_file:
+					self.output.openConf()
+					self.input.writeInputParamsToFileObject( self.output.conf ) 
+					self.output.conf.close()
+				#end if client wants this run to include
+				#a configuration file (if many replicates,
+				#this may be set to False for all but first)
 
-			#now we do the sim
-			self.__evolveSim()
-			self.output.out.close()
-			self.output.err.close()
-			self.output.megaDB.close()
+				#now we do the sim
+				self.__evolveSim()
+				self.output.out.close()
+				self.output.err.close()
+				self.output.megaDB.close()
 
-			#note as of 2016_08_23, we don't compress the config file
-			if self.__compress_output:
-				s_conf_file=self.output.confname
-				self.output.bz2CompressAllFiles( ls_files_to_skip=[  s_conf_file ] )
-			#end if compress
+				#note as of 2016_08_23, we don't compress the config file
+				if self.__compress_output:
+					s_conf_file=self.output.confname
+					self.output.bz2CompressAllFiles( ls_files_to_skip=[  s_conf_file ] )
+				#end if compress
 
-			self.__write_genepop_file()
+				self.__write_genepop_file()
 
-			if self.__remove_db_gen_sim_files:
-				#noite that this call removes both compressed
-				#and uncompressed versions of these files
-				#(see PGOutputSimuPop code and comments)
-				for s_extension in [ "sim", "gen", "db" ]:
-					self.output.removeOutputFileByExt( s_extension )
-				#end for output files *sim, *gen, *db
-			#end if we are to remove the non-genepop files (gen, sim, db)
-		else:
-			raise Exception( "PGOpSimuPop object not prepared to operate (see def prepareOp)." )
-		#end  if prepared, do op else exception
+				if self.__remove_db_gen_sim_files:
+					#noite that this call removes both compressed
+					#and uncompressed versions of these files
+					#(see PGOutputSimuPop code and comments)
+					for s_extension in [ "sim", "gen", "db" ]:
+						self.output.removeOutputFileByExt( s_extension )
+					#end for output files *sim, *gen, *db
+				#end if we are to remove the non-genepop files (gen, sim, db)
+			else:
+				raise Exception( "PGOpSimuPop object not prepared to operate (see def prepareOp)." )
+			#end  if prepared, do op else exception
+		except Exception as oex:
+			if self.__guierr is not None:
+				self.__guierr( None, str( oex ) )
+			#end if using gui messaging
+			raise oex
+		#end try...except
 
 		return
 	#end doOp
@@ -588,7 +668,7 @@ class PGOpSimuPop( modop.APGOperation ):
 				female.mate = male.ind_id
 			#end if is monog
 
-			if VERY_VERBOSE:
+			if VERY_VERY_VERBOSE:
 				print( "in __litterSkipGenerator, yielding with  " \
 						+ "male: %s, female: %s"
 						% ( str( male ), str( female ) ) )
@@ -654,7 +734,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			print ( "in __restrictedGenerator with " \
 					+ "args, pop: %s, subpop: %s"
-							% ( str( pop ), sr( subPop ) ) )
+							% ( str( pop ), str( subPop ) ) )
 		#end if VERBOSE
 
 		while not nbOK:
@@ -664,7 +744,6 @@ class PGOpSimuPop( modop.APGOperation ):
 			#print 1, pop.dvars().gen, nb
 
 
-			##### temp rem out
 			'''
 			2017_02_06
 			Now testing with goal of using this generator 
@@ -676,12 +755,11 @@ class PGOpSimuPop( modop.APGOperation ):
 				pair.append( gen.next() )
 			#end for i in range
 
-			##### temp revision
 			'''
-			Testing this def as now always used
-			to get the next gen.  Hence we change
-			the gen number after which we apply our
-			nb test, to the gen post burn in
+			2017_03_24.  Since this def is now always used
+			to get the next gen,  Hence we change the gen 
+			number after which we apply our nb test, to the 
+			gen post burn in
 			'''
 
 			first_gen_to_include = 0 \
@@ -703,12 +781,11 @@ class PGOpSimuPop( modop.APGOperation ):
 			original input.* attributes (see def createAge
 			for the initializatio of these values).
 			'''
-			#from the original code using the original param values:
-#			if abs(nb - self.input.Nb_orig_from_pop_section ) <= self.input.NbVar:
+			#### Remm'd out.  This is from the original code using the original param values:
+			#if abs(nb - self.input.Nb_orig_from_pop_section ) <= self.input.NbVar:
 
 			if abs(nb - self.__targetNb ) <= self.__toleranceNb:
 
-				##### temp 
 				'''
 				For comparing Nb values as calculated
 				(and accepted) on the pops as generated by simuPop, 
@@ -720,8 +797,6 @@ class PGOpSimuPop( modop.APGOperation ):
 				self.__file_for_nb_records.write( \
 						"\t".join( [ s_thisgen, s_thisNb ] ) \
 						+ "\n" )
-
-				##### end temp
 
 				nbOK = True
 			else:
@@ -744,12 +819,26 @@ class PGOpSimuPop( modop.APGOperation ):
 							+ str( self.__targetNb ) \
 							+ ", and tolerance at +/- " \
 							+ str( self.__toleranceNb ) + "."
+				#If we are using gui messaging, 
+				#we need to show this here, otherwise,
+				#because SimuPop is calling this def,
+				#the exception won't propogate to
+				#doOp, where other exceptions will
+				#be shown.
+				if self.__guierr is not None:					
+					self.__guierr( None, s_msg )
+				#end if using gui messaging
+
 				raise Exception( s_msg )
-				##### temp rem out
-				#Using above Exception instead of this message.
-	#			print( "out", pop.dvars().gen )
-	#			sys.exit(-1)
+
+				##### Remm'd out. 
+				#We are now using the above exception instead 
+				#of this message.  
+				#print( "out", pop.dvars().gen )
+				#sys.exit(-1)
+
 			#end if attempts > 100
+
 		#end while not nbOK
 
 		for male, female in pair:
@@ -1039,24 +1128,23 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		gen = pop.dvars().gen
 
-		##### temp
-		print( "-----------------" )
-		print( "in harvest with:" )
-		print( "    gen num: " + str( gen ) )
-		##### 
-		
+		if VERY_VERBOSE:
+			print( "-----------------" )
+			print( "in harvest with:" )
+			print( "    gen num: " + str( gen ) )
+		#end if very verbose
 
 		if self.__nb_and_census_adjustment_by_cycle is None \
 					or self.__nb_and_census_adjustment_by_cycle[ gen ] < f_reltol:
-			##### temp
-			print( "leaving harvest without harvesting pop or augmenting N0." )
-			#####
+			if VERY_VERBOSE:
+				print( "leaving harvest without harvesting pop or augmenting N0." )
+			#end if very verbose
 			return True
 		#end if no harvest needed
 
-		##### temp
-		print ("    current Nb: " + str( self.__targetNb ) )
-		#####
+		if VERY_VERBOSE:
+			print ("    current Nb: " + str( self.__targetNb ) )
+		#end if very verbose
 
 		#determine harvest rate for this generation
 		harvestRate = self.__nb_and_census_adjustment_by_cycle[ gen ]
@@ -1067,10 +1155,9 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__targetNb =self.__targetNb *(1-harvestRate) if harvestRate < 1.0 \
 												else self.__targetNb * harvestRate
 		
-		##### temp
-		print ("    harvest rate: " + str( harvestRate ) )
-		#####
-
+		if VERY_VERBOSE:
+			print ("    harvest rate: " + str( harvestRate ) )
+		#end if very verbose
 	
 
 		'''
@@ -1084,17 +1171,17 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.input.Nb=self.__targetNb
 		self.__current_N0=self.input.N0
 
-		##### temp
-		print ("    new targetNb: " + str( self.__targetNb ) )
-		print ("    new current N0: " + str( self.__current_N0 ) )
-		##### end temp
-
+		if VERY_VERBOSE:
+			print ("    new targetNb: " + str( self.__targetNb ) )
+			print ("    new current N0: " + str( self.__current_N0 ) )
+		#end if very verbose
 
 		#If we did the newborn N0 adjustment, we do not harvest.
 		if harvestRate >= 1.0:
-			##### temp
-			print ("returning after adjusting newborn N0" )
-			#####
+			if VERY_VERBOSE:
+				print ("returning after adjusting newborn N0" )
+			#end if very verbose
+
 			return True
 		#end if this simulatiuon only adjusts N0 for newborns
 
@@ -1123,10 +1210,10 @@ class PGOpSimuPop( modop.APGOperation ):
 				cohortDict[indAge] = []
 			cohortDict[indAge].append(i)
 		#end for each individual
-		
-		##### temp
-		print( "    current pop size: " + str( i_current_pop_size ) )
-		##### end temp
+	
+		if VERY_VERBOSE:
+			print( "    current pop size: " + str( i_current_pop_size ) )
+		#end if very verbose
 
 		for cohortKey in cohortDict:
 			## !! Cohort 0 does not get culled!!
@@ -1143,25 +1230,21 @@ class PGOpSimuPop( modop.APGOperation ):
 			cohortFemales = [x for x in cohort if x.sex() == 2]
 			femaleCount = len(cohortFemales)
 
-#			print(cohortKey)
-#			print cohortTotal
-#			print maleCount
-#			print femaleCount
-#			print"\n"
-
 			'''
 			2017_02_26. Adding int() because round returns a float,
 			which results in a type error in call to random.sample below.
 			'''
 			maleHarvest = int( numpy.round(maleCount * harvestRate) )
 			femaleHarvest = int( numpy.round(femaleCount * harvestRate) )
-			##### temp
-#			print ("cohort: " + str( cohortKey ) )
-#			print ("maleCount: " + str( maleCount ) )
-#			print ("femaleCount: " + str( femaleCount ) )
-#			print ("maleHarvest: " + str(maleHarvest) )
-#			print ("femaleHarvest: " + str(femaleHarvest) )
-#			print "\n\n"
+
+			if VERY_VERBOSE:
+				print ("cohort: " + str( cohortKey ) )
+				print ("maleCount: " + str( maleCount ) )
+				print ("femaleCount: " + str( femaleCount ) )
+				print ("maleHarvest: " + str(maleHarvest) )
+				print ("femaleHarvest: " + str(femaleHarvest) )
+				print "\n\n"
+			#end if very verbose
 
 			# choose which sex to kill first
 			# flag is one and 0 for easy switching
@@ -1176,8 +1259,6 @@ class PGOpSimuPop( modop.APGOperation ):
 			supposed to be random.sample
 			'''
 			#sample  harvest
-			#maleHarvestList = numpy.sample(cohortMales,maleHarvest)
-			#femaleHarvestList = numpy.sample(cohortFemales,femaleHarvest)
 			maleHarvestList = random.sample(cohortMales,maleHarvest)
 			femaleHarvestList = random.sample(cohortFemales,femaleHarvest)
 
@@ -1192,12 +1273,12 @@ class PGOpSimuPop( modop.APGOperation ):
 				# endif age>0 andage<.....
 		# end for i in pop
 
-		##### temp
-		print( "-----------------" )
-		print( "in __harvest, removing " \
-						+ str( len( kills ) ) \
-						+ " individuals " )
-		#####	
+		if VERY_VERBOSE:	
+			print( "-----------------" )
+			print( "in __harvest, removing " \
+							+ str( len( kills ) ) \
+							+ " individuals " )
+		#end if very_verbose
 
 		if len( kills ) == i_current_pop_size: 	
 			s_msg="In PGOpSimuPop instance, def __harvest, " \
@@ -1227,7 +1308,6 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		rep = pop.dvars().rep
 
-		##### temp
 		'''
 		Testing age counts per gen
 		'''
@@ -1293,20 +1373,19 @@ class PGOpSimuPop( modop.APGOperation ):
 			End of change to Tiago's code.
 			'''
 
-			##### temp for testing
 			'''
-			2017_02_07.  We are testing the effects of
-			the using the culls __equalSexCull and __harvest.
+			2017_02_07.  We are recording effects on the age 
+			structure of using the culls __equalSexCull 
+			and __harvest.
 			'''
 			if int( i.age ) in totals_by_age:
 				totals_by_age[ int(i.age) ] += 1
 			else:
 				totals_by_age[ int( i.age ) ] = 1
-			##### end temp
+			# end if age already recorded, else new age
 
 		#end for i in pop
 
-		##### temp
 
 		'''
 		2017_02_07.  To test age structure per gen.
@@ -1329,8 +1408,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		s_entry="\t".join( ls_entry )
 
 		self.__file_for_age_counts.write(  s_entry + "\n" )
-
-		##### end temp
 
 		return True
 	#end __outputAge
@@ -1417,7 +1494,6 @@ class PGOpSimuPop( modop.APGOperation ):
 			mySubPops.append((0, age + 1))
 		#end for age in range
 
-		##### temp
 		'''
 		2017_02_06
 		After meeting with Robin Waples, we decided to make the
@@ -1466,9 +1542,8 @@ class PGOpSimuPop( modop.APGOperation ):
 									sp.CloneMating(subPops=mySubPops, weight=-1) ],
 								subPopSize=self.__calcDemo )
 
-		##### end temp code addition
 
-		##### temp rem out
+		##### Code Remm'd out
 		'''
 		2017_02_06
 		This is the origial assignment of mateOP before changing the code used to select

@@ -40,6 +40,8 @@ from ttk import *
 import tkFileDialog as tkfd
 
 import sys
+import os
+
 
 #need a seperate, non-blocking
 #process for the neestimations
@@ -55,12 +57,17 @@ import pgguiapp as pgg
 import pgutilities as pgut
 import pgparamset as pgps
 import pgdriveneestimator as pgdn
+'''
+2017_03_27.  Used by def __create_temporary_directory_name()
+to get a uniq name for the directory.
+'''
+import uuid
 
 #these are the lowest-level interface frames
 #that take input from the user and update
 #this gui's attributes:
-from pgguiutilities import KeyValFrame
-from pgguiutilities import KeyListComboFrame
+from pgkeyvalueframe import KeyValFrame
+from pgkeylistcomboframe import KeyListComboFrame
 
 from pgguiutilities import FredLundhsAutoScrollbar
 from pgguiutilities import PGGUIInfoMessage
@@ -144,6 +151,15 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		self.__estimation_in_progress=False
 		self.__plotting_program_needs_to_be_run=False
+
+		'''
+		2017_03_27
+		This attribute is to be set and then passed 
+		to the code that runs the ne estimator, in order
+		to (better than before) manage the intermediate
+		files the estimator writes.
+		'''
+		self.__temporary_directory_for_estimator=None
 
 		self.__run_state_message=""
 
@@ -289,8 +305,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				ls_nefiles=pgut.get_list_files_and_dirs_from_glob( s_glob )
 
 				if VERY_VERBOSE:
-					print ( "with glob: " + s_glob )
-					print ( "got files: " + str( ls_nefiles ) )
+					print( "In def __get_existing_output_files: " )
+					print ( "   with glob: " + s_glob )
+					print ( "   got files: " + str( ls_nefiles ) )
 				#end if very verbose
 
 				ls_existing_outfiles += ls_nefiles
@@ -302,6 +319,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	def __remove_output_files( self, ls_files_to_remove):
 
+
 		if VERY_VERBOSE:
 			print( "removing files: " + str( ls_files_to_remove ) )
 		#end if very verbose
@@ -310,6 +328,23 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		return
 	#end __remove_output_files
+
+	def __remove_temporary_directory_used_by_estimator( self ):
+
+		if VERY_VERBOSE:
+			print ( "testing to remove temporary directory for estimator: " \
+						+ str( self.__temporary_directory_for_estimator ) )
+		#end if very verbose
+
+		if self.__temporary_directory_for_estimator is not None:
+			if os.path.exists( self.__temporary_directory_for_estimator ):
+				pgut.remove_directory_and_all_contents( \
+						self.__temporary_directory_for_estimator )
+			#end if path exists, remove
+			self.__temporary_directory_for_estimator=None
+		#end if the attribute has a non-None value
+		return
+	#end __remove_temporary_directory_used_by_estimator
 
 	def __cancel_neestimation( self ):
 
@@ -327,12 +362,12 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			if self.__neest_multi_process_event is not None:
 				try:
 					if VERY_VERBOSE==True:
-						print( "in cancel_neestimation, setting event" )
+						print( "In def __cancel_neestimation, setting event" )
 					#end if very verbose
 
 					self.__neest_multi_process_event.set()
 				except Exception as oex:
-					s_msg = "in PGGuiNeEstimator instance in def " \
+					s_msg = "In PGGuiNeEstimator instance, def " \
 							+ "__cancel_neestimation, Exception after " \
 							+ "setting multi process event: " \
 							+ str( oex ) + "."
@@ -345,7 +380,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			#cleared (after we set it), we can terminate op_process:
 			try:
 				if VERY_VERBOSE:
-					print( "sleeping before terminating proc" )
+					print( "In def __cancel_neestimation, " \
+								+ "sleeping before terminating proc." )
 				#end if very verbose
 
 				f_starttime=time.time()
@@ -355,7 +391,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						TIMEOUT_WAITING_FOR_EVENT_TO_CLEAR:
 
 					if VERY_VERBOSE:
-						print( "in while loop in gui while event is set" )
+						print( "In def __cancel_neestimation, " \
+									+ "in while loop in gui while event is set" )
 					#end if very verbose
 
 					time.sleep( SLEEPTIME_WAITING_FOR_EVENT_CLEAR )
@@ -363,10 +400,12 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 				if VERY_VERBOSE:
 					if self.__neest_multi_process_event.is_set():
-						print( "timed out waiting for event to clear -- even still set. " \
+						print( "In def __cancel_neestimation, " \
+								+ "timed out waiting for event to clear -- even still set. " \
 								+ "Terminating op_process " )
 					else:
-						print( "event now clear. Terminating op_process..." )
+						print( "In def __cancel_neestimation, event now clear. " \
+								+ "Terminating op_process..." )
 					#end if op_process management def in pgutilities.py not clear the event, else did
 				#end if very verbose
 
@@ -385,9 +424,12 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 			self.__remove_output_files( ls_output_files )
 
+			self.__remove_temporary_directory_used_by_estimator()
+
 			if VERY_VERBOSE:
-				print ( "removing the following output files: " \
-						+ str( ls_output_files ) )
+				print ( "In def __cancel_neestimation,  " \
+							+ "removing the following output files: " \
+							+ str( ls_output_files ) )
 			#end if very vergbose
 
 		else:
@@ -548,6 +590,15 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		return s_value
 	#end __get_nbne_ratio_as_string_for_call_to_estimator
 
+	def __make_temporary_directory_for_estimator( self, s_parent_directory ):
+		s_uuid=str( uuid.uuid4() )
+		self.__temporary_directory_for_estimator=s_parent_directory \
+					+ os.path.sep + "temp_estimator_workspace_" \
+					+ s_uuid
+		os.mkdir( self.__temporary_directory_for_estimator )
+		return
+	#end __make_temporary_directory_for_estimator
+
 	def runEstimator( self ):
 
 		'''
@@ -599,6 +650,13 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		self.__neest_multi_process_event=multiprocessing.Event()
 
+		'''
+		2017_03_27.  New class attribute __temporary_directory_for_estimator
+		allows easier cleanup of intermediate files created by the estimator.
+		The directory is a subdirectory inside the current output directory:
+		'''
+		self.__make_temporary_directory_for_estimator( self.__output_directory.get() )
+
 		self.__op_process=multiprocessing.Process( \
 
 				target=pgut.run_driveneestimator_in_new_process,
@@ -615,7 +673,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 							s_nbne_ratio,
 							self.__output_directory.get() \
 									+ "/" \
-									+ self.output_base_name ) )
+									+ self.output_base_name,
+							self.__temporary_directory_for_estimator ) )
 
 		self.__op_process.start()
 		self.__set_controls_by_run_state( self.__get_run_state() )
@@ -1519,14 +1578,14 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__set_controls_by_run_state( self.__get_run_state() )
 
 		if VERY_VERBOSE:
-			print ( "new genepop files value: " \
+			print ( "In def load_genepop_files, new genepop files value: " \
 					+ self.__genepopfiles.get() )
 			print ( "after loading genepop files" )
 			self.__test_values()
 		#end if very verbose
 
 		return
-	#end load_genepop_files
+	#end __load_genepop_files
 
 	def __select_output_directory( self ):
 		s_outputdir=tkfd.askdirectory( \
@@ -1606,7 +1665,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		if self.__op_process is not None:
 			if self.__op_process.is_alive():
 				if VERY_VERBOSE:
-					print ( "checking and process found alive" )
+					print ( "in __check_progress_operation_process, " \
+							+ "process found alive" )
 				#endif very verbose, pring
 
 				'''
@@ -1622,6 +1682,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						self.__op_process = None
 						ls_output_files=self.__get_existing_output_files()
 						self.__remove_output_files( ls_output_files )
+						self.__remove_temporary_directory_used_by_estimator()
 						self.__estimation_in_progress=False
 						self.__set_controls_by_run_state( self.__get_run_state() )
 						'''
@@ -1638,7 +1699,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				self.after( 500, self.__check_progress_operation_process )
 			else:
 				if VERY_VERBOSE:
-					print( "checking and process not None but not alive" )
+					print( "In def __check_progress_operation_process, " \
+								+ "process not None but not alive" )
 				#end if very verbose, print
 
 				self.__estimation_in_progress = False
@@ -1653,6 +1715,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				'''
 				self.__op_process=None
 				self.__neest_multi_process_event=None
+				self.__remove_temporary_directory_used_by_estimator()
 				self.__run_state_message=""
 				self.__init_interface( b_force_disable = False )
 				self.__load_param_interface( b_force_disable = False )
@@ -1665,9 +1728,10 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		else:
 			if VERY_VERBOSE:	
-				print( "process found to be None" )
+				print( "In def __check_progress_operation_process, " \
+							+ "process found to be None." )
 			#endif very verbose, pring
-
+			self.__remove_temporary_directory_used_by_estimator()
 			self.__estimation_in_progress = False
 			self.__run_state_message=""
 			self.__init_interface( b_force_disable = False )

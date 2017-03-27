@@ -77,14 +77,33 @@ class PGOpNeEstimator( APGOperation ):
 	__init__ parameter tells the object which program is to be used.
 	
 	'''
-	def __init__( self, o_input=None, o_output=None, s_estimator_name=NEESTIMATOR ):
+	def __init__( self, o_input=None, 
+							o_output=None, 
+								s_estimator_name=NEESTIMATOR, 
+									s_parent_dir_for_workspace=None ):
 
+		'''
+		2017_03_27. Adding parameter s_parent_dir_for_workspace to allow
+		for the gui to use a temp directory.  This object will run still
+		run the estimator in a separate temporary dir, but it will put
+		that directory inside that given by s_parent_dir_for_workspace,
+		if it is not None
+		'''
 		super( PGOpNeEstimator, self ).__init__( o_input, o_output )
 
 		self.__indir=None
 		self.__outdir=None
 		self.__infile=None
 		self.__outfile=None
+
+		'''
+		2017_03_27.  This is set in doOp(), so that the
+		curdir can be saved, and then returned-to after
+		changing to a temp directory, which now may be
+		different than a subdirectdory inside the curdir.
+		'''
+		self.__original_op_path=None
+		self.__parent_dir_for_workspace=s_parent_dir_for_workspace
 
 		if s_estimator_name not in [ NEESTIMATOR, LDNE_ESTIMATION ]:
 			s_msg="In PGOpNeEstimator instance, def __init__, " \
@@ -130,20 +149,32 @@ class PGOpNeEstimator( APGOperation ):
 		return(  s_dir, s_file ) 
 	#end get_separate_dir
 
-	def __change_current_directory_to_temporary_directory_inside_current( self ):
+	def __set_original_op_directory_path( self ):
+		self.__original_op_path=os.path.abspath( os.path.curdir )
+		return
+	#end __set_current_directory_path
 
+	def __change_current_directory_to_temporary_directory( self ):
+
+		s_parent_dir=None
 		s_temp_dir=None
 
-		s_abs_path_current_directory = \
-				os.path.abspath( os.path.curdir )
+		if self.__parent_dir_for_workspace is None:
 
-		#make the temp dir inside the current directory
-		s_temp_dir=tempfile.mkdtemp( dir=s_abs_path_current_directory )
+			s_parent_dir = \
+					os.path.abspath( os.path.curdir )
+
+			#make the temp dir inside the current directory
+		else:
+			s_parent_dir = self.__parent_dir_for_workspace
+		#end if client assigned no parent dir, use currdir, else use client's dir
 	
+
+		s_temp_dir=tempfile.mkdtemp( dir=s_parent_dir )
 		os.chdir( s_temp_dir )
 
 		return s_temp_dir
-	#end __change_current_directory_to_temporary_directory_inside_current
+	#end __change_current_directory_to_temporary_directory
 
 	def __return_to_original_non_temporary_directory( self ):
 		'''
@@ -151,9 +182,22 @@ class PGOpNeEstimator( APGOperation ):
 		the current directory when this def is called,
 		and that the original directory to which to return
 		is the parent of the current directory
+
+		2017_03_27.  We now may be using a temporary directory
+		whose path is not a subdirectory of the original
+		directory used for the operation.  Hence we have
+		now store the original operation directory, its
+		absolute path, as a class attribute:
 		'''
 
-		os.chdir( "../" )
+		try:
+			os.chdir( self.__original_op_path )
+		except Exception as oex:
+			s_msg="An exception occurred in PGOpNeEstimator instance, " \
+						+ "def __return_to_original_non_temporary_directory, " \
+						+ "with message: " + str( oex )
+			raise Exception( s_msg )
+		#end try ... except
 
 		return
 	#end __return_to_original_non_temporary_directory
@@ -270,8 +314,10 @@ class PGOpNeEstimator( APGOperation ):
 		#output base name:
 		self.__extract_file_in_out_info()
 	
+		self.__set_original_op_directory_path()
+
 		#run the estimator in a temporary directory, per Tiago's recommendation:
-		s_temp_dir=self.__change_current_directory_to_temporary_directory_inside_current()
+		s_temp_dir=self.__change_current_directory_to_temporary_directory()
 
 		s_temp_in, s_temp_out=self.__copy_genepop_input_and_get_temp_file_names()	
 

@@ -20,11 +20,23 @@ if USE_GUI_ERROR_MESSAGING:
 		from pgguiutilities import PGGUIInfoMessage as pggi
 		from pgguiutilities import PGGUIWarningMessage as pggw
 	except ImportError as oie:
-		raise( oie )
+		'''
+		2017_03_26.  When I added the importatio of the above PGGUI modules
+		into module pgopsimupop.py, in order to allow for GUI error messaging
+		during the simulation runs (which run in a new python instance), I 
+		received an import error when this module loaded.  Instead of aborting
+		the session, I am issueing a warning, since this module does not use
+		these classes, despite the importation.
+		'''
+		sys.stderr.write( "Warning, in setup_negui_environment.py, there was and import error "  \
+							+ "when importing the PGGUI message classes.  The error message " \
+							+ "is: " + str( oie ) + ".\n" )
+
+		USE_GUI_ERROR_MESSAGING=False
 	#end try ... except
+
 #end if USE_GUI_ERROR_MESSAGING	
 
-#end if use gui error messaging
 
 def looks_like_correct_program_directory( s_path ):
 	'''

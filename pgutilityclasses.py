@@ -12,6 +12,8 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 import sys
 import numpy
 
+from pgvalidationdefs import *
+
 class IndependantProcessGroup( object ):
 	'''
 	Simple convenience wrapper around a set of processes,
@@ -808,10 +810,13 @@ class ValueValidator( object ):
 	class (see def __reset_value) as defined in mod pgguiutilities.py
 	'''
 
+
 	def __init__( self, v_bool_expression_or_function_ref, v_value=None ):
 
 		if callable( v_bool_expression_or_function_ref ):
 			self.__validator=v_bool_expression_or_function_ref
+		elif self.__callable_after_eval( v_bool_expression_or_function_ref ):		
+			self.__validator=eval( v_bool_expression_or_function_ref )
 		elif type( v_bool_expression_or_function_ref ) == str:
 			s_lambda="lambda x: "  \
 						+ v_bool_expression_or_function_ref
@@ -841,6 +846,18 @@ class ValueValidator( object ):
 		self.__value=v_value
 		return
 	#end __init__
+	def __callable_after_eval( self, v_bool_expression_or_function_ref ):
+		b_return_value=True
+
+		try:
+			o_evaluated_item=eval( v_bool_expression_or_function_ref )
+			b_return_value=callable( o_evaluated_item )
+		except NameError as one:
+			b_return_value=False
+		#end try except
+
+		return b_return_value
+	#end __callable_after_eval
 
 	def isValid( self ):
 		
@@ -1391,6 +1408,25 @@ class LDNENbBiasAdjustor( object ):
 
 #end class LDNENbBiasAdjustor
 
+'''
+This s a convenience class supporting and used by
+the NbAdjustmentRangeAndRate class below.  
+It can be typed by an except clause,
+because it will be the type of exception raised
+when a an NbAdjustmentRangeAndRate object
+is initialized with an invalid range or rate.
+defs below.  This allows the validation def, 
+validateNbAdjustment, in the PGGuiSimuPop 
+object, to simply try to create
+an NbAdjustmentRangeAndRate with the proposed
+new user-entred expression, and to return false
+if this kind of excetpion is thrown. 
+'''
+
+class RangeAndRateViolationException( Exception ):
+	pass
+#end class RangeAndRateViolationException
+
 class NbAdjustmentRangeAndRate( object ):
 
 	'''
@@ -1403,6 +1439,8 @@ class NbAdjustmentRangeAndRate( object ):
 	the cycle range is set as cycles m to n.
 
 	'''
+
+
 	def __init__( self,
 				i_min_valid_cycle, 
 				i_max_valid_cycle, 
@@ -1442,7 +1480,7 @@ class NbAdjustmentRangeAndRate( object ):
 								+ "instance, the range/rate string, " \
 								+ s_string + ", cannot be parsed to yield a " \
 								+ "a rate and a cycle range."
-			raise Exception( s_msg )
+			raise RangeAndRateViolationException( s_msg )
 		#end if invalid range and rate list len
 
 		ls_range=ls_range_and_rate[ INDEX_RANGE ].split( DELIMIT_RANGE )
@@ -1455,7 +1493,7 @@ class NbAdjustmentRangeAndRate( object ):
 								+ "instance, the range/rate string, " \
 								+ s_string + ", cannot be parsed to yield a " \
 								+ "cycle range."
-			raise Exception( s_msg )
+			raise RangeAndRateViolationException( s_msg )
 		#end if invalid range list
 
 		try:
@@ -1469,11 +1507,6 @@ class NbAdjustmentRangeAndRate( object ):
 				i_end=int( ls_range[ INDEX_END ] )
 			#end if there are 2 ints fo range
 
-			##### temp
-			print( "-------------")
-			print( "in try having already typed the numbers" )
-			#####
-
 			if self.isValidRange( i_start, i_end ):
 				self.__start_cycle=i_start
 				self.__end_cycle=i_end
@@ -1481,8 +1514,11 @@ class NbAdjustmentRangeAndRate( object ):
 				s_msg="In pgutilityclasses, class NbAdjustmentRangeAndRate, " \
 								+ "instance, the range values, start-end: " \
 								+ str( i_start ) + "-" + str( i_end ) \
-								+ "is not valid." 
-				raise Exception( s_msg )
+								+ " is not valid. Please check that your min " \
+								+ "cycle is at least one, your max cycle is no more " \
+								+ "than the total reproductive cycles, " \
+								+ "and that your min is less than or equal to your max."
+				raise RangeAndRateViolationException( s_msg )
 			#end if range is valid
 		except ValueError as ve:
 			s_msg="In pgutilityclasses, class NbAdjustmentRangeAndRate, " \
@@ -1490,19 +1526,10 @@ class NbAdjustmentRangeAndRate( object ):
 								+ s_string + ", cannot be parsed to yield a " \
 								+ "cycle rate and range."
 			
-			raise Exception( s_msg )
+			raise RangeAndRateViolationException( s_msg )
 		except Exception as oex:
-			#####  temp
-			print("------------------" )
-			print( "caught general exception" )
-			print( "message: " + str(oex) )
-			#####
 			raise oex 
 		#end try...except 
-
-		##### temp
-		print( "returning from __set_range_and_rate_from_string" )
-		#####
 
 		return
 	#end __set_range_and_rate_from_string
@@ -1511,9 +1538,6 @@ class NbAdjustmentRangeAndRate( object ):
 		b_increasing=i_start<=i_end
 		b_in_range=self.isValidCycleNumber( i_start ) \
 						and self.isValidCycleNumber( i_end )
-		##### temp
-		print( "in isValidRange returning: " + str( b_increasing and b_in_range ) )
-		#####
 
 		return b_increasing and b_in_range
 	#end isValidRange

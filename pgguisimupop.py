@@ -26,16 +26,15 @@ import pginputsimupop as pgin
 import pgparamset as pgps
 import pgoutputsimupop as pgout
 
-from pgguiutilities import KeyValFrame
-from pgguiutilities import KeyListComboFrame
-from pgguiutilities import KeyCategoricalValueFrame
+from pgkeyvalueframe import KeyValFrame
+from pgkeylistcomboframe import KeyListComboFrame
+from pgkeycategoricalvalueframe import KeyCategoricalValueFrame
 from pgguiutilities import PGGUIInfoMessage
 from pgguiutilities import PGGUIYesNoMessage
 from pgguiutilities import PGGUIErrorMessage
 from pgutilityclasses import IndependantSubprocessGroup
 from pgutilityclasses import FloatIntStringParamValidity
 from pgutilityclasses import ValueValidator
-from pgutilityclasses import NbAdjustmentRangeAndRate
 
 import pgutilities as pgut
 
@@ -1358,78 +1357,115 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.__remove_temporary_config_file()
 	#end cleanup
 
-	def validateNbAdjustment( self, s_adjustment ):
-
-		'''
-		2017_03_08. This def is created to handle the PGInputSimuPop
-		parameter nbadjustment, which requires a more elaborate
-		validation than do the others that can be validated using
-		a simple boolean statement.
-		We test the user's entry into the list of strings that give
-		the cycle range and adjustment rate by creating an 
-		NbAdjustmentRangeAndRate object, solely to test it using
-		that objects validation code.  See the class description
-		and code for NbAdjustmentRangeAndRate in module pgutilityclasses.
-		'''
-
-		##### temp
-		print( "--------------------------" )
-		print( "in pgguisimupop, validateNbAdjustment" )
-		#####
-
-		try:
-
-			if self.__input is None:
-				##### temp
-				print( "returning false on no input object" )
-				#####
-				return False
-			#end if no input object
-
-			i_lowest_cycle_number=1
-			i_highest_cycle_number=self.__input.gens
-
-			if i_highest_cycle_number < i_lowest_cycle_number:
-				##### temp
-				print( "returning false on cycle number test" )
-				#####
-				return False
-			#end if gens is zero (number of cycles is zero)
-			
-			try:
-
-				o_rangeandrate=NbAdjustmentRangeAndRate( i_lowest_cycle_number,
-														i_highest_cycle_number,
-														s_adjustment )
-			except Exception as oex:
-
-				s_msg="In PGGuiSimuPop instance, def validateNbAdjustment, " \
-								+ "there was and exception creating a cycle range " \
-								+ "and rate entry. The entry was: " \
-								+ s_adjustment + "." \
-								+ "Correct format is min-max:rate, where " \
-								+ "min is a starting cycle number, " \
-								+ "max is an ending cycle number, " \
-								+ "and rate is the proportion by which to " \
-								+ "multiply Nb and the age/class individual counts " \
-								+ "to be applied for each cycle in the range." 
-
-				PGGUIInfoMessage( self, s_msg )
-
-				return False
-			#end try...except
-		except Exception as oex:
-			raise Exception( "In PGGuiSimuPop, def validateNbAdjustment, " \
-										+ "there was an exception: " \
-										+ str( oex ) + "." )
-		#end try...except
-		
-		##### temp
-		print( "in pgguisimupop, def validateNbAdjustment, returning true" )
-		#####
-
-		return True
-	#end validateNbAdjustment
+	##### temp rem out
+	'''
+	2017_03_26.
+	This def remm'd out as I debug a problem
+	with the validatio of the NbAdjustment param.
+	Validation code, when user enters invalid value
+	and then presses tabkey, goes into a long recursive
+	series of re-vaidations.
+	'''
+#	def validateNbAdjustment( self, s_adjustment ):
+#
+#		'''
+#		2017_03_08. This def is created to handle the PGInputSimuPop
+#		parameter nbadjustment, which requires a more elaborate
+#		validation than do the others that can be validated using
+#		a simple boolean statement.
+#		We test the user's entry into the list of strings that give
+#		the cycle range and adjustment rate by creating an 
+#		NbAdjustmentRangeAndRate object, solely to test it using
+#		that objects validation code.  See the class description
+#		and code for NbAdjustmentRangeAndRate in module pgutilityclasses.
+#		'''
+#
+#		b_return_val=True
+#		i_lowest_cycle_number=1
+#		i_highest_cycle_number=self.__input.gens
+#
+#		s_msg="In PGGuiSimuPop instance, def validateNbAdjustment, " \
+#							+ "there was an error in the range " \
+#							+ "and rate entry. The entry was: " \
+#							+ s_adjustment + ".  " \
+#							+ "\n\nThe correct format is min-max:rate, where " \
+#							+ "min is a starting cycle number, " \
+#							+ "max is an ending cycle number, " \
+#							+ "and rate is the proportion by which to " \
+#							+ "multiply Nb and the age/class individual counts " \
+#							+ "to be applied for each cycle in the range." 
+#
+#
+#		if VERY_VERBOSE:
+#			print( "--------------------" )
+#			print( "in pgguisimupop, validateNbAdjustment" )
+#		#end very verbose 
+#
+#
+#		if self.__input is None:
+#
+#			if VERY_VERBOSE:
+#				print( "returning false on no input object" )
+#			#end if very verbose
+#
+#			#Change message:
+#			s_msg="In PGGuiSimuPop instance, def validateNbAdjustment, " \
+#					"no input object found."
+#			b_return_val = False
+#
+#		
+#
+#		elif i_highest_cycle_number < i_lowest_cycle_number:
+#
+#			if VERY_VERBOSE:
+#				print( "returning false on cycle number test" )
+#			#end if very verbose
+#
+#			s_msg="In PGGuiSimuPop instance, def validateNbAdjustment, " \
+#					"cannot validate cycle range:  current setting for " \
+#					+ "total generations is less than 1."
+#			b_return_val = False
+#
+#		else:
+#			ls_adj_vals=s_adjustment.split( ":" )
+#
+#			if len( ls_adj_vals ) != 2:
+#				b_return_val = False
+#			else:
+#
+#				s_cycle_range=ls_adj_vals[ 0 ]
+#
+#				ls_min_max=s_cycle_range.split( "-" )			
+#
+#				if len( ls_min_max ) != 2:
+#					b_return_val = False
+#
+#				else:
+#
+#					try:
+#						i_min=int( ls_min_max[ 0 ] )
+#
+#						i_max=int( ls_min_max[ 1 ] )
+#						
+#						if i_min < 1 \
+#								or i_max > i_highest_cycle_number \
+#								or i_min > i_max:
+#							b_return_val = False
+#						#end if min-max invalid range
+#
+#					except ValueError as ove:
+#						b_return_val = False
+#					#end try except
+#
+#				#end if min-max list not 2 items
+#			#end if entry not colon-splittable into 2 items
+#		#end if no input, else if current input.gens < 1, else test entry
+#
+#		if b_return_val == False:
+#			PGGUIInfoMessage( self, s_msg )
+#		#end if problem, give message			
+#		return b_return_val
+#	#end validateNbAdjustment
 
 	def __create_validity_checker( self, v_init_value, s_validity_expression ):
 		'''
@@ -1447,10 +1483,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		o_checker=None
 		try:
 
-			##### temp
-			print( "-------------" )
-			print( "testing for attribute arg: " + s_validity_expression )
-			#####
+			if VERY_VERBOSE:
+				print( "-------------" )
+				print( "testing for attribute arg: " + s_validity_expression )
+			#end if very verbose
 
 			#We assume the expression arg is a string boolean expression:
 			v_validity_expression=s_validity_expression
@@ -1458,10 +1494,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#We reassign to a ref to a def is its an existing
 			if hasattr( self, s_validity_expression ):
 
-				##### temp 
-				print( "---------------" )
-				print( "setting valid express to attr, " + s_validity_expression )
-				#####
+				if VERY_VERBOSE: 
+					print( "---------------" )
+					print( "setting valid express to attr, " + s_validity_expression )
+				#end if very verbose
 
 				v_validity_expression=getattr( self, s_validity_expression )
 

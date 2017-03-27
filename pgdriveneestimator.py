@@ -122,6 +122,13 @@ import pgutilities as pgut
 VERBOSE=False
 VERY_VERBOSE=False
 
+ACTIVATE_GUI_MESSAGING=True
+
+if ACTIVATE_GUI_MESSAGING:
+	from pgguiutilities import PGGUIErrorMessage
+	from pgguiutilities import PGGUIInfoMessage
+#end if use gui messaging
+
 '''
 2017_03_16.  We are adding, as the default
 LDNE-estimation program to use, LDNe2,
@@ -144,12 +151,13 @@ spacer3="  "
 LS_FLAGS_SHORT_REQUIRED=[ "-f",  "-s", "-p", "-m", "-a", "-r", "-e", "-c", "-l", "-i",  "-n", "-x", "-g","-q" ]
 
 LS_FLAGS_LONG_REQUIRED=[ "--gpfiles", "--scheme", "--params", "--minpopsize", "--maxpopsize", "--poprange", 
-						"--minallelefreq", "--replicates", "--locischeme", "--locischemeparams",  "--mintotalloci", 
-																"--maxtotalloci", "--locirange", "--locireplicates" ]
+						"--minallelefreq", "--replicates", "--locischeme", "--locischemeparams",  
+						"--mintotalloci", "--maxtotalloci", "--locirange", "--locireplicates" ]
 
 LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes. " \
 						+ "(Example: \"mydir/*txt\")",
-				"\"none\", \"percent\", \"remove\", \"criteria\", \"cohorts\", \"cohortsperc\", or \"relateds\", " \
+				"\"none\", \"percent\", \"remove\", \"criteria\", \"cohorts\", \"cohortsperc\", " \
+						+ "or \"relateds\", " \
 						+ "indicating an individual-sampling scheme,  whether to sample none " \
 						+ "(only apply min/max pop size criteria), " \
 						+ "by percentages, removing N individuals randomly, testing individual id fields, " \
@@ -237,6 +245,16 @@ IDX_NBNE_RATIO=16
 IDX_MAIN_OUTFILE=17
 IDX_SECONDARY_OUTFILE=18
 IDX_MULTIPROCESSING_EVENT=19
+'''
+2017_03_27.  This new argument allows the intermediate
+genepop files created by this module before it runs
+the estimator to be written to a temporary directory. 
+
+It is set to None when called from the console, but
+when def mymain is called from pgutilities def 
+run_driveneestimator_in_new_process.
+'''
+IDX_TEMPORARY_DIRECTORY=20
 
 
 #Def mymain uses this index to test and pass
@@ -813,6 +831,9 @@ def parse_args( *args ):
 		#end try ... except
 	#end if nb/ne ratio value is none else cast as float
 
+	s_temporary_directory=None if args[ IDX_TEMPORARY_DIRECTORY ] is None \
+													else args[ IDX_TEMPORARY_DIRECTORY ]
+
 	return( ls_files, s_sample_scheme, lv_sample_values, 
 								i_min_pop_size, 
 								i_max_pop_size,
@@ -832,7 +853,8 @@ def parse_args( *args ):
 								o_main_outfile, 
 								o_secondary_outfile,
 								o_multiprocessing_event,
-								f_nbne_ratio )
+								f_nbne_ratio,
+								s_temporary_directory )
 	
 #end parse_args
 
@@ -1071,7 +1093,6 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 
 		s_genepop_file_subsample=o_ne_estimator.input.genepop_file
 
-
 		o_genepopfile.writeGenePopFile( s_genepop_file_subsample, 
 								s_indiv_subsample_tag=s_subsample_tag,
 								s_pop_subsample_tag=s_population_number,
@@ -1189,8 +1210,12 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 
 		
 	except Exception as oex:
-		print ( "Exception in do_estimate: " + str( oex ) )
-		raise oex
+
+		raise Exception( "An exception was raised in " \
+							 + "module pgdriveneestimator.py, " \
+							 + "def do_estimate, with message: " \
+							 + str( oex ) )
+	#end try...except
 	return { "for_stdout" : s_stdout, "for_stderr" : s_stderr, 
 			"for_indiv_table": None if ls_indiv_list is None \
 					else { "file" : o_genepopfile.original_file_name, 
@@ -1821,7 +1846,8 @@ def do_sample_loci( o_genepopfile,
 
 def get_subsample_genepop_file_name( s_original_genepop_file_name, 
 													s_loci_subsample_tag,
-													s_this_pop_sample_name ):
+													s_this_pop_sample_name,
+													s_temporary_directory ):
 	'''
 	Was originally simply a matter of replacing, in the original genepop file,
 	dots with underscores, but Windows revealed a case that needed attention 
@@ -1854,8 +1880,21 @@ def get_subsample_genepop_file_name( s_original_genepop_file_name,
 	'''
 
 	s_basename=os.path.basename( s_genepop_file_subsample )
-	s_dirs=os.path.dirname( s_genepop_file_subsample )
+
+	'''
+	2017_03_27.  We replace the path given by the original
+	genepop file with a temporary directory, if available.
+	'''
+	s_dirs=None
+
+	if s_temporary_directory is None:
+		s_dirs=os.path.dirname( s_genepop_file_subsample )
+	else:
+		s_dirs=s_temporary_directory
+	#end if we have no temp directory, else use it instead of genepop file dir
+
 	s_subsample_file_basename=s_basename.replace( ".", INPUT_FILE_DOT_CHAR_REPLACEMENT )
+
 	s_genepop_file_subsample=os.path.join( s_dirs, s_subsample_file_basename )
 	
 	#remmed out -- problems when the orig file has path that includes 
@@ -1886,7 +1925,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 											llv_args_each_process,
 											IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 											o_secondary_outfile,
-											f_nbne_ratio ):
+											f_nbne_ratio,
+											s_temporary_directory ):
 	'''		
 	This def creates ne-estimator caller object and adds it to list of args for a single call
 	to def do_estimate.  The call is then appended to llv_args_each_process
@@ -1980,7 +2020,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 				s_loci_sample_value, s_loci_replicate_number = \
 						get_loci_sample_val_and_rep_number_from_loci_sample_tag( s_loci_subsample_tag )
 
-				i_tot_indivs_this_subsample=o_genepopfile.getIndividualCount( i_population_number, s_indiv_sample )
+				i_tot_indivs_this_subsample=o_genepopfile.getIndividualCount( i_population_number, 
+																						s_indiv_sample )
 
 				if i_tot_indivs_this_subsample == 0:
 					s_msg= "In pgdriveneestimator.py, def add_to_set_of_calls_to_do_estimate, " \
@@ -2018,7 +2059,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 				#path mangling, so we made a separate def:
 				s_genepop_file_subsample=get_subsample_genepop_file_name( o_genepopfile.original_file_name, 
 														s_loci_subsample_tag, 
-														s_this_pop_number )
+														s_this_pop_number,
+														s_temporary_directory )
 
 				s_run_output_file=s_genepop_file_subsample + "_ne_run.txt"
 
@@ -2032,7 +2074,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 				
 				o_ne_estimator=pgne.PGOpNeEstimator( o_neinput, 
 														o_neoutput, 
-														s_estimator_name=ESTIMATOR_TO_USE ) 
+														s_estimator_name=ESTIMATOR_TO_USE,
+														s_parent_dir_for_workspace=s_temporary_directory ) 
 				
 				lv_these_args = [ o_genepopfile,  
 									o_ne_estimator, 
@@ -2201,7 +2244,10 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 		i_pool_timeout=max( MIN_ALLOWED_TIMEOUT, i_timeout_as_fx_chunksize )
 
 		if VERY_VERBOSE:
-			print( "In pgdriveneestimator, def execute_ne_for_each_sample, timeout set: " + str( i_pool_timeout ) )
+			print( "In pgdriveneestimator, " \
+						+ "def execute_ne_for_each_sample, " \
+						+ "timeout set: " + str( i_pool_timeout ) )
+
 		i_last_work_chunk_total=0
 
 		f_chunk_progress_start_time=time.time()
@@ -2388,7 +2434,8 @@ def drive_estimator( *args ):
 				o_main_outfile, 
 				o_secondary_outfile, 
 				o_multiprocessing_event,
-				f_nbne_ratio ) = parse_args( *args )
+				f_nbne_ratio,
+				s_temporary_directory ) = parse_args( *args )
 
 	o_process_pool=None
 
@@ -2439,7 +2486,7 @@ def drive_estimator( *args ):
 
 		if VERY_VERBOSE:
 			print ( "in pgdriveneestimator, def drive_estimator, calling " \
-					 			+ "add_to_set_of_calls_to_do_estimate " \
+								+ "add_to_set_of_calls_to_do_estimate " \
 								+ "for file, " + s_filename + "." )	
 		#end if VERY_VERBOSE
 
@@ -2452,7 +2499,8 @@ def drive_estimator( *args ):
 												llv_args_each_process,
 												IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 												o_secondary_outfile,
-												f_nbne_ratio )
+												f_nbne_ratio,
+												s_temporary_directory )
 		
 	#end for each genepop file, sample, add an ne-estimator object, and setup call to estimator 
 
@@ -2489,7 +2537,7 @@ def drive_estimator( *args ):
 			if s_sample_scheme in SAMPLE_SCHEMES_NON_CRITERIA \
 			else get_sample_abbrevs_for_criteria( lds_results )
 
- 	if VERY_VERBOSE:
+	if VERY_VERBOSE:
 		print ( "in pgdriveneestimator, def drive_estimator, calling " \
 							+ "write_result_sets" )	
 
@@ -2538,6 +2586,7 @@ def drive_estimator( *args ):
 	#end if the estimations were interrupted (see def execute_ne_for_each_sample 
 
 	return
+
 #end drive_estimator
 
 def did_find_ldne2_executable():
@@ -2611,7 +2660,7 @@ def mymainlongfilelist( *q_args ):
 	of Windows ability to correctly make the call via pOpen, 
 	due to a limit on the number of characters it can handle
 	in a command.  Now the above pgutilities defs will have
-	tested the command lenght.  If it exceeds a threshold,
+	tested the command length.  If it exceeds a threshold,
 	the comma-delimited list of genepop files will be
 	written to a temporary file.  This def will read in
 	the list from that file, delete the file, and then
@@ -2653,96 +2702,127 @@ def mymain( *q_args ):
 	to import this mod, then call this def after they load 
 	params (args for this driver) from their interface
 	'''
+
+	try:
 	
-	if VERY_VERBOSE:
-		print( "In pgdriveneestimator, def mymain" )
-	#end if VERY_VERBOSE
+		if VERY_VERBOSE:
+			print( "In pgdriveneestimator, def mymain" )
+		#end if VERY_VERBOSE
 
-	'''
-	To allow the pygenomics genomics.ne2.controller modules
-	Ne2 estimator class object to loop over the paths in the
-	PATH environmental variable, and be ensured that each
-	exists.
-	'''
-	pgut.remove_non_existent_paths_from_path_variable()
+		'''
+		To allow the pygenomics genomics.ne2.controller modules
+		Ne2 estimator class object to loop over the paths in the
+		PATH environmental variable, and be ensured that each
+		exists.
+		'''
+		pgut.remove_non_existent_paths_from_path_variable()
 
-	'''
-	New code to confirm the selected executable,
-	Now that we are using LDNe2 by default,
-	with Ne2 as the alternative, as indicated by the
-	flag constant.
-	'''
-	b_found_executable=False
+		'''
+		New code to confirm the selected executable,
+		Now that we are using LDNe2 by default,
+		with Ne2 as the alternative, as indicated by the
+		flag constant.
+		'''
+		b_found_executable=False
 
-	if ESTIMATOR_TO_USE==LDNE2:
-		b_found_executable = did_find_ldne2_executable()
-	elif ESTIMATOR_TO_USE==NEESTIMATOR:
-		b_found_executable = did_find_ne_estimator_executable()
-	else:
-		s_msg = "In pgdriveneestimator.py, def mymain(), " \
-						+ "checking for selected estimator executable. " \
-						+ "The selected estimator program is unknown: " \
-						+ str( ESTIMATOR_TO_USE ) + "."
-		raise Exception( s_msg )
-	#dnd if using ldne, else neestimator else unknown
-	
-	if not b_found_executable:
-		s_msg = "In pgdriveneestimator.py, def mymain(), " \
-							+ "did not find NeEstimator executable." 
-		raise Exception(s_msg )
-	#end if can't find executable
-	
-	'''
-	We adapted this def to open and close the main and secondary 
-	output files. Originally, it simply passed open file objects to def,
-	parse args.  Now we we check for string vs file for these
-	args, as the console version will still pass stdout and sterr
-	file objects, but the GUI will call with string filenames.  
-	We strip off the last 3 items, which now need to be checked 
-	for type string file names and assume, if not string, then 
-	the objects passed are assumed to be (open-for-writing) 
-	file objects.  We also pass along the last arg, the multiprocessing
-	event.  
-	'''
-	seq_unaltered_args=q_args[0:IDX_LAST_CONSOLE_ARG + 1 ]
+		if ESTIMATOR_TO_USE==LDNE2:
+			b_found_executable = did_find_ldne2_executable()
+		elif ESTIMATOR_TO_USE==NEESTIMATOR:
+			b_found_executable = did_find_ne_estimator_executable()
+		else:
+			s_msg = "In pgdriveneestimator.py, def mymain(), " \
+							+ "checking for selected estimator executable. " \
+							+ "The selected estimator program is unknown: " \
+							+ str( ESTIMATOR_TO_USE ) + "."
+			raise Exception( s_msg )
+		#dnd if using ldne, else neestimator else unknown
+		
+		if not b_found_executable:
+			s_msg = "In pgdriveneestimator.py, def mymain(), " \
+								+ "did not find NeEstimator executable." 
+			raise Exception(s_msg )
+		#end if can't find executable
+		
+		'''
+		We adapted this def to open and close the main and secondary 
+		output files. Originally, it simply passed open file objects to def,
+		parse args.  Now we we check for string vs file for these
+		args, as the console version will still pass stdout and sterr
+		file objects, but the GUI will call with string filenames.  
+		We strip off the last 3 items, which now need to be checked 
+		for type string file names and assume, if not string, then 
+		the objects passed are assumed to be (open-for-writing) 
+		file objects.  We also pass along the last arg, the multiprocessing
+		event.  
+		'''
+		seq_unaltered_args=q_args[0:IDX_LAST_CONSOLE_ARG + 1 ]
 
-	v_main_outfile_arg= q_args[ IDX_MAIN_OUTFILE ]
-	v_secondary_outfile_arg=q_args[ IDX_SECONDARY_OUTFILE ]
+		v_main_outfile_arg= q_args[ IDX_MAIN_OUTFILE ]
+		v_secondary_outfile_arg=q_args[ IDX_SECONDARY_OUTFILE ]
 
-	'''
-	Note that we check for string type, and otherwise
-	assume open file objects. (In Linux sys.std{out,err} return
-	"file" as type, but in Windows they return iostream or
-	something similar, but not file object.
-	'''
-	if type( v_main_outfile_arg  ) == str:
-		o_main_outfile=open( v_main_outfile_arg, 'w' )
-		o_secondary_outfile=open( v_secondary_outfile_arg, 'w' )
-	else:
-		o_main_outfile=v_main_outfile_arg
-		o_secondary_outfile=v_secondary_outfile_arg
-	#end if passed non-file object, open file, else pass along file object
+		'''
+		New argument, added 2017_03_27, to allow def do_estimate
+		to write its intermediate files inside a single temp
+		dir, whose name is known to the caller, so caller can
+		remove it.  
+		
+		Note that we subtract one to get its postiion in the
+		passed args.  This argument is passed as the last,
+		but the caller will not have passed the multiprocessing
+		event argument, so the index for our temp directory is
+		one less than the final position as passed to 
+		drive_estimator (and subsequenctly to parse_args):
+		'''
+		v_temporary_directory_arg=q_args[ IDX_TEMPORARY_DIRECTORY - 1 ]
 
-	'''
-	2017_02_12.  Having replaced the use of the python multiprocessing.Process
-	object with a Popen call when calling this def from the pgutilities.py, we
-	no longer have the multiprocessing event available.  For now, rather than
-	removing this arg, the former multiprocessing event to allow communication
-	between pgutilities.py and this code, we simply default this arg to None:
-	'''
-	o_event=None
+		'''
+		Note that we check for string type, and otherwise
+		assume open file objects. (In Linux sys.std{out,err} return
+		"file" as type, but in Windows they return iostream or
+		something similar, but not file object.
+		'''
+		if type( v_main_outfile_arg  ) == str:
+			o_main_outfile=open( v_main_outfile_arg, 'w' )
+			o_secondary_outfile=open( v_secondary_outfile_arg, 'w' )
+		else:
+			o_main_outfile=v_main_outfile_arg
+			o_secondary_outfile=v_secondary_outfile_arg
+		#end if passed non-file object, open file, else pass along file object
 
-	seq_args_to_parse=seq_unaltered_args + ( o_main_outfile, o_secondary_outfile, o_event )
+		'''
+		Reconstruct our arg list after creating the outfile objects.
 
-	drive_estimator( *seq_args_to_parse )
+		2017_02_12.  Having replaced the use of the python multiprocessing.Process
+		object with a Popen call when calling this def from the pgutilities.py, we
+		no longer have the multiprocessing event available.  For now, rather than
+		removing this arg, the former multiprocessing event to allow communication
+		between pgutilities.py and this code, we simply default this arg to None:
+		'''
+		o_event=None
 
-	if o_main_outfile != sys.stdout:
-		o_main_outfile.close()
-	#end if not stdout, close
+		seq_args_to_parse=seq_unaltered_args + ( o_main_outfile, 
+													o_secondary_outfile, 
+																	o_event, 
+													v_temporary_directory_arg )
 
-	if o_secondary_outfile != sys.stderr:
-		o_secondary_outfile.close()
-	#end if not stderr, close file
+		drive_estimator( *seq_args_to_parse )
+
+		if o_main_outfile != sys.stdout:
+			o_main_outfile.close()
+		#end if not stdout, close
+
+		if o_secondary_outfile != sys.stderr:
+			o_secondary_outfile.close()
+		#end if not stderr, close file
+
+	except Exception as oex:
+
+		if ACTIVATE_GUI_MESSAGING:
+			PGGUIErrorMessage( None , str( oex ) )
+		#end if using gui messaging
+		
+		raise ( oex )
+	#end try ... except
 
 	return
 #end mymain
@@ -2807,10 +2887,20 @@ if __name__ == "__main__":
 		ls_args_passed.append( o_args.nbneratio )
 	#end if nn nb/ne ratio passed
 
-	#now we add the default output file objects and 
-	#mp event args hidden from console user, set by
-	#users who import this mod and call mymain:
-	ls_args_passed+=[ sys.stdout, sys.stderr, None ]
+	'''
+	Now we add the default:
+		--output file objects 
+		-- mp event (None)
+		2017_03_27, final argument is not
+		a temporary directoyr name, used
+		by caller when mymain is called by
+		the GUI, otherwise default to None:
+		-- temporary directory name (None)
+	These are args hidden from console user, set by
+	users who import this mod and call mymain:
+	'''
+
+	ls_args_passed+=[ sys.stdout, sys.stderr, None, None ]
 
 	mymain( *( ls_args_passed ) )
 

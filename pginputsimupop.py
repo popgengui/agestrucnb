@@ -170,7 +170,7 @@ class PGInputSimuPop( object ):
 						+ "__update_attribute_nb_adjustement_by_cycle, " \
 						+ "an exception was raised evaluating the nbadjustment " \
 						+ "list: " + str( self.nbadjustment ) \
-						+ "Exception message: " + str( oex )
+						+ "\nException message: " + str( oex )
 
 			raise Exception( s_msg )
 
