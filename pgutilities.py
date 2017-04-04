@@ -62,6 +62,16 @@ SYS_LINUX="linux"
 SYS_WINDOWS="windows"
 SYS_MAC="mac"
 
+
+'''
+Defs do_shutil_* below address the problem
+with the limit on windows path length using
+shutil.copy (and, presumably, move and rmtree too).
+These are the paramaters needed to fix too-long paths.
+'''
+MAX_PATH_LENGTH=254
+WINDOWS_PREFIX_LONG_PATH="\\\\?\\"
+
 def do_usage_check( ls_this_argv, 
             ls_required_arg_descriptions, 
             ls_optional_arg_descriptions = [],
@@ -119,6 +129,142 @@ def do_usage_check( ls_this_argv,
 
 	return  s_usage_string 
 #def do_usage_check
+
+def get_temporary_directory( s_parent_dir=None, s_prefix='tmp' ):
+	
+	s_tempdir_name=None
+
+	try:
+		s_tempdir_name=tempfile.mkdtemp( dir=s_parent_dir, prefix=s_prefix )
+	except Exception as oex:
+		s_msg="In module pgutilities.py, " \
+					+ "def get_temporary_directory, " \
+					+ "with arguments, dir, " \
+					+ str( s_parent_dir ) + ", and prefix, " \
+					+ s_prefix  + ", tempfile.mkdtemp threw  " \
+					+ "an Exception with message: "  + str( oex )
+		raise Exception( s_msg )
+	#end try ... except
+
+	return s_tempdir_name
+#end get_temporary_directory
+
+def do_shutil_copy( s_source, s_destination ):
+
+	'''
+	This wrapper around the shutil.copy guards
+	against the Windows win32 api limit of 255
+	characters in a path string (see http://
+	stackoverflow.com/questions/14075465/
+	copy-a-file-with-a-too-long-path-to-another-
+	directory-in-python).  
+	
+	Despite the use 255 i nthe above info, and 260
+    as the length limit given elsewhere on the web,
+    My trial found that I needed to set my max path
+    at 259, as measured by the python len() function.
+
+    I also found that the long path prefix, 
+    "\\\\?\\" -- though it worked fine (i.e. had no
+    deleterious effect) on short paths (as long as
+    they were absolute), it did nothing to prevent
+    the copy failure problem on long paths (tests all
+    done on windows 10).
+	'''
+
+	MAX_PATH_LENGTH=259
+
+	if is_windows_platform():
+
+		if len( s_source ) > MAX_PATH_LENGTH \
+				or len( s_destination ) > MAX_PATH_LENGTH:
+
+			s_msg="In module pgutilities.py, def do_shutil_copy, " \
+						+ "The program is unable to copy from, " \
+						+ s_source + " to " + s_destination + ".\n" \
+						+ "The path of the source and/or destination " \
+						+ "exceed(s) the " \
+						+ str( MAX_PATH_LIMIT )  \
+						+ " character  limit that causes " \
+						+ "a copy failure in Windows."  
+			raise Exception( s_msg )
+		#end if path length exceeded
+		
+	#end if windows platform
+
+	shutil.copy( s_source, s_destination )
+
+	return
+#end do_shutil_copy
+
+
+def do_shutil_move( s_source, s_destination ):
+	'''
+	This wrapper around the shutil.move guards
+	against the Windows win32 api limit of 255
+	characters in a path string (see http://
+	stackoverflow.com/questions/14075465/
+	copy-a-file-with-a-too-long-path-to-another-
+	directory-in-python).  
+
+	See do_shutil_copy above for more details.
+	'''
+
+	MAX_PATH_LENGTH=259
+
+	if is_windows_platform():
+
+		if len( s_source ) > MAX_PATH_LENGTH \
+				or len( s_destination ) > MAX_PATH_LENGTH:
+
+			s_msg="In module pgutilities.py, def do_shutil_copy, " \
+						+ "The program is unable to move the frile from, " \
+						+ s_source + " to " + s_destination + ".\n" \
+						+ "The path of the source and/or destination " \
+						+ "exceed(s) the " \
+						+ str( MAX_PATH_LIMIT )  \
+						+ " character  limit that causes " \
+						+ "a copy failure in Windows."  
+			raise Exception( s_msg )
+		#end if path length exceeded
+		
+	#end if windows platform
+
+	shutil.move( s_source, s_destination )
+
+	return
+#end do_shutil_copy
+
+
+def do_shutil_rmtree( s_path ):
+	'''
+	This wrapper around the shutil.rmtree guards
+	against the Windows win32 api limit of 255
+	characters in a path string (see http://
+	stackoverflow.com/questions/14075465/
+	copy-a-file-with-a-too-long-path-to-another-
+	directory-in-python).  Not sure it applies
+	to the rmtree, but we assume it does.
+	'''
+
+	if is_windows_platform():
+		if len( s_path ) > MAX_PATH_LENGTH:
+			s_msg="In module pgutilities.py, def do_shutil_copy, " \
+					+ "The program is unable to remove the directory tree from, " \
+					+ s_source + " to " + s_destination + ".\n" \
+					+ "The path of the source and/or destination " \
+					+ "exceed(s) the " \
+					+ str( MAX_PATH_LIMIT )  \
+					+ " character limit that causes " \
+					+ "a failure in Windows."  
+			raise Exception( s_msg )
+		#end if path too long
+	#end if windows platform
+
+	shutil.rmtree( s_path )
+
+	return
+#end do_shutil_copy
 
 def get_date_time_string_dotted():
 	return time.strftime( '%Y.%m.%d.%H.%M.%S' )

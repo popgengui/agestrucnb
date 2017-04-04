@@ -25,7 +25,7 @@ then
 	echo "usage: $mys "
 	echo "args: "
 	echo "       <file with nb values table> "
-	echo "       <file, *.tsv,  with NeEstimator Nb values> "
+	echo "       <file, *.tsv,  with NeEstimator or LDNe2 Nb values> "
 	echo "       <int, number of generations> "
 	echo "       <int, min value for Nb axis (y-axis)"
 	echo "       <int, max value for Nb axis (y-axis)"

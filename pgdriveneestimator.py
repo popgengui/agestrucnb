@@ -94,16 +94,6 @@ import genepopindividualid as gpi
 #See the def get_nbne_ratio_from_genepop_file_header:
 import re
 
-'''
-In case of interrupted 
-multiprocessing runs.
-We copy the output files
-as *.interrupted. (See
-except clause in def 
-drive_estimator)
-'''
-import shutil
-
 #read genepop file, and 
 #sample its pop, and store
 #results:
@@ -140,6 +130,21 @@ NEESTIMATOR=pgne.NEESTIMATOR
 LDNE2=pgne.LDNE_ESTIMATION
 
 ESTIMATOR_TO_USE=LDNE2
+
+'''
+2017_03_29.  This mod-level value is set in 
+def set_mod_level_var_to_ldne2_executable_path.
+This variable was created because the former
+method of setting path to the
+LDNe2 executable was executed in the __init__
+method of the PGLDNe2Controller instance.
+However, when used in that setting the __file__
+value sometimes become corrupted (possibly related
+to the python bug at https://bugs.python.org/issue24670.
+'''
+
+PATH_TO_LDNE2=None
+
 
 #arguments passed either at command line
 #or from python using def mymain, having
@@ -256,46 +261,57 @@ run_driveneestimator_in_new_process.
 '''
 IDX_TEMPORARY_DIRECTORY=20
 
-
 #Def mymain uses this index to test and pass
 #the correct file/multiprocessing_event information
 #to parse args:
 IDX_LAST_CONSOLE_ARG=IDX_NBNE_RATIO
 
+'''
+These args are used by callers who import this mod
+and call mymain directly -- users of the console
+don't use these, and resultsa are to stdout for the main outpu,
+and stderr for the secondary output.  This is just a 
+bit of stand-in code in case usage ever implements hidden
+arguments.
 
-#these args are used by callers who import this mod
-#and call mymain directly -- users of the console
-#don't use these, and resultsa are to stdout for the main outpu,
-#and stderr for the secondary output.  This is just a 
-#bit of stand-in code in case usage ever implements hidden
-HIDDEN_ARGS=[ "file_object_main", "file_object_secondary", "multiprocessing_event" ]
+2017_03_29. We have added another hidden argument, the
+name of a temporary directory.
+'''
+HIDDEN_ARGS=[ "file_object_main", "file_object_secondary", 
+					"multiprocessing_event", "temporary_directory"  ]
 
-#if caller from console or to mymain
-#does not include opetionals,
-#these are the defaults (see mymain,
-#which is either invoked by python importing
-#this mod, or is invoked by this mods
-#code when python calls it as __main__:
+'''
+If this module is called from console or
+to mymain such that it does not include optionals,
+these are the defaults (see mymain),
+which is either invoked by python importing
+this mod, or is invoked by this mods
+code when python calls it as __main__:
+'''
 DEFAULT_NUM_PROCESSES="1"
 DEFAULT_DEBUG_MODE="no_debug"
 DEFAULT_NBNE_VAL="None"
 
-#in order to properly name the subsampled
-#files with replicate number, sample parameter
-#value, and population number, and not to subsequently
-#violate the NeEstimators limit of writing file names
-#to 31 characters, we impose this limit on the input
-#genepop files:
+'''
+In order to properly name the subsampled
+files with replicate number, sample parameter
+value, and population number, and not to subsequently
+violate the NeEstimators limit of writing file names
+to 31 characters, we impose this limit on the input
+genepop files:
+'''
 MAX_GENEPOP_FILE_NAME_LENGTH=310
 
-#when running the estimate calls
-#asynchronously, we test for event
-#set (i.e. user wants to cancel)
-#then wait a bit (see def 
-#execute_ne_for_each_sample)
+'''
+When running the estimate calls
+asynchronously, we test for event
+set (i.e. user wants to cancel)
+then wait a bit (see def 
+execute_ne_for_each_sample)
+'''
 SECONDS_TO_SLEEP=1.00
 
-#user enters the string as command
+#The user enters the string as command
 #line arg, codes tests with the constants
 SAMPLE_BY_NONE="none"
 SAMPLE_BY_PERCENTAGES="percent"
@@ -318,15 +334,17 @@ OUTPUT_ENDLINE="\n"
 REPLICATE_DELIMITER=","
 SAMPLE_SCHEME_PARAM_DELIMITER=","
 
-#case number will be the populatiuon number
-#based on the subsampled file sent to the
-#Ne Estimator, but we will be using pop numbers
-#always based on the original geepop file --
-#and the current case ( Mon Jul 25 19:49:56 MDT 2016)
-#is that before doing Ne Estimation, we split 
-#up the original so that each population in it
-#is run via a (temporary) separate genepop file,
-#hence this field is always 0:
+'''
+The case number will be the populatiuon number
+based on the subsampled file sent to the
+Ne Estimator, but we will be using pop numbers
+always based on the original geepop file --
+and the current case ( Mon Jul 25 19:49:56 MDT 2016)
+is that before doing Ne Estimation, we split 
+up the original so that each population in it
+is run via a (temporary) separate genepop file,
+hence this field is always 0:
+'''
 NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=[ "case_number" ]
 
 '''
@@ -343,19 +361,21 @@ NE_ESTIMATOR_AND_LDNE_OUTPUT_FILE_TAGS=[ "NoDat.txt", "xTp.txt", "ne_run.txt", "
 
 NE_ESTIMATOR_AND_LDNE_OUTPUT_FILES_GENERAL_TAG="_g_[0-9]" 
 
-#for users, namely instances of PGGuiNeEstimator,
-#to be able to use their genpop file basename,
-#and then locate intermediate genepopfiles
-#created by this mod:
+'''
+For users, namely instances of PGGuiNeEstimator,
+to be able to use their genpop file basename,
+and then locate intermediate genepopfiles
+created by this mod:
+'''
 GLOB_INTERMEDIATE_GENEPOP_FILE_TAGS="*_r_*_g_*"
 
-
-#because Ne2L (Ne2.exe, Ne2M), truncates output files
-#using dot char, to unabiguiously name the subsampled
-#input genepops and the Ne2L output files, we have
-#to replace the dots.  This is the replacement char
+'''
+Because Ne2L (Ne2.exe, Ne2M), truncates output files
+using dot char, to unabiguiously name the subsampled
+input genepops and the Ne2L output files, we have
+to replace the dots.  This is the replacement char
+'''
 INPUT_FILE_DOT_CHAR_REPLACEMENT="_"
-
 
 '''
 Main table formatting info:
@@ -986,7 +1006,8 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator, o_genepopf
 	#as arguement to this def
 
 	if v_nbne_ratio_to_use_for_adjustment is not None:
-		f_adj_estimate=do_ldne_bias_adjustment( f_this_ne, v_nbne_ratio_to_use_for_adjustment )
+		f_adj_estimate=do_ldne_bias_adjustment( f_this_ne, 
+									v_nbne_ratio_to_use_for_adjustment )
 		s_bias_adjusted_value=str( f_adj_estimate ) 
 	else:
 		'''
@@ -1916,6 +1937,32 @@ def get_subsample_genepop_file_name( s_original_genepop_file_name,
 	return s_genepop_file_subsample
 #end get_subsample_genepop_file_name
 
+def make_subsample_genepop_file_name( s_original_genepop_file,
+											s_temporary_directory, 
+													i_genepop_file_count, 
+														i_subsample_count ):
+		'''
+		2017_04_03.  This def replaces def get_subsample_genepop_file_name,
+		in order to shorten the intermediate genepop file names, to address
+		the path length limitations of Windows.
+		'''
+		s_parent_dir=None
+
+		if s_temporary_directory is None:
+			s_parent_dir=os.path.dirname( s_original_genepop_file )
+		else:
+
+			s_parent_dir=s_temporary_directory	
+		#end if no temp dir use orig genepop dir, else use temp
+
+		s_file_name="f" + str( i_genepop_file_count ) + "s" + str( i_subsample_count )
+
+		s_subsample_genepop_file=os.path.join( s_parent_dir, s_file_name )
+		
+		return s_subsample_genepop_file
+
+#end make_subsample_genepop_file_name
+
 def add_to_set_of_calls_to_do_estimate( o_genepopfile, 
 											s_sample_scheme,
 											f_min_allele_freq, 
@@ -1926,7 +1973,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 											IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 											o_secondary_outfile,
 											f_nbne_ratio,
-											s_temporary_directory ):
+											s_temporary_directory,
+											i_genepop_file_count ):
 	'''		
 	This def creates ne-estimator caller object and adds it to list of args for a single call
 	to def do_estimate.  The call is then appended to llv_args_each_process
@@ -1950,7 +1998,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 			s_sample_value, i_replicate_count=get_sample_val_and_rep_number_from_sample_name( \
 											s_indiv_sample, s_sample_scheme )
 			#we only want to report the first replicate
-			#(by inference of course all replicates will be skipped:
+			#(by inference of course all replicates will be skipped):
 			if i_replicate_count == 0:
 				s_msg="Skipping samples from: " \
 						+ o_genepopfile.original_file_name \
@@ -1980,10 +2028,13 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 																				i_max_pop_size )
 		#end if we need to check original (non-sampled) pop sizes
 
-
 		ls_loci_subsample_tags_associated_with_this_indiv_sample= \
 				get_loci_subsample_tags_for_this_indiv_subsample( o_genepopfile,
 																	s_indiv_sample )
+
+		
+	
+		i_subsample_count=0
 
 		for s_loci_subsample_tag in ls_loci_subsample_tags_associated_with_this_indiv_sample:
 
@@ -1994,6 +2045,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 			the pops up among processes:
 			'''
 			for i_population_number in li_population_numbers:
+
+				i_subsample_count+=1
 
 				if i_population_number in li_pops_with_invalid_size:
 					s_msg= "In pgdriveneestimator.py, def add_to_set_of_calls_to_do_estimate, " \
@@ -2052,15 +2105,27 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 											o_secondary_outfile, 
 											s_population_subsample_tag=s_this_pop_number )
 				#end if we're testing, print 
-				
 
+				'''
+				2017_04_03.  A Windows limit on path length motivates new, shorter names
+				for the intermediate genepop files.  Now we simply use the i_genepop_file_count
+				number passed to this def from def drive_estimator, and the subsample count
+				to get a uniq identifier for this genepop file vs. all others in this run.
+				For now we retain the original code remm'd out, and construct the shorter
+				name in a new def:
+				'''
 				#in naming a the genepop file for the subsampled pop,
 				#some processing is needed to avoid NeEstimator file naming errors, and
 				#path mangling, so we made a separate def:
-				s_genepop_file_subsample=get_subsample_genepop_file_name( o_genepopfile.original_file_name, 
-														s_loci_subsample_tag, 
-														s_this_pop_number,
-														s_temporary_directory )
+#				s_genepop_file_subsample=get_subsample_genepop_file_name( o_genepopfile.original_file_name, 
+#														s_loci_subsample_tag, 
+#														s_this_pop_number,
+#														s_temporary_directory )
+				
+				s_genepop_file_subsample=make_subsample_genepop_file_name( o_genepopfile.original_file_name,
+																							s_temporary_directory, 
+																								i_genepop_file_count, 
+																									i_subsample_count )
 
 				s_run_output_file=s_genepop_file_subsample + "_ne_run.txt"
 
@@ -2077,6 +2142,10 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 														s_estimator_name=ESTIMATOR_TO_USE,
 														s_parent_dir_for_workspace=s_temporary_directory ) 
 				
+				if ESTIMATOR_TO_USE == LDNE2 and PATH_TO_LDNE2 is not None:
+					o_ne_estimator.ldne_path=PATH_TO_LDNE2
+				#end if we are using LDNe2 and we have a path to the executable
+
 				lv_these_args = [ o_genepopfile,  
 									o_ne_estimator, 
 									s_sample_value, 
@@ -2454,7 +2523,21 @@ def drive_estimator( *args ):
 	
 	write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outfile )
 
+	'''
+	2017_04_03.  In order to shorten the file names for 
+	intermediate genepop files, we will use a genepop file counter
+	and pass the current value to the def, 
+	add_to_set_of_calls_to_do_estimate, which will use 
+	the number along with its own internas count of subsampled
+	genepop files, to use a simple 2-int id for each 
+	temporary, intermidiate genepop file.
+	'''
+
+	i_genepop_file_count=0
+
 	for s_filename in ls_files:
+
+		i_genepop_file_count+=1
 
 		if VERY_VERBOSE:
 			print( "in pgdriveneestimator, def drive_estimator, processing file, " \
@@ -2500,7 +2583,8 @@ def drive_estimator( *args ):
 												IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 												o_secondary_outfile,
 												f_nbne_ratio,
-												s_temporary_directory )
+												s_temporary_directory,
+												i_genepop_file_count )
 		
 	#end for each genepop file, sample, add an ne-estimator object, and setup call to estimator 
 
@@ -2571,7 +2655,7 @@ def drive_estimator( *args ):
 		for o_outfile in [ o_main_outfile, o_secondary_outfile ]:
 			o_outfile.close()
 			s_name_this_file=o_outfile.name
-			shutil.copy( s_name_this_file, s_name_this_file + ".interrupted" )
+			pgut.do_shutil_copy( s_name_this_file, s_name_this_file + ".interrupted" )
 		#end for each outfile, copy it as interrupted version
 
 		if o_multiprocessing_event is not None:
@@ -2589,7 +2673,7 @@ def drive_estimator( *args ):
 
 #end drive_estimator
 
-def did_find_ldne2_executable():
+def set_mod_level_var_to_ldne2_executable_path():
 
 	b_found = False
 
@@ -2607,8 +2691,13 @@ def did_find_ldne2_executable():
 	
 	b_found=pgut.confirm_executable_is_in_path( s_ldne_path )
 
+	if b_found:
+		global PATH_TO_LDNE2
+		PATH_TO_LDNE2=s_ldne_path
+	#end if b_found
+
 	return b_found
-#end did_find_ldne_executable
+#end set_mod_level_var_to_ldne2_executable_path
 
 def did_find_ne_estimator_executable():
 	b_found=False
@@ -2726,7 +2815,7 @@ def mymain( *q_args ):
 		b_found_executable=False
 
 		if ESTIMATOR_TO_USE==LDNE2:
-			b_found_executable = did_find_ldne2_executable()
+			b_found_executable = set_mod_level_var_to_ldne2_executable_path()
 		elif ESTIMATOR_TO_USE==NEESTIMATOR:
 			b_found_executable = did_find_ne_estimator_executable()
 		else:
@@ -2891,7 +2980,7 @@ if __name__ == "__main__":
 	Now we add the default:
 		--output file objects 
 		-- mp event (None)
-		2017_03_27, final argument is not
+		2017_03_27, final argument is now
 		a temporary directoyr name, used
 		by caller when mymain is called by
 		the GUI, otherwise default to None:

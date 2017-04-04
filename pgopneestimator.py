@@ -33,9 +33,7 @@ import os
 #so we can the NeEstimator session in its own
 #temporary directory:
 import tempfile
-#so we can delete the temporary directory
-#and all of its files:
-import shutil
+
 #so we can copy renamed input files
 import glob
 
@@ -97,6 +95,15 @@ class PGOpNeEstimator( APGOperation ):
 		self.__outfile=None
 
 		'''
+		2017_03_29.  To allow passing the executable path
+		into the controller objects.  Motivated by a problem
+		finding the path to the LDNe2 executable during
+		instantiation of the object.
+		'''
+		self.__ldne_path=None
+		self.__neestimator_path=None
+
+		'''
 		2017_03_27.  This is set in doOp(), so that the
 		curdir can be saved, and then returned-to after
 		changing to a temp directory, which now may be
@@ -125,6 +132,7 @@ class PGOpNeEstimator( APGOperation ):
 	#end prepareOp
 
 	def __extract_file_in_out_info( self ):
+
 		'''
 		Because we are, per Tiago's advice, running
 		the NeEstimator with currdir in a temp directory,
@@ -169,7 +177,6 @@ class PGOpNeEstimator( APGOperation ):
 			s_parent_dir = self.__parent_dir_for_workspace
 		#end if client assigned no parent dir, use currdir, else use client's dir
 	
-
 		s_temp_dir=tempfile.mkdtemp( dir=s_parent_dir )
 		os.chdir( s_temp_dir )
 
@@ -177,6 +184,7 @@ class PGOpNeEstimator( APGOperation ):
 	#end __change_current_directory_to_temporary_directory
 
 	def __return_to_original_non_temporary_directory( self ):
+
 		'''
 		Assumes that the temporary directory is
 		the current directory when this def is called,
@@ -202,8 +210,8 @@ class PGOpNeEstimator( APGOperation ):
 		return
 	#end __return_to_original_non_temporary_directory
 
-
 	def __remove_temporary_directory_and_all_of_its_contents( self, s_temp_dir ):
+
 		'''
 		Note: shutil.rmtree fails on encountering readonly files
 		We add a few paranoia-induced checks, in case the arg s_temp_dir
@@ -242,7 +250,7 @@ class PGOpNeEstimator( APGOperation ):
 							+ ", and/or subdirectory count, " + str(i_num_subdirs ) + "."
 				raise Exception( s_msg )
 		else:
-				shutil.rmtree( s_temp_dir )
+				pgut.do_shutil_rmtree( s_temp_dir )
 		#end if high file or subdir count, error, else remove 
 
 		return
@@ -255,11 +263,43 @@ class PGOpNeEstimator( APGOperation ):
 
 		s_currdir=os.path.abspath( os.curdir )
 
-		shutil.copy( self.__indir + os.path.sep + self.__infile, 
+		pgut.do_shutil_copy( self.__indir + os.path.sep + self.__infile, 
 						s_currdir + os.path.sep + s_temp_input_filename )
 
 		return s_temp_input_filename, s_temp_output_base
 	#end __prepare_temp_files_and_get_temp_file_names
+
+	def __correct_and_add_columnar_output_file_if_not_present( self, 
+														ls_output_files,
+														s_temp_out_base ):
+		'''
+		This def assumes that the current directory is the temp
+		directory in which the estimator wrote its output files.
+		'''
+
+		LDNE_COLUMN_FILE_EXT="x.txt"
+
+		ls_columnar_files=glob.glob( \
+				"*" + LDNE_COLUMN_FILE_EXT )
+		
+		if len( ls_columnar_files ) != 1:
+			s_msg="In PGOpNeEstimator instance, " \
+						+ "def correct_and_add_columnar_output_file_if_not_present, " \
+						+ "the number of LDNe2 result files with the columnar-file " \
+						+ "extension should be one, but " + str( len( ls_columnar_files ) ) \
+						+ " were found.  List of files:\n" + str( ls_columnar_files )
+			raise Exception( s_msg )
+		#end if  non uniq file found
+
+		if ls_columnar_files[ 0 ] not in ls_output_files:
+			#We correct the file name. 
+			s_corrected_name= s_temp_out_base + LDNE_COLUMN_FILE_EXT
+			pgut.do_shutil_move( ls_columnar_files[ 0 ], s_corrected_name )
+			ls_output_files.append( s_corrected_name )
+		#end if columnar file name not in output files list
+
+		return
+	#end __correct_and_add_columnar_output_file_if_not_present
 
 	def __copy_results_to_orig_dir( self, s_temp_out_base ):
 		'''
@@ -267,11 +307,24 @@ class PGOpNeEstimator( APGOperation ):
 		temp dir with result files inside.
 		'''
 		ls_output_files=glob.glob( s_temp_out_base + "*" )
-		
+
+		if self.__estimator_to_use == LDNE_ESTIMATION:
+			'''
+			2017_03_30.  Sometimes LDNe2 misnames (truncates) the 
+			columnar output file name (*x.txt), when there are dot 
+			characters in the outfile path/name supplied to LDNe2 as the
+			output base name, so that the glob expression
+			does not find it.
+			'''
+			self.__correct_and_add_columnar_output_file_if_not_present( \
+												ls_output_files,
+												s_temp_out_base )
+		#end if we are using LDNe
+
 		for s_file in ls_output_files:
 			s_copy_for_orig_dir=self.__outdir + os.path.sep \
 					+ s_file.replace( s_temp_out_base, self.__outfile )
-			shutil.copy( s_file, s_copy_for_orig_dir  )
+			pgut.do_shutil_copy( s_file, s_copy_for_orig_dir  )
 		#end for each file prefixed with our temp output file name
 
 		return
@@ -279,7 +332,15 @@ class PGOpNeEstimator( APGOperation ):
 
 	def __get_op_neestimator( self ):
 		o_op_object=None
-		o_op_object=NeEstimator2Controller()
+		s_path=None
+
+		if self.__ldne_path is not None:
+			s_path=self.__ldne_path
+		#end if we have an ldne path
+
+		o_op_object=NeEstimator2Controller( 
+					s_executable_and_path = s_path )
+
 		return o_op_object
 	#end def __get_op_neestimator
 
@@ -351,7 +412,8 @@ class PGOpNeEstimator( APGOperation ):
 		#does nothing if there is 
 		#no file)
 		self.output.parseNoDatFile()
-
+		
+		return
 	#end doOP
 
 	def deliverResults( self ):
@@ -371,6 +433,28 @@ class PGOpNeEstimator( APGOperation ):
 		'''
 		return self.output.getColumnNumberForFieldName (s_field_name )
 	#end def getColumnNumberForFieldName
+
+	@property
+	def ldne_path( self ):
+		return self.__ldne_path
+	#end property ldne_path
+
+	@ldne_path.setter
+	def ldne_path( self, s_value ):
+		self.__ldne_path=s_value
+		return
+	#end ldne_path setter
+
+	@property
+	def neestimator_path( self ):
+		return self.__neestimator_path
+	#end property ldne_path
+
+	@ldne_path.setter
+	def neestimator_path( self, s_value ):
+		self.__neestimator_path=s_value
+		return
+	#end ldne_path setter
 
 #end class PGOpNeEstimator 
 

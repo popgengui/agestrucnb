@@ -8,13 +8,14 @@ __date__ = "20160327"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import os
-import shutil
 import bz2
 
 #want to write genepop files
 #to a temp name, then rename
 #after writing is done:
 import uuid
+
+import shutil
 
 FILE_DOES_NOT_EXIST=0
 FILE_EXISTS_UNCOMPRESSED=1

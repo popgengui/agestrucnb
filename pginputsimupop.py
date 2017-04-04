@@ -159,7 +159,18 @@ class PGInputSimuPop( object ):
 				o_raterange=NbAdjustmentRangeAndRate( 1, self.gens, s_rate_and_range )
 
 				#we use the list indexes and cycle number minus 1	
-				for idx in range( o_raterange.start_cycle - 1, o_raterange.end_cycle ):
+				#note that the effects of harvest are such that
+				#the nth cycle's pop and Nb are changed at the end
+				#of cycle n-1.  Also note that simupop orders cycles
+				#on zero-indexed values:
+				i_start_cycle=o_raterange.start_cycle-2 \
+							if o_raterange.start_cycle > 1 else 0
+
+				i_end_cycle=o_raterange.end_cycle - 1 \
+							if o_raterange.end_cycle > 1 else 0
+
+
+				for idx in range( i_start_cycle, i_end_cycle ):
 					lf_rates[ idx ] = o_raterange.rate
 				#end for each idx in range
 			#end for each range and rate setting

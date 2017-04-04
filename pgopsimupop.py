@@ -725,6 +725,15 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __restrictedGenerator( self, pop, subPop ):
 
+
+		if VERY_VERBOSE:
+			print( "----------------" )
+			print( "in restrictedGenerator with gen: " + str( pop.dvars().gen ) )
+			print( "in restrictedGenerator with target: " + str( self.__targetNb ) )
+			print( "in restrictedGenerator with tolerance " + str( self.__toleranceNb ) )
+		#end if very erbose
+			
+
 		"""No monogamy, skip or litter"""
 		nbOK = False
 		nb = None
@@ -799,6 +808,11 @@ class PGOpSimuPop( modop.APGOperation ):
 						+ "\n" )
 
 				nbOK = True
+
+
+				if VERY_VERBOSE:
+					print( "in restrictedGenerator, selecting pop with Nb at: " + str( nb ) )
+				#end if very verbose	
 			else:
 				for male, female in pair:
 					female.breed -= 1
@@ -1153,12 +1167,14 @@ class PGOpSimuPop( modop.APGOperation ):
 		#which, though user-entered as a rate > 1.0, is literally a negative harvest rate, 
 		#and will proportionally increase the Nb:
 		self.__targetNb =self.__targetNb *(1-harvestRate) if harvestRate < 1.0 \
-												else self.__targetNb * harvestRate
+						else self.__targetNb * harvestRate
+
+		#Reset the toleracne to make it proportional to our new targetNb:
+		self.__set_nb_tolerance()
 		
 		if VERY_VERBOSE:
 			print ("    harvest rate: " + str( harvestRate ) )
 		#end if very verbose
-	
 
 		'''
 		2017_02_26.  No explicit call to a recalc fx is needed.  The assignment 
@@ -1237,7 +1253,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			maleHarvest = int( numpy.round(maleCount * harvestRate) )
 			femaleHarvest = int( numpy.round(femaleCount * harvestRate) )
 
-			if VERY_VERBOSE:
+			if VERY_VERY_VERBOSE:
 				print ("cohort: " + str( cohortKey ) )
 				print ("maleCount: " + str( maleCount ) )
 				print ("femaleCount: " + str( femaleCount ) )
@@ -1470,6 +1486,22 @@ class PGOpSimuPop( modop.APGOperation ):
 		return True
 	#end __setAge
 
+	def __set_nb_tolerance( self ):
+		'''
+		2017_04_03. This def was added after noting
+		that the tolerance needed to be computed not only
+		initially in __createAge, but also updated after 
+		changes to targetNb in def __harvest.
+		'''
+
+		f_nbvar=PGInputSimuPop.DEFAULT_NB_VAR if self.input.NbVar is None \
+															else self.input.NbVar 
+
+		self.__toleranceNb=self.__targetNb * f_nbvar
+
+		return
+	# end __set_nb_tolerance	
+
 	def __createAge( self ):
 
 		pop=self.__pop
@@ -1513,11 +1545,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		self.__targetNb=self.input.Nb
 
-		f_nbvar=PGInputSimuPop.DEFAULT_NB_VAR if self.input.NbVar is None \
-															else self.input.NbVar 
-
-
-		self.__toleranceNb=self.__targetNb * f_nbvar
+		self.__set_nb_tolerance()	
 
 		self.__selected_generator=None
 

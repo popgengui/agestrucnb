@@ -566,7 +566,7 @@ class GenepopFileManager( object ):
 
 		if os.path.exists( s_newfilename ):
 			s_msg="In GenepopFileManager object instance, " \
-					+ "in writeGenePopFile(), can't write file, " \
+					+ "def writeGenePopFile(), can't write file, " \
 					+ s_newfilename + ".  File already exists."
 			raise Exception( s_msg )
 		#end if file exists
@@ -1640,15 +1640,14 @@ class GenepopFileManager( object ):
 
 		return dddi_allele_counts_by_pop_by_loci
 	#end
-	
 
 	@property
 	def header( self ):
 		'''
 		This getter was added 2017_02_12 to allow clients to get
 		the header string, and so look for an Nb/Ne value in the 
-		header text.  The current implementation of storing this
-		value for the Nb estimation, is to put it in the header line
+		header text.  The current implementation stores this
+		value for the Nb estimation in the header line
 		as the final text, reading "nbne=<value>".  See 
 		pgdriveneestimator.py, def 
 		get_nbne_ratio_from_genepop_file_header.

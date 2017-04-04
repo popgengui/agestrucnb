@@ -10,7 +10,6 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 from os import path
 from genomics.popgen import ne2
 
-
 '''
 A value to use in teh parsed output instead 
 of pythons None.
@@ -27,7 +26,6 @@ __get_parsed_output_data -> __get_ne_estimator_parsed_output_data
 import pgldne2outputparser as pgldne
 ESTIMATOR_NEESTIMATOR="Ne2"
 ESTIMATOR_LDNE="LDNe2"
-
 
 class PGOutputNeEstimator( object ):
 

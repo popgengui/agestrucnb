@@ -215,21 +215,31 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 	#end __set_initial_file_info
 
 	def __on_click_run_or_cancel_neestimation_button( self ):
-		if self.__estimation_in_progress:
-			o_mbox=PGGUIYesNoMessage( self , 
-						"Are you sure you want to cancel " \
-					+ "the Ne estimation and remove all of its output files?" )
-			b_answer = o_mbox.value
-			if b_answer:
-				self.__cancel_neestimation()
-				self.__estimation_in_progress=False
-				self.__set_controls_by_run_state( self.__get_run_state() )
-			#end if yes
-		else:
-			if self.__params_look_valid( b_show_message=True ):
-				self.runEstimator()
-			#end if params look valid
-		#end if sim in progress else not
+		try:
+			if self.__estimation_in_progress:
+				o_mbox=PGGUIYesNoMessage( self , 
+							"Are you sure you want to cancel " \
+						+ "the Ne estimation and remove all of its output files?" )
+				b_answer = o_mbox.value
+				if b_answer:
+					self.__cancel_neestimation()
+					self.__estimation_in_progress=False
+					self.__set_controls_by_run_state( self.__get_run_state() )
+				#end if yes
+			else:
+				if self.__params_look_valid( b_show_message=True ):
+					self.runEstimator()
+				#end if params look valid
+			#end if sim in progress else not
+		except Exception as oex:
+			s_msg="In PGGuiNeEstimator instance, " \
+						+ " def __on_click_run_or_cancel_neestimation_button, " \
+						+ "an exception was caught with message: " \
+						+ str( oex )
+			PGGUIErrorMessage( self,  s_msg )
+			raise (oex)
+		#end try ... except
+
 		return
 
 	#end __on_click_run_or_cancel_neestimation_button
@@ -338,11 +348,27 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		if self.__temporary_directory_for_estimator is not None:
 			if os.path.exists( self.__temporary_directory_for_estimator ):
-				pgut.remove_directory_and_all_contents( \
-						self.__temporary_directory_for_estimator )
-			#end if path exists, remove
+				try:
+					pgut.remove_directory_and_all_contents( \
+							self.__temporary_directory_for_estimator )
+					#end if path exists, remove
+				except Exception as oex:
+					'''
+					Note that we don't propogate the exception, since
+					it will simply truncate the callers def and return
+					with the GUI still intact, but in a state that may 
+					be incorrect.  Hence we just tell the caller that the temporary
+					directory was not removed.
+					'''
+					s_msg="The program failed to remove the temporary " \
+								+ "directory used to run the Nb/Ne estimator.  " \
+								+ "Temporary directory name:\n" \
+								+ self.__temporary_directory_for_estimator
+					PGGUIErrorMessage( self, s_msg )
+				#end try...except
 			self.__temporary_directory_for_estimator=None
 		#end if the attribute has a non-None value
+
 		return
 	#end __remove_temporary_directory_used_by_estimator
 
@@ -591,11 +617,11 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 	#end __get_nbne_ratio_as_string_for_call_to_estimator
 
 	def __make_temporary_directory_for_estimator( self, s_parent_directory ):
-		s_uuid=str( uuid.uuid4() )
-		self.__temporary_directory_for_estimator=s_parent_directory \
-					+ os.path.sep + "temp_estimator_workspace_" \
-					+ s_uuid
-		os.mkdir( self.__temporary_directory_for_estimator )
+
+		self.__temporary_directory_for_estimator = \
+					pgut.get_temporary_directory( s_parent_dir=s_parent_directory,
+													s_prefix=( "tmp_est" ) )
+
 		return
 	#end __make_temporary_directory_for_estimator
 
