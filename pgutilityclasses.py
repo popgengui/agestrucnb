@@ -1515,7 +1515,8 @@ class NbAdjustmentRangeAndRate( object ):
 								+ "instance, the range values, start-end: " \
 								+ str( i_start ) + "-" + str( i_end ) \
 								+ " is not valid. Please check that your min " \
-								+ "cycle is at least one, your max cycle is no more " \
+								+ "cycle number is at least " + str( self.__min_valid_cycle )\
+								+ ", your max cycle is no more " \
 								+ "than the total reproductive cycles, " \
 								+ "and that your min is less than or equal to your max."
 				raise RangeAndRateViolationException( s_msg )

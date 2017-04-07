@@ -521,7 +521,7 @@ class PGGUIYesNoMessage( object ):
 		self.value=o_msgbox
 		return
 	#end __init__
-#end class PGGUIInfoMessage
+#end class PGGUIYesNoMessage
 
 class RightClickMenu( Menu ):
 

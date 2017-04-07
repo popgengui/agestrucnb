@@ -423,10 +423,21 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	o_input.makeInputConfig()
 	
 	b_write_conf_file=False
+	b_write_nb_and_age_tables=False
 
 	#we only write the configuraton file if the replicate number is 1:
 	if i_replicate_number == NUMBER_FIRST_REPLICATE:
 		b_write_conf_file=True
+		'''
+		2017_04_07.  These are files that, as the sim proceeds,
+		write two tables, one giving the pwop Nb values, the 
+		other giving a per-age cound of individuals for each pop.
+
+		These were intitially temporoary included files for testing,
+		but are useful enought to warrant inclusion in the output,
+		at least for the first replicate.
+		'''
+		b_write_nb_and_age_tables=True
 	#end if first replicate number
 
 	#reset reps to 1
@@ -459,7 +470,8 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 			o_output, 
 			b_remove_db_gen_sim_files=REMOVE_NON_GENEPOP_SIM_OUTPUT_FILES,
 			b_write_input_as_config_file=b_write_conf_file,
-			b_do_gui_messaging=True )
+			b_do_gui_messaging=True,
+			b_write_nb_and_ages_files=b_write_nb_and_age_tables )
 
 	o_new_pgopsimupop_instance.prepareOp( s_tag_out  )
 

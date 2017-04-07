@@ -1228,6 +1228,16 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				return	
 			#end if output or input is None
 
+			b_looks_good, s_consistency_msg=self.__input.valuesAreConsistent()
+
+
+			if not b_looks_good:
+
+				PGGUIInfoMessage( self, "Some input values are inconsisent.\n\n" + s_consistency_msg )
+
+				return
+			#end return after message if inconsistent input found
+
 			self.__setup_op()
 
 			'''
@@ -1502,7 +1512,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				v_validity_expression=getattr( self, s_validity_expression )
 
 				if not callable( v_validity_expression ):
-					s_msg="In PGGuiNeEstimator instance, " \
+					s_msg="In PGGuiSimupop instance, " \
 							+ "def __create_validity_checker, " \
 							+ "the validity expression argument " \
 							+ "evaluated to a non-callable attribute: " \
@@ -1514,7 +1524,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			o_checker=ValueValidator( v_validity_expression, v_init_value )
 
 			if not o_checker.isValid():
-				s_msg="In PGGuiNeEstimator instance, " \
+				s_msg="In PGGuiSimuPop instance, " \
 							+ "def __create_validity_checker, " \
 							+ "invalid initial value when setting up, " \
 							+ "validator object.  Validation message: " \

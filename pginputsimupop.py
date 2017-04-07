@@ -18,6 +18,7 @@ from ConfigParser import ConfigParser
 from pgutilityclasses import NbAdjustmentRangeAndRate
 
 class PGInputSimuPop( object ):
+
 	'''
 	Object meant to fetch parameter values and prepare them for 
 	use in a simuPop simulation.  
@@ -156,7 +157,7 @@ class PGInputSimuPop( object ):
 			
 			for s_rate_and_range in self.nbadjustment:
 
-				o_raterange=NbAdjustmentRangeAndRate( 1, self.gens, s_rate_and_range )
+				o_raterange=NbAdjustmentRangeAndRate( 2, self.gens, s_rate_and_range )
 
 				#we use the list indexes and cycle number minus 1	
 				#note that the effects of harvest are such that
@@ -168,7 +169,6 @@ class PGInputSimuPop( object ):
 
 				i_end_cycle=o_raterange.end_cycle - 1 \
 							if o_raterange.end_cycle > 1 else 0
-
 
 				for idx in range( i_start_cycle, i_end_cycle ):
 					lf_rates[ idx ] = o_raterange.rate
@@ -415,8 +415,25 @@ class PGInputSimuPop( object ):
 		self.__update_attribute_config_file_info( "reps", "sim", "reps" )
 		if config.has_option("sim", "startSave"):
 			self.startSave = config.getint("sim", "startSave")
+			'''
+			2017_04_05.  This is a correction for old configuration
+			files that were using the old default startSave value 
+			of 0 (now default is 1).
+			'''
+			if self.startSave==0:
+				self.startSave=1
+			#end if startsave is zero
+
 		else:
-			self.startSave = 0
+			'''
+			2017_04_05.  As we re-activatie the startSave feature,
+			with a control on the GUI interface, we now use 1-indexed
+			cycle numbers, so that the code during the simulation will 
+			(before writing results) check whether the gen number equals 
+			the startSave - 1.  Thus, the default startSave, to record all 
+			cycles, is now 1 instead of zero.
+			'''
+			self.startSave = 1
 		#end if config has startSave
 
 		self.__update_attribute_config_file_info( "startSave", "sim", "startSave" )
@@ -460,7 +477,7 @@ class PGInputSimuPop( object ):
 			self.cull_method = config.get("sim", "cull_method")
 		else:
 			self.cull_method = DEFAULT_CULL_METHOD
-		#end if config has startSave
+		#end if config has sim, cull_method
 		self.__update_attribute_config_file_info( "cull_method", "sim", "cull_method" )
 
 		'''
@@ -473,6 +490,17 @@ class PGInputSimuPop( object ):
 			We expect a config entry that will eval as a list of strings.
 			'''
 			self.nbadjustment=eval( config.get( "sim", "nbadjustment" ) )
+			'''
+			2017_04_05.  After changing the implementation of the nb adjustment 
+			parameter to better sync with cycle numbers, we set the minimum 
+			possible cycle number at 2 instead of 1 (which would have no effect, 
+			since the harvest, which makes the population and Nb adjustments,
+			needs an existing pop, i.e., can operate only after at least one
+			pop has been created).  We correct any nb adjustment list that was
+			saved before this change.
+			'''
+
+			self.__correct_min_cycle_in_nb_adjustment_list()
 		else:
 
 			s_msg="In PGInputSimuPop instance, " \
@@ -481,7 +509,7 @@ class PGInputSimuPop( object ):
 					+ "giving the total cycles to be simulated."
 			assert self.gens, s_msg
 
-			self.nbadjustment=[ "1-" + str( self.gens ) + ":0.0" ]
+			self.nbadjustment=[ "2-" + str( self.gens ) + ":0.0" ]
 		#end if the config file has an nbadjustment list else make one
 
 		self.__update_attribute_config_file_info( "nbadjustment", "sim" , "nbadjustment" )
@@ -489,6 +517,17 @@ class PGInputSimuPop( object ):
 
 		return
 	#end __get_config
+
+	def __correct_min_cycle_in_nb_adjustment_list( self ):
+		for idx in range( len(  self.nbadjustment ) ):
+			s_entry=self.nbadjustment[ idx ]
+			if s_entry.startswith( "1-" ):
+				s_new_entry="2-" + s_entry[ 2: ]
+				self.nbadjustment[ idx ] = s_new_entry 
+			#end if entry has start cycle 1, should be 2
+		#end for each entry
+		return
+	#end __correct_min_cycle_in_nb_adjustment_list
 
 	def __reset_start_lambda_using_ages( self ):
 		'''
@@ -1025,6 +1064,157 @@ class PGInputSimuPop( object ):
 		#end if nb is from effective_size_section
 		return b_returnval
 	#end has_effective_size_info
+
+	def __check_for_consistent_age_related_params( self ):
+		'''
+		2017_04_05.  This def checks that the parameters
+		related to the total ages of the model species are
+		consistent.  
+		'''
+		b_return_value=True
+
+		s_msg="In PGInputSimuPop instance, " \
+					+ "def __check_for_consistent_age_related_params, " \
+					+ "the following inconsistencies were found:"
+
+		if not( hasattr( self, "ages" ) ) or self.ages is None:
+			s_msg+="\n\n No value was found for the ages parameter.\n\n"
+			b_return_value=False
+		#end if no ages	
+
+		if not( hasattr( self, "fecundityFemale" ) ) \
+							or self.fecundityFemale is None:
+			s_msg+="\n\n No value was found for the female fecundity parameter.\n\n"
+			b_return_value=False
+		#end if no femail fecundity
+
+		if not( hasattr( self, "fecundityMale" ) ) or self.fecundityMale is None:
+			s_msg+="\n\n No value was found for the male fecundity parameter.\n\n"
+			b_return_value=False
+		#end if no male fecundity
+
+		if not( hasattr( self, "survivalFemale" ) ) or self.survivalFemale is None:
+			s_msg+="\n\n No value was found for the female survival parameter.\n\n"
+			b_return_vale=False
+		#end if no female survival 
+
+		if not( hasattr( self, "survivalMale" ) ) or self.survivalMale is None:
+			s_msg+="\n\n No value was found for the male survival parameter.\n\n"
+			b_return_value=False
+		#end if no female surviva
+
+		i_num_ages=self.ages
+		i_num_female_fecundity_values=len( self.fecundityFemale )
+		i_num_male_fecundity_values=len( self.fecundityMale )
+		i_num_female_survival_values=len( self.survivalFemale )
+		i_num_male_survival_values=len( self.survivalMale )
+
+		
+		if i_num_female_fecundity_values != i_num_ages-1 \
+				or i_num_male_fecundity_values != i_num_ages-1:
+			s_msg+="\n\n There are inconsistent age/fecundity values.  " \
+						+ "The number of female and/or male fecundity values " \
+						+ " should equal the number of ages minus one.\n\n"
+			b_return_value=False
+		#end if inconsistent fecundity list length
+
+		if i_num_female_survival_values != i_num_ages - 2 \
+			 or i_num_male_survival_values != i_num_ages - 2: 
+			 
+			s_msg+="\n\n There are inconsistent age/survival values, " \
+						+ "The number of female and/or male survival values " \
+						+ " should equal the number of ages minus two.\n\n"
+			b_return_value=False
+
+		#end if inconsistent survival list length
+
+		return b_return_value, s_msg
+	#end def __check_for_consistent_age_related_params 
+
+	def __check_for_consistent_cycle_related_values( self ):
+		'''
+		2017_04_05.  This def checks on parameters that depend 
+		on the number of reproductive cycles (named "gens"
+		in this input object).  These include
+		the burn-in value, as well as the startSave value,
+		and the ranges in the nb-adjustment list.
+		'''
+		b_return_value=True
+		b_have_gens_value=True	
+
+		s_msg="In PGInputSimuPop instance, " \
+				+ "def, __check_for_consistent_cycle_related_values, " \
+				+ "the following inconsistancies were found:" 
+
+
+		if not( hasattr( self, "gens" ) ) or self.gens is None:
+			s_msg+="\n\n Parameter gens (giving total reproductive cycles) " \
+					+ "is missing.\n\n"
+			b_have_gens_value=False	
+			b_return_value=False
+		#end if no gens param
+
+		#The startSave value should be at least 1 and no more than gens:
+		if not( hasattr( self, "startSave" ) ) or self.startSave is None:
+			s_msg+= "\n\n Parameter startSave is missing.\n\n"
+			b_return_value=False
+		elif b_have_gens_value:
+			if self.startSave < 1 or self.startSave > self.gens:
+				s_msg+="\n\n The startSave value (cycle at which to start recording) " \
+							+ "has an invalid value: " + str( self.startSave ) \
+							+ ".  It should be at least 1 and no greater than the " \
+							+ "number of gens (reproductive cycles), " \
+							+ str( self.gens ) + ".\n\n"
+
+				b_return_value=False
+		#end if no startSave parameter	
+
+		try:
+			lf_rates=self.makePerCycleNbAdjustmentList()	
+		except Exception as oex:
+			s_msg += "\n\n" + str( oex ) + "\n\n"
+			b_return_value=False
+		#end try...except
+
+
+		return b_return_value, s_msg
+
+	#end __check_for_consistent_cycle_related_values
+			
+	def valuesAreConsistent(self):
+		'''
+		2017_04_05. This def added so that 
+		when the PGGuiSimuPop instance's 
+		runSimulation def is called, it
+		can check for consistencies in the input
+		before proceeding to the simulation proper.
+
+		Increasing interdependancies among the 
+		current set of allowed input user settings
+		means that the per-control valideity tests
+		are not sufficient guarantors of valid input
+		values.
+		'''
+		s_msg="Messages from consistency checks: " 
+
+		b_ages_look_consistent, s_ages_msgs= \
+					self.__check_for_consistent_age_related_params()
+		b_cycles_look_consistent, s_cycles_msg=\
+					self.__check_for_consistent_cycle_related_values()
+
+		if not b_ages_look_consistent:
+			s_msg+="\n\n" + s_ages_msgs
+		#end if inconsistent ages values 
+
+		if not b_cycles_look_consistent:
+			s_msg+="\n\n" + s_cycles_msg
+		#end if  inconsistent cycles values
+
+		b_return_value=( b_ages_look_consistent and b_cycles_look_consistent )
+
+		return b_return_value, s_msg
+	#end def valuesAreConsistent
+		
 #end class PGInputSimuPop
 
 if __name__ == "__main__":

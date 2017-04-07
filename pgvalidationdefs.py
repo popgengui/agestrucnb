@@ -41,7 +41,7 @@ def validateNbAdjustment( s_adjustment, i_highest_cycle_number=1e20 ):
 	'''
 
 	b_return_val=True
-	i_lowest_cycle_number=1
+	i_lowest_cycle_number=2
 
 	s_msg="In mod pgvalidationdefs.py, def validateNbAdjustment, " \
 						+ "there was an error in the range " \
@@ -68,7 +68,8 @@ def validateNbAdjustment( s_adjustment, i_highest_cycle_number=1e20 ):
 
 		s_msg="In mod pgvalidationdefs.py, def validateNbAdjustment, " \
 				"cannot validate cycle range:  current setting for " \
-				+ "total generations is less than 1."
+				+ "total generations is less than the allowed minimum for " \
+				+ "adjustment (cycle " + str( i_lowest_cycle_number ) + ")."
 
 		b_return_val = False
 
@@ -96,7 +97,7 @@ def validateNbAdjustment( s_adjustment, i_highest_cycle_number=1e20 ):
 
 					f_rate=float( ls_adj_vals[ 1 ] )
 					
-					if i_min < 1 \
+					if i_min < i_lowest_cycle_number \
 							or i_max > i_highest_cycle_number \
 							or i_min > i_max:
 						b_return_val = False
@@ -113,10 +114,18 @@ def validateNbAdjustment( s_adjustment, i_highest_cycle_number=1e20 ):
 	return b_return_val
 #end validateNbAdjustment
 
+def validateStartSave( i_value, i_max_cycle_number=None ):
+	b_return_val=True
 
+	if type( i_value ) != int:
+		b_return_val=False
+	elif i_value < 1 or \
+			( i_max_cycle_number is not None and i_value > i_max_cycle_number ):
+		b_return_val=False
+	#end if non-int or out of range, return false
 
-
-
+	return b_return_val
+#end validateStartSave
 
 if __name__ == "__main__":
 	pass
