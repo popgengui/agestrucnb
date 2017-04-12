@@ -1940,7 +1940,8 @@ def get_subsample_genepop_file_name( s_original_genepop_file_name,
 def make_subsample_genepop_file_name( s_original_genepop_file,
 											s_temporary_directory, 
 													i_genepop_file_count, 
-														i_subsample_count ):
+														i_indiv_sample_count,
+														i_loci_subsample_count ):
 		'''
 		2017_04_03.  This def replaces def get_subsample_genepop_file_name,
 		in order to shorten the intermediate genepop file names, to address
@@ -1955,7 +1956,9 @@ def make_subsample_genepop_file_name( s_original_genepop_file,
 			s_parent_dir=s_temporary_directory	
 		#end if no temp dir use orig genepop dir, else use temp
 
-		s_file_name="f" + str( i_genepop_file_count ) + "s" + str( i_subsample_count )
+		s_file_name="f" + str( i_genepop_file_count ) \
+					+ "i" + str( i_indiv_sample_count ) \
+					+ "l" + str( i_loci_subsample_count )
 
 		s_subsample_genepop_file=os.path.join( s_parent_dir, s_file_name )
 		
@@ -1988,7 +1991,14 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 
 	li_population_numbers=o_genepopfile.getListPopulationNumbers( s_population_sample_name )
 	#for each sample (i.e. for each replicate of a sampling with a given set of params:
+
+	#Added this to help create a unique, temporary gp file name
+	#using file number individ sample, and loci sample counts:
+	i_individ_sample_count=0
+
 	for s_indiv_sample in ls_indiv_sample_names:
+
+		i_individ_sample_count+=1
 
 		#we also check that at least one pop has at least one individual
 		#listed for this subsample
@@ -2034,7 +2044,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 
 		
 	
-		i_subsample_count=0
+		i_loci_subsample_count=0
 
 		for s_loci_subsample_tag in ls_loci_subsample_tags_associated_with_this_indiv_sample:
 
@@ -2046,7 +2056,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 			'''
 			for i_population_number in li_population_numbers:
 
-				i_subsample_count+=1
+				i_loci_subsample_count+=1
 
 				if i_population_number in li_pops_with_invalid_size:
 					s_msg= "In pgdriveneestimator.py, def add_to_set_of_calls_to_do_estimate, " \
@@ -2125,7 +2135,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 				s_genepop_file_subsample=make_subsample_genepop_file_name( o_genepopfile.original_file_name,
 																							s_temporary_directory, 
 																								i_genepop_file_count, 
-																									i_subsample_count )
+																									i_individ_sample_count,
+																										i_loci_subsample_count )
 
 				s_run_output_file=s_genepop_file_subsample + "_ne_run.txt"
 
