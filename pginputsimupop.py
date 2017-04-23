@@ -380,7 +380,7 @@ class PGInputSimuPop( object ):
 			if self.NbVar > 1.0:
 				s_msg="Warning:  in PGInputSimuPop instance, def get_config, Nb tolerance value looks high at " \
 														+ str( self.NbVar ) + ".  " \
-														+ "This will allow generations with " \
+														+ "This will allow populations with " \
 														+ "Nb values varying substantially " \
 														+ "(i.e by at or more than the target Nb value)." 
 

@@ -1,7 +1,7 @@
 '''
 Description
 
-2017_03_25.  THis class was extracted from the
+2017_03_25.  This class was extracted from the
 pgguiutilities.py module, so that it is easier
 to debug.
 '''
@@ -13,8 +13,6 @@ from Tkinter import *
 from ttk import *
 import createtooltip as ctt
 import sys
-
-from pgkeycontrolframe import PGKeyControlFrame
 from pgguiutilities import FredLundhsAutoScrollbar
 from pgguiutilities import PGGUIInfoMessage
 from pgguiutilities import PGGUIYesNoMessage
@@ -24,21 +22,20 @@ from pgguiutilities import PGGUIErrorMessage
 2017_04_18.  To consolidate some of the objects and functions
 common to the key-value-frame classes, we add a second parent class.
 '''
-class KeyCategoricalValueFrame( PGKeyControlFrame ):
+from pgkeycontrolframe import PGKeyControlFrame
+class KeyCheckboxValueFrame( PGKeyControlFrame ):
 
 	'''
 	Description
 	
 	Revised KeyValueFrame
-	substituting a Radiobutton widget
+	substituting a Checkbutton widget
 	for the entry box used in KeyValFrame
 	
 	'''
 
 	def __init__( self, s_name, 
-			lq_modes,
-			i_default_mode_number,
-			o_value_type=None,
+			v_value=True,
 			o_master=None, 
 			s_associated_attribute=None,
 			o_associated_attribute_object=None,
@@ -46,9 +43,7 @@ class KeyCategoricalValueFrame( PGKeyControlFrame ):
 			i_labelwidth=15,
 			b_is_enabled=True,
 			s_label_justify='right',
-			s_buttons_justify='right',
 			s_label_name=None,
-			b_buttons_in_a_row=False,
 			b_force_disable=False,
 			s_tooltip = "" ):
 
@@ -56,12 +51,6 @@ class KeyCategoricalValueFrame( PGKeyControlFrame ):
 		Param lq_modes, list of sequences, each a pair
 		    giving the mode label text, and its associated value
 			assigned when it is the selected radio button
-		Param i_default_mode_number gives the ith (one-indexed)
-			item in modes, that is to be the active button,
-			and that gives the default value
-		Param o_value_type gives the python type for the values
-			given in lq_modes value items.  Currently implemented
-			for bool, int, float, and string.
 		Param o_master is the parent Tkinter object.
 				Param s_associated_attribute is the name of 
 			attribute instance that can be accessed
@@ -77,12 +66,7 @@ class KeyCategoricalValueFrame( PGKeyControlFrame ):
 			This def is to have no passed params.
 		Param i_labelwidth gives the width the the Label widget.
 		Param s_label_justify gives Label widget "justify" value.
-		Param s_buttons_justify gives Radiobutten Widget text "justify" value.
-				currently not implemented (ttk radio button widgets are not
-				settable for justify and foreground, without using a syle map).
 		Param s_label_name, if not None, replaces s_name as the text for the label.
-		Param b_buttons_in_a_row, if False (default) all buttons are in a single column, if True,
-				then all buttons side by side in a single row
 		Param b_force_disable, if True, will override the b_is_enabled value and disable all entry 
 			  boxes
 		"""
@@ -90,52 +74,28 @@ class KeyCategoricalValueFrame( PGKeyControlFrame ):
 		PGKeyControlFrame.__init__( self, o_master, name=s_name.lower() )
 
 		self.__master=o_master
-		self.__value=None
-		self.__default_mode_number=i_default_mode_number
-		self.__modes=lq_modes
+		self.__value=v_value
 		self.__name=s_name
 		self.__lablewidth=i_labelwidth
 		self.__labeljustify=s_label_justify
-		self.__buttons_justify=s_buttons_justify
 		self.__isenabled=b_is_enabled
 		self.__associated_attribute=s_associated_attribute
 		self.__associated_attribute_object=o_associated_attribute_object
 		self.__def_on_button_change=def_on_button_change
-		self.__put_buttons_in_row=b_buttons_in_a_row
-		self.__current_button_value=self.__init_current_button_val( o_value_type )
 		self.__label_name=self.__name if s_label_name is None else s_label_name
 		self.__force_disable=b_force_disable
 		self.__tooltip=self.__label_name if s_tooltip == "" else s_tooltip
 		self.__subframe=None
 
-		#To maintain a reference to the Radiobutton objects,
+		#To maintain a reference to the Checkbutton object,
 		#this will be appended-to as they are created:
-		self.__radio_buttons=[]
+		self.__check_button=None
+
+		self.__current_button_value=BooleanVar()
+		self.__current_button_value.set( v_value )
 		self.__setup()
+
 	#end init
-
-	def __init_current_button_val( self, o_value_type ):
-		
-		o_var=None
-
-		if o_value_type==bool:
-			o_var=BooleanVar()
-		elif o_value_type==int:
-			o_var=IntVar()
-		elif o_value_type==float:
-			o_var=DoubleVar()
-		elif o_value_type==StringVar:
-			o_var=StringVar()
-		else:
-			s_msg="in KeyCategoryValFrame object instance, " \
-					+ "value type, " + str( o_value_type ) \
-					+ " has no associated Tkinter variable type"
-			raise Exception( s_msg )
-		#end if bool ... else int ... etc
-	
-		return o_var
-
-	#end __init_current_button_val
 
 	def __reset_value( self ):
 
@@ -177,7 +137,7 @@ class KeyCategoricalValueFrame( PGKeyControlFrame ):
 		self.__subframe=Frame( self.__canvas )
 
 		self.__setup_label()
-		self.__setup_buttons()
+		self.__setup_button()
 
 		self.__subframe_id=self.__canvas.create_window(0,0, anchor=NW, window=self.__subframe )
 		o_horiz_scroll.config( command=self.__canvas.xview )
@@ -200,64 +160,39 @@ class KeyCategoricalValueFrame( PGKeyControlFrame ):
 		self.label=o_label
 	#end __setup_label
 
-	def __setup_buttons( self ):
+	def __setup_button( self ):
 
-		self.__make_radio_buttons()
+		self.__make_check_button()
 
 		return
 
 	#end __setup_entries
 
-	def __make_radio_buttons( self ):
-
-		i_rowcount=0
+	def __make_check_button( self ):
+	
+		i_row_val=0
+		i_column_val=0
 
 		s_state="enabled"
 		if self.__isenabled==False or self.__force_disable==True:
 			s_state="disabled" 
 		#end if enabled else not
 
-		for idx in range( len( self.__modes ) ):
-
-			#modes is a list of sequences, pairs
-			#giving ( buttontext, buttonvalue):
-			s_text, v_value=self.__modes[ idx ]
 			
-			i_rowcount+=1
+		self.__check_button=Checkbutton( self.__subframe, 
+									onvalue=True,
+									offvalue=False,
+									text=self.__name,
+									variable=self.__current_button_value,
+									command=self.__on_button_change,
+									state=s_state )
+	
+		self.__tooltip=ctt.insertNewlines( self.__tooltip )
+		o_tooltip=ctt.CreateToolTip( self.__check_button,  self.__tooltip )
 
-			self.__current_button_value.set( v_value )
-			
-			o_radio_button=Radiobutton( self.__subframe, 
-										text=s_text,
-										variable=self.__current_button_value,
-										value=v_value,
-										command=self.__on_button_change,
-										state=s_state )
-			
-			self.__tooltip=ctt.insertNewlines( self.__tooltip )
-			o_tooltip=ctt.CreateToolTip( o_radio_button,  self.__tooltip )
 
-			i_row_val=i_rowcount
-			i_column_val=0
 
-			#if user wants buttons in a row
-			#invert the default row,col vals:
-			if self.__put_buttons_in_row == True:
-				i_row_val=0
-				i_column_val=i_rowcount
-			#end if we want buttons in single row
-
-			o_radio_button.grid( row = i_row_val, column = i_column_val, sticky=(NW) )
-
-			if idx == self.__default_mode_number - 1:
-				o_defaul_button=o_radio_button
-			#end if this is the default button
-
-			self.__radio_buttons.append( o_radio_button )
-
-		#end for each index
-
-		self.__current_button_value.set( o_defaul_button.cget( "value" ) )
+		self.__check_button.grid( row = i_row_val, column = i_column_val, sticky=(NW) )
 
 		return
 	#end __make_value_row
@@ -293,25 +228,18 @@ class KeyCategoricalValueFrame( PGKeyControlFrame ):
 
 	def setStateControls( self, s_state ):
 		'''
-		Set the state of all this objects
-		radio buttons.
+		Set the Checkbutton's state.
 		'''
-		for o_radio_button in self.__radio_buttons:
-			o_radio_button.configure( state=s_state )
-		#end for each entry box
+		self.__check_button.configure( state=s_state )
 
 		return
 	#end disableControls
 
 	def getControlStates( self ):
-		ls_states=[]
-		for o_radio_button in self.__radio_buttons:
-			s_state=o_radio_button.cget( "state" )
-			ls_states.append( s_state )
-		#end for each entry box
 
-		return ls_states
-	#end 
+		return str( self.__check_button.cget( "state" ) )
+
+	#end getControlStates
 
 	@property
 	def is_enabled( self ):
@@ -336,6 +264,38 @@ class KeyCategoricalValueFrame( PGKeyControlFrame ):
 #end class KeyCategoricalValueFrame
 
 if __name__ == "__main__":
+
+	class myattr( object ):
+		def __init__( self, vval=False ):
+			self.vval=vval
+		#end __init__
+	#ende myattr	
+
+	omya=myattr(True)
+
+	myr=Tk()
+
+	def lookatvval():
+		print( "vval in mya: " + str( omya.vval ) )
+		return
+	#end lookatmya
+
+	mycb=KeyCheckboxValueFrame( s_name="mybool", 
+			v_value=omya.vval,
+			o_master=myr, 
+			s_associated_attribute="vval",
+			o_associated_attribute_object=omya,
+			def_on_button_change=lookatvval,
+			i_labelwidth=15,
+			b_is_enabled=True,
+			s_label_justify='right',
+			s_label_name=None,
+			b_force_disable=False,
+			s_tooltip = "" )
+
+	mycb.grid()
+
+	myr.mainloop()
 	pass
 #end if main
 

@@ -8,7 +8,7 @@ __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 VERBOSE=False
-VERY_VERBOSE=True
+VERY_VERBOSE=False
 VERY_VERY_VERBOSE=False
 
 USE_GUI_MESSAGING=False
@@ -231,10 +231,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		try:
 			self.__nb_and_census_adjustment_by_cycle=self.input.makePerCycleNbAdjustmentList()
-			##### temp
-			print ("----------------" )
-			print( "in prepare op, wth adjust: " + str( self.__nb_and_census_adjustment_by_cycle ) )
-			##### 
 			self.__createSinglePop()
 			self.__createGenome()
 			self.__createAge()	
@@ -800,7 +796,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			'''
 			2017_03_24.  Since this def is now always used
-			to get the next gen,  Hence we change the gen 
+			to get the next gen, we change the gen 
 			number after which we apply our nb test, to the 
 			gen post burn in
 			'''
@@ -868,12 +864,14 @@ class PGOpSimuPop( modop.APGOperation ):
 							+ str( self.__targetNb ) \
 							+ ", and tolerance at +/- " \
 							+ str( self.__toleranceNb ) + "."
-				#If we are using gui messaging, 
-				#we need to show this here, otherwise,
-				#because SimuPop is calling this def,
-				#the exception won't propogate to
-				#doOp, where other exceptions will
-				#be shown.
+				'''
+				If we are using gui messaging, 
+				we need to show this here, otherwise,
+				because SimuPop is calling this def,
+				the exception won't propogate to
+				doOp, where other exceptions will
+				be shown.
+				'''
 				if self.__guierr is not None:					
 					self.__guierr( None, s_msg )
 				#end if using gui messaging

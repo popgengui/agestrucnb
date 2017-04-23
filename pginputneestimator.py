@@ -47,7 +47,6 @@ class PGInputNeEstimator (object):
 		return
 	#end setRunParams
 
-
 #end class PgInputNeEstimator
 
 if __name__ == "__main__":

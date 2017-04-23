@@ -8,6 +8,7 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 VERBOSE=False
 VERY_VERBOSE=False
+VERY_VERY_VERBOSE=False
 
 DO_PUDB=False
 
@@ -29,6 +30,8 @@ import pgoutputsimupop as pgout
 from pgkeyvalueframe import KeyValFrame
 from pgkeylistcomboframe import KeyListComboFrame
 from pgkeycategoricalvalueframe import KeyCategoricalValueFrame
+from pgkeycheckboxvalueframe import KeyCheckboxValueFrame
+
 from pgguiutilities import PGGUIInfoMessage
 from pgguiutilities import PGGUIYesNoMessage
 from pgguiutilities import PGGUIErrorMessage
@@ -301,6 +304,11 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 						def_button_command=self.load_config_file,
 						b_force_disable=b_force_disable )
 
+		'''
+		Though we don't want the Entry box enabled, we want the
+		label to show:
+		'''
+		o_config_kv.setLabelState( "enabled" )
 		o_config_kv.grid( row=i_row, sticky=( NW ) )
 
 		i_row+=1
@@ -318,6 +326,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					s_button_text="Select",
 					def_button_command=self.select_output_directory,
 					b_force_disable=b_force_disable )
+		
+		o_outdir_kv.setLabelState("enabled" )
 
 		o_outdir_kv.grid( row= i_row, sticky=( NW ) )
 
@@ -341,6 +351,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					s_label_justify='left',
 					o_validity_tester=o_basename_validity_tester,
 					b_force_disable=b_force_disable ) 
+		
+		#Despite sometimes disabling the text entry,
+		#we want the label always to show non-grayed-out.
+		self.__outbase_kv.setLabelState( "enabled" )
 
 		self.__outbase_kv.grid( row=i_row, sticky=( NW ) )
 
@@ -470,6 +484,14 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#for parameters in this section, we set enabled 
 		#flag to false for the KeyValFrame entry box:
 		CONFIG_INFO_SECTION_NAME="Configuration Info"
+
+		'''
+		2017_04_20.  After making the default behaiour
+		that when the control is disabled, so is the label,
+		we will override by re-enabling the label for
+		our interface.
+		'''
+		LABEL_ALWAYS_ENABLED=True
 
 		self.__param_key_value_frames={}
 
@@ -740,19 +762,39 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					#end if
 
 					o_kv=KeyCategoricalValueFrame( s_name=s_param, 
-							lq_modes=[ ( "Yes", True ), ( "No", False ) ],
-							i_default_mode_number=i_default_mode,
-							o_value_type=bool,
-							o_master=o_frame_for_this_param, 
-							s_associated_attribute=s_param,
-							o_associated_attribute_object=self.__input,
-							def_on_button_change=def_to_call_on_change,
-							i_labelwidth=i_width_labelname,
-							s_label_name=s_longname,
-							b_buttons_in_a_row = True,
-							b_is_enabled=b_allow_entry_change,
-							b_force_disable=b_force_disable,
-							s_tooltip=s_tooltip )
+										lq_modes=[ ( "Yes", True ), ( "No", False ) ],
+										i_default_mode_number=i_default_mode,
+										o_value_type=bool,
+										o_master=o_frame_for_this_param, 
+										s_associated_attribute=s_param,
+										o_associated_attribute_object=self.__input,
+										def_on_button_change=def_to_call_on_change,
+										i_labelwidth=i_width_labelname,
+										s_label_name=s_longname,
+										b_buttons_in_a_row = True,
+										b_is_enabled=b_allow_entry_change,
+										b_force_disable=b_force_disable,
+										s_tooltip=s_tooltip )
+				elif s_param_control_type=="checkbutton":
+				
+					'''
+					Unlike for the key-value frame, here We use the longname 
+					for param s_name, as that becomes the label text for the
+					Checkbutton object.  We also send in an empty string for the
+					label name, since it is not needed.
+					'''
+					o_kv=KeyCheckboxValueFrame( s_name=s_longname,
+										v_value=v_val,
+										o_master=o_frame_for_this_param, 
+										s_associated_attribute=s_attribute_to_update,
+										o_associated_attribute_object=self.__input,
+										def_on_button_change=def_to_call_on_change,
+										i_labelwidth=i_width_labelname,
+										b_is_enabled=b_allow_entry_change,
+										s_label_justify='right',
+										s_label_name="",
+										b_force_disable=b_force_disable,
+										s_tooltip = s_tooltip )
 
 				else:
 					s_msg="In PGGuiSimuPop instance, def " \
@@ -761,7 +803,12 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							+ s_param_control_type + "."
 					raise Exception( s_msg )
 
-				#end if control type entry, else combobox, else bool radio button, else unknown
+				#end if control type entry, else combobox, else bool radio button, 
+				#else check button, else unknown
+
+				if LABEL_ALWAYS_ENABLED:
+					o_kv.setLabelState( "enabled" )
+				#end if labels should always be non-grayed-out
 
 				o_kv.grid( row=i_row, sticky=(NW) )
 				self.__param_key_value_frames[ s_param ] = o_kv
@@ -842,6 +889,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					title='Load a configuration file' )
 
 			if pgut.dialog_returns_nothing( s_config_file ):
+
 				return
 			#end if no file selected, return
 
@@ -1266,15 +1314,41 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				return
 			#end if output files exist	
 
-			#input file to reaplace the orig config file
-			#as well as the attr/value dict originally passed to each 
-			#process.  We need to set this temp file name attribute
-			#in this instance before spawning a multiprocessing.process
-			#in do_operation, else it will not appear during call backs
-			#to __check_progress_operation_process, in which we delete
-			#the temp file when sim processes are finished
-			self.__temp_config_file_for_running_replicates=str( uuid.uuid4() ) 
+			'''
+			input file to reaplace the orig config file
+			as well as the attr/value dict originally passed to each 
+			process.  We need to set this temp file name attribute
+			in this instance before spawning a multiprocessing.process
+			in do_operation, else it will not appear during call backs
+			to __check_progress_operation_process, in which we delete
+			the temp file when sim processes are finished
+
+			2017_04_21.  Add the output directory path to the temp config
+			filename.  This allows the file to be written even if the user's
+			current directory is not writeable. We also no use a tempfile
+			created file rather than the uuid naming.
+			'''
+
+			s_output_dir=os.path.dirname( self.__output.basename )
+
+
+			if not( os.path.exists( s_output_dir ) ):
+				s_msg="In PGGuiSimuPop instance, def runSimulation, " \
+							+ "the program cannot write the temp config file " \
+							+ "because the curren output directory name, " \
+							+ self.__output.basename  \
+							+ ", does not exist as a path."
+				raise Exception( s_msg )
+			#end if not a path
 			
+			s_temp_file_name=pgut.get_temp_file_name( s_parent_dir=s_output_dir )
+
+			if pgut.is_windows_platform():
+				s_temp_file_name = pgut.fix_windows_path( s_temp_file_name )
+			#end if windows, fix path
+
+			self.__temp_config_file_for_running_replicates=s_temp_file_name
+
 			self.__input.writeInputParamsAsConfigFile( \
 				self.__temp_config_file_for_running_replicates )
 
@@ -1540,5 +1614,16 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		return o_checker
 	#end __create_validity_checker
+
+	def onChangeInMonogamyCheckbox( self ):
+		'''
+		For testing only, as of 2017_04_19.
+		'''
+		if VERY_VERY_VERBOSE:		
+			print( "current type for isMonog: " + str( type ( self.__input.isMonog ) ) )
+			print( "current value for isMonog: " + str( self.__input.isMonog ) )
+		#end if VERY_VERY_VERBOSE	
+		return
+	#end onChangeInMonogamyCheckbox
 
 #end class PGGuiSimuPop

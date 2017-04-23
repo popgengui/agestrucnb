@@ -130,6 +130,11 @@ def do_usage_check( ls_this_argv,
 	return  s_usage_string 
 #def do_usage_check
 
+def get_temp_file_name( s_parent_dir=None ):
+	s_tempfile=tempfile.mktemp( dir=s_parent_dir )	
+	return s_tempfile
+#end get_temp_file_name
+
 def get_temporary_directory( s_parent_dir=None, s_prefix='tmp' ):
 	
 	s_tempdir_name=None
@@ -871,6 +876,7 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 										i_num_processes,
 										s_runmode,
 										s_nbne_ratio,
+										s_do_nb_bias_adjustment,
 										s_outfile_basename,
 										s_temporary_directory_for_estimator,
 										s_file_delimiter="," ):
@@ -939,7 +945,7 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 						+ qs_sample_scheme_args \
 						+ ( str( f_min_allele_freq ), str( i_replicates ) ) \
 						+ qs_loci_sampling_scheme_args \
-						+ ( str( i_loci_replicates ), str( i_num_processes ), s_runmode, s_nbne_ratio ) 
+						+ ( str( i_loci_replicates ), str( i_num_processes ), s_runmode, s_nbne_ratio, s_do_nb_bias_adjustment ) 
 
 		s_main_output_filename=s_outfile_basename + "." \
 				+ NE_ESTIMATION_MAIN_TABLE_FILE_EXT

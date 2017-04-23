@@ -18,8 +18,8 @@
 
 #requires gnuplot program.
 
-numrequiredargs="7"
-numwithopt="8"
+numrequiredargs="8"
+numwithopt="9"
 
 mys=$( basename $0 )
 
@@ -34,6 +34,7 @@ then
 	echo "       <int, max value for Nb axis (y-axis)"
 	echo "       <int, target Nb>"
 	echo "       <title> (use \"newline\" to break the title into multiple lines.)"
+	echo "       <regex string, empty for none, to see only tsv entries with a matching substring (example \".r1.\" substring for sim genepop, replicate 1 only)"
 	echo "       optional, <term name> (default is \"qt\", but try \"wxt\" or \"x11 (linux)\" if no qt)"
 
 	exit 0
@@ -47,6 +48,7 @@ minyval="$4"
 maxyval="$5"
 target_nb="$6"
 mytitle="$7"
+myregex="$8"
 
 if [ "$#" -eq "${numwithopt}" ]
 then
@@ -64,13 +66,20 @@ const_height="600"
 const_size="size ${const_width}, ${const_height}"
 const_tsv_gen_col="2"
 const_tsv_nb_col="11"
-const_tsv_adj_nb_col="19"
+const_tsv_adj_nb_col="21"
 const_lw=1
 
 #2-line substitution breaks
 #title into multi lines:
 mytitle="${mytitle//newline/
 }"
+
+tsvdata="$mytsv"
+
+if [ "$myregex" != "" ]
+then
+	tsvdata="<grep \"${myregex}\" ${mytsv} "  
+fi
 
 gnuplot_statements="set term ${const_term} ${const_size}; \
 			set xlabel 'reproductive cycle'; \
@@ -81,9 +90,9 @@ gnuplot_statements="set term ${const_term} ${const_size}; \
 			set arrow 1 from 0,${target_nb} to ${total_gens},${target_nb} nohead; \
 			set label 'expected' at 0,${target_nb} offset 0.5,1; \
 			plot '${mytable}' using 1:2 with linespoints lw ${const_lw} t 'sim' , \
-						'${mytsv}' using (\$${const_tsv_gen_col}-1):${const_tsv_nb_col} \
+						'${tsvdata}' using (\$${const_tsv_gen_col}-1):${const_tsv_nb_col} \
 								t 'ldne' lw ${const_lw} with linespoints , \
-						'${mytsv}' using (\$${const_tsv_gen_col}-1):${const_tsv_adj_nb_col} \
+						'${tsvdata}' using (\$${const_tsv_gen_col}-1):${const_tsv_adj_nb_col} \
 						t 'adj ldne' lw ${const_lw} with linespoints ;"
 
 gnuplot -p -e "${gnuplot_statements}"

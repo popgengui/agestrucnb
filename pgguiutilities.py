@@ -521,6 +521,12 @@ class PGGUIYesNoMessage( object ):
 		self.value=o_msgbox
 		return
 	#end __init__
+
+	@property
+	def user_response( self ):
+		return self.value
+	#end property user_response
+
 #end class PGGUIYesNoMessage
 
 class RightClickMenu( Menu ):
@@ -554,24 +560,27 @@ def destroy_on_def_returning_true( o_object_to_destroy, def_that_returns_boolean
 #end destroy_on_def_returning_true
 
 if __name__=="__main__":
-	import pgutilities as modut
-	import test_code.testdefs as td
+#	import pgutilities as modut
+#	import test_code.testdefs as td
+#
+#	ls_args=[ "test number" ]
+#
+#	s_usage=modut.do_usage_check( sys.argv, ls_args )
+#
+#	if s_usage:
+#		print( s_usage )
+#		sys.exit()
+#	#end if usage
+#	
+#	s_test_number=sys.argv[ 1 ]
+#
+#	ddefs={ 1:td.testdef_pgguiutilities_1,
+#			2:td.testdef_pgguiutilities_2 }
+#	
+#	ddefs[ int( s_test_number ) ] ( )
+	myr=Tk()
+	obox=PGGUIYesNoMessage( myr, "yes or no" )
 
-	ls_args=[ "test number" ]
-
-	s_usage=modut.do_usage_check( sys.argv, ls_args )
-
-	if s_usage:
-		print( s_usage )
-		sys.exit()
-	#end if usage
-	
-	s_test_number=sys.argv[ 1 ]
-
-	ddefs={ 1:td.testdef_pgguiutilities_1,
-			2:td.testdef_pgguiutilities_2 }
-	
-	ddefs[ int( s_test_number ) ] ( )
-
+	print( "answer: " + str( obox.user_response ) )
 #end if  __main__
 

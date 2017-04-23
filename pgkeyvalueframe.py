@@ -8,7 +8,6 @@ __filename__ = "pgkeyvalueframe.py"
 __date__ = "20170325"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-
 from Tkinter import *
 from ttk import *
 from pglisteditingsubframe import ListEditingSubframe 
@@ -18,11 +17,17 @@ from pgguiutilities import PGGUIInfoMessage
 from pgguiutilities import PGGUIYesNoMessage
 from pgguiutilities import PGGUIErrorMessage
 
-
 import createtooltip as ctt
 import sys
 
-class KeyValFrame( Frame ):
+'''
+2017_04_18.  To consolidate some of the objects and functions
+common to the key-value-frame classes, we make  parent class that
+itself inherits Frame, while also implementing other common functions.
+'''
+from pgkeycontrolframe import PGKeyControlFrame
+
+class KeyValFrame( PGKeyControlFrame ):
 	
 	'''
 	Description
@@ -129,10 +134,8 @@ class KeyValFrame( Frame ):
 			  trim, extend, or assign one value to a range of list indices.
 		"""
 
-		#TCL won't allow uppercase names for windows
-		#(note that we save the name, case in-tact, in
-		#member __name:
-		Frame.__init__( self, o_master, name=s_name.lower() )
+		PGKeyControlFrame.__init__( self, o_master, name=s_name.lower() )
+
 		self.__master=o_master
 		'''
 		This boolean var will be  reassigned
@@ -279,7 +282,7 @@ class KeyValFrame( Frame ):
 			#if client passed us a validity object,
 			#we use it to vett the new entry:
 			elif self.__validity_tester is not None:
-
+				
 				v_val_to_test=o_type( o_entryval.get() )
 
 				self.__validity_tester.value=v_val_to_test			
@@ -373,9 +376,22 @@ class KeyValFrame( Frame ):
 	#end __setup_subwidgets
 
 	def __setup_label( self ):
-		o_label=Label( self.__subframe, text=self.__label_name, justify=self.__labeljustify )
+		s_state="enabled"
+
+		if self.__force_disable==True or self.__isenabled==False:
+			s_state="disabled"
+		#end if force disable
+
+		o_label=Label( self.__subframe, text=self.__label_name, 
+										justify=self.__labeljustify, 
+														state=s_state )
 		o_label.config( width=self.__lablewidth )
 		o_label.grid( row=0, column=0 )
+		'''
+		A parent-class (PGKeyControlFrame)  instance handle on the label is added 2017_04_18.  We now
+		manipulate its state through the parent class methods.
+		'''
+		self.label=o_label
 		return
 	#end __setup_label
 
@@ -637,10 +653,15 @@ class KeyValFrame( Frame ):
 	def __on_enterkey( self, event=None ):
 
 		if self.__isenabled == False or self.__force_disable == True:
+
 			return
+
 		else:
+
 			self.__update_after_entry_change()
-		#end
+
+		#end if not enabled or force disable is True
+
 		return
 	#end __on_enterkey
 
@@ -666,6 +687,9 @@ class KeyValFrame( Frame ):
 		entry boxes and (if present) button
 		to the value passed.
 		'''
+
+		self.__isenabled=( s_state == "enabled" )
+
 		for o_entry_box in self.__entry_boxes:
 			o_entry_box.configure( state=s_state )
 		#end for each entry box
@@ -680,18 +704,24 @@ class KeyValFrame( Frame ):
 	def getControlStates( self ):
 		ls_states=[]
 		for o_entry_box in self.__entry_boxes:
-			s_state=o_entry_box.cget( "state" )
+			'''
+			Trials show that sometimes this call returns
+			a string, other times an "index object", whose
+			str() value is as expected ('enabled', 'disabled', 
+			'normal'...)
+			'''
+			s_state=str( o_entry_box.cget( "state" ) )
 			ls_states.append( s_state )
 		#end for each entry box
 
 		if self.__button_object is not None:
-			s_button_state=self.__button_object.cget( state )
-			ls_states.apend( s_state )
+			s_button_state=str( self.__button_object.cget( "state" ) )
+			ls_states.append( s_state )
 		#end if there is a button
 
 		return ls_states
-	#end 
-	
+	#end getControlStates
+
 	@property
 	def val( self ):
 		if self.__orig_value_is_list:

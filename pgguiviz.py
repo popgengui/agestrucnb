@@ -308,6 +308,9 @@ class PGGuiViz( pgg.PGGuiApp ):
 						b_force_disable=b_force_disable,
 						s_tooltip = "Load a tsv file, output from an Nb/Ne Estimation run" )
 
+		#The entry box should be disabled, but
+		#we want the lable non-grayed-out:
+		o_config_kv.setLabelState( "enabled" )
 		o_config_kv.grid( row=i_row, sticky=( NW ) )
 
 		i_row+=1
@@ -325,6 +328,8 @@ class PGGuiViz( pgg.PGGuiApp ):
 					s_button_text="Select",
 					def_button_command=self.__select_output_directory,
 					b_force_disable=b_force_disable )
+
+		o_outdir_kv.setLabelState( "enabled" )
 
 		o_outdir_kv.grid( row= i_row, sticky=( NW ) )
 

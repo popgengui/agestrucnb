@@ -106,7 +106,9 @@ import genepopfilesampler as gps
 import pgopneestimator as pgne
 import pginputneestimator as pgin
 import pgoutputneestimator as pgout
+from pgutilityclasses import NbNeReader
 from pgutilityclasses import LDNENbBiasAdjustor
+
 import pgutilities as pgut
 
 VERBOSE=False
@@ -214,9 +216,9 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 		"Integer, Number of loci sampling replicates (value of 1 means one loci subsample " \
 								+ "per loci sampling param, per individual replicate)." ]
 
-LS_FLAGS_SHORT_OPTIONAL=[  "-o", "-d", "-b" ]
+LS_FLAGS_SHORT_OPTIONAL=[  "-o", "-d", "-b", "-j"  ]
 
-LS_FLAGS_LONG_OPTIONAL=[ "--processes", "--mode", "--nbneratio" ]
+LS_FLAGS_LONG_OPTIONAL=[ "--processes", "--mode", "--nbneratio", "--donbbiasadjust" ]
 
 LS_ARGS_HELP_OPTIONAL=[  "total processes to use (single integer) Default is 1 process.",
 				"\"no_debug\", \"debug1\", \"debug2\", \"debug3\", \"testserial\", \"testmulti\"" \
@@ -227,7 +229,8 @@ LS_ARGS_HELP_OPTIONAL=[  "total processes to use (single integer) Default is 1 p
 				+ "in each file, which replicate Ne estimates include the individual.  It also preserves " \
 				+ "the intermediate genepop and NeEstimator output files",
 				"An Nb/Ne ratio, if supplied, then used in a bias adjustment to the LDNE " \
-				+ "estimates (after Waples, 2014)" ]
+				+ "estimates (after Waples, 2014)", "True|False, whether to do the Nb bias adjustment. " \
+				+ "If False, the Nb/Ne ratio parameter is ignored." ]
 
 #Indices into the args as passed as list/sequence to def parse_args:
 IDX_GENEPOP_FILES=0
@@ -247,9 +250,13 @@ IDX_LOCI_SAMPLE_REPLICATES=13
 IDX_PROCESSES=14
 IDX_DEBUG_MODE=15
 IDX_NBNE_RATIO=16
-IDX_MAIN_OUTFILE=17
-IDX_SECONDARY_OUTFILE=18
-IDX_MULTIPROCESSING_EVENT=19
+'''
+This parameter was added on 2017_04_14.
+'''
+IDX_DO_BIAS_ADJUST=17
+IDX_MAIN_OUTFILE=18
+IDX_SECONDARY_OUTFILE=19
+IDX_MULTIPROCESSING_EVENT=20
 '''
 2017_03_27.  This new argument allows the intermediate
 genepop files created by this module before it runs
@@ -259,12 +266,12 @@ It is set to None when called from the console, but
 when def mymain is called from pgutilities def 
 run_driveneestimator_in_new_process.
 '''
-IDX_TEMPORARY_DIRECTORY=20
+IDX_TEMPORARY_DIRECTORY=21
 
 #Def mymain uses this index to test and pass
 #the correct file/multiprocessing_event information
 #to parse args:
-IDX_LAST_CONSOLE_ARG=IDX_NBNE_RATIO
+IDX_LAST_CONSOLE_ARG=IDX_DO_BIAS_ADJUST
 
 '''
 These args are used by callers who import this mod
@@ -392,6 +399,11 @@ COL_NAME_NBNE_RATIO_FOR_BIAS_ADJUST="nbne"
 COL_NAME_BIAS_ADJUSTED_LDNE="ne_est_adj"
 COL_NAME_NEESTIMATOR_NE_ESTIMATE="est_ne"
 
+'''
+2017_04_20.  For comparing floating point values to zero.
+'''
+RELTOL=1e-90
+
 def set_indices_ne_estimator_output_fields_to_skip():
 
 	IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=[]
@@ -428,7 +440,7 @@ class ArgSet( object ):
 						"loci_sampling_values", "loci_min_total",
 						"loci_max_total", "loci_num_range", 
 						"loci_sampling_replicates", "total_cpu_processes",
-						"debug_mode", "nbne_ratio", "output_file",
+						"debug_mode", "nbne_ratio", "do_nb_bias_adjustment", "output_file",
 						"secondary_output_file" ]
 		
 		#we make a copy of the arg values:
@@ -854,6 +866,25 @@ def parse_args( *args ):
 	s_temporary_directory=None if args[ IDX_TEMPORARY_DIRECTORY ] is None \
 													else args[ IDX_TEMPORARY_DIRECTORY ]
 
+	'''
+	This parameter was added on 2017_04_14.
+	'''
+	s_do_nb_bias_adjustment=args[ IDX_DO_BIAS_ADJUST ]
+	b_do_nb_bias_adjustment=None
+	if s_do_nb_bias_adjustment=="True":
+		b_do_nb_bias_adjustment=True
+	elif s_do_nb_bias_adjustment=="False":
+		b_do_nb_bias_adjustment=False
+	else:
+		s_msg="In pgdriveneestimator.py, def parse_args, " \
+					+ "the program cannot evaluate the value " \
+					+ "for the do_nb_bias_adjustment paramater. " \
+					+ "Either \"True\" or \"False\" is expected, " \
+					+ "but the value found is: " + str( s_do_nb_bias_adjustment ) \
+					+ "."
+		raise Exception( s_msg )
+	#end if bias adjust flag value is "True", else "False", else error.
+
 	return( ls_files, s_sample_scheme, lv_sample_values, 
 								i_min_pop_size, 
 								i_max_pop_size,
@@ -874,7 +905,8 @@ def parse_args( *args ):
 								o_secondary_outfile,
 								o_multiprocessing_event,
 								f_nbne_ratio,
-								s_temporary_directory )
+								s_temporary_directory,
+								b_do_nb_bias_adjustment )
 	
 #end parse_args
 
@@ -963,24 +995,18 @@ def get_pops_in_file_outside_valid_size_range( o_genepopfile,
 	return li_pops_outside_valid_size_range
 #end get_pops_in_file_outside_valid_range
 
-def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator, o_genepopfile, 
-													lv_results_list, f_nbne_ratio_from_args ):
+def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator, 
+															lv_results_list, 
+															f_nbne_ratio ):
 	'''
-	2017_02_11.  Implementing a bias adjustment to the NeEstimator's
-	LDNE estimate.  We test for an nb/ne ratio,
-	and, if found, we compute a bias adjustment.  We look both in the
-	header of the genepop file, and the value of the arg f_nbne_ratio,
-	which was passed to this module by clients, either via calling
-	mymain, or calling this module directly from the command line
-	(see below, toplevel conditional, if __name__ == "__main__" ).
+	Revised on 2017_04_17, so that the nbne ratio passed here has 
+	already been vetted in run_estimator, so the we can test it
+	and, if it is None, we return "None" and the original LDNe
+	estimate.  Otherwise, we 
 	'''
 
 	s_bias_adjusted_value="None"
 
-	v_nbne_ratio_to_use_for_adjustment=None	
-
-	f_nbne_ratio_from_genepop_file_header = \
-				get_nbne_ratio_from_genepop_file_header( o_genepopfile )
 
 	'''
 	We need the original Ne (Nb)  estimate
@@ -996,99 +1022,31 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator, o_genepopf
 				o_ne_estimator.getOutputColumnNumberForFieldName( \
 											COL_NAME_NEESTIMATOR_NE_ESTIMATE )
 
-	f_this_ne=float( lv_results_list[ i_col_ne_est ] )
+	f_unadjusted_estimate=float( lv_results_list[ i_col_ne_est ] )
 
-	if f_nbne_ratio_from_genepop_file_header is not None:
-		v_nbne_ratio_to_use_for_adjustment=f_nbne_ratio_from_genepop_file_header
-	elif f_nbne_ratio_from_args is not None:
-		v_nbne_ratio_to_use_for_adjustment=f_nbne_ratio_from_args
-	#end if we have a ratio from the genepop file header, else check the value passed 
-	#as arguement to this def
-
-	if v_nbne_ratio_to_use_for_adjustment is not None:
-		f_adj_estimate=do_ldne_bias_adjustment( f_this_ne, 
-									v_nbne_ratio_to_use_for_adjustment )
+	if f_nbne_ratio is not None:
+		f_adj_estimate=do_ldne_bias_adjustment( f_unadjusted_estimate,
+															f_nbne_ratio )
 		s_bias_adjusted_value=str( f_adj_estimate ) 
 	else:
 		'''
-		2017_02_15.  Instead of writing "None" when we have no bias
-		adjustment, we'll enter the original estimate.  This allows
-		Brian T to find the Nb (Ne) values to plot in the new 
+		2017_02_15.  Instead of writing "None" as the bias-adjusted estimate, 
+		when we have no bias adjustment, we'll enter the original estimate.  
+		This allows Brian T to find the Nb (Ne) values to plot in the new 
 		ne_est_adj column instead of the original est_ne column.  
 		By using original estimates when no bias adjustment was done,
 		he does not have to use conditional language to find 
 		his Ne estimate.
 		'''
-		s_bias_adjusted_value=str( f_this_ne )
+		s_bias_adjusted_value=str( f_unadjusted_estimate )
 
 	#end if we have a nb/ne ratio, do bias adjustment 
-	return str( v_nbne_ratio_to_use_for_adjustment ), s_bias_adjusted_value
+	return str( f_nbne_ratio ), s_bias_adjusted_value
 #end get_string_values_ldne_ratio_and_bias_adjustment
 
 def get_nbne_ratio_from_genepop_file_header( o_genepopfile ):
-	'''
-	2017_02_13.  In searching for an Nb/Ne ratio value in the
-	genepop file header text, we assume it is in the form, 
-	"nbne=<float>", or possibly "nbne=<int>", where <float>
-	or <int> are numbers.  We also assume it is the final
-	text in the header line.
-	'''
-	v_value=None
-	s_keyval_splitter="="
-	s_header_text=o_genepopfile.header
-	s_nbne_regex="nbne=[0-9,\.]+"
-	f_reltol=1e-90
-
-	ls_matches=re.findall( s_nbne_regex, s_header_text )
-
-	'''
-	We do not expect groups of matches from 
-	the header, and so reject any non-list
-	(such as the resulting tuple for groups)
-	returned from re.findall.
-	'''
-	if type( ls_matches ) != list:
-		s_msg="In pgdriveneestimator.py, " \
-					+ "def get_nbne_ratio_from_genepop_file_header, " \
-					+ "expecting a list to be returned from call to " \
-					+ "re.findall.  Returned:  " + str( ls_matches ) \
-					+ "."
-		raise Exception( s_msg )
-	#end if return is not a list, exception
-
-	i_total_matches=len( ls_matches )
-	
-	if i_total_matches > 0:
-		if i_total_matches > 1:
-			s_msg="In pgdriveneestimator.py, " \
-					+ "def get_nbne_ratio_from_genepop_file_header, " \
-					+ "the program cannot correctly parse the " \
-					+ "genepop file header to find the nb/ne ratio.  " \
-					+ "It expects either no entry " \
-					+ "or one key=value entry at the end of the header " \
-					+ "text.  Header text: \"" + s_header_text + "\"."
-			raise Exception( s_msg )
-		else:
-			ls_keyval=( ls_matches[ 0 ].split( s_keyval_splitter ) )
-			try:
-				s_val=ls_keyval[ 1 ]
-				v_value=float( s_val )
-				#We retain the intitialized None value,
-				#unless ratio > 0.0
-				if v_value <= f_reltol:
-					v_value=None
-				#end if value > zero
-			except:
-				s_msg="In pgdriveneestimator.py, " \
-							+ "def get_nbne_ratio_from_genepop_file_header, " \
-							+ "The program cannot parse and type the Nb/Ne ratio value from " \
-							+ "the genepop file entry, " + str( ls_matches[ 0 ] ) + "."
-				raise Exception( s_msg )
-			#end try ... except
-		#end if more than one match, else one
-	#end if total matches > 0
-
-	return v_value
+	o_nbne_reader=NbNeReader( o_genepopfile )
+	return o_nbne_reader.nbne_ratio
 #end def get_nbne_ratio_from_genepop_file_header
 
 def do_ldne_bias_adjustment( f_ldne_estimate, f_nbne_ratio ):
@@ -1124,7 +1082,7 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 		llv_output=o_ne_estimator.deliverResults()
 
 		li_sample_indiv_count=o_genepopfile.getIndividualCounts( s_indiv_subsample_tag = s_subsample_tag, 
-				s_pop_subsample_tag = s_population_number )
+																	s_pop_subsample_tag = s_population_number )
 
 		s_sample_indiv_count = str( li_sample_indiv_count[ 0 ] )
 
@@ -1146,6 +1104,11 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 
 			ls_output_vals_as_strings=[ str( v_val ) for v_val in lv_output ]
 
+			##### temp
+			print( "------------------" )
+			print ( "in do estimate with output list: " + str( ls_output_vals_as_strings ) )
+			#####
+
 			for idx in range( len( ls_output_vals_as_strings ) ):
 				if idx not in IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP:
 					ls_fields_to_report.append( ls_output_vals_as_strings[ idx ] )
@@ -1153,18 +1116,22 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 			#end for each field's index
 
 			'''
-			2017_02_11.  Add the bias adjusted value (or None if we have no nb/ne ratio,
-			either a value given in the header of the genepop file (see def 
-			get_string_values_ldne_ratio_and_bias_adjustment), and, if not present there, then 
-			the value passed into our def call "f_nbne_ratio".
+			2017_04_17.  The bias adjustment code in this def is now simplified,
+			so that it is passed an f_nbne_ratio, that is either None, or a float,
+			so that this def can simply pass it and the objects needed to get the
+			un-adjusted estimate.  Formerly, we passed the genepop file object to a
+			allow the called def to search  the header for a ratio, if a flag
+			(also used to be passed to this def) was true.  Now this ratio finding
+			is done on a per-original-genepop file basis in def run_estimator.
 			'''
+
 			s_ratio_used_for_adjustment, s_bias_adjusted_value=\
 						get_string_values_ldne_ratio_and_bias_adjustment( \
 																o_ne_estimator,
-																o_genepopfile,
 																lv_output,
 																f_nbne_ratio )
 
+			
 			ls_fields_to_report.append( s_ratio_used_for_adjustment )
 			ls_fields_to_report.append( s_bias_adjusted_value )
 
@@ -2515,7 +2482,8 @@ def drive_estimator( *args ):
 				o_secondary_outfile, 
 				o_multiprocessing_event,
 				f_nbne_ratio,
-				s_temporary_directory ) = parse_args( *args )
+				s_temporary_directory,
+				b_do_nb_bias_adjustment ) = parse_args( *args )
 
 	o_process_pool=None
 
@@ -2584,6 +2552,27 @@ def drive_estimator( *args ):
 								+ "for file, " + s_filename + "." )	
 		#end if VERY_VERBOSE
 
+
+		'''
+		This code to settle on a final nbne ratio was added 2017_04_17, to
+		avoid finding it in do_estimate, and passing tehe b_do_nb_bias_adjustment
+		flag to do_estimate.  Further, we change the logic so that if we are
+		to do the bias adjustment, we will take the passed-in ratio over any other
+		value, unless it is zero.  In that caswe we look for the ratio in the header
+		of our genepop file.  In the case of False for b_do_nb_bias_adjustment,
+		we will leafe the ratio as a None value, which will then signal, during
+		def do_estimates call to calculate the adjustment, that no adjustment will be done.
+		'''
+		f_nbne_ratio_to_use=None	
+
+		if b_do_nb_bias_adjustment == True:
+			if f_nbne_ratio < RELTOL:
+				f_nbne_ratio_to_use=get_nbne_ratio_from_genepop_file_header( o_genepopfile )
+			else:
+				f_nbne_ratio_to_use=f_nbne_ratio
+			#end if no nbne ratio provided in arg list, then find it in the genepop file header	
+		#end if we are to do a bias adjustment
+
 		add_to_set_of_calls_to_do_estimate( o_genepopfile, 
 												s_sample_scheme,
 												f_min_allele_freq, 
@@ -2593,7 +2582,7 @@ def drive_estimator( *args ):
 												llv_args_each_process,
 												IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 												o_secondary_outfile,
-												f_nbne_ratio,
+												f_nbne_ratio_to_use,
 												s_temporary_directory,
 												i_genepop_file_count )
 		
@@ -2656,7 +2645,7 @@ def drive_estimator( *args ):
 	if b_run_was_interrupted:
 
 		'''
-		When we throw erroro below, the calling def in pgutilities 
+		When we throw error below, the calling def in pgutilities 
 		(run_driveneestimator_in_new_process) will set the multiprocessing 
 		event, which will then result in the outfiles being delted by
 		the GUI cleanup op. Thus we save a "interrupted" version
@@ -2678,7 +2667,7 @@ def drive_estimator( *args ):
 					+ "have been saved with tag, \"interrupted,\"" \
 					+ "\nand may be empty or truncated."
 		raise Exception( s_msg )
-	#end if the estimations were interrupted (see def execute_ne_for_each_sample 
+	#end if the estimations were interrupted (see def execute_ne_for_each_sample). 
 
 	return
 

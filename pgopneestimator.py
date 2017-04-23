@@ -8,10 +8,23 @@ ne.py code and his other utilitites.
 __filename__ = "pgopneestimator.py"
 __date__ = "20160502"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
+
+__REQUIRE_PYGENOMICS__=False
+
 import sys
 
-from genomics.popgen.ne2.controller import NeEstimator2Controller
-from genomics.popgen import ne2
+
+'''
+2017_04_15. This test and the __REQUIRE_PYGENOMICS__ flag added above
+allow the program to rely exclusively on the LDNe2 executable as shipped
+with the program in the bin directory, which renders pygenomics unnecessary.
+'''
+
+if __REQUIRE_PYGENOMICS__ == True:
+	from genomics.popgen.ne2.controller import NeEstimator2Controller
+	from genomics.popgen import ne2
+
+#end if we are using the pygenomics package
 
 '''
 2017_03_16.  New class to allow using LDNe2 instead 
@@ -59,8 +72,13 @@ LDNE_DEFAULT_LOC_IN_DIST=pgldne.DEFAULT_LOC_INSIDE_DIST
 2017_03_19. Depending on the estimator, we call the 
 applicable def:
 '''
+def_neestimator=None
 
-RUN_DEF_BY_ESTIMATOR={ NEESTIMATOR:NeEstimator2Controller.run,
+if __REQUIRE_PYGENOMICS__ == True:
+	def_neestimator=NeEstimator2Controller.run
+#end no def for neestimator unless pygenomics is required
+
+RUN_DEF_BY_ESTIMATOR={ NEESTIMATOR:def_neestimator,
 						LDNE_ESTIMATION:pgldne.PGLDNe2Controller.runWithNeEstimatorParams }
 
 class PGOpNeEstimator( APGOperation ):
@@ -116,6 +134,13 @@ class PGOpNeEstimator( APGOperation ):
 			s_msg="In PGOpNeEstimator instance, def __init__, " \
 						+ "caller passed unknown estimator name: " \
 						+ s_estimator_name + "."
+			raise Exception( s_msg )
+		elif s_estimator_name == NEESTIMATOR and __REQUIRE_PYGENOMICS__ == False:
+			s_msg="In PGOpNeEstimator instance, def __init__, " \
+						+ "the caller has selected " + NEESTIMATOR \
+						+ " as for LDNe estimations, " \
+						+ " but this module has its __REQUIRE_PYGENOMICS__ " \
+						+ " flag set to false."
 			raise Exception( s_msg )
 		else:
 			self.__estimator_to_use=s_estimator_name
@@ -418,7 +443,7 @@ class PGOpNeEstimator( APGOperation ):
 
 	def deliverResults( self ):
 		'''
-		abstract base class requres this def
+		abstract base class requires this def
 		'''
 		return self.output.parsed_output
 	#end deliver results 

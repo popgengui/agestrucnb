@@ -9,6 +9,7 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import os
 import bz2
+import sys
 
 #want to write genepop files
 #to a temp name, then rename
@@ -16,6 +17,8 @@ import bz2
 import uuid
 
 import shutil
+
+import tempfile
 
 FILE_DOES_NOT_EXIST=0
 FILE_EXISTS_UNCOMPRESSED=1
@@ -254,8 +257,15 @@ class PGOutputSimuPop( object ):
 		o_genfile=None
 
 		o_genepopfile=None
-		
-		s_temp_file_name=str( uuid.uuid4() ) 
+	
+		'''
+		2017_04_21.  We change the way we name the temp file, so that it will be written
+		int he output base path, rather than the currdir. Note that we define the var
+		here, but create the name just before using, as the check for duplicate file names,
+		which is perfomred in the call to our new def __get_temp_file_name, 
+		should be done just before we then open the file.
+		'''
+		s_temp_file_name=None
 	
 		s_genepop_filename=self.__basename + "."  \
 				+  PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "genepop" ]		
@@ -290,7 +300,9 @@ class PGOutputSimuPop( object ):
 		else:
 			self.__raise_file_not_found_error( self.__genfile, "convert gen file to genepop" )
 		#end if uncompressed only or uncomp. and compressed, else compressed only, else no file
-		
+
+		s_temp_file_name=self.__get_temp_file_name()
+
 		if b_do_compress == True:
 			o_genepopfile=bz2.BZ2File( s_temp_file_name + '.bz2', 'wb', compresslevel=9 ) 
 		else:
@@ -411,6 +423,34 @@ class PGOutputSimuPop( object ):
 
 		return
 	#end removeOuputFileByExt
+
+	def __get_temp_file_name( self ):
+		'''
+		This def would have been unnecessary,
+		given pgutilities has the code, but
+		pgutilities imports this module.
+		'''
+
+		s_out_dir=os.path.dirname( self.__basename )
+		s_temp_file_name=tempfile.mktemp( dir=s_out_dir )
+
+		'''
+		We standardize the path as unix.
+		
+		'''
+		if  sys.platform.lower().startswith( "win" ):
+			s_temp_file_name=s_temp_file_name.replace( "\\", "/" )
+		#end if
+
+		if os.path.exists( s_temp_file_name ):
+			s_msg="In PGOutputSimuPop, def __get_temp_file_name, " \
+						+ "the program cannot make the temp file with name: " \
+						+ s_temp_file_name + ".  The file already exists"
+			raise Exception( s_msg )
+		#end if path exists
+
+		return s_temp_file_name
+	#end def __get_temp_file_name
 
 	@property
 	def basename( self ):

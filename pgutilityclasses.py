@@ -11,6 +11,7 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import sys
 import numpy
+import re
 
 from pgvalidationdefs import *
 
@@ -1568,8 +1569,282 @@ class NbAdjustmentRangeAndRate( object ):
 		return self.__rate
 	#end property rate
 
-
 #end class NbAdjustmentRangeAndRate
+
+class NbNeReader( object ):
+
+	'''
+	2017_04_17.  This class is used to check the header line of a
+	Genepop file for a terminating string of the form, "nbne=r", where
+	r is a float giving an Nb/Ne ratio.  Genepop file generated using our
+	pgop, pginput and pgoutput simupop driving modules will store the 
+	value suchwise.
+	'''
+
+	NO_RATIO=None
+
+	def __init__( self, v_genepop_file ):
+		'''
+		Param v_genepopfile_manager_object should be either,
+			--A string giving the name of a genepop file, or, 
+			--A GenepopFileManager object.
+		'''
+		self.__nbne_ratio=NbNeReader.NO_RATIO
+		self.__read_nbne_ratio( v_genepop_file )
+		return
+	#end init
+
+	def __read_nbne_ratio( self, v_genepop_file ):
+		'''
+		Except for the file open call, this def was copied
+		from module pgdriveneestimator.
+
+		Note that this def will only assign the self.__nbne_ratio
+		when it can find it in the file header.  Otherwise the
+		def returns without touching the attribute's value.
+
+		Note that if the value found in the header text is very
+		close to zero, the def will not assign any value to the attribute
+		self.__nbne_ratio.
+		'''
+
+		s_header_text=None
+
+		if hasattr( v_genepop_file, 'header' ):
+			s_header_text=v_genepop_file.header
+		else:
+			try:
+				o_file=open( v_genepop_file, 'r' )
+			except IOError as ioe:
+				s_msg="In NbNeReader, def __read_nbne_ratio, " \
+							+ "there was an error opening the file, " \
+							+ v_genepop_file + ".  The error message is: " \
+							+ str( ioe )
+				raise Exception( IOError )
+			#end try...except
+			s_header_text=o_file.readline().strip()
+
+		#end if we have a genepop file
+
+		'''
+		2017_02_13.  In searching for an Nb/Ne ratio value in the
+		genepop file header text, we assume it is in the form, 
+		"nbne=<float>", or possibly "nbne=<int>", where <float>
+		or <int> are numbers.  We also assume it is the final
+		text in the header line.
+		'''
+
+		v_value=None
+		s_keyval_splitter="="
+		s_nbne_regex="nbne=[0-9,\.]+"
+		f_reltol=1e-90
+
+		ls_matches=re.findall( s_nbne_regex, s_header_text )
+
+		'''
+		We do not expect groups of matches from 
+		the header, and so reject any non-list
+		(such as the resulting tuple for groups)
+		returned from re.findall.
+		'''
+		if type( ls_matches ) != list:
+			s_msg="In NbNeReader instance, def __read_nbne_ratio, " \
+						+ "The program is expecting a list to be returned from call to " \
+						+ "re.findall.  Returned:  " + str( ls_matches ) \
+						+ "."
+			raise Exception( s_msg )
+		#end if return is not a list, exception
+
+		i_total_matches=len( ls_matches )
+		
+		if i_total_matches > 0:
+			if i_total_matches > 1:
+				s_msg="In NbNeReader instance, def __read_nbne_ratio, " \
+						+ "the program cannot correctly parse the " \
+						+ "genepop file header to find the nb/ne ratio.  " \
+						+ "It expects either no entry " \
+						+ "or one key=value entry at the end of the header " \
+						+ "text.  Header text: \"" + s_header_text + "\"."
+				raise Exception( s_msg )
+			else:
+				ls_keyval=( ls_matches[ 0 ].split( s_keyval_splitter ) )
+				try:
+					s_value=ls_keyval[ 1 ]
+					v_value=float( s_value )
+
+					#We retain the intitialized None value,
+					#unless ratio > 0.0
+					if v_value > f_reltol:
+
+						self.__nbne_ratio=v_value
+
+					#end if value > zero
+				except:
+					s_msg="In NbNeReader instance, def __read_nbne_ratio, " \
+								+ "The program cannot parse and type the Nb/Ne ratio value from " \
+								+ "the genepop file entry, " + str( ls_matches[ 0 ] ) + "."
+					raise Exception( s_msg )
+				#end try ... except
+			#end if more than one match, else one
+		#end if total matches > 0
+		return
+	#end __read_nbne_ratio
+
+	@property 
+	def nbne_ratio( self ):
+		return self.__nbne_ratio
+	#end property
+
+#end class NbNeReader
+
+class GenepopPopWriter( object ):
+	'''
+	This class was created to simplify
+	and speed up the output performance 
+	of the simulation.  It is an alternative
+	to the original 3-file output that I conserved
+	from the original AgeStructure code.  
+
+	This class is meant to be used by PGOpSimuPop instances,
+	and the PGOutputSimuPop instances,
+	to store output until a threshold is reached, when it
+	will then write it to file.  
+
+	Assumtions 
+	  1. The client adds entries using numbering with ints the "pop" sections
+		in the order they are intended to be written to file. 
+	  2.  The client adds entries in the order they are to be written.
+	  3.  The loci list is either \n endlined, or on a single line.
+
+	As of 2017_04_22 it is not yet integrated into the
+	simulation code.
+	'''
+
+	#How many entry lines are stored
+	#before writing then to file.
+	STANDARD_CAPACITY=1e5
+	
+	def __init__( self, s_genepop_file_name, s_header, 
+							s_loci_lines,
+							i_max_entry_capacity=STANDARD_CAPACITY ):
+		
+		self.__genepop_file=s_genepop_file_name
+		self.__header=s_header
+		self.__loci_lines=s_loci_lines
+		self.__max_capacity=i_max_entry_capacity
+
+		self.__pops={}
+		self.__num_last_pop_written=None
+		self.__numbers_of_written_pops=None
+		self.__entry_count=0
+		return
+	#end __init
+
+	def __write_current_pop_entries( self ):
+
+		'''
+		This def assumes that the keys
+		to the self.__pops dictionary
+		are integers, that the order
+		they should be in in the file
+		is given by the integers.		
+		'''
+
+		o_file=open( self.__genepop_file, 'a' )	
+
+		li_pop_nums_sorted=list( self.__pops.keys() )
+		li_pop_nums_sorted.sort()
+
+		if self.__num_last_pop_written is None:
+			o_file.write( self.__header + "\n" )
+			o_file.write( self.__loci_lines + "\n" )
+		#end if no pop yet written
+
+		#If we are not in the middle of the last pop written,
+		#end add a "pop" line
+		if li_pop_nums_sorted[ 0 ] != self.__num_last_pop_written:
+			o_file.write( "pop\n" )
+		#end if a new pop entry
+
+		self.__numbers_of_written_pops.append( li_pop_nums_sorted[ 0 ] )
+
+		for s_entry in self.__pops[ li_pop_nums_sorted[ 0 ] ]:
+				o_file.write( s_entry + "\n" )
+				self.__entry_count -= 1
+		#end for each entry in the pop with lowest number
+
+		for i_pop in li_pop_nums_sorted[ 1: ]:
+			o_file.write( "pop\n" )
+
+			for s_entry in self.__pops[ i_pop ]:
+				o_file.write( s_entry + "\n" )
+				self.__entry_count -= 1
+			#end for each entry in this pop, write
+		#end for each pop after the one with lowest number
+		
+		o_file.close()
+		self.__num_last_pop_written=max( li_pops_by_num_sorted )
+
+		return
+	#end __write_current_pop_entries	
+
+	def addEntryAndWriteFirstIfFull( self, i_pop_number, s_indiv_and_loci_entry ):
+		'''
+		This def checks the current capacity, and if the number of entries 
+		currently meets it, it will write the current pops to the file
+		given by the self.__genepop_file string.
+
+		Otherwise it will add the entry to the pop indicated by arg i_pop_number.
+		'''
+
+		if self.__entry_count > i_max_entry_capacity:
+			s_msg="In GenepopPopWriter instance, the current total " \
+						+ "for number of entries, " + str( self.__entry_count ) \
+						+ "exceeds the value for maximum capacity, " \
+						+ str( self.__max_capacity ) + "."
+		elif self.__entry_count==i_max_entry_capacity:
+			self.__write_current_pop_entries
+		else:
+			b_pop_already_written_and_surpassed = \
+				i_pop_number in self.__numbers_of_written_pops \
+					and i_pop_number != self.__num_last_pop_written
+			b_pop_number_smaller_than_current = \
+				i_pop_number < self.__num_last_pop_written
+			if b_pop_already_written_and_surpassed \
+					or b_pop_number_smaller_than_current:
+				s_msg="In GenepopPopWriter instance, the current entry, " \
+							+ "cannot be added.  It has a pop number, "  \
+							+ str( i_pop_number ) \
+							+ "lower than the last one written,  " \
+							+ "with other pops written after it."
+				raise Exception( s_msg )
+			else:
+				if i_pop not in self.__pops:
+					self.__pops[ i ]=[ s_indiv_and_loci_entry ]
+				else:
+					self.__pops[ i ].append( s_indiv_and_loci_entry )
+				#end
+				'''
+				This should be the only code that increments the
+				entry count. Note that it is decremented only in
+				__write_current_pop_entries.
+				'''
+				self.__entry_count += 1
+					
+			#end if pop has a number showing its either out of order
+			#or already written
+
+	def __get_total_unused_capacity( self ):
+		return i_max_entry_capacity - self.__entry_count
+	#end __get_total_unused_capacity
+
+	@property 
+	def entry_count( self ):
+		return self.__entry_count	
+	#end property entry_count
+
+
+#end class GenepopPopWriter
 
 if __name__ == "__main__":
 #	

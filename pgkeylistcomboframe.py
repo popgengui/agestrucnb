@@ -17,8 +17,13 @@ from pgguiutilities import PGGUIInfoMessage
 from pgguiutilities import PGGUIYesNoMessage
 from pgguiutilities import PGGUIErrorMessage
 
+'''
+2017_04_18.  To consolidate some of the objects and functions
+common to the key-value-frame classes, we add a second parent class.
+'''
+from pgkeycontrolframe import PGKeyControlFrame
 
-class KeyListComboFrame( Frame ):
+class KeyListComboFrame( PGKeyControlFrame ):
 
 	'''
 	Description
@@ -88,10 +93,8 @@ class KeyListComboFrame( Frame ):
 			 see attribute of same name in class KeyValFrame
 		"""
 
-		#TCL won't allow uppercase names for windows
-		#(note that we save the name, case in-tact, in
-		#member __name:
-		Frame.__init__( self, o_master, name=s_name.lower() )
+		PGKeyControlFrame.__init__( self, o_master, name=s_name.lower() )
+
 		self.__master=o_master
 		self.__value=StringVar()
 		self.__default_choice_number=i_default_choice_number
@@ -165,6 +168,11 @@ class KeyListComboFrame( Frame ):
 		o_label=Label( self.__subframe, text=self.__label_name, justify=self.__labeljustify )
 		o_label.config( width=self.__lablewidth )
 		o_label.grid( row=0, column=0 )
+		'''
+		Added 2017_04_18, the label attribute is implemented in the
+		new PGKeyControlFrame parent class.
+		'''
+		self.label=o_label
 	#end __setup_label
 
 	def __setup_combobox( self ):

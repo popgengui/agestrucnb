@@ -23,6 +23,10 @@ ATTRIBUTE_DEMANLGER="_PGGuiNeEstimator__"
 #split on the delimiter:
 DELIMITER_GENEPOP_FILES=","
 
+#Accesssed in both def __set_initial_file_info
+#and __give_user_nbne_value_message
+INIT_GENEPOP_FILE_NAME="none"
+
 ROW_NUM_FILE_LOCATIONS_FRAME=0
 ROW_NUM_FILE_INFO_FRAME=1
 ROW_NUM_PARAMETERS_FRAME=2
@@ -41,7 +45,6 @@ import tkFileDialog as tkfd
 
 import sys
 import os
-
 
 #need a seperate, non-blocking
 #process for the neestimations
@@ -68,6 +71,7 @@ import uuid
 #this gui's attributes:
 from pgkeyvalueframe import KeyValFrame
 from pgkeylistcomboframe import KeyListComboFrame
+from pgkeycheckboxvalueframe import KeyCheckboxValueFrame
 
 from pgguiutilities import FredLundhsAutoScrollbar
 from pgguiutilities import PGGUIInfoMessage
@@ -80,6 +84,8 @@ from pgdriveneestimator import MAX_GENEPOP_FILE_NAME_LENGTH
 #See def runEstimator
 from pgutilityclasses import NeEstimatorSamplingSchemeParameterManager 
 from pgutilityclasses import NeEstimatorLociSamplingSchemeParameterManager
+#This is to check for Nb/Ne ratios present in genepop file headers
+from pgutilityclasses import NbNeReader
 
 from pglineregressconfigfilemaker import PGLineRegressConfigFileMaker
 
@@ -202,7 +208,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 	def __set_initial_file_info( self ):
 		
-		INIT_GENEPOP_FILE_NAME="none"
 		INIT_OUTPUT_DIRECTORY=pgut.get_current_working_directory()
 		INIT_OUTPUT_FILES_BASE_NAME="nb.out." \
 				+ pgut.get_date_time_string_dotted()
@@ -598,7 +603,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 	def __get_nbne_ratio_as_string_for_call_to_estimator( self ):
 		'''
 		2017_02_13, implementing a bias adjustment in Nb estimations
-		(via LDNE), taht uses new parameter Nb/Ne ratio.  This new parm
+		(via LDNE), that uses new parameter Nb/Ne ratio.  This new parm
 		in our Nb estimation interface is used only if the value
 		is not found in the genepop file header (via parse code in 
 		pgdriveneestimator.py).
@@ -674,6 +679,14 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		'''
 		s_nbne_ratio=self.__get_nbne_ratio_as_string_for_call_to_estimator()
 
+		'''
+		2017_04_14. New parameter tells pgdriveneestimator.py whether to run
+		the Nb bias adjustment, aside from whether there is a value present
+		either in the s_nbne_ratio set here, or in  the header(s) of input genpop
+		file(s).
+		'''
+		s_do_nb_bias_adjustment=str( self.__do_bias_adjustment )
+
 		self.__neest_multi_process_event=multiprocessing.Event()
 
 		'''
@@ -697,6 +710,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 							self.__processes,
 							self.__runmode,
 							s_nbne_ratio,
+							s_do_nb_bias_adjustment,
 							self.__output_directory.get() \
 									+ "/" \
 									+ self.output_base_name,
@@ -769,6 +783,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						s_tooltip = "Ne estimator can allocate one process " \
 								+ "for each pop, and within pop, each subsample " \
 								+ "percentate or remove-N value or replicate. " )
+		#The label should always be non-grayed-out:
+		o_tot_process_kv.setLabelState( "enabled" )
 
 		o_tot_process_kv.grid( row=i_row, column=0, sticky=( NW ) )
 
@@ -803,6 +819,13 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						b_force_disable=b_force_disable,
 						s_tooltip = "Load genepop files" )
 
+		'''
+		We override the disabled setting for the label.  While
+		the entry box should always be disabled, the label should
+		be enabled.
+		'''
+		o_config_kv.setLabelState( "enabled" )
+
 		o_config_kv.grid( row=i_row, sticky=( NW ) )
 
 		i_row+=1
@@ -820,6 +843,11 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					s_button_text="Select",
 					def_button_command=self.__select_output_directory,
 					b_force_disable=b_force_disable )
+
+		'''
+		The label is enabled as for the "Load genepop files" entrybox.
+		'''
+		o_outdir_kv.setLabelState( "enabled" )
 
 		o_outdir_kv.grid( row= i_row, sticky=( NW ) )
 
@@ -1061,13 +1089,33 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			else use default (and create the new atttr):
 			'''
 			v_value_for_entry_control=None
+			s_state_to_use=None
 
 			if  hasattr( self, s_attr_name ):
 				v_value_for_entry_control=getattr( self, s_attr_name )
+				'''
+				We also want to retain the state flag:
+				'''
+
+				if self.__param_frame_reference_is_available( s_param ):
+					b_current_val_for_enabled=\
+							self.__get_enabled_state_flag_value_for_param_control( s_param )
+
+					if b_current_val_for_enabled==True:
+						s_state_to_use="enabled"
+					else:
+						s_state_to_use="disabled"
+					#end if flag is true, else not		
+				else:
+					s_state_to_use=s_param_control_state
+				#end if frame ref exists
+
 			else:
 				setattr( self, s_attr_name, v_param_default_value )
 				v_value_for_entry_control=v_param_default_value
+				s_state_to_use=s_param_control_state
 			#end if not has attr
+
 			if s_param_interface_section != "Parameters" \
 					or s_param_interface_section.startswith( "suppress" ):
 
@@ -1116,9 +1164,27 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				the latter is a list, in which case it is the first
 				list item in the default value
 				'''
+
 				o_validity_checker=self.__create_validity_checker( v_default_item_value, 
 																	s_param_validity_expression )
 			#end if expression is not "None"
+
+			v_param_assoc_def=None
+
+			if s_param_assoc_def != "None":
+
+				if hasattr( self, s_param_assoc_def ):
+					v_param_assoc_def = getattr( self, s_param_assoc_def )
+				else:
+					s_msg="In PGGuiNeEstimator instance, def, __load_params_interface, " \
+							+ "for parameter, " + s_param_longname \
+							+ ", the parameter ParamSet object indicates that this parameter has a " \
+							+ "def associated with it called, " \
+							+ s_param_assoc_def + ".  This object does not have " \
+							+ "a def by that name."
+					raise Exception( s_msg )
+				#end if we have the associated def, else error
+			#end if there is a non-None value for s_param_assoc_def	
 
 			if s_param_control_type=="entry":		
 				'''
@@ -1131,7 +1197,9 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				'''	
 
 				#Default call when entry box changed:
-				def_on_entry_change=self.__test_values
+				def_on_entry_change=v_param_assoc_def \
+									if v_param_assoc_def is not None \
+													else self.__test_values
 
 				if s_param_assoc_def != "None":
 					def_on_entry_change=getattr( self,  s_param_assoc_def )
@@ -1147,7 +1215,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					s_associated_attribute=s_attr_name,
 					i_entrywidth=i_width_this_entry,
 					i_labelwidth=LABEL_WIDTH,
-					b_is_enabled=( s_param_control_state == "enabled" ),
+					b_is_enabled=( s_state_to_use == "enabled" ),
 					s_entry_justify=s_this_entry_justify,
 					s_label_justify='left',
 					s_tooltip=s_param_tooltip,
@@ -1176,10 +1244,10 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				#we need to have it call our sample scheme updating
 				#def when a new choice is made in the combobox		
 				#if none supplied we default to the test values def
-				if s_param_assoc_def == "None":
+				if v_param_assoc_def is None:
 					def_on_combo_choice_change=self.__test_values
 				else:
-					def_on_combo_choice_change=getattr( self,  s_param_assoc_def )
+					def_on_combo_choice_change=v_param_assoc_def
 				#end if def is "None"
 
 				#end if this is the genepop sample scheme combo box, else not
@@ -1222,10 +1290,31 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 							i_cbox_width=PARAMETERS_CBOX_WIDTH,
 							s_label_justify='left',
 							s_tooltip=s_param_tooltip,
-							b_is_enabled=( s_param_control_state == "enabled" ),
+							b_is_enabled=( s_state_to_use == "enabled" ),
 							b_force_disable=b_force_disable,
 							s_state=s_state_this_cbox )
 
+			elif s_param_control_type=="checkbutton":
+
+				v_def_on_button_change=self.__test_values
+
+				if v_param_assoc_def is not None:
+					v_def_on_button_change=v_param_assoc_def
+				#end if we have a def to call when the val changes
+
+				o_this_keyval=KeyCheckboxValueFrame( s_name=s_param_longname,
+														v_value=v_value_for_entry_control,
+														o_master=o_params_subframe, 
+														s_associated_attribute=s_attr_name,
+														o_associated_attribute_object=self,
+														def_on_button_change=v_def_on_button_change,
+														i_labelwidth=15,
+														b_is_enabled=( s_state_to_use == "enabled" ),
+														s_label_justify='right',
+														s_label_name=None,
+														b_force_disable=b_force_disable,
+														s_tooltip = s_param_tooltip )
+			
 			elif s_param_control_type=="radiobutton":
 				raise Exception( "radio button key val not yet implemented for neestimator gui" )
 			else:
@@ -1561,7 +1650,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		#dialog returns sequence:
 		tup_genepop_files=tkfd.askopenfilenames(  \
-				title='Load a genepop file' )
+				title='Load one or more genepop file(s)' )
 
 		if pgut.dialog_returns_nothing(  tup_genepop_files ):
 			return
@@ -1602,6 +1691,12 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__update_genepopfile_sampling_params_interface()
 		self.__update_genepopfile_loci_sampling_params_interface()
 		self.__set_controls_by_run_state( self.__get_run_state() )
+
+		s_nbne_state=self.__get_state_of_control( "nbne" )
+
+		if s_nbne_state == "enabled":
+			self.__evaluate_nbne_value()
+		#end if nbne is enabled, set the value
 
 		if VERY_VERBOSE:
 			print ( "In def load_genepop_files, new genepop files value: " \
@@ -1776,6 +1871,308 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		self.__cancel_neestimation()
 		return
 	#end cleanup
+
+	def onChangeInNbBiasAdjustmentFlag( self ):
+		'''
+		2017_04_14.  This def was added to be associated with the checkbox
+		that give True or False, whether to do an Nb bias adjustment.  We 
+		want to disable the Nb/Ne ratio entry when the checkbox has updated
+		our local copy of the flag to false.
+		'''
+		
+		s_param_name="nbne"
+
+		s_nbne_ratio_attribute_name=ATTRIBUTE_DEMANLGER + s_param_name
+
+		if s_nbne_ratio_attribute_name not in self.__param_value_frames_by_attr_name:
+			s_msg="In PGGuiNeEstimator instance, def onChangeInNbBiasAdjustmentFlag, " \
+						+ "the program cannot find a key value frame associated " \
+						+ "with the attribute name: " + s_nbne_ratio_attribute_name + "."
+			PGGUIErrorMessage( self, s_msg )
+			raise Exception( s_msg )
+		#end if no key val frame for the nb/ne ratio param
+
+		o_keyvalueframe=self.__param_value_frames_by_attr_name[ s_nbne_ratio_attribute_name ]
+
+		if self.__do_bias_adjustment == False:
+			o_keyvalueframe.setStateControls( "disabled" )
+			o_keyvalueframe.setLabelState( "disabled" )
+		else:
+			o_keyvalueframe.setStateControls( "enabled" )
+			o_keyvalueframe.setLabelState( "enabled" )
+			'''
+			This call will check the input genepop files (if any)
+			and the current value in the interface entry for Nb/Ne,
+			and will reset it if interface is zero and a unique
+			value is available in the input file headers.
+			'''
+			self.__evaluate_nbne_value()
+		#end if we are not doing a bias adjustment, else we are 
+
+		return
+	#end def onChangeInNbBiasAdjustmentFlag
+
+	def __get_handle_to_param_frame( self, s_param_name ):
+
+		o_frame=None
+
+		s_nbne_ratio_attribute_name=ATTRIBUTE_DEMANLGER + s_param_name
+
+		if s_nbne_ratio_attribute_name in self.__param_value_frames_by_attr_name:
+			
+			o_frame=self.__param_value_frames_by_attr_name[ s_nbne_ratio_attribute_name ]
+
+		#end if frame exists
+
+		return o_frame
+
+	#end __get_handle_to_param_frame
+
+	def __param_frame_reference_is_available( self, s_param_name ):
+		o_frame=self.__get_handle_to_param_frame( s_param_name )
+		return ( o_frame is not None )
+	#end __param_frame_reference_is_available
+
+
+	def __get_enabled_state_flag_value_for_param_control( self, s_param_name ):
+
+		b_return_value=None
+
+		o_frame=self.__get_handle_to_param_frame( s_param_name )
+
+		if o_frame is None:
+			s_msg= "In PGGuiNeEstimator instance, " \
+						+ "def __get_enabled_state_flag_value_for_param_control, " \
+						+ "the program cannot find a key value frame associated " \
+						+ "with the parameter: " + s_param_name + "."
+			PGGUIErrorMessage( self, s_msg )
+			raise Exception( s_msg )
+		#end if frame is not found
+
+		b_return_value=o_frame.is_enabled
+
+		return b_return_value
+	#end __get_enabled_state_flag_value_for_param_control
+
+			
+	def __get_state_of_control( self, s_param_name ):
+		'''
+		2017_04_18.  Called by __load_genepop_files, to see if the
+		nbne ratio is enabled (meaning the user wants to do a bias adjustment).
+		If so, the new input file(s) need to be tested against the interface
+		entry.
+		'''
+
+		o_keyvalueframe=s_return_value=self.__get_handle_to_param_frame( s_param_name ) 
+
+		if o_keyvalueframe is None:
+			s_msg="In PGGuiNeEstimator instance, def __get_state_of_control, " \
+						+ "the program cannot find a key value frame associated " \
+						+ "with the parameter: " + s_param_name + "."
+	
+			PGGUIErrorMessage( self, s_msg )
+
+			raise Exception( s_msg )
+		#end if no frame with this param name
+
+		ls_states=o_keyvalueframe.getControlStates()
+
+		if set( ls_states ) == { "enabled" }:
+			s_return_value="enabled"
+		elif set( ls_states ) == { "disabled" }:
+			s_return_value="disabled"
+		else:
+			s_msg="In PGGuiNeEstimator instance, def __get_state_of_control, " \
+							+ "the control state has an unexpected set of values: " \
+							+ str( ls_states ) + "."
+			PGGUIErrorMessage( self, s_msg )
+			raise Exception( s_msg )
+		return  s_return_value
+	#end __get_state_of_control
+
+	def __get_nbne_values_from_genepop_file_headers( self ):
+
+		lf_nbne_values=[]
+		dli_file_number_by_nbne_value={}
+		i_total_files_read=0
+		if self.__genepopfiles is not None:
+			s_genepop_files=self.__genepopfiles.get()
+			ls_genepop_files=s_genepop_files.split( DELIMITER_GENEPOP_FILES )
+
+			for s_genepop_file in ls_genepop_files:
+
+				if os.path.isfile( s_genepop_file ):
+					i_total_files_read+=1
+					o_nbne_reader=NbNeReader( s_genepop_file )
+
+					v_ratio=o_nbne_reader.nbne_ratio
+
+					if v_ratio in dli_file_number_by_nbne_value:
+						dli_file_number_by_nbne_value[ v_ratio ].append( i_total_files_read )
+					else:
+						dli_file_number_by_nbne_value[ v_ratio ] = [ i_total_files_read ]
+					#end if we have already recorded this value in another file, else new
+				#end if file exists		
+			#end for each file name
+		#end if we have genepop file names
+		dlv_value_by_file_number_list={}
+
+		'''
+		We convert the dict to another that will be more human-
+		readable when we include in a message to the reader.
+		'''
+		if len( dli_file_number_by_nbne_value ) == 1:
+
+			li_file_numbers=list( dli_file_number_by_nbne_value.values() )[ 0 ]
+			i_total_files=len( li_file_numbers )
+
+			i_min=min( li_file_numbers )
+			i_max=max( li_file_numbers )
+
+			if i_total_files==1:
+				s_this_file_list="File "
+			else:
+				s_this_file_list="Files "  + str( i_min ) + "-" + str( i_max )
+			#end if for the single Nb/Ne ratio there is one file only, else a range
+
+			v_val=list( dli_file_number_by_nbne_value.keys() ) [ 0 ] 
+			dlv_value_by_file_number_list[ s_this_file_list ] = v_val
+		else:
+			for v_val in dli_file_number_by_nbne_value:
+				li_file_numbers=dli_file_number_by_nbne_value[ v_val ]
+				s_this_file_list="File number(s) " + \
+							",".join( str(i_num) for i_num in li_file_numbers ) 
+				dlv_value_by_file_number_list[ s_this_file_list ] = v_val
+		#end if only 1 value, else multiple
+
+		return dlv_value_by_file_number_list 
+
+	#end __get_nbne_values_from_genepop_file_headers		
+
+	def __evaluate_nbne_value( self, b_manually_update=True ):
+
+		s_msg=None
+
+		f_reltol=1e-90
+
+		v_value_in_files=None
+
+		dlv_nbne_values_by_file_numbers= \
+					self.__get_nbne_values_from_genepop_file_headers()
+
+		if self.__nbne < f_reltol:
+			if len( dlv_nbne_values_by_file_numbers ) == 1:
+
+				f_ratio_val=list( dlv_nbne_values_by_file_numbers.values() ) [ 0 ]
+
+				if f_ratio_val is not None:
+					o_frame=self.__get_handle_to_param_frame( "nbne" )
+					if o_frame is None:
+						s_msg="In PGGuiNeEstimator instance, def __evaluate_nbne_value, " \
+								+ "The control frame for the Nb/Ne ratio entry box "  \
+								+ "is not found."
+						PGGUIErrorMessage( self, s_msg )
+						raise Exception( s_msg )
+					else:
+					
+						if b_manually_update:
+							s_msg="The program found an Nb/Ne ratio in your input file(s), " \
+									+ "and is loading it into the Nb/Ne entry box.  " \
+									+ "You can replace it with any non-zero value if " \
+									+ "you want to override the ratio given in your input file(s)."
+							o_frame.manuallyUpdateValue( f_ratio_val )
+						else:
+							s_msg="The program found an Nb/Ne ratio in your input file(s): " \
+									+ str( f_ratio_val ) + ".\n" \
+									+ "  You can enter any non-zero value in the interface Nb/Ne ratio " \
+									+ "to override it.  If you leave the bias adjustment checkbox checked, " \
+									+ "and enter zero in the Nb/Ne ratio entry box, the program will" \
+									+ "perform an Nb bias adjustment using the value found in your input file(s)."						
+						#end if we should manually update, else not
+					#end if we can't find the nbne frame, else set it
+				#end if non-None value, update the entry
+
+			elif len( dlv_nbne_values_by_file_numbers ) == 0:
+				#There are no nb/ne ratio values in the header. Do nothing.
+				pass
+			else:
+				s_msg="The program found the following values for Nb/Ne among your input " \
+							+ "genepop files:\n" + str( dlv_nbne_values_by_file_numbers ) + "\n" \
+							+ "If you leave the Nb/Ne ratio in the interface set to zero, " \
+							+ "and check the box that indicates you want to do a " \
+							+ "bias adjustment, each genepop file's Nb/Ne ratio will be " \
+							+ "used to perform a bias adjustment on that file's estimates."
+			#end if a single nb/ne value, else if no nb/ne values, else multiple values
+		else:
+			i_num_values_in_files=len( dlv_nbne_values_by_file_numbers )
+			if i_num_values_in_files > 0:
+				if i_num_values_in_files==1:
+					v_value_in_files=list( dlv_nbne_values_by_file_numbers.values() )[0]
+					if v_value_in_files is not None:
+						if abs( v_value_in_files - self.__nbne ) > f_reltol:
+							if b_manually_update:
+								#The entry in the interface differs from a 
+								#uniq value found in the genepop files.
+								s_msg="The program found an Nb/Ne ratio given in your input " \
+											+ "genepop files:\n" + str( dlv_nbne_values_by_file_numbers ) + ".\n" \
+											+ "Any non-zero entry you set in the Nb/Ne ratio interface " \
+											+ "entry box will override the value found in your input files. " \
+											+ "Would you like to use the value found in your input files? " 
+								o_msgbox=PGGUIYesNoMessage( self, s_msg )
+
+								b_response=o_msgbox.user_response
+
+								#reset msg to None, since we no longer need any
+								#message sent to the user:
+								s_msg=None
+
+								if b_response==True:
+									o_nbne_control_frame=self.__get_handle_to_param_frame( "nbne" )
+									if o_nbne_control_frame is not None:
+										o_nbne_control_frame.manuallyUpdateValue( v_value_in_files )
+									else:
+										s_msg="In PGGuiNeEstimator instance, def __evaluate_nbne_value, " \
+											+ "The control frame for the Nb/Ne ratio entry box "  \
+											+ "is not found."
+										PGGUIErrorMessage( self, s_msg )
+										raise Exception( s_msg )
+									#end if frame exists, else error
+								#end if user responds "yes"
+							else:
+								s_msg="The program found an Nb/Ne ratio given in your input " \
+											+ "genepop files:\n" + str( dlv_nbne_values_by_file_numbers ) + ".\n" \
+											+ "Any non-zero entry you set in the Nb/Ne ratio interface " \
+											+ "entry box will override the value found in your input files.\n"  \
+											+ "If you set the interface value to zero, but leave the bias adjustment " \
+											+ "checkbox checked, the program will do a bias adjustment using the "  \
+											+ "value found in your input files.\n"
+							#end if we should ask the user if we should manually update, else just show a messgae
+						#end if the value in the interface does not match the one in the inpu files
+				else:
+					s_msg="The program found Nb/Ne ratio values in the headers in your genepop " \
+							+ "input files:\n" + str( dlv_nbne_values_by_file_numbers ) + "\n"  \
+							+ "The non-zero ratio currently set " \
+							+ "in the interface will override the value(s) found in the " \
+							+ "genepop file header lines.  To use the values given in the genepop files " \
+							+ "set the value in the interface to zero, but keep the bias-adjustment " \
+							+ "checkbox checked."
+				#end if there is one value in files, else not	
+			#end if there is at least one nb/ne ratios in the genepop file headers
+		#end if interface nb/ne ratio is set to zero, else not	
+
+		if s_msg is not None:
+			PGGUIInfoMessage( self, s_msg )
+		#end if s_msg is not None
+
+		return
+	#end __evaluate_nbne_value
+
+	def onNbNeRatioChange( self ):
+		'''
+		2017_04_20.  Currently no action on value change.
+		'''
+		return
+	#end onNbNeRatioChange
 
 #end class PGGuiNeEstimator 
 
