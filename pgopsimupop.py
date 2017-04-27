@@ -1100,62 +1100,55 @@ class PGOpSimuPop( modop.APGOperation ):
 				print cullCount
 				print "\n\n"
 			#end if verbose
+					##!! Cohort 0 does not get culled!!
+			if cohortKey == 0.0:
+				continue
 
-			#choose which sex to kill first
-			#flag is one and 0 for easy switching
-			killChoiceFlag = round(random.random())
-			if femaleCount > maleCount:
-				killChoiceFlag = 0
-			if maleCount > femaleCount:
-				killChoiceFlag = 1
+			cohortKills = []
 
-			# halfCull = int(cullCount / 2)
-			# maleKills = halfCull
-			# femaleKills = halfCull
-			# if cullCount%2 ==1:
-			# 	if killChoiceFlag == 1:
-			# 		maleKills +=1
-			# 	else:
-			# 		femaleKills+=1
-			# maleCulls = random.sample(cohortMales,maleKills)
-			# femaleCulls = random.sample(cohortFemales,femaleKills)
-			# print len(maleCulls)
-			# print len(femaleCulls)
-			# for male in maleCulls:
-			# 	cohortKills.append(male.ind_id)
-			# 	print "male "+str(male.ind_id)
-			# for female in femaleCulls:
-			# 	cohortKills.append(female.ind_id)
-			# 	print "female "+str(female.ind_id)
-			# print "\n\n\n"
+			'''
+			2017_02_26. Adding int() because round returns a float,
+			which results in a type error in call to random.sample below.
+			'''
+			maleCull = int(numpy.round(maleCount *(1- self.input.survivalMale[int(cohortKey) - 1])))
+			femaleCull = int(numpy.round(femaleCount *(1- self.input.survivalFemale[int(cohortKey) - 1])))
 
-			#Lottery Loop
-			lotteryCount = 0
-			maleCullOrder =list(cohortMales)
-			femaleCullOrder = list(cohortFemales)
-			random.shuffle(maleCullOrder)
-			random.shuffle(femaleCullOrder)
-			while lotteryCount < cullCount:
-				#sample by gender
-				if len(maleCullOrder)>len(femaleCullOrder):
-					lottoInd = maleCullOrder.pop()
-					if VERBOSE:
-						print "MaleChosen "+str(lottoInd.ind_id)
-					#end if VERBOSE
-				else:
-					lottoInd = femaleCullOrder.pop()
-					if VERBOSE:
-						print "FemaleChosen "+str(lottoInd.ind_id)
-					#end if VERBOSE
-				#if not already "dead"
-				if not lottoInd.ind_id in cohortKills:
-					lotteryCount +=1
-					if VERBOSE:
-						print "Dead "+str(lotteryCount)
-					#end if VERBOSE
+			#if VERY_VERY_VERBOSE:
+			print ("cohort: " + str(cohortKey))
+			print ("maleCount: " + str(maleCount))
+			print ("femaleCount: " + str(femaleCount))
+			print ("maleCull: " + str(maleCull))
+			print ("femaleCull: " + str(femaleCull))
+			print "\n\n"
+			# end if very verbose
 
-					kills.append(lottoInd.ind_id)
-					killChoiceFlag = abs(killChoiceFlag-1)
+			# choose which sex to kill first
+			# flag is one and 0 for easy switching
+			# killChoiceFlag = round(random.random())
+			# if femaleCount > maleCount:
+			# 	killChoiceFlag = 0
+			# if maleCount > femaleCount:
+			# 	killChoiceFlag = 1
+
+			'''
+			2017_02_26 Correction to the following two lines.  I think numpy.sample is
+			supposed to be random.sample
+			'''
+			# sample  harvest
+			maleHarvestList = random.sample(cohortMales, maleCull)
+			femaleHarvestList = random.sample(cohortFemales, femaleCull)
+
+			for ind in maleHarvestList:
+				#				print "Dead " + str(ind.ind_id)
+				kills.append(ind.ind_id)
+			for ind in femaleHarvestList:
+				#				print "Dead " + str(ind.ind_id)
+				kills.append(ind.ind_id)
+
+			# kills.extend(cohortKills)
+			# endif age>0 andage<.....
+			# end for i in pop
+
 
 			#kills.extend(cohortKills)
 			# endif age>0 andage<.....
