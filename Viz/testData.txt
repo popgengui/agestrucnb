@@ -1,4 +1,4 @@
-original_file	pop	census	indiv_count	sample_value	replicate_number	loci_sample_value	loci_replicate_number	min_allele_freq	est_type	est_ne	95ci_low	95ci_high	overall_rsquared	expected_rsquared	indep_comparisons	harmon_mean_samp_size
+original_file	pop	census	indiv_count	sample_value	replicate_number	loci_sample_value	loci_replicate_number	min_allele_freq	est_type	ne_est_adj	95ci_low	95ci_high	overall_rsquared	expected_rsquared	indep_comparisons	harmon_mean_samp_size
 /home/sinless/Summer2016/negui_base/BT_50_0.9_750_2.r1.genepop	1	200	112	1.0	0	rt	0	0.01	ld	30761.9	5637.2	Inf	0.00919	0.00918	280875	112.0
 /home/sinless/Summer2016/negui_base/BT_50_0.9_750_2.r1.genepop	2	137	44	1.0	0	rt	0	0.01	ld	37.5	36.7	38.3	0.03278	0.02437	280875	44.0
 /home/sinless/Summer2016/negui_base/BT_50_0.9_750_2.r1.genepop	3	107	44	1.0	0	rt	0	0.01	ld	42.8	41.8	43.8	0.03179	0.02437	280875	44.0

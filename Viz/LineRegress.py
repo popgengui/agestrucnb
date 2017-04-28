@@ -169,6 +169,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", ou
     if len(plotstats["fliers"])>0:
         outliers = {"":makeOutlierDict(plotstats["fliers"])}
     plt.clf()
+    plt.figure("box")
     plt.boxplot(plotData, labels=listX, sym = "")
     if title:
         plt.title(title)
