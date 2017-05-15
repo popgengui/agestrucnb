@@ -1,3 +1,5 @@
+from __future__ import division
+from __future__ import print_function
 ## function to calculate a N0 from an Nb an Nb/Nc Ratio and a lifetable
 #praram Nb:  the desired Nb
 #param NbNcRatio: the ratio Nb/Nc
@@ -5,9 +7,11 @@
 #param femaleSurvival: a list of the female survival rates for each age
 #param MRatio: the percentage of males in the recruitment cohort represented as a float such that 0<MRatio<1
 
+from builtins import range
+from past.utils import old_div
 def calcN0(Nb, NbNcRatio, maleSurvival, femaleSurvial, MRatio):
     FRatio = 1-MRatio
-    Nc = Nb/NbNcRatio
+    Nc = old_div(Nb,NbNcRatio)
     currentMaleProp=MRatio
     currentFemaleProp= FRatio
     cumPopPorp = 1
@@ -21,16 +25,16 @@ def calcN0(Nb, NbNcRatio, maleSurvival, femaleSurvial, MRatio):
         cumPopPorp+=currentMaleProp
         cumPopPorp+= currentFemaleProp
     #calulate N0
-    N0 = Nc/cumPopPorp
+    N0 = old_div(Nc,cumPopPorp)
     return N0
 
 
-print calcN0(50,0.144,[0.142,0.124],[0.142,0.124],0.5)
-print calcN0(20,0.144,[0.142,0.124],[0.142,0.124],0.7)
+print(calcN0(50,0.144,[0.142,0.124],[0.142,0.124],0.5))
+print(calcN0(20,0.144,[0.142,0.124],[0.142,0.124],0.7))
 
-print calcN0(20,0.144,[0.144,0.126],[0.140,0.122],0.5)
-print calcN0(20,0.144,[0.144,0.126],[0.140,0.122],0.6)
-print calcN0(20,0.144,[0.144,0.126],[0.140,0.122],0.4)
+print(calcN0(20,0.144,[0.144,0.126],[0.140,0.122],0.5))
+print(calcN0(20,0.144,[0.144,0.126],[0.140,0.122],0.6))
+print(calcN0(20,0.144,[0.144,0.126],[0.140,0.122],0.4))
 
 
 

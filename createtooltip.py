@@ -7,13 +7,16 @@ gives a Tkinter widget a tooltip as the mouse is above the widget
 tested with Python27 and Python34  by  vegaseat  09sep2014
 '''
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 __filename__ = "tooltip.py"
 __date__ = "20160605"
 __author__ = " vegaseat on DANIWEB, https://www.daniweb.com/members/19440/vegaseat"
 
 try:
 	# for Python2
-	import Tkinter as tk
+	import tkinter as tk
 except ImportError:
 	# for Python3
 	import tkinter as tk

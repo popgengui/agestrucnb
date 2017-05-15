@@ -81,6 +81,11 @@ Wed Sep  7 18:12:26 MDT 2016
 	of the loci (as circumscribed by existing params min loci 
 	position and max loci position.
 '''
+from __future__ import division
+from __future__ import print_function
+from builtins import range
+from past.utils import old_div
+from builtins import object
 __filename__ = "pgdriveneestimator.py"
 __date__ = "20160510"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -749,7 +754,7 @@ def parse_args( *args ):
 	if s_sample_scheme == SAMPLE_BY_NONE:
 		lv_sample_values=None
 	elif s_sample_scheme == SAMPLE_BY_PERCENTAGES:
-		lv_sample_values=[ float( s_val )/100.0  for s_val in args[ IDX_SAMPLE_VALUE_LIST ].split( \
+		lv_sample_values=[ old_div(float( s_val ),100.0)  for s_val in args[ IDX_SAMPLE_VALUE_LIST ].split( \
 																	SAMPLE_SCHEME_PARAM_DELIMITER ) ]
 	elif s_sample_scheme == SAMPLE_BY_REMOVAL:
 		lv_sample_values=[ int( s_val ) for s_val in args[ IDX_SAMPLE_VALUE_LIST ].split( \
@@ -814,7 +819,7 @@ def parse_args( *args ):
 		pass
 	elif s_loci_sampling_scheme == SAMPLE_LOCI_SCHEME_PERCENT:
 		ls_list_of_percentages=args[ IDX_LOCI_SCHEME_PARAM ].split( "," )
-		v_loci_sampling_scheme_param=[ float( s_val )/100.0 \
+		v_loci_sampling_scheme_param=[ old_div(float( s_val ),100.0) \
 				for s_val in ls_list_of_percentages ]
 	elif s_loci_sampling_scheme == SAMPLE_LOCI_CONSTANT_TOTAL:
 		ls_list_of_totals= \
@@ -1059,15 +1064,16 @@ def do_ldne_bias_adjustment( f_ldne_estimate, f_nbne_ratio ):
 	return o_adjustor.adjusted_nb
 #end def do_ldne_bias_adjustment
 
-def do_estimate( ( o_genepopfile, o_ne_estimator, 
+def do_estimate(xxx_todo_changeme ):
+
+	( o_genepopfile, o_ne_estimator, 
 					s_sample_param_val, s_loci_sample_value,
 					f_min_allele_freq, s_subsample_tag, 
 					s_loci_sample_tag, s_population_number, 
 					s_census, i_replicate_number, 
 					s_loci_replicate_number, o_debug_mode, 
 						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
-						f_nbne_ratio ) ):
-
+						f_nbne_ratio ) = xxx_todo_changeme
 	try:
 
 		s_genepop_file_subsample=o_ne_estimator.input.genepop_file
@@ -1103,11 +1109,6 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 			ls_fields_to_report=[]	
 
 			ls_output_vals_as_strings=[ str( v_val ) for v_val in lv_output ]
-
-			##### temp
-			print( "------------------" )
-			print ( "in do estimate with output list: " + str( ls_output_vals_as_strings ) )
-			#####
 
 			for idx in range( len( ls_output_vals_as_strings ) ):
 				if idx not in IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP:
@@ -1198,11 +1199,13 @@ def do_estimate( ( o_genepopfile, o_ne_estimator,
 
 		
 	except Exception as oex:
-
+		o_traceback=sys.exc_info()[ 2 ]
+		s_trace_msg=pgut.get_traceback_info_about_offending_code( o_traceback )	
 		raise Exception( "An exception was raised in " \
 							 + "module pgdriveneestimator.py, " \
 							 + "def do_estimate, with message: " \
-							 + str( oex ) )
+							 + str( oex ) + "\n" + "Exeption origin from " \
+							 + s_trace_msg )
 	#end try...except
 	return { "for_stdout" : s_stdout, "for_stderr" : s_stderr, 
 			"for_indiv_table": None if ls_indiv_list is None \
@@ -1305,7 +1308,7 @@ def write_indiv_table( dddli_indiv_list, s_file_name, lf_proportions ):
 			for s_indiv in dddli_indiv_list[ s_file ][s_pop_number]:
 				s_reps_by_proportion=""
 				#sort proportions to sync up with header:
-				lf_proportion_keys_sorted=(dddli_indiv_list[ s_file ][s_pop_number][ s_indiv ]).keys()
+				lf_proportion_keys_sorted=list((dddli_indiv_list[ s_file ][s_pop_number][ s_indiv ]).keys())
 				lf_proportion_keys_sorted.sort()
 				for f_proportion in lf_proportion_keys_sorted:
 					ls_replist=dddli_indiv_list[ s_file ][s_pop_number] [ s_indiv ][ f_proportion ]
@@ -1586,7 +1589,7 @@ def do_sample_individuals( o_genepopfile,
 
 		i_max_pop_range=min( i_max_pop_range, i_total_pops_in_file )
 
-		li_population_list=range( i_min_pop_range, i_max_pop_range + 1 )
+		li_population_list=list(range( i_min_pop_range, i_max_pop_range + 1))
 	#end if min pop range is None, else have a value
 
 	o_sampler=None	
@@ -1675,7 +1678,7 @@ def do_sample_individuals( o_genepopfile,
 		lv_cohort_param_fields=lv_sample_values[ 0:len( lv_sample_values ) - 1 ] \
 															+ [ s_max_age ]		
 		#Convert the percentages to a list of floats giving proportion:
-		lf_proportions=[ float( s_percentage )/100.0 for s_percentage  \
+		lf_proportions=[ old_div(float( s_percentage ),100.0) for s_percentage  \
 							in s_percentages.split( COHORT_PERC_DELIM ) ]
 
 		( o_indiv_fields,
@@ -2008,8 +2011,6 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 		ls_loci_subsample_tags_associated_with_this_indiv_sample= \
 				get_loci_subsample_tags_for_this_indiv_subsample( o_genepopfile,
 																	s_indiv_sample )
-
-		
 	
 		i_loci_subsample_count=0
 
@@ -2049,6 +2050,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 
 				s_loci_sample_value, s_loci_replicate_number = \
 						get_loci_sample_val_and_rep_number_from_loci_sample_tag( s_loci_subsample_tag )
+				
 
 				i_tot_indivs_this_subsample=o_genepopfile.getIndividualCount( i_population_number, 
 																						s_indiv_sample )
@@ -2975,6 +2977,12 @@ if __name__ == "__main__":
 	else:
 		ls_args_passed.append( o_args.nbneratio )
 	#end if nn nb/ne ratio passed
+
+	if o_args.donbbiasadjust is None:
+		ls_args_passed.append( "False" )
+	else:
+		ls_args_passed.append( o_args.donbbiasadjust )
+	#end if no bias adjust flag, default to False, else use
 
 	'''
 	Now we add the default:

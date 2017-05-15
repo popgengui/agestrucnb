@@ -92,3 +92,13 @@ as an xml file.
 fields
 2. For the todo above sept 2, number 1, should simply generlize to propogate
 all excpetions into dialogs, for all the programs functions.
+
+Wed Mar 22 18:31:27 MDT 2017
+GUI error message when sim fails due to pop creation failing to produce pwop within Nb tolerance
+
+Thu Apr 20 16:56:56 MDT 2017
+To reduce IO costs, especially for long simuilations with many cycles, the simulation output 
+should be written directly to a genepop.  I see no reason to date to retain any of the other 
+files currently output (and from which the genepop file is constructed after they have been written).
+I think a good strategy would be to write the data to data struct like a class, and every N cycles
+update a genepop output file.

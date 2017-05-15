@@ -2,9 +2,11 @@
 
 Fri Jul 29 DT 2016
 
-B1.  Running 9 simulations -- bug may be solved, but have not yet
-	retested ( 2016_08_15 ) -- have added code to kill processes when the gui is
-	killed, which at least should not leave haning processes.  However, the 9-sim hang may persist untill killed -- as noted, 2 of them were much more
+B1.  Besides code to kill processes, also addressed by using pOpen instead of
+	multiprocessing processes, which tended to hang when parent died.  Earlier note:
+	addressed with revised process managment. Have added code to kill processes when
+	the gui is killed, which at least should not leave haning processes.  However,
+	the 9-sim hang may persist untill killed -- as noted, 2 of them were much more
 	computationally intensive (CI) than the others, resulted  in one of the CI sims
 	to hang.  I was able to recreate the problem on two computers (Linux) when I
 	used the same 9 config files and started them in the same order.  On one
@@ -12,15 +14,16 @@ B1.  Running 9 simulations -- bug may be solved, but have not yet
 	do_sim_replicate.py) running.  On the 2nd computer, closing the GUI killed all
 	subprocesses still running sims. 
 
-B2.  Related to B1, clicking the "Cancel Simulatin" button during a long
+B2.  Fixed.Related to B1, clicking the "Cancel Simulatin" button during a long
 simulation did not kill the process.  --testing shows fixed as of Fri Aug 12
 DT 2016
 
 Fri Aug 12 DT 2016
 
-B3.  Cancelling an ne-estmation in the gui has seconds of delay before Ne2
-executable stops.  Then process dies with error in the multiprocessing mod --
-need a cleaner exit
+B3.  Improved by better control of pOpen process, though delays in termination
+	persist. Cancelling an ne-estmation in the gui has seconds of delay before Ne2
+	executable stops.  Then process dies with error in the multiprocessing mod --
+	need a cleaner exit
 
 B4. Fixed in pygenomics latest 20160825.  Windows -- pygenomics Controller.py
 	uses a system command includeing "/dev/null", which directory windows lacks.  A
@@ -30,9 +33,9 @@ B4. Fixed in pygenomics latest 20160825.  Windows -- pygenomics Controller.py
 B5. Fixed 2016_08_15 -- mangled names in main menu.
 
 B6.  Windows -- cancelling a simulation or ne-estimation process in the gui
-results in windows error, "WindowsError: [Error32] The process cannot access
-the file because it is being used by another process."  File locking conflict
-does not occur in Linux (Nor, I think, in OSX, but will need to test).
+	results in windows error, "WindowsError: [Error32] The process cannot access
+	the file because it is being used by another process."  File locking conflict
+	does not occur in Linux (Nor, I think, in OSX, but will need to test).
 
 B7.  Loading a config file in the simulation interface -- cliking the select
 	button then cancelling rarely results in an update that sets the config
@@ -46,7 +49,7 @@ B8.  Rare but possible -- it's currently possible to load a genepop file that's 
 	user has chosen the (unlikely) temp name as input, or if  such that there's a
 	final *genepop name but no data yet in the file.
 
-B9.  Total characters in a genepop file go be used as input into the
+B9.  Fixed.  Total characters in a genepop file go be used as input into the
 	NeEstimator must not exceed 31 characters, else the auto-truncation that
 	program performes on longer names, makes the output names unrecog.  to my
 	algorithm.  For now I'm enforcing a much smaller basename for genepop file input
@@ -117,10 +120,11 @@ B15 Fixed 20161031 (difficult to confirm complete fix, but many tests show no
 	keyboard selection is done, but the tooltip window then will not disappear as it
 	should after mouse off.
 
-B16 Have had inexplicable hangs in ne-estimation doing cohort sampling on a
-	20-pop genepop with N0 at  about 50.  Unable to consistently reproduce this bug,
-	as identical interface inputs run to completion when attempting to reproduce the
-	bug.
+B16 This symptom seems to have resolved with improved process handling when
+	calling the Nb estimation driver: Have had inexplicable hangs in ne-estimation
+	doing cohort sampling on a 20-pop genepop with N0 at  about 50.  Unable to
+	consistently reproduce this bug, as identical interface inputs run to completion
+	when attempting to reproduce the bug.
 
 Sun Nov  6 ST 2016
 
@@ -142,4 +146,40 @@ B19 Windows 10 GUI (Windows 7 32-bit did not show this problem), some labels
 B20 Windows GUI, if the current focus is a combobox, the scroll wheel not only
 	scrolls the whole interface (as desired), but also scrolls through and changes
 	the combobox selection. 
+
+2017_11_26
+
+B21 Fixed 2017_02_15. User reports (email 01/26) that the plotting "stats out"
+	file is being written to negui's current directory instead of the selected
+	output directory.
+
+2017_02_03
+
+B22 Fixed 2017_02_21.  Windows only, user noted that when he loads over about
+	200 genepop files into the Nb estimation interface, the list box showing the
+	files stops updating.  This apparently caused by a limit on the number of
+	characters Windows allows in a command. 
+
+2017_02_21
+
+B23 In WindowsFile locking prevents a temp file from being removed after it's created to
+	solve B22 above.  This is also seen in the inability of the main
+	nb-estimation-calling process to delete temporary files after an Nb estimation
+	run is cancelled before completion,using the "Cancel Estimation" button.  This is
+	probably the same problem in B6.
+B24 Sluggishness in the interface when more than a few hundred genepop files
+	are loaded.  The problem is not as bad inLinux, which only shows a slow
+	response after pushing the "Run Estimation" button.  In Windows, however, the
+	interface behavior is slow for all operations when many genepop files are
+	loaded.
+
+2017_02_21
+
+b25 In the simulation interface, when the user changes (reduces) the number of repro cycles, then the "Nb and census adjustment" control, in in its initial value, will havce a max-cycle value invalid (i.e. > total repro cycles) and the sim will fail with an error message to console that notes the discprepancy
+
+b26  In the simulation interface, while sim is in progress the list button controls for the "Nb and census adjustment" say enabled.  They should be disabled
+
+2017_04_20
+
+b27 Not a bug per-se but could be an unexpected behavior to users.  In Windows, execting negui.py from powershell, if the user scrolls (or otherwise manipulates the console prompt?) the execution is suspended, that is, the interface is still active and responsive, but the processes, such as the simulation procedure, hang until the user hits the enter key when the powershell windows is active.  THis web page I belive gives a solution, and suggests it is a peculiarity of powershell, and may not happen in the regular DOS command window: https://serverfault.com/questions/204150/sometimes-powershell-stops-sending-output-until-i-press-enter-why
 

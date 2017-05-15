@@ -17,6 +17,9 @@ exclude pop sections, individuals within pop sections, and/or
 loci, keyed to the object's member tags (see __init__).
 
 '''
+from __future__ import division
+from builtins import object
+from past.utils import old_div
 __filename__ = "genepopfilelociinfo.py"
 __date__ = "20170127"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -84,7 +87,7 @@ class GenepopFileLociInfo( object ):
 
 				for i_this_allele in di_allele_counts:
 					i_this_count=di_allele_counts[ i_this_allele ]
-					f_this_freq=float( i_this_count )/ float( i_total_allele_instances ) 
+					f_this_freq=old_div(float( i_this_count ), float( i_total_allele_instances )) 
 					di_allele_freqs[ i_this_allele ] = f_this_freq
 				#end for each allele
 

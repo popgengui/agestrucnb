@@ -12,15 +12,18 @@ utility code in the original AgeStructureNe
 collection.
 
 '''
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 __filename__ = "pgsimupopresources.py"
 __date__ = "20160418"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 
 import glob
-import ConfigParser as cp
-from ConfigParser import NoSectionError
-from ConfigParser import NoOptionError
+import configparser as cp
+from configparser import NoSectionError
+from configparser import NoOptionError
 import sys
 
 class PGSimuPopResources( object ):

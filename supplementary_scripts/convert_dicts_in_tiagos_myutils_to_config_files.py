@@ -5,13 +5,15 @@ sumulation models in his other code in his AgeStructureNe project
 want to make them text files as I adapt his program to a more general
 (and gui) framework
 '''
+from future import standard_library
+standard_library.install_aliases()
 __filename__ = "convert_dicts_in_tiagos_mytils_to_config_files.py"
 __date__ = "20160325"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import sys
 import os
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 sys.path.append( "/home/ted/documents/source_code/python/others_code/tiago_antao/AgeStructureNe" )
 

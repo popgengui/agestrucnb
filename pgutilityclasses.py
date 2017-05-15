@@ -4,7 +4,12 @@ Instead of putting utility classes in pgutilities,
 this module will house all classes not directly related
 to front or back end of the pg operations.
 '''
+from __future__ import division
+from __future__ import print_function
 
+from builtins import range
+from past.utils import old_div
+from builtins import object
 __filename__ = "pgutilityclasses.py"
 __date__ = "20160702"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -905,7 +910,7 @@ class ValueValidator( object ):
 	
 #end class ValueValidator
 
-class NeEstimationTableFileManager:
+class NeEstimationTableFileManager(object):
 	'''
 	Class to read and write the table 
 	files with Ne estimations generatted 
@@ -1355,7 +1360,7 @@ class LDNENbBiasAdjustor( object ):
 							+ "the bias adjustment calculation " \
 							+ "is undefined (denoninator term is zero)."
 
-			self.__adjusted_nb = f_numerator / f_denominator
+			self.__adjusted_nb = old_div(f_numerator, f_denominator)
 		#end if no original nb or no nb/ne ratio, else compute
 
 		return

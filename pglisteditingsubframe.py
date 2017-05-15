@@ -5,14 +5,19 @@ Description
 the pgguiutilities.py module, to ease debugging.
 '''
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 __filename__ = "pglisteditingsubframe.py"
 __date__ = "20170325"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 
 
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
+
+import pgutilities as pgut
 
 class ListEditingSubframe( Frame ):
 	'''
@@ -63,7 +68,16 @@ class ListEditingSubframe( Frame ):
 		self.__default_value=v_default_value
 		self.__state=s_state
 		self.__control_width=i_control_width
-		self.__button_width=i_button_width
+		'''
+		Button width default was sized on Linux,
+		but it is not sufficient for Windows,
+		and button text gets trunctated.
+		'''
+		i_adjusted_button_width= \
+				self.__adjust_button_width_if_on_windows(  \
+												i_button_width )
+
+		self.__button_width=i_adjusted_button_width
 		self.__acceptable_item_type=o_acceptable_item_type
 		self.__allow_none_value=b_allow_none_value_for_list
 
@@ -97,6 +111,22 @@ class ListEditingSubframe( Frame ):
 		return
 
 	#end __init__
+
+	def __adjust_button_width_if_on_windows( self, i_button_width ):
+
+		WINDOWS_REQUIRED_WIDTH_INCREASE=2
+
+		i_adjusted_width=i_button_width
+
+		b_is_windows_platform= pgut.is_windows_platform()
+
+		if b_is_windows_platform:
+			i_adjusted_width=i_button_width \
+					+ WINDOWS_REQUIRED_WIDTH_INCREASE
+		#end if is windows platform
+
+		return i_adjusted_width
+	#end __adjust_button_width_if_on_windows
 
 	def __validate_list( self, lv_list, o_correct_item_type ):
 

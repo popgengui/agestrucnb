@@ -2,6 +2,7 @@
 Description
 Wrapper to execute the program LDNe2.
 '''
+from builtins import object
 __filename__ = "pgldnecontroller.py"
 __date__ = "20170314"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"

@@ -25,6 +25,7 @@ and the tag of semi-colon delimited fields,
 one of which is now the longname.
 
 '''
+from builtins import object
 __filename__ = "pgparamset.py"
 __date__ = "20160429"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -59,7 +60,7 @@ class PGParamSet( object ):
 	IDX_PARAM_TAG=1
 	PARAM_FIELDS_TOTAL=2
 
-	TAG_FIELDS_TOTAL=15
+	TAG_FIELDS_TOTAL=16
 
 	'''
 	Below indices refer to the semicolon delimited
@@ -163,6 +164,18 @@ class PGParamSet( object ):
 	is enabled or disabled.
 	'''
 	IDX_TAG_FIELD_CONTROL_STATE=14
+
+	'''
+	Added 2017_05_05, this field names a def
+	(assumed to be in the loading entity),
+	that intitializes the value of the parameter
+	after testing for conditions (for example,
+	to test the state of one control, like a 
+	combobox text value, and set the enabled state
+	and value of a related text box).
+	'''
+	IDX_TAG_FIELD_DEF_ON_LOADING=15
+
 
 	COMMENT_CHAR="#"
 
@@ -333,6 +346,10 @@ class PGParamSet( object ):
 		return s_def
 	#end getControlStateFromTag
 
+	def getDefOnLoadingFromTag( self, s_tag ):
+		s_def=self.__get_tag_field( s_tag,
+				PGParamSet.IDX_TAG_FIELD_DEF_ON_LOADING  )
+
 	def getConfigSectionNameForParam( self, s_name ):
 		s_tag=self.tag( s_name )
 		s_section_name = self.__get_tag_field( s_tag, 
@@ -438,6 +455,13 @@ class PGParamSet( object ):
 		return s_def
 	#end getControlStateForParam
 
+	def getDefOnLoadingForParam( self, s_name ):
+		s_tag=self.tag( s_name )
+		s_def=self.__get_tag_field( s_tag,
+					PGParamSet.IDX_TAG_FIELD_DEF_ON_LOADING )
+		return s_def
+	#end getDefaultValueForParam
+
 	def tag( self, s_name ):
 		'''
 		param s_name can be either among the 
@@ -539,6 +563,7 @@ class PGParamSet( object ):
 		s_param_validity_expression=self.getValidationForParam( s_param )
 		s_param_assoc_def=self.getAssocDefForParam( s_param )
 		s_param_control_state=self.getControlStateForParam( s_param )
+		s_param_def_on_loading=self.getDefOnLoadingForParam( s_param )
 
 		v_param_default_value=None
 
@@ -586,14 +611,16 @@ class PGParamSet( object ):
 						s_param_control_list,
 						s_param_validity_expression,
 						s_param_assoc_def,
-						s_param_control_state )
+						s_param_control_state,
+						s_param_def_on_loading )
 		
 		if len( qv_return_values ) != PGParamSet.TAG_FIELDS_TOTAL:
+			s_fields_total=str( PGParamSet.TAG_FIELDS_TOTAL )
 			s_msg = "In PGParamSet instance, def getAllParamSettings, " \
 						+ "number of values to be returned, " \
-						+ str( len( qv_return_values ) ) + \
-						+" does not equal the expected total tag fields: " \
-						+ str( PGParamSet.TAG_FIELDS_TOTAL ) + "."
+						+ str( len( qv_return_values ) ) + ", "\
+						+ " does not equal the expected total tag fields: " \
+						+ s_fields_total + "."
 			raise Exception( s_msg ) 
 		#end if not correct number of values to return
 
@@ -624,7 +651,7 @@ class PGParamSet( object ):
 
 		lo_paramobjects=[]
 
-		for s_param in self.__tags_by_shortname.keys():
+		for s_param in list(self.__tags_by_shortname.keys()):
 			i_section_order=self.getSectionOrderForParam( s_param )
 			i_param_order=self.getParamOrderNumberForParam( s_param )
 			lo_paramobjects.append( ParamPlacements( s_param, 
@@ -651,7 +678,7 @@ class PGParamSet( object ):
 
 		ls_longnames=[]
 
-		for s_name in self.__tags_by_shortname.keys():
+		for s_name in list(self.__tags_by_shortname.keys()):
 			ls_longnames.append( \
 					self.getLongnameForParam( s_name ) )
 		#end for each param
@@ -675,7 +702,7 @@ class PGParamSet( object ):
 		the set of unique tags if the tags categorize
 		the paramset into groups
 		'''
-		ls_tags=self.__tags_by_shortname.values()
+		ls_tags=list(self.__tags_by_shortname.values())
 		ls_tags.sort()
 		return ls_tags
 	#end shortnames

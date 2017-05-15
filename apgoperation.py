@@ -6,21 +6,21 @@ Or an Ne calculation.  Instantiated subclass objects are the expected type membe
 of the PGGuiApp class objects attribute "gp_operation".
 
 '''
+from builtins import object
+from future.utils import with_metaclass
 __filename__ = "pgoperation.py"
 __date__ = "20160124"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 from abc import ABCMeta, abstractmethod
 
-class APGOperation( object ):
+class APGOperation( with_metaclass(ABCMeta, object) ):
 	'''
 	Abstract class PGOperation is to be implemented by subclasses.
 	Wraps the code required to perform a pop gen analysis, such as a simuPop simulation,
 	Or an Ne calculation.  Instantiated subclass objects are the expected type members 
 	of the PGGuiApp class objects attribute "gp_operation".
 	'''
-
-	__metaclass__ = ABCMeta
 
 	def __init__( self, o_input, o_output ):
 		self.__input=o_input

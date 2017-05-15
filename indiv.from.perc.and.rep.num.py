@@ -20,6 +20,8 @@ Output:
 	replicate at that proportion.
 
 '''
+from __future__ import print_function
+from builtins import range
 __filename__ = "indiv.from.perc.and.rep.num.py"
 __date__ = "20160524"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"

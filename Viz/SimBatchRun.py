@@ -1,4 +1,7 @@
-import ConfigParser
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+import configparser
 import os
 import re
 from itertools import product
@@ -29,7 +32,7 @@ def readconfig(filename):
     delimiters = ',|\||\n|;'
 
     #open files
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.readfp(open(filename))
 
     #read in output filename
@@ -193,7 +196,7 @@ def parseIdentifier(identifier):
 
 def nameRunFolder(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig):
     runFolder = createIdentifier(species,outFolder,simReps,lambdaVal,startPop,N0,microSats,alleleCount,SNPs,mutationRate,locisampling,popsampling,regressConfig)
-    print runFolder
+    print(runFolder)
     runFolder = os.sys.join(outFolder, runFolder)
     if os.path.isdir(runFolder):
         return None
@@ -226,9 +229,9 @@ def collectStatsData(neDict, statsDict, outFolder,regressConfig):
         neFile = neDict[identifier]
         neData = gatherNe(neFile, statConfig["startData"])
         for datapoint in neData:
-            print datapoint
+            print(datapoint)
             data = neData[datapoint]
-            print data
+            print(data)
             for point in data:
                 neOut.write(str(identifier) + "," + str(datapoint) + "," + str(point[0]) + "," + str(point[1]) + "\n")
     neOut.close()

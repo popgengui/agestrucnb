@@ -5,6 +5,9 @@ entries, the fields (maybe just an integer,
 or maybe many fields like age, parent numbers,
 etc as delimited in the individual ID.
 '''
+from __future__ import print_function
+from builtins import range
+from builtins import object
 __filename__ = "genepopindividualid.py"
 __date__ = "20160831"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -185,7 +188,7 @@ class GenepopIndivIdVals( object ):
 			raise Exception( s_msg )
 		#end if value count ne field count			
 
-		for idx in xrange( i_numfields ):
+		for idx in range( i_numfields ):
 
 			s_value=ls_values[ idx ]
 			v_value_evaluated=None

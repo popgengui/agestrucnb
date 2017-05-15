@@ -3,6 +3,7 @@ Description
 Object manages output from the PGOpNeEstimator object
 
 '''
+from builtins import object
 __filename__ = "pgoutputneestimator.py"
 __date__ = "20160502"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"

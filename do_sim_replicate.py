@@ -16,6 +16,7 @@ This module was created to be called in a forked (subprocess.call)  os process,
 
 
 '''
+from __future__ import print_function
 
 __filename__ = "do_sim_replicate.py"
 __date__ = "20160726"

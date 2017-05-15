@@ -4,7 +4,10 @@ A PGGuiApp object with widgets that manage an Ne-estimation using
 a pgopsimupop object, itself calling Tiago's pygenomics.popgen.ne2.controller
 object.
 '''
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
 __filename__ = "pgguineestimator.py"
 __date__ = "20160805"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -39,9 +42,9 @@ COL_NUM_SAMPLING_PARAMS_FRAME=0
 COL_NUM_LOCI_SAMPLING_PARAMS_FRAME=0
 COL_NUM_VIZ_PARAMS_FRAME=0
 
-from Tkinter import *
-from ttk import *
-import tkFileDialog as tkfd
+from tkinter import *
+from tkinter.ttk import *
+import tkinter.filedialog as tkfd
 
 import sys
 import os
@@ -381,7 +384,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		SLEEPTIME_WAITING_FOR_EVENT_CLEAR=0.25
 
-		TIMEOUT_WAITING_FOR_EVENT_TO_CLEAR=05
+		TIMEOUT_WAITING_FOR_EVENT_TO_CLEAR=0o5
 
 		if self.__op_process is not None:
 			
@@ -734,12 +737,17 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 	#end runEstimator
 
 	def __init_file_locations_interface( self, b_force_disable=False ):
+		'''
+		2017_04_28.  Some labels, with widths sized on linux,
+		are too small in Windows, so that text gets truncated.
+		'''
+		b_is_windows_platform=pgut.is_windows_platform()
 		ENTRY_WIDTH=70
-		LABEL_WIDTH=20
+		LABEL_WIDTH= 22 if b_is_windows_platform else 20
 		LOCATIONS_FRAME_PADDING=30
 		LOCATIONS_FRAME_LABEL="Load/Run"
 		LOCATIONS_FRAME_STYLE="groove"
-		RUNBUTTON_PADDING=07	
+		RUNBUTTON_PADDING=0o7	
 
 		o_file_locations_subframe=LabelFrame( self,
 				padding=LOCATIONS_FRAME_PADDING,
@@ -1068,7 +1076,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				s_param_control_list,
 				s_param_validity_expression,
 				s_param_assoc_def,
-				s_param_control_state ) = \
+				s_param_control_state,
+				s_def_on_loading ) = \
 						self.__param_set.getAllParamSettings( s_param )
 
 			#Note that the o_param_type returned from above call
@@ -1435,7 +1444,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				s_param_control_list,
 				s_param_validity_expression,
 				s_param_assoc_def,
-				s_param_control_state ) = \
+				s_param_control_state,
+				s_def_on_loading ) = \
 						self.__param_set.getAllParamSettings( s_param )
 
 			b_param_is_list=self.__param_set.paramIsList( s_param )
@@ -1495,7 +1505,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			#end if attr already exists, fill control with existing val
 			#else init with default
 	
-
 			if s_param_validity_expression != "None":
 				o_validity_checker=self.__create_validity_checker( \
 															v_default_item_value,
@@ -2180,8 +2189,8 @@ if __name__ == "__main__":
 
 	import sys
 	ls_args=[ "param names file" ]
-	from Tkinter import *
-	from ttk import *
+	from tkinter import *
+	from tkinter.ttk import *
 
 	s_usage=pgut.do_usage_check( sys.argv, ls_args )
 	 

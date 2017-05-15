@@ -6,7 +6,12 @@ adding subsamples to the GenepopFileManager's subsample collections according,
 to one of mulitple sampling schemes.  Class GenepopFileSampleParams give 
 values used in sampling.
 '''
+from __future__ import division
+from __future__ import print_function
 
+from builtins import range
+from past.utils import old_div
+from builtins import object
 __filename__ = "genepopfilesampler.py"
 __date__ = "20160710"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -1064,7 +1069,7 @@ class GenepopFileSamplerIndividualsAgeStructureRelateds( GenepopFileSampler ):
 		while i_total_relateds_not_yet_collected > 0:
 			b_have_more=False
 
-			for ts_parents, li_siblings in dli_indiv_index_by_parentage.items():
+			for ts_parents, li_siblings in list(dli_indiv_index_by_parentage.items()):
 
 				if ts_parents in lt_done_parents:
 					continue
@@ -1145,7 +1150,7 @@ class GenepopFileSamplerIndividualsAgeStructureRelateds( GenepopFileSampler ):
 				We try version-neutral syntax:
 				'''
 
-				f_fraction_relateds=self.sampleparams.percent_relateds / 100.0
+				f_fraction_relateds=old_div(self.sampleparams.percent_relateds, 100.0)
 
 				assert type( f_fraction_relateds ) == float,  \
 						"In GenepopFileSamplerIndividualsAgeStructureRelateds Instance, " \

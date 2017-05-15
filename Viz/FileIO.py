@@ -1,4 +1,7 @@
-import ConfigParser
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+import configparser
 import csv
 import os
 import re
@@ -24,24 +27,29 @@ def scrapeSlopes(fileName):
     slopeResults = []
     for match in  matches:
         matchDict ={}
-        print match
+        print(match)
         matchDict['slope'] = float(match[0])
         matchDict['intercept'] = float(match[1])
         matchDict['lowerCI'] = float(match[3])
         matchDict['upperCI'] = float(match[4])
         slopeResults.append(matchDict)
-        print matchDict
+        print(matchDict)
     slopeArray = [dict['slope'] for dict in slopeResults]
     interceptArray = [dict['intercept'] for dict in slopeResults]
     lowerCIArray=[dict['lowerCI']for dict in slopeResults]
     upperCIArray = [dict['upperCI'] for dict in slopeResults]
     resultDict = {"slope":slopeArray,"intercept":interceptArray,"lowerCI":lowerCIArray,"upperCI":upperCIArray}
-    print resultDict
+    print(resultDict)
     statFile.close()
     return slopeResults, resultDict
 
 def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0):
-    fileBuffer = open(filename, "rb")
+    '''
+    2017_04_27.  Note from Ted: Python3's csv reader chokes on the bytes-type
+    reads returned when its file object is opened 'rb'. I've 
+    changed the 'rb' flag to just 'r'.
+    '''
+    fileBuffer = open(filename, "r")
     replicateData = csv.DictReader(fileBuffer, delimiter="\t", quotechar="\"")
     dataDict = {}
     popDict = {}
@@ -74,7 +82,7 @@ def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0):
         popDict[sourceName][popNum] = individualCount
         maxDict[sourceName][popNum] = maxError
         minDict[sourceName][popNum] = minError
-    replicateKeys = dataDict.keys()
+    replicateKeys = list(dataDict.keys())
     resultTable = {}
     individualCountTable = {}
     errorTable = {}
@@ -87,7 +95,7 @@ def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0):
         minRepDict = minDict[replicate]
         maxRepDict = maxDict[replicate]
 
-        popKeys = replicateDict.keys()
+        popKeys = list(replicateDict.keys())
         popKeys.sort()
         for popKey in popKeys:
             if popKey >= firstVal:
@@ -123,7 +131,7 @@ def configRead(filename):
     sortBy = "pop"
     significantCycle = 1
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.readfp(open(filename))
     if config.has_section("labels"):
         if config.has_option("labels", "title"):
@@ -235,7 +243,7 @@ def configRead(filename):
 
 def readCFGFileOrder(filename):
     orderDict = {}
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.readfp(open(filename))
     tuplePattern = re.compile("\((\d*.\d*,.*?)\)")
     if config.has_section("Order"):
@@ -255,9 +263,9 @@ def readFileOrder(filename):
     orderDict = {}
     with open(filename) as fileBuffer:
         tempLines = fileBuffer.readline()  + fileBuffer.readline()
-        print tempLines
+        print(tempLines)
         dialect = csv.Sniffer().sniff(tempLines, delimiters=',|\t;')
-        print dialect
+        print(dialect)
         fileBuffer.seek(0)
         orderData = csv.DictReader(fileBuffer, dialect=dialect, quotechar="\"")
         for item in orderData:
@@ -267,7 +275,7 @@ def readFileOrder(filename):
             if not orderName in orderDict:
                 orderDict[orderName] = []
             orderDict[orderName].append((ordinal, fileIdent))
-    print orderDict
+    print(orderDict)
     return  orderDict
 
 #
@@ -285,11 +293,11 @@ def makeOutlierDict(fliersList):
 
 def writeOutliers(fliersDict,outputName):
     outliersFile = open(outputName, "w")
-    for key in fliersDict.keys():
+    for key in list(fliersDict.keys()):
         outliersFile.write("Key: "+str(key)+"\n")
         keyStr = ""
         keyDict = fliersDict[key]
-        keyList = fliersDict[key].keys()
+        keyList = list(fliersDict[key].keys())
         keyList.sort()
         for x in keyList:
             keyStr += str(x)+": "

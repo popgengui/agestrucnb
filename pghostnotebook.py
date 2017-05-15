@@ -5,7 +5,10 @@ that hosts tabbed pages that each implement
 a PGOperation, such as doing simupop simulations,
 or ne estimations
 '''
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
 __filename__ = "pghostnotebook.py"
 __date__ = "20160623"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -14,8 +17,8 @@ NE_GUI_IS_IMPLEMENTED=True
 
 VERBOSE=False
 
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 
 import pgmenubuilder as pgmb
 
@@ -283,7 +286,7 @@ class PGHostNotebook( Notebook ):
 	#end removeAllTabs
 
 	def cleanupAllTabs( self ):
-		for o_gui in self.__my_gui_objects_by_tab_text.values():
+		for o_gui in list(self.__my_gui_objects_by_tab_text.values()):
 			if o_gui is not None:
 				if VERBOSE: 
 					print ( "cleaning up running operations in gui: " + str ( o_gui ) )

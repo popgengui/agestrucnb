@@ -9,6 +9,9 @@
 #requires matplotlib.
 
 
+from __future__ import division
+from __future__ import print_function
+from past.utils import old_div
 import matplotlib.pyplot as pt
 import sys
 import os
@@ -66,11 +69,11 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 	FONTSIZE=12
 	PLOTFONTSIZE=12
 
-	f_y_limits_units=(1/10.0)
-	f_x_limits_units=(1/60.0 )
+	f_y_limits_units=(old_div(1,10.0))
+	f_x_limits_units=(old_div(1,60.0) )
 
-	f_label_y_space_unit=(1/30.0)
-	f_label_x_space_unit=(1/5.0)
+	f_label_y_space_unit=(old_div(1,30.0))
+	f_label_x_space_unit=(old_div(1,5.0))
 
 	v_min_x_value_dict1=max( minxval, min( list( d_dict1.keys() ) ) )
 	v_max_x_value_dict1=min( maxxval,  max( list( d_dict1.keys() ) ) )
@@ -106,8 +109,8 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 				
 	o_fig=pt.figure()
 	o_subplt=o_fig.add_subplot(111)
-	o_subplt.plot( d_dict1.keys(), list( d_dict1.values() ), linewidth=PLOTLINEWIDTH )
-	o_subplt.plot( d_dict2.keys(), list( d_dict2.values() ), linewidth=PLOTLINEWIDTH )
+	o_subplt.plot( list(d_dict1.keys()), list( d_dict1.values() ), linewidth=PLOTLINEWIDTH )
+	o_subplt.plot( list(d_dict2.keys()), list( d_dict2.values() ), linewidth=PLOTLINEWIDTH )
 	o_subplt.plot( [ v_min_x_value, v_max_x_value ], [ target_nb, target_nb ], linewidth=PLOTLINEWIDTH )
 
 	o_subplt.set_ybound( lower=lf_ylimits[0], upper=lf_ylimits[ 1 ] )

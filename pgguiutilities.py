@@ -3,17 +3,28 @@ Description
 Class objects in this module are TKinter=based
 helper objects, with no PG specific function.
 '''
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+from past.utils import old_div
 __filename__ = "pgguiutilities.py"
 __date__ = "20160427"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu and " \
 				+ "Fredrik Lundh for the Autoscrollbar class (see below)"
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 import createtooltip as ctt
 import sys
-import tkMessageBox
+import tkinter.messagebox
 import pgutilities as pgut
-import tkSimpleDialog
+
+try:
+	import tkSimpleDialog as TKSimp
+except ImportError as ie:
+	import tkinter.simpledialog as TKSimp
+#end try...
 
 '''
 Fred Lundh's code from
@@ -30,9 +41,9 @@ class FredLundhsAutoScrollbar(Scrollbar):
             self.grid()
         Scrollbar.set(self, lo, hi)
     def pack(self, **kw):
-        raise TclError, "cannot use pack with this widget"
+        raise TclError("cannot use pack with this widget")
     def place(self, **kw):
-        raise TclError, "cannot use place with this widget"
+        raise TclError("cannot use place with this widget")
 #end class FredLundhsAutoScrollbar
 
 class FrameContainerScrolled( object ):
@@ -205,9 +216,9 @@ class FrameContainerScrolled( object ):
 				self.__canvas.yview( 'scroll', 1, 'units' )
 			#end if event num is 4 else 5
 		elif s_platform == pgut.SYS_MAC:
-			self.__canvas.yview_scroll( event.delta/120 , 'units' )
+			self.__canvas.yview_scroll( old_div(event.delta,120) , 'units' )
 		elif s_platform == pgut.SYS_WINDOWS:
-			self.__canvas.yview_scroll( -1 * ( event.delta/120 ), 'units' )
+			self.__canvas.yview_scroll( -1 * ( old_div(event.delta,120) ), 'units' )
 		#end if linux, else mac, else windows
 		return
 #end class FrameContainerScrolled
@@ -303,9 +314,9 @@ class PGGUIErrorMessage( object ):
 		if o_parent is None:
 			root=Tk()
 			root.withdraw()
-			tkMessageBox.showerror( title="Error", message=s_message )
+			tkinter.messagebox.showerror( title="Error", message=s_message )
 		else:
-			tkMessageBox.showerror(  parent=o_parent, title="Error", message=s_message )
+			tkinter.messagebox.showerror(  parent=o_parent, title="Error", message=s_message )
 		#end if no parent, then make a parent and hide it, else just invode messagebox
 
 		if root is not None:
@@ -322,9 +333,9 @@ class PGGUIWarningMessage( object ):
 		if o_parent is None:
 			root=Tk()
 			root.withdraw()
-			tkMessageBox.showinfo( title="Warning", message=s_message, icon=tkMessageBox.WARNING )
+			tkinter.messagebox.showinfo( title="Warning", message=s_message, icon=tkinter.messagebox.WARNING )
 		else:
-			tkMessageBox.showinfo(  parent=o_parent, title="Warning", message=s_message, icon=tkMessageBox.WARNING )
+			tkinter.messagebox.showinfo(  parent=o_parent, title="Warning", message=s_message, icon=tkinter.messagebox.WARNING )
 		#and if no parent
 
 		if root is not None:
@@ -341,9 +352,9 @@ class PGGUIInfoMessage( object ):
 		if o_parent is None:
 			root=Tk()
 			root.withdraw()
-			tkMessageBox.showinfo( title="Info", message=s_message, icon=tkMessageBox.INFO )
+			tkinter.messagebox.showinfo( title="Info", message=s_message, icon=tkinter.messagebox.INFO )
 		else:
-			tkMessageBox.showinfo(  parent=o_parent, title="Info", message=s_message, icon=tkMessageBox.INFO )
+			tkinter.messagebox.showinfo(  parent=o_parent, title="Info", message=s_message, icon=tkinter.messagebox.INFO )
 		#end if no parent, then make a parent and hide it, else just invode messagebox
 
 		if root is not None:
@@ -354,7 +365,7 @@ class PGGUIInfoMessage( object ):
 	#end __init__
 #End class PGGUIInfoMessage
 
-class PGGUIMessageWaitForResultsAndActionOnCancel( tkSimpleDialog.Dialog ):
+class PGGUIMessageWaitForResultsAndActionOnCancel( TKSimp.Dialog ):
 
 	AFTERTIME=5
 	MAX_ELLIPSES=15
@@ -394,7 +405,7 @@ class PGGUIMessageWaitForResultsAndActionOnCancel( tkSimpleDialog.Dialog ):
 		I also made the default geometry bigger.
 		'''
 		XPACKPAD=150
-		YPACKPAD=050
+		YPACKPAD=0o50
 		XGEOPAD=350
 		YGEOPAD=150
 
@@ -517,7 +528,7 @@ class PGGUIMessageWaitForResultsAndActionOnCancel( tkSimpleDialog.Dialog ):
 
 class PGGUIYesNoMessage( object ):
 	def __init__( self, o_parent, s_message ):
-		o_msgbox=tkMessageBox.askyesno( parent=o_parent, title="Info", message=s_message, icon=tkMessageBox.INFO )
+		o_msgbox=tkinter.messagebox.askyesno( parent=o_parent, title="Info", message=s_message, icon=tkinter.messagebox.INFO )
 		self.value=o_msgbox
 		return
 	#end __init__

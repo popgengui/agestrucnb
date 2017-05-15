@@ -2,13 +2,15 @@
 Description
 Support defs for the pop gen interface programs.
 '''
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function
 
+from builtins import range
 __filename__ = "pgutilities.py"
 __date__ = "20160601"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import os
+import sys
 import sys
 import pgopsimupop as pgsim
 import pgsimupopresources as pgrec
@@ -45,12 +47,29 @@ import platform
 '''
 import shutil
 
+'''
+2017_04_27
+For traceback information for catchall
+try statements made during processes
+executing in parallell.
+'''
+import traceback
+
 from pgutilityclasses import IndependantSubprocessGroup 
 from pgutilityclasses import NeEstimationTableFileManager 
 
+'''
+2017_04_27
+For python 2 and 3 compatibility,
+for users who have both versions
+of python in their paths, we
+need to use the current interpreters
+executable for our spawned python processes.
+'''
+PYEXE_FOR_POPEN=sys.executable
+
 VERBOSE=False
 
-PYEXE_FOR_POPEN="python"
 PROCESS_QUEUE_STOP_SIGN='STOP'
 SIMULATION_OUTPUT_FILE_REPLICATE_TAG=".r"
 DELIMITER_LIFE_TABLE_FILES=","
@@ -588,9 +607,7 @@ def remove_directory_and_all_contents( s_directory ):
 		if os.path.exists( s_directory ):
 			shutil.rmtree( s_directory )
 		else:
-			raise( Exception( "Directory path: " \
-					+ s_directory \
-					+ "  does not exist." ) )
+			raise Exception
 		#end if path exists, remove, else exception
 
 	except Exception as oex:
@@ -803,10 +820,14 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 		#end while
 
 	except Exception as oex:
-		
+
+		o_traceback=sys.exc_info()[ 2 ]
+		s_err_info=get_traceback_info_about_offending_code( o_traceback )
 		show_error_in_messagebox_in_new_process( oex, 
 				s_msg_prefix = "Error caught by pgutilities, "
-								+ "def __do_simulation_reps_in_subprocesses." )
+								+ "def __do_simulation_reps_in_subprocesses." \
+								+ "\\nError origin info:\\n" )
+
 		raise oex
 	#end try...except...
 	return
@@ -837,7 +858,7 @@ def dialog_returns_nothing( v_return_value ):
 	elif o_return_type == str:
 		b_is_nothing = ( v_return_value == "" )
 	elif o_return_type == unicode:
-		b_is_nothing == ""
+		b_is_nothing = ( v_return_value == "" )
 	else:
 		s_msg = "In pgutilities, def dialog_returns_nothing(), " \
 				+ "Unknown return value type: " \
@@ -1518,8 +1539,13 @@ def run_plotting_program( s_type, s_estimates_table_file, s_plotting_config_file
 			raise Exception( s_msg )
 		#end if type is regression, else...
 	except Exception as oex:
-		show_error_in_messagebox_in_new_process( oex, s_msg_prefix="In pgutilities.py " \
-						+ "def, run_plotting_program" )
+		o_traceback=sys.exc_info()[ 2 ]
+		s_err_info=get_traceback_info_about_offending_code( o_traceback )
+		s_prefix="In pgutilities.py " \
+						+ "def, run_plotting_program, " \
+						+ "An exception was caught, with origin:\\n" \
+						+ s_err_info + "\\n"
+		show_error_in_messagebox_in_new_process( oex, s_msg_prefix=s_prefix )
 		raise ( oex )
 	#end try...except
 	return
@@ -1688,6 +1714,58 @@ def return_when_def_is_true( def_with_boolean_return, dv_args=None, f_sleeptime_
 
 #end return_when_def_is_true
 
+def get_traceback_info_about_offending_code( o_traceback_object ):
+	'''
+	2017_04_27
+	This def was created to help trace errors in the
+	pgdriveneestimator.py module that are caught by
+	the def do_estimate, which is running on a separate
+	process a map_async call, and so tracebacks are not spilled to
+	stdout.
+	'''
+
+	s_msg=""
+
+	TOTAL_FIELDS=4
+
+	IDX_FILE=0
+	IDX_LINE_NUM=1
+	IDX_DEF=2
+	IDX_TXT=3
+
+	ls_categories=[ "file", "line", "function", "text" ]
+
+	l_tup_trace=traceback.extract_tb( o_traceback_object )
+
+	'''
+	We want the last tuple in the traceback list:
+	'''
+
+	ls_fields=[]
+	if len ( l_tup_trace ) > 0:
+		i_last_idx=len( l_tup_trace ) - 1
+		tup_info=l_tup_trace[ i_last_idx ]
+		ls_fields.append( tup_info[ IDX_FILE ] ) 
+		ls_fields.append( str( tup_info[ IDX_LINE_NUM ] ) )
+		ls_fields.append( tup_info[ IDX_DEF ]  )
+		ls_fields.append( tup_info[ IDX_TXT ] ) 
+	else:
+		ls_fields=[ "no_info" for idx in range( TOTAL_FIELDS ) ]
+	#end if we have info
+	s_combined_info=[]
+
+	for idx in range( TOTAL_FIELDS ):
+		s_combined_info.append( ls_categories[idx] + ": " + ls_fields[idx] )
+	#end for each field
+
+	s_msg=", ".join( s_combined_info )
+
+	return s_msg
+#end get_traceback_info_about_offending_code
+
+
+
+
 def call_with_or_without_args( def_to_call, dv_args ):
 	'''
 	Helper for def return_when_def_is_true.
@@ -1704,6 +1782,11 @@ def call_with_or_without_args( def_to_call, dv_args ):
 	#end if no args, else args present
 
 #end call_with_or_without_args
+
+def get_current_python_executable():
+	s_path=sys.executable
+	return s_path
+#end get_current_python_executable
 
 if __name__ == "__main__":
 

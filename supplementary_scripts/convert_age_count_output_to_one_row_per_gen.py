@@ -6,6 +6,8 @@ and we want table gen <tab> total_age1 <total_age2>...<total_age_max>
 
 Input to be from stdin.
 '''
+from __future__ import print_function
+from builtins import range
 __filename__ =""
 __date__ = "20170212"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"

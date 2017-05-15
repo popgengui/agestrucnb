@@ -1,14 +1,21 @@
 '''
 Description
 Check for each generation n, compare the list of individual IDs in the sim file,
-to the l;ist of individual IDs in the nth pop in the genepop file
+to the list of individual IDs in the nth pop in the genepop file
 '''
+from __future__ import print_function
 __filename__ =""
 __date__ = "20160825"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-import pgutilities as pgut
 import sys
+import supp_utils as supu
+try:
+	import pgutilities as pgut
+except ImportError as oie:
+	supu.add_main_pg_dir_to_path()
+	import pgutilities as pgut
+#end try...except	
 
 SIMCOLINDIV=2
 SIMCOLGEN=0
@@ -86,8 +93,6 @@ def compare_genepop_file( s_genfile, s_popfile ):
 	print ( "wrong indiv-gen associations: " + str( countindivwrong ) )
 
 #end compare_genepop_file
-
-
 
 if __name__=="__main__":
 

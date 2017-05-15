@@ -1,4 +1,5 @@
 from __future__ import print_function
+from builtins import range
 from Bio.PopGen.GenePop.EasyController import EasyController
 import sys
 import os

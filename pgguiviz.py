@@ -5,13 +5,18 @@ program(s) using an existing *tsv file containing Ne estimations
 produced by the pgdrivenestimator.py code,
 most often called by the pgguineestimator.py GUI interface.
 '''
+from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 __filename__ = "pgguiviz.py"
 __date__ = "20161209"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 VERBOSE=False
 VERY_VERBOSE=False
+KEEP_CONFIG_FILE=False
 
 VIZ_RUNNING_MSG="Plotting in progress"
 
@@ -50,9 +55,9 @@ __add_subsample_selection_controls.
 
 INIT_TSV_FILE_NAME="none"
 
-from Tkinter import *
-from ttk import *
-import tkFileDialog as tkfd
+from tkinter import *
+from tkinter.ttk import *
+import tkinter.filedialog as tkfd
 import sys
 
 #Support asynchronous running
@@ -255,7 +260,7 @@ class PGGuiViz( pgg.PGGuiApp ):
 		LOCATIONS_FRAME_PADDING=30
 		LOCATIONS_FRAME_LABEL="Load/Run"
 		LOCATIONS_FRAME_STYLE="groove"
-		RUNBUTTON_PADDING=07	
+		RUNBUTTON_PADDING=0o7	
 
 		o_file_locations_subframe=LabelFrame( self,
 				padding=LOCATIONS_FRAME_PADDING,
@@ -687,8 +692,6 @@ class PGGuiViz( pgg.PGGuiApp ):
 			#(if any).
 			i_row=i_rows_used_for_subsampling_selection
 
-        		i_max_label_width
-
 			for s_param in ls_params:
 
 				'''
@@ -717,7 +720,8 @@ class PGGuiViz( pgg.PGGuiApp ):
 					s_param_control_list,
 					s_param_validity_expression,
 					s_param_assoc_def,
-					s_param_control_state ) = \
+					s_param_control_state,
+					s_def_on_loading ) = \
 							self.__param_set.getAllParamSettings( s_param )
 
 				#Note that the o_param_type returned from above call
@@ -1187,7 +1191,9 @@ class PGGuiViz( pgg.PGGuiApp ):
 				self.__load_viz_type_selection_interface( b_force_disable = False )
 				self.__load_params_interface( b_force_disable = False )
 				if self.__config_file_name is not None:
-					i_num_files_removed=pgut.remove_files( [ self.__config_file_name ] )
+					if KEEP_CONFIG_FILE == False:
+						i_num_files_removed=pgut.remove_files( [ self.__config_file_name ] )
+					#end if we are not keeping the config file
 				#end if we have a config file, remove it
 			#end if process alive else not
 			self.__set_controls_by_run_state( self.__get_run_state() )
@@ -1207,9 +1213,11 @@ class PGGuiViz( pgg.PGGuiApp ):
 
 			#remove any existing config file:
 			if self.__config_file_name is not None:
+				if KEEP_CONFIG_FILE == False:
 					#We do nothing for now with the return int
 					#giving the number of files that were removed.
 					i_num_files_removed=pgut.remove_files( [ self.__config_file_name ] )
+				#end if we do not keep the config file
 			#end if we have a config file, remove it
 
 		#end if process not None else None
@@ -1403,7 +1411,7 @@ class PGGuiViz( pgg.PGGuiApp ):
 
 		SLEEPTIME_WAITING_FOR_EVENT_CLEAR=0.25
 
-		TIMEOUT_WAITING_FOR_EVENT_TO_CLEAR=05
+		TIMEOUT_WAITING_FOR_EVENT_TO_CLEAR=0o5
 
 		if self.__op_process is not None:
 			
@@ -1463,9 +1471,11 @@ class PGGuiViz( pgg.PGGuiApp ):
 			#end try, except
 
 			if self.__config_file_name is not None:
-				#pgutilities def will check for path before calling remove.
-				#If the file is not found, the return value is zero, else 1.
-				i_num_files_removed = pgut.remove_files( [ self.__config_file_name ] )
+				if KEEP_CONFIG_FILE == False:
+					#pgutilities def will check for path before calling remove.
+					#If the file is not found, the return value is zero, else 1.
+					i_num_files_removed = pgut.remove_files( [ self.__config_file_name ] )
+				#end if we do not keep the config file
 			#end if we have a config file name
 			if VERY_VERBOSE:
 				print ( "removing the following output file: " \

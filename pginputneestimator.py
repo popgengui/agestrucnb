@@ -2,6 +2,7 @@
 Description
 Object manages input data to be used by the pgopneestimator object.
 '''
+from builtins import object
 __filename__ = "pginputneestimator.py"
 __date__ = "20160502"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"

@@ -3,6 +3,8 @@ Description
 manages output of the PGOpSimuPop object
 based on Tiago Anteo's code in sim.py
 '''
+from builtins import range
+from builtins import object
 __filename__ = "pgoutputsimupop.py"
 __date__ = "20160327"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -24,6 +26,13 @@ FILE_DOES_NOT_EXIST=0
 FILE_EXISTS_UNCOMPRESSED=1
 FILE_EXISTS_AS_BZ2=2
 FILE_EXISTS_AS_BOTH_UNCOMPRESSED_AND_BZ2=3
+
+'''
+2017_05_02. For python3, in def gen2Genepop(),
+we need to decode the text read in from the compressed
+*gen file.
+'''
+SYSDEFAULTENCODING=sys.getdefaultencoding()
 
 '''
 2017_03_20.  Until now the default way to join the alleles with the
@@ -205,7 +214,7 @@ class PGOutputSimuPop( object ):
 						#if the copy op fails:
 						try: 
 							shutil.copyfileobj( o_input, o_output )
-						except Exception,  e:
+						except Exception as  e:
 							raise e
 						#end try except
 
@@ -294,9 +303,7 @@ class PGOutputSimuPop( object ):
 			o_genfile=open( self.__genfile )
 
 		elif i_genfile_exists == FILE_EXISTS_AS_BZ2:
-
-			o_genfile=bz2.BZ2File( self.__genfile + ".bz2" )
-
+			o_genfile=bz2.BZ2File( self.__genfile + ".bz2", mode='r' )
 		else:
 			self.__raise_file_not_found_error( self.__genfile, "convert gen file to genepop" )
 		#end if uncompressed only or uncomp. and compressed, else compressed only, else no file
@@ -304,7 +311,7 @@ class PGOutputSimuPop( object ):
 		s_temp_file_name=self.__get_temp_file_name()
 
 		if b_do_compress == True:
-			o_genepopfile=bz2.BZ2File( s_temp_file_name + '.bz2', 'wb', compresslevel=9 ) 
+			o_genepopfile=bz2.BZ2File( s_temp_file_name + '.bz2', 'w', compresslevel=9 ) 
 		else:
 			o_genepopfile=open( s_temp_file_name, 'w' )
 		#end if compress else don't
@@ -316,18 +323,40 @@ class PGOutputSimuPop( object ):
 			s_header += ", nbne=" + str( f_nbne_ratio )
 		#end if caller passed and nb/ne ratio value
 
-		o_genepopfile.write(  s_header + "\n" )
+		s_header_line=s_header + "\n"
+
+		if b_do_compress:
+			s_header_line=s_header_line.encode( SYSDEFAULTENCODING )
+		#end if writing compressed data
+
+		o_genepopfile.write(  s_header_line )
 
 		for i_locus in range( i_num_loci ):
-		    o_genepopfile.write("l" + str(i_locus) + "\n" )
+			s_locus_name="l" + str(i_locus) + "\n" 
+
+			if b_do_compress:
+				s_locus_name=s_locus_name.encode( SYSDEFAULTENCODING )
+			#end if do compress	
+
+			o_genepopfile.write(s_locus_name )
+
 		#end for each loci number
 
 		#write indiv id and alleles, line by line:
 		i_currgen=None
 
 		for s_line in o_genfile:
-		    
-			ls_line = s_line.rstrip().split(" ")
+
+			'''
+			2017_05_02.  For python 3, because in a compressed file python 3 reads bytes
+			instead of strings (despite opening bzw2 in in mode='r'), 
+			we need to decode if we read in bytes.
+			'''
+			if type( s_line ) == bytes:
+				s_line=s_line.decode( SYSDEFAULTENCODING )
+			#end if type is bytes
+
+			ls_line = s_line.rstrip().split(" ") 
 
 			'''
 			As of 2016_09_01, we are no longer typing the id as an int, since
@@ -335,6 +364,7 @@ class PGOutputSimuPop( object ):
 			(see pgopsimupop.py def __outputAge )
 			to be a (currenly semicolon) delimited list of the indiv age,sex,etc)
 			'''
+			
 			s_id = ls_line[IDX_GEN_INDIV]
 
 			i_gen = int(float(ls_line[IDX_GEN_GENERATION]))
@@ -343,10 +373,15 @@ class PGOutputSimuPop( object ):
 			ls_alleles = ls_line[ idx_first_allele_in_line : idx_last_allele_in_line + 1 ]
 
 			if i_currgen is None or ( b_pop_per_gen == True and i_currgen != i_gen ):
-				    o_genepopfile.write( "pop\n" )
-				    i_currgen=i_gen
-			    #end if new generation (== new population )
-		    	#end if we should make a new population for each generation
+				s_pop_line="pop\n"
+
+				if b_do_compress:
+						s_pop_line=s_pop_line.encode( SYSDEFAULTENCODING )
+				#end if b_do_compress
+
+				o_genepopfile.write( s_pop_line )
+				i_currgen=i_gen
+
 			#end if no curr gen or new gen and we write pop per gen
 			
 			'''
@@ -366,7 +401,13 @@ class PGOutputSimuPop( object ):
 				s_delimit_indiv_from_loci=","
 			#end if we aret to separate first loci from indiv with comma and space
 
-			o_genepopfile.write( str( s_id ) + s_delimit_indiv_from_loci +  " ".join( ls_alleles ) + "\n"  )
+			s_this_entry=s_id + s_delimit_indiv_from_loci +  " ".join( ls_alleles ) + "\n" 
+		
+			if b_do_compress:
+				s_this_entry=s_this_entry.encode( SYSDEFAULTENCODING )
+			#end if writing compressed data
+
+			o_genepopfile.write( s_this_entry )
 
 		#end for each line in gen file
 
@@ -377,7 +418,12 @@ class PGOutputSimuPop( object ):
 
 		#change to shutil.move from os.rename -- threw errors (in docker install) when
 		#renaming across volumes:
-		shutil.move( o_genepopfile.name, s_final_name )
+		if b_do_compress:
+			s_temp_file_name=s_temp_file_name + ".bz2"
+			s_final_name=s_final_name + ".bz2"
+		#end if we wrote a compressed file
+
+		shutil.move( s_temp_file_name, s_final_name )
 
 		return
 	#end gen2Popgene
@@ -389,12 +435,12 @@ class PGOutputSimuPop( object ):
 
 	def removeOutputFileByExt( self, s_extension ):
 
-		if s_extension not in PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS.values():
+		if s_extension not in list(PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS.values()):
 			s_msg="In PGOutputSimupop instance, def removeOutputFileByExt, " \
 					+ "unknown extension was passed as argument: " \
 					+ s_extension + "." \
 					+ "Valid extensions include, " \
-					+ ", ".join( PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS.values() ) \
+					+ ", ".join( list(PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS.values()) ) \
 					+ "."
 			raise Exception( s_msg )
 		#end if unknown extension

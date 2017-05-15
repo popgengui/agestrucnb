@@ -5,13 +5,17 @@ Description
 
 Driver for the negui program
 '''
+from __future__ import division
 
+from future import standard_library
+standard_library.install_aliases()
+from past.utils import old_div
 __filename__ ="negui.py"
 __date__ = "20160427"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 
 import os
 import glob
@@ -167,8 +171,8 @@ def negui_main():
 	i_width=o_master.winfo_screenwidth()
 	i_height=o_master.winfo_screenheight()
 
-	i_geo_width=int( ( i_width/2 ) * ( 1 - WINDOW_MARGIN ) )
-	i_geo_height=int( ( i_height/2 ) * ( 1 - WINDOW_MARGIN ) )
+	i_geo_width=int( ( old_div(i_width,2) ) * ( 1 - WINDOW_MARGIN ) )
+	i_geo_height=int( ( old_div(i_height,2) ) * ( 1 - WINDOW_MARGIN ) )
 
 	o_host=pgn.PGHostNotebook( o_master, 
 			s_menu_config, 

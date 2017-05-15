@@ -21,11 +21,13 @@ these classes into this parent class as interface features and demands
 increase.
 '''
 
+from future import standard_library
+standard_library.install_aliases()
 __filename__ = "pgkeycontrolframe.py"
 __date__ = "20170418"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 
 class PGKeyControlFrame( Frame ):
 

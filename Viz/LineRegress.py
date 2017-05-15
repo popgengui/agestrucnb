@@ -1,10 +1,17 @@
+from __future__ import division
+from __future__ import print_function
 #created by Brian Trethewey
 #
 #neGrapher is primary interface for graphing data
 #neStats is primary interface for creating statistics output file for a dataset
 
 
-import ConfigParser
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
+from past.utils import old_div
+import configparser
 
 from numpy import array, math
 from scipy import stats, random
@@ -13,7 +20,7 @@ from numpy import mean, median, isnan
 import csv
 import sys
 import os
-from  FileIO import scrapeNE, configRead, readFileOrder, makeOutlierDict, writeOutliers
+from Viz.FileIO import scrapeNE, configRead, readFileOrder, makeOutlierDict, writeOutliers
 
 
 #function to perform the linear regression and store the results in a dictionary
@@ -38,7 +45,7 @@ def _getGraphLine(slope, intercept, xVctr):
 
 def _pointsToVectors(points):
     #zip with a * preforms the inverse
-    xVctr , yVctr = zip(*points)
+    xVctr , yVctr = list(zip(*points))
     return xVctr, yVctr
 
 
@@ -106,7 +113,7 @@ def createScatterPlot(table,errorTable, title=None, xlab=None, yLab=None, dest="
         minErrorVctr.append(minDelta)
         maxErrorVctr.append(maxDelta)
     errorArray = [minErrorVctr,maxErrorVctr]
-    unzippedX, unzippedY = zip(*flatData)
+    unzippedX, unzippedY = list(zip(*flatData))
     #plt.errorbar(unzippedX, unzippedY,errorArray, fmt = "o")
     plt.scatter(unzippedX,unzippedY)
     plt.margins(0.15,0.15)
@@ -127,7 +134,7 @@ def createHzLinePlot(table, title=None, xlab="Heterozygosity", yLab=None, dest="
     if dest == "none":
         return
     plt.figure("Hz")
-    for key in table.keys():
+    for key in list(table.keys()):
         pass
 
     # plt.errorbar(unzippedX, unzippedY,errorArray, fmt = "o")
@@ -156,7 +163,7 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", ou
 
     plotData = []
 
-    unzippedX, unzippedy = zip(*flatData)
+    unzippedX, unzippedy = list(zip(*flatData))
     setX = set(unzippedX)
     listX = list(setX)
     listX.sort()
@@ -200,7 +207,7 @@ def slopeConfidence(alpha, linePoints):
     #get linear regression for points
     regression = lineRegress(linePoints)
     #get Tscore
-    tScore = stats.t.ppf((1-alpha/2), len(linePoints)-2)
+    tScore = stats.t.ppf((1-old_div(alpha,2)), len(linePoints)-2)
 
 
     #get s(b1)  == (MSE)/sum(xi-mean(x))^2)
@@ -213,7 +220,7 @@ def slopeConfidence(alpha, linePoints):
         xDiffSq = xDiff *xDiff
         xMeanDiffArray.append(xDiffSq)
     xDiffSum = sum(xMeanDiffArray)
-    sSqVal = MSE/xDiffSum
+    sSqVal = old_div(MSE,xDiffSum)
     sVal = math.sqrt(sSqVal)
     deltaConfidence = tScore*sVal
     confidenceInterval = (regression["slope"]-deltaConfidence,regression["slope"]+deltaConfidence)
@@ -240,7 +247,7 @@ def _MSE(slope, intercept,linePoints):
     errorSum = sum(errorArray)
 
     #devide by DoF (n-2)
-    MSE = errorSum/(len(linePoints)-2)
+    MSE = old_div(errorSum,(len(linePoints)-2))
     return MSE
 
 
@@ -276,20 +283,20 @@ def _getExpectedLineStats(slopes, intercepts, xVctr,expectedSlope = None):
 def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
     #get linear regression stats for all datasets
     LineStats = []
-    for line in dataVctrs.values():
+    for line in list(dataVctrs.values()):
         data = lineRegress(line)
         LineStats.append(data)
     #flatten the array
-    allpoints = [val for sublist in dataVctrs.values()  for val in sublist]
+    allpoints = [val for sublist in list(dataVctrs.values())  for val in sublist]
     #unzip to obtain x and y value vectors for all points
-    xVals, yVals = zip(*allpoints)
+    xVals, yVals = list(zip(*allpoints))
 
     minX = min(xVals)
     maxX = max(xVals)+1
     xVctr = list(set(allpoints))
     if maxX - minX>1:
 
-        xVctr = range(int(math.floor(minX)),int(math.ceil(maxX)))
+        xVctr = list(range(int(math.floor(minX)),int(math.ceil(maxX))))
 
     lineVctrs =[]
     colorVctr = []
@@ -302,7 +309,7 @@ def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
             if popTable:
                 averagePopPoints = []
                 allpoints = [val for sublist in popTable for val in popTable[sublist]]
-                xVals, yVals = zip(*allpoints)
+                xVals, yVals = list(zip(*allpoints))
                 xSet = set(xVals)
                 for x in xSet:
                     pointYSet = [point[1] for point in allpoints if point[0] == x]
@@ -425,6 +432,7 @@ def _enviromentalFactor(table, factorTable):
 #significantValue: value of comparison w/ regards to slope. should be 0 for every test, but can be changed if needed.
 #testFlag: flag that disables file write and prints stats to console instead, used for test functions
 def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,testFlag = False):
+
     tableFormat = "{:<30}{:<30}{:<50}{:<80}\n"
     confPercent = (1 - confidenceAlpha)*100
     tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)","Source File")
@@ -432,10 +440,13 @@ def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt",
     confidenceVctr = []
 
     Uncountable = 0
-    for recordKey in table.keys():
+    for recordKey in list(table.keys()):
         record = table[recordKey]
         slope, intercept, confidence  = slopeConfidence(confidenceAlpha,record)
-        tableString+=tableFormat.format(slope,intercept,confidence,recordKey[0])
+        #Ted edit 2017_05_12. For python3, we have to cast the confidence tuple 
+        #as a string. Looks like py3 provides no tuple handling in the format 
+        #method for the string.
+        tableString+=tableFormat.format(slope,  intercept ,  str( confidence ) , recordKey[0])
         if isnan(slope):
             Uncountable +=1
         else:
@@ -456,12 +467,12 @@ def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt",
         else:
             zeroCount+=1
     if testFlag:
-        print slopeVctr
-        print confidenceVctr
+        print(slopeVctr)
+        print(confidenceVctr)
 
-        print positiveCount
-        print zeroCount
-        print negativeCount
+        print(positiveCount)
+        print(zeroCount)
+        print(negativeCount)
         return
     outFile = open(outFileName,"w")
     outFile.write("File:"+neFile+"\n")
@@ -497,7 +508,7 @@ def neStats(neFile, configFile = None, testFlag = False):
 
 #gets teh minumum of the maximum of the number of subpops for the table
 def _getSubpopLimit(table,itemList=None):
-    identTuples = table.keys()
+    identTuples = list(table.keys())
     maxDict = {}
     for ident in identTuples:
         if not itemList or ident in itemList:
@@ -509,20 +520,20 @@ def _getSubpopLimit(table,itemList=None):
 
 def _geLociVal(table):
 
-    identTuples = table.keys()
+    identTuples = list(table.keys())
     lociCounter ={}
     for ident in identTuples:
         if ident[2] not in lociCounter:
             #initilize counter
             lociCounter[ident[2]] = 0
         lociCounter[ident[2]]+=1
-    sortedLociList = lociCounter.keys()
+    sortedLociList = list(lociCounter.keys())
     sortedLociList.sort()
     lociSum = sum(lociCounter.values())
     chanceList = [0]*len(sortedLociList)
     chanceSum=0
     for i in range(len(sortedLociList)):
-        lociChance  = lociCounter[sortedLociList[i]]/lociSum
+        lociChance  = old_div(lociCounter[sortedLociList[i]],lociSum)
         chanceSum+=lociChance
         chanceList[i]=chanceSum
     randVal = random.rand()
@@ -546,8 +557,8 @@ def orderFiles(table, orderDict,genNum = 1):
 
     #create randomized lists  for each file to
 
-    for ordering in orderDict.keys():
-        for ident in subpopLimits.keys():
+    for ordering in list(orderDict.keys()):
+        for ident in list(subpopLimits.keys()):
             SelectRandom.createOrdering((ident,ordering), subpopLimits, subpopLimit)
 
         for subpopNumber in range(int(subpopLimit)-1):
@@ -561,13 +572,13 @@ def orderFiles(table, orderDict,genNum = 1):
                         foundGen = point[1]
                         break
                 if not foundGen:
-                    print "desired gen not found in"
-                    print entry[1]
+                    print("desired gen not found in")
+                    print(entry[1])
                     raise Exception("desired gen number "+str(genNum)+" not found in "+str(entry))
                 orderedTable[(ordering,subpopNumber)].append((entry[0], foundGen))
     return orderedTable
 
-class SelectRandom:
+class SelectRandom(object):
     orderingDict = {}
 
     @staticmethod
@@ -577,16 +588,16 @@ class SelectRandom:
         #print selectedCount
         if not identifier in SelectRandom.orderingDict:
             SelectRandom.orderingDict[identifier] = SelectRandom._createorderArray(subpopLimits[identifier[0]],int(selectedCount))
-            print "New Entry"
+            print("New Entry")
         else:
-            print "existing entry found"
+            print("existing entry found")
 
     @staticmethod
     def clearOrdering():
         SelectRandom.orderingDict = {}
     @staticmethod
     def _createorderArray(totalCount, selectedCount):
-        ordering  = random.choice(range(1,int(totalCount+1)) , selectedCount)
+        ordering  = random.choice(list(range(1,int(totalCount+1))) , selectedCount)
         return ordering
 
     @staticmethod
@@ -625,131 +636,131 @@ if __name__ == "__main__":
     #Tests
 
     #Test Linear Regression
-    print"lineRegress Tests"
+    print("lineRegress Tests")
     #Perfect Positive Regression
-    xVct = range(10)
-    yVct  = range(10)
-    table = zip(xVct,yVct)
+    xVct = list(range(10))
+    yVct  = list(range(10))
+    table = list(zip(xVct,yVct))
     result = lineRegress(table)
     assert result["slope"] == 1.0
     assert result["intercept"] == 0.0
     assert result["r_val"] ==1.0
-    yVct = range(0,20,2)
-    table = zip(xVct,yVct)
+    yVct = list(range(0,20,2))
+    table = list(zip(xVct,yVct))
     result = lineRegress(table)
     assert result["slope"] == 2.0
     assert result["intercept"] == 0.0
     assert result["r_val"] == 1.0
-    yVct = range(10,20,1)
-    table = zip(xVct,yVct)
+    yVct = list(range(10,20,1))
+    table = list(zip(xVct,yVct))
     result = lineRegress(table)
     assert result["slope"] == 1.0
     assert result["intercept"] == 10.0
     assert result["r_val"] ==1.0
-    print "Perfect Positive regression passed"
+    print("Perfect Positive regression passed")
 
     # Perfect Negative Regression
-    xVct = range(10)
-    yVct  = range(10,0,-1)
-    table = zip(xVct,yVct)
+    xVct = list(range(10))
+    yVct  = list(range(10,0,-1))
+    table = list(zip(xVct,yVct))
     result = lineRegress(table)
     assert result["slope"] == -1.0
     assert result["intercept"] == 10.0
     assert result["r_val"] == -1.0
-    yVct = range(20,0,-2)
-    table = zip(xVct,yVct)
+    yVct = list(range(20,0,-2))
+    table = list(zip(xVct,yVct))
     result = lineRegress(table)
     assert result["slope"] == -2.0
     assert result["intercept"] == 20.0
     assert result["r_val"] ==-1.0
-    yVct = range(0,-10,-1)
-    table = zip(xVct,yVct)
+    yVct = list(range(0,-10,-1))
+    table = list(zip(xVct,yVct))
     result = lineRegress(table)
     assert result["slope"] == -1.0
     assert result["intercept"] == 0.0
     assert result["r_val"] ==-1.0
-    print "Perfect Negative regression passed"
+    print("Perfect Negative regression passed")
 
 
 
 
 
-    print "lineRegress Tests Passed"
+    print("lineRegress Tests Passed")
 
-    print "Confidence Tests "
-    xVct = range(5)
-    yVct  = range(5)
-    table = zip(xVct,yVct)
-    print slopeConfidence(0.05,table)
-    xVct = range(5)
-    yVct  = range(5)
+    print("Confidence Tests ")
+    xVct = list(range(5))
+    yVct  = list(range(5))
+    table = list(zip(xVct,yVct))
+    print(slopeConfidence(0.05,table))
+    xVct = list(range(5))
+    yVct  = list(range(5))
     yVct[0]-=1
-    table = zip(xVct,yVct)
-    print slopeConfidence(0.01,table)
-    print slopeConfidence(0.05, table)
-    print slopeConfidence(0.1,table)
-    xVct = range(10)
-    yVct  = range(10)
+    table = list(zip(xVct,yVct))
+    print(slopeConfidence(0.01,table))
+    print(slopeConfidence(0.05, table))
+    print(slopeConfidence(0.1,table))
+    xVct = list(range(10))
+    yVct  = list(range(10))
     yVct[0]-=1
-    table = zip(xVct,yVct)
-    print slopeConfidence(0.01,table)
-    print slopeConfidence(0.05, table)
-    print slopeConfidence(0.1,table)
-    print "Confidence Tests passed"
+    table = list(zip(xVct,yVct))
+    print(slopeConfidence(0.01,table))
+    print(slopeConfidence(0.05, table))
+    print(slopeConfidence(0.1,table))
+    print("Confidence Tests passed")
 
-    print"getLineGraph Tests"
-    xVct = range(10)
+    print("getLineGraph Tests")
+    xVct = list(range(10))
 
     assert _getGraphLine(0.0, 0.0, xVct) == [(0,0.0), (1,0.0),(2, 0.0), (3,0.0), (4,0.0), (5,0.0), (6,0.0), (7,0.0), (8,0.0), (9,0.0)]
-    print "slope 0 test passed"
+    print("slope 0 test passed")
     assert _getGraphLine(0.0, 6.0, xVct) == [(0,6.0), (1,6.0),(2, 6.0), (3,6.0), (4,6.0), (5,6.0), (6,6.0), (7,6.0), (8,6.0), (9,6.0)]
-    print "slope 0 intercept !=0 test passed"
+    print("slope 0 intercept !=0 test passed")
     assert _getGraphLine(1.0, 0.0, xVct) == [(0,0.0), (1,1.0), (2,2.0), (3,3.0), (4,4.0), (5,5.0), (6,6.0), (7,7.0), (8,8.0), (9,9.0)]
-    print"x=y case pass"
+    print("x=y case pass")
     assert _getGraphLine(1.0, 1.0, xVct) == [(0,1.0),(1, 2.0), (2,3.0), (3,4.0), (4,5.0), (5,6.0), (6,7.0), (7,8.0), (8,9.0), (9,10.0)]
-    print "intercept != 0 test passed"
+    print("intercept != 0 test passed")
     assert _getGraphLine(4.0, 1.0, xVct) == [(0,1.0), (1,5.0), (2,9.0), (3,13.0), (4,17.0), (5,21.0), (6,25.0), (7,29.0), (8,33.0), (9,37.0)]
-    print "slope 4 intercept 1 test passed"
+    print("slope 4 intercept 1 test passed")
     assert _getGraphLine(-1.0, 0.0, xVct) == [(0,0.0), (1,-1.0), (2,-2.0), (3,-3.0), (4,-4.0), (5,-5.0), (6,-6.0), (7,-7.0), (8,-8.0), (9,-9.0)]
-    print "negative slope test passed"
+    print("negative slope test passed")
     assert _getGraphLine(-2.0, 3.0, xVct) == [(0,3.0), (1,1.0), (2,-1.0 ), (3,-3.0), (4,-5.0), (5,-7.0), (6,-9.0), (7,-11.0), (8,-13.0), (9,-15.0)]
-    print "negative slope intercept !=0 test passed"
+    print("negative slope intercept !=0 test passed")
     assert _getGraphLine(2.0, -3.0, xVct) == [(0,-3.0), (1,-1.0), (2,1.0 ), (3,3.0), (4,5.0), (5,7.0), (6,9.0), (7,11.0), (8,13.0), (9,15.0)]
-    print "negative intercept !=0 test passed"
+    print("negative intercept !=0 test passed")
 
 
-    xVct = range(3,13,1)
+    xVct = list(range(3,13,1))
     assert _getGraphLine(1.0, 0.0, xVct) == [(3,3.0), (4,4.0), (5,5.0), (6,6.0), (7,7.0), (8,8.0), (9,9.0), (10,10.0), (11,11.0), (12,12.0)]
-    print "non 0 positive x start passed"
-    xVct = range(3,13,1)
+    print("non 0 positive x start passed")
+    xVct = list(range(3,13,1))
     yVct = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
-    assert _getGraphLine(1.0, -3.0, xVct) == zip(xVct,yVct)
-    print "non 0 x start non 0 intercept passed"
+    assert _getGraphLine(1.0, -3.0, xVct) == list(zip(xVct,yVct))
+    print("non 0 x start non 0 intercept passed")
 
-    xVct = range(10,0,-1)
+    xVct = list(range(10,0,-1))
     yVct = [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
-    assert _getGraphLine(1.0, 0.0, xVct) == zip(xVct,yVct)
-    print "negative step x axis passed"
+    assert _getGraphLine(1.0, 0.0, xVct) == list(zip(xVct,yVct))
+    print("negative step x axis passed")
 
-    xVct = range(0, -10, -1)
+    xVct = list(range(0, -10, -1))
     yVct = [0.0, -1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0, -8.0, -9.0]
-    assert _getGraphLine(1.0, 0.0, xVct) == zip(xVct, yVct)
-    print "negative step x axis passed"
+    assert _getGraphLine(1.0, 0.0, xVct) == list(zip(xVct, yVct))
+    print("negative step x axis passed")
 
-    xVct = range(-7,3,1)
+    xVct = list(range(-7,3,1))
     yVct = [-7.0, -6.0, -5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0]
-    assert _getGraphLine(1.0, 0.0, xVct) == zip(xVct, yVct)
-    print "negative start x axis passed"
+    assert _getGraphLine(1.0, 0.0, xVct) == list(zip(xVct, yVct))
+    print("negative start x axis passed")
 
     xVct = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
     yVct = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
-    assert _getGraphLine(1.0, 0.0, xVct) == zip(xVct, yVct)
-    print "non integer x axis passed"
+    assert _getGraphLine(1.0, 0.0, xVct) == list(zip(xVct, yVct))
+    print("non integer x axis passed")
 
-    print "getGraphLine Passed"
+    print("getGraphLine Passed")
 
 
-    xVct = range(0,20,2)
+    xVct = list(range(0,20,2))
     table = []
     table.append(_getGraphLine(-0.1, 0, xVct))
     table.append(_getGraphLine(-0.005, 0, xVct))
@@ -757,7 +768,7 @@ if __name__ == "__main__":
     table.append(_getGraphLine(0.25, 10, xVct))
 
 
-    print "createGraph Test"
+    print("createGraph Test")
     colorStyles = ["", ""]
     lineStyles = ["", ""]
     title = "testTitle"
@@ -766,13 +777,13 @@ if __name__ == "__main__":
     createGraph(table,colorVctr=colorStyles, styleVctr=lineStyles, title=title, xlab=x, yLab=y)
 
 
-    print "NeRegressionGraphMaker"
+    print("NeRegressionGraphMaker")
 
     testYs = [[0,0,0,0,0],[1,2,3,4,5],[-1,-2,-3,-4,-5],[1,3,1,3,1]]
     testX = [1,2,3,4,5]
     testTable =[]
     for yVct in testYs:
-        testTable.append(zip(testX,yVct))
+        testTable.append(list(zip(testX,yVct)))
     id = 0
     testDict = {}
     for data in testTable:
@@ -785,7 +796,7 @@ if __name__ == "__main__":
 
     testYs = [[0,0,0,0,0],[1,2,3,4,5],[-1,-2,-3,-4,-5],[1,3,0,2,-1]]
     for yVct in testYs:
-        testTable.append(zip(testX,yVct))
+        testTable.append(list(zip(testX,yVct)))
     testDict = {}
     for data in testTable:
         testDict[id] = data
@@ -796,19 +807,19 @@ if __name__ == "__main__":
 
     testArray = [2,5,3,6,1,4]
     testArray.sort()
-    print  testArray
+    print(testArray)
 
     table, countsTable, errorTable = scrapeNE("testData.txt")
 
-    print table
-    print countsTable
-    print errorTable
+    print(table)
+    print(countsTable)
+    print(errorTable)
 
 
 
     neGraphMaker(table)
 
-    configwrite= ConfigParser.ConfigParser()
+    configwrite= configparser.ConfigParser()
     configwrite.add_section("labels")
     configwrite.set("labels","title", "titletext")
     configwrite.set("labels", "xLab", "xLabel")
@@ -827,8 +838,8 @@ if __name__ == "__main__":
     configwrite.set("confidence","alpha",0.05)
     configwrite.write(open("example1.cfg","w"))
 
-    print configRead("example1.cfg")
-    print "test master methods"
+    print(configRead("example1.cfg"))
+    print("test master methods")
     neGrapher("testData.txt","example1.cfg")
     table, countsTable, errorTable = scrapeNE("testData.txt")
     _neStatsHelper(table,"testData",0.1,testFlag=True)
@@ -838,16 +849,16 @@ if __name__ == "__main__":
 
     orderTable ={("biz",1):[(1,5),(3,33)],("biz",2):[(1,10),(6,67)],("baz",1):[(1,10),(4,33)],("baz",2):[(1,20),(4,88)],("baz",3):[(1,30),(4,99)],("bar",1):[(1,15),(5,33)],("boz",1):[(1,25),(2,33)]}
 
-    print orderFiles(orderTable,orderDict)
+    print(orderFiles(orderTable,orderDict))
     ordered = orderFiles(orderTable,orderDict)
     ordered2 = orderFiles(orderTable,orderDict)
-    print ordered
-    print ordered2
-    print ordered == ordered2
+    print(ordered)
+    print(ordered2)
+    print(ordered == ordered2)
     neGraphMaker(ordered)
 
     try:
         orderFiles(orderTable, orderDict, 3)
     except Exception as e:
-        print e.message
-        print "exception check passed"
+        print(e.message)
+        print("exception check passed")

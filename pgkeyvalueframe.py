@@ -4,12 +4,16 @@ Description
 2017_03_25.  This class code was extracted from the 
 pgguiutilities.py module, in order to ease debugging.
 '''
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 __filename__ = "pgkeyvalueframe.py"
 __date__ = "20170325"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 from pglisteditingsubframe import ListEditingSubframe 
 from pgguiutilities import FredLundhsAutoScrollbar
 

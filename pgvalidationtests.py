@@ -17,7 +17,11 @@ plotting for most of our model species by sim breeding cycles, implying a 1/1
 breeding cycle per generation ratio for measuring heterozygosity, shows 
 inaccurate declines, expected vs theoretical.
 '''
+from __future__ import division
+from __future__ import print_function
 
+from builtins import range
+from past.utils import old_div
 __filename__ = "pgvalidationtests.py"
 __date__ = "20170130"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -98,6 +102,8 @@ def get_ne_per_cycle( s_genepop_file,
 									o_tsv_file,
 									i_initial_cycle_number,
 									i_final_cycle_number ):
+
+	TSV_COL_WITH_NE_VALS="ne_est_adj"
 	df_ne_by_cycle=None
 
 	o_tsv_file.unsetAllFilters()
@@ -122,7 +128,7 @@ def get_ne_per_cycle( s_genepop_file,
 
 	o_tsv_file.setFilter( "pop" , cycle_range_check )
 
-	ls_pop_and_ne=o_tsv_file.getFilteredTableAsList( [ "pop", "est_ne" ] )
+	ls_pop_and_ne=o_tsv_file.getFilteredTableAsList( [ "pop", TSV_COL_WITH_NE_VALS ] )
 
 
 	#The zeroth item in the ls_pop_and_ne list is the header, so we
@@ -147,8 +153,8 @@ def get_theoretical_heterozygosity_per_generation( df_mean_het_by_cycle,
 
 	df_theoretical_het_per_generation={}
 
-	li_cycle_numbers_for_ne=df_ne_by_cycle.keys()
-	li_cycle_numbers_for_het=df_mean_het_by_cycle.keys()
+	li_cycle_numbers_for_ne=list(df_ne_by_cycle.keys())
+	li_cycle_numbers_for_het=list(df_mean_het_by_cycle.keys())
 
 	li_cycle_numbers_for_ne.sort()
 	li_cycle_numbers_for_het.sort()
@@ -167,7 +173,7 @@ def get_theoretical_heterozygosity_per_generation( df_mean_het_by_cycle,
 		raise Exception( s_msg )
 	#end if non-equal key sets
 
-	i_total_cycle_numbers=len( df_ne_by_cycle.keys() )
+	i_total_cycle_numbers=len( list(df_ne_by_cycle.keys()) )
 	i_lowest_cycle_number=min( df_ne_by_cycle.keys() )
 
 	f_ne0=f_theoretical_ne if f_theoretical_ne is not None  \
@@ -186,7 +192,7 @@ def get_theoretical_heterozygosity_per_generation( df_mean_het_by_cycle,
 
 	df_theoretical_het_per_generation[ 1 ] =  f_ht0	
 
-	f_calc_coefficient = 1 if f_ne0 <= f_reltol else 1 - 1 / ( 2*f_ne0 )
+	f_calc_coefficient = 1 if f_ne0 <= f_reltol else 1 - old_div(1, ( 2*f_ne0 ))
 
 	'''
 	We use cycles per generation to
@@ -225,7 +231,7 @@ def get_theoretical_het_loss_per_generation( df_ne_by_cycle_number, f_cycles_per
 
 	i_cycles_per_generation=int( round( f_cycles_per_generation ) )
 
-	li_sorted_cycle_numbers=df_ne_by_cycle_number.keys()
+	li_sorted_cycle_numbers=list(df_ne_by_cycle_number.keys())
 	li_sorted_cycle_numbers.sort()
 
 	i_min_gen_number=min( li_sorted_cycle_numbers )
@@ -233,7 +239,7 @@ def get_theoretical_het_loss_per_generation( df_ne_by_cycle_number, f_cycles_per
 	f_ne_for_initial_pop=f_theoretical_ne if f_theoretical_ne is not None \
 			else np.mean( list( df_ne_by_cycle_number.values() ) )	
 
-	f_one_over_2Ne=1.0/( 2.0*f_ne_for_initial_pop )
+	f_one_over_2Ne=old_div(1.0,( 2.0*f_ne_for_initial_pop ))
 
 	f_one_minus_one_over_2Ne=1 - f_one_over_2Ne
 
@@ -274,7 +280,7 @@ def convert_mean_hets_to_het_loss( df_mean_het_by_gen ):
 
 	f_h0=df_mean_het_by_gen[ i_min_het_number ]
 
-	li_sorted_gen_numbers=df_mean_het_by_gen.keys()
+	li_sorted_gen_numbers=list(df_mean_het_by_gen.keys())
 	li_sorted_gen_numbers.sort()
 
 	for i_gen_number in li_sorted_gen_numbers:
@@ -316,11 +322,11 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 		LINEPOINTTYPE2="-"
 	#end if too many gens to show points, just show line
 
-	f_y_limits_units=(1/10.0)
-	f_x_limits_units=(1/60.0 )
+	f_y_limits_units=(old_div(1,10.0))
+	f_x_limits_units=(old_div(1,60.0) )
 
-	f_label_y_space_unit=(1/30.0)
-	f_label_x_space_unit=(1/5.0)
+	f_label_y_space_unit=(old_div(1,30.0))
+	f_label_x_space_unit=(old_div(1,5.0))
 
 	v_min_x_value_dict1=min( list( d_dict1.keys() ) )
 	v_max_x_value_dict1=max( list( d_dict1.keys() ) )
@@ -355,8 +361,8 @@ def plot_two_dicts_similarly_scaled( d_dict1, d_dict2,
 				
 	o_fig=pt.figure()
 	o_subplt=o_fig.add_subplot(111)
-	o_subplt.plot( d_dict1.keys(), list( d_dict1.values() ), LINEPOINTTYPE1, linewidth=PLOTLINEWIDTH )
-	o_subplt.plot( d_dict2.keys(), list( d_dict2.values() ), LINEPOINTTYPE2, linewidth=PLOTLINEWIDTH )
+	o_subplt.plot( list(d_dict1.keys()), list( d_dict1.values() ), LINEPOINTTYPE1, linewidth=PLOTLINEWIDTH )
+	o_subplt.plot( list(d_dict2.keys()), list( d_dict2.values() ), LINEPOINTTYPE2, linewidth=PLOTLINEWIDTH )
 
 	o_subplt.set_ybound( lower=lf_ylimits[0], upper=lf_ylimits[ 1 ] )
 	o_subplt.set_xlabel( s_xaxis_label, fontsize=FONTSIZE )
@@ -683,7 +689,7 @@ def get_expected_vs_observed_loss_heterozygosity( s_ne_tsv_file,
 		ddf_theoretical_het_loss_by_file[ s_gp_file_name ] = df_theoretical_het_loss_by_generation
 
 		f_ne0=f_theoretical_ne if f_theoretical_ne is not None \
-				else np.mean( ddf_ne_by_gp_file_by_gen[ s_gp_file_name ].values() ) 
+				else np.mean( list(ddf_ne_by_gp_file_by_cycle[ s_gp_file_name ].values()) ) 
 
 		df_theoretical_as_perc={ i_gen: 100 * ( 1.0 - df_theoretical_het_loss_by_generation[ i_gen ] ) \
 																			for i_gen in df_theoretical_het_loss_by_generation } 
@@ -793,7 +799,7 @@ if __name__ == "__main__":
 
 	if s_test_name not in ddefs_by_test_name:
 		print( "\"test\" arg must be one of: " \
-					+ ",".join( ddefs_by_test_name.keys() )  \
+					+ ",".join( list(ddefs_by_test_name.keys()) )  \
 					+ "." )
 
 		sys.exit()

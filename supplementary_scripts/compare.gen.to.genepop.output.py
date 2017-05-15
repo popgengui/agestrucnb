@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 
-import pgutilities as pgut
+from __future__ import print_function
 import sys
+import supp_utils as supu
+
+try:
+	import pgutilities as pgut
+except ImportError as oie:
+	supu.add_main_pg_dir_to_path()		
+	import pgutilities as pgut
+#end try...except
+	
 
 GENCOLINDIV=0
 GENCOLGEN=1
@@ -115,6 +124,10 @@ def compare_genepop_file( s_genfile, s_popfile ):
 
 
 if __name__=="__main__":
+
+	myloc=__file__
+
+	print( myloc )
 
 	numargs="3"
 

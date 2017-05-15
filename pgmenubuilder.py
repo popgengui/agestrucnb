@@ -4,14 +4,18 @@ Description
 Builds a Tkinter menu bar and menus using a configuration file.  See class description.
 
 '''
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 __filename__ = "pgmenubuilder.py"
 __date__ = "20160123"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import sys
 import os
-import ConfigParser as modCP
-from Tkinter import Menu
+import configparser as modCP
+from tkinter import Menu
 
 class PGMenuBuilder(object):
 	'''

@@ -12,9 +12,9 @@ then
       	echo "  <sampled genepop file>"
 	echo "  <list of pop numbers \"i,j,k..\">" 
 	echo "  [\"noheaders\"]"
-	echo "Note:  in the list, i refers to the first pop in the sampled file, " 
-	echo "  the value i indicating that is the ith pop in the original, "
-	echo "  j referring similarly to the second pop in sthe sampled file, " 
+	echo "Note:  in the list, \"i\" refers to the first pop in the sampled file, " 
+	echo "  the value \"i\" indicating that is the ith pop in the original, "
+	echo "  \"j\" referring similarly to the second pop in sthe sampled file, " 
 	echo "  being the jth pop in the original, etc"
 	echo "Note: All files must have matching endline schemes.  In the present "
 	echo "  cases, this means unix endlines -- the forced endline scheme output "
@@ -57,9 +57,15 @@ do
 	if [ "$linecount" -eq "1" ]
 	then
 		continue
+	fi
 
-	elif [ "$myline" == "pop" ]
+	ispopline=$( echo "$myline" | awk '{ print ( $0 ~ "pop\r" || $0  == "pop" ); }' )
+
+	if [ "$ispopline" -eq "1" ]
 	then
+		##### temp 
+		echo "found pop line"
+		#####
 		popnum=$( expr $popnum + 1 )
 
 	elif [ "$popnum" -eq "0" ]
@@ -69,7 +75,7 @@ do
 	else
 		myid=$( echo "$myline" | cut -d "," -f 1 )
 		#Gets space-delimited list of loci
-		myloci="$( echo "$myline" | cut -d "," -f 2 )"
+		myloci="$( echo "$myline" | cut -d "," -f 2 | awk '{ sub( /^ /, "", $0); print $0 }' )"
 		locibypopandindiv["${popnum}_${myid}"]="${myloci}"
 	fi
 done < "$origgp"
@@ -84,7 +90,6 @@ for thispop in $poplist
 do
 	loopcount=$( expr "$loopcount" + 1 )
 
-	origpopnumbysuborder[$loopcount]="$thispop"
 done
 
 linecount="0"
@@ -105,8 +110,11 @@ do
 	if [ "$linecount" -eq "1" ]
 	then
 		continue
+	fi
 
-	elif [ "$myline" == "pop" ]
+	ispopline=$( echo "$myline" | awk '{ print( $0 ~ "pop\r" || $0 == "pop" ); }' )
+
+	if [ "$ispopline" -eq "1" ]
 	then
 		if [ "$popnum" -gt 0 ]
 		then
@@ -119,17 +127,21 @@ do
 
 	elif [ "$popnum" -eq "0" ]
 	then
+		##### temp
+		echo "reading loci line: $myline"
+		#####
 		locicount=$( expr $locicount + 1 )
 		sampledlocinums[$locicount]="${locinumbersbyname[$myline]}"
 	else
 		myid=$( echo "$myline" | cut -d "," -f 1 )
 		#Gets space-delimited list of loci
-		myloci=($( echo "$myline" | cut -d "," -f 2 ))
+		myloci=($( echo "$myline" | cut -d "," -f 2  | awk '{ sub( /^ /, "", $0 ); print $0;}' )) 
 
 		origpop="${origpopnumbysuborder[$popnum]}"		
 		mainkey="${origpop}_${myid}"
 		
 		origloci="${locibypopandindiv[${origpop}_${myid}]}"
+
 		origlocilist=($origloci)
 
 		if [ -z "$origlocilist" ]
@@ -142,6 +154,9 @@ do
 
 			for sublocinum in $( seq 1 "$locicountsampled" )		
 			do
+				##### temp
+				echo "looping"
+				#####
 				origlocinum=${sampledlocinums[$sublocinum]}
 				origallele=${origlocilist[$origlocinum-1]}
 				idx=$( expr $sublocinum - 1 )

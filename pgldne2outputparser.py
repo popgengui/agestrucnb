@@ -7,7 +7,10 @@ LDNe2, this object parses the results and
 delivers the values.
 
 '''
+from __future__ import print_function
 
+from builtins import range
+from builtins import object
 __filename__ = "pgldneoutputparser.py"
 __date__ = "20170317"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -162,7 +165,7 @@ class PGLDNe2OutputParser( object ):
 		idx_range_end=i_total_lines  \
 						- self.me.PARSING_METRICS[ "TOTAL_LINES_FOLLOWING_DATA" ]
 		
-		return range( idx_range_start, idx_range_end )
+		return list(range( idx_range_start, idx_range_end))
 	#end __get_data_range
 
 	def __extract_pop_number_from_string_entry( self , s_string_value ):

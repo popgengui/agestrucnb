@@ -4,6 +4,13 @@ Description
 Retrieves and prepares data needed to run simuPop.  See class description.
 
 '''
+from __future__ import division
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
+from past.utils import old_div
 __filename__ = "pginputsimupop.py"
 __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -14,7 +21,7 @@ DEFAULT_NB_VAR=0.05
 
 import sys
 import os
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 from pgutilityclasses import NbAdjustmentRangeAndRate
 
 class PGInputSimuPop( object ):
@@ -89,7 +96,7 @@ class PGInputSimuPop( object ):
 
 			v_value=eval (s_config_file_value )
 
-		except NameError, ne:
+		except NameError as ne:
 
 			if self.__resources is not None:
 				
@@ -259,7 +266,7 @@ class PGInputSimuPop( object ):
 		self.__update_attribute_config_file_info( "isMonog", "pop", "isMonog" )
 
 		if config.has_option("pop", "forceSkip"):
-			self.forceSkip = config.getfloat("pop", "forceSkip") / 100
+			self.forceSkip = old_div(config.getfloat("pop", "forceSkip"), 100)
 		else:
 			self.forceSkip = 0
 		#end if forceSkip, else not
@@ -600,7 +607,7 @@ class PGInputSimuPop( object ):
 
 		if self.NbNc != 0:
 
-			f_Nc = float( self.__Nb_from_eff_size_info ) / float( self.NbNc )
+			f_Nc = old_div(float( self.__Nb_from_eff_size_info ), float( self.NbNc ))
 		else:
 			f_Nc=0
 
@@ -634,7 +641,7 @@ class PGInputSimuPop( object ):
 			raise Exception( s_msg )
 		#end if invalid value for f_cum_pop_porp
 
-		i_n0 = int( round ( f_Nc/f_cum_pop_porp ) )
+		i_n0 = int( round ( old_div(f_Nc,f_cum_pop_porp) ) )
 		
 		return i_n0
 	#end __compute_n0_from_eff_size_info
@@ -693,7 +700,7 @@ class PGInputSimuPop( object ):
 		o_parser=ConfigParser()
 		o_parser.optionxform=str
 
-		ls_attribute_names=self.__config_file_section_name_by_attribute_name.keys()
+		ls_attribute_names=list(self.__config_file_section_name_by_attribute_name.keys())
 
 		for s_attribute in ls_attribute_names:
 
@@ -704,7 +711,7 @@ class PGInputSimuPop( object ):
 				o_parser.add_section( s_section_name )
 			#end if new section
 
-			o_parser.set( s_section_name, s_option_name, getattr( self, s_attribute ) ) 
+			o_parser.set( s_section_name, s_option_name, str( getattr( self, s_attribute ) ) ) 
 		#end for each attribue
 
 		return o_parser

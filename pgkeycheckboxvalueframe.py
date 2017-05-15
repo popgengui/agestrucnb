@@ -5,12 +5,16 @@ Description
 pgguiutilities.py module, so that it is easier
 to debug.
 '''
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 __filename__ = "pgkeycategoricalvalueframe.py"
 __date__ = "20170325"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 import createtooltip as ctt
 import sys
 from pgguiutilities import FredLundhsAutoScrollbar

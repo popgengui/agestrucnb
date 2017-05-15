@@ -3,12 +3,14 @@ Description
 
 Deploy tkinter by subclassing Frame class.  See class description.
 '''
+from future import standard_library
+standard_library.install_aliases()
 __filename__ = "pgguiapp.py"
 __date__ = "20160124"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 
 class PGGuiApp( Frame ):
 	'''
@@ -39,9 +41,13 @@ class PGGuiApp( Frame ):
 	#end menu getter
 
 	@master.setter
-	def master( self, i_value ):
+	def master( self, v_value ):
+		'''
 		raise Exception( "in PGGuiApp object, " \
 		+ "there is no setter for the master object. " )
+		'''
+		self.__master = v_value
+		return
 	#end master setter
 
 	@master.deleter

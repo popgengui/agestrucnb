@@ -2,13 +2,17 @@
 Description
 This class takes a gui interface as an intit param, extracts the
 neLineRegress paramater values from the the interface, and uses
-them to write a config file that can be used by the neLineRegress program(s)>
+them to write a config file that can be used by the neLineRegress program(s).
 '''
+
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 __filename__ = "pglineregressconfigfilemaker.py"
 __date__ = "20161115"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 import os 
 import pgutilities as pgut
 
@@ -57,7 +61,7 @@ class PGLineRegressConfigFileMaker( object ):
 		I can't use the simpler type() method to
 		get the class name, becuase the (grand)parent 
 		Frame class (must be) old style, hence no metadata
-		for type().  I instead use this tortured bit of code
+		for type().  I instead use this tortured bit of code.
 		'''
 		s_gui_class_name=( self.__interface ).__class__.__name__ 
 
@@ -166,7 +170,7 @@ class PGLineRegressConfigFileMaker( object ):
 			dv_param_values_by_param_name=self.__ds_interface_param_values_by_param_names_by_section[ s_section ]
 			for s_param_name in dv_param_values_by_param_name:
 				v_value_this_param=dv_param_values_by_param_name[ s_param_name ]
-				o_parser.set( s_section, s_param_name, v_value_this_param )
+				o_parser.set( s_section, s_param_name, str( v_value_this_param ) )
 			#end for each param (option, in config file parlance), in this section
 		#end for each section
 
@@ -183,7 +187,7 @@ class PGLineRegressConfigFileMaker( object ):
 							+ "def, __write_config_file.  The file, " \
 							+ self.__config_outfile_name + ", " \
 							+ "already exists.  This class disallows " \
-							+ "overwriting exisiting files."
+							+ "overwriting exisiting files"
 				raise Exception( s_msg )
 
 			#end if file exists
@@ -196,7 +200,7 @@ class PGLineRegressConfigFileMaker( object ):
 						+ "def, __write_config_file, an existing " \
 						+ "parser object is required to write " \
 						+ "the config file.  Found a None value for the " \
-						+	"confg_parser_object member." \
+						+	"confg_parser_object member" \
 
 			raise Exception( s_msg )
 		#end if we have a config parser object else not

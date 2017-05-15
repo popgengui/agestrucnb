@@ -1,6 +1,11 @@
 '''
 Description
 '''
+from __future__ import division
+from __future__ import print_function
+from builtins import range
+from builtins import object
+from past.utils import old_div
 __filename__ = "genepopfilemanager.py"
 __date__ = "20160505"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -12,6 +17,13 @@ from genepopindividualid import GenepopIndivIdVals
 from genepopindividualid import GenepopIndividualId
 
 COMMA_DELIMITED_LOCI_LIST_HAS_LEADING_SPACE=True
+'''
+2017_05_01.  Py3 compatiblity requires decoding
+file lines read in from a file opened 'rb'.
+This value is accessed dynamically in defs
+__get_indiv_entry and getListIndividuals. 
+'''
+SYSENCODING=sys.getdefaultencoding()
 
 class GenepopFileManager( object ):
 
@@ -79,7 +91,7 @@ class GenepopFileManager( object ):
 		#for compat with python 3 (we need to cast
 		#byte addresses as long in python 2, else very big files
 		#have byte addresses that overrun py2's max int)
-		self.__byte_address_type=long if i_currver==2 else int
+		self.__byte_address_type=int if i_currver==2 else int
 		self.__range_iterator=xrange if i_currver==2 else range
 		self.__first_pop_address=None
 		self.__pop_byte_addresses={}
@@ -124,8 +136,13 @@ class GenepopFileManager( object ):
 					self.__header_and_loci_byte_addresses[ \
 												IDX_LOCI_LINE ] 
 			o_orig_file.seek( l_byte_address )
-			s_loci_line=o_orig_file.readline()
-			ls_loci=s_loci_line.split( "," )
+			v_loci_line=o_orig_file.readline()
+
+			if type( v_loci_line )==bytes:
+				v_loci_line=v_loci_line.decode( SYSENCODING )
+			#end if type is bytes
+
+			ls_loci=v_loci_line.split( "," )
 			i_loci_count=len( ls_loci )
 		else:
 			i_loci_count=i_loci_line_count
@@ -340,7 +357,7 @@ class GenepopFileManager( object ):
 		#recall the pops are numbered 1,2,3...N for N populations,
 		#and that these numbers are the keys in the dict of byte addresses
 		#giving the first line (the "pop" line ) of each pop
-		return len( self.__pop_byte_addresses.keys() )
+		return len( list(self.__pop_byte_addresses.keys()) )
 	#end __get_count_populations
 
 	def __get_pop_list( self, s_pop_subsample_tag = None ):
@@ -386,14 +403,18 @@ class GenepopFileManager( object ):
 
 		#here we open the file without the 'b' flag, so we
 		#will read string in both python 2 and 3
-		o_origfile=open( self.__filename, 'r' )
+		'''
+		2017_05_01.  Restoring the 'rb' flag, and adjusting code below to
+		handle bytes objects, if the interpretor is python3.
+		'''
+		o_origfile=open( self.__filename, 'rb' )
 		o_newfile=o_file_object
 
 		li_header_and_loci_lines=None
 		li_pop_numbers=None
 
 		if s_pop_subsample_tag is None:
-			li_pop_numbers=self.__pop_byte_addresses.keys()
+			li_pop_numbers=list(self.__pop_byte_addresses.keys())
 		else:
 			if s_pop_subsample_tag not in self.__pop_subsamples:
 				s_msg="In GenepopFileManager instance, " \
@@ -406,7 +427,7 @@ class GenepopFileManager( object ):
 		#end if all pops to be written, else only those subsampled
 		
 		if s_loci_subsample_tag is None:
-			li_header_and_loci_lines=self.__header_and_loci_byte_addresses.keys()
+			li_header_and_loci_lines=list(self.__header_and_loci_byte_addresses.keys())
 		else:
 			l_header_address=self.__header_and_loci_byte_addresses[ 0 ]
 			li_header_and_loci_lines=[ l_header_address ] \
@@ -415,10 +436,19 @@ class GenepopFileManager( object ):
 		
 		#write header and loci list:
 		for i_line_number in li_header_and_loci_lines:
-
 			o_origfile.seek( self.__header_and_loci_byte_addresses[ i_line_number ] )
-			s_line_stripped=( o_origfile.readline() ).strip()
-			o_newfile.write( s_line_stripped + UNIX_ENDLINE )
+
+			'''
+			In python 3, realine() will deliver a bytes object, which
+			has the strip() method, just like a string in python 2.
+			'''
+			v_line_stripped=( o_origfile.readline() ).strip()
+
+			if type( v_line_stripped ) == bytes:
+				v_line_stripped=v_line_stripped.decode( SYSENCODING )
+			#end if bytes type, decode
+
+			o_newfile.write( v_line_stripped + UNIX_ENDLINE )
 		#end for each line in the header and loci section
 
 		#write pops:
@@ -428,7 +458,7 @@ class GenepopFileManager( object ):
 			i_tot_indiv=None
 
 			if s_indiv_subsample_tag is None:
-				li_indiv_list=self.__pop_byte_addresses[ i_pop_number ].keys()
+				li_indiv_list=list(self.__pop_byte_addresses[ i_pop_number ].keys())
 				i_tot_indiv=self.__get_count_indiv( li_indiv_list )
 			else:
 				ddli_subsamples=self.__indiv_subsamples
@@ -462,8 +492,12 @@ class GenepopFileManager( object ):
 						for i_line_number in self.__pop_byte_addresses[ i_pop_number ][ i_indiv_number ]:
 							o_origfile.seek( self.__pop_byte_addresses[ i_pop_number ]\
 															[ i_indiv_number ][ i_line_number ] )
-							s_line_stripped=( o_origfile.readline() ).strip()
-							o_newfile.write( s_line_stripped + UNIX_ENDLINE )
+							v_line_stripped=( o_origfile.readline() ).strip()
+
+							if type( v_line_stripped ) == bytes:
+								v_line_stripped=v_line_stripped.decode( SYSENCODING )
+							#end if bytes type, decode
+							o_newfile.write( v_line_stripped + UNIX_ENDLINE )
 						#end for each line number
 					#otherwise we need to get loci via subsample:
 					else:
@@ -627,7 +661,7 @@ class GenepopFileManager( object ):
 	def __get_list_loci_numbers( self, s_loci_subsample_tag=None ):
 		li_loci_numbers=None
 		if s_loci_subsample_tag is None:
-			li_loci_numbers=range( 1, self.__loci_count + 1 )
+			li_loci_numbers=list(range( 1, self.__loci_count + 1))
 		else:
 			li_loci_numbers=self.__loci_subsamples[ s_loci_subsample_tag ]
 		#end if we have no loci subsample tag, else we have one	
@@ -648,17 +682,25 @@ class GenepopFileManager( object ):
 
 		o_orig_file.seek( l_address )
 
-		s_this_indiv_line=o_orig_file.readline()
+		v_this_indiv_line=o_orig_file.readline()
+		'''
+		We assume the file was opened 'rb'.  If the interpretor
+		is python3, then we need to convert the bytes object.
+		'''
+		if type( v_this_indiv_line ) == bytes:
+			v_this_indiv_line=v_this_indiv_line.decode( SYSENCODING )
+		#end if readline returned bytes, decode
 
-		if "," not in s_this_indiv_line:
+
+		if "," not in v_this_indiv_line:
 			s_msg="In GenepopFileManager instance, " \
 						+ "def, __get_individual_id, " \
 						+ "no comma found in entry line: " \
-						+ s_this_indiv_line + "."
+						+ v_this_indiv_line + "."
 			raise Exception( s_msg )
 		#end if no comma in line
 
-		ls_this_indiv=s_this_indiv_line.split( "," )
+		ls_this_indiv=v_this_indiv_line.split( "," )
 
 		#possible to have a blank field in genepop
 		#individual entry (i.e. line starts with comma),
@@ -670,7 +712,7 @@ class GenepopFileManager( object ):
 		else:
 			s_msg = "In GenepopFileManager object instance,  getListIndiv(), " \
 					+ "more than one comma found in individual listing.  Line reads: " \
-					+ s_this_indiv_line.strip() + "\n"
+					+ v_this_indiv_line.strip() + "\n"
 			raise Exception( s_msg )
 		#end if no id, else id, else parsing error
 
@@ -691,9 +733,6 @@ class GenepopFileManager( object ):
 		concatenated entry lines.  Note that most often
 		there will be only one entry line (id,loci-list).
 		'''
-
-		o_orig_file = open( self.__filename, 'rb' )
-
 		s_entry=""
 
 		i_num_lines_this_indiv_entry=len( self.__pop_byte_addresses[ i_pop_number ][ i_indiv_number ] )
@@ -716,7 +755,19 @@ class GenepopFileManager( object ):
 		for i_line_number in li_entry_line_numbers_sorted:
 			l_address=self.__pop_byte_addresses[ i_pop_number ][ i_indiv_number ][ i_line_number ]		
 			o_orig_file.seek( l_address )
-			s_entry+=o_orig_file.readline()
+
+			'''
+			For python 3, when reading in bytes from 
+			the 'rb' opened file:
+			'''
+			v_line=o_orig_file.readline()
+
+			if type( v_line ) == bytes:
+				v_line=v_line.decode( SYSENCODING )
+			#end if we read in bytes
+
+			s_entry+=v_line		
+
 		#end for each line in entry
 
 		return s_entry
@@ -838,7 +889,7 @@ class GenepopFileManager( object ):
 		#end if requested range invalid
 
 	
-		li_range_loci_numbers=range( i_min_loci_position, ( i_max_loci_position + 1 ) )
+		li_range_loci_numbers=list(range( i_min_loci_position, ( i_max_loci_position + 1 )))
 
 		return li_range_loci_numbers
 	#end def __get_range_loci_nums
@@ -969,9 +1020,17 @@ class GenepopFileManager( object ):
 
 			l_address=self.__pop_byte_addresses[ i_pop_number ][ i_this_indiv ][1]		
 			o_orig_file.seek( l_address )
-			s_this_indiv_line=o_orig_file.readline()
+			v_this_indiv_line=o_orig_file.readline()
 
-			ls_this_indiv=s_this_indiv_line.split( "," )
+			'''
+			2017_05_01. For python3, we need to convert
+			the bytes read-in to a string type:
+			'''
+			if type( v_this_indiv_line )==bytes:
+				v_this_indiv_line=v_this_indiv_line.decode( SYSENCODING )
+			#end if bytes, decode
+
+			ls_this_indiv=v_this_indiv_line.split( "," )
 
 			#possible to have a blank field in genepop
 			#individual entry (i.e. line starts with comma),
@@ -1019,7 +1078,7 @@ class GenepopFileManager( object ):
 			li_indiv_numbers=None
 
 			if s_indiv_subsample_tag is None:
-				li_indiv_numbers=self.__pop_byte_addresses[ i_pop_number ].keys()
+				li_indiv_numbers=list(self.__pop_byte_addresses[ i_pop_number ].keys())
 			else:
 				li_indiv_numbers=self.__indiv_subsamples[ s_indiv_subsample_tag ] [ i_pop_number ]
 			#end if we son't have an indiv subsample tag else we do
@@ -1589,7 +1648,7 @@ class GenepopFileManager( object ):
 										+ "loci entry, " + s_this_loci \
 										+ ", character count not divisible by two."
 
-					i_chars_per_allele=i_char_count/2
+					i_chars_per_allele=old_div(i_char_count,2)
 					
 					try:
 						i_allele_1=int( s_this_loci[ 0:i_chars_per_allele ] )
@@ -1659,7 +1718,7 @@ class GenepopFileManager( object ):
 #end class GenepopFileManager
 
 if __name__ == "__main__":
-	#test the code
+#	test the code
 #	mydir=os.path.sep + os.path.join( "home","ted","documents","source_code","python","negui","temp_data","genepop_from_brian_20160506" )
 #	restag="py" + str( sys.version_info.major ) + "test"
 #	filecount=0
@@ -1699,7 +1758,6 @@ if __name__ == "__main__":
 	MINPOPNUM=24
 	MAXPOPNUM=24
 
-
 	opg=GenepopFileManager( f_genepopfile )
 
 	li_pop_numbers=list(  range( MINPOPNUM, MAXPOPNUM + 1 ) )
@@ -1713,6 +1771,5 @@ if __name__ == "__main__":
 
 	print( dddi_allelecounts )
 
-	
 #end if main
 

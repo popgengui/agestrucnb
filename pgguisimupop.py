@@ -2,6 +2,11 @@
 Description
 A PGGUIApp object with widgets that manage a simuPop simulation
 '''
+
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 __filename__ = "pgsimupopper.py"
 __date__ = "20160124"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -55,14 +60,24 @@ import inspect
 #create and execute the sim objects:
 import uuid
 
-from Tkinter import *
+from tkinter import *
 #since we import all names from Tkinter,
 #and ttk, we get the ttk widgets
 #with their better styling,#automaitcally
 #. (see #https://docs.python.org/2/library/ttk.html)
-from ttk import *
+from tkinter.ttk import *
 
-import tkFileDialog as tkfd
+import tkinter.filedialog as tkfd
+
+'''
+2017_05_05. Aids in defs onCullMethodSelectionChange,
+and onUpdateMaleProb, to properly set
+the male probablity number and the enabled/disabled
+state its entry box, given the cull method selected.
+'''
+CBOX_EQUAL_SEX_RATIO_TEXT="equal_sex_ratio"
+CBOX_SURVIVAL_RATE_TEXT="survival_rates"
+
 class PGGuiSimuPop( pgg.PGGuiApp ):
 
 	'''
@@ -215,7 +230,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		pass
 		return
 	#end of __init_run_sub_subframe
-
 			
 	def __init_interface( self, b_force_disable = False ):
 		'''
@@ -232,12 +246,18 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		'''
 		
+		'''
+		2017_04_28.  For label width's sized on Linux, 
+		some Windows labels truncate text.
+		'''
+		b_is_windows_platform=pgut.is_windows_platform()
+
 		ENTRY_WIDTH=70
-		LABEL_WIDTH=20
+		LABEL_WIDTH=22 if b_is_windows_platform else 20
 		LOCATIONS_FRAME_PADDING=30
 		LOCATIONS_FRAME_LABEL="Load/Run"
 		LOCATIONS_FRAME_STYLE="groove"
-		RUNBUTTON_PADDING=07	
+		RUNBUTTON_PADDING=0o7	
 
 		o_file_locations_subframe=LabelFrame( self,
 				padding=LOCATIONS_FRAME_PADDING,
@@ -464,10 +484,17 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		enabled/disabled state (as set by their attribute "isenabled", so that 
 		all are disabled.
 		'''
+
+		'''
+		2017_04_28.  Label widths sized for Linux are sometimes too small in windows,
+		so that text gets truncated.
+		'''
+		b_is_windows_platform=pgut.is_windows_platform()
+
 		MAXLABELLEN=200
-		WIDTHSMALL=21
-		WIDTHBIG=21
-		LENSMALL=20
+		WIDTHSMALL= 23 if b_is_windows_platform else 21
+		WIDTHBIG= 24 if b_is_windows_platform else 21
+		LENSMALL= 22 if b_is_windows_platform else 20
 
 		LABEL_WIDTH = [ WIDTHSMALL if i<LENSMALL else WIDTHBIG for i in range( MAXLABELLEN ) ] 
 		PARAMETERS_CBOX_WIDTH=15
@@ -580,7 +607,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				s_param_control_list,
 				s_param_validity_expression,
 				s_param_assoc_def,
-				s_param_control_state ) = \
+				s_param_control_state,
+				s_def_on_loading ) = \
 						o_input.param_names.getAllParamSettings( s_param )
 				#end if param is in paramset
 
@@ -810,9 +838,17 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					o_kv.setLabelState( "enabled" )
 				#end if labels should always be non-grayed-out
 
+				
+
 				o_kv.grid( row=i_row, sticky=(NW) )
 				self.__param_key_value_frames[ s_param ] = o_kv
 
+				#Execute the def to be run on loading the param,
+				#if any.
+				if s_def_on_loading != "None":
+					o_mydef=getattr( self, s_def_on_loading )
+					o_mydef()
+				#end if we need to execute a def on loading
 			#end if section name not "suppress"
 		#end for each input param
 
@@ -840,36 +876,31 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		to InitSex in the simulation will be
 		maleProb=0.5).
 		'''
-		CBOX_EQUAL_SEX_RATIO_TEXT="equal_sex_ratio"
+		f_reltol = 1e-99	
 
-		
 		if self.__input is not None:
 
 			b_have_cullmethod_attr=hasattr( self.__input, "cull_method" )
 			b_have_maleprob_attr=hasattr(  self.__input, "maleProb" )
 			b_have_access_to_control="maleProb" in self.__param_key_value_frames
 
+			#We ignore the returned value, which simply describes the action taken (if not None).
+			s_result=self.__disable_or_enable_maleprob_according_to_cull_method()
+
 			if b_have_cullmethod_attr  \
 							and b_have_maleprob_attr \
 							and b_have_access_to_control:
-
-				o_this_kv=self.__param_key_value_frames[ "maleProb" ]
+		
 
 				if self.__input.cull_method == CBOX_EQUAL_SEX_RATIO_TEXT:
-					o_this_kv.setStateControls( "disabled" )
-				else:
-					'''
-					If the control was initialized with "isenabled" as true,
-					and if the force_disable is also true, then the current
-					state of controls, if they are disabled, must be due to
-					a former change to equal sex ratio.  Now we have a different
-					cull setting, so we can, in that case, re-enable:
-					'''
-					if o_this_kv.is_enabled and not o_this_kv.force_disable:
-						o_this_kv.setStateControls( "enabled" )
-					#end if we should enable
 
-				#end if cull method is set to equal sex ratio, else not
+					o_this_kv=self.__param_key_value_frames[ "maleProb" ]
+
+					if abs( self.__input.maleProb - 0.5 ) > f_reltol:
+						o_this_kv.manuallyUpdateValue( 0.5 )
+					#end if current value is not 0.5, set it manually
+						
+				#end if cull method is set to equal sex ratio, reset male prob to 0.5 
 			#end if we have a cull_method attribute, a male prob attribute, 
 			#and access to the maleProb entry control
 		#end if we have an input object
@@ -879,6 +910,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#end if very verbose
 
 		return
+
 	#end __on_cull_method_selection_change
 
 	def load_config_file( self, event=None ):
@@ -912,8 +944,13 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			self.__load_values_into_interface()
 			self.__set_controls_by_run_state( self.__get_run_state() )
 		except Exception as oex:
+			o_traceback=sys.exc_info()[ 2 ]
+			s_trace= \
+				pgut.get_traceback_info_about_offending_code( o_traceback )
+
 			s_msg="In PGGuiSimuPop instance, def load_config_file " \
-					+ "an exception was raised: " + str( oex ) 
+					+ "an exception was raised: " + str( oex ) \
+					+ "\nwith traceback info: " + s_trace
 
 			PGGUIErrorMessage( self, s_msg )
 
@@ -1063,7 +1100,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 									if not( s_param.startswith( "_" ) )  ]
 			
 			for s_param in ls_input_params:
-				print s_param + "\t" + str( getattr( self.__input, s_param ) )
+				print(s_param + "\t" + str( getattr( self.__input, s_param ) ))
 			#end for each param
 
 		#end if VERBOSE			
@@ -1445,7 +1482,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	'''
 	2017_03_26.
 	This def remm'd out as I debug a problem
-	with the validatio of the NbAdjustment param.
+	with the validation of the NbAdjustment param.
 	Validation code, when user enters invalid value
 	and then presses tabkey, goes into a long recursive
 	series of re-vaidations.
@@ -1625,5 +1662,110 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#end if VERY_VERY_VERBOSE	
 		return
 	#end onChangeInMonogamyCheckbox
+
+	def __disable_or_enable_maleprob_according_to_cull_method(self):
+		s_result=None
+
+		if hasattr( self.__input, "cull_method" ):
+
+			if "maleProb" in self.__param_key_value_frames:
+
+				o_this_kv=self.__param_key_value_frames[ "maleProb" ]
+
+				if self.__input.cull_method == CBOX_EQUAL_SEX_RATIO_TEXT:
+
+					o_this_kv.setStateControls( "disabled" )
+
+					s_result="disabled"
+
+				elif self.__input.cull_method == CBOX_SURVIVAL_RATE_TEXT:
+					'''
+					If the control was initialized with "isenabled" as true,
+					and if the force_disable is also true, then the current
+					state of controls, if they are disabled, must be due to
+					a former change to equal sex ratio.  Now we have a different
+					cull setting, so we can, in that case, re-enable:
+
+					
+					2017_05_05. We have changed the keyvalue text box setStateControls def
+					so that the is_enabled attribute is updated according to the state
+					passed in the def.  This means that we can no longer test the 
+					attribute to get it's initial value.  We now just make sure that
+					force disable is False, and assume that we should enable the control
+					under this cull method.
+					'''
+					if not o_this_kv.force_disable:
+
+						o_this_kv.setStateControls( "enabled" )
+
+						s_result="enabled"
+					#end if we should enable
+
+				else:
+					'''
+					If we have added or changed the cbox text choices, but have not
+					updated this def, we will show the error, but enable the male prob
+					of birth text box.
+					'''
+					s_msg = "In PGGuiSimuPop instance, " \
+								+ "def __disable_or_enable_maleprob_according_to_cull_method " \
+								+ "the selected cull method is not recognized.  The " \
+								+ "current known methods are " + CBOX_SURVIVAL_RATE_TEXT \
+								+ " and " + CBOX_EQUAL_SEX_RATIO_TEXT + ".  Hence the " \
+								+ "program does not know whether to disable the " \
+								+ "entry box for Probability of Male Birth."
+					PGGUIErrorMessage( self, s_msg )
+					o_this_kv.setStateControls( "enabled" )
+
+					if o_this_kv.force_disable == False:
+						o_this_kv.setStateControls( "enabled" )
+						s_result="enabled"
+					#end if not force diabled	
+				#end if  
+			#end if maleProb control frame exists
+		#end if cull_method attribute exists
+		return s_result
+	#end __disable_or_enable_maleprob_according_to_cull_method
+
+	def onUpdateMaleProb( self ):
+		'''
+		2017_05_05. This def was added because,
+		when the conf file loaded defalts to the
+		cull method "equal_sex_ratio," and it's 
+		cbox is created before the input.maleProb
+		entry box is created, then the latter
+		can't be set to disabled, and equal to 0.5,
+		its proper state when the cull method is 
+		"equal_sex_ratio."
+		'''
+		s_result=self.__disable_or_enable_maleprob_according_to_cull_method()	
+		#we also need to recalculate the N0
+		self.updateN0EntryBox()
+	#end def onUpdateMaleProb
+
+	def onLoadingMaleProb( self ):
+		'''
+		2017_05_05.  The initial value of
+		this parameter depends on the value of the
+		cull method parameter. 
+		'''
+		f_reltol=1e-99
+		
+		s_result=self.__disable_or_enable_maleprob_according_to_cull_method()
+		
+		if hasattr( self.__input, 'cull_method' ):
+			if self.__input.cull_method==CBOX_EQUAL_SEX_RATIO_TEXT:
+				f_curr_prob=self.__input.maleProb
+				if abs( f_curr_prob - 0.5 ) > f_reltol:
+					o_kv=self.__param_key_value_frames[ 'maleProb' ]
+					o_kv.manuallyUpdateValue( 0.5 )
+				#end if non-0.5 value
+			#end if cull method set to equal_sex_ratio	
+		#end if the cull_method attribute exists
+
+		return
+	#end onLoadingMaleProb
+
+
 
 #end class PGGuiSimuPop

@@ -4,6 +4,8 @@ from stderr output table from pgdriveneestimator.py, using "testmulti" or "tests
 thatlists indices of individuals for each replicate, find for each indiv, the frequency
 with which it is in the same replicate as the indiv whose index is provided as arg 2
 '''
+from __future__ import print_function
+from builtins import range
 __filename__ = "get_freq_idx_paired_with_other_idx.py"
 __date__ = "20160709"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"

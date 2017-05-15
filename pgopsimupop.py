@@ -3,6 +3,10 @@ Description
 Implements abstract class AGPOperation for simuPop simulations,
 as coded by Tiago Antao's sim.py modlule.  See class description.
 '''
+from __future__ import division
+from __future__ import print_function
+from builtins import range
+from past.utils import old_div
 __filename__ = "pgopsimupop.py"
 __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -12,7 +16,6 @@ VERY_VERBOSE=False
 VERY_VERY_VERBOSE=False
 
 USE_GUI_MESSAGING=False
-
 
 #if True, then invokes ncurses debugger
 DO_PUDB=False
@@ -172,12 +175,16 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		DEFAULT_AGES=50
 
-		self.__total_ages_for_age_file=DEFAULT_AGES if self.input.ages is None \
-																else self.input.ages
+		self.__total_ages_for_age_file=DEFAULT_AGES \
+										if self.input.ages is None \
+												else self.input.ages
+		
+		self.__file_for_nb_records=None
+		self.__file_for_age_counts=None
 		
 		if self.__write_nb_and_age_count_files:
-			self.__file_for_nb_records=open( self.output.basename + "_nb_values_calc_by_gen.csv", 'w' )
-			self.__file_for_age_counts=open( self.output.basename + "_age_counts_by_gen.csv", 'w' )
+			self.__file_for_nb_records=open( self.output.basename + "_nb_values_calc_by_gen.tsv", 'w' )
+			self.__file_for_age_counts=open( self.output.basename + "_age_counts_by_gen.tsv", 'w' )
 
 			s_header="\t".join( [ "generation" ] \
 						+ [ "age" + str( idx ) for idx \
@@ -191,7 +198,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		is used by def __harvest
 		'''
 		self.__nb_and_census_adjustment_by_cycle=None
-
 
 		return
 	#end __init__
@@ -277,7 +283,20 @@ class PGOpSimuPop( modop.APGOperation ):
 				#this may be set to False for all but first)
 
 				#now we do the sim
+
 				self.__evolveSim()
+
+				'''
+				We close the ages and nb-values file object, if it exists.  This
+				necessitated by python3, which otherwise produced emtpy files. Note
+				that a None value will simply return false for the hasattr test.
+				'''
+				for v_this in [ self.__file_for_nb_records, self.__file_for_age_counts ]:
+					if hasattr( v_this, "close" ):
+						v_this.close()
+					#end if a closable object, close it
+				#for each of the test file attributes
+
 				self.output.out.close()
 				self.output.err.close()
 				self.output.megaDB.close()
@@ -302,8 +321,13 @@ class PGOpSimuPop( modop.APGOperation ):
 				raise Exception( "PGOpSimuPop object not prepared to operate (see def prepareOp)." )
 			#end  if prepared, do op else exception
 		except Exception as oex:
+			
 			if self.__guierr is not None:
-				self.__guierr( None, str( oex ) )
+				o_traceback=sys.exc_info()[ 2 ]
+				s_err_info=pgut.get_traceback_info_about_offending_code( o_traceback )
+				s_msg="In PGOpSimupop instance, an exception was raised with message: " \
+							+ str( oex ) + "\nThe error origin info is:\n" + s_err_info
+				self.__guierr( None, s_msg )
 			#end if using gui messaging
 			raise oex
 		#end try...except
@@ -381,7 +405,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		if self.input.mutFreq > 0:
 			preOps.append(sp.StepwiseMutator(rates=self.input.mutFreq,
-					loci=range(numMSats)))
+					loci=list(range(numMSats))))
 		#end if mufreq > 0
 
 		self.__loci=loci
@@ -411,7 +435,13 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		if self.input.cull_method == \
 					pgin.PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS:
+			##### temp
+			print( "--------------" )
+			print( "loading maleProp" )
+			##### end temp
+
 			ldef_init_sex=[sp.InitSex(maleProp=0.5)]
+
 		elif self.input.cull_method == \
 					pgin.PGInputSimuPop.CONST_CULL_METHOD_SURVIVIAL_RATES:
 			ldef_init_sex=[ sp.InitSex(maleFreq=self.input.maleProb) ]
@@ -421,6 +451,10 @@ class PGOpSimuPop( modop.APGOperation ):
 						+ "parameter: " + str( self.input.cull_method ) + "."
 			raise Exception( s_msg )
 		#end if equal sex ratio else
+
+		##### temp
+		print ( "initOps: " + str( ldef_init_sex ) )
+		#####
 
 		initOps=ldef_init_sex 
 
@@ -545,6 +579,10 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __getRandomPos
 
 	def __litterSkipGenerator( self, pop, subPop ):
+
+		if VERY_VERY_VERBOSE:
+			print( "In __litterSkipGenerator on gen: " + str( pop.dvars().gen ) )
+		#end if very very verbose
 
 		fecms = self.input.fecundityMale
 		fecfs = self.input.fecundityFemale
@@ -673,6 +711,9 @@ class PGOpSimuPop( modop.APGOperation ):
 			female.breed = gen
 
 			if self.input.isMonog:
+				##### temp
+				print( "in litter skip, with isMong, assigning female mate to " + str( male.ind_id ) )
+				#####
 				female.mate = male.ind_id
 			#end if is monog
 
@@ -747,14 +788,13 @@ class PGOpSimuPop( modop.APGOperation ):
 			raise Exception( s_msg )
 		#end if kbar close to zero
 
-		nb = (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
+		nb = old_div((kbar * len(cofs) - 2), (kbar - 1 + old_div(Vk, kbar)))
 		#print len(pair), kbar, Vk, (kbar * len(cofs) - 2) / (kbar - 1 + Vk / kbar)
 	
 		return nb
 	#end __calcNb
 
 	def __restrictedGenerator( self, pop, subPop ):
-
 
 		if VERY_VERBOSE:
 			print( "----------------" )
@@ -791,7 +831,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			'''
 
 			for i in range( int( round( self.__current_N0 ) ) ):
-				pair.append( gen.next() )
+				pair.append( next(gen) )
 			#end for i in range
 
 			'''
@@ -1083,22 +1123,22 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			if VERBOSE:
 				print(cohortKey)
-				print cohortTotal
-				print maleCount
-				print femaleCount
-				print"\n"
+				print(cohortTotal)
+				print(maleCount)
+				print(femaleCount)
+				print("\n")
 			#end if verbose
 
 			#determine survival rate of this cohort
-			survivalRate =(self.input.survivalMale[int(cohortKey) - 1]+self.input.survivalFemale[int(cohortKey) - 1])/2
+			survivalRate =old_div((self.input.survivalMale[int(cohortKey) - 1]+self.input.survivalFemale[int(cohortKey) - 1]),2)
 			survivorCount = numpy.round(cohortTotal * survivalRate)
 			cullCount = cohortTotal  - survivorCount
 			
 			if VERBOSE:
-				print survivalRate
-				print survivorCount
-				print cullCount
-				print "\n\n"
+				print(survivalRate)
+				print(survivorCount)
+				print(cullCount)
+				print("\n\n")
 			#end if verbose
 					##!! Cohort 0 does not get culled!!
 			if cohortKey == 0.0:
@@ -1119,7 +1159,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			print ("femaleCount: " + str(femaleCount))
 			print ("maleCull: " + str(maleCull))
 			print ("femaleCull: " + str(femaleCull))
-			print "\n\n"
+			print ("\n\n")
 			# end if very verbose
 
 			# choose which sex to kill first
@@ -1154,7 +1194,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			# endif age>0 andage<.....
 		# end for i in pop
 		if VERBOSE:
-			print kills
+			print(kills)
 		#end if VERBOSE
 
 		pop.removeIndividuals(IDs=kills)
@@ -1285,7 +1325,7 @@ class PGOpSimuPop( modop.APGOperation ):
 				print ("femaleCount: " + str( femaleCount ) )
 				print ("maleHarvest: " + str(maleHarvest) )
 				print ("femaleHarvest: " + str(femaleHarvest) )
-				print "\n\n"
+				print("\n\n")
 			#end if very verbose
 
 			# choose which sex to kill first
@@ -1666,7 +1706,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 
 		pop.setVirtualSplitter(sp.InfoSplitter(field='age',
-			   cutoff=range(1, self.input.ages)))
+			   cutoff=list(range(1, self.input.ages))))
 
 		self.__ageInitOps=ageInitOps
 		self.__agePreOps=agePreOps

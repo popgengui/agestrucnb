@@ -4,12 +4,14 @@ Description
 2017_03_25.  This class was extracted from the
 pgguiutilities.py module, in order to ease debugging.
 '''
+from future import standard_library
+standard_library.install_aliases()
 __filename__ = "pgkeylistcomboframe.py"
 __date__ = "20170325"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 import createtooltip as ctt
 import sys
 from pgguiutilities import FredLundhsAutoScrollbar

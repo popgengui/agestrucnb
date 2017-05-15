@@ -20,6 +20,8 @@ Output:
 	replicate at that proportion.
 
 '''
+from __future__ import print_function
+from builtins import range
 __filename__ = "indiv.from.perc.and.rep.num.py"
 __date__ = "20160524"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -273,7 +275,7 @@ if __name__ == "__main__":
 	if s_output_request not in di_output_inclusions:
 			raise Exception( "5th argument must one of "  \
 					+ " or ".join( [ "\"" + skey + "\"" for skey \
-					in di_output_inclusions.keys() ] ) )
+					in list(di_output_inclusions.keys()) ] ) )
 	else:
 		i_output_type=di_output_inclusions[ s_output_request ]
 	#end if 5th arg invalid else get vals
