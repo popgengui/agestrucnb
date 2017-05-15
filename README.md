@@ -3,61 +3,51 @@
 Overview
 --------
 
-	Our goal is a front end that incorporates the population
-	genetics functions provided by Tiago Antao's python program at
-	https://github.com/tiagoantao/AgeStructureNe.git. We further plan
-	to add analysis tools for the Ne estimation results.
+	Our program is a front end that incorporates the simulation and LDNe
+	based population genetics functions provided by Tiago Antao's python program at
+	https://github.com/tiagoantao/AgeStructureNe.git, enhanced by multiple methods
+	for population subsampling when performing LD-based Ne and Nb estimations from
+	genepop file inputs.  Further, we provide a plotting interface to visualize
+	estimate distributions and regression lines. 
 
-	This project will proceed by iterative implementation, to provide several
-	analyses performed by Tiago's code, along with some added analyses.
+	The program uses multi-processing to allow an arbitrary number of
+	simultaneous simulation, LD-baseed Nb and Ne estimations, and plotting
+	interfaces.  Further, within simulations and estimations, multi-processing
+	allows simultaneous processing replicates and subsample instances.
 
-	 Codewise we have a tkinter-based interface, supported by a class structure,
-	essentially a host ttk notebook that brings up interfaces for various analyses.
-	These interfaces essentially consist of the GUI itself as a class, which then
-	uses non-gui classes that handle the input (as delivered by the interface),
-	analysis, and output.   This is seen in the file, preliminary_uml_classes.png (a
-	diagram that is sorely in need up updating).  A better look at the current
-	structure of the program can be seen via descriptions of classes and
-	relationships by loading doxydoc/html/index.html into a browser. 
-
-
-Current python version
-----------------------
+Current compatible python versions
+----------------------------------
 	python 2.7
-
-	For ease of meeting the dependancy simuPOP, the anaconda python 
-	distribution is recommended by the simuPOP installation page 
-	(see dependancies, below).
-
+	python 3.6
 
 OS-comaptibility
 -----------------
 	1. Linux. The program has been run on Linux (Ubuntu 16.04).
 
-	2. OSX. The program has been run on OSX (version unknown).
+	2. OSX. The program needs further testing on OS X.
 
-	3. Windows 10 (64-bit) and Windows 7 (32-bit) shows successful runs.  
-	   One persistent problem is the inability to remove files for
-	   some cleanup operations when processes are user cancelled. See
-	   the "BUGS" file for this and other windows-specific issues.
+	3. Windows 10 and 8.1 (64-bit).  Earlier versions of the program
+	   were also run successfully on 32-bit Windows 7 and Vista, and
+	   we consider it likely that it will still run well on those older
+	   Windows platforms.  Note that on Windows  One persistent problem 
+	   is the inability of the program to remove files for
+	   some cleanup operations when processes do not finish (through error or
+	   user-cancellation). See the "BUGS" file for this and other issues.
 
 Current dependencies
 --------------------
-	1.  pygenomics, https://github.com/tiagoantao/pygenomics.git The
-	pygenomics python modules should be installed using the supplied
-	setup.py, so that they can be imported by your python interpereter.
+	1.  SimuPOP, a python package, available at http://simupop.sourceforge.net. See the installation
+	    instructions at http://simupop.sourceforge.net/Main/Download.  Python 3.6 
+	    users using the Anaconda3 distribution can easily install simuPOP with 
 
-	2.  SimuPOP, http://simupop.sourceforge.net The SimuPOP modules should
-	be installed into your default python package location so that they will
-	automatically  be accessed by your python interpreter. Pip is a
-	recommended tool that ships with most python distributions.  To install SimuPop
-	using pip, simply open a terminal (in any of the Operating systems), and issue
-	command "pip install simupop."  Below are some software packages that SimuPop
-	needs in order to be installed.  Note that these are often already present in
-	many python distributions, according to the OS in which thay are installed:
+		conda config --add channels conda-forge
+		conda install simupop
+		
+	    Python 2 users will have a more involved installation, as you'll see at the installation page.  Below
+ 	    are a few notes of our experience installing simuPOP for python 2 in Windows.
 
 		i. VC++ Library, 2008 (Windows only).  We found that the installation of SimuPOP
-		on Windows (10 and 7) did not work without installing the Microsoft VC++
+		on Windows (10 ) did not work without installing the Microsoft VC++
 		Redistributable 2008 library, as noted in the SimuPOP installation web page.
 		Note that the link on the Simupop installation web page points to the Microsoft
 		to the 32-bit libary download-page (unless I missed an option).  Most of us will
@@ -75,134 +65,52 @@ Current dependencies
 		had 32-bit Windows versions we also needed to install the windows python
 		compiler.  Simupop, if it's installation fails for lack of this compiler, will
 		give you the correct web address from which to download and intall it.
+	2. Other python packages, available through pip with the command "pip
+	install <package>", or, if you use the Anaconda distribution of python,
+	"conda install <package>".
 				
-		iv. numpy, often included in science-centered python installations, if you can
-			execute the terminal command, 
-				''python -c "import numpy"''
-		without an ImportError, you have the package.  If you see an ImportError
-		message then you can install numpy with the python "pip" program, or via
-		your python distribution's package manager (for example, the "apt" package
-		manager on Ubuntu and Debian Linux distributions).
+		i.   numpy	
 
-		v. For the modules that perform a regression plot on the Ne estimation table output,
-			you'll also need the python packages scipy" and "matplotlib," available through
-			the same sources as noted above for numpy
+		ii.  scipy
+		
+		iii. future
+
+		iv.  psutils
+		
+		v.   configparser, for python 2 only. This is a backported python 3 package, different 
+		     than the default python2 ConfigParser package, which is a default package. 
 
 Installation.  
 ------------
 
-While future versions may include setup.py installation into default python
-library directories, as of now:
-
-	1. Clone the repository or download the files from
+	1. Clone the repository using the git program, or download the zipped files from
 	https://github.com/popgengui/negui
 
-	2. Add the location of the python modules to your PYTHONPATH variable,
-	and add negui.py to your PATH: 
-		i. Linux/OSX: If you downloaded the
-	python files into /home/myname/mydir/negui-master, you can either: 
+Starting the program
+--------------------
 
-			a. On starting a new terminal you can make python aware of the
-			modules, and add the negui.py to your command path, by typing these two lines: 
+	1. From a console, a terminal in Linux in OS X, or a DOS prompt or
+	   powershell in Windows, you can start the program with the command:
+		
+		<python> <path_to_negui.py>
 
-				PATH=${PATH}:/path/to/the/negui/modules
-				PYTHONPATH=${PYTHONPATH}:/path/to/the/negui/modules 
+	   <python> can be anyalias for python 2.7 or python 3.6 executable.
+	   <path_to_negui> should give a full or relative path to the main program
+	   directory and the file negui.py
 
-			b. If your Linux or OSX installation has the typical configuration, then you
-			can also automate the change by adding the above lines to the .bashrc file, or
-			on OSX, the .bash_profile file, in your home directory. After these lines you
-			should then and add an export line for each of the variables: 
+	   For example, if you downloaded the program files to
+	   /home/me/programs/agestructurene, you can start the program with the command,
 
-				export PYTHONPATH 
-				export PATH Windows 
+		python /home/me/programs/agestructurene/negui.py
+		
+	2. In windows from its File Explorer program, if you navigate the
+	   programs main directory, you can double-click on the negui.py file.
 
-		ii. Windows: Windows provides a gui interface that allows you to
-		add new environmental variables.  In most distributions you can find it by
-		opening the file explorer and right clicking on the "Computer" icon (Win7), or
-		"ThisPC" (Win10).  On the Menu,  select properties->advanced system settings
-		(list on right-hand side) -> Environment Varibles.  Under the "system variables"
-		window (the bottom window) you can click "New..." to add new variables, as
-		likely you'll need to for PYTHONPATH.  To add the path to your negui modules to
-		the PATH varable, select "Edit...".  See the existing variables for examples of
-		path formatting in Windows.
+Using the program	
+-----------------
+	To load one of the three interfaces or either running a simulation,
+	calculating Nb or Ne estimates, or plotting the results, on the main menu click
+	on "Add".  
 
-
-Current Functionality
----------------------
-
-	1. The GUI interface is invoked using the command 
-
-		python /path/to/negui/negui.py 
-
-	Better, modify negui.py to be executable with the command, 
-
-		chmod +x negui.py  
-
-	This done, and with the location of negui.py in your PATH variable
-	(see above), you can simply type negui.py at a terminal. 
-
-	However you invoke it, optionally negui also can accept an integer argument 
-        that gives the number or processes to use when doing simulation replicates.  
-
-		python /path/to/negui/negui.py 8
-
-	This number should practically not exceed the number of CPU's on your
-	machine.  It defaults to "1" when no such argument is given.  Note that
-	multiple processes are only useful for the simulations when more than one
-	replicate is performed (multiplexing in simulations currently is done
-	per-replicate). 
-
-	These are the current interfaces:
-
-		a. Simupop simulation:  clicking on the "New" main menu option, then
-		"Add new simulation" creates a tab window allowing AgeStructureNe-based simuPop
-		simulations when supplied with configuration files.  Currently, life tables are
-		preloaded from the resources directory.  Thus, if you need to use your own,
-		please open an example or examples in resources, and modify as needed,
-		remembering to use a model name that will match that in the configuration file
-		you'll load to run the simulation.  Also, currently, you'll need to name your
-		customized life table table file so that it ends in ".life.table.info." 
-
-			i. Input: In the interface you'll see the editable parameters listed, as well as
-			buttons tos select input configuration file, outpout directory, and the output
-			base name (the prefix applied to the output files.		
-
-			ii. Output:  A simulation run produces 5 files, 4 of
-			which are compressed.  There are 3 files from the original output of Tiago's
-			AgeStructureNe code, *.sim, *.gen, *.db.  There is now also a *.conf, which is a
-			configuration file that has all of teh setting used in the simulation, as read
-			in from both the life table and the original configuration file, and reflecting
-			any changes the user made using the interface, before running the simulation.
-			One uncompressed file, *.genepop, is produced.  THis can be then used as input
-			to the Ne-estimation analysis.	
-
-		b. LDNe estimation:  Click on the "New" menu, then "Add new Ne
-		estimation," to get an interface for running an Ne estimation using NeEstimator,
-		via Tiago's AgeStructureNe implemenation.  It requires a genepop file as input
-		(using the "select" button).  
-
-			i. Input:  one or more genepop file.  Note that the
-			select dialog for genepop files will let you enter an expression in the
-			filenames box,  such as *.genepop, to show only matching files.  You can then
-			use the shift or control key along with mouse or pad, to load multiple files at
-			once.  Currently you can also set several parameters.  Note that setting the
-			"replicates" parameter to values other than 1 is currently not useful.
-			Replicates in this interface refers to repeated Ne estimates of subsamples of
-			the genepop individuals, and such subsampling is not yet available in the GUI.
-			Thus 2 or more replicates will simply add identical estimates to the *tsv table.
-
-			ii. Output:  A *.tsv file, giving, for each population in the genepop file, an
-			LDNe estimate, with confidence intervals, Expected r-squared, Overall r-squared,
-			total Independent Comparisons, Harmonic Mean Sample Size, as produced by the
-			NeEstimator program (see the header line in the *tsv for which values are in
-			which columns).  A second file *.msgs is also produced, currently not used by
-			the program for any results.
-
-	2. You can also perform Ne estimation from the command line, which
-	offers subsampling of individuals using  percentages of the populaion
-	(randomly selected), or values of N in a remove-N scheme, whereby N randomly
-	selected individuals are removed from the population before the Ne is estimated.
-	Repicates at each percentage or N value is user set.  In the remove-N case of
-	N=1, all combinations are run. For a list of the required input arguments type
-	the command "pgdriveneestimator.py" with no arguments.
-
+	For details about runnin running the different interfaces, see the
+	user manual.
