@@ -78,13 +78,14 @@ Current dependencies
 		iv.  psutils
 		
 		v.   configparser, for python 2 only. This is a backported python 3 package, different 
-		     than the default python2 ConfigParser package, which is a default package. 
+		     than the default python2 ConfigParser package. 
 
 Installation.  
 ------------
 
-	1. Clone the repository using the git program, or download the zipped files from
-	https://github.com/popgengui/negui
+	Clone the repository using the git program, or download the zipped files from
+	https://github.com/popgengui/negui and unzip them inside any directory to which you
+	have read and write access.
 
 Starting the program
 --------------------
@@ -94,7 +95,7 @@ Starting the program
 		
 		<python> <path_to_negui.py>
 
-	   <python> can be anyalias for python 2.7 or python 3.6 executable.
+	   <python> can be any alias for python 2.7 or python 3.6 executable.
 	   <path_to_negui> should give a full or relative path to the main program
 	   directory and the file negui.py
 
