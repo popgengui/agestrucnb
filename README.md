@@ -11,9 +11,10 @@ Overview
 	estimate distributions and regression lines. 
 
 	The program uses multi-processing to allow an arbitrary number of
-	simultaneous simulation, LD-baseed Nb and Ne estimations, and plotting
-	interfaces.  Further, within simulations and estimations, multi-processing
-	allows simultaneous processing replicates and subsample instances.
+	simultaneous simulation, LD-based Nb and Ne estimations, and plotting
+	interfaces.  Further, within simulations, it can run simulation replicates
+	simultaneously, and, within Ne or Nb estimation sessions, it allows
+	simultaneously running genepop-file population sections. 
 
 Current compatible python versions
 ----------------------------------
@@ -36,15 +37,17 @@ OS-comaptibility
 
 Current dependencies
 --------------------
-	1.  SimuPOP, a python package, available at http://simupop.sourceforge.net. See the installation
-	    instructions at http://simupop.sourceforge.net/Main/Download.  Python 3.6 
-	    users using the Anaconda3 distribution can easily install simuPOP with 
+	1.  SimuPOP, a python package, available at
+	    http://simupop.sourceforge.net. See the installation instructions at
+	    http://simupop.sourceforge.net/Main/Download.  Python 3.6 users using the
+	    Anaconda3 distribution can easily install simuPOP with 
 
 		conda config --add channels conda-forge
 		conda install simupop
 		
-	    Python 2 users will have a more involved installation, as you'll see at the installation page.  Below
- 	    are a few notes of our experience installing simuPOP for python 2 in Windows.
+	    Python 2 users will have a more involved installation, as you'll see
+	    at the installation page.  Below are a few notes of our experience installing
+	    simuPOP for python 2 in Windows.
 
 		i. VC++ Library, 2008 (Windows only).  We found that the installation of SimuPOP
 		on Windows (10 ) did not work without installing the Microsoft VC++
@@ -83,9 +86,9 @@ Current dependencies
 Installation.  
 ------------
 
-	Clone the repository using the git program, or download the zipped files from
-	https://github.com/popgengui/negui and unzip them inside any directory to which you
-	have read and write access.
+	Clone the repository using the git program, or download the zipped files
+	from https://github.com/popgengui/negui and unzip them inside any directory to
+	which you have read and write access.
 
 Starting the program
 --------------------
@@ -113,5 +116,5 @@ Using the program
 	calculating Nb or Ne estimates, or plotting the results, on the main menu click
 	on "Add".  
 
-	For details about runnin running the different interfaces, see the
+	For details about running the different interfaces, see the
 	user manual.
