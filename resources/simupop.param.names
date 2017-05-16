@@ -31,7 +31,7 @@ NbNc	Nb/Nc;Population;2;1;1;0.0;float;None;None;Nb/Nc, where Nc=No;entry;None;ty
 NbNe	Nb/Ne;Population;0;0;1;0.0;float;None;None;Nb/Ne ratio.  This value is passed to the Nb estimation function for use in a LDNE bias correction (Waples etal., 2014). The entry is ignored if set to zero.;entry;None;type(x)==float or type(x) == int;None;enabled;None
 N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle. If not editable then calculated using Nb, Nb/Nc, survival rates, and male birth probability.;entry;None;type(x)==int and x >= 0;None;enabled;None
 Nb	Nb;Population;2;0;1;0;int;None;None;"Nb";entry;None;type(x)==int and x>= 0;updateN0EntryBox;enabled;None
-NbVar	Nb Tolerance;Population;0;0;1;0.05;float;None;None;The calculated population Nb, for each generation, must be within this percent of the expected Nb;entry;None;type(x)==float and x >= 0.0;None;enabled;None
+NbVar	Nb Tolerance;Population;0;0;1;0.05;float;None;None;The calculated population Nb, for each cycle after burn-in, must be within this proportion of the expected Nb;entry;None;type(x)==float and x >= 0.0;None;enabled;None
 ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None;type(x)==int and x >= 0;None;enabled;None
 config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None;type(x)==str;None;enabled;None
 life_table_glob	Life Table File(s);Configuration Info;1;1;1;"none";str;None;None;Life table files;entry;None;type(x)==str;None;enabled;None
