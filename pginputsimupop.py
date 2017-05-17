@@ -516,7 +516,17 @@ class PGInputSimuPop( object ):
 					+ "giving the total cycles to be simulated."
 			assert self.gens, s_msg
 
-			self.nbadjustment=[ "2-" + str( self.gens ) + ":0.0" ]
+			'''
+			2017_05_16.  We change the default setting of the nbadjustment.
+			Instead of the range "2-" + str(self.gens), we'll intialize as 2-2:0.0. 
+			This is better, because the user can change the number of cycles
+			int the PGGuiSimuPop instance, and, unless ages is then lower than 2,
+			the value here is consistent, and won't cause an error to be raised 
+			when the sim's "run" button is clicked,the error from the consistency check
+			between the number of cycles value and the entries for nbadjustment.
+			Note, too that the 0.0 rate means no adjustment will be made.
+			'''
+			self.nbadjustment=[ "2-2:0.0" ]
 		#end if the config file has an nbadjustment list else make one
 
 		self.__update_attribute_config_file_info( "nbadjustment", "sim" , "nbadjustment" )
