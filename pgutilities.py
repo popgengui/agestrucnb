@@ -517,11 +517,26 @@ def remove_simulation_replicate_output_files( s_basename ):
 	ls_output_extentions=list( \
 			pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS.values() )
 
-	for s_ext in ls_output_extentions:
+	'''
+	2017_05_16. Added to remove the recently added age counts and 
+	PWOP Nb estimates files created on rep 1 in the simulations.
+	These files don't have replicate tags in their names, 
+	so our glob should not include one.
+	'''
+	s_age_counts_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "age_counts" ]
+	s_sim_nb_vals_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
 
-		s_unzipped_file_pattern=s_basename + "*" \
-				+ SIMULATION_OUTPUT_FILE_REPLICATE_TAG \
-				+ "*" + s_ext
+	ls_non_replicate_extensions=[ s_age_counts_ext, s_sim_nb_vals_ext ]
+
+	for s_ext in ls_output_extentions:
+		s_unzipped_file_pattern=None	
+		if s_ext in ls_non_replicate_extensions:
+			s_unzipped_file_pattern=s_basename + s_ext
+		else:
+			s_unzipped_file_pattern=s_basename + "*" \
+					+ SIMULATION_OUTPUT_FILE_REPLICATE_TAG \
+					+ "*" + s_ext
+		#end if  non-replicate file name, else use replicate tag	
 
 		ls_files_unzipped=glob.glob( s_unzipped_file_pattern )
 
@@ -733,7 +748,7 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 				#end if VERBOSE
 
 				o_subprocess_group.terminateAllSubprocesses()
-				
+			
 				remove_simulation_replicate_output_files( s_output_basename )
 
 				break

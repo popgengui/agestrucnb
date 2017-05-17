@@ -684,7 +684,9 @@ class PGGuiViz( pgg.PGGuiApp ):
 
 			if  self.__viztype in VIZ_TYPES_REQUIRING_SUBSAMPLE_SELECTION:
 				i_rows_used_for_subsampling_selection, i_max_label_width= \
-						self.__add_subsample_selection_controls( o_params_subframe, 0, LABEL_WIDTH, b_force_disable  )	
+						self.__add_subsample_selection_controls( o_params_subframe, 0, 
+																		LABEL_WIDTH, 
+																		b_force_disable  )	
 			#end if we need to add subsample selection controls
 
 			#We add param controls starting at the first

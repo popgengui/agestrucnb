@@ -57,13 +57,24 @@ class PGOutputSimuPop( object ):
 	is passed to a PGGuiSimuPop object, or created in pgutilities,
 	to run parallel replicates.  This object writes and manages the
 	output of the simupop simulation. 
+
+	2017_05_16.  Adding to the output file extensions the two files,
+	listing age-counts and the PWOP Nb estimates file extensions.
+	These are written by PGOpSimuPop instances, on the fist replicate
+	only, initially to have been for testing only, but have become
+	part of the standard output.  Their extensions are included here
+	so that, if pgutilities def, remove_simulation_replicate_output_files
+	is called on a cancelled simulation run, these files will also
+	be removed.
 	'''
 	
 	DICT_OUTPUT_FILE_EXTENSIONS={ "simfile":"sim",
 									"genfile":"gen",
 									"dbfile":"db",
 									"conffile":"conf",
-									"genepop":"genepop" }
+									"genepop":"genepop",
+									"age_counts":"_age_counts_by_gen.tsv",
+									"sim_nb_estimates":"_nb_values_calc_by_gen.tsv" }
 
 	COMPRESSION_FILE_EXTENSION="bz2"
 

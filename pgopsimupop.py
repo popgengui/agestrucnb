@@ -26,8 +26,15 @@ if DO_PUDB:
 
 import apgoperation as modop
 import pgutilities as pgut
+
 #for the lambda-ignore constant:
 import pginputsimupop as pgin
+
+#For the file names to use
+#for recording age counts 
+#and PWOP Nb estimnates:
+import pgoutputsimupop as pgout
+
 from simuOpt import simuOptions
 simuOptions["Quiet"] = True
 import simuPOP as sp
@@ -183,8 +190,11 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__file_for_age_counts=None
 		
 		if self.__write_nb_and_age_count_files:
-			self.__file_for_nb_records=open( self.output.basename + "_nb_values_calc_by_gen.tsv", 'w' )
-			self.__file_for_age_counts=open( self.output.basename + "_age_counts_by_gen.tsv", 'w' )
+			s_nb_values_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
+			s_age_counts_file_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "age_counts" ]
+
+			self.__file_for_nb_records=open( self.output.basename + s_nb_values_ext, 'w' )
+			self.__file_for_age_counts=open( self.output.basename + s_age_counts_file_ext, 'w' )
 
 			s_header="\t".join( [ "generation" ] \
 						+ [ "age" + str( idx ) for idx \
