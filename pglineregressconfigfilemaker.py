@@ -34,27 +34,79 @@ class PGLineRegressConfigFileMaker( object ):
 	IDX_GUI_ATTRIB_CONFIG_FILE_SECTION=2
 	IDX_GUI_ATTRIB_CONFIG_FILE_PARAM=3
 
+	'''
+	2017_05_17. Information to help determine
+	which outputFilename value to use. See
+	comments in __init__
+	'''
+	IDX_GUI_ATTRIB_VIZ_TYPE=1
+
+	DICT_ATTRBUTE_TYPE_BY_VIZ_TYPE={ "Regression":"regress", 
+										"Subsample":"subsample" }
+
 
 	def __init__( self, o_gui_interface, b_omit_x_range=True ):
 		'''
 		Param b_omit_x_range, if True, results in a config file
 		missing the xMin and xMax config options, to let (per Brian T)
 		matplot lib auto-set the x range.
+
+	
 		'''
 
 		self.__interface=o_gui_interface
 		self.__omit_x_range=b_omit_x_range
 		self.__ds_interface_param_values_by_param_names_by_section={}
+
 		self.__mangled_attribute_prefix=None
+		self.__plot_type=None
 		self.__config_outfile_name=None
 		self.__config_parser_object=None
-		
+
+
 		self.__make_mangled_attribute_prefix()
+		'''
+		2017_05_17.  New parameter for object plot_type, which
+		the caller interface supplies via its viztype attribute, 
+		as either "Regression" or "Subsample", gives us a way to tell 
+		which outputFilename value to use (see the test in 
+		def __make_dict_interface_param_values.  The PGGuiViz objects 
+		attribute, __viztype, gives the user-readable name, and our 
+		member dict above will translate that into the field name used 
+		in the attributes that give the viz param info "viz_type_section_param".  
+		We need this because the viz code uses the same option name "outputFilename" 
+		for both the regression stats and the subsample info output that gives the 
+		keys to each plot.
+		'''
+		self.__get_attr_field_plot_type()
 		self.__make_dict_interface_param_values()
 		self.__make_outfile_name()
 		self.__make_parser_object()
 		return
 	#end __init__
+
+	def __get_attr_field_plot_type( self ):
+
+		s_gui_viz_type=getattr( self.__interface, self.__mangled_attribute_prefix + "viztype" )		
+		ds_attr_by_viz=PGLineRegressConfigFileMaker.DICT_ATTRBUTE_TYPE_BY_VIZ_TYPE
+
+		if s_gui_viz_type not in ds_attr_by_viz:
+			s_known_types= ", ".join( list( ds_attr_by_viz.keys() ) )
+
+			s_msg="In PGLineRegressConfigFileMaker instance, " \
+						+ "def __get_attr_field_plot_type, " \
+						+ "the gui viz type passed, " \
+						+ s_gui_viz_type + ", " \
+						+ "is not one of the known types: " \
+						+ s_known_types + "."
+			
+			raise Exception( s_msg )
+		else:
+			self.__plot_type=ds_attr_by_viz[ s_gui_viz_type ]
+		#end if viz plot type name not known, else is	
+	
+		return
+	#end def __get_attr_field_plot_type
 
 	def __make_mangled_attribute_prefix( self ):
 		'''
@@ -82,7 +134,7 @@ class PGLineRegressConfigFileMaker( object ):
 		for s_member_name in ls_interface_member_names:
 
 			if s_member_name.startswith( s_viz_prefix ):
-
+			
 				#strip off the mangling:
 				s_member_name_unmangled=s_member_name.replace( self.__mangled_attribute_prefix, "" )
 
@@ -104,6 +156,17 @@ class PGLineRegressConfigFileMaker( object ):
 				#Vis config file -- the "confidence" section).
 
 				if s_viz_section_name == "destination" or s_viz_param_name == "outputFilename":
+					'''
+					2017_05_17. We skip writing the outputFilename param if its plot_type
+					attribute is not the one current in the gui (see comments in __init__).
+					'''
+					if s_viz_param_name == "outputFilename":
+						s_this_attr_plot_type=ls_member_name_parts[ \
+								PGLineRegressConfigFileMaker.IDX_GUI_ATTRIB_VIZ_TYPE ]
+						if s_this_attr_plot_type != self.__plot_type:
+							continue
+						#end if wrong type for outputFilename, don't write it into dict
+					#end if this is the outputFilename
 
 					if v_value_this_param not in [ "show", "none" ]:
 						#returns a StrVal tkinter object
