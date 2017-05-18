@@ -18,8 +18,8 @@ Overview
 
 Current compatible python versions
 ----------------------------------
-	python 2.7
-	python 3.6
+	python 3.6 (recommended).
+	python 2.7 (requires building an older version of simuPOP)
 
 OS-comaptibility
 -----------------
@@ -35,39 +35,23 @@ OS-comaptibility
 	   some cleanup operations when processes do not finish (through error or
 	   user-cancellation). See the "BUGS" file for this and other issues.
 
-Current dependencies
---------------------
+Dependencies
+------------
 	1.  SimuPOP, a python package, available at
 	    http://simupop.sourceforge.net. See the installation instructions at
-	    http://simupop.sourceforge.net/Main/Download.  Python 3.6 users using the
-	    Anaconda3 distribution can easily install simuPOP with 
+	    http://simupop.sourceforge.net/Main/Download.  The SimuPOP installation page
+	    recommends using an Anaconda Python installation, since the conda package
+	    distribution collection includes a pre-compiled simuPOP package.   
+	    Python 3.6 users using the Anaconda3 distribution can easily install simuPOP with 
 
 		conda config --add channels conda-forge
 		conda install simupop
 		
-	    Python 2 users will have a more involved installation, as you'll see
-	    at the installation page.  Below are a few notes of our experience installing
-	    simuPOP for python 2 in Windows.
-
-		i. VC++ Library, 2008 (Windows only).  We found that the installation of SimuPOP
-		on Windows (10 ) did not work without installing the Microsoft VC++
-		Redistributable 2008 library, as noted in the SimuPOP installation web page.
-		Note that the link on the Simupop installation web page points to the Microsoft
-		to the 32-bit libary download-page (unless I missed an option).  Most of us will
-		actually need the x64 verion at
-		https://www.microsoft.com/en-us/download/details.aspx?id=15336
-
-		ii.  SWIG.  On one linux machine tested we found that, before
-		python would install simuPOP we needed the SWIG tool at
-		http://www.swig.org/download.html. (This tool makes C and C++ code in simuPOP
-		python compatible). Since we found that most of our python installations will
-		had have the necessary SWIG resources, it's be best to try to install simuPOP
-		first, and install SWIG if you get a message that it is missing missing.
-
-		iii. Python compiler for Windows. On two of our platforms that
-		had 32-bit Windows versions we also needed to install the windows python
-		compiler.  Simupop, if it's installation fails for lack of this compiler, will
-		give you the correct web address from which to download and intall it.
+	    The Anaconda python3 distribution is escpecially recommended for Windows users.
+	    Aquiring simupop without using the conda package manager requires compiling simuPOP 
+	    source code, which can difficult in Windows.  See the simuPOP web page, noted above, 
+	    for details.
+		
 	2. Other python packages, available through pip with the command "pip
 	install <package>", or, if you use the Anaconda distribution of python,
 	"conda install <package>".
@@ -83,7 +67,7 @@ Current dependencies
 		v.   configparser, for python 2 only. This is a backported python 3 package, different 
 		     than the default python2 ConfigParser package. 
 
-Installation.  
+Installation  
 ------------
 
 	Clone the repository using the git program, or download the zipped files
