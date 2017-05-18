@@ -30,7 +30,7 @@ OS-comaptibility
 	3. Windows 10 and 8.1 (64-bit).  Earlier versions of the program
 	   were also run successfully on 32-bit Windows 7 and Vista, and
 	   we consider it likely that it will still run well on those older
-	   Windows platforms.  Note that on Windows  One persistent problem 
+	   Windows platforms.  Note that on Windows, one persistent problem 
 	   is the inability of the program to remove files for
 	   some cleanup operations when processes do not finish (through error or
 	   user-cancellation). See the "BUGS" file for this and other issues.
@@ -47,10 +47,10 @@ Dependencies
 		conda config --add channels conda-forge
 		conda install simupop
 		
-	    The Anaconda python3 distribution is escpecially recommended for Windows users.
-	    Aquiring simupop without using the conda package manager requires compiling simuPOP 
-	    source code, which can difficult in Windows.  See the simuPOP web page, noted above, 
-	    for details.
+	    The Anaconda python 3 distribution is escpecially recommended for Windows users.
+	    Aquiring simupop otherwise requires compiling simuPOP source code, which can 
+	    can be difficult in Windows.  See the simuPOP download page, noted above, for 
+	    details.
 		
 	2. Other python packages, available through pip with the command "pip
 	install <package>", or, if you use the Anaconda distribution of python,
@@ -77,7 +77,7 @@ Installation
 Starting the program
 --------------------
 
-	1. From a console, a terminal in Linux in OS X, or a DOS prompt or
+	1. From a terminal in Linux or OS X, or a DOS prompt or
 	   powershell in Windows, you can start the program with the command:
 		
 		<python> <path_to_negui.py>
@@ -91,7 +91,7 @@ Starting the program
 
 		python /home/me/programs/agestructurene/negui.py
 		
-	2. In windows from its File Explorer program, if you navigate the
+	2. In Windows, from its File Explorer program, if you navigate to the
 	   programs main directory, you can double-click on the negui.py file.
 
 Using the program	
