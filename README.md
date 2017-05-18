@@ -96,7 +96,7 @@ Starting the program
 
 Using the program	
 -----------------
-	To run a simulation, calculate Nb or Ne estimates, or plot results, load one
+	To run a simulation, calculate Nb or Ne estimates, or plot results,
 	load one of the three interfaces by clicking "New" on the main menu.
 
 	For details about running the different interfaces, see the
