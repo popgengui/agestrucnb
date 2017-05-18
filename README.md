@@ -98,7 +98,7 @@ Using the program
 -----------------
 	To load one of the three interfaces or either running a simulation,
 	calculating Nb or Ne estimates, or plotting the results, on the main menu click
-	on "Add".  
+	on "New".  
 
 	For details about running the different interfaces, see the
 	user manual.
