@@ -18,11 +18,13 @@ Overview
 
 Current compatible python versions
 ----------------------------------
+
 	python 3.6 (recommended).
 	python 2.7 (requires building an older version of simuPOP)
 
 OS-comaptibility
 -----------------
+
 	1. Linux. The program has been run on Linux (Ubuntu 16.04).
 
 	2. OSX. The program needs further testing on OS X.
@@ -31,9 +33,10 @@ OS-comaptibility
 	   were also run successfully on 32-bit Windows 7 and Vista, and
 	   we consider it likely that it will still run well on those older
 	   Windows platforms.  Note that on Windows, one persistent problem 
-	   is the inability of the program to remove files for
-	   some cleanup operations when processes do not finish (through error or
-	   user-cancellation). See the "BUGS" file for this and other issues.
+	   is the inability of the program to remove temprorary files after
+	   some cleanup operations, when operations are interrupted or
+	   cancelled, so that the user may sometimes need to delete them. 
+	   See the "BUGS" file for this and other issues.
 
 Dependencies
 ------------
@@ -96,6 +99,7 @@ Starting the program
 
 Using the program	
 -----------------
+
 	To run a simulation, calculate Nb or Ne estimates, or plot results,
 	load one of the three interfaces by clicking "New" on the main menu.
 
