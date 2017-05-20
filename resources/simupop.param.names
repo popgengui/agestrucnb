@@ -41,7 +41,7 @@ dataDir	Data Directory;suppress;0;0;1;"";str;None;None;"";entry;None;type(x)==st
 doNegBinom	Use negative binomial;suppress;4;1;1;False;bool;None;None;Use Negative Binomial;boolradio;None;type(x)==bool;None;enabled;None
 fecundityFemale	Female relative fecundity;Population;2;1;1;None;listfloat;None;None;Female Relative Fecundity;entry;None;x is None or ( type(x)==float );None;enabled;None
 fecundityMale	Male relative fecundity;Population;2;1;1;None;listfloat;None;None;Male Relative Fecundity;entry;None;x is None or ( type(x)==float );None;enabled;None
-forceSkip	Force skip;Population;2;1;1;0.0;float;None;None;For each reproductive cycle, for non-zero fecundity rates, the probability of thatfecundity rate being forced to zero.;entry;None;type(x)==float and x >=0.0 and x <= 1.0;None;disabled;None
+forceSkip	Force skip;Population;2;1;1;0.0;float;None;None;For each reproductive cycle, for non-zero fecundity rates f_a, the probability of f_a being forced to zero.;entry;None;type(x)==float and x >=0.0 and x <= 1.0;None;disabled;None
 gens	Reproductive cycles;Population;2;1;1;1;int;None;None;Reproductive Cycles;entry;None;type(x)==int and x >= 0;None;enabled;None
 isMonog	Monogamous;Population;2;1;1;False;bool;None;None;Monogamous or Non-monogamous;checkbutton;None;type(x)==bool;onChangeInMonogamyCheckbox;enabled;None
 # 2017_02_24.  We are hiding lambda and replacing it with a new population-reducing parameter, to be applied across age/sex classes
