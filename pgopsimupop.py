@@ -445,10 +445,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		if self.input.cull_method == \
 					pgin.PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS:
-			##### temp
-			print( "--------------" )
-			print( "loading maleProp" )
-			##### end temp
 
 			ldef_init_sex=[sp.InitSex(maleProp=0.5)]
 
@@ -461,10 +457,6 @@ class PGOpSimuPop( modop.APGOperation ):
 						+ "parameter: " + str( self.input.cull_method ) + "."
 			raise Exception( s_msg )
 		#end if equal sex ratio else
-
-		##### temp
-		print ( "initOps: " + str( ldef_init_sex ) )
-		#####
 
 		initOps=ldef_init_sex 
 
@@ -656,6 +648,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		femaleFec = []
 		for i in range(len(fecfs)):
+
 			if self.input.forceSkip > 0 and random.random() < self.input.forceSkip:
 				femaleFec.append(0.0)
 			else:
@@ -721,9 +714,6 @@ class PGOpSimuPop( modop.APGOperation ):
 			female.breed = gen
 
 			if self.input.isMonog:
-				##### temp
-				print( "in litter skip, with isMong, assigning female mate to " + str( male.ind_id ) )
-				#####
 				female.mate = male.ind_id
 			#end if is monog
 

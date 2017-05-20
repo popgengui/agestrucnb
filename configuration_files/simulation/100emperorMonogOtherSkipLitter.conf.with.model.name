@@ -4,7 +4,7 @@ name=emperor
 popSize=1000
 ages=ages["emperor"]
 N0=100
-forceSkip=21
+forceSkip=0.21
 isMonog=1
 litter=[-1]
 #newborns always survive

@@ -265,10 +265,29 @@ class PGInputSimuPop( object ):
 		#end if isMonog else not
 		self.__update_attribute_config_file_info( "isMonog", "pop", "isMonog" )
 
-		if config.has_option("pop", "forceSkip"):
-			self.forceSkip = old_div(config.getfloat("pop", "forceSkip"), 100)
+		if config.has_option("pop", "forceSkip"):	
+			'''
+			2017_05_19.  Orignially this probability value was read 
+			in as a percentage (only present in 2 of the 100emperor
+			config files, and set to 21) and then divided by 100.  
+			However, because the GUI will store the assigned value, 
+			it is simplest to avoid any manipulation of the value 
+			when it is read in.  We simply require a value in [0.0,1.0].
+			'''
+
+			self.forceSkip = config.getfloat( "pop", "forceSkip" )
+
+			if self.forceSkip < 0.0 or self.forceSkip > 1.0:
+				s_msg="In PGInputSimuPop instance, def __get_config, " \
+							+ "the configuration file's value for forceSkip, " \
+							+ str( self.forceSkip ) + ", " \
+							+ "is not valid.  It should be a float in the range, " \
+							+ "0.0 <= float <= 1.0."  
+				
+				raise Exception( s_msg )
+			#end if forceSkip not a valid value
 		else:
-			self.forceSkip = 0
+			self.forceSkip = 0.0
 		#end if forceSkip, else not
 		self.__update_attribute_config_file_info( "forceSkip", "pop", "forceSkip" )
 
@@ -278,7 +297,6 @@ class PGInputSimuPop( object ):
 			self.skip = None
 		#end if skip, else not
 		self.__update_attribute_config_file_info( "skip", "pop", "skip" )
-
 
 		if config.has_option("pop", "litter"):
 			self.litter = self.__find_resources( s_model_name,  config.get("pop", "litter"))
@@ -433,7 +451,7 @@ class PGInputSimuPop( object ):
 
 		else:
 			'''
-			2017_04_05.  As we re-activatie the startSave feature,
+			2017_04_05.  As we re-activate the startSave feature,
 			with a control on the GUI interface, we now use 1-indexed
 			cycle numbers, so that the code during the simulation will 
 			(before writing results) check whether the gen number equals 
