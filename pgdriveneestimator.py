@@ -1756,30 +1756,44 @@ def do_sample_loci( o_genepopfile,
 	replicates given by def param i_loci_replicates.
 	'''
 
+
 	for s_indiv_subsample_tag in o_genepopfile.indiv_subsample_tags:
+
 		if s_loci_sampling_scheme == SAMPLE_LOCI_SCHEME_NONE:
 
-			for idx in range( i_loci_replicates ):
-				'''
-				Loci subsample tags consist of an individual subsample tag
-				followed by "_l_t_v_r" where t gives the scheme type, v gives
-				the salient param value for the scheme, and r gives the replicate.
-				'''
-				s_loci_subsample_tag_base=s_indiv_subsample_tag
+			'''
+			Loci subsample tags consist of an individual subsample tag
+			followed by "_l_t_v_r" where t gives the scheme type, v gives
+			the salient param value for the scheme, and r gives the replicate.
 
-				o_sample_params=gps.GenepopFileSampleParamsLoci( \
-											li_population_numbers=li_population_list,
-											i_min_loci_position=i_min_loci_position,
-											i_max_loci_position=i_max_loci_position,
-											i_min_total_loci=i_min_total_loci,
-											i_max_total_loci=i_max_total_loci,
-											i_replicates=1,
-											s_sample_tag_base=s_loci_subsample_tag_base )
+			
+			2017_05_24. Bug fix.  The subsampling for this scheme was being
+			done in a loop, for idx in range( i_replicates), but the
+			i_replicates parameter in the sampler was hard-coded to 1.
+			Hence only a single replicate was being done, with one
+			loci subsample tag, but overwritten i_loci_replicates
+			times.  The tsv file then had only one replicate of the sampling,
+			corresponding to the last sampling.  Since the instance of 
+			GenepopFileSamplerLociByRangeAndTotal, in its doSample()
+			def, if passed i_loci_replicates by its GenepopFileSampleParamsLoci
+			object, will do each replicate and give it a uniq tag (as with
+			other schemes).
+			'''
+			s_loci_subsample_tag_base=s_indiv_subsample_tag
 
-				o_sampler=gps.GenepopFileSamplerLociByRangeAndTotal( o_genepopfile,
-																		o_sample_params )
-				o_sampler.doSample()
-			#end for each replicate
+			o_sample_params=gps.GenepopFileSampleParamsLoci( \
+										li_population_numbers=li_population_list,
+										i_min_loci_position=i_min_loci_position,
+										i_max_loci_position=i_max_loci_position,
+										i_min_total_loci=i_min_total_loci,
+										i_max_total_loci=i_max_total_loci,
+										i_replicates=i_loci_replicates,
+										s_sample_tag_base=s_loci_subsample_tag_base )
+
+			o_sampler=gps.GenepopFileSamplerLociByRangeAndTotal( o_genepopfile,
+																	o_sample_params )
+
+			o_sampler.doSample()
 
 		elif s_loci_sampling_scheme == SAMPLE_LOCI_SCHEME_PERCENT:
 
