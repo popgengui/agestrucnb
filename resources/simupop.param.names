@@ -31,7 +31,7 @@ NbNc	Nb/Nc;Population;2;1;1;0.0;float;None;None;Nb/Nc, where Nc=No;entry;None;ty
 NbNe	Nb/Ne;Population;0;0;1;0.0;float;None;None;Nb/Ne ratio.  This value is passed to the Nb estimation function for use in a LDNE bias correction (Waples etal., 2014). The entry is ignored if set to zero.;entry;None;type(x)==float or type(x) == int;None;enabled;None
 N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle. If not editable then calculated using Nb, Nb/Nc, survival rates, and male birth probability.;entry;None;type(x)==int and x >= 0;None;enabled;None
 Nb	Nb;Population;2;0;1;0;int;None;None;"Nb";entry;None;type(x)==int and x>= 0;updateN0EntryBox;enabled;None
-NbVar	Nb Tolerance;Population;0;0;1;0.05;float;None;None;The calculated population Nb, for each cycle after burn-in, must be within this proportion of the expected Nb;entry;None;type(x)==float and x >= 0.0;None;enabled;None
+NbVar	Nb tolerance;Population;0;0;1;0.05;float;None;None;The calculated population Nb, for each cycle after burn-in, must be within this proportion of the expected Nb;entry;None;type(x)==float and x >= 0.0;None;enabled;None
 ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None;type(x)==int and x >= 0;None;disabled;None
 config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None;type(x)==str;None;enabled;None
 life_table_glob	Life Table File(s);Configuration Info;1;1;1;"none";str;None;None;Life table files;entry;None;type(x)==str;None;enabled;None
@@ -49,7 +49,7 @@ isMonog	Monogamous;Population;2;1;1;False;bool;None;None;Monogamous or Non-monog
 lbd	Lambda (after burn-in);suppress;4;1;1;1.0;float;None;None;Lambda after burn in;entry;None;type(x)==float and x>=0;None;enabled;None
 # 2017_03_09. We replaced the single harvest rate float with a list of range/rate combinations.  See param nbadjustment below.
 #harvestrate	Harvest rate (after burn-in);Simulation;4;1;1;0.0;float;None;None;After the burn-in cycles, at each culling, additionaly reduce the population evenly across ages and sexes at this rate;entry;None;type(x)==float and x>=0;None;enabled
-litter	Litter;Population;2;1;1;None;listint;None;None;Litter;entry;None;x is None or ( type(x)==int );None;disabled;None
+litter	Proportional Litter Sizes;Population;2;1;1;None;listint;None;None;When not "None," this list of integers affects litter sizes in one of two ways.~~  1.  If the list has a single, negative number, then its absolute value gives the maximum litter size for any female.~~  2. If positive values totalling n, then each value, with index idx in 1,2,3...n, gives the chance,~~     proportional to the other values, that the next idx offspring, as long as N0 is not reached, will have the same mother.;entry;None;x is None or ( type(x)==int );None;disabled;None
 maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth.  If cull method is equal_sex_ratio, this value is forced to 0.5.;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;onUpdateMaleProb;enabled;onLoadingMaleProb
 model_name	Model;Configuration Info;1;1;1;"none";str;None;None;Model name;entry;None;type(x)==str;None;enabled;None
 numSNPs	Number of SNPs;Genome;3;1;1;0;int;None;None;Number of SNPs;entry;None;type(x)==int and x >= 0;None;enabled;None

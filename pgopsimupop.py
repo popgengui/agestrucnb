@@ -14,6 +14,7 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 VERBOSE=False
 VERY_VERBOSE=False
 VERY_VERY_VERBOSE=False
+PRINT_CULL_TOTALS=False
 
 USE_GUI_MESSAGING=False
 
@@ -134,12 +135,22 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__guierr=None
 
 		if b_do_gui_messaging:
+
 			self.__activate_gui_messaging()
+
 		#end if we are to use gui messaging
 
 		super( PGOpSimuPop, self ).__init__( o_input, o_output )
 
-		self.__lSizes = [0, 0, 0, 0, 0, 0]
+		'''
+		2017_05_20.  Checked the original sim.py code and its use 
+		here and find that the lSizes variable is never accessed
+		beyond it's items being incremented in __litterSkipGenerator,
+		so that I'm removing it from its assignment here 
+		"lSizes = [0, 0, 0, 0, 0, 0]"
+		and its use in litterSkipGenerator: "lSizes[lSize] += 1".
+		'''
+
 		self.__reportOps = [ sp.Stat(popSize=True) ]
 		self.__is_prepared=False
 		self.__compress_output=b_compress_output
@@ -241,7 +252,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		2017_03_08.  This call converts the list
 		of cycle range and rate entries in the 
-		listu attribite nbadjustment into a list
+		list attribite nbadjustment into a list
 		of per-cycle rate adjustments, used by
 		this objects def __harvest.
 		'''
@@ -365,11 +376,26 @@ class PGOpSimuPop( modop.APGOperation ):
 			sys.stderr.write( s_msg + "\n" )
 		else:
 			#writes all loci values 
+			'''
+			2017_05_30.  To accomodate new module pgdrivesimulation.py, which
+			reads in a conf and does not require a life table, we default an
+			NbNe value to zero if the conf file does not supply it.  Note that
+			this parameter (Nb/Ne ratio) is not (currently) required for the 
+			simulation, but is passed along in the genepop file header to allow 
+			for an Nb bias adjustment as read-in and calculated by the 
+			pgdriveneestimator.py module.
+			'''
+			f_this_nbne=0.0
+
+			if hasattr( self.input, "NbNe" ):
+				f_this_nbne=self.input.NbNe
+			#end if we have an NbNe value, use it.
+
 			self.output.gen2Genepop( 1, 
 					i_total_loci, 
 					b_pop_per_gen=True,
 					b_do_compress=False,
-					f_nbne_ratio=self.input.NbNe )
+					f_nbne_ratio=f_this_nbne )
 		#end if no loci reported
 	#end __write_genepop_file
 
@@ -460,11 +486,43 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		initOps=ldef_init_sex 
 
-		if startLambda < pgin.START_LAMBDA_IGNORE:
-			preOps = [sp.ResizeSubPops(proportions=(float(lbd), ),
-								begin=startLambda)]
-		else:
+		'''
+		2017_05_31. Note that after we implemented the __harvest def in
+		pgopsimupop.py, we were no longer using lambda to adjust the N0
+		in def __calcDemo (see).  However, this use of the lambda (i.e. ldb),
+		was not deleted.  It was set to be hidden in the resources/simupop.param.names,
+		but was still getting used in the ResizeSubPops operator with a default
+		value of 1.0.  I am now checking for either the IGNORE in startLambda or
+		a lambda value very close to 1.0. 
+		'''
+		f_insig_diff=1e-64
+		f_this_diff=abs( lbd - pgin.LAMBDA_IGNORE )
+		if startLambda < pgin.START_LAMBDA_IGNORE \
+				and f_this_diff > f_insig_diff:
+			
+			s_msg="Warning: In PGOpSimuPop instance, def __createSinglePop, " \
+					+ "the non-unity lambda parameter found in your configuration file, "  \
+					+ "with value, " + str( lbd ) + ", will be ignored.  "  \
+					+ "Per cycle population reductions are currently not done using lambda, " \
+					+ "but instead using the Nb and census adjustment parameter \"nbadjustment\"."
+				
+			sys.stderr.write( s_msg + "\n" )
+			
+			if self.__guiinfo is not None:
+				self.__guiinfo( None, s_msg )
+			#end if using gui messaging
+
+			#####2017_05_31 rem out, currently not used.
+			#preOps = [sp.ResizeSubPops(proportions=(float(lbd), ),
+			#					begin=startLambda)]
+			#####
+
 			preOps = []
+				
+		else:
+
+			preOps = []
+
 		#end if lambda < VALUE_NO_LAMBA
 
 		postOps = []
@@ -678,13 +736,12 @@ class PGOpSimuPop( modop.APGOperation ):
 						#end if availOfs, else not
 					elif self.input.litter:
 						lSize = self.__getRandomPos(self.input.litter) + 1
-						self.__lSizes[lSize] += 1
 						if lSize > 1:
 							nextFemales = [female] * (lSize - 1)
 						#end if size>1
 
 						femalesAge[age].remove(female)
-					#end if nLitter is not nonem elif litter
+					#end if nLitter is not none elif litter
 				#end if len( femalsage . . . 
 			#end while not female
 
@@ -1153,14 +1210,14 @@ class PGOpSimuPop( modop.APGOperation ):
 			maleCull = int(numpy.round(maleCount *(1- self.input.survivalMale[int(cohortKey) - 1])))
 			femaleCull = int(numpy.round(femaleCount *(1- self.input.survivalFemale[int(cohortKey) - 1])))
 
-			#if VERY_VERY_VERBOSE:
-			print ("cohort: " + str(cohortKey))
-			print ("maleCount: " + str(maleCount))
-			print ("femaleCount: " + str(femaleCount))
-			print ("maleCull: " + str(maleCull))
-			print ("femaleCull: " + str(femaleCull))
-			print ("\n\n")
-			# end if very verbose
+			if PRINT_CULL_TOTALS:
+				print ("cohort: " + str(cohortKey))
+				print ("maleCount: " + str(maleCount))
+				print ("femaleCount: " + str(femaleCount))
+				print ("maleCull: " + str(maleCull))
+				print ("femaleCull: " + str(femaleCull))
+				print ("\n\n")
+			# end if PRINT_CULL_TOTALS
 
 			# choose which sex to kill first
 			# flag is one and 0 for easy switching

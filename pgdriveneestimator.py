@@ -119,12 +119,15 @@ import pgutilities as pgut
 VERBOSE=False
 VERY_VERBOSE=False
 
-ACTIVATE_GUI_MESSAGING=True
+'''
+2017_05_31. These mod-level variables
+are assigned in def set_messaging_procedures
+'''
 
-if ACTIVATE_GUI_MESSAGING:
-	from pgguiutilities import PGGUIErrorMessage
-	from pgguiutilities import PGGUIInfoMessage
-#end if use gui messaging
+ACTIVATE_GUI_MESSAGING=None
+GUIERR=None
+GUIINFO=None
+
 
 '''
 2017_03_16.  We are adding, as the default
@@ -183,7 +186,7 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 						 + spacer2 + "(1) Semicolon-delimited field names (ex, for the AgeStructureNe " \
 						 					+ "genpop output: \"id;sex;father;mother;age\")."\
 						 + spacer2 + "(2) Semicolon-delimited field (python) types (ex, for the " \
-						 					+ "AgeStructureNe genepop: \"floatint;float;float;float\")." \
+						 					+ "AgeStructureNe genepop: \"float;int;float;float;float\")." \
 						 + spacer2 + "(3) A set of parameters for the given sampling scheme:" \
 						 + spacer3 + "i. \"critera\": semicolon-delimited test expressions " \
 								   + "(ex: \"age<5;sex==1\")." \
@@ -191,9 +194,7 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 						 + spacer3 + "iii. \"cohortsperc\": two semicolon-delimited values, a single " \
 						 + "integer giving max age of cohorts, and a hyphenated list of numbers " \
 						 		   + "(ints or floats) giving percenantages at which to randomly " \
-								   + "sample from the cohorts. " \
-						 + spacer3 + "iv. \"relateds\": single float giving percent of relateds to select " \
-							+ "(remainder filled in by the un-chosen to meet the min pop size value).", 
+								   + "sample from the cohorts.", 
 		"Minimum pop size (single integer).",
 		"Maximum pop size (single integer).",
 		"Genepop file pop range (hyphenated pair of integers, i-j indicating estimator should evaluate " \
@@ -233,8 +234,11 @@ LS_ARGS_HELP_OPTIONAL=[  "total processes to use (single integer) Default is 1 p
 				+ "Debug 3, for example, adds to the output a table listing, for each indiv. " \
 				+ "in each file, which replicate Ne estimates include the individual.  It also preserves " \
 				+ "the intermediate genepop and NeEstimator output files",
-				"An Nb/Ne ratio, if supplied, then used in a bias adjustment to the LDNE " \
-				+ "estimates (after Waples, 2014)", "True|False, whether to do the Nb bias adjustment. " \
+				"An Nb/Ne ratio, if supplied, will be used in a bias adjustment to the LDNE " \
+				+ "estimates (after Waples, 2014).  Ignored if --donbbiasadjust is \"False.\"  " \
+					+ "If you use 0.0 here, the program will look in the genepop file " \
+					+ "header for an entry giving the Nb/Ne ratio as \"nbne=<value>\".", 
+				"True|False, whether to do the Nb bias adjustment. " \
 				+ "If False, the Nb/Ne ratio parameter is ignored." ]
 
 #Indices into the args as passed as list/sequence to def parse_args:
@@ -272,6 +276,13 @@ when def mymain is called from pgutilities def
 run_driveneestimator_in_new_process.
 '''
 IDX_TEMPORARY_DIRECTORY=21
+
+'''
+2017_05_31. This new argument allows the console
+command to prevent the module from importing
+and using the GUI messaging classes.
+'''
+IDX_USE_GUI_MESSAGING=22
 
 #Def mymain uses this index to test and pass
 #the correct file/multiprocessing_event information
@@ -1516,6 +1527,15 @@ def do_sample( o_genepopfile,
 				i_min_total_loci,
 				i_max_total_loci,
 				i_loci_replicates ):
+	'''
+	2017_05_29.  We add a return value, so that the calling
+	def (drive_estimator), will know whether any pops were
+	sampled. If the call to do_sample_individuals has no
+	pops in range we return 0, otherwise, we do the loci
+	sampling and return the value returned, which will be
+	the pop list length, or zero if no loci are in range,
+	as given by min_loci_number and max_loci_number.
+	'''
 
 	li_population_list=do_sample_individuals( o_genepopfile, 
 					i_min_pop_range,
@@ -1526,10 +1546,14 @@ def do_sample( o_genepopfile,
 					lv_sample_values, 
 					i_replicates )
 
+	if li_population_list is None:
+		return 0
+	#end if no pops were sampled (i.e. min pop > total pops).  
+
 	#we also want to sample loci one loci sampling
 	#replicate for each each individual replicate,
 	#the latter now included in the genepopfile object:
-	do_sample_loci( o_genepopfile,
+	i_total_pops_sampled=do_sample_loci( o_genepopfile,
 					s_loci_sampling_scheme,
 					v_loci_sampling_scheme_param,
 					i_min_loci_position,
@@ -1539,7 +1563,7 @@ def do_sample( o_genepopfile,
 					li_population_list,
 					i_loci_replicates )
 
-	return
+	return i_total_pops_sampled
 #end do_sample
 
 def do_sample_individuals( o_genepopfile, 
@@ -1558,6 +1582,9 @@ def do_sample_individuals( o_genepopfile,
 	sampler requires a population list (in case we want to sample fewer than
 	all the pops in the file). If the client passed in "all" parse_args
 	will have assigned None to both min and max.
+
+	2017_05_29.  We add check to see if the min pop range number is >
+	the total pops int he genepop file, in which case we return None.
 	'''
 
 	i_total_pops_in_file=o_genepopfile.pop_total
@@ -1575,9 +1602,8 @@ def do_sample_individuals( o_genepopfile,
 						+ str( i_max_pop_range ) \
 						+ ".  Invalid argument pair."
 			raise Exception( s_msg )
-		#end if max is None else error
-	else:
-		if i_min_pop_range < 1 or i_min_pop_range > i_max_pop_range:
+		#end if max is None, then get all pops into list, else error
+	elif i_min_pop_range < 1 or i_min_pop_range > i_max_pop_range:
 			s_msg="In pgdriveneestimator.py, def do_sample, " \
 						+ "min pop number range, " \
 						+ str( i_min_pop_range ) \
@@ -1586,11 +1612,14 @@ def do_sample_individuals( o_genepopfile,
 						+ str( i_max_pop_range ) + "." 
 			raise Exception( s_msg )
 		#end if min or max out of range
+	elif i_min_pop_range > i_total_pops_in_file:
+		return None
+	else:
 
 		i_max_pop_range=min( i_max_pop_range, i_total_pops_in_file )
-
 		li_population_list=list(range( i_min_pop_range, i_max_pop_range + 1))
-	#end if min pop range is None, else have a value
+	#end if min pop range is None, else if range invalid, else if out of range, 
+	#else good range, get corresponding pop number list 
 
 	o_sampler=None	
 
@@ -1754,7 +1783,28 @@ def do_sample_loci( o_genepopfile,
 	we subsample the loci for each loci-subsampling parameter
 	value, and for each of these, for the number of loci
 	replicates given by def param i_loci_replicates.
+
+	2017_05_29.  We add a check at the start of this def
+	to validate the min and max loci position arguments.
+	if the range is invalid, we throw and error.  If the
+	min is greater than the total number of loci, we return
+	a 0, to indicate no pops were sampled.  Otherwise, 
+	we return the number of items in the li_population_numbers.
+
 	'''
+
+	if i_min_loci_position < 1  \
+			or i_min_loci_position > i_max_loci_position:
+		s_msg="In pgdriveneestimator.py, def do_sample_loci, " \
+						+ "min loci number range, " \
+						+ str( i_min_loci_position ) \
+						+ ", is less than one or " \
+						+ "greater than max pop number, " \
+						+ str( i_max_loci_position ) + "." 
+		raise Exception( s_msg )
+	elif i_min_loci_position > o_genepopfile.loci_total:
+			return 0
+	#end if invalid range, else no loci in range
 
 
 	for s_indiv_subsample_tag in o_genepopfile.indiv_subsample_tags:
@@ -1846,7 +1896,7 @@ def do_sample_loci( o_genepopfile,
 		#end if sampling scheme none else unknown
 	#end for each individual subsample tag
 
-	return
+	return len( li_population_list )
 #end do_sample_loci
 
 def get_subsample_genepop_file_name( s_original_genepop_file_name, 
@@ -2516,7 +2566,6 @@ def drive_estimator( *args ):
 	#currently disabled:
 	#s_indiv_table_file=None
 	
-	write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outfile )
 
 	'''
 	2017_04_03.  In order to shorten the file names for 
@@ -2546,7 +2595,13 @@ def drive_estimator( *args ):
 								+ "for file, " + s_filename + "." )	
 		#end if VERY_VERBOSE
 
-		do_sample( o_genepopfile, 
+		'''
+		2017_05_29. We revised do_sample to return either the length
+		of the list of pop numbers sent for sampling, or zero, which indicates
+		that either the pop number range, or the loci number range were
+		out of range (i.e. min was greater than the total).
+		'''
+		i_total_pops_sampled=do_sample( o_genepopfile, 
 					i_min_pop_range,
 					i_max_pop_range,
 					i_min_pop_size,
@@ -2561,6 +2616,25 @@ def drive_estimator( *args ):
 					i_min_total_loci,
 					i_max_total_loci,
 					i_loci_replicates )
+
+		
+		if i_total_pops_sampled == 0:
+
+			s_filename=o_genepopfile.original_file_name
+			s_msg = "In file " \
+							+ s_filename \
+							+ ", no pop sections were sampled. " \
+							+ "Either the population number range, " \
+							+ str( i_min_pop_range ) \
+							+ " to " + str( i_max_pop_range ) \
+							+ ", or the loci number range, " \
+							+ str( i_min_loci_position )  \
+							+ " to " + str( i_max_loci_position ) \
+							+ " excluded all pops and/or loci."
+			o_secondary_outfile.write( s_msg + "\n" )
+
+			continue
+		#end if no pops sampled
 
 		if VERY_VERBOSE:
 			print ( "in pgdriveneestimator, def drive_estimator, calling " \
@@ -2602,13 +2676,27 @@ def drive_estimator( *args ):
 												s_temporary_directory,
 												i_genepop_file_count )
 		
-	#end for each genepop file, sample, add an ne-estimator object, and setup call to estimator 
+	#end for each genepop file, sample, and, if > 0 pops were sampled, add an ne-estimator object, 
+	#and setup call to estimator 
 
 	if len( llv_args_each_process ) == 0:
-		s_msg="Warning:  no calls were made to NeEstimator, indicating " \
-					+ "that sampling parameters resulted in no samples."
+		s_msg="Warning:  no calls were made to NeEstimator. " \
+					+ "Sampling parameters likely filtered out all pop sections."
+		
+		o_secondary_outfile.write( s_msg + "\n" )
 
-		sys.stderr.write( s_msg + "\n" )
+		s_info_msg=s_msg + "Please check the output file *.msgs for details.\n"
+		sys.stderr.write( s_info_msg  )
+
+		if ACTIVATE_GUI_MESSAGING:
+			GUIINFO( None , s_info_msg )
+		#end if using gui messaging
+
+	else:
+
+		write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outfile )
+
+	#end if no calls to neestimator, else write header to tsv
 
 	#end if no calls were made, print warning to stderr
 
@@ -2794,6 +2882,40 @@ def mymainlongfilelist( *q_args ):
 
 #end mymainlongfilelist
 
+def set_messaging_procedures( s_gui_flag ):
+	'''
+	2017_05_31. This def was added in order to
+	control the GUI messaging, and limit it to
+	the processes that call def mymain from
+	the GUI-based program.  Console based calls
+	will have the flag set to "False."
+	'''
+
+	global ACTIVATE_GUI_MESSAGING
+
+	if s_gui_flag == "True":
+
+		global GUIERR
+		global GUIINFO
+
+		ACTIVATE_GUI_MESSAGING=True
+		from pgguiutilities import PGGUIErrorMessage
+		from pgguiutilities import PGGUIInfoMessage
+		GUIERR=PGGUIErrorMessage
+		GUIINFO=PGGUIInfoMessage
+	elif s_gui_flag == "False":
+		ACTIVATE_GUI_MESSAGING=False
+	else:
+		s_msg="In pgdriveneestimator, def set_messaging_procedures, " \
+					+ "the program found an unknown value for the " \
+					+ "flag that indicates whether to use GUI " \
+					+ "messaging: " + s_gui_flag + "."
+		raise Exception( s_msg )
+	#end if we are using gui messaging
+	return
+#end set_messaging_procedures
+
+
 
 def mymain( *q_args ):
 
@@ -2806,10 +2928,36 @@ def mymain( *q_args ):
 	This was an adaptation to enable PGGuiNeEstimator objects
 	to import this mod, then call this def after they load 
 	params (args for this driver) from their interface
+	
+	2017_05_31. We have added a new final string argument
+	"True" or "False" to indicate whether to use GUI
+	messaging. Note that parse_args does not parse this
+	final arg, but this def evaluates it immediately
+	in order to propery use error messaging.
 	'''
 
+	'''
+	The multiprocessing event arg is not yet added to 
+	the list, so that we'll find the gui messaging flag
+	at its designated index minus one.
+	'''
+	s_gui_flag=q_args[ IDX_USE_GUI_MESSAGING - 1 ]
+
+	if s_gui_flag not in [ "True", "False" ]:
+
+		s_msg="In pgdriveneestimator.py, def mymain, " \
+						+ "the program did not find the " \
+						+ "\"True\" or \"False\" value " \
+						+ "for the parameter that indicates " \
+						+ "whether to activate GUI messaging.  " \
+						+ "The value found is: " + s_gui_flag + "."
+		raise Exception( s_msg )
+	#end if no flag value
+
+	set_messaging_procedures( s_gui_flag )
+
 	try:
-	
+
 		if VERY_VERBOSE:
 			print( "In pgdriveneestimator, def mymain" )
 		#end if VERY_VERBOSE
@@ -2923,7 +3071,12 @@ def mymain( *q_args ):
 	except Exception as oex:
 
 		if ACTIVATE_GUI_MESSAGING:
-			PGGUIErrorMessage( None , str( oex ) )
+			s_trace=o_traceback=sys.exc_info()[ 2 ]
+			s_trace= \
+				pgut.get_traceback_info_about_offending_code( o_traceback )
+
+			s_errormsg=str( oex )
+			GUIERR( None , s_errormsg + "\n" + s_trace )
 		#end if using gui messaging
 		
 		raise ( oex )
@@ -2999,19 +3152,21 @@ if __name__ == "__main__":
 	#end if no bias adjust flag, default to False, else use
 
 	'''
-	Now we add the default:
-		--output file objects 
-		-- mp event (None)
-		2017_03_27, final argument is now
-		a temporary directoyr name, used
-		by caller when mymain is called by
+	Now we add the defaults that all console calls use:
+		--output file objects stdout and stderr
+	2017_03_27: 		
+		--temporary directory (default for console is None), 
+		used by caller when mymain is called by
 		the GUI, otherwise default to None:
-		-- temporary directory name (None)
+	2017_05_31. Now the last default arg is 
+		--flag to suppress gui messaging="False".
+
 	These are args hidden from console user, set by
-	users who import this mod and call mymain:
+	the def in pgutilities.py, run_driveneestimator_in_new_process.
+
 	'''
 
-	ls_args_passed+=[ sys.stdout, sys.stderr, None, None ]
+	ls_args_passed+=[ sys.stdout, sys.stderr, None, "False" ]
 
 	mymain( *( ls_args_passed ) )
 

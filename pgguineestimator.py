@@ -498,6 +498,44 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		return ls_bad_filenames
 	#end __get_list_bad_genepop_file_names
 
+	def __validate_pop_and_loci_number_ranges( self ):
+		'''
+		2017_05_29.  This def is created to
+		validate the pop and loci number range parameters.
+		This will be called by def __params_look_valid.
+		If invalide ranges are found, then it returns
+		a string of messages specifying the error.
+		Otherwise it returns an empty list.
+		'''
+
+		ls_invalidity_messages=[]
+
+		i_minpop=self.__scheme_all_min_pop_number
+		i_maxpop=self.__scheme_all_max_pop_number
+		i_minloci=self.__locischeme_all_min_loci_number
+		i_maxloci=self.__locischeme_all_max_loci_number
+	
+		dtup_ranges={ "Pop number" : ( i_minpop, i_maxpop ), 
+						"Loci number" : ( i_minloci, i_maxloci ) }
+		
+		for s_num_range in dtup_ranges:
+			i_thismin=dtup_ranges[ s_num_range ][ 0 ]
+			i_thismax=dtup_ranges[ s_num_range ][ 1 ]
+			if i_thismin < 1 \
+					or i_thismin > i_thismax:
+
+				ls_invalidity_messages.append( "Invalid range " \
+								+ "entered for " + s_num_range \
+								+ ": " + str( i_thismin ) \
+								+ " to " + str( i_thismax ) \
+								+ "." )
+			#end if range invald
+		#end for each range		
+
+		return ls_invalidity_messages
+
+	#end __validate_pop_and_loci_number_ranges
+
 	def __params_look_valid( self, b_show_message=False ):
 
 		'''
@@ -517,10 +555,14 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		ls_invalidity_messages=[]
 
 		'''
-		Should collect all errors and present all to user at once,
-		but for now will just abort on the first encountered 
-		invalid param.
+		2017_05_29.  The first check is the pop and loci number ranges.
 		'''
+		ls_invalid_pop_or_loci_number_ranges=self.__validate_pop_and_loci_number_ranges()
+
+		if len( ls_invalid_pop_or_loci_number_ranges ) > 0:
+			ls_invalidity_messages += ls_invalid_pop_or_loci_number_ranges
+			b_valid=False
+		#end if invalid ranges
 
 		BULLET="**"
 

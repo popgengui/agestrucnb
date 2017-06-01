@@ -88,7 +88,7 @@ with the limit on windows path length using
 shutil.copy (and, presumably, move and rmtree too).
 These are the paramaters needed to fix too-long paths.
 '''
-MAX_PATH_LENGTH=254
+WINDOWS_PATH_LENGTH_LIMIT=254
 WINDOWS_PREFIX_LONG_PATH="\\\\?\\"
 
 def do_usage_check( ls_this_argv, 
@@ -196,19 +196,18 @@ def do_shutil_copy( s_source, s_destination ):
     done on windows 10).
 	'''
 
-	MAX_PATH_LENGTH=259
 
 	if is_windows_platform():
 
-		if len( s_source ) > MAX_PATH_LENGTH \
-				or len( s_destination ) > MAX_PATH_LENGTH:
+		if len( s_source ) > WINDOWS_PATH_LENGTH_LIMIT \
+				or len( s_destination ) > WINDOWS_PATH_LENGTH_LIMIT:
 
 			s_msg="In module pgutilities.py, def do_shutil_copy, " \
 						+ "The program is unable to copy from, " \
 						+ s_source + " to " + s_destination + ".\n" \
 						+ "The path of the source and/or destination " \
 						+ "exceed(s) the " \
-						+ str( MAX_PATH_LIMIT )  \
+						+ str( WINDOWS_PATH_LENGTH_LIMIT )  \
 						+ " character  limit that causes " \
 						+ "a copy failure in Windows."  
 			raise Exception( s_msg )
@@ -234,19 +233,18 @@ def do_shutil_move( s_source, s_destination ):
 	See do_shutil_copy above for more details.
 	'''
 
-	MAX_PATH_LENGTH=259
 
 	if is_windows_platform():
 
-		if len( s_source ) > MAX_PATH_LENGTH \
-				or len( s_destination ) > MAX_PATH_LENGTH:
+		if len( s_source ) > WINDOWS_PATH_LENGTH_LIMIT \
+				or len( s_destination ) > WINDOWS_PATH_LENGTH_LIMIT:
 
 			s_msg="In module pgutilities.py, def do_shutil_copy, " \
 						+ "The program is unable to move the frile from, " \
 						+ s_source + " to " + s_destination + ".\n" \
 						+ "The path of the source and/or destination " \
 						+ "exceed(s) the " \
-						+ str( MAX_PATH_LIMIT )  \
+						+ str( WINDOWS_PATH_LENGTH_LIMIT )  \
 						+ " character  limit that causes " \
 						+ "a copy failure in Windows."  
 			raise Exception( s_msg )
@@ -272,13 +270,13 @@ def do_shutil_rmtree( s_path ):
 	'''
 
 	if is_windows_platform():
-		if len( s_path ) > MAX_PATH_LENGTH:
+		if len( s_path ) > WINDOWS_PATH_LENGTH_LIMIT:
 			s_msg="In module pgutilities.py, def do_shutil_copy, " \
 					+ "The program is unable to remove the directory tree from, " \
 					+ s_source + " to " + s_destination + ".\n" \
 					+ "The path of the source and/or destination " \
 					+ "exceed(s) the " \
-					+ str( MAX_PATH_LIMIT )  \
+					+ str( WINDOWS_PATH_LENGTH_LIMIT )  \
 					+ " character limit that causes " \
 					+ "a failure in Windows."  
 			raise Exception( s_msg )
@@ -371,24 +369,33 @@ def prep_and_call_do_pgopsimupop_replicate( s_config_file,
 											s_life_table_files, 
 											s_param_file, 
 											s_output_base_name, 
-											s_replicate_number ):
+											s_replicate_number,
+											s_use_gui_messaging="True" ):
 	'''	
 	This def to be invoked in a subprocess.Popen command, as
 	instantiated in a PGGuiSimuPop instance in do_operation.
 
 	This def simply prepares the args for the call to def
 	do_pgopsimupop_replicate_from_files (below).
+
+	2017_05_30.  Added def parameter (string by necessity) s_use_gui_messaging with default
+	(bool-converted) value True, so that our new module pgdrivesimulation.py can call
+	this with this (bool-converted) value set to False, to avoid gui processing during
+	a command line execution.
 	'''
 
 	#de-stringify args for call to def below:
 	ls_life_table_files = s_life_table_files.split( DELIMITER_LIFE_TABLE_FILES )
 	i_replicate_number=int( s_replicate_number )
 
+	b_use_gui_messaging=True if s_use_gui_messaging=="True" else False
+
 	do_pgopsimupop_replicate_from_files( s_config_file,
 						ls_life_table_files,
 						s_param_file,
 						s_output_base_name,
-						i_replicate_number )
+						i_replicate_number,
+						b_use_gui_messaging =  b_use_gui_messaging  )
 
 	return
 #end prep_and_call_do_pgopsimupop_replicate
@@ -397,7 +404,8 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 												ls_life_table_files, 
 												s_param_name_file, 
 												s_outfile_basename, 
-												i_replicate_number ):
+												i_replicate_number,
+												b_use_gui_messaging=True ):
 	'''
 	necessitated by fact that python2 (and 3?) was not able to pickle 
 	a class-instance def to be used to run replicates of the pgopsimupop
@@ -416,6 +424,10 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	updated to be called by a driver that creates a new OS process, then calls this def to do the replicate.  No longer
 	uses the dv_input_parm_values_by_attribute, but instead relies on reading a complete and up-to-date (i.e. all values
 	as changed or edited on the gui interface) configuration files (that includes the "life table" params).
+
+	2017_05_30. Added def param b_use_gui_messaging with default value True, to accomodate new
+	module pgdrivesimulation.py which needs to call with False, to avoid gui messaging in
+	a server setting.
 	'''
 
 	s_tag_out=""
@@ -440,7 +452,19 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 
 	#end if rep number is not none
 
-	o_resources=pgrec.PGSimuPopResources( ls_life_table_files )
+	'''
+	2017_05_30.  To allow no life table, as implemented  in the new module
+	pgdrivesimulation.py, we set the resources object to None, then test for 
+	a life table name not equal to "none."  If found, then we 
+	create a resource object.  Otherwise, pass it as None to the input object.
+
+	'''
+	o_resources=None
+
+	if ls_life_table_files != [ "none" ]:
+		o_resources=pgrec.PGSimuPopResources( ls_life_table_files )
+	#end if we have life tables
+
 	o_paramset=pgpar.PGParamSet( s_param_name_file )
 	o_input=pgin.PGInputSimuPop( s_configuration_file, o_resources, o_paramset ) 
 	
@@ -494,7 +518,7 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 			o_output, 
 			b_remove_db_gen_sim_files=REMOVE_NON_GENEPOP_SIM_OUTPUT_FILES,
 			b_write_input_as_config_file=b_write_conf_file,
-			b_do_gui_messaging=True,
+			b_do_gui_messaging=b_use_gui_messaging,
 			b_write_nb_and_ages_files=b_write_nb_and_age_tables )
 
 	o_new_pgopsimupop_instance.prepareOp( s_tag_out  )
@@ -676,7 +700,8 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 										s_temp_config_file_for_running_replicates,
 										ls_life_table_files,
 										s_param_names_file,
-										s_output_basename ):
+										s_output_basename,
+										b_use_gui_messaging=True ):
 
 	'''
 	Failed to get independant initialization of population per-replicate
@@ -696,6 +721,12 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 	This def manages the replices via creating subprocesses, and 
 	calling pgutilities.prep_and_call_do_pgopsimupop_replicate.
 
+	2017_05_30.  We added the def param b_use_gui_messaging=True, to allow
+	this def to be called from a command line implentation (new module 
+	pgdrivesimulation.py), and set the flag to false, without having to
+	revise the call from the GUI pgguisimupop.py.
+
+
 	'''	
 
 	'''	
@@ -704,6 +735,7 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 	simulation setup and execution code. When we catch exceptions 
 	below, we send an error message to a gui message box, then
 	re-raise the exception.	
+
 	'''
 	try:
 		s_life_tables_stringified=",".join( ls_life_table_files )
@@ -784,6 +816,14 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 					seq_complete_arg_set=seq_first_four_args_to_sim_call + ( str( i_total_replicates_started ), )
 
 					'''
+					2017_05_30.  We added this argument to def prep_and_call_do_pgopsimupop_replicate, to propgate
+					to its call to def do_pgopsimupop_replicate_from_files.
+					
+					'''
+					seq_complete_arg_set=seq_complete_arg_set + ( str( b_use_gui_messaging ), )
+
+
+					'''
 					in case the negui mods are not in the default python 
 					install dirs, then we need to add them to the sys.paths in
 					any  spawned invocation of python exe -- seems that 
@@ -809,7 +849,7 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 
 					s_python_command=s_path_append_statements + "import pgutilities;" \
 										"pgutilities.prep_and_call_do_pgopsimupop_replicate" \
-										+ "( \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" )" %  seq_complete_arg_set
+										+ "( \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" )" %  seq_complete_arg_set
 
 					o_new_subprocess=subprocess.Popen( [ PYEXE_FOR_POPEN, "-c", s_python_command ] )
 					o_subprocess_group.addSubprocess( o_new_subprocess ) 
@@ -838,12 +878,18 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 
 		o_traceback=sys.exc_info()[ 2 ]
 		s_err_info=get_traceback_info_about_offending_code( o_traceback )
-		show_error_in_messagebox_in_new_process( oex, 
-				s_msg_prefix = "Error caught by pgutilities, "
+		s_prefix_msg_with_trace="Error caught by pgutilities, " \
 								+ "def __do_simulation_reps_in_subprocesses." \
-								+ "\\nError origin info:\\n" )
+								+ "\\nError origin info:\\n" \
+								+ s_err_info 
 
-		raise oex
+		if b_use_gui_messaging:
+			show_error_in_messagebox_in_new_process( oex, 
+				s_msg_prefix = s_prefix_msg_with_trace )
+		#end if use gui messaging
+
+		s_msg=s_prefix_msg_with_trace + str( oex )
+		raise Exception( oex )
 	#end try...except...
 	return
 #end __do_simulation_reps_in_subprocesses
@@ -1006,6 +1052,12 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 		seq_arg_set += ( s_main_output_filename,
 								s_secondary_output_filename, 
 								s_temporary_directory_for_estimator )
+
+		'''
+		2017_05_31.  We now add an argument that activates gui messaging.
+		'''
+		seq_arg_set += ( "True", )
+
 
 		'''
 		2017_02_20.  We check the set of arguments for total command length.

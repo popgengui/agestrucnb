@@ -912,11 +912,7 @@ class GenepopFileSamplerIndividualsAgeStructureCohortsPercentage( \
 					+ ", is greader than the value given for " \
 					+ "the maximum pop size, " \
 					+ str( self.sampleparams.max_indiv_per_gen ) \
-					+ ".  For percentage sampling, unlike "  \
-					+ "Cohort sampling without a percentage, " \
-					+ "in which the max number is sampled randomly, " \
-					+ "in the percentage scheme, cohort samples over " \
-					+ "the max are treated as invalid."
+					+ "."
 			raise Exception( s_msg )
 		else:
 			i_sample_size=None

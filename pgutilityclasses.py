@@ -1583,7 +1583,9 @@ class NbNeReader( object ):
 	Genepop file for a terminating string of the form, "nbne=r", where
 	r is a float giving an Nb/Ne ratio.  Genepop file generated using our
 	pgop, pginput and pgoutput simupop driving modules will store the 
-	value suchwise.
+	value suchwise.  If the value stored in the header is very close
+	to zero (see def __read_nbne_ratio), then the __nbne_ratio will
+	be set to NO_RATIO (curently = None).
 	'''
 
 	NO_RATIO=None

@@ -496,8 +496,18 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		WIDTHBIG= 24 if b_is_windows_platform else 21
 		LENSMALL= 22 if b_is_windows_platform else 20
 
+		'''
+		2017_05_20.  For the configuration file info fields, so that their width
+		is not initialized to a small value:
+		'''
+		DEFAULT_WIDTH_LONG_TEXT=40
+
 		LABEL_WIDTH = [ WIDTHSMALL if i<LENSMALL else WIDTHBIG for i in range( MAXLABELLEN ) ] 
 		PARAMETERS_CBOX_WIDTH=15
+
+		
+		DEFAULT_WIDTHS_FOR_SOME_TEXT_PARAMS={ "model_name":DEFAULT_WIDTH_LONG_TEXT, 
+												"config_file":DEFAULT_WIDTH_LONG_TEXT }
 
 		'''
 		When we look for config file attributes
@@ -646,7 +656,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				i_width_labelname=LABEL_WIDTH[ i_len_labelname ]
 
 				'''
-				As of 2017_01_23, the param set (PGParamSet instance
+				As of 2017_01_23, the param set (PGParamSet instance)
 				now includeds a control state (see above, call to 
 				getAllParamSettings), set either to enabled
 				or disabled.  Hence we default to its setting, 
@@ -686,7 +696,9 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#instance so it will be the object whose attribute (with name s_param)
 				#is reset when user resets the value in the KeyValFrame:
 				if s_param_control_type == "entry":
-					
+
+					i_entry_width=None
+
 					if type( v_val ) == str:
 						i_entry_width=len( v_val )
 					elif s_param == "nbadjustment":
@@ -694,6 +706,12 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					else:
 						i_entry_width=7
 					#end if string param type, else nbadjustment list, else other
+
+					if  s_param in DEFAULT_WIDTHS_FOR_SOME_TEXT_PARAMS:
+						if i_entry_width < DEFAULT_WIDTHS_FOR_SOME_TEXT_PARAMS[ s_param ]:
+							i_entry_width=DEFAULT_WIDTHS_FOR_SOME_TEXT_PARAMS[ s_param ]
+						#end if param's width is less than the default
+					#end if this param has a long-text default width
 						
 					s_entry_justify='left' if type( v_val ) == str else 'right' 
 					'''

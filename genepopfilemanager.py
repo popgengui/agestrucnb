@@ -1522,6 +1522,11 @@ class GenepopFileManager( object ):
 	#end getNumberOfPops
 
 	@property
+	def loci_total( self ):
+		return self.__loci_count
+	#end loci_total
+
+	@property
 	def population_subsample_tags( self ):
 		'''
 		so user can iterate over populations

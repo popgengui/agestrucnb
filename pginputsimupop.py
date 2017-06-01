@@ -367,11 +367,10 @@ class PGInputSimuPop( object ):
 			set of parameters)
 			'''
 			v_nb_val=eval( config.get( "pop", "Nb" ) ) 
-			v_nbvar_val=eval(config.get("pop", "NbVar") )
 
 			'''
 			As of 2016_10_14, we don't want to accept on-None values
-			for np in the pop section, as we now only use a given Nb
+			for nb in the pop section, as we now only use a given Nb
 			as supplied in an (optional) "effective_size" section
 			(section can be in config file (checked first) or
 			life table (see below).
@@ -392,29 +391,38 @@ class PGInputSimuPop( object ):
 			#end if an Nb val was found in the pop section, error
 
 			self.__Nb_from_pop_section = None if v_nb_val is None else config.getint("pop", "Nb")
-			self.NbVar = DEFAULT_NB_VAR if v_nbvar_val is None else config.getfloat("pop", "NbVar")
 
-			'''
-			2017_02_07
-			We are revising to try to use a targeted Nb, but instead of NbVar being a fixed int, 
-			we want to use a float f, 0.0 <= f <= 1.0.  We want to warn users when we've loaded
-			an NbVar from the original configuration files, that uses an integer, for the original
-			tolerance test that simply took the abs(diff) between the calc'd Nb and the target 
-			Nb - NbVar.  Thus some config files may load inappropriatly large NbVar values:
-			'''
-			if self.NbVar > 1.0:
-				s_msg="Warning:  in PGInputSimuPop instance, def get_config, Nb tolerance value looks high at " \
-														+ str( self.NbVar ) + ".  " \
-														+ "This will allow populations with " \
-														+ "Nb values varying substantially " \
-														+ "(i.e by at or more than the target Nb value)." 
-
-				sys.stderr.write( s_msg + "\n" )
-			# end if NbVar > 1
 		else:
 			self.__Nb_from_pop_section = None
-			self.NbVar = DEFAULT_NB_VAR
 		#end if config has Nb, else not
+
+
+		if config.has_option( "pop", "NbVar" ):
+			v_nbvar=eval( config.get( "pop", "NbVar" ) )
+
+			self.NbVar=DEFAULT_NB_VAR if v_nbvar is None else config.getfloat( "pop", "NbVar" )		
+		else:
+			self.NbVar=DEFAULT_NB_VAR
+		#end if NbVar present, else use default
+
+
+		'''
+		2017_02_07
+		We are revising to try to use a targeted Nb, but instead of NbVar being a fixed int, 
+		we want to use a float f, 0.0 <= f <= 1.0.  We want to warn users when we've loaded
+		an NbVar from the original configuration files, that uses an integer, for the original
+		tolerance test that simply took the abs(diff) between the calc'd Nb and the target 
+		Nb - NbVar.  Thus some config files may load inappropriatly large NbVar values:
+		'''
+		if self.NbVar > 1.0:
+			s_msg="Warning:  in PGInputSimuPop instance, def get_config, Nb tolerance value looks high at " \
+													+ str( self.NbVar ) + ".  " \
+													+ "This will allow populations with " \
+													+ "Nb values varying substantially " \
+													+ "(i.e by at or more than the target Nb value)." 
+
+			sys.stderr.write( s_msg + "\n" )
+		# end if NbVar > 1
 
 		self.__update_attribute_config_file_info( "_PGInputSimuPop__Nb_from_pop_section", "pop", "Nb" )
 		self.__update_attribute_config_file_info( "NbVar", "pop", "NbVar" )
@@ -980,6 +988,8 @@ class PGInputSimuPop( object ):
 						+ "unknown string value returned from " \
 						+ "call to __get_nb_attribute_derivation."
 			raise Exception( s_msg )
+		#end if N0 in pop section else effective size, else other
+		return
 	#end setter N0
 
 	@property 
