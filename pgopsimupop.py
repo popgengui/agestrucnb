@@ -904,7 +904,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			if pop.dvars().gen < first_gen_to_include:
 				break
-			#end if gen number is larger than our burn-in threshold.
+			#end if gen number is less than our burn-in threshold.
 
 			nb = self.__calcNb(pop, pair)
 

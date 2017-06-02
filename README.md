@@ -18,13 +18,11 @@ Overview
 
 Current compatible python versions
 ----------------------------------
-
 	python 3.6 (recommended).
 	python 2.7 (requires building an older version of simuPOP)
 
 OS-comaptibility
 -----------------
-
 	1. Linux. The program has been run on Linux (Ubuntu 16.04).
 
 	2. OSX. The program needs further testing on OS X.
@@ -32,11 +30,10 @@ OS-comaptibility
 	3. Windows 10 and 8.1 (64-bit).  Earlier versions of the program
 	   were also run successfully on 32-bit Windows 7 and Vista, and
 	   we consider it likely that it will still run well on those older
-	   Windows platforms.  Note that on Windows, one persistent problem 
-	   is the inability of the program to remove temprorary files after
-	   some cleanup operations, when operations are interrupted or
-	   cancelled, so that the user may sometimes need to delete them. 
-	   See the "BUGS" file for this and other issues.
+	   Windows platforms.  Note that on Windows  One persistent problem 
+	   is the inability of the program to remove files for
+	   some cleanup operations when processes do not finish (through error or
+	   user-cancellation). See the "BUGS" file for this and other issues.
 
 Dependencies
 ------------
@@ -50,10 +47,10 @@ Dependencies
 		conda config --add channels conda-forge
 		conda install simupop
 		
-	    The Anaconda python 3 distribution is escpecially recommended for Windows users.
-	    Aquiring simupop otherwise requires compiling simuPOP source code, which can 
-	    can be difficult in Windows.  See the simuPOP download page, noted above, for 
-	    details.
+	    The Anaconda python3 distribution is escpecially recommended for Windows users.
+	    Aquiring simupop without using the conda package manager requires compiling simuPOP 
+	    source code, which can difficult in Windows.  See the simuPOP web page, noted above, 
+	    for details.
 		
 	2. Other python packages, available through pip with the command "pip
 	install <package>", or, if you use the Anaconda distribution of python,
@@ -67,8 +64,10 @@ Dependencies
 
 		iv.  psutils
 		
-		v.   configparser, for python 2 only. This is a backported python 3 package, different 
+		v.   for python 2 only, configparser.y. This is a backported python 3 package, different 
 		     than the default python2 ConfigParser package. 
+		vi.  for python2 only, if not already in your distribution, the ttk package.  The pip package
+		     can be installed with pip install pyttk.
 
 Installation  
 ------------
@@ -80,7 +79,7 @@ Installation
 Starting the program
 --------------------
 
-	1. From a terminal in Linux or OS X, or a DOS prompt or
+	1. From a console, a terminal in Linux in OS X, or a DOS prompt or
 	   powershell in Windows, you can start the program with the command:
 		
 		<python> <path_to_negui.py>
@@ -94,13 +93,12 @@ Starting the program
 
 		python /home/me/programs/agestructurene/negui.py
 		
-	2. In Windows, from its File Explorer program, if you navigate to the
+	2. In windows from its File Explorer program, if you navigate the
 	   programs main directory, you can double-click on the negui.py file.
 
 Using the program	
 -----------------
-
-	To run a simulation, calculate Nb or Ne estimates, or plot results,
+	To run a simulation, calculate Nb or Ne estimates, or plot results, load one
 	load one of the three interfaces by clicking "New" on the main menu.
 
 	For details about running the different interfaces, see the

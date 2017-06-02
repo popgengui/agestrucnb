@@ -198,7 +198,8 @@ def get_input_object( s_config_file,
 						i_Nb, 
 						f_Nb_tolerance,
 						i_replicates,
-						i_startsave ):
+						i_startsave,
+						i_burnin ):
 
 	o_paramInfo=pgparams.PGParamSet( s_param_names_file )
 
@@ -216,20 +217,20 @@ def get_input_object( s_config_file,
 
 	#Reset any values the user passed in the command.
 
-	if [ lv_value_list, i_Nb, f_Nb_tolerance, i_replicates]  != [ None, None, None, None ]:
-		'''
-		2017_06_01.  We ignore lv_value_list since it is not currently
-		added to the argument list.
-		'''
-		o_value_holder = SimInputParamValueHolder( \
-											Nb_from_effective_size_section=i_Nb,
-											NbVar=f_Nb_tolerance,
-											reps=i_replicates,
-											startSave=i_startsave )
+	'''
+	2017_06_01.  We ignore lv_value_list since it is not currently
+	added to the argument list.
+	'''
+	o_value_holder = SimInputParamValueHolder( \
+										Nb_from_effective_size_section=i_Nb,
+										NbVar=f_Nb_tolerance,
+										reps=i_replicates,
+										startSave=i_startsave,
+										startLambda=i_burnin )
 
-		o_input_manager = SimInputParamResetManager( o_simInput, o_value_holder )
+	o_input_manager = SimInputParamResetManager( o_simInput, o_value_holder )
 
-		o_input_manager.resetInputParamValues()
+	o_input_manager.resetInputParamValues()
 
 	#end if value list is not None
 
@@ -245,6 +246,7 @@ def drive_sims( s_config_file,
 					i_Nb,
 					f_Nb_tolerance,
 					i_startsave,
+					i_burnin,
 					i_processes ):
 
 	check_for_existing_output_files( s_output_base )
@@ -276,10 +278,11 @@ def drive_sims( s_config_file,
 						s_life_table_file, 
 						s_param_names_file, 
 						lv_value_list,
-						i_Nb,
-						f_Nb_tolerance,
-						i_replicates,
-						i_startsave )
+						i_Nb=i_Nb,
+						f_Nb_tolerance=f_Nb_tolerance,
+						i_replicates=i_replicates,
+						i_startsave=i_startsave,
+						i_burnin=i_burnin )
 
 	print( "Writing a temp configuration file for the simulation..." )
 
@@ -321,8 +324,8 @@ if __name__ == "__main__":
 
 	VALUE_LIST_IS_IMPLEMENTED=False
 
-	OPT_SHORT=[  "-n" , "-t", "-r", "-s", "-p" ]
-	OPT_LONG=[ "--nb", "--nbtolerance", "--replicates", "--startsave", "--processes"  ]
+	OPT_SHORT=[ "-b", "-n" , "-t", "-r", "-s", "-p" ]
+	OPT_LONG=[ "--burnin", "--nb", "--nbtolerance", "--replicates", "--startsave", "--processes"  ]
 
 
 	s_chelp="configuration file.  Typically one of the files in the \"resources\\simulation\" " \
@@ -352,6 +355,10 @@ if __name__ == "__main__":
 								+ "This will overwrite the \"startSave\" value in the configuration file."
 
 	s_thelp="Nb tolerance.  Float. This will overwrite the nb tolerance value (\"NbVar\") in the configuration file."
+	
+	s_bhelp="Burn-in cycles.  Number of the repro cycle at which to start applying Nb tolerance test.  " \
+								+ "This will overwrite the burn-in setting " \
+								+ "(i.e. \"startLambda\") in the configuration file."
 
 	'''
 	2017_06_01. We are not yet showing this option, for now just offering "replicates" and "Nb" as optional settings.
@@ -371,10 +378,11 @@ if __name__ == "__main__":
 	f_Nb_tolerance=None
 	i_replicates=None
 	i_startsave=None
+	i_burnin=None
 
 	REQUIRED_HELP=[ s_chelp, s_lhelp, s_ohelp ]
 
-	OPT_HELP=[ s_nhelp, s_thelp, s_rhelp, s_shelp, s_phelp ]
+	OPT_HELP=[ s_bhelp, s_nhelp, s_thelp, s_rhelp, s_shelp, s_phelp ]
 
 	o_parser=ap.ArgumentParser()
 
@@ -414,6 +422,10 @@ if __name__ == "__main__":
 		i_replicates=int( o_args.replicates )
 	#end if replicates arg
 
+	if o_args.burnin is not None:
+		i_burnin = int( o_args.burnin )
+	#end if burnin arg supplied		
+
 	
 	if o_args.nb is not None:
 		i_Nb=int( o_args.nb )
@@ -432,11 +444,12 @@ if __name__ == "__main__":
 				s_life_table_file, 
 				s_output_base, 
 				lv_value_list,
-				i_replicates,
-				i_Nb,
-				f_Nb_tolerance,
-				i_startsave,
-				i_processes )
+				i_replicates=i_replicates,
+				i_Nb=i_Nb,
+				f_Nb_tolerance=f_Nb_tolerance,
+				i_startsave=i_startsave,
+				i_burnin=i_burnin,
+				i_processes=i_processes )
 
 #end if main
 
