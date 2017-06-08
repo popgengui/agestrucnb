@@ -1186,17 +1186,6 @@ class PGOpSimuPop( modop.APGOperation ):
 				print("\n")
 			#end if verbose
 
-			#determine survival rate of this cohort
-			survivalRate =old_div((self.input.survivalMale[int(cohortKey) - 1]+self.input.survivalFemale[int(cohortKey) - 1]),2)
-			survivorCount = numpy.round(cohortTotal * survivalRate)
-			cullCount = cohortTotal  - survivorCount
-			
-			if VERBOSE:
-				print(survivalRate)
-				print(survivorCount)
-				print(cullCount)
-				print("\n\n")
-			#end if verbose
 					##!! Cohort 0 does not get culled!!
 			if cohortKey == 0.0:
 				continue
@@ -1206,10 +1195,22 @@ class PGOpSimuPop( modop.APGOperation ):
 			'''
 			2017_02_26. Adding int() because round returns a float,
 			which results in a type error in call to random.sample below.
-			'''
-			maleCull = int(numpy.round(maleCount *(1- self.input.survivalMale[int(cohortKey) - 1])))
-			femaleCull = int(numpy.round(femaleCount *(1- self.input.survivalFemale[int(cohortKey) - 1])))
 
+			'''
+			maleCull = int(numpy.floor(maleCount *(1- self.input.survivalMale[int(cohortKey) - 1])))
+			femaleCull = int(numpy.floor(femaleCount *(1- self.input.survivalFemale[int(cohortKey) - 1])))
+			maleChance = maleCount *(1- self.input.survivalMale[int(cohortKey) - 1]) - maleCull
+			femaleChance = femaleCount *(1- self.input.survivalFemale[int(cohortKey) - 1]) - femaleCull
+			maleRand = random.random()
+			femaleRand = random.random()
+			if maleChance>maleRand:
+				maleCull+=1
+				print ("extra Male")
+			if femaleChance>femaleRand:
+				femaleCull+=1
+				print ("extraFemale")
+
+			PRINT_CULL_TOTALS = 1
 			if PRINT_CULL_TOTALS:
 				print ("cohort: " + str(cohortKey))
 				print ("maleCount: " + str(maleCount))
@@ -1373,8 +1374,19 @@ class PGOpSimuPop( modop.APGOperation ):
 			2017_02_26. Adding int() because round returns a float,
 			which results in a type error in call to random.sample below.
 			'''
-			maleHarvest = int( numpy.round(maleCount * harvestRate) )
-			femaleHarvest = int( numpy.round(femaleCount * harvestRate) )
+			maleHarvest = int( numpy.floor(maleCount * harvestRate) )
+			femaleHarvest = int( numpy.floor(femaleCount * harvestRate) )
+
+			maleChance = (maleCount * harvestRate) - maleHarvest
+			femaleChance = (femaleCount * harvestRate) - femaleHarvest
+			maleRand = random.random()
+			femaleRand = random.random()
+			if maleChance>maleRand:
+				maleHarvest+=1
+				print ("extra MaleHarvest")
+			if femaleChance>femaleRand:
+				femaleHarvest+=1
+				print ("extraFemaleHarvest")
 
 			if VERY_VERY_VERBOSE:
 				print ("cohort: " + str( cohortKey ) )
