@@ -1205,12 +1205,12 @@ class PGOpSimuPop( modop.APGOperation ):
 			femaleRand = random.random()
 			if maleChance>maleRand:
 				maleCull+=1
-				print ("extra Male")
+				#print ("extra Male")
 			if femaleChance>femaleRand:
 				femaleCull+=1
-				print ("extraFemale")
+				#print ("extraFemale")
 
-			PRINT_CULL_TOTALS = 1
+
 			if PRINT_CULL_TOTALS:
 				print ("cohort: " + str(cohortKey))
 				print ("maleCount: " + str(maleCount))
@@ -1383,10 +1383,10 @@ class PGOpSimuPop( modop.APGOperation ):
 			femaleRand = random.random()
 			if maleChance>maleRand:
 				maleHarvest+=1
-				print ("extra MaleHarvest")
+				#print ("extra MaleHarvest")
 			if femaleChance>femaleRand:
 				femaleHarvest+=1
-				print ("extraFemaleHarvest")
+				#print ("extraFemaleHarvest")
 
 			if VERY_VERY_VERBOSE:
 				print ("cohort: " + str( cohortKey ) )
