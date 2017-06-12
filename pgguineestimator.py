@@ -240,10 +240,15 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				#end if params look valid
 			#end if sim in progress else not
 		except Exception as oex:
+
+			o_traceback=sys.exc_info()[ 2 ]
+			s_trace=pgut.get_traceback_info_about_offending_code( o_traceback )
 			s_msg="In PGGuiNeEstimator instance, " \
 						+ " def __on_click_run_or_cancel_neestimation_button, " \
 						+ "an exception was caught with message: " \
-						+ str( oex )
+						+ str( oex ) + ".\n" \
+						+ "Error origin: " + s_trace
+
 			PGGUIErrorMessage( self,  s_msg )
 			raise (oex)
 		#end try ... except
@@ -503,9 +508,10 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		2017_05_29.  This def is created to
 		validate the pop and loci number range parameters.
 		This will be called by def __params_look_valid.
-		If invalide ranges are found, then it returns
+		If invalid ranges are found, then it returns
 		a string of messages specifying the error.
 		Otherwise it returns an empty list.
+
 		'''
 
 		ls_invalidity_messages=[]
@@ -696,6 +702,18 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		o_sample_args=NeEstimatorSamplingSchemeParameterManager( o_pgguineestimator=self, 
 																	s_attr_prefix=ATTRIBUTE_DEMANLGER )
+
+		s_validation_error_message=o_sample_args.validateArgs()
+
+		if s_validation_error_message is not None:
+			s_msg="\n\nIn PGGuiNeEstimator instance, def runEstimator, " \
+					"There is an invalid value in the pop sampling " \
+					"parameters.  Please check that the following " \
+					"criteria are met:\n\n" + s_validation_error_message \
+					+ ".\n\n"
+		
+			raise Exception( s_msg )
+		#end if invalid args
 		
 		#we return the sample-scheme-specific args as a sequence of strings:
 		qs_sample_scheme_args=o_sample_args.getSampleSchemeArgsForDriver()
@@ -716,6 +734,19 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		o_loci_sampling_args= \
 				NeEstimatorLociSamplingSchemeParameterManager( o_pgguineestimator= self,
 																s_attr_prefix=ATTRIBUTE_DEMANLGER )
+
+		
+		s_validation_error_message=o_loci_sampling_args.validateArgs()
+
+		if s_validation_error_message is not None:
+			s_msg="\n\nIn PGGuiNeEstimator instance, def runEstimator, " \
+					"There is an invalid value in the loci sampling " \
+					"parameters.  Please check that the following " \
+					"criteria are met:\n\n" + s_validation_error_message \
+					+ ".\n\n"
+		
+			raise Exception( s_msg )
+		#end if invalid args
 
 		qs_loci_sample_scheme_args=o_loci_sampling_args.getSampleSchemeArgsForDriver()
 

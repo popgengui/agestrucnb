@@ -379,6 +379,48 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 		
 	CRIT_EXPRESSIONS_IN_ATTR_ORDER=[ "%age% >= ", "%age% <=" ]
 
+
+	'''
+	2017_06_02.  See def validateArgs, which creates a dict of arg values keyed to
+	param names.
+	'''
+	DICT_VALIDATIONS_BY_SCHEME={ \
+					SCHEME_ALL : lambda dsv : dsv[ "min_pop_number" ] > 0  \
+										and dsv[ "min_pop_number" ] <= dsv[ "max_pop_number" ],
+					SCHEME_NONE : lambda dsv : dsv[ "min_pop_size" ] > 0 \
+										and dsv ["min_pop_size" ] <= dsv [ "max_pop_size" ],
+					SCHEME_PERCENT : lambda dsv : dsv [ "min_pop_size" ] > 0 \
+										and dsv [ "min_pop_size" ] <= dsv [ "max_pop_size" ],					
+					SCHEME_REMOVE : lambda dsv : dsv [ "min_pop_size" ] > 0 \
+										and dsv [ "min_pop_size" ] <= dsv [ "max_pop_size" ], \
+					SCHEME_CRIT :  lambda dsv : dsv [ "min_age" ] >= 0  \
+										and dsv[ "min_age" ] <= dsv[ "max_age" ]
+										and dsv[ "min_pop_size" ] > 0 \
+										and dsv[ "min_pop_size" ] <= dsv [ "max_pop_size" ],					
+					SCHEME_COHORTS : lambda dsv : dsv[ "max_age" ] >= 0  \
+										and dsv[ "min_pop_size" ] >= 0 \
+										and dsv[ "min_pop_size" ] <= dsv [ "max_pop_size" ] ,
+					SCHEME_RELATEDS : lambda dsv : dsv[  "percent_relateds" ] >= 0 \
+										and dsv[ "percent_relateds" ] <= 100 \
+										and dsv[ "min_pop_size" ] >= 0 \
+										and dsv[ "min_pop_size" ] <= dsv[ "max_pop_size" ] }
+
+	POP_NUM_RANGE_MESSAGE="min pop number > 0, " \
+							"min pop number <= max pop number"
+	POP_SIZE_RANGE_MESSAGE="min pop size > 0, " \
+							"min pop size <= max pop size"
+	POP_AGE_RANGE_MESSAGE="min age > 0 and min age <= max age"
+	PERCENT_RELATEDS_RANGE_MESSAGE="percent relateds >= 0 and percent relateds <= 100"
+
+	DICT_VALIDATION_MESSAGES_BY_SCHEME={ \
+					SCHEME_ALL :  POP_NUM_RANGE_MESSAGE,
+					SCHEME_NONE : POP_NUM_RANGE_MESSAGE + ", " + POP_SIZE_RANGE_MESSAGE,				
+					SCHEME_PERCENT : POP_SIZE_RANGE_MESSAGE,
+					SCHEME_REMOVE : POP_SIZE_RANGE_MESSAGE,
+					SCHEME_CRIT : POP_AGE_RANGE_MESSAGE + ", " + POP_SIZE_RANGE_MESSAGE,
+					SCHEME_COHORTS : "max age >= 0, " + POP_SIZE_RANGE_MESSAGE,
+					SCHEME_RELATEDS : PERCENT_RELATEDS_RANGE_MESSAGE + POP_SIZE_RANGE_MESSAGE }
+
 	def __init__( self, o_pgguineestimator, s_attr_prefix ):
 		self.__interface=o_pgguineestimator
 		self.__attr_prefix=s_attr_prefix
@@ -564,6 +606,43 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 		return ls_sample_scheme_args_as_strings
 	#end def __get_sampling_args_for_schemes_requiring_id_fields
 
+	def validateArgs( self ):
+
+		'''
+		2017_06_02.  We add a validation def for the parameters that involve
+		minima and maxima.
+		'''
+
+		MYCLASS=NeEstimatorSamplingSchemeParameterManager
+		
+		s_validation_message=None
+
+		s_scheme=self.__get_scheme_name()
+		
+		dsv_value_by_param={}
+
+		for s_arg in NeEstimatorSamplingSchemeParameterManager\
+							.DICT_ATTR_ORDER_BY_SCHEME[ s_scheme ]:
+
+			s_attr_name=self.__attr_prefix \
+					+ NeEstimatorSamplingSchemeParameterManager\
+											.DICT_ATTR_BY_SCHEME[ s_scheme ][ s_arg ]
+
+			v_value=getattr( self.__interface, 
+									s_attr_name )
+
+			dsv_value_by_param[ s_arg ] = v_value
+		#end for each arg get its value
+
+		b_are_valid_args=MYCLASS.DICT_VALIDATIONS_BY_SCHEME[ s_scheme ]( dsv_value_by_param )
+
+		if not b_are_valid_args:
+			s_validation_message=MYCLASS.DICT_VALIDATION_MESSAGES_BY_SCHEME[ s_scheme ]
+		#end if not valid args
+		
+		return s_validation_message
+	#end validateArgs
+
 	def getSampleSchemeArgsForDriver( self ):
 
 		'''
@@ -592,6 +671,7 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 					self.__get_sampling_args_for_schemes_not_requiring_id_fields()
 		#end if not indiv criteria scheme, call def for such,
 		#else call def to get indiv criteria scheme args
+
 
 		'''
 		All sampling schemes have a range of pop numbers,
@@ -663,6 +743,30 @@ class NeEstimatorLociSamplingSchemeParameterManager( object ):
 									SCHEME_NONE : [ "none_dummy_param", "min_loci_count", "max_loci_count" ],
 									SCHEME_PERCENT : [ "percentages", "min_loci_count", "max_loci_count" ],
 									SCHEME_TOTAL : [ "totals", "min_loci_count", "max_loci_count" ] }
+	'''
+	2017_06_02.  See def validateArgs, which creates a dict of arg values keyed to
+	param names.
+	'''
+	DICT_VALIDATIONS_BY_SCHEME={ \
+					SCHEME_ALL : lambda dsv : dsv[ "min_loci_number" ] > 0  \
+										and dsv[ "min_loci_number" ] <= dsv[ "max_loci_number" ],
+					SCHEME_NONE : lambda dsv : dsv[ "min_loci_count" ] > 0 \
+										and dsv ["min_loci_count" ] <= dsv [ "max_loci_count" ],
+					SCHEME_PERCENT : lambda dsv : dsv [ "min_loci_count" ] > 0 \
+										and dsv [ "min_loci_count" ] <= dsv [ "max_loci_count" ],
+					SCHEME_TOTAL : lambda dsv : dsv [ "min_loci_count" ] > 0 \
+										and dsv [ "min_loci_count" ] <= dsv [ "max_loci_count" ] }
+					
+
+	LOCI_NUM_RANGE_MESSAGE="min loci number > 0, " \
+							"min loci number <= max loci number"
+	LOCI_COUNT_RANGE_MESSAGE="min loci count > 0, " \
+							"min loci count <= max loci count"
+
+	DICT_VALIDATION_MESSAGES_BY_SCHEME={ \
+					SCHEME_ALL :  LOCI_NUM_RANGE_MESSAGE,
+					SCHEME_NONE : LOCI_NUM_RANGE_MESSAGE + ", " + LOCI_COUNT_RANGE_MESSAGE,				
+					SCHEME_PERCENT : LOCI_COUNT_RANGE_MESSAGE }
 
 	def __init__( self, o_pgguineestimator, s_attr_prefix ):
 		self.__interface=o_pgguineestimator
@@ -704,6 +808,41 @@ class NeEstimatorLociSamplingSchemeParameterManager( object ):
 		return s_sampling_scheme_name
 
 	# end __get_scheme_name
+
+	def validateArgs( self ):
+
+		'''
+		2017_06_02.  We add a validation def for the parameters that involve
+		minima and maxima.
+		'''
+
+		MYCLASS=NeEstimatorLociSamplingSchemeParameterManager
+		
+		s_validation_message=None
+
+		s_scheme=self.__get_scheme_name()
+		
+		dsv_value_by_param={}
+
+		for s_arg in MYCLASS.DICT_ATTR_ORDER_BY_SCHEME[ s_scheme ]:
+
+			s_attr_name=self.__attr_prefix \
+					+ MYCLASS.DICT_ATTR_BY_SCHEME[ s_scheme ][ s_arg ]
+
+			v_value=getattr( self.__interface, 
+									s_attr_name )
+
+			dsv_value_by_param[ s_arg ] = v_value
+		#end for each arg get its value
+
+		b_are_valid_args=MYCLASS.DICT_VALIDATIONS_BY_SCHEME[ s_scheme ]( dsv_value_by_param )
+
+		if not b_are_valid_args:
+			s_validation_message=MYCLASS.DICT_VALIDATION_MESSAGES_BY_SCHEME[ s_scheme ]
+		#end if not valid args
+		
+		return s_validation_message
+	#end validateArgs
 
 	def __get_sampling_args_for_scheme( self ):
 

@@ -177,9 +177,8 @@ B24 Sluggishness in the interface when more than a few hundred genepop files
 
 b25 In the simulation interface, when the user changes (reduces) the number of repro cycles, then the "Nb and census adjustment" control, in in its initial value, will havce a max-cycle value invalid (i.e. > total repro cycles) and the sim will fail with an error message to console that notes the discprepancy
 
-b26  In the simulation interface, while sim is in progress the list button controls for the "Nb and census adjustment" say enabled.  They should be disabled
+b26  In the simulation interface, while sim is in progress the list button controls for the "Nb and census adjustment" stay enabled.  They should be disabled.
 
 2017_04_20
 
 b27 Not a bug per-se but could be an unexpected behavior to users.  In Windows, execting negui.py from powershell, if the user scrolls (or otherwise manipulates the console prompt?) the execution is suspended, that is, the interface is still active and responsive, but the processes, such as the simulation procedure, hang until the user hits the enter key when the powershell windows is active.  THis web page I belive gives a solution, and suggests it is a peculiarity of powershell, and may not happen in the regular DOS command window: https://serverfault.com/questions/204150/sometimes-powershell-stops-sending-output-until-i-press-enter-why
-

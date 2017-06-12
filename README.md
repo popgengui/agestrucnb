@@ -18,8 +18,8 @@ Overview
 
 Current compatible python versions
 ----------------------------------
-	python 3.6 (recommended).
-	python 2.7 (requires building an older version of simuPOP)
+	python 3.5 and 3.6 
+	python 2.7 (python 3 is recommended, as 2.7 requires building an older version of simuPOP)
 
 OS-comaptibility
 -----------------
@@ -30,7 +30,7 @@ OS-comaptibility
 	3. Windows 10 and 8.1 (64-bit).  Earlier versions of the program
 	   were also run successfully on 32-bit Windows 7 and Vista, and
 	   we consider it likely that it will still run well on those older
-	   Windows platforms.  Note that on Windows  One persistent problem 
+	   Windows platforms.  Note that on Windows, a persistent problem 
 	   is the inability of the program to remove files for
 	   some cleanup operations when processes do not finish (through error or
 	   user-cancellation). See the "BUGS" file for this and other issues.

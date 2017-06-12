@@ -93,7 +93,8 @@ class PGOpSimuPop( modop.APGOperation ):
 									b_remove_db_gen_sim_files=False,
 									b_write_input_as_config_file=True,
 									b_do_gui_messaging=False,
-									b_write_nb_and_ages_files=False ):  
+									b_write_nb_and_ages_files=False,
+									b_is_replicate_1=False ):  
 		'''
 			o_input, a PGInputSimuPop object
 			o_output, a PGOutputSimuPop object
@@ -129,6 +130,14 @@ class PGOpSimuPop( modop.APGOperation ):
 				do_pgopsimupop_replicate_from_files , to produce
 				the age counts and pwob nb values files only for
 				the first replicate.
+
+
+			b_is_replicate_1.  This param was added	2017_06_11 so that
+				we can ignore sending a (blocking) gui info messaget
+				about the lambda warning in non-first
+				replicates (see warning in __createSinglePop).  This avoids
+				the gui producing a series of blocking warning windows, one
+				for each replicate, restating the warning.
 		'''
 
 		self.__guiinfo=None
@@ -157,6 +166,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__remove_db_gen_sim_files=b_remove_db_gen_sim_files
 		self.__write_input_as_config_file=b_write_input_as_config_file
 		self.__write_nb_and_age_count_files=b_write_nb_and_ages_files
+		self.__is_first_replicate=b_is_replicate_1
 
 		#if this object is created in one of multiple
 		#python so-called "Processes" objects from class
@@ -509,7 +519,9 @@ class PGOpSimuPop( modop.APGOperation ):
 			sys.stderr.write( s_msg + "\n" )
 			
 			if self.__guiinfo is not None:
-				self.__guiinfo( None, s_msg )
+				if self.__is_first_replicate:
+					self.__guiinfo( None, s_msg )
+				#end if this is the first replicate
 			#end if using gui messaging
 
 			#####2017_05_31 rem out, currently not used.
@@ -972,6 +984,12 @@ class PGOpSimuPop( modop.APGOperation ):
 				if self.__guierr is not None:					
 					self.__guierr( None, s_msg )
 				#end if using gui messaging
+				
+				'''
+				2017_06_11.  Request from Brian H. to delete the output files
+				after an Nb-tolerance test fail.
+				'''
+				self.__cleanup_on_failure()
 
 				raise Exception( s_msg )
 
@@ -981,7 +999,7 @@ class PGOpSimuPop( modop.APGOperation ):
 				#print( "out", pop.dvars().gen )
 				#sys.exit(-1)
 
-			#end if attempts > 100
+			#end if attempts > MAX_TRIES_AT_NB
 
 		#end while not nbOK
 
@@ -1784,7 +1802,76 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		return
 	#end __createAge
-	
+
+	def __cleanup_on_failure( self, s_reason="Nb tolerance test failure."  ):
+		'''
+		2017_06_11.  This def was added on request from 
+		Brian H. to delete the output files when
+		the Nb tolerance test fails.
+		'''
+
+		ERR_NOTICE_FILE_EXT="sim.interruption.msg"
+
+		s_fail_notice="\nError:  output interrupted due to " + s_reason + "\n"
+
+		if self.output:
+
+			for s_outfile in [ "out", "err", "megaDB" ]:	
+				if hasattr( self.output, s_outfile ):
+					o_file=getattr( self.output, s_outfile )
+					if hasattr( o_file, "close" ):
+						o_file.close()
+					#end if closable, close
+				#end if output has the outfile
+			#end close output files, preperatory to removing
+		
+			for s_outfile_attr in [ "simname", "genname", "dbname" ]:
+				if hasattr( self.output, s_outfile_attr ):
+					s_outfile_name=getattr( self.output, s_outfile_attr )
+					#This utility def only removes a file (files) if it exists:
+					pgut.remove_files( [ s_outfile_name ] )
+				#end if file name available, close it if exists
+			#end for each of the sim output files (except conf and age/pwop records)
+
+			if hasattr( self.output, "basename" ):
+				s_err_file_name=self.output.basename + "." + ERR_NOTICE_FILE_EXT
+				try:
+					o_err_file=open( s_err_file_name, 'w' )
+					o_err_file.write( s_fail_notice )
+					o_err_file.close()
+				except IOError as oei:
+
+					'''
+					We don't want to rase an exception, since this 
+					def is meant to be called before throwing an exception,
+					so we know there is a more pertinent error to be thrown
+					by the caller.
+					'''
+					
+					s_msg="Warning, in PGOpSimuPop instance, def __cleanup_on_failure, " \
+								+ "failed to write file, "  + s_err_file_name \
+								+ ", with message: " + s_fail_notice + "." 
+
+					sys.stderr.write( s_msg + "\n" )
+				#end check for IO error
+		#end if we have an output object
+			
+		if self.__file_for_nb_records is not None:
+			if hasattr( self.__file_for_nb_records, "write" ):
+				self.__file_for_nb_records.write( s_fail_notice  )
+				self.__file_for_nb_records.close()
+			#end if we have a writable nb recores item
+		#end if we have a nb records file
+				
+		if self.__file_for_age_counts is not None:
+			if hasattr( self.__file_for_age_counts, "write" ):
+				self.__file_for_age_counts.write( s_fail_notice )
+				self.__file_for_age_counts.close()
+			#end if we have a writable age counts item
+		#end if we have an age counts file
+
+		return
+	#end __cleanup_on_failure
 #end class PGOpSimuPop
 
 if __name__ == "__main__":
@@ -1794,7 +1881,7 @@ if __name__ == "__main__":
 		import pgoutputsimupop as pgout
 		import pgsimupopresources as pgrec
 		import pgparamset as pgps
-		import pgutilities	 as pgut
+		import pgutilities as pgut
 	except ImportError as ie:
 		s_my_mod_path=os.path.abspath( __file__ )
 		sys.path.append( s_my_mod_path )

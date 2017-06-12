@@ -512,6 +512,12 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	Note that the import works file in this context, when
 	the pgopsimupop.py module is imported in this separate
 	python instance.
+
+	2017_06_11. Note we have added a new parameter, b_is_replicate_1,
+	to tell the pgopsimupop instance that it is the first replicate.
+	This limits the number of warning gui's it will produce to one,
+	about presence of lamba value in conf being unused (see __init__
+	in pgopsimupop.py).
 	'''
 
 	o_new_pgopsimupop_instance=pgsim.PGOpSimuPop( o_input,
@@ -519,7 +525,8 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 			b_remove_db_gen_sim_files=REMOVE_NON_GENEPOP_SIM_OUTPUT_FILES,
 			b_write_input_as_config_file=b_write_conf_file,
 			b_do_gui_messaging=b_use_gui_messaging,
-			b_write_nb_and_ages_files=b_write_nb_and_age_tables )
+			b_write_nb_and_ages_files=b_write_nb_and_age_tables,
+			b_is_replicate_1 = ( i_replicate_number == 1 ) )
 
 	o_new_pgopsimupop_instance.prepareOp( s_tag_out  )
 
