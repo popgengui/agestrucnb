@@ -99,6 +99,10 @@ import genepopindividualid as gpi
 #See the def get_nbne_ratio_from_genepop_file_header:
 import re
 
+#2017_07_09. Numpy is currently only used in call to def, 
+#get_mean_het_based_on_allele_freqs.
+import numpy as np
+
 #read genepop file, and 
 #sample its pop, and store
 #results:
@@ -113,6 +117,15 @@ import pginputneestimator as pgin
 import pgoutputneestimator as pgout
 from pgutilityclasses import NbNeReader
 from pgutilityclasses import LDNENbBiasAdjustor
+
+
+'''
+2017_07_09. For getting the heterozygosity values
+based on allele frequencies. See def,
+get_mean_het_based_on_allele_freqs 
+'''
+import genepopfilelociinfo as gpl
+
 
 import pgutilities as pgut
 
@@ -334,6 +347,36 @@ execute_ne_for_each_sample)
 '''
 SECONDS_TO_SLEEP=1.00
 
+'''
+This constant is added 2017_06_14, 
+after noting that in a large file
+(7G, 1500 pop sections, 500 loci)
+the process pool timed out before
+getting any estimates done (see
+def execute_ne_for_each_sample).
+Now, we divy up the total estimate
+call sets in batches, so that there
+is no longer a single huge process
+pool made.
+'''
+POOL_BATCH_SIZE=100
+
+'''
+These constants added 2017_06_23 to better
+estimate a reasonable number of GenepopFileManager
+objects to put in RAM at once. The proportion
+of bytes of whole file used by object is my
+guess after some testing, and is likely very
+approximate.
+'''
+PROPORTION_FILE_BYTES_USED_BY_OBJECT=0.12
+'''
+These constants were added 2017_07_06. Like
+the one above, this proportion is very approximate.
+'''
+PROPORTION_GP_OBJECTS_PER_ADDITIONAL_PROCESS=0.3
+PERC_AVAIL_RAM_TO_ACCESS=0.7
+
 #The user enters the string as command
 #line arg, codes tests with the constants
 SAMPLE_BY_NONE="none"
@@ -407,13 +450,21 @@ MAIN_TABLE_RUN_INFO_COLS=[ "original_file", "pop", "census",   "indiv_count",
 							"sample_value", "replicate_number", "loci_sample_value", 
 							"loci_replicate_number","min_allele_freq" ] 
 '''
-2017_02_11.  A field appened to the NeEstimator columns (as named 
+2017_02_11.  A field appended to the NeEstimator columns (as named 
 by the constants in class PGOutputNeEstimator), since we do the
 ldne bias adjustement in this module:
 '''
 COL_NAME_NBNE_RATIO_FOR_BIAS_ADJUST="nbne"
 COL_NAME_BIAS_ADJUSTED_LDNE="ne_est_adj"
 COL_NAME_NEESTIMATOR_NE_ESTIMATE="est_ne"
+
+'''
+2017_06_30.  A field appended to the NeEstimator columns,
+to give a heterozygosity value for the pop/loci evaluated
+in the given entry.
+'''
+COL_NAME_HET_VALUE="mean_het"
+
 
 '''
 2017_04_20.  For comparing floating point values to zero.
@@ -432,6 +483,39 @@ def set_indices_ne_estimator_output_fields_to_skip():
 	return IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP
 #end set_indices_ne_estimator_output_fields_to_skip
 
+class Counter( object ):
+	'''
+	2017_07_05.  Need to pass an object that can increment an int
+	counter, so that caller gets updated.  This was
+	motivated by the def file_can_be_added_to_current_set.
+	'''
+	def __init__( self, i_init_val=0 ):
+		self.__counter=i_init_val
+		return
+	#end __init__
+
+	def addToCurrentValue( self, i_amount_to_add ):
+		self.__counter+=i_amount_to_add
+		return
+	#end addToCurrentValue
+
+	def subtractFromCurrentValue( self, i_amount_to_subtract ):
+		self.__counter-=i_amount_to_subtract
+		return
+	#end subtractFromCurrentValue
+
+	def resetCounterToValue( self, i_reset_value ):
+		self.__counter=i_reset_value
+		return
+	#end resetCounterToValue
+
+	@property 
+	def current_count( self ):
+		return self.__counter
+	#end current_count
+#end class Counter
+
+
 class ArgSet( object ):
 	'''
 	Wraps list of the arguments and their param names
@@ -445,8 +529,14 @@ class ArgSet( object ):
 	write_parms_to_file).
 	'''
 
-	def __init__( self, ls_args ):
-
+	def __init__( self, ls_args, ls_genepop_file_names=None ):
+		'''
+		2017_07_11.  We added the ls_genepop_file_names list
+		and member __genepop_file_list, so that we can report
+		the actral list of genepop files instead of a glob,
+		which may have been passed at the command line( See 
+		def drive_estimator).
+		'''
 		self.param_names_in_order= \
 				[ "genepop_files", "pop_sampling_scheme",
 						"pop_sampling_values",
@@ -461,6 +551,8 @@ class ArgSet( object ):
 		
 		#we make a copy of the arg values:
 		self.arg_values=[ v_arg for v_arg in ls_args ]
+
+		self.__genepop_file_list=ls_genepop_file_names
 		return
 	#end init
 
@@ -491,7 +583,21 @@ class ArgSet( object ):
 		lv_reversed_copy_of_args.reverse()
 
 		for s_param in self.param_names_in_order:
-			s_value=str( lv_reversed_copy_of_args.pop() )
+			s_value_from_main_arg_list=str( lv_reversed_copy_of_args.pop() )
+			'''
+			2017_07_11. When called from the command line at a console,
+			the caller often will use a glob expression, and we want
+			to use the actural list of files, so we assume the client
+			of this class (def drive_estimator) will supply the list
+			as derived from the glob via def parse_args, when this
+			object is intiated.
+			'''
+			if s_param == "genepop_files":
+				s_value=str( self.__genepop_file_list )	
+			else:
+				s_value=s_value_from_main_arg_list
+			#end if the arg is genepop files, we use the actual list,
+			#instead of the glob the caller passed in.
 			ls_return_val_lines.append( s_param + "\t" + s_value )
 		#end for each param name
 
@@ -500,6 +606,12 @@ class ArgSet( object ):
 		return s_return_val
 
 	#end __write_param_table_as_string
+
+	@property
+	def genepop_file_list( self, ls_list ):
+		self.__genepop_file_list = ls_list
+		return
+	#end property genepop_file_list
 
 	@property 
 	def paramtable( self ):
@@ -681,8 +793,8 @@ def file_name_list_is_all_strings( ls_files ):
 	
 def get_genepop_file_list( s_genepop_files_arg ):
 	'''
-	if invoked from the console the arg is a glob expression
-	if invoked from the gui interface in pgguineestimator.py,
+	if invoked from the console the arg is a glob expression, but
+	but if invoked from the gui interface in pgguineestimator.py,
 	the arg is a list, such that eval will genreate a python
 	list of strings.
 
@@ -863,7 +975,7 @@ def parse_args( *args ):
 
 	i_min_total_loci=int( args[ IDX_LOCI_MIN_TOTAL ] )
 	i_max_total_loci=int( args[ IDX_LOCI_MAX_TOTAL ] )
-	i_loci_repliates=int( args[ IDX_LOCI_SAMPLE_REPLICATES ] )
+	i_loci_replicates=int( args[ IDX_LOCI_SAMPLE_REPLICATES ] )
 	s_nbne_ratio=args[ IDX_NBNE_RATIO ]
 	if s_nbne_ratio.lower() == "none":
 		f_nbne_ratio=None
@@ -914,7 +1026,7 @@ def parse_args( *args ):
 								i_max_loci_position,
 								i_min_total_loci,
 								i_max_total_loci,
-								i_loci_repliates,
+								i_loci_replicates,
 								i_total_processes, 
 								o_debug_mode, 
 								o_main_outfile, 
@@ -1043,7 +1155,8 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator,
 	if f_nbne_ratio is not None:
 		f_adj_estimate=do_ldne_bias_adjustment( f_unadjusted_estimate,
 															f_nbne_ratio )
-		s_bias_adjusted_value=str( f_adj_estimate ) 
+
+		s_bias_adjusted_value=str( round( f_adj_estimate, 3 ) ) 
 	else:
 		'''
 		2017_02_15.  Instead of writing "None" as the bias-adjusted estimate, 
@@ -1065,6 +1178,39 @@ def get_nbne_ratio_from_genepop_file_header( o_genepopfile ):
 	return o_nbne_reader.nbne_ratio
 #end def get_nbne_ratio_from_genepop_file_header
 
+def get_mean_het_based_on_allele_freqs( o_genepopfile, 
+												s_pop_subsample_tag=None,
+												s_individual_subsample_tag=None,
+												s_loci_subsample_tag=None ):
+
+	'''
+	2017_06_30.  Adds the mean heterozygosity calculated using allele frequencies of all loci,
+	for the pop (or pops) given by the pop subsample tag, which, as of this date, will always
+	be just a single pop, as this is the unit of estimation used in def do_estimate, and all loci
+	will be called using a subsample of the loci number ranges that the caller provided.
+	'''
+	df_mean_hets_by_pop={}
+
+	o_loci_info=gpl.GenepopFileLociInfo( o_genepopfile, 
+											s_population_subsample_tag=s_pop_subsample_tag,
+											s_individual_subsample_tag=s_individual_subsample_tag,
+											s_loci_subsample_tag=s_loci_subsample_tag )
+
+	ddf_het_per_pop_per_loci=o_loci_info.getHeterozygosity()
+
+	for i_pop in ddf_het_per_pop_per_loci:
+
+		lf_het_values_this_pop=list( ddf_het_per_pop_per_loci[ i_pop ].values() )
+		f_mean_het_value_this_pop=np.mean( lf_het_values_this_pop )
+
+		df_mean_hets_by_pop[ i_pop ]=f_mean_het_value_this_pop
+		
+	#end for this pop
+
+	return df_mean_hets_by_pop
+
+#end get_mean_het_based_on_allele_freqs
+
 def do_ldne_bias_adjustment( f_ldne_estimate, f_nbne_ratio ):
 	'''
 	2017_02_11. Implements, through the LDNENbBiasAdjustor
@@ -1076,7 +1222,13 @@ def do_ldne_bias_adjustment( f_ldne_estimate, f_nbne_ratio ):
 #end def do_ldne_bias_adjustment
 
 def do_estimate(xxx_todo_changeme ):
-
+	'''
+	2017_07_07.  The paramaters min_loci_position
+	and max_loci_position are added to the arglist,
+	so that this def can compute the heterozygosity
+	only using the loci in the range specified by the
+	caller.
+	'''
 	( o_genepopfile, o_ne_estimator, 
 					s_sample_param_val, s_loci_sample_value,
 					f_min_allele_freq, s_subsample_tag, 
@@ -1084,7 +1236,9 @@ def do_estimate(xxx_todo_changeme ):
 					s_census, i_replicate_number, 
 					s_loci_replicate_number, o_debug_mode, 
 						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
-						f_nbne_ratio ) = xxx_todo_changeme
+						f_nbne_ratio,
+						i_min_loci_position,
+						i_max_loci_position) = xxx_todo_changeme
 	try:
 
 		s_genepop_file_subsample=o_ne_estimator.input.genepop_file
@@ -1114,42 +1268,91 @@ def do_estimate(xxx_todo_changeme ):
 									str( f_min_allele_freq ) ]
 		
 		ls_stdout=[]
+		'''
+		2017_06_30.  We now append a mean heterozygosity value based on allele
+		freqs of the loci sampled in this run of the Ne estimator.
+		
+		2017_07_07. We add a loci sample that includes all in the range
+		specified by the caller.  This allows het values, for example,
+		to include only SNPs when the caller specifies range n to m, where
+		loci n-1 is the last microsat and loci n is the first SNP.
+		'''
 
-		for lv_output in llv_output:
+		o_genepopfile.subsampleLociByRangeAndMax( i_min_loci_position, i_max_loci_position, "locirange" )
+		
+		df_het_values_by_pop_number=\
+				get_mean_het_based_on_allele_freqs( \
+											o_genepopfile,
+											s_pop_subsample_tag=s_population_number,
+											s_loci_subsample_tag="locirange" )
 
-			ls_fields_to_report=[]	
+		#Becuase this def should always be operating on a single pop,
+		#We do this check for consistency:
+		if len( df_het_values_by_pop_number ) != 1:
+			s_gp_file=o_genepopfile.original_file_name
+			s_msg="In pgdriveneestimator.py, def do_estimate, " \
+						+ "the number of heterozygosity values for " \
+						+ "the estimate on population number " \
+						+ s_population_number + ", " \
+						+ "from file, " + s_gp_file + ", " \
+						+ "should be a single number, " \
+						+ "but instead is, " + str( df_het_values_by_pop_number ) \
+						+ "."
+			raise Exception( s_msg )
+		#end if we did not get a single het value
 
-			ls_output_vals_as_strings=[ str( v_val ) for v_val in lv_output ]
+		i_pop_number_key_for_het = int( s_population_number )
+		f_this_het=round( df_het_values_by_pop_number[ i_pop_number_key_for_het ], 4 )
+		s_this_het=str( f_this_het )
+		if len( llv_output ) == 0:
+			#In this case we stub in "NA" vals for the missing estimator and bias adjust values
+			i_total_estimator_fields=get_count_estimator_fields()
 
-			for idx in range( len( ls_output_vals_as_strings ) ):
-				if idx not in IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP:
-					ls_fields_to_report.append( ls_output_vals_as_strings[ idx ] )
-				#end if idx is not for a field we're skipping
-			#end for each field's index
+			#Besides the estimator fields, We add two fields for the Nb/Ne and bias akjustment
+			i_number_nb_bias_fields=2
 
-			'''
-			2017_04_17.  The bias adjustment code in this def is now simplified,
-			so that it is passed an f_nbne_ratio, that is either None, or a float,
-			so that this def can simply pass it and the objects needed to get the
-			un-adjusted estimate.  Formerly, we passed the genepop file object to a
-			allow the called def to search  the header for a ratio, if a flag
-			(also used to be passed to this def) was true.  Now this ratio finding
-			is done on a per-original-genepop file basis in def run_estimator.
-			'''
+			ls_output_vals_as_none=[ "NA" for idx \
+						in range( i_total_estimator_fields  + i_number_nb_bias_fields ) ] 
 
-			s_ratio_used_for_adjustment, s_bias_adjusted_value=\
-						get_string_values_ldne_ratio_and_bias_adjustment( \
-																o_ne_estimator,
-																lv_output,
-																f_nbne_ratio )
+			ls_stdout.append( OUTPUT_DELIMITER.join( ls_runinfo + ls_output_vals_as_none + [s_this_het] ) )
+		else:
 
-			
-			ls_fields_to_report.append( s_ratio_used_for_adjustment )
-			ls_fields_to_report.append( s_bias_adjusted_value )
+			for lv_output in llv_output:
 
-			ls_stdout.append( OUTPUT_DELIMITER.join(  ls_runinfo + ls_fields_to_report )  )
+				ls_fields_to_report=[]	
 
-		#end for each line of parsed NeEstimator Output
+				ls_output_vals_as_strings=[ str( v_val ) for v_val in lv_output ]
+
+				for idx in range( len( ls_output_vals_as_strings ) ):
+					if idx not in IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP:
+						ls_fields_to_report.append( ls_output_vals_as_strings[ idx ] )
+					#end if idx is not for a field we're skipping
+				#end for each field's index
+
+				'''
+				2017_04_17.  The bias adjustment code in this def is now simplified,
+				so that it is passed an f_nbne_ratio, that is either None, or a float,
+				so that this def can simply pass it and the objects needed to get the
+				un-adjusted estimate.  Formerly, we passed the genepop file object to a
+				allow the called def to search  the header for a ratio, if a flag
+				(also used to be passed to this def) was true.  Now this ratio finding
+				is done on a per-original-genepop file basis in def run_estimator.
+				'''
+
+				s_ratio_used_for_adjustment, s_bias_adjusted_value=\
+							get_string_values_ldne_ratio_and_bias_adjustment( \
+																	o_ne_estimator,
+																	lv_output,
+																	f_nbne_ratio )
+
+				
+				ls_fields_to_report.append( s_ratio_used_for_adjustment )
+				ls_fields_to_report.append( s_bias_adjusted_value )
+				ls_fields_to_report.append( s_this_het )
+				ls_stdout.append( OUTPUT_DELIMITER.join(  ls_runinfo + ls_fields_to_report )  )
+
+			#end for each line of parsed NeEstimator Output
+		#end if we have no estimation output, else we do
 		
 		#Make one long string, endline-delimited, for the stdout.
 		#Note:  if the inpout genepop file had only one
@@ -2000,11 +2203,25 @@ def make_subsample_genepop_file_name( s_original_genepop_file,
 
 #end make_subsample_genepop_file_name
 
+'''
+2017_07_07.  I'm adding the min and max loci numbers
+to the arg list for def add_to_set_of_calls_to_do_estimate,
+so that these will be passed to def do_estimate, which can 
+compute the heterozygosity across the range of loci the caller
+specified.  This was motivated by genepop file input for which
+loci 1-100 are microsats, and 101-500 are SNPs, and we had
+het values targeted for each type, and nb values computed
+for each type by usig loci ranges.  Thus, we wanted to see
+the het values as calculated across only the microsats or
+SNPs, whichever was specified using loci range.
+'''
 def add_to_set_of_calls_to_do_estimate( o_genepopfile, 
 											s_sample_scheme,
 											f_min_allele_freq, 
 											i_min_pop_size,
 											i_max_pop_size,
+											i_min_loci_position,
+											i_max_loci_position,
 											o_debug_mode,
 											llv_args_each_process,
 											IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
@@ -2203,7 +2420,9 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 									s_loci_replicate_number,
 									o_debug_mode,
 									IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
-									f_nbne_ratio ]
+									f_nbne_ratio,
+									i_min_loci_position,
+									i_max_loci_position ]
 
 				llv_args_each_process.append( lv_these_args )
 			#end for each population
@@ -2310,8 +2529,12 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 	aid in the handling of multiprocessing.Pool
 	hangs.  See the elapsted-time code below,
 	used when MULTI_PROCESSED are running.
+
+	2017_06_14.  Instead of a flag, we'll
+	pass back a string message on interruption,
+	default to None if no interruption.
 	'''
-	b_run_was_interrupted=False
+	s_interrupt_msg=None
 
 	lds_results=None
 
@@ -2326,12 +2549,12 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 		no change (presumably, a reduction),
 		in remaining chunks of work over a TIMEOUT period, 
 		we save the results that have come in so far,
-		set a flag that indicates an interrupted run,
+		(write a messgage that indicates an interrupted run,	
 		and return these to drive_estimator, which in turn
 		handles writinng an interrupted set of outfiles,
 		and raises an error. )
 
-		Heuristically, with high observed variance in the per-chunk runtime,
+		Heuristically, with high observed variation in the per-chunk runtime,
 		We give at least 3 minutes per chunk in the fastest case, and compute
 		a per chunk timout based on the slowest per-call rate that I observed 
 		in a few tests (two Linux computers, one Windows), with total 160000 calls
@@ -2340,11 +2563,18 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 		chunk, but I did observe nearly as lengthly times in subsequenct chunks
 		in Windows.
 		'''
-	
-		#for now giving each chunk at least 3 hours, as
-		#the upper limit on the variability of per-chunk processing time is
-		#hard to find:
-		MIN_ALLOWED_TIMEOUT=60*180
+
+		'''
+		for now giving each chunk at least 3 hours, as
+		the upper limit on the variability of per-chunk processing time is
+		hard to find:
+		
+		2017_06_16.  For very large genepop files, and the use selecting
+		one process, it seems that 3 hours minimum timeout is not sufficient.
+		We now allow 12 hours to ensure that we give enough time for the 
+		mapresult to be updated when the pool has many calls and few processors.
+		'''
+		MIN_ALLOWED_TIMEOUT=60*60*12
 		SLOWEST_PER_CALL_RATE=0.4
 		ELBOW_ROOM_FACTOR=3
 
@@ -2368,7 +2598,7 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 		#We set chunksize to 1 so we can use a timeout that estimates suffiient
 		#time to run 1 call to do_estimate:
 		o_mapresult=o_process_pool.map_async( do_estimate, llv_args_each_process )
-		
+
 		while not ( o_mapresult.ready() ):
 
 			if VERY_VERBOSE:
@@ -2380,7 +2610,7 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 				print ( "In pgdriveneestimator, def execute_ne_for_each_sample, total completed calls: "  \
 									+ str( sum( [ ( o_res is not None ) for o_res in o_mapresult._value  ] ) ) )
 			#end if very verbose
-
+ 
 			i_updated_work_chunk_total=o_mapresult._number_left
 
 			if i_last_work_chunk_total != i_updated_work_chunk_total:
@@ -2417,12 +2647,7 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 					truncated result set to caller, with flag set to
 					indicate interrupted run.
 					'''
-					if VERY_VERBOSE:
-						print ( "In pgdriveneestimator, def execute_ne_for_each_sample, " 
-									+ "time out with chunk total: " + str( i_last_work_chunk_total ) )
-					#end if VERY_VERBOSE
-
-					b_run_was_interrupted=True
+					
 					ldv_interruped_results=o_mapresult._value
 					ldv_completed_results=[]
 
@@ -2432,8 +2657,17 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 							ldv_completed_results.append( dv_result )
 						#end if lv_result is not None
 					#end for each item in incomplete result set
+					i_tot_completed=len( ldv_completed_results )
+					s_interrupt_msg="Estimations timed out.  Minutes elapsed with no new results: " \
+															+ str( int( f_time_elapsed_last_chunk_total/60 ) ) \
+															+ ".  Total results completed: " \
+															+ str( i_tot_completed ) + "." 
 
-					return b_run_was_interrupted, ldv_completed_results
+					if VERY_VERBOSE:
+						print ( "In pgdriveneestimator, def execute_ne_for_each_sample, "  + s_interrupt_msg )
+					#end if VERY_VERBOSE
+
+					return s_interrupt_msg, ldv_completed_results
 				#end if  progress timed out
 			#end if new chunk total else check elapsed time
 
@@ -2464,7 +2698,7 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 
 			time.sleep( SECONDS_TO_SLEEP )
 		#end while results not ready
-
+	
 		o_process_pool.close()
 		o_process_pool.join()
 		#end for each result
@@ -2478,8 +2712,24 @@ def execute_ne_for_each_sample( llv_args_each_process, o_process_pool, o_debug_m
 		#end for each set of args
 	#end if multiprocess allowed, execute async, else serially
 
-	return b_run_was_interrupted, lds_results
+	return s_interrupt_msg, lds_results
 #end execute_ne_for_each_sample
+
+def get_count_estimator_fields():
+	'''
+	2017_06_22.   This def is called by do_estimate 
+	when the estimator produces no output, so that
+	an entry can be made in the tsv file (ex. with NA
+	values for estimator values) with correct field count.
+	'''
+	i_count=0
+	for s_field in pgout.PGOutputNeEstimator.OUTPUT_FIELDS:
+		if s_field not in NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP:
+			i_count += 1
+		#end if not a skipped field
+	#end for each output field
+	return i_count
+#end get_count_estimator_fields
 
 def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outfile ):
 
@@ -2503,6 +2753,10 @@ def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outf
 	ls_reported_fields.append( COL_NAME_NBNE_RATIO_FOR_BIAS_ADJUST )
 	ls_reported_fields.append( COL_NAME_BIAS_ADJUSTED_LDNE )
 
+	'''
+	2017_06_30.  We add a het calc value to the tsv:
+	'''
+	ls_reported_fields.append( COL_NAME_HET_VALUE )
 	o_main_outfile.write( OUTPUT_DELIMITER.join( MAIN_TABLE_RUN_INFO_COLS + ls_reported_fields  ) + OUTPUT_ENDLINE )
 
 	return
@@ -2520,6 +2774,318 @@ def get_sample_abbrevs_for_criteria( lds_results ):
 	#(else they are type dict_keys
 	return list( ds_abbrevs.keys() )
 #end get_sample_abbrevs_for_criteria
+
+def get_total_bytes_needed_for_genepop_object( s_filename ):
+	i_total_bytes=0
+
+	try:
+		i_total_bytes=os.path.getsize( s_filename ) 
+
+	except Exception as oex:
+		s_msg="In pgdriveneestimator.py, def " \
+					+ "get_total_bytes_needed_for_genepop_object, " \
+					+ "the program cannot get the size of the " \
+					+ "genepop file, " + s_filename + ".  " \
+					+ "The exception message is, " \
+					+ str( oex ) 
+		raise Exception( s_msg )
+	#end try...except
+	i_total_bytes=int( round( i_total_bytes * PROPORTION_FILE_BYTES_USED_BY_OBJECT )  )
+
+
+	return i_total_bytes
+#end get_total_bytes_needed_for_genepop_object
+
+def get_total_ram_usage_for_this_file( s_filename, o_debug_mode, i_total_processes ):
+
+	i_total_bytes_used=0
+
+	i_total_bytes_needed_for_gp_object=get_total_bytes_needed_for_genepop_object( s_filename )
+
+	i_total_extra_processes=0
+	
+	if o_debug_mode.ALLOW_MULTI_PROCESSES:
+		i_total_extra_processes=i_total_processes-1
+	#end if we're using multi processes
+
+	i_total_bytes_for_extra_processes=\
+			 i_total_bytes_needed_for_gp_object \
+			 * PROPORTION_GP_OBJECTS_PER_ADDITIONAL_PROCESS \
+			 * i_total_extra_processes 
+
+	i_total_bytes_used=i_total_bytes_needed_for_gp_object \
+							+ i_total_bytes_for_extra_processes
+
+	return i_total_bytes_used
+#end get_total_ram_usage_for_this_file
+
+def file_can_be_added_to_current_set( s_filename, 
+							o_total_bytes_currently_used_for_gp_objects,
+							i_total_processes,
+							o_debug_mode,
+							i_bytes_available_virtual_memory ):
+
+	b_file_can_be_added_to_current_set=False
+
+	i_bytes_total_for_this_file=\
+			get_total_ram_usage_for_this_file( s_filename, o_debug_mode, i_total_processes )
+
+	i_new_byte_total=o_total_bytes_currently_used_for_gp_objects.current_count \
+														+ i_bytes_total_for_this_file
+
+	if i_new_byte_total <= i_bytes_available_virtual_memory:
+		b_file_can_be_added_to_current_set=True
+		o_total_bytes_currently_used_for_gp_objects.addToCurrentValue( \
+												i_bytes_total_for_this_file )
+	#end if new byte total at or below max allowed
+
+	return b_file_can_be_added_to_current_set
+
+#end file_can_be_added_to_current_set
+
+def add_file_to_current_set( s_filename,
+							i_min_pop_range,
+							i_max_pop_range,
+							i_min_pop_size,
+							i_max_pop_size,
+							s_sample_scheme, 
+							lv_sample_values, 
+							i_total_replicates,
+							s_loci_sampling_scheme,
+							v_loci_sampling_scheme_param,
+							i_min_loci_position,
+							i_max_loci_position,
+							i_min_total_loci,
+							i_max_total_loci,
+							i_loci_replicates,
+							llv_args_each_process,
+							b_do_nb_bias_adjustment, 
+							f_nbne_ratio,
+							f_min_allele_freq,
+							o_debug_mode,
+							IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+							i_genepop_file_count,
+							s_temporary_directory,
+							o_secondary_outfile ):
+
+	if VERY_VERBOSE:
+
+		print ( "in pgdriveneestimator, def drive_estimator, calling do_sample " \
+							+ "for file, " + s_filename + "." )	
+	#end if VERY_VERBOSE
+
+	o_genepopfile=gpf.GenepopFileManager( s_filename )
+
+	'''
+	2017_05_29. We revised do_sample to return either the length
+	of the list of pop numbers sent for sampling, or zero, which indicates
+	that either the pop number range, or the loci number range were
+	out of range (i.e. min was greater than the total).
+	'''
+	i_total_pops_sampled=do_sample( o_genepopfile, 
+				i_min_pop_range,
+				i_max_pop_range,
+				i_min_pop_size,
+				i_max_pop_size,
+				s_sample_scheme, 
+				lv_sample_values, 
+				i_total_replicates,
+				s_loci_sampling_scheme,
+				v_loci_sampling_scheme_param,
+				i_min_loci_position,
+				i_max_loci_position,
+				i_min_total_loci,
+				i_max_total_loci,
+				i_loci_replicates )
+	
+	if i_total_pops_sampled == 0:
+
+		s_filename=o_genepopfile.original_file_name
+		s_msg = "In file " \
+						+ s_filename \
+						+ ", no pop sections were sampled. " \
+						+ "Either the population number range, " \
+						+ str( i_min_pop_range ) \
+						+ " to " + str( i_max_pop_range ) \
+						+ ", or the loci number range, " \
+						+ str( i_min_loci_position )  \
+						+ " to " + str( i_max_loci_position ) \
+						+ " excluded all pops and/or loci."
+		o_secondary_outfile.write( s_msg + "\n" )
+
+	else:
+
+		'''
+		This code to settle on a final nbne ratio was added 2017_04_17, to
+		avoid finding it in do_estimate, and passing the b_do_nb_bias_adjustment
+		flag to do_estimate.  Further, we change the logic so that if we are
+		to do the bias adjustment, we will take the passed-in ratio over any other
+		value, unless it is zero.  In that case we look for the ratio in the header
+		of our genepop file.  In the case of False for b_do_nb_bias_adjustment,
+		we will leave the ratio as a None value, which will then signal, during
+		def do_estimates call to calculate the adjustment, that no adjustment will be done.
+		'''
+		f_nbne_ratio_to_use=None	
+
+		if b_do_nb_bias_adjustment == True:
+			if f_nbne_ratio < RELTOL:
+				f_nbne_ratio_to_use=get_nbne_ratio_from_genepop_file_header( o_genepopfile )
+			else:
+				f_nbne_ratio_to_use=f_nbne_ratio
+			#end if no nbne ratio provided in arg list, then find it in the genepop file header	
+		#end if we are to do a bias adjustment
+
+		'''
+		2017_06_16. Since we moved the call to execute_ne_for_each_sample inside 
+		this loop, so that we now execute on a per-genepop-file basis, we re-create 
+		a new list of args for this genepop file.
+		'''
+
+		add_to_set_of_calls_to_do_estimate( o_genepopfile, 
+												s_sample_scheme,
+												f_min_allele_freq, 
+												i_min_pop_size,
+												i_max_pop_size,
+												i_min_loci_position,
+												i_max_loci_position,
+												o_debug_mode,
+												llv_args_each_process,
+												IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+												o_secondary_outfile,
+												f_nbne_ratio_to_use,
+												s_temporary_directory,
+												i_genepop_file_count )
+
+	#end if no pops sampled, else add to call set
+
+	return
+#end add_file_to_current_set
+
+def raise_exception_file_size_limit( s_filename, o_debug_mode, i_total_processes ):
+
+		i_total_ram_usage_for_this_file=get_total_ram_usage_for_this_file( \
+																s_filename, 
+																o_debug_mode,
+																i_total_processes )
+
+		i_total_in_gigs=round( i_total_ram_usage_for_this_file/1e9 ) 
+
+		s_msg="In pgdriveneestimator.py, def " \
+					+ "raise_exception_file_size_limit, " \
+					+ "The program cannot load the genepop file, " + s_filename \
+					+ ".  The file is too large to be processed " \
+					+ " using " + str( i_total_processes ) + ".  " \
+					+ "The program estimates that this file will " \
+					+ "use about " + str( i_total_in_gigs ) \
+					+ "gigabytes of RAM for each process.  " \
+					+ "and so will exceed the allowed RAM total of " \
+					+ str( int( round( MAX_BYTES_FOR_GP_OBJECTS )/1e9 ) ) \
+					+ "gigabytes."
+
+		raise Exception( s_msg )
+					
+#end raise_exception_file_size_limit
+
+
+def process_current_set_of_gp_files( llv_args_each_process, 
+										s_filename,
+										o_debug_mode,
+										i_total_processes,
+										o_multiprocessing_event,
+										s_sample_scheme,
+										lv_sample_values,
+										o_main_outfile, 
+										o_secondary_outfile,
+										o_total_calls_to_do_estimate,
+										IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+										s_all_interrupt_messages ):
+	
+
+	if o_total_calls_to_do_estimate.current_count == 0:
+		write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, 
+															o_main_outfile)
+	#end if no calls yet made, write header
+
+	o_total_calls_to_do_estimate.addToCurrentValue( len( llv_args_each_process ) )
+
+	if VERY_VERBOSE:
+		print ( "in pgdriveneestimator, def drive_estimator, calling " \
+							+ "execute_ne_for_each_sample "  \
+							+ "for file, " + s_filename + "." )	
+	#end if VERY_VERBOSE
+
+	'''
+	2017_06_14
+	We batch the calls, and  make a seris of process pools with calls
+	at most numbering POOL_BATCH_SIZE.  We found that a  very large set of 
+	calls (ex: 1500 ) is sent and one pool created, it takes a very long 
+	time (> 3 hours) for the process pool to begin actual estimations.  
+	Note the batch size is set above as POOL_BATCH_SIZE, used by default in
+	the def get_ranges_for_list_slices.
+	'''
+	ldi_starts_and_ends=get_ranges_for_list_slices( len( llv_args_each_process ) )
+	
+	for di_start_and_end in ldi_starts_and_ends:
+
+		o_process_pool=None
+
+		if o_debug_mode.isSet( DebugMode.ALLOW_MULTI_PROCESSES ):
+			o_process_pool=Pool( i_total_processes )
+		#end if multi processing
+
+
+		idx_start=di_start_and_end[ "start"]
+		idx_end=di_start_and_end[ "end" ]
+		llv_args_this_batch=llv_args_each_process[ idx_start:idx_end ]
+		s_interrupt_msg, lds_results=execute_ne_for_each_sample( llv_args_this_batch, 
+														o_process_pool, 
+														o_debug_mode,
+														o_multiprocessing_event )
+		if s_interrupt_msg is not None:
+			s_msg_prefix="For file, " + s_filename + ", "
+			if s_all_interrupt_messages is None:
+				s_all_interrupt_messages=s_msg_ + prefix + s_interrupt_msg
+			else:
+				s_prefixed_interrup_msg=s_msg_prefix + s_interrupt_msg
+				s_all_interrupt_messages= "\n".join([s_all_interrupt_messages, s_prefixed_interrupt_msg ])
+			#end if first interrupt message
+		#end if this batch interrupted
+
+		'''
+		For proportional (random) and remove-n (random)
+		sampling, the list of sample values (proprotions
+		or n's) is the correct list to use. For criteria
+		sampling (ex: age==1), we can't use the sample
+		values list, because the list does not contain
+		the (short) abbreviation needed for 
+		NeEstimator file names.  Hence criteria sampling
+		sample param names are simply c<sum-of-critera>.
+		Which we calculate from the result sets.
+		'''	
+		lv_sample_value_groupings=lv_sample_values \
+				if s_sample_scheme in SAMPLE_SCHEMES_NON_CRITERIA \
+				else get_sample_abbrevs_for_criteria( lds_results )
+
+		if VERY_VERBOSE:
+			print ( "in pgdriveneestimator, def drive_estimator, " \
+							+ "for file " + s_filename + ", " \
+							+ "calling write_result_sets with start " + str(idx_start ) \
+							+ " and end " + str( idx_end )  + "." )	
+
+		#end if VERY_VERBOSE
+
+		write_result_sets( lds_results, 
+							lv_sample_value_groupings, 
+							o_debug_mode, 
+							o_main_outfile, 
+							o_secondary_outfile )
+		o_main_outfile.flush()
+		o_secondary_outfile.flush()
+	#end for each batch given by start/end indices
+
+	return s_all_interrupt_messages
+#end process_current_set_of_gp_files
+
 
 def drive_estimator( *args ):
 
@@ -2556,16 +3122,31 @@ def drive_estimator( *args ):
 	IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP = \
 			set_indices_ne_estimator_output_fields_to_skip()
 
-	if o_debug_mode.isSet( DebugMode.ALLOW_MULTI_PROCESSES ):
-		o_process_pool=Pool( i_total_processes )
-	#end if multi processing
-
-	llv_args_each_process=[]
 
 	#Was used in call to make indiv table file
 	#currently disabled:
 	#s_indiv_table_file=None
-	
+
+
+	'''
+	For the secondary outfile, we write a
+	table of parameters and their corresponding
+	arg values
+
+	2017_07_11. We added a param to give the ArgSet
+	object the actual list of files.  This is needed
+	when this mod is called from the console and a 
+	glob is used instead of a list of files (which
+	is what is passed by the GUI to mymain).
+	'''
+	o_argset=ArgSet( args, ls_files )
+
+	o_secondary_outfile.write( "Table of parameters and values:\n" \
+							+ o_argset.paramtable + "\n" )
+
+	#For windows, which will otherwise defer writing until flush call 
+	#after writing result sets.
+	o_secondary_outfile.flush()
 
 	'''
 	2017_04_03.  In order to shorten the file names for 
@@ -2578,108 +3159,185 @@ def drive_estimator( *args ):
 	'''
 
 	i_genepop_file_count=0
+	o_total_calls_to_do_estimate=Counter(0)
+	b_tsv_file_header_written=False
+	o_total_bytes_currently_used_for_gp_objects=Counter( 0 )
+	llv_args_each_process=[]
 
+	s_all_interrupt_messages=None
+
+	'''
+	2017_07_06.  I added this value to allow
+	a (very approximate) heuristic method to
+	manage the number of genepop files allowed to
+	be processed at once, to avoid over-consuming
+	RAM.
+	'''
+	i_bytes_available_virtual_memory=\
+			int( pgut.get_memory_virtual_available()*PERC_AVAIL_RAM_TO_ACCESS )
+	
 	for s_filename in ls_files:
 
 		i_genepop_file_count+=1
 
-		if VERY_VERBOSE:
-			print( "in pgdriveneestimator, def drive_estimator, processing file, " \
-								+ s_filename + "." )
-		#end if VERY_VERBOSE
+		b_file_can_be_added_to_current_set=\
+				file_can_be_added_to_current_set( s_filename, 
+						o_total_bytes_currently_used_for_gp_objects, 
+						i_total_processes,
+						o_debug_mode,
+						i_bytes_available_virtual_memory )
 
-		o_genepopfile=gpf.GenepopFileManager( s_filename )
+		if b_file_can_be_added_to_current_set:
 
-		if VERY_VERBOSE:
-			print ( "in pgdriveneestimator, def drive_estimator, calling do_sample " \
-								+ "for file, " + s_filename + "." )	
-		#end if VERY_VERBOSE
+			if VERY_VERBOSE:
+				print( "in pgdriveneestimator, def drive_estimator, processing file, " \
+									+ s_filename + "." )
+				print( "making genepop file index" )
+			#end if VERY_VERBOSE
 
-		'''
-		2017_05_29. We revised do_sample to return either the length
-		of the list of pop numbers sent for sampling, or zero, which indicates
-		that either the pop number range, or the loci number range were
-		out of range (i.e. min was greater than the total).
-		'''
-		i_total_pops_sampled=do_sample( o_genepopfile, 
-					i_min_pop_range,
-					i_max_pop_range,
-					i_min_pop_size,
-					i_max_pop_size,
-					s_sample_scheme, 
-					lv_sample_values, 
-					i_total_replicates,
-					s_loci_sampling_scheme,
-					v_loci_sampling_scheme_param,
-					i_min_loci_position,
-					i_max_loci_position,
-					i_min_total_loci,
-					i_max_total_loci,
-					i_loci_replicates )
+			add_file_to_current_set( \
+							s_filename=s_filename,
+							i_min_pop_range=i_min_pop_range,
+							i_max_pop_range=i_max_pop_range,
+							i_min_pop_size=i_min_pop_size,
+							i_max_pop_size=i_max_pop_size,
+							s_sample_scheme=s_sample_scheme, 
+							lv_sample_values=lv_sample_values, 
+							i_total_replicates=i_total_replicates,
+							s_loci_sampling_scheme=s_loci_sampling_scheme,
+							v_loci_sampling_scheme_param=v_loci_sampling_scheme_param,
+							i_min_loci_position=i_min_loci_position,
+							i_max_loci_position=i_max_loci_position,
+							i_min_total_loci=i_min_total_loci,
+							i_max_total_loci=i_max_total_loci,
+							i_loci_replicates=i_loci_replicates,
+							llv_args_each_process=llv_args_each_process,
+							b_do_nb_bias_adjustment=b_do_nb_bias_adjustment,
+							f_nbne_ratio=f_nbne_ratio,
+							f_min_allele_freq=f_min_allele_freq,
+							o_debug_mode=o_debug_mode,
+							IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+							i_genepop_file_count=i_genepop_file_count,
+							s_temporary_directory=s_temporary_directory,
+							o_secondary_outfile=o_secondary_outfile )
 
-		
-		if i_total_pops_sampled == 0:
+		elif o_total_bytes_currently_used_for_gp_objects.current_count==0 \
+								and ( not b_file_can_be_added_to_current_set ):
+			'''
+			This is the case in which there are no files loaded but the current 
+			file will generate gp objects (with n copies n=total processes under
+			multi processing) too RAM-consuming to process.  We throw an error and
+			let the user know.
+			'''
+			raise_exception_file_size_limit( s_filename, o_debug_mode, i_total_processes )
+		else:
 
-			s_filename=o_genepopfile.original_file_name
-			s_msg = "In file " \
-							+ s_filename \
-							+ ", no pop sections were sampled. " \
-							+ "Either the population number range, " \
-							+ str( i_min_pop_range ) \
-							+ " to " + str( i_max_pop_range ) \
-							+ ", or the loci number range, " \
-							+ str( i_min_loci_position )  \
-							+ " to " + str( i_max_loci_position ) \
-							+ " excluded all pops and/or loci."
-			o_secondary_outfile.write( s_msg + "\n" )
+			if len( llv_args_each_process ) > 0:
+				
+				s_all_interrupt_messages =\
+								process_current_set_of_gp_files( \
+										llv_args_each_process=llv_args_each_process, 
+										s_filename=s_filename,
+										o_debug_mode=o_debug_mode,
+										i_total_processes=i_total_processes,
+										o_multiprocessing_event=o_multiprocessing_event,
+										s_sample_scheme=s_sample_scheme,
+										lv_sample_values=lv_sample_values,
+										o_main_outfile=o_main_outfile, 
+										o_secondary_outfile=o_secondary_outfile,
+										o_total_calls_to_do_estimate=o_total_calls_to_do_estimate,
+										IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, 
+										s_all_interrupt_messages=s_all_interrupt_messages )
 
-			continue
-		#end if no pops sampled
+			#end if we have at least one set of args for estimation
 
-		if VERY_VERBOSE:
-			print ( "in pgdriveneestimator, def drive_estimator, calling " \
-								+ "add_to_set_of_calls_to_do_estimate " \
-								+ "for file, " + s_filename + "." )	
-		#end if VERY_VERBOSE
+			'''
+			Since the current file in our list could not be added to the call set before
+			doing a round of estimates, we now reset out byte count to zero and emtpy
+			our call-set list, then add the current file as the first for the next round:
+			'''
 
+			llv_args_each_process=[]
 
-		'''
-		This code to settle on a final nbne ratio was added 2017_04_17, to
-		avoid finding it in do_estimate, and passing tehe b_do_nb_bias_adjustment
-		flag to do_estimate.  Further, we change the logic so that if we are
-		to do the bias adjustment, we will take the passed-in ratio over any other
-		value, unless it is zero.  In that caswe we look for the ratio in the header
-		of our genepop file.  In the case of False for b_do_nb_bias_adjustment,
-		we will leafe the ratio as a None value, which will then signal, during
-		def do_estimates call to calculate the adjustment, that no adjustment will be done.
-		'''
-		f_nbne_ratio_to_use=None	
+			o_total_bytes_currently_used_for_gp_objects.resetCounterToValue(0)
 
-		if b_do_nb_bias_adjustment == True:
-			if f_nbne_ratio < RELTOL:
-				f_nbne_ratio_to_use=get_nbne_ratio_from_genepop_file_header( o_genepopfile )
+			b_can_add_this_as_first_in_new_file_batch=\
+							file_can_be_added_to_current_set( s_filename, 
+												o_total_bytes_currently_used_for_gp_objects, 
+												i_total_processes,
+												o_debug_mode, 
+												i_bytes_available_virtual_memory )
+
+			if not b_can_add_this_as_first_in_new_file_batch:
+				'''
+				As noted above, if this file alone (since we've just processed and zeroed out
+				our total gp files loaded) is too large to process we need to raise an exception:
+				'''
+				raise_exception_file_size_limit( s_filename, o_debug_mode, i_total_processes )
 			else:
-				f_nbne_ratio_to_use=f_nbne_ratio
-			#end if no nbne ratio provided in arg list, then find it in the genepop file header	
-		#end if we are to do a bias adjustment
+				add_file_to_current_set(  \
+						s_filename=s_filename,
+						i_min_pop_range=i_min_pop_range,
+						i_max_pop_range=i_max_pop_range,
+						i_min_pop_size=i_min_pop_size,
+						i_max_pop_size=i_max_pop_size,
+						s_sample_scheme=s_sample_scheme, 
+						lv_sample_values=lv_sample_values, 
+						i_total_replicates=i_total_replicates,
+						s_loci_sampling_scheme=s_loci_sampling_scheme,
+						v_loci_sampling_scheme_param=v_loci_sampling_scheme_param,
+						i_min_loci_position=i_min_loci_position,
+						i_max_loci_position=i_max_loci_position,
+						i_min_total_loci=i_min_total_loci,
+						i_max_total_loci=i_max_total_loci,
+						i_loci_replicates=i_loci_replicates,
+						llv_args_each_process=llv_args_each_process,
+						b_do_nb_bias_adjustment=b_do_nb_bias_adjustment,
+						f_nbne_ratio=f_nbne_ratio,
+						f_min_allele_freq=f_min_allele_freq,
+						o_debug_mode=o_debug_mode,
+						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+						i_genepop_file_count=i_genepop_file_count,
+						s_temporary_directory=s_temporary_directory,
+						o_secondary_outfile=o_secondary_outfile )
+			#end if our file on its own is still too big
 
-		add_to_set_of_calls_to_do_estimate( o_genepopfile, 
-												s_sample_scheme,
-												f_min_allele_freq, 
-												i_min_pop_size,
-												i_max_pop_size,
-												o_debug_mode,
-												llv_args_each_process,
-												IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
-												o_secondary_outfile,
-												f_nbne_ratio_to_use,
-												s_temporary_directory,
-												i_genepop_file_count )
-		
-	#end for each genepop file, sample, and, if > 0 pops were sampled, add an ne-estimator object, 
-	#and setup call to estimator 
+		#end if we can add this file to our current call set else if 
+		#no other files processed but this one too big, 
+		#else we don't add the file to the current set, but we
+		#do estimates on the current set, then add the current to 
+		#the next set
+							
+	#end for each genepop file, if add-able to set, add to set
+	#else if too big opn its own, throw an exception, 
+	#else do estimates on the current set, then add the current file
+	#as the first in a new setr 
 
-	if len( llv_args_each_process ) == 0:
+	'''
+	As expected, after a loop that processes based on batches, 
+	if we handled the last genepop file by adding it to the
+	current set of calls to do_estimate, then we still need to do 
+	estimations on this last batch of calls:
+	'''
+	if len( llv_args_each_process ) > 0:
+		s_all_interrupt_messages =\
+						process_current_set_of_gp_files( \
+										llv_args_each_process=llv_args_each_process, 
+										s_filename=s_filename,
+										o_debug_mode=o_debug_mode,
+										i_total_processes=i_total_processes,
+										o_multiprocessing_event=o_multiprocessing_event,
+										s_sample_scheme=s_sample_scheme,
+										lv_sample_values=lv_sample_values,
+										o_main_outfile=o_main_outfile, 
+										o_secondary_outfile=o_secondary_outfile,
+										o_total_calls_to_do_estimate=o_total_calls_to_do_estimate,
+										IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, 
+										s_all_interrupt_messages=s_all_interrupt_messages )
+	#end if we have at least one call to make
+
+	
+	if o_total_calls_to_do_estimate.current_count == 0:
 		s_msg="Warning:  no calls were made to NeEstimator. " \
 					+ "Sampling parameters likely filtered out all pop sections."
 		
@@ -2691,73 +3349,24 @@ def drive_estimator( *args ):
 		if ACTIVATE_GUI_MESSAGING:
 			GUIINFO( None , s_info_msg )
 		#end if using gui messaging
+	#end if no calls were made
 
-	else:
-
-		write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outfile )
-
-	#end if no calls to neestimator, else write header to tsv
-
-	#end if no calls were made, print warning to stderr
-
-	if VERY_VERBOSE:
-		print ( "in pgdriveneestimator, def drive_estimator, calling " \
-							+ "execute_ne_for_each_sample." )	
-
-	#end if VERY_VERBOSE
-
-	b_run_was_interrupted, lds_results=execute_ne_for_each_sample( llv_args_each_process, 
-												o_process_pool, 
-												o_debug_mode,
-												o_multiprocessing_event )
-	'''
-	For proportional (random) and remove-n (random)
-	sampling, the list of sample values (proprotions
-	or n's) is the correct list to use. For criteria
-	sampling (ex: age==1), we can't use the sample
-	values list, because the list does not contain
-	the (short) abbreviation needed for 
-	NeEstimator file names.  Hence criteria sampling
-	sample param names are simply c<sum-of-critera>.
-	Which we calculate from the result sets.
-	'''	
-	lv_sample_value_groupings=lv_sample_values \
-			if s_sample_scheme in SAMPLE_SCHEMES_NON_CRITERIA \
-			else get_sample_abbrevs_for_criteria( lds_results )
-
-	if VERY_VERBOSE:
-		print ( "in pgdriveneestimator, def drive_estimator, calling " \
-							+ "write_result_sets" )	
-
-	#end if VERY_VERBOSE
-
-
-	write_result_sets( lds_results, 
-						lv_sample_value_groupings, 
-						o_debug_mode, 
-						o_main_outfile, 
-						o_secondary_outfile )
-
-	'''
-	Last, for the secondary outfile, we write a
-	table of parameters and their corresponding
-	arg values
-	'''
-	o_argset=ArgSet( args )
-	o_secondary_outfile.write( "Table of parameters and values:\n" \
-							+ o_argset.paramtable + "\n" )
-	if b_run_was_interrupted:
+	
+	if s_all_interrupt_messages is not None:
 
 		'''
 		When we throw error below, the calling def in pgutilities 
 		(run_driveneestimator_in_new_process) will set the multiprocessing 
-		event, which will then result in the outfiles being delted by
+		event, which will then result in the outfiles being deleted by
 		the GUI cleanup op. Thus we save a "interrupted" version
 		of the output, not recognized by the GUI as needing to be 
 		deleted.
 		'''
 		for o_outfile in [ o_main_outfile, o_secondary_outfile ]:
-			o_outfile.close()
+			if not o_outfile.closed:
+				o_outfile.write( s_interrupt_msg + "\n" )
+				o_outfile.close()
+			#end if not closed
 			s_name_this_file=o_outfile.name
 			pgut.do_shutil_copy( s_name_this_file, s_name_this_file + ".interrupted" )
 		#end for each outfile, copy it as interrupted version
@@ -2773,7 +3382,7 @@ def drive_estimator( *args ):
 		raise Exception( s_msg )
 	#end if the estimations were interrupted (see def execute_ne_for_each_sample). 
 
-	return
+	return 
 
 #end drive_estimator
 
@@ -2914,8 +3523,6 @@ def set_messaging_procedures( s_gui_flag ):
 	#end if we are using gui messaging
 	return
 #end set_messaging_procedures
-
-
 
 def mymain( *q_args ):
 
@@ -3069,21 +3676,41 @@ def mymain( *q_args ):
 		#end if not stderr, close file
 
 	except Exception as oex:
-
+		o_traceback=sys.exc_info()[ 2 ]
+		s_trace=pgut.get_traceback_info_about_offending_code( \
+													o_traceback )
 		if ACTIVATE_GUI_MESSAGING:
-			s_trace=o_traceback=sys.exc_info()[ 2 ]
-			s_trace= \
-				pgut.get_traceback_info_about_offending_code( o_traceback )
-
 			s_errormsg=str( oex )
 			GUIERR( None , s_errormsg + "\n" + s_trace )
 		#end if using gui messaging
 		
-		raise ( oex )
+		raise Exception( "In pgdriveneestimator.py, def mymain, "  \
+							+ "an exception was caught with message: " \
+							+ str(oex) + ", and trace back: " \
+							+ s_trace )
 	#end try ... except
 
 	return
 #end mymain
+
+def get_ranges_for_list_slices( i_length_of_list, i_slice_size=POOL_BATCH_SIZE ):
+
+	li_slice_start_indices=[ idx for idx in range( 0, i_length_of_list, i_slice_size ) ]
+
+	li_slice_end_indices=li_slice_start_indices[ 1: ] + [ i_length_of_list ]
+
+	assert ( len( li_slice_start_indices ) == len( li_slice_end_indices ) ), "in def get_ranges_for_list_slices, unequal starts/ends lists" 
+
+	ldi_starts_and_ends=[]
+
+	for idx in range( len ( li_slice_start_indices ) ):
+		ldi_starts_and_ends.append( { "start":li_slice_start_indices[ idx ],
+									"end":li_slice_end_indices[ idx ] } )
+	#end for each idx
+
+	return ldi_starts_and_ends
+
+#end def get_ranges_for_list_slices
 
 if __name__ == "__main__":
 
@@ -3158,15 +3785,36 @@ if __name__ == "__main__":
 		--temporary directory (default for console is None), 
 		used by caller when mymain is called by
 		the GUI, otherwise default to None:
+		2017_06_16. we now create a tmp dir
+		inside our current directory. This avoids
+		existing-file errors when an aborted run
+		leaves intermediate genepop files of form
+		f<num>i<num>l<num> in the current dir.
+	'''
+	try:
+		s_temp_dir=pgut.get_temporary_directory()
+	except:
+		s_msg = "In pgdriveneestimator main section, " \
+					+ "The program can't make a temporary " \
+					+ "directory in the current directory. " \
+					+ "Please execute this script from a " \
+					+ "writable directory."
+		raise Exception( s_msg )
+	#end try to make a tmp dir
+
+	'''
 	2017_05_31. Now the last default arg is 
 		--flag to suppress gui messaging="False".
 
 	These are args hidden from console user, set by
 	the def in pgutilities.py, run_driveneestimator_in_new_process.
 
+	Note that, in the mymain call below, another argument, the
+	multiproc event arg is added, so that the IDX_<arg> constants
+	used in def parse_args are not accurately reflected here.
 	'''
 
-	ls_args_passed+=[ sys.stdout, sys.stderr, None, "False" ]
+	ls_args_passed+=[ sys.stdout, sys.stderr, s_temp_dir, "False" ]
 
 	mymain( *( ls_args_passed ) )
 

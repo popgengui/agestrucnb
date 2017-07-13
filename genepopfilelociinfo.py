@@ -60,13 +60,14 @@ class GenepopFileLociInfo( object ):
 	#end __init__
 
 	def __get_allele_frequencies( self ):
+
 		dddf_allele_frequencies={}
+
 		dddf_allele_counts = self.__genepop_file.getAlleleCounts( \
 													self.__pop_subsample,
 													self.__indiv_subsample,
 													self.__loci_subsample,
 													b_skip_loci_with_parial_data=True )
-
 		for i_pop_number in dddf_allele_counts:
 
 			dddf_allele_frequencies[ i_pop_number ]={}
@@ -76,12 +77,23 @@ class GenepopFileLociInfo( object ):
 
 				i_total_allele_instances=sum( di_allele_counts.values() )
 
-				assert i_total_allele_instances != 0, "In GenepopFileLociInfo instance, " \
-											+ "def __get_allele_frequencies, " \
-											+ "found zero alleles for pop number, " \
-											+ str( i_pop_number ) \
-											+ ", and loci number, " \
-											+ str( i_loci_number ) + "." 
+				'''
+				2017_07_12.  Revmoved the assert and exception when a loci has no 
+				allieles (i.e. the entries are all-zeros for all individuals). We now
+				simply skip the loci.
+				'''
+#				assert i_total_allele_instances != 0, "In GenepopFileLociInfo instance, " \
+#											+ "def __get_allele_frequencies, " \
+#											+ "for genepop file, " \
+#											+ self.__genepop_file.original_file_name \
+#											+ ", found zero alleles for pop number, " \
+#											+ str( i_pop_number ) \
+#											+ ", and loci number, " \
+#											+ str( i_loci_number ) + "." 
+				
+				if i_total_allele_instances == 0:
+					continue
+				#end if no allele instances, skip this loci
 			
 				di_allele_freqs={}
 

@@ -33,6 +33,10 @@ psutil is used as the preferred tool
 for cancelling the subprocess
 launched to do ne estimations. See def
 run_driveneestimator_in_new_process.
+
+2017_07_06. psutil is now also used 
+to report availble virtual memory in
+def get_memory_virtual_available
 '''
 import psutil
 
@@ -1837,9 +1841,6 @@ def get_traceback_info_about_offending_code( o_traceback_object ):
 	return s_msg
 #end get_traceback_info_about_offending_code
 
-
-
-
 def call_with_or_without_args( def_to_call, dv_args ):
 	'''
 	Helper for def return_when_def_is_true.
@@ -1861,6 +1862,11 @@ def get_current_python_executable():
 	s_path=sys.executable
 	return s_path
 #end get_current_python_executable
+
+def get_memory_virtual_available():
+	tup_meminfo=psutil.virtual_memory()
+	return tup_meminfo.available
+#end get_memory_virtual_available
 
 if __name__ == "__main__":
 

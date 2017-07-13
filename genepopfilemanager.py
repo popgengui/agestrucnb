@@ -622,10 +622,14 @@ class GenepopFileManager( object ):
 			s_pop_subsample_tag=None, 
 			s_indiv_subsample_tag=None, 
 			s_loci_subsample_tag=None, 
-			i_min_pop_size=0 ):
+			i_min_pop_size=0,
+			o_outstream=sys.stdout ):
 
-		self.__write_genepop_file_to_file_object( sys.stdout, s_indiv_subsample_tag, 
-				s_loci_subsample_tag, s_pop_subsample_tag, i_min_pop_size )	
+		self.__write_genepop_file_to_file_object( o_outstream, 
+													s_pop_subsample_tag, 
+													s_indiv_subsample_tag, 
+													s_loci_subsample_tag,  
+													i_min_pop_size )	
 		return
 	#end printGenePopFile
 
@@ -1703,7 +1707,7 @@ class GenepopFileManager( object ):
 																		b_skip_loci_with_parial_data )
 
 		return dddi_allele_counts_by_pop_by_loci
-	#end
+	#end getAlleleCounts
 
 	@property
 	def header( self ):

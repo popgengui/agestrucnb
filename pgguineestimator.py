@@ -235,8 +235,11 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					self.__set_controls_by_run_state( self.__get_run_state() )
 				#end if yes
 			else:
+
 				if self.__params_look_valid( b_show_message=True ):
+
 					self.runEstimator()
+
 				#end if params look valid
 			#end if sim in progress else not
 		except Exception as oex:
@@ -303,39 +306,46 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			ls_matching_existing=pgut.get_list_files_and_dirs_from_glob( s_filename )
 			ls_existing_outfiles += ls_matching_existing
 		#end for each
-
-		s_genepop_files=self.__genepopfiles.get()
-
-		ls_genepop_files=s_genepop_files.split( DELIMITER_GENEPOP_FILES )
-
-		#Now we collect the names of any existing intermediate files
-		#produced during a previous run:
-		for s_genepop_file in ls_genepop_files:	
-
-			for s_tag in pgdn.NE_ESTIMATOR_AND_LDNE_OUTPUT_FILE_TAGS \
-					+ [ pgdn.NE_ESTIMATOR_AND_LDNE_OUTPUT_FILES_GENERAL_TAG + "*" ]: 
-
-				s_reformatted_filename = \
-						self.__convert_genepop_file_to_neestimator_basename ( \
-																	s_genepop_file )	
-				#glob basename plus wildcard, ending
-				#with ne-estimator file tag.   (Wildcard
-				#is needed because pgdriveneestimator.py
-				#will have added sample/replicate/popnun fields
-				#to the output file basename:
-				s_glob=s_reformatted_filename + "*" + s_tag 
-
-				ls_nefiles=pgut.get_list_files_and_dirs_from_glob( s_glob )
-
-				if VERY_VERBOSE:
-					print( "In def __get_existing_output_files: " )
-					print ( "   with glob: " + s_glob )
-					print ( "   got files: " + str( ls_nefiles ) )
-				#end if very verbose
-
-				ls_existing_outfiles += ls_nefiles
-
-			#end for each NeEstimator file tag
+		'''
+		20170710.  This REM out is not deleted yet because I am not sure that 
+		it is yet completely expendable.  We may want to replace it with a 
+		search for current intermediates, which will require new code. Note
+		that the pgdriveneestimator.py module no longer names intermediate files 
+		after parent genepop files, and, further, that new sessions will be run
+		in uniquely named temporary directories.
+		'''
+#		s_genepop_files=self.__genepopfiles.get()
+#
+#		ls_genepop_files=s_genepop_files.split( DELIMITER_GENEPOP_FILES )
+#
+#		#Now we collect the names of any existing intermediate files
+#		#produced during a previous run:
+#		for s_genepop_file in ls_genepop_files:	
+#
+#			for s_tag in pgdn.NE_ESTIMATOR_AND_LDNE_OUTPUT_FILE_TAGS \
+#					+ [ pgdn.NE_ESTIMATOR_AND_LDNE_OUTPUT_FILES_GENERAL_TAG + "*" ]: 
+#
+#				s_reformatted_filename = \
+#						self.__convert_genepop_file_to_neestimator_basename ( \
+#																	s_genepop_file )	
+#				#glob basename plus wildcard, ending
+#				#with ne-estimator file tag.   (Wildcard
+#				#is needed because pgdriveneestimator.py
+#				#will have added sample/replicate/popnun fields
+#				#to the output file basename:
+#				s_glob=s_reformatted_filename + "*" + s_tag 
+#
+#				ls_nefiles=pgut.get_list_files_and_dirs_from_glob( s_glob )
+#
+#				if VERY_VERBOSE:
+#					print( "In def __get_existing_output_files: " )
+#					print ( "   with glob: " + s_glob )
+#					print ( "   got files: " + str( ls_nefiles ) )
+#				#end if very verbose
+#
+#				ls_existing_outfiles += ls_nefiles
+#
+#			#end for each NeEstimator file tag
 
 		return ls_existing_outfiles
 	#end __get_existing_output_files
@@ -649,7 +659,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		#end if any invalidity
 
 		return b_valid
-	#end __validate_run
+	#end __params_look_valid
 	
 	def __get_nbne_ratio_as_string_for_call_to_estimator( self ):
 		'''
@@ -695,7 +705,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			self.__test_values()
 		#end if very verbose
 
-			
 		#Object assembles the sample-scheme related args needed for 
 		#the call to the pgdriveneestimator.py module, used by
 		#the run_driveneestimator_in_new_process def called below.
@@ -809,6 +818,38 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		return
 	#end runEstimator
 
+	def __get_genepop_files_value_for_textbox( self ):
+		'''
+		This def was added 20170710 to solve a problem
+		in the GUI in Windows machines.  When many
+		genepop file names are loaded into the interface
+		via the def __load_genepop_files, say over a few hundered,
+		then the Windows machine GUI becomes non-responsive.
+		In the case of a low powered machine, and many
+		files, the GUI could freeze it indefintely.  The
+		blocking occurs, apparently, when a large string
+		is given to a textbox as it's value.  Linux 
+		seemed to be immune from the problem.
+		'''
+		MAX_NUM_FILE_NAMES_IN_TEXTBOX=10
+
+		s_value_for_textbox=""
+
+		s_current_genepop_files_value=self.__genepopfiles.get()
+
+		i_num_files_selected=\
+				len( s_current_genepop_files_value.split( DELIMITER_GENEPOP_FILES ) )
+		
+		if i_num_files_selected > MAX_NUM_FILE_NAMES_IN_TEXTBOX:
+			ls_files=s_current_genepop_files_value.split( DELIMITER_GENEPOP_FILES )
+			s_value_for_textbox=DELIMITER_GENEPOP_FILES.join( ls_files[ 0:MAX_NUM_FILE_NAMES_IN_TEXTBOX ] + [ "..."] )
+		else:
+			s_value_for_textbox=s_current_genepop_files_value
+		#end if our list of genepop files is too large, else not
+
+		return s_value_for_textbox
+	#end __get_genepop_files_value_for_textbox
+
 	def __init_file_locations_interface( self, b_force_disable=False ):
 		'''
 		2017_04_28.  Some labels, with widths sized on linux,
@@ -885,13 +926,23 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		i_row += 1
 		
+		'''
+		20170710.  This call is added to avoid the KeyValFrame
+		having to load a very large string into its text box.  On
+		Windows machines, especially underpowered machines,
+		this caused a prolonged block of the main gui thread
+		on all graphical updates.
+		'''
+		s_value_for_textbox=self.__get_genepop_files_value_for_textbox()
+
 		o_config_kv=KeyValFrame( s_name="Load genepop files", 
-						v_value=self.__genepopfiles.get(),
+						v_value=s_value_for_textbox,
 						o_type=str,
 						v_default_value="",
 						o_master=o_file_locations_subframe,
 						i_entrywidth=ENTRY_WIDTH,
 						i_labelwidth=LABEL_WIDTH,
+
 						b_is_enabled=False,
 						s_entry_justify='left',
 						s_label_justify='left',

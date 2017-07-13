@@ -161,7 +161,7 @@ def check_for_existing_output_files( s_output_base ):
 							+ ", found the followng:\n\n"  \
 							+ str( ls_exisiting_items ) + ".\n\n" \
 							+ "Please rename or delete these files, or change your " \
-							+ "of your output base name."
+							+ "output base name."
 		raise Exception( s_msg )
 	#end if files exist
 

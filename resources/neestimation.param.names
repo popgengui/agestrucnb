@@ -23,7 +23,7 @@
 #-----Main parameter section-----:
 #
 #processes	Number of Processes;Parameters;1;1;1;1;int;None;None;Processes;entry;None;None;None
-minallelefreq	Minimum Allele Frequency;Parameters;2;0;1;0.01;float;None;None;Minimum allele frequency;entry;None;type(x)==float and x>=0 and x<=1.0;None;enabled;None
+minallelefreq	Minimum Allele Frequency;Parameters;2;0;1;0.05;float;None;None;Minimum allele frequency;entry;None;type(x)==float and x>=0 and x<=1.0;None;enabled;None
 #This parameter was added 2017_04_14, so that the user can opt to apply the bias adjustment, but to avoid it if it is not appropriate for their input data or sampling strategy.
 do_bias_adjustment	Apply Nb bias adjustment;Parameters;2;0;2;False;bool;None;None;Apply the Nb bias adjustment using the Nb/Ne ratio, as supplied:~~  1. Set the ratio in this interface to zero to use the ratio supplied in a genepop file header in the output from a simulation.~~  2. Use the Nb/Ne ratio as set in this interface.;checkbutton;None;type(x)==bool;onChangeInNbBiasAdjustmentFlag;enabled;None
 #If an Nb/Ne ratio is not found in the genepop file header,

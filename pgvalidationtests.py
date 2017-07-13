@@ -753,7 +753,8 @@ if __name__ == "__main__":
 	LS_OPTIONAL_ARGS_LONG=[ "--expectedne" ]
 	LS_OPTIONAL_ARGS_HELP=[ "float, Ne value to use for the calculation of the expected heterozygosity " \
 								+ "( 1-( 1-1/(2Ne) )^{repro_cycle_number}), and loss of heterozygosity, " \
-								+ "( Hz_repro_cycle_i=Hz_repro_cycle_i-1 * ( 1 - 1/( 2Ne ) ) )." ]
+								+ "( Hz_repro_cycle_i=Hz_repro_cycle_i-1 * ( 1 - 1/( 2Ne ) ) ).  " \
+								+ "Default is the mean of the LDNe estimations" ]
 						
 
 
@@ -776,7 +777,7 @@ if __name__ == "__main__":
 	#end for each required argument
 
 	for idx in range( i_total_opt ):
-		o_arglist.add_argument( \
+		o_parser.add_argument( \
 				LS_OPTIONAL_ARGS_SHORT[ idx ],
 				LS_OPTIONAL_ARGS_LONG[ idx ],
 				help=LS_OPTIONAL_ARGS_HELP[ idx ],
