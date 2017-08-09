@@ -673,11 +673,16 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		f_real_tol=1e-90
 		'''
 		If the value is non-zero, then we return it's string value, 
-		otherwise we return "None".
+		If the value is zero, but the flag to do bias adjust is True,
+		then the user is indicating the bias adjustment should be
+		done using the Nb/Ne vals in the the genepop file header,
+		so we send the 0.0 string value.  Otherwise, we return "None". 
 		'''
 		if self.__nbne > f_real_tol:
 			s_value=str( self.__nbne )
-		#end if non-zero
+		elif self.__nbne == 0.0 and self.__do_bias_adjustment == True:
+			s_value=str( self.__nbne )
+		#end if non-zero, or zero but doing bias adjustment
 		
 		return s_value
 	#end __get_nbne_ratio_as_string_for_call_to_estimator
@@ -726,7 +731,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		
 		#we return the sample-scheme-specific args as a sequence of strings:
 		qs_sample_scheme_args=o_sample_args.getSampleSchemeArgsForDriver()
-
 
 		'''
 		For loci sampling (as of 2016_10_08) we have no schemes,
@@ -1157,7 +1161,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		LABEL_WIDTH=self.__get_max_longname_length() \
 				+ PAD_LABEL_WIDTH
 		ENTRY_WIDTH_NON_STRING=7
-		PARAMETERS_CBOX_WIDTH=10
+		PARAMETERS_CBOX_WIDTH=20
 		GRID_SPACE_HORIZ=10
 
 		ls_params=self.__param_set.getShortnamesOrderedBySectionNumByParamNum()
