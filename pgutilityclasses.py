@@ -309,20 +309,27 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 	DELIMITER_FOR_ID_FIELD_SCHEMES_NUMERIC_LISTS="-"
 	DELIMITER_FOR_COMMAND_ARGS=","
 
+	'''
+	These are the names used in the gui combobox,
+	and so are the values returned when corresponding
+	scheme is selected.
+	'''
+
 	SCHEME_ALL="All"
 	SCHEME_NONE="None"
 	SCHEME_PERCENT="Percent"
 	SCHEME_REMOVE="Remove-N"
 	SCHEME_CRIT="Indiv Criteria"
-	SCHEME_COHORTS="Cohorts"
+	SCHEME_COHORTS_PERC="Cohorts Percent"
+	SCHEME_COHORTS_COUNT="Cohorts Count"
 	SCHEME_RELATEDS="Relateds"
 
-
 	SCHEMES_REQUIRING_ID_FIELDS=[ SCHEME_CRIT, 
-									SCHEME_COHORTS, 
+									SCHEME_COHORTS_PERC, 
+									 SCHEME_COHORTS_COUNT,
 										SCHEME_RELATEDS ]
 
-	PARAMS_IN_ID_FIELD_SCHEMES_WITH_NUMERIC_LISTS= [ "scheme_cohort_percentages" ]
+	PARAMS_IN_ID_FIELD_SCHEMES_WITH_NUMERIC_LISTS= [ "scheme_cohortperc_percentages", "scheme_cohortcount_counts" ]
 
 	ATTR_NAME_SCHEME="sampscheme"
 	ATTR_NAME_MIN_POP_NUMBER="min_pop_number"
@@ -330,18 +337,13 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 	ATTR_NAME_MIN_POP_SIZE="min_pop_size"
 	ATTR_NAME_MAX_POP_SIZE="max_pop_size"
 	
-	'''
-	Note that in the GUI interface, all cohort
-	scheme settings include one or more percentages,
-	so we use the "cohortsperc" scheme arg for the 
-	driver, while the interface uses simply "Cohorts".
-	'''
 	DICT_DRIVER_SCHEME_NAME_BY_INTERFACE_NAME = { \
 				SCHEME_NONE : "none",
 				SCHEME_PERCENT : "percent",
 				SCHEME_REMOVE : "remove",
 				SCHEME_CRIT : "criteria",
-				SCHEME_COHORTS : "cohortsperc",
+				SCHEME_COHORTS_PERC : "cohortsperc",
+				SCHEME_COHORTS_COUNT : "cohortscount",
 				SCHEME_RELATEDS : "relateds" }
 		
 	DICT_ATTR_BY_SCHEME= { \
@@ -360,10 +362,14 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 							"max_age" : "scheme_crit_max_age",
 							"min_pop_size" : "scheme_crit_min_pop_size",
 							"max_pop_size" : "scheme_crit_max_pop_size" },
-				SCHEME_COHORTS : { "max_age" : "scheme_cohort_max_age",
-								"min_pop_size" : "scheme_cohort_min_indiv_per_gen",
-								"max_pop_size" : "scheme_cohort_max_indiv_per_gen",
-								"percentages" : "scheme_cohort_percentages" },
+				SCHEME_COHORTS_PERC : { "max_age" : "scheme_cohortperc_max_age",
+								"min_pop_size" : "scheme_cohortperc_min_indiv_per_gen",
+								"max_pop_size" : "scheme_cohortperc_max_indiv_per_gen",
+								"percentages" : "scheme_cohortperc_percentages" },
+				SCHEME_COHORTS_COUNT :{ "max_age" : "scheme_cohortcount_max_age",
+								"min_pop_size" : "scheme_cohortcount_min_indiv_per_gen",
+								"max_pop_size" : "scheme_cohortcount_max_indiv_per_gen",
+								"counts" : "scheme_cohortcount_counts" },
 				SCHEME_RELATEDS : { "percent_relateds" : "scheme_relateds_percent_relateds",
 							"min_pop_size" : "scheme_relateds_min_indiv_per_gen",
 							"max_pop_size" : "scheme_relateds_max_indiv_per_gen" } }
@@ -374,7 +380,8 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 				SCHEME_PERCENT : [ "percentages", "min_pop_size", "max_pop_size"  ],
 				SCHEME_REMOVE : [ "n", "min_pop_size", "max_pop_size"  ],
 				SCHEME_CRIT : [ "min_age" , "max_age", "min_pop_size", "max_pop_size" ],
-				SCHEME_COHORTS : [ "max_age" , "percentages", "min_pop_size", "max_pop_size" ],
+				SCHEME_COHORTS_PERC : [ "max_age" , "percentages", "min_pop_size", "max_pop_size" ],
+				SCHEME_COHORTS_COUNT : [ "max_age" , "counts", "min_pop_size", "max_pop_size" ],
 				SCHEME_RELATEDS : [ "percent_relateds", "min_pop_size",  "max_pop_size" ] }
 		
 	CRIT_EXPRESSIONS_IN_ATTR_ORDER=[ "%age% >= ", "%age% <=" ]
@@ -397,7 +404,10 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 										and dsv[ "min_age" ] <= dsv[ "max_age" ]
 										and dsv[ "min_pop_size" ] > 0 \
 										and dsv[ "min_pop_size" ] <= dsv [ "max_pop_size" ],					
-					SCHEME_COHORTS : lambda dsv : dsv[ "max_age" ] >= 0  \
+					SCHEME_COHORTS_PERC : lambda dsv : dsv[ "max_age" ] >= 0  \
+										and dsv[ "min_pop_size" ] >= 0 \
+										and dsv[ "min_pop_size" ] <= dsv [ "max_pop_size" ] ,
+					SCHEME_COHORTS_COUNT : lambda dsv : dsv[ "max_age" ] >= 0  \
 										and dsv[ "min_pop_size" ] >= 0 \
 										and dsv[ "min_pop_size" ] <= dsv [ "max_pop_size" ] ,
 					SCHEME_RELATEDS : lambda dsv : dsv[  "percent_relateds" ] >= 0 \
@@ -418,7 +428,8 @@ class NeEstimatorSamplingSchemeParameterManager( object ):
 					SCHEME_PERCENT : POP_SIZE_RANGE_MESSAGE,
 					SCHEME_REMOVE : POP_SIZE_RANGE_MESSAGE,
 					SCHEME_CRIT : POP_AGE_RANGE_MESSAGE + ", " + POP_SIZE_RANGE_MESSAGE,
-					SCHEME_COHORTS : "max age >= 0, " + POP_SIZE_RANGE_MESSAGE,
+					SCHEME_COHORTS_PERC : "max age >= 0, " + POP_SIZE_RANGE_MESSAGE,
+					SCHEME_COHORTS_COUNT : "max age >= 0, " + POP_SIZE_RANGE_MESSAGE,
 					SCHEME_RELATEDS : PERCENT_RELATEDS_RANGE_MESSAGE + POP_SIZE_RANGE_MESSAGE }
 
 	def __init__( self, o_pgguineestimator, s_attr_prefix ):

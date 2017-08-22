@@ -89,12 +89,38 @@ class PGOpSimuPop( modop.APGOperation ):
 	'''
 	MAX_TRIES_AT_NB=100
 
-	def __init__(self, o_input, o_output, b_compress_output=True, 
+	'''
+	2017_08_04.  New parameter the class object usess
+	to determine which kind of output files are produced,
+	the original set of 3 files *gen *sim *db, plus genepop,
+	or just a genepop file.
+	'''
+	OUTPUT_ORIG=1
+	OUTPUT_GENEPOP_ONLY=2
+	'''
+	2017_08_05.  This output mode will write the 
+	sim-generated pop section only if it meets
+	a mean-heterozygosity criteria.  Our motivating 
+	case is to write pops only if they have a 
+	at or near a target value, such as 0.3 for SNPs.
+	'''
+	OUTPUT_GENEPOP_HET_FILTERED=3
+	HET_FILTER_ATTR_NAMES_IN_ORDER = [ "min_mean_heterozygosity", 
+										"max_mean_heterozygosity",
+										"total_filtered_pops_to_save" ]
+
+	HET_FILTER_PARAM_TYPES_IN_ORDER= [ float, float, int ]
+	POP_HET_FILTER_STRING_DELIM=","
+
+
+	def __init__(self, o_input, o_output, b_compress_output=False, 
 									b_remove_db_gen_sim_files=False,
 									b_write_input_as_config_file=True,
 									b_do_gui_messaging=False,
 									b_write_nb_and_ages_files=False,
-									b_is_replicate_1=False ):  
+									b_is_replicate_1=False,
+									i_output_mode=OUTPUT_GENEPOP_ONLY,
+									s_pop_het_filter_string=None ):  
 		'''
 			o_input, a PGInputSimuPop object
 			o_output, a PGOutputSimuPop object
@@ -130,15 +156,20 @@ class PGOpSimuPop( modop.APGOperation ):
 				do_pgopsimupop_replicate_from_files , to produce
 				the age counts and pwob nb values files only for
 				the first replicate.
-
-
 			b_is_replicate_1.  This param was added	2017_06_11 so that
 				we can ignore sending a (blocking) gui info messaget
 				about the lambda warning in non-first
 				replicates (see warning in __createSinglePop).  This avoids
 				the gui producing a series of blocking warning windows, one
 				for each replicate, restating the warning.
-		'''
+			i_output_mode.  This param was added 2017_08_04 to speed up
+				the output and skip writing the *gen *db and *sim files used
+				by Tiago in his original pipeline.  
+			s_pop_het_filter_string.  This param was added 2017_08_06 to enable
+				output of genepop files with sim pops that are within a range
+				of mean (expected) heterozygosity mean (sum_all_alleles( freq^2) ) ).		
+				the caluclation is done by a call in def __outputAge
+			'''
 
 		self.__guiinfo=None
 		self.__guierr=None
@@ -167,6 +198,28 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__write_input_as_config_file=b_write_input_as_config_file
 		self.__write_nb_and_age_count_files=b_write_nb_and_ages_files
 		self.__is_first_replicate=b_is_replicate_1
+		
+		'''
+		2017_08_04.  In preperation for changing the 
+		output to offer a mode that skips  writing the 
+		*gen, *sim and *db files, and just write the genepop directly
+		as pops are created.
+		'''
+		self.__output_mode=i_output_mode
+
+
+		'''
+		2017_08_05.  In preparation fo implementing
+		output mode OUTPUT_GENEPOP_HET_FILTERED.  These
+		members will be used to get the range and total
+		saved pops for a filter based on a pop's 
+		heterozygosity.
+		'''
+		self.__pop_het_filter_string=s_pop_het_filter_string
+		self.min_mean_heterozygosity=None
+		self.max_mean_heterozygosity=None
+		self.total_filtered_pops_to_save=None
+		self.total_filtered_pops_saved=None
 
 		#if this object is created in one of multiple
 		#python so-called "Processes" objects from class
@@ -209,6 +262,15 @@ class PGOpSimuPop( modop.APGOperation ):
 		
 		self.__file_for_nb_records=None
 		self.__file_for_age_counts=None
+		'''
+		2017_08_08. This file will be created
+		when the output mode is OUTPUT_GENEPOP_HET_FILTERED,
+		to record the cycle number and het value for the
+		pops recorded in the output genepop file.	
+		See def __set_het_filter_params for its creation. 
+		'''
+		self.__file_for_het_filter=None
+
 		
 		if self.__write_nb_and_age_count_files:
 			s_nb_values_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
@@ -229,7 +291,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		is used by def __harvest
 		'''
 		self.__nb_and_census_adjustment_by_cycle=None
-
+		
 		return
 	#end __init__
 
@@ -257,6 +319,67 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	#end if use gui messaging
 
+	def __setup_genepop_file( self ):
+		self.output.openGenepop()
+		f_this_nbne=0.0
+		if hasattr( self.input, "NbNe" ):
+			f_this_nbne=self.input.NbNe
+		#end if we have an NbNe value, use it.
+
+		i_total_loci=self.input.numMSats + self.input.numSNPs
+
+		self.output.writeGenepopFileHeaderAndLociList( \
+												self.output.genepop,
+												i_total_loci,
+												f_this_nbne,
+												b_do_compress=False )
+		return
+	#end __setup_genepop_file
+
+	def __set_het_filter_params( self ):
+
+		mycl=PGOpSimuPop
+
+		if self.__pop_het_filter_string is None:
+			s_msg="In PGOpSimuPop instance, " \
+						+ "def __set_het_filter_params, " \
+						+ "there is not pop het filter string."
+			raise Exception( s_msg )
+		#end if no string
+
+		i_num_fields_expected=len( mycl.HET_FILTER_ATTR_NAMES_IN_ORDER )
+		ls_filter_params=self.__pop_het_filter_string.split( \
+										mycl.POP_HET_FILTER_STRING_DELIM )
+		i_num_param_values=len( ls_filter_params )
+
+		if i_num_fields_expected != i_num_param_values:
+			s_msg="In PGOpSimuPop instance, " \
+					+ "def __set_het_filter_params, " \
+					+ "the program expects " \
+					+ str( i_num_fields_expected ) \
+					+ "parameters for the heterozygosity " \
+					+ "filter, but received " \
+					+ str( i_num_param_values ) + "."
+			raise Exception( s_msg )
+		#end if values number other than expected 
+
+		for idx in range(  len( ls_filter_params ) ):
+			s_value=ls_filter_params[ idx ]
+			v_value_typed=mycl.HET_FILTER_PARAM_TYPES_IN_ORDER[idx]( s_value )
+			setattr( self, mycl.HET_FILTER_ATTR_NAMES_IN_ORDER[ idx ], v_value_typed )
+		#end for each param
+
+		#This file will record the cycle number and heterozygosity value
+		#for each recorded pop:
+
+		s_het_filter_info_file_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "het_filter_info" ]
+		self.__file_for_het_filter=open( self.output.basename + s_het_filter_info_file_ext, 'w' )
+		#counter used to compare to the last attribute
+		#passed in the het filter string (total pops to save):
+		self.total_filtered_pops_saved=0
+
+		return
+	#end __set_het_filter_params
 
 	def prepareOp( self, s_tag_out="" ):
 		'''
@@ -280,9 +403,22 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			self.output.basename=s_basename_without_replicate_number + s_tag_out
 
-			self.output.openOut()
-			self.output.openErr()
-			self.output.openMegaDB()
+			if self.__output_mode == PGOpSimuPop.OUTPUT_ORIG:
+				self.output.openOut()
+				self.output.openErr()
+				self.output.openMegaDB()
+			elif self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_ONLY:
+				self.__setup_genepop_file()	
+			elif self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED:
+				self.__setup_genepop_file()
+				self.__set_het_filter_params()
+			else:
+				s_msg="In PGOpSimuPop instance, " \
+						+ "def prepareOp, " \
+						+ "unknown value for output mode: " \
+						+ str( self.__output_mode ) + "."
+				raise Exception( s_msg )
+			#end if orig out, else gp only, else error.
 
 			self.__createSim()
 			self.__is_prepared=True
@@ -322,32 +458,54 @@ class PGOpSimuPop( modop.APGOperation ):
 				necessitated by python3, which otherwise produced emtpy files. Note
 				that a None value will simply return false for the hasattr test.
 				'''
-				for v_this in [ self.__file_for_nb_records, self.__file_for_age_counts ]:
+				for v_this in [ self.__file_for_nb_records, self.__file_for_age_counts, self.__file_for_het_filter ]:
 					if hasattr( v_this, "close" ):
 						v_this.close()
 					#end if a closable object, close it
 				#for each of the test file attributes
+				
+				if self.__output_mode == PGOpSimuPop.OUTPUT_ORIG:
+					self.output.out.close()
+					self.output.err.close()
+					self.output.megaDB.close()
 
-				self.output.out.close()
-				self.output.err.close()
-				self.output.megaDB.close()
+					#note as of 2016_08_23, we don't compress the config file
+					if self.__compress_output:
+						s_conf_file=self.output.confname
+						s_genepop_file=self.output.genepopname
+						self.output.bz2CompressAllFiles( \
+									ls_files_to_skip=[ s_genepop_file,  s_conf_file ] )
+					#end if compress
 
-				#note as of 2016_08_23, we don't compress the config file
-				if self.__compress_output:
-					s_conf_file=self.output.confname
-					self.output.bz2CompressAllFiles( ls_files_to_skip=[  s_conf_file ] )
-				#end if compress
+					self.__write_genepop_file()
 
-				self.__write_genepop_file()
+					if self.__remove_db_gen_sim_files:
+						#note that this call removes both compressed
+						#and uncompressed versions of these files
+						#(see PGOutputSimuPop code and comments)
+						for s_extension in [ "sim", "gen", "db" ]:
+							self.output.removeOutputFileByExt( s_extension )
+						#end for output files *sim, *gen, *db
+					#end if we are to remove the non-genepop files (gen, sim, db)
 
-				if self.__remove_db_gen_sim_files:
-					#noite that this call removes both compressed
-					#and uncompressed versions of these files
-					#(see PGOutputSimuPop code and comments)
-					for s_extension in [ "sim", "gen", "db" ]:
-						self.output.removeOutputFileByExt( s_extension )
-					#end for output files *sim, *gen, *db
-				#end if we are to remove the non-genepop files (gen, sim, db)
+				elif self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_ONLY:
+
+					self.output.genepop.close()
+
+					if self.__compress_output:
+						'''
+						Note that when PGOpSimuPop is in genepop-only
+						output mode, the *gen, *sim, *db files do
+						not exist.  If called without excluding them
+						the def bz2CompressAllFiles will throw an error.
+						'''
+						self.output.bz2CompressAllFiles( \
+									ls_files_to_skip=[ self.output.genname,
+														self.output.simname,
+														self.output.dbname,
+														self.output.confname ] )
+					#end if compress
+				#end if orig output mode, else genepop output mode
 			else:
 				raise Exception( "PGOpSimuPop object not prepared to operate (see def prepareOp)." )
 			#end  if prepared, do op else exception
@@ -367,46 +525,55 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end doOp
 
 	def __write_genepop_file( self ):
-		i_num_msats=0
-		i_num_snps=0
-		
-		if hasattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS ):
-			i_num_msats=getattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS )
-		#end if input has num msats
 
-		if hasattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_SNPS ):
-			i_num_snps=getattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_SNPS )
-		#end if input has number of snps
+		if self.__output_mode == PGOpSimuPop.OUTPUT_ORIG:
+			i_num_msats=0
+			i_num_snps=0
+			
+			if hasattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS ):
+				i_num_msats=getattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS )
+			#end if input has num msats
 
-		i_total_loci=i_num_msats+i_num_snps
+			if hasattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_SNPS ):
+				i_num_snps=getattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_SNPS )
+			#end if input has number of snps
 
-		if i_total_loci == 0:
-			s_msg= "In %s instance, cannot write genepop file.  MSats and SNPs total zero."  \
-					% type( self ).__name__ 
-			sys.stderr.write( s_msg + "\n" )
+			i_total_loci=i_num_msats+i_num_snps
+
+			if i_total_loci == 0:
+				s_msg= "In %s instance, cannot write genepop file.  MSats and SNPs total zero."  \
+						% type( self ).__name__ 
+				sys.stderr.write( s_msg + "\n" )
+			else:
+				#writes all loci values 
+				'''
+				2017_05_30.  To accomodate new module pgdrivesimulation.py, which
+				reads in a conf and does not require a life table, we default an
+				NbNe value to zero if the conf file does not supply it.  Note that
+				this parameter (Nb/Ne ratio) is not (currently) required for the 
+				simulation, but is passed along in the genepop file header to allow 
+				for an Nb bias adjustment as read-in and calculated by the 
+				pgdriveneestimator.py module.
+				'''
+				f_this_nbne=0.0
+
+				if hasattr( self.input, "NbNe" ):
+					f_this_nbne=self.input.NbNe
+				#end if we have an NbNe value, use it.
+
+				self.output.gen2Genepop( 1, 
+							i_total_loci, 
+							b_pop_per_gen=True,
+							b_do_compress=False,
+							f_nbne_ratio=f_this_nbne )
+			#end if no loci reported
 		else:
-			#writes all loci values 
-			'''
-			2017_05_30.  To accomodate new module pgdrivesimulation.py, which
-			reads in a conf and does not require a life table, we default an
-			NbNe value to zero if the conf file does not supply it.  Note that
-			this parameter (Nb/Ne ratio) is not (currently) required for the 
-			simulation, but is passed along in the genepop file header to allow 
-			for an Nb bias adjustment as read-in and calculated by the 
-			pgdriveneestimator.py module.
-			'''
-			f_this_nbne=0.0
-
-			if hasattr( self.input, "NbNe" ):
-				f_this_nbne=self.input.NbNe
-			#end if we have an NbNe value, use it.
-
-			self.output.gen2Genepop( 1, 
-					i_total_loci, 
-					b_pop_per_gen=True,
-					b_do_compress=False,
-					f_nbne_ratio=f_this_nbne )
-		#end if no loci reported
+			s_msg="In PGOpSimuPop instance, def __write_genepop_file, " \
+						+ "this def was called but he output mode was " \
+						+ "not for the original mode."
+			raise Exception( s_msg )
+		#end if output mode is orig else not
+		return
 	#end __write_genepop_file
 
 	def deliverResults( self ):
@@ -583,13 +750,39 @@ class PGOpSimuPop( modop.APGOperation ):
 		reportOps=self.__reportOps
 		oExpr=self.__oExpr
 
+		##### rem out to add stopOp option 2017_08_07
+#		sim.evolve( initOps=genInitOps + popInitOps + ageInitOps,
+#					preOps=popPreOps + genPreOps + agePreOps,
+#					postOps=popPostOps + reportOps + agePostOps,
+#					matingScheme=mateOp,
+#					gen=gens)
+
+
+		stopOp=[]
+
+		if self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED:
+			stopOp=[ sp.PyOperator( func=self.__keep_collecting_filtered_pops  ) ]
+		#end if we are writing het-value-filtered pops, then we stop after the user-supplied limit
+		#is reached.
+
 		sim.evolve( initOps=genInitOps + popInitOps + ageInitOps,
 					preOps=popPreOps + genPreOps + agePreOps,
-					postOps=popPostOps + reportOps + agePostOps,
+					postOps=popPostOps + reportOps + agePostOps + stopOp,
 					matingScheme=mateOp,
 					gen=gens)
+		##### end rem out and revise the evole op set by adding a stop when filtering pops by het value.
 
 	#end __evolveSim
+
+	def __keep_collecting_filtered_pops( self, pop ):
+		'''
+		This pyOperator is used when the output mode is OUTPUT_GENEPOP_ONLY
+		'''
+
+		b_result=self.total_filtered_pops_saved < self.total_filtered_pops_to_save
+
+		return  b_result
+	#end keep_collecting_filtered_pops
 
 	def __calcDemo( self, gen, pop ):
 
@@ -1469,124 +1662,197 @@ class PGOpSimuPop( modop.APGOperation ):
 		return a
 	#end __zeroC
 
+	def __get_mean_heterozygosity_over_all_loci( self, pop ):
+		lf_hetvals=[]
+		for idx in range( self.input.numSNPs + self.input.numMSats ):
+			sp.stat(pop, alleleFreq=[idx])
+			lf_hetvals.append( 1 - sum([x*x for x in pop.dvars().alleleFreq[idx].values()]) )
+		#end for each loci
+
+		return numpy.mean( lf_hetvals )
+	#end __get_mean_heterozygosity_over_all_loci
+
 	def __outputAge( self, pop ):
-		gen = pop.dvars().gen
-		'''
-		2017_04_05.  Now using startSave, which was
-		formerly suppressed and always set to zero.
-		Since the GUI offers it and users excpect
-		a 1-based count of cycles, we subtract
-		one from the value to get the proper cycle
-		as the start.
-		'''
-		if gen < ( self.input.startSave - 1 ):
-			return True
-		#end if gen < startSave
+		try:
 
-		rep = pop.dvars().rep
+			gen = pop.dvars().gen
+			'''
+			2017_04_05.  Now using startSave, which was
+			formerly suppressed and always set to zero.
+			Since the GUI offers it and users excpect
+			a 1-based count of cycles, we subtract
+			one from the value to get the proper cycle
+			as the start.
+			'''
+			if gen < ( self.input.startSave - 1 ):
+				return True
+			#end if gen < startSave
 
-		'''
-		Testing age counts per gen
-		'''
-		totals_by_age={}
-
-		for i in pop.individuals():
-			self.output.out.write("%d %d %d %d %d %d %d\n" % (gen, rep, i.ind_id, i.sex(),
-								i.father_id, i.mother_id, i.age))
+			rep = pop.dvars().rep
 
 			'''
-			As of 2016_08_24:
-			Change to Tiago's code to facilitate converting the *gen file 
-			(i.e. the file whose handle is output.err), 
-			to a genepop file (see def __write_genepop file, 
-			we simply write indiv ID and alleles for all individuals
-			in this pop to the *gen file, instead of those only for the 
-			newborns -- hence we comment out the if statement, and de-indent 
-			it's body
-
-			As of 2016_08_31, reverted to the original code, so that
-			as before the genepop file will be written with newborns
-			only past the first cycle.  This is for the purposes of Congen
-			conference, to do Nb estimates on the newborn cohort. Once
-			genepop subsampling by individal demographics is implemented,
-			we'll once again write the genpop to include all individuals,
-			(then do subsampling on the full genepop) but will also include the 
-			parentage and age (and other?) info as part of the individual 
-			ID (using both the *gen (output.err) and *sim (output.err) files to 
-			create the genepop.  It may be that we'll just keep this original 
-			filter on the gen, and create the genepop using the indiv list to 
-			get the individual ids, and this gen output to lookup genotypes.
-			
-
-			As of 2016_09_01, combining the age, sex, and parantage info into the indiv id
-			for the first (indiv id) field in the *gen file.  Note above that this info
-			is also written to the *sim file.  Putting it in the gen file will allow
-			the gen file to be the sole source for writing  gen2genepop conversion
-			in instances of type PGOutputSimuPop.  Also, we will again eliminate
-			the filter used in writing the gen file indivs/cycle, and to 
-			apply age or other filter conditions downstream from this output (using
-			instances of class objects in new module genepopindividualid.py). Hence,
-			once again we rem out the original filter on age for the gen-file indiv/generation
+			Testing age counts per gen
 			'''
-#			if i.age == 1 or gen == 0:
+			totals_by_age={}
 
-			s_id_fields=PGOpSimuPop.DELIMITER_INDIV_ID.join( [ \
-						str( i.ind_id ), str( i.sex() ), str( i.father_id ),
-						str( i.mother_id ), str( i.age ) ] )
+			if self.__output_mode==PGOpSimuPop.OUTPUT_GENEPOP_ONLY:
+				self.output.genepop.write( "pop\n" )
+			elif self.__output_mode==PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED:
 
-			self.output.err.write("%s %d " % (s_id_fields, gen))
+				f_mean_het=self.__get_mean_heterozygosity_over_all_loci( pop )
 
-			for pos in range(len(i.genotype(0))):
-				a1 = self.__zeroC(i.allele(pos, 0))
-				a2 = self.__zeroC(i.allele(pos, 1))
-				self.output.err.write(a1 + a2 + " ")
-			#end for pos in range
-
-			self.output.err.write("\n")
-			
-			#end if age == 1 or gen == 0
-
-			'''
-			End of change to Tiago's code.
-			'''
-
-			'''
-			2017_02_07.  We are recording effects on the age 
-			structure of using the culls __equalSexCull 
-			and __harvest.
-			'''
-			if int( i.age ) in totals_by_age:
-				totals_by_age[ int(i.age) ] += 1
-			else:
-				totals_by_age[ int( i.age ) ] = 1
-			# end if age already recorded, else new age
-
-		#end for i in pop
-
-
-		'''
-		2017_02_07.  To test age structure per gen.
-		'''
-		if self.__write_nb_and_age_count_files:
-			ls_entry=[ str( gen ) ]
-			
-			for idx in range( self.__total_ages_for_age_file ):
-				i_thisage=idx+1
-				if i_thisage in totals_by_age: 
-					s_this_val=str( totals_by_age[ i_thisage ]  )
+				if f_mean_het >= self.min_mean_heterozygosity \
+							and f_mean_het <= self.max_mean_heterozygosity:
+					self.output.genepop.write( "pop\n" )
+					self.total_filtered_pops_saved += 1
+					self.__file_for_het_filter.write( str( gen ) + "\t" \
+													+ str( f_mean_het ) + "\n" )
 				else:
-					s_this_val=str(0)
-				#end if age has a total
+					return True
+				#end if het in range, else return.
+			#end if output mode is genepop only, else genepop with pop het filter
 
-				ls_entry.append( s_this_val )
+			for i in pop.individuals():
+				'''
+				2017_08_04. I'm adding a new output mode, to 
+				output genepop file only.  So, first, we check
+				mode, then, if original, we do the code from
+				the original.
+				'''
+				if self.__output_mode==PGOpSimuPop.OUTPUT_ORIG:
+					self.output.out.write("%d %d %d %d %d %d %d\n" % (gen, rep, i.ind_id, i.sex(),
+										i.father_id, i.mother_id, i.age))
 
-			#end for each possible age
+					'''
+					As of 2016_08_24:
+					Change to Tiago's code to facilitate converting the *gen file 
+					(i.e. the file whose handle is output.err), 
+					to a genepop file (see def __write_genepop file, 
+					we simply write indiv ID and alleles for all individuals
+					in this pop to the *gen file, instead of those only for the 
+					newborns -- hence we comment out the if statement, and de-indent 
+					it's body
 
-			s_entry="\t".join( ls_entry )
+					As of 2016_08_31, reverted to the original code, so that
+					as before the genepop file will be written with newborns
+					only past the first cycle.  This is for the purposes of Congen
+					conference, to do Nb estimates on the newborn cohort. Once
+					genepop subsampling by individal demographics is implemented,
+					we'll once again write the genpop to include all individuals,
+					(then do subsampling on the full genepop) but will also include the 
+					parentage and age (and other?) info as part of the individual 
+					ID (using both the *gen (output.err) and *sim (output.err) files to 
+					create the genepop.  It may be that we'll just keep this original 
+					filter on the gen, and create the genepop using the indiv list to 
+					get the individual ids, and this gen output to lookup genotypes.
+					
 
-			self.__file_for_age_counts.write(  s_entry + "\n" )
-		#end if we are to write the age counts file
+					As of 2016_09_01, combining the age, sex, and parantage info into the indiv id
+					for the first (indiv id) field in the *gen file.  Note above that this info
+					is also written to the *sim file.  Putting it in the gen file will allow
+					the gen file to be the sole source for writing  gen2genepop conversion
+					in instances of type PGOutputSimuPop.  Also, we will again eliminate
+					the filter used in writing the gen file indivs/cycle, and to 
+					apply age or other filter conditions downstream from this output (using
+					instances of class objects in new module genepopindividualid.py). Hence,
+					once again we rem out the original filter on age for the gen-file indiv/generation
+					'''
+		#			if i.age == 1 or gen == 0:
 
+					s_id_fields=PGOpSimuPop.DELIMITER_INDIV_ID.join( [ \
+								str( i.ind_id ), str( i.sex() ), str( i.father_id ),
+								str( i.mother_id ), str( i.age ) ] )
+
+					self.output.err.write("%s %d " % (s_id_fields, gen))
+
+					for pos in range(len(i.genotype(0))):
+						a1 = self.__zeroC(i.allele(pos, 0))
+						a2 = self.__zeroC(i.allele(pos, 1))
+						self.output.err.write(a1 + a2 + " ")
+					#end for pos in range
+
+					self.output.err.write("\n")
+					
+					#end if age == 1 or gen == 0
+
+					'''
+					End of change to Tiago's code.
+					'''
+				elif self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_ONLY:
+
+					s_id_fields=PGOpSimuPop.DELIMITER_INDIV_ID.join( [ \
+								str( i.ind_id ), str( i.sex() ), str( i.father_id ),
+								str( i.mother_id ), str( i.age ) ] )
+
+					self.output.genepop.write( "%s" % (s_id_fields + ", " ) )
+
+					for pos in range(len(i.genotype(0))):
+						a1 = self.__zeroC(i.allele(pos, 0))
+						a2 = self.__zeroC(i.allele(pos, 1))
+						self.output.genepop.write(a1 + a2 + " ")
+					#end for pos in range
+
+					self.output.genepop.write( "\n" )
+
+				elif self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED \
+								or self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED:
+
+					s_this_pop_line=PGOpSimuPop.DELIMITER_INDIV_ID.join( [ \
+								str( i.ind_id ), str( i.sex() ), str( i.father_id ),
+								str( i.mother_id ), str( i.age ) ] )
+
+					s_this_pop_line += ", "
+
+					for pos in range(len(i.genotype(0))):
+						a1 = self.__zeroC(i.allele(pos, 0))
+						a2 = self.__zeroC(i.allele(pos, 1))
+						s_this_pop_line+=(a1 + a2 + " ")
+					#end for pos in range
+
+					self.output.genepop.write( s_this_pop_line + "\n" )
+
+
+				#end if output mode original, else genepop only or genepop filtered
+
+
+				'''
+				2017_02_07.  We are recording effects on the age 
+				structure of using the culls __equalSexCull 
+				and __harvest.
+				'''
+				if int( i.age ) in totals_by_age:
+					totals_by_age[ int(i.age) ] += 1
+				else:
+					totals_by_age[ int( i.age ) ] = 1
+				# end if age already recorded, else new age
+
+			#end for i in pop
+
+			'''
+			2017_02_07.  To record age structure per gen.
+			'''
+			if self.__write_nb_and_age_count_files:
+				ls_entry=[ str( gen ) ]
+				
+				for idx in range( self.__total_ages_for_age_file ):
+					i_thisage=idx+1
+					if i_thisage in totals_by_age: 
+						s_this_val=str( totals_by_age[ i_thisage ]  )
+					else:
+						s_this_val=str(0)
+					#end if age has a total
+
+					ls_entry.append( s_this_val )
+
+				#end for each possible age
+
+				s_entry="\t".join( ls_entry )
+
+				self.__file_for_age_counts.write(  s_entry + "\n" )
+			#end if we are to write the age counts file
+		except  Exception as oex:
+			raise oex
+		#end try...except
 		return True
 	#end __outputAge
 
@@ -1604,12 +1870,18 @@ class PGOpSimuPop( modop.APGOperation ):
 			return True
 		#end if gen < startSave
 
-		for i in pop.individuals():
-			if i.age == 0:
-				self.output.megaDB.write("%d %d %d %d %d\n" % (gen, i.ind_id, i.sex(),
-								i.father_id, i.mother_id))
-			#end if age == 0
-		#end for i in pop
+		'''
+		We write the db info only if we're in orignial output mode:
+		'''
+		if self.__output_mode == PGOpSimuPop.OUTPUT_ORIG:
+
+			for i in pop.individuals():
+				if i.age == 0:
+					self.output.megaDB.write("%d %d %d %d %d\n" % (gen, i.ind_id, i.sex(),
+									i.father_id, i.mother_id))
+				#end if age == 0
+			#end for i in pop
+		#end if output mode is original	
 
 		return True
 	#end __outputMega
@@ -1816,7 +2088,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		if self.output:
 
-			for s_outfile in [ "out", "err", "megaDB" ]:	
+			for s_outfile in [ "out", "err", "megaDB", "genepop" ]:	
 				if hasattr( self.output, s_outfile ):
 					o_file=getattr( self.output, s_outfile )
 					if hasattr( o_file, "close" ):
@@ -1825,7 +2097,7 @@ class PGOpSimuPop( modop.APGOperation ):
 				#end if output has the outfile
 			#end close output files, preperatory to removing
 		
-			for s_outfile_attr in [ "simname", "genname", "dbname" ]:
+			for s_outfile_attr in [ "simname", "genname", "dbname", "genepopname" ]:
 				if hasattr( self.output, s_outfile_attr ):
 					s_outfile_name=getattr( self.output, s_outfile_attr )
 					#This utility def only removes a file (files) if it exists:
@@ -1870,6 +2142,13 @@ class PGOpSimuPop( modop.APGOperation ):
 			#end if we have a writable age counts item
 		#end if we have an age counts file
 
+		if self.__file_for_het_filter is not None:
+			if hasattr( self.__file_for_het_filter, "write" ):
+				self.__file_for_het_filter.write( s_fail_notice )
+				self.__file_for_het_filter.close()
+			#end if we have a writable age counts item
+		#end if we have an age counts file
+
 		return
 	#end __cleanup_on_failure
 #end class PGOpSimuPop
@@ -1894,8 +2173,6 @@ if __name__ == "__main__":
 
 	import time
 	import argparse	as ap
-
-
 
 	LS_ARGS_SHORT=[ "-l", "-c" , "-p" , "-o"  ]
 	LS_ARGS_LONG=[ "--lifetable" , "--configfile", "--paramnamesfile", "--outputbase" ]

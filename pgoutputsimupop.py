@@ -66,6 +66,10 @@ class PGOutputSimuPop( object ):
 	so that, if pgutilities def, remove_simulation_replicate_output_files
 	is called on a cancelled simulation run, these files will also
 	be removed.
+
+
+	2017_08_08.  Adding to output file etendsions a file created when
+	the new PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED output mode is used.
 	'''
 	
 	DICT_OUTPUT_FILE_EXTENSIONS={ "simfile":"sim",
@@ -74,7 +78,8 @@ class PGOutputSimuPop( object ):
 									"conffile":"conf",
 									"genepop":"genepop",
 									"age_counts":"_age_counts_by_gen.tsv",
-									"sim_nb_estimates":"_nb_values_calc_by_gen.tsv" }
+									"sim_nb_estimates":"_nb_values_calc_by_gen.tsv",
+									"het_filter_info": "_het_value_by_cycle_number.tsv" }
 
 	COMPRESSION_FILE_EXTENSION="bz2"
 
@@ -88,7 +93,14 @@ class PGOutputSimuPop( object ):
 		self.err=None
 		self.megaDB=None
 		self.conf=None
-
+		'''
+		2017_08_04.  Adding genepop as a member
+		file name, after creating new output mode
+		in class PGOpSimuPop, that writes only
+		a genepop file.  Note that is mode will
+		obviate any call to def gen2Genepop.
+		'''
+		self.genepop=None
 		return
 	#end def __init__
 	
@@ -104,11 +116,19 @@ class PGOutputSimuPop( object ):
 				+ PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "dbfile" ]
 		self.__confname=s_output_files_prefix + "." \
 				+ PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "conffile" ]
+		'''
+		2017_08_04.  Adding the genepop file name to the member file names.
+		This is to aid the use of new PGOpSimuPop output mode that writes
+		genepop files only.
+		'''
+		self.__genepopname=s_output_files_prefix + "." \
+				+ PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "genepop" ]
 
 		self.__genfile=self.__errname
 		self.__simfile=self.__outname
 		self.__dbfile=self.__megadbname
 		self.__conffile=self.__confname
+		self.__genepopfile=self.__genepopname
 
 		return
 	#end __set_file_names
@@ -120,6 +140,7 @@ class PGOutputSimuPop( object ):
 		del self.__errname
 		del self.__megadbname
 		del self.__confname
+		del self.__genepopname
 
 		return
 	#end __set_file_names
@@ -128,7 +149,6 @@ class PGOutputSimuPop( object ):
 
 		b_uncompressed_exists=os.path.isfile( s_name )
 		b_compressed_exists=os.path.isfile( s_name + ".bz2" )
-
 
 		if b_uncompressed_exists:
 			if b_compressed_exists:
@@ -171,6 +191,7 @@ class PGOutputSimuPop( object ):
 		else:
 			self.out=open( self.__outname, 'w' )
 		#end if file exists, else open
+		return
 	#end openOut
 
 	def openErr(self):
@@ -179,6 +200,7 @@ class PGOutputSimuPop( object ):
 		else:
 			self.err=open( self.__errname, 'w' )
 		#end if file exists, else open
+		return
 	#end openErr
 
 	def openMegaDB(self):
@@ -187,7 +209,22 @@ class PGOutputSimuPop( object ):
 		else:
 			self.megaDB=open( self.__megadbname, 'w' )
 		#end if file exists, else open
+		return
 	#end openMegaDB
+
+	'''
+	2017_08_04 This def was added to facilitate the
+	new output mode in PGOpSimupop code that writes
+	only a genepop file, as pops are created.
+	'''
+	def openGenepop( self ):
+		if self.__file_exists( self.__genepopname ):
+			self.__raise_file_exists_error( self.__genepopname )
+		else:
+			self.genepop=open( self.__genepopname, 'w' )
+		#end if file exists esle error
+		return
+	#end openGenepop
 	
 	def copyMe( self ):
 		o_copy=PGOutputSimuPop( self.__basename )
@@ -211,7 +248,7 @@ class PGOutputSimuPop( object ):
 		which warns of loss of meta file info (owner/group ACLs) when using shutil.copy() or shutil.copy2().  Unclear
 		whether this applies to the copyfileobj, though my few tests showd all of these were retained.
 		'''
-		for s_myfile in [ self.__outname, self.__errname, self.__megadbname, self.__confname ]:
+		for s_myfile in [ self.__outname, self.__errname, self.__megadbname, self.__confname, self.__genepopname ]:
 			
 			if s_myfile in ls_files_to_skip:
 				pass
@@ -237,6 +274,51 @@ class PGOutputSimuPop( object ):
 			#end if file absent, else exists
 		#end for each file
 	#end bz2CompressAllFiles
+
+	def writeGenepopFileHeaderAndLociList( self, 
+								o_genepopfile,
+								i_num_loci,
+								f_nbne_ratio = None, 
+								b_do_compress=False ):
+	
+		'''
+		2017_08_04. Code to write the genpop file header
+		and loci list was moved here from def gen2Genepop
+		so that it can also be called from a PGOpSimuPop object
+		that is writing the genepop file using the new
+		mode that skips the intermediate *.gen, *.sim , etc.
+		files.
+		'''
+
+		#write header and loci list:
+		s_header="genepop from simupop sim run, data file " + self.__genfile
+
+		if f_nbne_ratio is not None:
+			s_header += ", nbne=" + str( f_nbne_ratio )
+		#end if caller passed and nb/ne ratio value
+
+		s_header_line=s_header + "\n"
+
+		if b_do_compress:
+			s_header_line=s_header_line.encode( SYSDEFAULTENCODING )
+		#end if writing compressed data
+
+		o_genepopfile.write(  s_header_line )
+
+
+		for i_locus in range( i_num_loci ):
+			s_locus_name="l" + str(i_locus) + "\n" 
+
+			if b_do_compress:
+				s_locus_name=s_locus_name.encode( SYSDEFAULTENCODING )
+			#end if do compress	
+
+			o_genepopfile.write(s_locus_name )
+
+		#end for each loci number
+
+		return
+	#end writeGenepopFileHeaderAndLociList
 
 	#derived from Tiao's code in ne2.py:
 	def gen2Genepop( self, idx_allele_start, idx_allele_stop, 
@@ -287,8 +369,7 @@ class PGOutputSimuPop( object ):
 		'''
 		s_temp_file_name=None
 	
-		s_genepop_filename=self.__basename + "."  \
-				+  PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "genepop" ]		
+		s_genepop_filename=self.__genepopname	
 
 		i_num_loci=(idx_allele_stop-idx_allele_start) + 1
 
@@ -328,31 +409,11 @@ class PGOutputSimuPop( object ):
 		#end if compress else don't
 
 		#write header and loci list:
-		s_header="genepop from simupop run data file " + self.__genfile
-
-		if f_nbne_ratio is not None:
-			s_header += ", nbne=" + str( f_nbne_ratio )
-		#end if caller passed and nb/ne ratio value
-
-		s_header_line=s_header + "\n"
-
-		if b_do_compress:
-			s_header_line=s_header_line.encode( SYSDEFAULTENCODING )
-		#end if writing compressed data
-
-		o_genepopfile.write(  s_header_line )
-
-		for i_locus in range( i_num_loci ):
-			s_locus_name="l" + str(i_locus) + "\n" 
-
-			if b_do_compress:
-				s_locus_name=s_locus_name.encode( SYSDEFAULTENCODING )
-			#end if do compress	
-
-			o_genepopfile.write(s_locus_name )
-
-		#end for each loci number
-
+		self.writeGenepopFileHeaderAndLociList( o_genepopfile, 
+													i_num_loci, 
+													f_nbne_ratio, 
+													b_do_compress )
+		
 		#write indiv id and alleles, line by line:
 		i_currgen=None
 
@@ -544,6 +605,11 @@ class PGOutputSimuPop( object ):
 	def dbname( self ):
 		return self.__megadbname
 	#end property confname
+
+	@property
+	def genepopname( self ):
+		return self.__genepopname
+	#end property genepopname
 
 #end class
 

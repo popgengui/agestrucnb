@@ -557,6 +557,27 @@ class PGInputSimuPop( object ):
 
 		self.__update_attribute_config_file_info( "nbadjustment", "sim" , "nbadjustment" )
 
+		'''
+		These two params are added 2017_08_08, to allow the gui to pass 
+		an output mode of type PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED
+		and a set of parameters to produce output restricted to 
+		pop sections with mean expected heterozygosity within a range,
+		and to stop saving such filtered pops after a total have been
+		recorded.
+		'''
+		if config.has_option("sim", "do_het_filter" ):
+			self.do_het_filter = config.get("sim", "do_het_filter")
+		else:
+			self.do_het_filter=False
+		#end if config has sim, cull_method
+		self.__update_attribute_config_file_info( "do_het_filter", "sim", "do_het_filter" )
+
+		if config.has_option("sim", "het_filter" ):
+			self.het_filter = config.get("sim", "het_filter")
+		else:
+			self.het_filter="0.00,1.00,99999"
+		#end if config has sim, cull_method
+		self.__update_attribute_config_file_info( "het_filter", "sim", "het_filter" )
 
 		return
 	#end __get_config

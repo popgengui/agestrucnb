@@ -374,7 +374,9 @@ def prep_and_call_do_pgopsimupop_replicate( s_config_file,
 											s_param_file, 
 											s_output_base_name, 
 											s_replicate_number,
-											s_use_gui_messaging="True" ):
+											s_use_gui_messaging="True",
+											s_output_mode=str( pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY ), 
+											s_pop_het_filter_string=str( None ) ):
 	'''	
 	This def to be invoked in a subprocess.Popen command, as
 	instantiated in a PGGuiSimuPop instance in do_operation.
@@ -386,6 +388,9 @@ def prep_and_call_do_pgopsimupop_replicate( s_config_file,
 	(bool-converted) value True, so that our new module pgdrivesimulation.py can call
 	this with this (bool-converted) value set to False, to avoid gui processing during
 	a command line execution.
+
+	2017_08_07.  Added def parameters s_output_mode and s_pop_het_filter_string, to
+	allows caller to use new output mode selections and het pop filter in PGOpSimuPop instances.
 	'''
 
 	#de-stringify args for call to def below:
@@ -394,12 +399,19 @@ def prep_and_call_do_pgopsimupop_replicate( s_config_file,
 
 	b_use_gui_messaging=True if s_use_gui_messaging=="True" else False
 
+	i_output_mode=int( s_output_mode )
+
+	s_pop_het_filter_string=None if s_pop_het_filter_string is None \
+											else s_pop_het_filter_string
+
 	do_pgopsimupop_replicate_from_files( s_config_file,
 						ls_life_table_files,
 						s_param_file,
 						s_output_base_name,
 						i_replicate_number,
-						b_use_gui_messaging =  b_use_gui_messaging  )
+						b_use_gui_messaging =  b_use_gui_messaging,
+						i_output_mode=i_output_mode,
+						s_pop_het_filter_string=s_pop_het_filter_string )
 
 	return
 #end prep_and_call_do_pgopsimupop_replicate
@@ -409,7 +421,9 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 												s_param_name_file, 
 												s_outfile_basename, 
 												i_replicate_number,
-												b_use_gui_messaging=True ):
+												b_use_gui_messaging=True, 
+												i_output_mode=pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY,
+												s_pop_het_filter_string=None ):
 	'''
 	necessitated by fact that python2 (and 3?) was not able to pickle 
 	a class-instance def to be used to run replicates of the pgopsimupop
@@ -530,7 +544,9 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 			b_write_input_as_config_file=b_write_conf_file,
 			b_do_gui_messaging=b_use_gui_messaging,
 			b_write_nb_and_ages_files=b_write_nb_and_age_tables,
-			b_is_replicate_1 = ( i_replicate_number == 1 ) )
+			b_is_replicate_1 = ( i_replicate_number == 1 ),
+			i_output_mode=i_output_mode,
+			s_pop_het_filter_string=s_pop_het_filter_string )
 
 	o_new_pgopsimupop_instance.prepareOp( s_tag_out  )
 
@@ -712,7 +728,9 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 										ls_life_table_files,
 										s_param_names_file,
 										s_output_basename,
-										b_use_gui_messaging=True ):
+										b_use_gui_messaging=True,
+										i_output_mode=pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY,
+										s_pop_het_filter_string = None ):
 
 	'''
 	Failed to get independant initialization of population per-replicate
@@ -747,7 +765,13 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 	below, we send an error message to a gui message box, then
 	re-raise the exception.	
 
+	 
+	2017_08_07.  I've added the params i_output_mode and s_pop_het_filter_string,
+	to allow callers to this def to set these new parameters in the PGOpSimuPop
+	object.
+
 	'''
+
 	try:
 		s_life_tables_stringified=",".join( ls_life_table_files )
 
@@ -833,6 +857,13 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 					'''
 					seq_complete_arg_set=seq_complete_arg_set + ( str( b_use_gui_messaging ), )
 
+					'''
+					2017_08_07.  We added args to allow caller to use diffeent output modes, 
+					and, if using the filter output mode, to pass a string with parameters,
+					for filtering pops by mean heterozygosity.  (See new additions to PGOpSimuPop code.)
+					'''
+					seq_complete_arg_set=seq_complete_arg_set + ( str( i_output_mode ), str( s_pop_het_filter_string ) )
+
 
 					'''
 					in case the negui mods are not in the default python 
@@ -860,7 +891,7 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 
 					s_python_command=s_path_append_statements + "import pgutilities;" \
 										"pgutilities.prep_and_call_do_pgopsimupop_replicate" \
-										+ "( \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" )" %  seq_complete_arg_set
+										+ "( \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" )" %  seq_complete_arg_set
 
 					o_new_subprocess=subprocess.Popen( [ PYEXE_FOR_POPEN, "-c", s_python_command ] )
 					o_subprocess_group.addSubprocess( o_new_subprocess ) 

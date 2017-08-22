@@ -1319,6 +1319,62 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		return b_files_exist
 	#end __output_files_exist_with_current_output_basename
 
+	def __validate_het_filter_string( self, s_filter_string ):
+
+		DELIM=","
+		NUM_FIELDS=3
+		FIELD_TYPES=[ float, float, int ]
+		IDX_MIN=0
+		IDX_MAX=1
+		IDX_TOTAL=2
+		ls_problems=[]
+
+		ls_values=s_filter_string.split( "," )
+
+		lv_typed_values=[]
+
+		if len( ls_values ) != NUM_FIELDS:
+			ls_problems.append( "The filter should have " \
+									+ "3, comma-separated fields." )
+		else:
+			for idx in range( NUM_FIELDS ):
+				try:
+
+					lv_typed_values.append( FIELD_TYPES[idx]( ls_values[ idx ] ) )
+
+				except ( TypeError, ValueError ) as oet:
+					ls_problems.append( "value for item " \
+								+ str( idx + 1 ) \
+								+ ", \"" + ls_values[ idx ] \
+								+ "\", should be of type " \
+								+ str( FIELD_TYPES[ idx ] ) \
+								+ "." )
+			#end for each value
+			
+			if len( ls_problems ) == 0:
+				if lv_typed_values[IDX_MIN] > lv_typed_values[IDX_MAX]:
+					ls_problems.append( \
+							"Value for minimum, " + ls_values[ IDX_MIN ] \
+								+ ", should be less than or equal to " \
+								+ " the value for the maximum, " \
+								+ str( ls_values[ IDX_MAX ] ) + "." )
+				elif lv_typed_values[ IDX_TOTAL ] < 0:
+					ls_problems.append( "The value for total pops to save, " \
+											+ str( lv_typed_values[ IDX_TOTAL ]  \
+											+ " should be greater than or equal to " \
+											+ "zero." ) )
+				#end if min > max, elif total lt zero
+			#end if we have no problems so far.
+		#end if we have the proper number of values
+		
+		v_return_value=None
+		if len( ls_problems ) > 0:
+			 v_return_value = ls_problems
+		#end if no problems return None
+
+		return v_return_value
+	#end __validate_het_filter_string
+
 	def runSimulation( self ):
 		try:
 
@@ -1416,6 +1472,30 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#up its collection of subprocess.Popen processes 
 			self.__sim_multi_process_event=multiprocessing.Event()
 
+			'''
+			2017_08_08.  We have added to the pgopsimupop.py code an optinal output mode argument and
+			a mode-dependant pop filter, so that we need to now use the optional args added to the
+			do_simulation_reps_in_subprocesses def -- including the gui messaging flag, in order
+			to correctly pass a complete arg set:
+			'''
+			b_do_use_gui_messaging=True
+			i_output_mode=pgut.pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY
+			s_het_filter_string=None
+
+			if self.__input.do_het_filter==True:
+				i_output_mode=pgut.pgsim.PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED
+				s_het_filter_string=self.__input.het_filter
+				ls_invalidity_msgs=self.__validate_het_filter_string( s_het_filter_string )
+				if ls_invalidity_msgs is not None:
+					s_invalidity_msgs="\n\n".join(ls_invalidity_msgs )
+					PGGUIInfoMessage( self, "The heterozygosity filter " \
+											+ "string should be of form \"min,max,total\" " \
+											+ "but is not consistent.\n\n" \
+											+ s_invalidity_msgs )
+					return
+				#end if bad filter string
+			#end if we have a het filter
+
 			#our sim run(s) should not block the main gui, so we
 			#run it(them) in one or more python.subprocesses:
 			self.__op_process=multiprocessing.Process( target=pgut.do_simulation_reps_in_subprocesses, 
@@ -1425,7 +1505,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							self.__temp_config_file_for_running_replicates,
 							self.__life_table_files,
 							self.__param_names_file,
-							self.__output.basename ) ) 
+							self.__output.basename,
+							b_do_use_gui_messaging,
+							i_output_mode, 
+							s_het_filter_string ) ) 
 
 			self.__op_process.start()
 
@@ -1783,6 +1866,40 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		return
 	#end onLoadingMaleProb
+
+	def onLoadingHetFilter( self ):
+		self.onChangeInHetFilterFlag()
+	#end onLoadingHetFilter
+
+	def onChangeInHetFilterFlag( self ):
+		'''
+		2017_08_08.  This def was added to be associated with the checkbox
+		that gives True or False, whether to filter pops by mean expected
+		heterozygosity.  We want to disable the het filter string entry 
+		when the checkbox has updated our local copy of the flag to false.
+		'''
+
+		s_het_filter_attribute_name="het_filter"
+
+		if s_het_filter_attribute_name not in self.__param_key_value_frames:
+			s_msg="In PGGuiSimuPop instance, def onChangeInHetFilterFlag, " \
+						+ "the program cannot find a key value frame associated " \
+						+ "with the attribute name: " + s_het_filter_attribute_name + "."
+			PGGUIErrorMessage( self, s_msg )
+			raise Exception( s_msg )
+		#end if no key val frame for the nb/ne ratio param
+
+		o_keyvalueframe=self.__param_key_value_frames[ s_het_filter_attribute_name ]
+
+		if self.__input.do_het_filter == False:
+			o_keyvalueframe.setStateControls( "disabled" )
+			o_keyvalueframe.setLabelState( "disabled" )
+		else:
+			o_keyvalueframe.setStateControls( "enabled" )
+			o_keyvalueframe.setLabelState( "enabled" )
+		#end if we are not doing a bias adjustment, else we are 
+		return
+	#end def onChangeInNbBiasAdjustmentFlag
 
 
 

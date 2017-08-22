@@ -185,7 +185,7 @@ LS_FLAGS_LONG_REQUIRED=[ "--gpfiles", "--scheme", "--params", "--minpopsize", "-
 LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes. " \
 						+ "(Example: \"mydir/*txt\")",
 				"\"none\", \"percent\", \"remove\", \"criteria\", \"cohorts\", \"cohortsperc\", " \
-						+ "or \"relateds\", " \
+						+ "\"cohortscount\", or \"relateds\", " \
 						+ "indicating an individual-sampling scheme,  whether to sample none " \
 						+ "(only apply min/max pop size criteria), " \
 						+ "by percentages, removing N individuals randomly, testing individual id fields, " \
@@ -207,7 +207,10 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 						 + spacer3 + "iii. \"cohortsperc\": two semicolon-delimited values, a single " \
 						 + "integer giving max age of cohorts, and a hyphenated list of numbers " \
 						 		   + "(ints or floats) giving percenantages at which to randomly " \
-								   + "sample from the cohorts.", 
+								   + "sample from the cohorts." \
+						+ spacer3 + "\niv. \"cohortscount\": two semicolon-delimited values, a single " \
+							+ "integer giving max age of cohorts, and a hyphenated list of numbers " \
+							+ "(ints) v, such that v individuals will be randomly selected from each sampled age class", 
 		"Minimum pop size (single integer).",
 		"Maximum pop size (single integer).",
 		"Genepop file pop range (hyphenated pair of integers, i-j indicating estimator should evaluate " \
@@ -385,6 +388,7 @@ SAMPLE_BY_REMOVAL="remove"
 SAMPLE_BY_CRITERIA="criteria"
 SAMPLE_BY_COHORT="cohorts"
 SAMPLE_BY_COHORT_PERCENTAGE="cohortsperc"
+SAMPLE_BY_COHORT_COUNT="cohortscount"
 SAMPLE_BY_RELATEDS="relateds"
 
 SAMPLE_SCHEMES_NON_CRITERIA=[ SAMPLE_BY_PERCENTAGES, 
@@ -885,7 +889,9 @@ def parse_args( *args ):
 	elif s_sample_scheme == SAMPLE_BY_CRITERIA \
 			or s_sample_scheme == SAMPLE_BY_COHORT \
 			or s_sample_scheme == SAMPLE_BY_RELATEDS \
-			or s_sample_scheme == SAMPLE_BY_COHORT_PERCENTAGE:
+			or s_sample_scheme == SAMPLE_BY_COHORT_PERCENTAGE \
+			or s_sample_scheme == SAMPLE_BY_COHORT_COUNT:
+
 		lv_sample_values=[ s_val for s_val in args[ IDX_SAMPLE_VALUE_LIST ].split( \
 																SAMPLE_SCHEME_PARAM_DELIMITER ) ]
 	else:
@@ -1059,6 +1065,8 @@ def get_sample_val_and_rep_number_from_sample_name( s_sample_name, s_sample_sche
 		s_sampler_type=gps.SCHEME_COHORTS
 	elif s_sample_scheme==SAMPLE_BY_COHORT_PERCENTAGE:
 		s_sampler_type=gps.SCHEME_COHORTS_PERC
+	elif s_sample_scheme==SAMPLE_BY_COHORT_COUNT:
+		s_sampler_type=gps.SCHEME_COHORTS_COUNT
 	elif s_sample_scheme==SAMPLE_BY_RELATEDS:
 		s_sampler_type=gps.SCHEME_RELATEDS
 	else:
@@ -1876,7 +1884,11 @@ def do_sample_individuals( o_genepopfile,
 		( o_indiv_fields,
 			i_max_age ) = get_cohorts_sampling_params( lv_sample_values )
 
-		o_sample_params=gps.GenepopFileSampleParamsAgeStructureCohorts( \
+		'''
+		2017_07_21.  We are now using the newer classes GenepopFileSampleParamsCohorts
+		and GenepopFileSamplerCohorts.
+		'''
+		o_sample_params=gps.GenepopFileParamsCohorts( \
 										o_genepop_indiv_id_fields = o_indiv_fields,
 										li_population_numbers = li_population_list,
 										i_max_age=i_max_age,
@@ -1884,8 +1896,7 @@ def do_sample_individuals( o_genepopfile,
 										i_max_individuals_per_gen=i_max_pop_size,
 										i_replicates=i_replicates )
 
-		o_sampler=gps.GenepopFileSamplerIndividualsAgeStructureCohorts( o_genepopfile,
-																	o_sample_params )
+		o_sampler=gps.GenepopFileSamplerCohorts( o_genepopfile, o_sample_params )
 	elif s_sample_scheme==SAMPLE_BY_COHORT_PERCENTAGE:
 
 		#this scheme has params identical to the regular "cohorts" scheme,
@@ -1916,17 +1927,89 @@ def do_sample_individuals( o_genepopfile,
 		( o_indiv_fields,
 				i_max_age ) = get_cohorts_sampling_params( lv_cohort_param_fields )
 
-		o_sample_params=gps.GenepopFileSampleParamsAgeStructureCohorts( \
+		'''
+		2017_07_21. We are now using the new classes GenepopFileSampleParamsCohorts
+		and GenepopFileSamplerCohorts.  The new params class requires that any
+		subsample value list be submitted as a list of new objects of type
+		CohortSamplingValue.  Note, too that the class GenepopFileSamplerCohorts
+		handles both plain cohorts sampling and sampling with a list of proportions.
+		'''
+
+		lo_cohort_sample_value_objects=[ \
+					gps.CohortSamplingValue( i_type=gps.CohortSamplingValue.TYPE_PROPORTION,
+										 v_value=f_proportion ) \
+												 for f_proportion in lf_proportions ]
+		o_sample_params=gps.GenepopFileSampleParamsCohorts( \
 											o_genepop_indiv_id_fields = o_indiv_fields,
 											li_population_numbers = li_population_list,
 											i_max_age=i_max_age,
-											lf_proportions=lf_proportions,
+											lo_list_of_value_objects=lo_cohort_sample_value_objects,
 											i_min_individuals_per_gen=i_min_pop_size,
 											i_max_individuals_per_gen=i_max_pop_size,
 											i_replicates=i_replicates )
 
-		o_sampler=gps.GenepopFileSamplerIndividualsAgeStructureCohortsPercentage( o_genepopfile,
-																					o_sample_params )
+		o_sampler=gps.GenepopFileSamplerCohorts( o_genepopfile, o_sample_params )
+
+	elif s_sample_scheme==SAMPLE_BY_COHORT_COUNT:	
+		'''
+		2017_07_21.  This scheme is added to allow a user to request
+		a sample with a constant "t" such that each cohort in range,
+		0 to max_age, will have "t" individuals (instead of the default
+		even sampling where "t" = min( sum_invid( total_indiv) ).
+		'''
+		COHORT_PARAM_LIST_DELIMITER=";"
+		COHORT_COUNTS_DELIM="-"
+		IDX_MAX_AGE=0
+		IDX_COUNT=1
+
+		s_last_param=lv_sample_values[ -1 ]
+
+		ls_age_and_counts=s_last_param.split( \
+						COHORT_PARAM_LIST_DELIMITER )
+
+		s_max_age=ls_age_and_counts[ IDX_MAX_AGE ]
+		s_counts=ls_age_and_counts[ IDX_COUNT ]
+		
+		#we reassemble the list to match the expected
+		#cohort sampling params (without the counts):
+		lv_cohort_param_fields=lv_sample_values[ 0:len( lv_sample_values ) - 1 ] \
+															+ [ s_max_age ]		
+		#Convert the counts to a list of ints giving tot indivs per age class:
+		li_counts=[ int( s_count ) for s_count  \
+							in s_counts.split( COHORT_COUNTS_DELIM ) ]
+
+		( o_indiv_fields,
+				i_max_age ) = get_cohorts_sampling_params( lv_cohort_param_fields )
+
+		'''
+		2017_07_21. We are now using the new classes GenepopFileSampleParamsCohorts
+		and GenepopFileSamplerCohorts.  The new params class requires that any
+		subsample value list be submitted as a list of new objects of type
+		CohortSamplingValue.  Note, too that the class GenepopFileSamplerCohorts
+		handles both plain cohorts sampling and sampling with a list of proportions
+		and/or counts.
+		'''
+
+		lo_cohort_sample_value_objects=[]
+
+		for i_count in li_counts:
+			o_this_sample_object=gps.CohortSamplingValue( \
+							i_type=gps.CohortSamplingValue.TYPE_COUNT,
+						 	v_value=i_count )
+			lo_cohort_sample_value_objects.append( o_this_sample_object )
+		#end for each count valuie
+
+		o_sample_params=gps.GenepopFileSampleParamsCohorts( \
+											o_genepop_indiv_id_fields = o_indiv_fields,
+											li_population_numbers = li_population_list,
+											i_max_age=i_max_age,
+											lo_list_of_value_objects=lo_cohort_sample_value_objects,
+											i_min_individuals_per_gen=i_min_pop_size,
+											i_max_individuals_per_gen=i_max_pop_size,
+											i_replicates=i_replicates )
+
+		o_sampler=gps.GenepopFileSamplerCohorts( o_genepopfile, o_sample_params )
+
 								
 	elif s_sample_scheme==SAMPLE_BY_RELATEDS:
 
@@ -2337,12 +2420,14 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 																						s_indiv_sample )
 
 				if i_tot_indivs_this_subsample == 0:
+
 					s_msg= "In pgdriveneestimator.py, def add_to_set_of_calls_to_do_estimate, " \
+									+ " no estimation was done on pop section number "  \
+									+ str( i_population_number ) \
 									+ " in file, " + o_genepopfile.original_file_name \
-									+ ", with sample value: " + s_sample_value \
-									+ ", and loci sample value: " + s_loci_sample_value \
-									+ ", skipping pop number, "  + str( i_population_number ) \
-									+ ".  It has a zero indiv count."
+									+ ".  The parameters for population or loci " \
+									+ "resulted in no individuals being sampled."
+
 					o_secondary_outfile.write( s_msg + "\n" )
 					continue
 				# end if this sample for this pop has zero individuals

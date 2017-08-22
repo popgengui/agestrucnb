@@ -128,6 +128,67 @@ def validateStartSave( i_value, i_max_cycle_number=None ):
 	return b_return_val
 #end validateStartSave
 
+def validateHetFilter( s_het_filter ):
+
+	b_return_value=False
+
+	DELIM=","
+	NUM_FIELDS=3
+	FIELD_TYPES=[ float, float, int ]
+	IDX_MIN=0
+	IDX_MAX=1
+	IDX_TOTAL=2
+	ls_problems=[]
+
+	ls_values=s_het_filter.split( "," )
+
+	lv_typed_values=[]
+
+	if len( ls_values ) != NUM_FIELDS:
+		ls_problems.append( "The filter should have " \
+								+ "3, comma-separated fields." )
+	else:
+		for idx in range( NUM_FIELDS ):
+			try:
+
+				lv_typed_values.append( FIELD_TYPES[idx]( ls_values[ idx ] ) )
+
+			except ( TypeError, ValueError ) as oet:
+				ls_problems.append( "value for item " \
+							+ str( idx + 1 ) \
+							+ ", \"" + ls_values[ idx ] \
+							+ "\", should be of type " \
+							+ str( FIELD_TYPES[ idx ] ) \
+							+ "." )
+		#end for each value
+		
+		if len( ls_problems ) == 0:
+			if lv_typed_values[IDX_MIN] > lv_typed_values[IDX_MAX]:
+				ls_problems.append( \
+						"Value for minimum, " + ls_values[ IDX_MIN ] \
+							+ ", should be less than or equal to " \
+							+ " the value for the maximum, " \
+							+ str( ls_values[ IDX_MAX ] ) + "." )
+			elif lv_typed_values[ IDX_TOTAL ] < 0:
+				ls_problems.append( "The value for total pops to save, " \
+										+ str( lv_typed_values[ IDX_TOTAL ]  \
+										+ " should be greater than or equal to " \
+										+ "zero." ) )
+			#end if min > max, elif total lt zero
+		#end if we have no problems so far.
+	#end if we have the proper number of values
+	
+
+	if len( ls_problems ) > 0:
+		 b_return_value = False
+	else:
+		 b_return_value = True
+	#end if no problems return None
+
+	return b_return_value
+#end validateHetFilter
+
+
 if __name__ == "__main__":
 	pass
 #end if main

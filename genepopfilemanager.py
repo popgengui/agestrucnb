@@ -449,6 +449,11 @@ class GenepopFileManager( object ):
 			#end if bytes type, decode
 
 			o_newfile.write( v_line_stripped + UNIX_ENDLINE )
+
+			##### temp
+			o_newfile.flush()
+			#####
+
 		#end for each line in the header and loci section
 
 		#write pops:

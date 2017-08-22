@@ -103,7 +103,6 @@ class GenepopFileLociInfo( object ):
 					di_allele_freqs[ i_this_allele ] = f_this_freq
 				#end for each allele
 
-
 				dddf_allele_frequencies[ i_pop_number ] [ i_loci_number ] = di_allele_freqs 
 
 			#end for each loci
