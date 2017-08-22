@@ -6,22 +6,22 @@ REM quotes from lhs of these assignments,
 REM as python read their values in
 REM with the quotes
 
-set myf=py3.test2.wf.r1.genepop
-set popscheme=none
-set popparam=none
+set myf="gp.9"
+set popscheme="cohortsperc"
+set popparam="id;sex;father;mother;age,float;int;float;float;float,1;50"
 set popmin=1
 set popmax=99999
-set poprange=1-99999
-set freq=0.01
+set poprange=2-2
+set freq=0.05
 set popreps=1
 set locscheme=none
 set locparam=none
 set locmin=1
 set locmax=99999
-set locrange=1-99999
+set locrange=1-30
 set locreps=1
 set procs=2
-set mode=testserial
+set mode=no_debug
 set nbrat=None
 set dobias=False
 

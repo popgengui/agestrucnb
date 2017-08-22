@@ -2,8 +2,6 @@
 
 args=commandArgs(trailingOnly = TRUE)
 
-s.file="../temp_data/my.tsv"
-s.file="../../p3negui/nb.test2.ldne.tsv"
 
 
 getlvlcount=function( v_vector )
@@ -13,8 +11,13 @@ getlvlcount=function( v_vector )
 
 if( length( args ) == 1 )
 {
-	s.file= args[ 1 ]
+	s.file=args[ 1 ]
+}else{
+
+	stop( "usage: check_tsv_for_correct_plexing.R <tsv file (from Nb or Ne estimation run>" )
+
 }
+
 
 mydf=read.table( s.file, header=T )
 
