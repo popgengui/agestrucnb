@@ -7,7 +7,8 @@ Overview
 	based population genetics functions provided by Tiago Antao's python program at
 	https://github.com/tiagoantao/AgeStructureNe.git, enhanced by multiple methods
 	for population subsampling when performing LD-based Ne and Nb estimations from
-	genepop file inputs.  Further, we provide a plotting interface to visualize
+	genepop file inputs.  Further, we have added simulation functionality and subsampling
+	methods and interfaces for LDNe estimation, as well as  plotting interfaces to show
 	estimate distributions and regression lines. 
 
 	The program uses multi-processing to allow an arbitrary number of
@@ -19,7 +20,10 @@ Overview
 Current compatible python versions
 ----------------------------------
 	python 3.5 and 3.6 
+
 	python 2.7 (python 3 is recommended, as 2.7 requires building an older version of simuPOP)
+
+	These are the python versions on which the program was developed and tested.  Other versions may work, too.
 
 OS-comaptibility
 -----------------
@@ -62,12 +66,15 @@ Dependencies
 		
 		iii. future
 
-		iv.  psutils
+		iv.  psutil
 		
 		v.   for python 2 only, configparser.y. This is a backported python 3 package, different 
 		     than the default python2 ConfigParser package. 
+
 		vi.  for python2 only, if not already in your distribution, the ttk package.  The pip package
 		     can be installed with pip install pyttk.
+
+		vii. natsort
 
 Installation  
 ------------
@@ -84,7 +91,7 @@ Starting the program
 		
 		<python> <path_to_negui.py>
 
-	   <python> can be any alias for python 2.7 or python 3.6 executable.
+	   <python> can be any alias for python 2.7 or python 3.5, 3.6 executable.
 	   <path_to_negui> should give a full or relative path to the main program
 	   directory and the file negui.py
 
