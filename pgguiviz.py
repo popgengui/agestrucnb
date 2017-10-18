@@ -525,8 +525,6 @@ class PGGuiViz( pgg.PGGuiApp ):
 						b_force_disable=b_force_disable )
 
 			o_this_keyval.grid( row=i_row, sticky=( NW ) )
-
-
 			
 			#Keep a reference to this param frame frame keyed to its attribute name
 			self.__param_value_frames_by_attr_name[ s_attr_name ] = o_this_keyval
@@ -1319,13 +1317,6 @@ class PGGuiViz( pgg.PGGuiApp ):
 		self.__load_viz_type_selection_interface()
 		self.__load_params_interface()
 		self.__set_controls_by_run_state( self.__get_run_state() )
-
-		if VERY_VERBOSE:
-			print ( "new genepop files value: " \
-					+ self.__genepopfiles.get() )
-			print ( "after loading genepop files" )
-			self.__test_values()
-		#end if very verbose
 
 		return
 	#end __load_tsv_file

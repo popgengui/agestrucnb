@@ -25,11 +25,24 @@ import pgmenubuilder as pgmb
 #These classes provide the interfaces, 
 #each offered in the main "Add"
 #menu.
-import pgguisimupop as pggs
-import pgguiviz as pggv
-import pgguineestimator as pgne
 
-from pgguiutilities import FrameContainerScrolled
+##### temp rem out and replace
+#for testing life plotting during sim
+#import pgguisimupop as pggs
+import pgguisimupop as pggs
+##### end temp rem out
+
+import pgguiviz as pggv
+
+##### temp rem out and replace
+#as above for testing embedded plotting
+import pgguineestimator as pgne
+#####
+
+import pgneestimationboxplotinterface as pgbp
+import pgneestimationregressplotinterface as pgrp
+
+from pgframecontainerscrolled import FrameContainerScrolled
 from pgguiutilities import PGGUIYesNoMessage
 
 class PGHostNotebook( Notebook ):
@@ -113,6 +126,7 @@ class PGHostNotebook( Notebook ):
 		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
 		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
 		self.enable_traversal()
+	#end addPGGuiSimupop
 
 	def addPGGuiNeEstimation( self ):
 		'''
@@ -183,6 +197,63 @@ class PGHostNotebook( Notebook ):
 
 		return
 	#end addPGGuiViz
+
+	def addPGNeBoxplot( self ):
+
+		o_container=Frame( self, padding=self.__container_padding )
+
+		o_canvas=Canvas( o_container )
+
+		o_plot_master_frame=Frame( o_container)
+
+		o_plot_master_frame.grid( row=0, column=0, sticky=( N,S,E,W ) )
+		o_pgbp=pgbp.PGNeEstimationBoxplotInterface( o_plot_master_frame )
+		
+
+		o_scan=FrameContainerScrolled( o_container, o_plot_master_frame, o_canvas, 
+			i_scroll_direction=FrameContainerScrolled.SCROLLBOTH )
+
+		s_tab_text="Estimation Distribution Boxplots " + str( self.__tab_count )
+
+		self.add( o_container, text=s_tab_text )
+		self.__tab_children.append( o_container )
+		self.__tab_count+=1
+		self.select( o_container )
+
+		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgbp 
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+
+		return
+	#end addPGNeBoxplot
+
+	def addPGNeRegressPlot( self ):
+
+		o_container=Frame( self, padding=self.__container_padding )
+
+		o_canvas=Canvas( o_container )
+
+		o_plot_master_frame=Frame( o_container)
+
+		o_plot_master_frame.grid( row=0, column=0, sticky=( N,S,E,W ) )
+		o_pgbp=pgrp.PGNeEstimationRegressplotInterface( o_plot_master_frame )
+		
+
+		o_scan=FrameContainerScrolled( o_container, o_plot_master_frame, o_canvas, 
+			i_scroll_direction=FrameContainerScrolled.SCROLLBOTH )
+
+		s_tab_text="Estimation Regression Plots " + str( self.__tab_count )
+
+		self.add( o_container, text=s_tab_text )
+		self.__tab_children.append( o_container )
+		self.__tab_count+=1
+		self.select( o_container )
+
+		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgbp 
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+
+		return
+	#end addPGNeRegressPlot
+
 
 	def exitNotebook( self ):
 		if self.__get_tab_count() > 0:

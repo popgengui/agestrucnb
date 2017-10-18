@@ -60,7 +60,7 @@ executing in parallell.
 import traceback
 
 from pgutilityclasses import IndependantSubprocessGroup 
-from pgutilityclasses import NeEstimationTableFileManager 
+from pgneestimationtablefilemanager import NeEstimationTableFileManager 
 
 '''
 2017_04_27
@@ -375,8 +375,7 @@ def prep_and_call_do_pgopsimupop_replicate( s_config_file,
 											s_output_base_name, 
 											s_replicate_number,
 											s_use_gui_messaging="True",
-											s_output_mode=str( pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY ), 
-											s_pop_het_filter_string=str( None ) ):
+											s_output_mode=str( pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY ) ):
 	'''	
 	This def to be invoked in a subprocess.Popen command, as
 	instantiated in a PGGuiSimuPop instance in do_operation.
@@ -391,6 +390,9 @@ def prep_and_call_do_pgopsimupop_replicate( s_config_file,
 
 	2017_08_07.  Added def parameters s_output_mode and s_pop_het_filter_string, to
 	allows caller to use new output mode selections and het pop filter in PGOpSimuPop instances.
+
+	2017_09_04. Removed the het filter string from this def's arglist.  It will now
+	be stored in the input object only.
 	'''
 
 	#de-stringify args for call to def below:
@@ -401,8 +403,6 @@ def prep_and_call_do_pgopsimupop_replicate( s_config_file,
 
 	i_output_mode=int( s_output_mode )
 
-	s_pop_het_filter_string=None if s_pop_het_filter_string is None \
-											else s_pop_het_filter_string
 
 	do_pgopsimupop_replicate_from_files( s_config_file,
 						ls_life_table_files,
@@ -410,8 +410,7 @@ def prep_and_call_do_pgopsimupop_replicate( s_config_file,
 						s_output_base_name,
 						i_replicate_number,
 						b_use_gui_messaging =  b_use_gui_messaging,
-						i_output_mode=i_output_mode,
-						s_pop_het_filter_string=s_pop_het_filter_string )
+						i_output_mode=i_output_mode )
 
 	return
 #end prep_and_call_do_pgopsimupop_replicate
@@ -422,8 +421,7 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 												s_outfile_basename, 
 												i_replicate_number,
 												b_use_gui_messaging=True, 
-												i_output_mode=pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY,
-												s_pop_het_filter_string=None ):
+												i_output_mode=pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY ):
 	'''
 	necessitated by fact that python2 (and 3?) was not able to pickle 
 	a class-instance def to be used to run replicates of the pgopsimupop
@@ -545,8 +543,7 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 			b_do_gui_messaging=b_use_gui_messaging,
 			b_write_nb_and_ages_files=b_write_nb_and_age_tables,
 			b_is_replicate_1 = ( i_replicate_number == 1 ),
-			i_output_mode=i_output_mode,
-			s_pop_het_filter_string=s_pop_het_filter_string )
+			i_output_mode=i_output_mode )
 
 	o_new_pgopsimupop_instance.prepareOp( s_tag_out  )
 
@@ -729,8 +726,7 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 										s_param_names_file,
 										s_output_basename,
 										b_use_gui_messaging=True,
-										i_output_mode=pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY,
-										s_pop_het_filter_string = None ):
+										i_output_mode=pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY ):
 
 	'''
 	Failed to get independant initialization of population per-replicate
@@ -861,8 +857,12 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 					2017_08_07.  We added args to allow caller to use diffeent output modes, 
 					and, if using the filter output mode, to pass a string with parameters,
 					for filtering pops by mean heterozygosity.  (See new additions to PGOpSimuPop code.)
+
+					2017_09_04. We remove the s_pop_het_filter_string argument.  It has been removed from
+					the arglist for initializing PGOpSimuPop instances, and instead those instances
+					will access it directly from the PGInputSimuPop object.
 					'''
-					seq_complete_arg_set=seq_complete_arg_set + ( str( i_output_mode ), str( s_pop_het_filter_string ) )
+					seq_complete_arg_set=seq_complete_arg_set + ( str( i_output_mode ), )
 
 
 					'''
@@ -891,7 +891,7 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 
 					s_python_command=s_path_append_statements + "import pgutilities;" \
 										"pgutilities.prep_and_call_do_pgopsimupop_replicate" \
-										+ "( \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" )" %  seq_complete_arg_set
+										+ "( \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\" )" %  seq_complete_arg_set
 
 					o_new_subprocess=subprocess.Popen( [ PYEXE_FOR_POPEN, "-c", s_python_command ] )
 					o_subprocess_group.addSubprocess( o_new_subprocess ) 
@@ -1633,8 +1633,6 @@ def run_plotting_program( s_type, s_estimates_table_file, s_plotting_config_file
 			to replace the double call, to neGrapher and neStats, 
 			formerly required to get plots and then a stats file.
 			'''
-#			Viz.LineRegress.neGrapher( s_estimates_table_file, s_plotting_config_file )
-#			Viz.LineRegress.neStats( s_estimates_table_file, s_plotting_config_file )
 			Viz.LineRegress.neRun( s_estimates_table_file, s_plotting_config_file )
 		elif s_type == "Subsample":
 
@@ -1749,7 +1747,6 @@ def remove_non_existent_paths_from_path_variable():
 	and uses each path qua existing path without
 	checking whether it exists.
 	'''
-
 	ls_paths_that_exist=[]
 
 	IX_NAME="posix"

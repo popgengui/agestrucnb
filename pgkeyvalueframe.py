@@ -755,6 +755,18 @@ class KeyValFrame( PGKeyControlFrame ):
 #end class KeyValFrame
 
 if __name__ == "__main__":
+
+	mym=Tk()
+
+	mykv=KeyValFrame( s_name="test", 
+						v_value=1, 
+						o_type=int,
+						v_default_value=0,
+						o_master=mym )	
+	mykv.grid()
+
+	mym.mainloop()
+
 	pass
 #end if main
 

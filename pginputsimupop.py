@@ -566,7 +566,7 @@ class PGInputSimuPop( object ):
 		recorded.
 		'''
 		if config.has_option("sim", "do_het_filter" ):
-			self.do_het_filter = config.get("sim", "do_het_filter")
+			self.do_het_filter = config.getboolean("sim", "do_het_filter")
 		else:
 			self.do_het_filter=False
 		#end if config has sim, cull_method
