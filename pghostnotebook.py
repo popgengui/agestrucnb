@@ -44,6 +44,7 @@ import pgneestimationregressplotinterface as pgrp
 
 from pgframecontainerscrolled import FrameContainerScrolled
 from pgguiutilities import PGGUIYesNoMessage
+from pgutilities import get_cpu_count
 
 class PGHostNotebook( Notebook ):
 	'''
@@ -137,9 +138,26 @@ class PGHostNotebook( Notebook ):
 
 		o_canvas=Canvas( o_container )
 
+		'''
+		2017_10_19.  We now default to half the 
+		existing (logical) cores as the default setting
+		for number of processes to use for 
+		Ne estimations.  Note that before this
+		update  the PGGuiNeEstimator was intitializing 
+		its i_total_processes_for_est param with
+		this object's self.__max_process_total, which
+		is still used by the other interfaces.
+		'''
+		i_total_cpus=get_cpu_count()
+
+		i_floor_half=int( i_total_cpus/2.0 )
+		
+		i_total_processes_for_est=\
+				1 if i_floor_half <= 0 else i_floor_half
+
 		o_pgg=pgne.PGGuiNeEstimator( o_container, 
 						self.__param_names_file_for_neestimation,
-						i_total_processes_for_est=self.__max_process_total )
+						i_total_processes_for_est=i_total_processes_for_est )
 
 		o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
 		i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
@@ -155,7 +173,6 @@ class PGHostNotebook( Notebook ):
 		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
 
 		return
-
 	#end addPGGuiNeEstimation
 
 	def addPGGuiViz( self ):
