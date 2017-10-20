@@ -23,6 +23,12 @@ import tkinter as tki
 from tkinter import *
 from tkinter.ttk import *
 import tkinter.filedialog as tkfd
+'''
+2017_10_19.  So I can access
+the TclError class in def
+__destroy_widgets
+'''
+import tkinter
 
 import sys
 import os
@@ -131,6 +137,7 @@ class PGNeEstimationBoxplotInterface( object ):
 		self.__comboboxes=None
 		self.__buttons=None
 		self.__subframes=None
+		self.__scales=None
 
 		if self.__plot_width is None \
 					or self.__plot_height is None:
@@ -227,6 +234,7 @@ class PGNeEstimationBoxplotInterface( object ):
 							+ "but has no destroy attribute" 
 					raise Exception( s_msg )
 				#end if plot frame has destroy method, else has
+			self.__destroy_all_widgets()
 			self.__setup_tsv_file_loader()
 			self.__make_tsv_file_manager()
 			self.__setup_plotting_interface()	
@@ -264,7 +272,7 @@ class PGNeEstimationBoxplotInterface( object ):
 		s_header=o_tsv.readline()
 		o_tsv.close()
 
-		ls_header_fields = s_header.split( o_tsvc.DELIM_TABLE )
+		ls_header_fields = s_header.strip().split( o_tsvc.DELIM_TABLE )
 
 		for s_name in ls_column_names_to_test:
 
@@ -347,6 +355,22 @@ class PGNeEstimationBoxplotInterface( object ):
 		return
 	#end __setup_plotting_interface
 
+	def __destroy_all_widgets( self ):
+
+		for do_widget_dict in [ self.__subframes, 
+								self.__labels,
+								self.__comboboxes,
+								self.__scales,
+								self.__buttons ]:
+
+			if do_widget_dict is not None:
+				if len( do_widget_dict ) > 0:
+					self.__destroy_widgets( do_widget_dict )
+				#end if at least one item dict
+			#end if dict exists
+		#end for each widget dict
+	#end __destroy_all_widgets
+
 	def __set_master_frame_grid_weights( self ):
 		'''
 		2017_10_09.  Not yet in use.
@@ -421,10 +445,6 @@ class PGNeEstimationBoxplotInterface( object ):
 
 	def __make_labels( self ):
 
-		if self.__labels is not None:
-			self.__destroy_widgets( self.__labels )
-		#end if no labels
-
 		self.__labels={}
 
 		o_myc=PGNeEstimationBoxplotInterface
@@ -483,11 +503,6 @@ class PGNeEstimationBoxplotInterface( object ):
 	#end __make labels
 
 	def __make_combos( self ):
-
-		if self.__comboboxes is not None:
-			self.__destroy_widgets( self.__comboboxes )
-		#end if comboboxes exist
-
 
 		self.__comboboxes={}
 
@@ -641,30 +656,31 @@ class PGNeEstimationBoxplotInterface( object ):
 		many of the former's handy attributes.
 		'''
 
-		self.__y_lower_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
+		o_y_lower_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
 							to = df_min_max["max"],
 							command=self.__on_y_scale_change,
 							orient=HORIZONTAL,
 							resolution=f_resolution,
 							bigincrement=f_bigincrement )
 
-		self.__y_lower_value_scale.set( df_min_max[ "min" ] )
-		self.__y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
+		o_y_lower_value_scale.set( df_min_max[ "min" ] )
+		o_y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
 											column=o_myclass.COLNUM_YVAL_LOWER_SCALE, 
 																		sticky=( N,W ) )
 
-		self.__y_upper_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
+		o_y_upper_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
 																			to = df_min_max["max"],
 																			command=self.__on_y_scale_change,
 																			orient=HORIZONTAL,
 																			resolution=f_resolution,
 																			bigincrement=f_bigincrement )
 
-		self.__y_upper_value_scale.set( df_min_max[ "max" ] )
-		self.__y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
+		o_y_upper_value_scale.set( df_min_max[ "max" ] )
+		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
 											column=o_myclass.COLNUM_YVAL_UPPER_SCALE, 
 																			sticky=( N,W ) )
-
+		
+		self.__scales={ 'y_value_lower':o_y_lower_value_scale, 'y_value_upper':o_y_upper_value_scale }
 		return
 	#end __make_y_value_scales
 
@@ -732,17 +748,17 @@ class PGNeEstimationBoxplotInterface( object ):
 			the min (from)  and max (to) will be both set to 0.0. Hence,
 			we must reset the resolution before resetting the from and to.
 			'''
-			self.__y_lower_value_scale[ 'resolution' ] = f_resolution
-			self.__y_lower_value_scale[ 'bigincrement' ] = f_bigincrement	
-			self.__y_lower_value_scale[ 'from' ] = df_min_max[ "min" ] 	
-			self.__y_lower_value_scale[ 'to' ]=df_min_max[ "max" ] 
-			self.__y_lower_value_scale.set( df_min_max[ "min" ] )
+			self.__scales[ 'y_value_lower' ][ 'resolution' ] = f_resolution
+			self.__scales[ 'y_value_lower' ][ 'bigincrement' ] = f_bigincrement	
+			self.__scales[ 'y_value_lower' ][ 'from' ] = df_min_max[ "min" ] 	
+			self.__scales[ 'y_value_lower' ][ 'to' ]=df_min_max[ "max" ] 
+			self.__scales[ 'y_value_lower' ].set( df_min_max[ "min" ] )
 
-			self.__y_upper_value_scale[ 'resolution' ] = f_resolution
-			self.__y_upper_value_scale[ 'bigincrement' ] = f_bigincrement
-			self.__y_upper_value_scale[ 'from' ] = df_min_max[ "min" ] 	
-			self.__y_upper_value_scale[ 'to' ]=df_min_max[ "max" ] 
-			self.__y_upper_value_scale.set( df_min_max[ "max" ] )
+			self.__scales[ 'y_value_upper' ][ 'resolution' ] = f_resolution
+			self.__scales[ 'y_value_upper' ][ 'bigincrement' ] = f_bigincrement
+			self.__scales[ 'y_value_upper' ][ 'from' ] = df_min_max[ "min" ] 	
+			self.__scales[ 'y_value_upper' ][ 'to' ]=df_min_max[ "max" ] 
+			self.__scales[ 'y_value_upper' ].set( df_min_max[ "max" ] )
 
 		#end if the y var combo has been created
 	#end __update_y_scales
@@ -789,10 +805,6 @@ class PGNeEstimationBoxplotInterface( object ):
 	def __make_buttons( self ):
 
 		o_myc=PGNeEstimationBoxplotInterface
-
-		if self.__buttons is not None:
-			self.__destroy_widgets( self.__buttons )
-		#end if buttons exist, destroy
 
 		self.__buttons={}
 
@@ -848,16 +860,17 @@ class PGNeEstimationBoxplotInterface( object ):
 	def __on_y_variable_selection_change( self, s_column_name, s_value, o_tsv_file_manager ):
 		o_myc=PGNeEstimationBoxplotInterface
 
-		b_scales_created= hasattr( self, '_PGNeEstimationBoxplotInterface__y_upper_value_scale' ) \
-					and hasattr( self, '_PGNeEstimationBoxplotInterface__y_lower_value_scale' )
 		'''
 		When the variable for the y value changes,
 		we need to clear any filters imposed by the
 		Scale object setting a limit on the value for
 		any formerly selected y values:
 		'''
+
+		ls_non_convertable_vals=[ "NA" ]
+
 		for s_name in o_myc.Y_AXIS_VALUE_COLUMNS:
-			self.__tsv_file_manager.setFilter( s_name, None )
+			self.__tsv_file_manager.setFilter( s_name, lambda x : x not in ls_non_convertable_vals )
 		#end for each y-val column variable, reset filter.
 
 		self.__update_y_scales()
@@ -893,8 +906,8 @@ class PGNeEstimationBoxplotInterface( object ):
 				b_valid=False
 			else:
 				f_value=float( s_value )
-				if f_value <= float( self.__y_upper_value_scale.get() ) \
-						and f_value >= float( self.__y_lower_value_scale.get() ):
+				if f_value <= float( self.__scales[ 'y_value_upper'].get() ) \
+						and f_value >= float( self.__scales[ 'y_value_lower' ].get() ):
 					b_valid=True
 				#end if float in range
 			#end if
@@ -946,16 +959,35 @@ class PGNeEstimationBoxplotInterface( object ):
 	#end __convert_labels
 
 	def __destroy_widgets( self, do_dict_of_widgets ):
-
 		for s_widget_name in do_dict_of_widgets:
 
 			o_widget=do_dict_of_widgets[ s_widget_name ]	
 
-			if hasattr( o_widget, 'destroy' ):
-				o_widget.destroy()	
-			#end if has destroy def
+			try:
+				if hasattr( o_widget, "grid_forget" ):
+					o_widget.grid_forget()
+				#end if has grid forget
 
-			return
+				if hasattr( o_widget, 'destroy' ):
+					o_widget.destroy()	
+				#end if has destroy def
+
+			except tkinter._tkinter.TclError as tkerr:
+				s_tkmsg=str( tkerr )
+				s_msg="Warning:  in PGNeEstimationBoxplotInterface instance, " \
+							+ "def __destroy_widgets, " \
+							+ "Failed to forget and destroy widgets keyed to " \
+							+ s_widget_name + ".  Tkinter Error message is: " \
+							+ s_tkmsg + "\n"
+
+				sys.stderr.write( s_msg )
+			#end try...except	
+		#end for each widget
+
+		return
+	#end __destroy_widgets
+
+
 	#end __destroy_widgets
 
 	def cleanup( self ):

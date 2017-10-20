@@ -155,6 +155,7 @@ class PGNeEstimationRegressplotInterface( object ):
 		self.__labels=None
 		self.__comboboxes=None
 		self.__buttons=None
+		self.__scales=None
 		self.__subframes=None
 
 		if self.__plot_width is None \
@@ -256,6 +257,7 @@ class PGNeEstimationRegressplotInterface( object ):
 				#end if plot frame has destroy method, else has
 			self.__setup_tsv_file_loader()
 			self.__make_tsv_file_manager()
+			self.__destroy_all_widgets()
 			self.__setup_plotting_interface()	
 
 		else:
@@ -291,7 +293,7 @@ class PGNeEstimationRegressplotInterface( object ):
 		s_header=o_tsv.readline()
 		o_tsv.close()
 
-		ls_header_fields = s_header.split( o_tsvc.DELIM_TABLE )
+		ls_header_fields = s_header.strip().split( o_tsvc.DELIM_TABLE )
 
 		for s_name in ls_column_names_to_test:
 
@@ -366,8 +368,8 @@ class PGNeEstimationRegressplotInterface( object ):
 	
 		WINDOW_MARGIN=0.0
 
-		WIDTH_PROPORTION=0.02
-		HEIGHT_PROPORTION=0.02
+		WIDTH_PROPORTION=0.03
+		HEIGHT_PROPORTION=0.03
 
 		i_width=self.__master_frame.winfo_screenwidth()
 		i_height=self.__master_frame.winfo_screenheight()
@@ -383,6 +385,23 @@ class PGNeEstimationRegressplotInterface( object ):
 		#end if no plot height provided
 
 		return
+	#end __get_auto_text_size
+
+	def __destroy_all_widgets( self ):
+
+		for do_widget_dict in [ self.__subframes, 
+								self.__labels,
+								self.__comboboxes,
+								self.__scales,
+								self.__buttons ]:
+
+			if do_widget_dict is not None:
+				if len( do_widget_dict ) > 0:
+					self.__destroy_widgets( do_widget_dict )
+				#end if at least one item dict
+			#end if dict exists
+		#end for each widget dict
+	#end __destroy_all_widgets
 
 	def __setup_plotting_interface( self ):
 
@@ -418,10 +437,6 @@ class PGNeEstimationRegressplotInterface( object ):
 	#end __make_tsv_file_manager 
 
 	def __make_subframes( self ):
-		
-		if self.__subframes is not None:
-			self.__destroy_widgets( self.__subframes )
-		#end if subframes exist
 
 		self.__subframes={}
 
@@ -490,10 +505,6 @@ class PGNeEstimationRegressplotInterface( object ):
 
 	def __make_labels( self ):
 
-		if self.__labels is not None:
-			self.__destroy_widgets( self.__labels )
-		#end if no labels
-
 		self.__labels={}
 
 		o_myc=PGNeEstimationRegressplotInterface
@@ -546,10 +557,6 @@ class PGNeEstimationRegressplotInterface( object ):
 	#end __make labels
 
 	def __make_combos( self ):
-
-		if self.__comboboxes is not None:
-			self.__destroy_widgets( self.__comboboxes )
-		#end if comboboxes exist
 
 		self.__comboboxes={}
 
@@ -647,31 +654,34 @@ class PGNeEstimationRegressplotInterface( object ):
 		many of the former's handy attributes.
 		'''
 
-		self.__y_lower_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
+		o_y_lower_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
 							to = df_min_max["max"],
 							command=self.__on_y_scale_change,
 							orient=HORIZONTAL,
 							resolution=f_resolution,
 							bigincrement=f_bigincrement )
 
-		self.__y_lower_value_scale.set( df_min_max[ "min" ] )
-		self.__y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
+		o_y_lower_value_scale.set( df_min_max[ "min" ] )
+		o_y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
 											column=o_myclass.COLNUM_YVAL_LOWER_SCALE, 
 																		sticky=( N,W ) )
 
-		self.__y_upper_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
+		o_y_upper_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
 																			to = df_min_max["max"],
 																			command=self.__on_y_scale_change,
 																			orient=HORIZONTAL,
 																			resolution=f_resolution,
 																			bigincrement=f_bigincrement )
 
-		self.__y_upper_value_scale.set( df_min_max[ "max" ] )
-		self.__y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
+		o_y_upper_value_scale.set( df_min_max[ "max" ] )
+		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
 											column=o_myclass.COLNUM_YVAL_UPPER_SCALE, 
 																			sticky=( N,W ) )
+		
+		self.__scales={ 'y_value_lower':o_y_lower_value_scale, 'y_value_upper':o_y_upper_value_scale }
 
 		return
+
 	#end __make_y_value_scales
 
 	def __get_range_unfiltered_y_data( self ):
@@ -741,17 +751,17 @@ class PGNeEstimationRegressplotInterface( object ):
 			the min (from)  and max (to) will be both set to 0.0. Hence,
 			we must reset the resolution before resetting the from and to.
 			'''
-			self.__y_lower_value_scale[ 'resolution' ] = f_resolution
-			self.__y_lower_value_scale[ 'bigincrement' ] = f_bigincrement	
-			self.__y_lower_value_scale[ 'from' ] = df_min_max[ "min" ] 	
-			self.__y_lower_value_scale[ 'to' ]=df_min_max[ "max" ] 
-			self.__y_lower_value_scale.set( df_min_max[ "min" ] )
+			self.__scales[ 'y_value_lower' ][ 'resolution' ] = f_resolution
+			self.__scales[ 'y_value_lower' ][ 'bigincrement' ] = f_bigincrement	
+			self.__scales[ 'y_value_lower' ][ 'from' ] = df_min_max[ "min" ] 	
+			self.__scales[ 'y_value_lower' ][ 'to' ]=df_min_max[ "max" ] 
+			self.__scales[ 'y_value_lower' ].set( df_min_max[ "min" ] )
 
-			self.__y_upper_value_scale[ 'resolution' ] = f_resolution
-			self.__y_upper_value_scale[ 'bigincrement' ] = f_bigincrement
-			self.__y_upper_value_scale[ 'from' ] = df_min_max[ "min" ] 	
-			self.__y_upper_value_scale[ 'to' ]=df_min_max[ "max" ] 
-			self.__y_upper_value_scale.set( df_min_max[ "max" ] )
+			self.__scales[ 'y_value_upper' ][ 'resolution' ] = f_resolution
+			self.__scales[ 'y_value_upper' ][ 'bigincrement' ] = f_bigincrement
+			self.__scales[ 'y_value_upper' ][ 'from' ] = df_min_max[ "min" ] 	
+			self.__scales[ 'y_value_upper' ][ 'to' ]=df_min_max[ "max" ] 
+			self.__scales[ 'y_value_upper' ].set( df_min_max[ "max" ] )
 
 		#end if the y var combo has been created
 	#end __update_y_scales
@@ -874,10 +884,6 @@ class PGNeEstimationRegressplotInterface( object ):
 
 		o_myc=PGNeEstimationRegressplotInterface
 
-		if self.__buttons is not None:
-			self.__destroy_widgets( self.__buttons )
-		#end if buttons exist, destroy
-
 		self.__buttons={}
 
 		self.__buttons[ 'save_plot_to_file' ]=Button( \
@@ -913,39 +919,44 @@ class PGNeEstimationRegressplotInterface( object ):
 
 	def __on_group_by_selection_change( self, s_column_name, s_value, o_tsv_file_manager  ):
 
-		if self.__plotframe is not None:
-			ls_group_by_column_names=self.__get_group_by_column_names()
-			s_x_label=self.__get_x_label( ls_group_by_column_names )
-			s_y_label=self.__get_y_label( self.__comboboxes[ 'select_y_variable' ].current_value )
-
-			self.__plotframe.setGroupByColumnNames(ls_group_by_column_names )	
-			self.__plotframe.setYValueColumnName( self.__comboboxes[ 'select_y_variable' ].current_value )
-			self.__plotframe.setXLabel( s_x_label )
-			self.__plotframe.setYLabel( s_y_label )
-			self.__plotframe.animate()
-			self.__update_stats_text()
-		#end if plot frame exists
+		
 		return
 	#end __on_group_by_selection_change	
 
 	def __on_y_variable_selection_change( self, s_column_name, s_value, o_tsv_file_manager ):
+
+		##### temp
+		print( "------------in __on_y_variable_selection_change" )
+		#####
 		o_myc=PGNeEstimationRegressplotInterface
 
-		b_scales_created= hasattr( self, '_PGNeEstimationRegressplotInterface__y_upper_value_scale' ) \
-					and hasattr( self, '_PGNeEstimationRegressplotInterface__y_lower_value_scale' )
 		'''
 		When the variable for the y value changes,
 		we need to clear any filters imposed by the
 		Scale object setting a limit on the value for
-		any formerly selected y values:
+		any formerly selected y values, but still filter
+		non-float-convertible values:
 		'''
+
+		ls_non_numeric_values=[ "NA" ]
+
 		for s_name in o_myc.Y_AXIS_VALUE_COLUMNS:
-			self.__tsv_file_manager.setFilter( s_name, None )
+			self.__tsv_file_manager.setFilter( s_name, 
+							lambda x : x not in ls_non_numeric_values )
 		#end for each y-val column variable, reset filter.
 
 		self.__update_y_scales()
 
-		self.__on_group_by_selection_change( s_column_name, s_value, o_tsv_file_manager )
+		if self.__plotframe is not None:
+			s_y_label=self.__get_y_label( \
+					self.__comboboxes[ 'select_y_variable' ].current_value )
+			self.__plotframe.setYValueColumnName( \
+					self.__comboboxes[ 'select_y_variable' ].current_value )
+			self.__plotframe.setYLabel( s_y_label )
+			self.__plotframe.animate()
+			self.__update_stats_text()
+		#end if plot frame exists
+
 		return
 	#end __on_y_variable_selection_change
 
@@ -984,8 +995,8 @@ class PGNeEstimationRegressplotInterface( object ):
 				b_valid=False
 			else:
 				f_value=float( s_value )
-				if f_value <= float( self.__y_upper_value_scale.get() ) \
-						and f_value >= float( self.__y_lower_value_scale.get() ):
+				if f_value <= float( self.__scales[ 'y_value_upper' ].get() ) \
+						and f_value >= float( self.__scales[ 'y_value_lower' ].get() ):
 					b_valid= True
 				#end if float in range
 			#end if
@@ -1037,16 +1048,33 @@ class PGNeEstimationRegressplotInterface( object ):
 	#end __convert_labels
 
 	def __destroy_widgets( self, do_dict_of_widgets ):
-
 		for s_widget_name in do_dict_of_widgets:
 
 			o_widget=do_dict_of_widgets[ s_widget_name ]	
 
-			if hasattr( o_widget, 'destroy' ):
-				o_widget.destroy()	
-			#end if has destroy def
+			try:
+				if hasattr( o_widget, "grid_forget" ):
+					o_widget.grid_forget()
+				#end if has grid forget
 
-			return
+				if hasattr( o_widget, 'destroy' ):
+					o_widget.destroy()	
+				#end if has destroy def
+
+			except tki._tkinter.TclError as tkerr:
+				s_tkmsg=str( tkerr )
+				s_msg="Warning:  in PGNeEstimationBoxplotInterface instance, " \
+							+ "def __destroy_widgets, " \
+							+ "Failed to forget and destroy widgets keyed to " \
+							+ s_widget_name + ".  Tkinter Error message is: " \
+							+ s_tkmsg + "\n"
+
+				sys.stderr.write( s_msg )
+			#end try...except	
+		#end for each widget
+
+		return
+
 	#end __destroy_widgets
 
 	def cleanup( self ):
@@ -1054,32 +1082,7 @@ class PGNeEstimationRegressplotInterface( object ):
 		This def is called by the pghostnotebook.py instance
 		when user wants to exit.
 		'''
-		for s_widget_type in [ "labels", 
-									"comboboxes", 
-									"buttons", 
-									"subframes" ]:
-			s_attr_name="_PGNeEstimationRegressplotInterface__" \
-								+  s_widget_type
-		
-			if hasattr( self, s_attr_name ):
-
-				do_dict_of_widgets=getattr( self, s_attr_name )
-
-				if do_dict_of_widgets is not None:
-					self.__destroy_widgets( do_dict_of_widgets )
-				#end if dict exists
-
-				setattr( self, s_attr_name, None )
-			#end if we have the attribute
-		#end for each widget type created by this class
-
-		if self.__master_frame is not None:
-			if hasattr( self.__master_frame, "destroy" ):
-				self.__master_frame.destroy()
-				self.__master_frame=None
-			#end if not yet destroyed
-		#end if master frame exits
-
+		self.__destroy_all_widgets()
 		return
 	#end def cleanup
 
