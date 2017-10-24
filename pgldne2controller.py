@@ -68,7 +68,7 @@ DEFAULT_LOC_INSIDE_DIST="bin"
 
 EXEC_NAMES_BY_OS= { pgut.SYS_LINUX:"LDNe2OptDbL",
 					pgut.SYS_WINDOWS:"LDNe2OptDb.exe",
-					pgut.SYS_MAC:"LDNe2OptDbL" }
+					pgut.SYS_MAC:"LDNe2OptDbOSX" }
 
 class PGLDNe2Controller( object ):
 	'''
