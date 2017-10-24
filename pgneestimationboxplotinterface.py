@@ -323,8 +323,8 @@ class PGNeEstimationBoxplotInterface( object ):
 	
 		WINDOW_MARGIN=0.0
 
-		WIDTH_PROPORTION=0.50
-		HEIGHT_PROPORTION=0.50
+		WIDTH_PROPORTION=0.90
+		HEIGHT_PROPORTION=0.90
 
 		i_width=self.__master_frame.winfo_screenwidth()
 		i_height=self.__master_frame.winfo_screenheight()
@@ -478,27 +478,28 @@ class PGNeEstimationBoxplotInterface( object ):
 
 		self.__labels[ 'select_y_variable' ] = Label( self.__subframes[ 'y_value' ], 
 															text= "Y axis value" , 
-															padding=o_myc.LABEL_PADDING)
-	
-		self.__labels[ 'y_lower_scale' ]=Label( self.__subframes[ 'y_value' ], 
-												text="Lower limit Y axis values", 
-														padding=o_myc.LABEL_PADDING )
-		
-		self.__labels[ 'y_upper_scale' ]=Label( self.__subframes[ 'y_value' ], 
-												text="Upper limit Y axis values", 
+#															padding=o_myc.LABEL_PADDING)
+#	
+#		self.__labels[ 'y_lower_scale' ]=Label( self.__subframes[ 'y_value' ], 
+#												text="Lower limit Y axis values", 
+#														padding=o_myc.LABEL_PADDING )
+#		
+#		self.__labels[ 'y_upper_scale' ]=Label( self.__subframes[ 'y_value' ], 
+#												text="Upper limit Y axis values", 
 														padding=o_myc.LABEL_PADDING )
 	
 
 		self.__labels[ 'select_y_variable' ].grid( row = o_myc.ROW_NUM_YVAL_LABEL, 
 																column=0, sticky=( N,W ) )
 
-		self.__labels[ 'y_lower_scale' ].grid( row=o_myc.ROW_NUM_YVAL_LOWER_SCALE_LABEL, 
-												column=o_myc.COLNUM_YVAL_LOWER_SCALE_LABEL, 
-																			sticky=( N,W ) )
+#		self.__labels[ 'y_lower_scale' ].grid( row=o_myc.ROW_NUM_YVAL_LOWER_SCALE_LABEL, 
+#												column=o_myc.COLNUM_YVAL_LOWER_SCALE_LABEL, 
+#																			sticky=( N,W ) )
+#
+#		self.__labels[ 'y_upper_scale' ].grid( row=o_myc.ROW_NUM_YVAL_UPPER_SCALE_LABEL, 
+#												column=o_myc.COLNUM_YVAL_UPPER_SCALE_LABEL, 
+#																				sticky=( N,W ) )
 
-		self.__labels[ 'y_upper_scale' ].grid( row=o_myc.ROW_NUM_YVAL_UPPER_SCALE_LABEL, 
-												column=o_myc.COLNUM_YVAL_UPPER_SCALE_LABEL, 
-																				sticky=( N,W ) )
 		return
 	#end __make labels
 
@@ -644,7 +645,7 @@ class PGNeEstimationBoxplotInterface( object ):
 	#end __get_y_label
 	
 	def __make_y_value_scales( self ):
-
+		SCALE_LENGTH=150
 		o_myclass=PGNeEstimationBoxplotInterface
 
 		df_min_max=self.__get_range_unfiltered_y_data()
@@ -661,7 +662,9 @@ class PGNeEstimationBoxplotInterface( object ):
 							command=self.__on_y_scale_change,
 							orient=HORIZONTAL,
 							resolution=f_resolution,
-							bigincrement=f_bigincrement )
+							bigincrement=f_bigincrement,
+							length=SCALE_LENGTH,
+							label="lower limit y axis values")
 
 		o_y_lower_value_scale.set( df_min_max[ "min" ] )
 		o_y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
@@ -673,7 +676,9 @@ class PGNeEstimationBoxplotInterface( object ):
 																			command=self.__on_y_scale_change,
 																			orient=HORIZONTAL,
 																			resolution=f_resolution,
-																			bigincrement=f_bigincrement )
+																			bigincrement=f_bigincrement,
+																			length=SCALE_LENGTH,
+																			label="upper limit y axis values" )
 
 		o_y_upper_value_scale.set( df_min_max[ "max" ] )
 		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
@@ -689,7 +694,8 @@ class PGNeEstimationBoxplotInterface( object ):
 		df_min_max={ "min":None, "max":None }
 
 		ls_y_values=self.__tsv_file_manager.getUnfilteredTableAsList( b_skip_header=True,
-											ls_exclusive_inclusion_cols=[ self.__comboboxes[ 'select_y_variable' ].current_value ] )
+											ls_exclusive_inclusion_cols=[ \
+														self.__comboboxes[ 'select_y_variable' ].current_value ] )
 
 		for s_val in ls_y_values:
 			if s_val != "inf" and s_val != "NA":
@@ -704,8 +710,10 @@ class PGNeEstimationBoxplotInterface( object ):
 					raise Exception( s_msg )
 				#end try...except
 
-				df_min_max[ "min" ] = f_val if df_min_max[ "min"] is None or f_val < df_min_max[ "min" ] else df_min_max[ "min" ]
-				df_min_max[ "max" ] = f_val if df_min_max[ "max"] is None or f_val > df_min_max[ "max" ] else df_min_max[ "max" ]
+				df_min_max[ "min" ] = f_val if df_min_max[ "min"] is None \
+									or f_val < df_min_max[ "min" ] else df_min_max[ "min" ]
+				df_min_max[ "max" ] = f_val if df_min_max[ "max"] is None \
+									or f_val > df_min_max[ "max" ] else df_min_max[ "max" ]
 			#end if s_val not inf
 
 		#end for each value	
@@ -864,7 +872,10 @@ class PGNeEstimationBoxplotInterface( object ):
 		When the variable for the y value changes,
 		we need to clear any filters imposed by the
 		Scale object setting a limit on the value for
-		any formerly selected y values:
+		any formerly selected y values.  However,
+		we still filter out non-numeric values.
+		As of 2017_10_20, the only non-numeric
+		values for the y-variables are "NA."
 		'''
 
 		ls_non_convertable_vals=[ "NA" ]
@@ -898,11 +909,11 @@ class PGNeEstimationBoxplotInterface( object ):
 		'''
 		We use the local def instead of a simple lambda
 		because we need to check for nonnumeric value
-		NA
+		(NA).
 		'''
 		def is_valid_y( s_value ):
 			b_valid=False
-			if s_value == "NA":
+			if s_value in ["NA"]:
 				b_valid=False
 			else:
 				f_value=float( s_value )
@@ -916,7 +927,7 @@ class PGNeEstimationBoxplotInterface( object ):
 
 		self.__tsv_file_manager.setFilter( \
 						self.__comboboxes[ 'select_y_variable' ].current_value, 
-						is_valid_y )
+																	is_valid_y )
 
 		if self.__plotframe is not None:
 			self.__plotframe.animate()

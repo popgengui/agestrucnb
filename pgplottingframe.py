@@ -1,8 +1,8 @@
 '''
 Description
 These classes provide tkinter frames that embed 
-matplotlib plotting figures, with def do_animate
-to update the figure.  The do_animate def is 
+matplotlib plotting figures, with def animate
+to update the figure.  The animate def is 
 a wrapper for a client-supplied def.  Code to create
 and animate was adapted from tutorial at
 https://pythonprogramming.net/
@@ -24,8 +24,14 @@ from natsort import realsorted
 #These imports are from the
 #URL tutorial (see Description above).
 import matplotlib
-import matplotlib.pyplot as plt
+'''
+2017_10_24.  Note that this line use to come after
+the pyplot import statement, but that caused a problem
+on the Mac OSX.  This positioning, right after the
+matplotlib import, seems to have solved it.
+'''
 matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 import matplotlib.animation as animation

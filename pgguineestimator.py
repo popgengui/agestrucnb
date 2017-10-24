@@ -957,7 +957,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						o_master=o_file_locations_subframe,
 						i_entrywidth=ENTRY_WIDTH,
 						i_labelwidth=LABEL_WIDTH,
-
 						b_is_enabled=False,
 						s_entry_justify='left',
 						s_label_justify='left',

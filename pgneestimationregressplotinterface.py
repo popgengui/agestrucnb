@@ -100,7 +100,7 @@ class PGNeEstimationRegressplotInterface( object ):
 	COLNUM_SUBFRAME_FILTER=0
 	COLNUM_SUBFRAME_GROUPBY=0
 	COLNUM_SUBFRAME_PLOT=0
-	COLNUM_SUBFRAME_STATS_TEXT=4
+	COLNUM_SUBFRAME_STATS_TEXT=5
 
 	COLNUM_YVAL_LOWER_SCALE_LABEL=1
 	COLNUM_YVAL_UPPER_SCALE_LABEL=2
@@ -116,7 +116,7 @@ class PGNeEstimationRegressplotInterface( object ):
 	COLSPAN_SUBFRAME_Y_VALUE=1
 	COLSPAN_SUBFRAME_X_VALUE=1
 	COLSPAN_SUBFRAME_SAVE_PLOT=1
-	COLSPAN_SUBFRAME_PLOT=5
+	COLSPAN_SUBFRAME_PLOT=4
 	COLSPAN_SUBFRAME_STATS_TEXT=1
 
 	SUBFRAME_STYLE="groove"
@@ -343,8 +343,8 @@ class PGNeEstimationRegressplotInterface( object ):
 	
 		WINDOW_MARGIN=0.0
 
-		WIDTH_PROPORTION=0.30
-		HEIGHT_PROPORTION=0.50
+		WIDTH_PROPORTION=0.50
+		HEIGHT_PROPORTION=0.70
 
 		i_width=self.__master_frame.winfo_screenwidth()
 		i_height=self.__master_frame.winfo_screenheight()
@@ -368,8 +368,8 @@ class PGNeEstimationRegressplotInterface( object ):
 	
 		WINDOW_MARGIN=0.0
 
-		WIDTH_PROPORTION=0.03
-		HEIGHT_PROPORTION=0.03
+		WIDTH_PROPORTION=0.04
+		HEIGHT_PROPORTION=0.04
 
 		i_width=self.__master_frame.winfo_screenwidth()
 		i_height=self.__master_frame.winfo_screenheight()

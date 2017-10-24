@@ -84,7 +84,11 @@ class KeyValFrame( PGKeyControlFrame ):
 					o_validity_tester=None,
 					b_force_disable=False,
 					s_tooltip=None,
-					b_use_list_editor=False ):
+					b_use_list_editor=False,
+					i_entry_row=0,
+					i_entry_col=1,
+					i_label_row=0,
+					i_label_col=0 ):
 		
 		"""
 		Param s_name provides the label text.
@@ -136,6 +140,11 @@ class KeyValFrame( PGKeyControlFrame ):
 		Param b_use_list_editor, if True, and if param v_value (see above) is passed as a list, 
 			  then a ListEditingSubframe object will be instantiated, allowing a GUI user to
 			  trim, extend, or assign one value to a range of list indices.
+		Param i_entry_row, integer, grid row at which to layout the entry or entries.
+		Param i_entry_col, integer, grid column at which to layout the first entry (incrementing for otherentries).
+				note that when a button is present, this will be it's column number, the entries following. 
+		Param i_label_row, integer, grid row at which to layout the label.
+		Param i_label_col, integer, grid column at which to layout the label.
 		"""
 
 		PGKeyControlFrame.__init__( self, o_master, name=s_name.lower() )
@@ -170,6 +179,10 @@ class KeyValFrame( PGKeyControlFrame ):
 		self.__subframe_padding=i_subframe_padding
 		self.__validity_tester=o_validity_tester
 		self.__force_disable=b_force_disable
+		self.__entry_row=i_entry_row
+		self.__entry_col=i_entry_col
+		self.__label_row=i_label_row
+		self.__label_col=i_label_col
 		self.__idx_none_values=[]
 		self.__entryvals=[]
 		
@@ -390,7 +403,7 @@ class KeyValFrame( PGKeyControlFrame ):
 										justify=self.__labeljustify, 
 														state=s_state )
 		o_label.config( width=self.__lablewidth )
-		o_label.grid( row=0, column=0 )
+		o_label.grid( row=self.__label_row, column=self.__label_col )
 		'''
 		A parent-class (PGKeyControlFrame)  instance handle on the label is added 2017_04_18.  We now
 		manipulate its state through the parent class methods.
@@ -419,14 +432,13 @@ class KeyValFrame( PGKeyControlFrame ):
 		#end if no button command, return
 
 		'''
-		The Button is at col 1, that is,
-		Between the label (col 0)
-		and the entry (first entry 
-		if list, col1):
+		The Button is at the first entry col 
+		the entries will be put at following 
+		columns:
 		'''
 
-		BUTTON_ROW=0
-		BUTTON_COL=1
+		BUTTON_ROW=self.__entry_row
+		BUTTON_COL=self.__entry_col
 		BUTTON_XPAD=10
 		BUTTON_YPAD=10
 		
@@ -506,7 +518,6 @@ class KeyValFrame( PGKeyControlFrame ):
 
 		o_entry = Entry( self.__subframe, 
 				textvariable=o_strvar,
-				
 				width=self.__entrywidth,
 				state=s_enabled,
 				foreground="black",
@@ -525,9 +536,9 @@ class KeyValFrame( PGKeyControlFrame ):
 		i_num_vals=len( self.__value )
 	
 		if self.__button_command is not None:
-			i_colcount=2
+			i_colcount=self.__entry_col + 1
 		else:
-			i_colcount=1
+			i_colcount=self.__entry_col
 		#end if we have a button, then
 		#first entry will start at 2nd column (col 1),
 		#else start at first column (col 0)
@@ -560,7 +571,7 @@ class KeyValFrame( PGKeyControlFrame ):
 			o_tooltip=ctt.CreateToolTip( o_entry,  s_ttip_text )
 
 			self.__entryvals.append( o_strvar  )
-			o_entry.grid( row = 0, column = i_colcount )
+			o_entry.grid( row = self.__entry_row, column = i_colcount )
 			o_entry.bind( '<Return>', self.__on_enterkey )
 			o_entry.bind( '<Tab>', self.__on_enterkey )
 
@@ -766,7 +777,6 @@ if __name__ == "__main__":
 	mykv.grid()
 
 	mym.mainloop()
-
 	pass
 #end if main
 
