@@ -34,6 +34,7 @@ import pginputsimupop as pgin
 import pgoutputsimupop as pgout
 import pgopsimupop as pgop
 
+OUTPUT_USE_HET_FILTER=3
 
 class SimInputParamValueHolder(object):
 	def __init__(self, model_name=None, 
@@ -66,7 +67,9 @@ class SimInputParamValueHolder(object):
 					startSave=None,
 					gens=None,
 					cull_method=None,
-					nbadjustment=None ):
+					nbadjustment=None,
+					het_filter=None,
+					do_het_filter=None):
 
 
 
@@ -99,7 +102,9 @@ class SimInputParamValueHolder(object):
 									"reps":reps,
 									"startSave":startSave,
 									"gens":gens,
-									"cull_method":cull_method }
+									"cull_method":cull_method,
+									"het_filter":het_filter,
+									"do_het_filter":do_het_filter }
 							
 		return
 	#end __init__
@@ -109,8 +114,7 @@ class SimInputParamValueHolder(object):
 		return self.__values_by_param_name
 	#end paramvalues
 
-#end class
-
+#end class SimInputParamValueHolder
 					
 class SimInputParamResetManager( object ):
 	def __init__( self, o_input_object, o_param_value_holder):
@@ -201,7 +205,11 @@ def get_input_object( s_config_file,
 						i_replicates,
 						i_startsave,
 						i_burnin,
-						i_total_cycles ):
+						i_total_cycles,
+						b_do_het_filter,
+						s_het_filter,
+						i_popsize,
+						s_cull_method ):
 
 	o_paramInfo=pgparams.PGParamSet( s_param_names_file )
 
@@ -229,7 +237,11 @@ def get_input_object( s_config_file,
 										reps=i_replicates,
 										startSave=i_startsave,
 										startLambda=i_burnin,
-										gens=i_total_cycles )
+										gens=i_total_cycles,
+										do_het_filter=b_do_het_filter,
+										het_filter=s_het_filter,
+										popSize=i_popsize,
+										cull_method=s_cull_method)
 
 	o_input_manager = SimInputParamResetManager( o_simInput, o_value_holder )
 
@@ -253,7 +265,9 @@ def drive_sims( s_config_file,
 					i_processes,
 					i_total_cycles,
 					i_output_mode,
-					s_hetfilter ):
+					s_het_filter,
+					i_popsize,
+					s_cull_method ):
 
 	check_for_existing_output_files( s_output_base )
 
@@ -289,7 +303,12 @@ def drive_sims( s_config_file,
 						i_replicates=i_replicates,
 						i_startsave=i_startsave,
 						i_burnin=i_burnin,
-						i_total_cycles = i_total_cycles )
+						i_total_cycles = i_total_cycles,
+						b_do_het_filter=( i_output_mode==OUTPUT_USE_HET_FILTER ),
+						s_het_filter=s_het_filter,
+						i_popsize=i_popsize,
+						s_cull_method=s_cull_method )
+
 
 	print( "Writing a temp configuration file for the simulation..." )
 
@@ -308,6 +327,12 @@ def drive_sims( s_config_file,
 
 	print( "Running the simulation in a new python process..." )
 
+	#The op object recognizes only ORIG or GENEPOP only,
+	#and assumes genepop only for het filter output.
+	if i_output_mode in ( pgop.PGOpSimuPop.OUTPUT_GENEPOP_ONLY, OUTPUT_USE_HET_FILTER ):
+		i_output_mode=pgop.PGOpSimuPop.OUTPUT_GENEPOP_ONLY
+	#end if output type is genepop only
+
 	pgut.do_simulation_reps_in_subprocesses( sim_multi_process_event, 
 									o_input_object.reps, 
 									i_processes,
@@ -316,8 +341,8 @@ def drive_sims( s_config_file,
 									s_param_names_file,
 									s_output_base,
 									b_use_gui_messaging = False,
-									i_output_mode = i_output_mode,
-									s_pop_het_filter_string=s_hetfilter )
+									i_output_mode = i_output_mode )
+
 	print( "Simulation complete. Removing temporary configuration file..." )
 	
 	pgut.remove_files( [ s_temp_config_file_for_running_replicates ] )
@@ -333,9 +358,9 @@ if __name__ == "__main__":
 
 	VALUE_LIST_IS_IMPLEMENTED=False
 
-	OPT_SHORT=[ "-b", "-n" , "-t", "-r", "-s", "-p", "-g", "-u", "-z" ]
+	OPT_SHORT=[ "-b", "-n" , "-t", "-r", "-s", "-p", "-g", "-u", "-z", "-i", "-m" ]
 	OPT_LONG=[ "--burnin", "--nb", "--nbtolerance", "--replicates", "--startsave", "--processes" , 
-													"--cycles", "--outputmode", "--hetfilter" ]
+													"--cycles", "--outputmode", "--hetfilter", "--popsize", "--cullmethod" ]
 
 
 	s_chelp="configuration file.  Typically one of the files in the \"resources\\simulation\" " \
@@ -363,16 +388,19 @@ if __name__ == "__main__":
 
 	s_shelp="Start save. Integer. Repro cycle number at which to start recording results. " \
 								+ "This will overwrite the \"startSave\" value in the configuration file."
-	
-
 
 	s_thelp="Nb tolerance.  Float. This will overwrite the nb tolerance value (\"NbVar\") in the configuration file."
 	
 	s_bhelp="Burn-in cycles.  Number of the repro cycle at which to start applying Nb tolerance test.  " \
 								+ "This will overwrite the burn-in setting " \
 								+ "(i.e. \"startLambda\") in the configuration file."
+
 	s_ghelp="Total cycles.  Total number of cycles to be run in the simulation.  This will overwrite this setting " \
 								+ "(i.e. \"gens\") in the configuration file."
+
+	s_mhelp="Cull method.  Accepts either \"equal_sex_cull\" or \"survival_rates\" (the original cull method).  This " \
+								+ "value will replace the \"cull_method\" value in the configuraation file."
+
 
 	'''
 	2017_06_01. We are not yet showing this option, for now just offering "replicates" and "Nb" as optional settings.
@@ -395,7 +423,12 @@ if __name__ == "__main__":
 								+ "per-locus squared allele frequencies) is calulated, and, " \
 								+ "if found to be in range, then the pop is recorded to the output "\
 								+ "genepop file.  If the total pops t have already been written " \
-								+ "then the sim stops."
+								+ "then the sim stops.  If you select outpuot mode 3 and omit this " \
+								+ "argument, then the program will use the het filter string in " \
+								+ "the configuration file."
+	s_ihelp="Pop size.  The size of the initial population.  This value will replace the \"popSize\" value in the " \
+				+ "configuration file."
+
 
 	s_vhelp_table_of_parameters=""
 
@@ -412,11 +445,13 @@ if __name__ == "__main__":
 	i_total_cycles=None
 	i_output_mode=pgop.PGOpSimuPop.OUTPUT_GENEPOP_ONLY
 	s_hetfilter=None
+	i_popsize=None
+	s_cull_method=None
 
 
 	REQUIRED_HELP=[ s_chelp, s_lhelp, s_ohelp ]
 
-	OPT_HELP=[ s_bhelp, s_nhelp, s_thelp, s_rhelp, s_shelp, s_phelp, s_ghelp, s_uhelp, s_zhelp ]
+	OPT_HELP=[ s_bhelp, s_nhelp, s_thelp, s_rhelp, s_shelp, s_phelp, s_ghelp, s_uhelp, s_zhelp, s_ihelp, s_mhelp ]
 
 	o_parser=ap.ArgumentParser()
 
@@ -479,16 +514,20 @@ if __name__ == "__main__":
 	#end if cycles supplied
 
 	if o_args.outputmode is not None:
-		#####  temp
-		print( "---------" )
-		print( "setting outmode to " + o_args.outputmode )
-		#####
 		i_output_mode=int( o_args.outputmode )
 	#end if output mode set
 	
 	if o_args.hetfilter is not None:
 		s_hetfilter = o_args.hetfilter
 	#end if hetfilter string supplied
+
+	if o_args.popsize is not None:
+		i_popsize = o_args.popsize
+	#end if popsize set
+
+	if o_args.cullmethod is not None:
+		s_cull_method=o_args.cullmethod
+	#end if cull method set
 
 	drive_sims( s_config_file, 
 				s_life_table_file, 
@@ -502,7 +541,9 @@ if __name__ == "__main__":
 				i_processes=i_processes, 
 				i_total_cycles=i_total_cycles,
 				i_output_mode=i_output_mode,
-				s_hetfilter=s_hetfilter )
+				s_het_filter=s_hetfilter,
+				i_popsize=i_popsize,
+				s_cull_method=s_cull_method )
 			
 
 #end if main

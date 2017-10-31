@@ -97,14 +97,7 @@ class PGOpSimuPop( modop.APGOperation ):
 	'''
 	OUTPUT_ORIG=1
 	OUTPUT_GENEPOP_ONLY=2
-	'''
-	2017_08_05.  This output mode will write the 
-	sim-generated pop section only if it meets
-	a mean-heterozygosity criteria.  Our motivating 
-	case is to write pops only if they have a 
-	at or near a target value, such as 0.3 for SNPs.
-	'''
-	OUTPUT_GENEPOP_HET_FILTERED=3
+
 	HET_FILTER_ATTR_NAMES_IN_ORDER = [ "min_mean_heterozygosity", 
 										"max_mean_heterozygosity",
 										"total_filtered_pops_to_save" ]
@@ -119,8 +112,8 @@ class PGOpSimuPop( modop.APGOperation ):
 									b_do_gui_messaging=False,
 									b_write_nb_and_ages_files=False,
 									b_is_replicate_1=False,
-									i_output_mode=OUTPUT_GENEPOP_ONLY,
-									s_pop_het_filter_string=None ):  
+									i_output_mode=OUTPUT_GENEPOP_ONLY ):  
+
 		'''
 			o_input, a PGInputSimuPop object
 			o_output, a PGOutputSimuPop object
@@ -165,10 +158,6 @@ class PGOpSimuPop( modop.APGOperation ):
 			i_output_mode.  This param was added 2017_08_04 to speed up
 				the output and skip writing the *gen *db and *sim files used
 				by Tiago in his original pipeline.  
-			s_pop_het_filter_string.  This param was added 2017_08_06 to enable
-				output of genepop files with sim pops that are within a range
-				of mean (expected) heterozygosity mean (sum_all_alleles( freq^2) ) ).		
-				the caluclation is done by a call in def __outputAge
 			'''
 
 		self.__guiinfo=None
@@ -209,13 +198,12 @@ class PGOpSimuPop( modop.APGOperation ):
 
 
 		'''
-		2017_08_05.  In preparation fo implementing
-		output mode OUTPUT_GENEPOP_HET_FILTERED.  These
+		2017_08_05.  In preparation for implementing
+		output het filtering,  These
 		members will be used to get the range and total
 		saved pops for a filter based on a pop's 
-		heterozygosity.
+		heterozygosity.  See input param "het_filter"
 		'''
-		self.__pop_het_filter_string=s_pop_het_filter_string
 		self.min_mean_heterozygosity=None
 		self.max_mean_heterozygosity=None
 		self.total_filtered_pops_to_save=None
@@ -264,7 +252,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__file_for_age_counts=None
 		'''
 		2017_08_08. This file will be created
-		when the output mode is OUTPUT_GENEPOP_HET_FILTERED,
+		when the het filter is applied,
 		to record the cycle number and het value for the
 		pops recorded in the output genepop file.	
 		See def __set_het_filter_params for its creation. 
@@ -340,7 +328,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		mycl=PGOpSimuPop
 
-		if self.__pop_het_filter_string is None:
+		if self.input.het_filter is None:
 			s_msg="In PGOpSimuPop instance, " \
 						+ "def __set_het_filter_params, " \
 						+ "there is not pop het filter string."
@@ -348,7 +336,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		#end if no string
 
 		i_num_fields_expected=len( mycl.HET_FILTER_ATTR_NAMES_IN_ORDER )
-		ls_filter_params=self.__pop_het_filter_string.split( \
+		ls_filter_params=self.input.het_filter.split( \
 										mycl.POP_HET_FILTER_STRING_DELIM )
 		i_num_param_values=len( ls_filter_params )
 
@@ -408,10 +396,24 @@ class PGOpSimuPop( modop.APGOperation ):
 				self.output.openErr()
 				self.output.openMegaDB()
 			elif self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_ONLY:
-				self.__setup_genepop_file()	
-			elif self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED:
+
 				self.__setup_genepop_file()
-				self.__set_het_filter_params()
+
+				if self.input.do_het_filter == True:
+					##### temp
+					print( "calling __set_het_filter_params()" )
+					#####
+					self.__set_het_filter_params()
+				#end if het filter is to be applied
+
+			elif self.__output_mode == PGOpSimuPop.OUTPUT_ORIG \
+									and self.do_het_filter == True:
+				s_msg="In PGOpSimuPop instance, " \
+						+ "def prepareOp, " \
+						+ "the output mode is for original output, " \
+						+ "and the het filter flag is set to True.  " \
+						+ "This is currently not an implemented output state."
+				raise Exception( s_msg )
 			else:
 				s_msg="In PGOpSimuPop instance, " \
 						+ "def prepareOp, " \
@@ -760,7 +762,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		stopOp=[]
 
-		if self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED:
+		if self.input.do_het_filter:
 			stopOp=[ sp.PyOperator( func=self.__keep_collecting_filtered_pops  ) ]
 		#end if we are writing het-value-filtered pops, then we stop after the user-supplied limit
 		#is reached.
@@ -1138,6 +1140,11 @@ class PGOpSimuPop( modop.APGOperation ):
 					self.__file_for_nb_records.write( \
 							"\t".join( [ s_thisgen, s_thisNb ] ) \
 							+ "\n" )
+					'''
+					Added 2017_08_24 to allow constantly updated plotting
+					in PGGuiSimuPop instances.
+					'''
+					self.__file_for_nb_records.flush()
 				#end if we are to write the nb value file
 
 				nbOK = True
@@ -1696,21 +1703,23 @@ class PGOpSimuPop( modop.APGOperation ):
 			totals_by_age={}
 
 			if self.__output_mode==PGOpSimuPop.OUTPUT_GENEPOP_ONLY:
-				self.output.genepop.write( "pop\n" )
-			elif self.__output_mode==PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED:
-
-				f_mean_het=self.__get_mean_heterozygosity_over_all_loci( pop )
-
-				if f_mean_het >= self.min_mean_heterozygosity \
-							and f_mean_het <= self.max_mean_heterozygosity:
+				if self.input.do_het_filter == False:
 					self.output.genepop.write( "pop\n" )
-					self.total_filtered_pops_saved += 1
-					self.__file_for_het_filter.write( str( gen ) + "\t" \
-													+ str( f_mean_het ) + "\n" )
 				else:
-					return True
-				#end if het in range, else return.
-			#end if output mode is genepop only, else genepop with pop het filter
+
+					f_mean_het=self.__get_mean_heterozygosity_over_all_loci( pop )
+
+					if f_mean_het >= self.min_mean_heterozygosity \
+								and f_mean_het <= self.max_mean_heterozygosity:
+						self.output.genepop.write( "pop\n" )
+						self.total_filtered_pops_saved += 1
+						self.__file_for_het_filter.write( str( gen ) + "\t" \
+														+ str( f_mean_het ) + "\n" )
+					else:
+						return True
+					#end if het in range, else return.
+				#end if not het filter in effect, else test
+			#end if output mode is genepop only, check whether het filter
 
 			for i in pop.individuals():
 				'''
@@ -1794,26 +1803,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 					self.output.genepop.write( "\n" )
 
-				elif self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED \
-								or self.__output_mode == PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED:
-
-					s_this_pop_line=PGOpSimuPop.DELIMITER_INDIV_ID.join( [ \
-								str( i.ind_id ), str( i.sex() ), str( i.father_id ),
-								str( i.mother_id ), str( i.age ) ] )
-
-					s_this_pop_line += ", "
-
-					for pos in range(len(i.genotype(0))):
-						a1 = self.__zeroC(i.allele(pos, 0))
-						a2 = self.__zeroC(i.allele(pos, 1))
-						s_this_pop_line+=(a1 + a2 + " ")
-					#end for pos in range
-
-					self.output.genepop.write( s_this_pop_line + "\n" )
-
-
-				#end if output mode original, else genepop only or genepop filtered
-
+				#end if output mode original, else genepop only 
 
 				'''
 				2017_02_07.  We are recording effects on the age 

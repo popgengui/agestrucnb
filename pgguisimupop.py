@@ -234,15 +234,15 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	def __init_interface( self, b_force_disable = False ):
 		'''
 		param b_force_disable, if set to true,
-			will set all the KeyValueFrame text entry
-			boxes do state "disabled."  This is useful
-			to show user when the interface is busy
-			computing a simulation, and keeps user
-			from editing values when the sim is 
-			being run (though, besides any user
-			misperceptions, such editign would not
-			affect the current sim, but rather would
-			be applied to any subsequent run.)
+		will set all the KeyValueFrame text entry
+		boxes do state "disabled."  This is useful
+		to show user when the interface is busy
+		computing a simulation, and keeps user
+		from editing values when the sim is 
+		being run (though, besides any user
+		misperceptions, such editign would not
+		affect the current sim, but rather would
+		be applied to any subsequent run.)
 
 		'''
 		
@@ -469,7 +469,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			i_cat_frame_row+=1
 		#end for each catgory frame
 	#end __place_category_frames
-			
 
 	def __load_values_into_interface( self, b_force_disable=False ):
 		'''
@@ -504,7 +503,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		LABEL_WIDTH = [ WIDTHSMALL if i<LENSMALL else WIDTHBIG for i in range( MAXLABELLEN ) ] 
 		PARAMETERS_CBOX_WIDTH=15
-
 		
 		DEFAULT_WIDTHS_FOR_SOME_TEXT_PARAMS={ "model_name":DEFAULT_WIDTH_LONG_TEXT, 
 												"config_file":DEFAULT_WIDTH_LONG_TEXT }
@@ -917,7 +915,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					if abs( self.__input.maleProb - 0.5 ) > f_reltol:
 						o_this_kv.manuallyUpdateValue( 0.5 )
 					#end if current value is not 0.5, set it manually
-						
 				#end if cull method is set to equal sex ratio, reset male prob to 0.5 
 			#end if we have a cull_method attribute, a male prob attribute, 
 			#and access to the maleProb entry control
@@ -928,7 +925,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#end if very verbose
 
 		return
-
 	#end __on_cull_method_selection_change
 
 	def load_config_file( self, event=None ):
@@ -1477,13 +1473,15 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			a mode-dependant pop filter, so that we need to now use the optional args added to the
 			do_simulation_reps_in_subprocesses def -- including the gui messaging flag, in order
 			to correctly pass a complete arg set:
+
+			2017_09_04. We have eliminated the het filter string as an arg passed to the pgutilities
+			def.  It now will be accessed directly from the input config file.
 			'''
 			b_do_use_gui_messaging=True
 			i_output_mode=pgut.pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY
 			s_het_filter_string=None
 
 			if self.__input.do_het_filter==True:
-				i_output_mode=pgut.pgsim.PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED
 				s_het_filter_string=self.__input.het_filter
 				ls_invalidity_msgs=self.__validate_het_filter_string( s_het_filter_string )
 				if ls_invalidity_msgs is not None:
@@ -1507,8 +1505,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 							self.__param_names_file,
 							self.__output.basename,
 							b_do_use_gui_messaging,
-							i_output_mode, 
-							s_het_filter_string ) ) 
+							i_output_mode ) ) 
 
 			self.__op_process.start()
 

@@ -873,7 +873,7 @@ class GenepopFileSamplerCohorts( GenepopFileSampler ):
 									+ "def __get_individuals, " \
 									+ "subsampling value specifying a count of " \
 									+ str( o_sample_value_object.sampling_value ) \
-									+ "individuals per age class is greater than the " \
+									+ " individuals per age class is greater than the " \
 									+ "maximum possible even-sampling total for individuals: " \
 									+ str( i_max_individuals_per_cohort ) + "."
 						raise Exception( s_msg )

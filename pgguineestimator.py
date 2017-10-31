@@ -883,11 +883,22 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		'''
 		o_run_sub_subframe=Frame( o_file_locations_subframe )
 
+		i_tot_procs=pgut.get_cpu_count()
+
+	
+		'''
+		2017_10_19. Instead of defaulting to 1.0, 
+		we'll use half the available cpus.
+		'''
 		if self.__processes is None:
-			self.__processes=1
+			##### temp
+			print( "calcing procs using total: " + str( i_tot_procs ) )
+			#####
+
+			i_floor=int( i_tot_procs/2.0 )
+			self.__processes=1 if i_floor == 0 else i_floor
 		#end assign min if not set
 
-		i_tot_procs=pgut.get_cpu_count()
 
 		o_tot_process_validator=FloatIntStringParamValidity( \
 					"proccess total",
@@ -946,7 +957,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 						o_master=o_file_locations_subframe,
 						i_entrywidth=ENTRY_WIDTH,
 						i_labelwidth=LABEL_WIDTH,
-
 						b_is_enabled=False,
 						s_entry_justify='left',
 						s_label_justify='left',

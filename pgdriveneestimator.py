@@ -1315,7 +1315,7 @@ def do_estimate(xxx_todo_changeme ):
 			#In this case we stub in "NA" vals for the missing estimator and bias adjust values
 			i_total_estimator_fields=get_count_estimator_fields()
 
-			#Besides the estimator fields, We add two fields for the Nb/Ne and bias akjustment
+			#Besides the estimator fields, We add two fields for the Nb/Ne and bias adjustment
 			i_number_nb_bias_fields=2
 
 			ls_output_vals_as_none=[ "NA" for idx \

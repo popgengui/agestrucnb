@@ -25,12 +25,26 @@ import pgmenubuilder as pgmb
 #These classes provide the interfaces, 
 #each offered in the main "Add"
 #menu.
-import pgguisimupop as pggs
-import pgguiviz as pggv
-import pgguineestimator as pgne
 
-from pgguiutilities import FrameContainerScrolled
+##### temp rem out and replace
+#for testing life plotting during sim
+#import pgguisimupop as pggs
+import pgguisimupop as pggs
+##### end temp rem out
+
+import pgguiviz as pggv
+
+##### temp rem out and replace
+#as above for testing embedded plotting
+import pgguineestimator as pgne
+#####
+
+import pgneestimationboxplotinterface as pgbp
+import pgneestimationregressplotinterface as pgrp
+
+from pgframecontainerscrolled import FrameContainerScrolled
 from pgguiutilities import PGGUIYesNoMessage
+from pgutilities import get_cpu_count
 
 class PGHostNotebook( Notebook ):
 	'''
@@ -113,6 +127,7 @@ class PGHostNotebook( Notebook ):
 		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgg 
 		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
 		self.enable_traversal()
+	#end addPGGuiSimupop
 
 	def addPGGuiNeEstimation( self ):
 		'''
@@ -123,9 +138,26 @@ class PGHostNotebook( Notebook ):
 
 		o_canvas=Canvas( o_container )
 
+		'''
+		2017_10_19.  We now default to half the 
+		existing (logical) cores as the default setting
+		for number of processes to use for 
+		Ne estimations.  Note that before this
+		update  the PGGuiNeEstimator was intitializing 
+		its i_total_processes_for_est param with
+		this object's self.__max_process_total, which
+		is still used by the other interfaces.
+		'''
+		i_total_cpus=get_cpu_count()
+
+		i_floor_half=int( i_total_cpus/2.0 )
+		
+		i_total_processes_for_est=\
+				1 if i_floor_half <= 0 else i_floor_half
+
 		o_pgg=pgne.PGGuiNeEstimator( o_container, 
 						self.__param_names_file_for_neestimation,
-						i_total_processes_for_est=self.__max_process_total )
+						i_total_processes_for_est=i_total_processes_for_est )
 
 		o_scan=FrameContainerScrolled( o_container, o_pgg, o_canvas, 
 		i_scroll_direction=FrameContainerScrolled.SCROLLVERTICAL)
@@ -141,7 +173,6 @@ class PGHostNotebook( Notebook ):
 		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
 
 		return
-
 	#end addPGGuiNeEstimation
 
 	def addPGGuiViz( self ):
@@ -183,6 +214,63 @@ class PGHostNotebook( Notebook ):
 
 		return
 	#end addPGGuiViz
+
+	def addPGNeBoxplot( self ):
+
+		o_container=Frame( self, padding=self.__container_padding )
+
+		o_canvas=Canvas( o_container )
+
+		o_plot_master_frame=Frame( o_container)
+
+		o_plot_master_frame.grid( row=0, column=0, sticky=( N,S,E,W ) )
+		o_pgbp=pgbp.PGNeEstimationBoxplotInterface( o_plot_master_frame )
+		
+
+		o_scan=FrameContainerScrolled( o_container, o_plot_master_frame, o_canvas, 
+			i_scroll_direction=FrameContainerScrolled.SCROLLBOTH )
+
+		s_tab_text="Estimation Distribution Boxplots " + str( self.__tab_count )
+
+		self.add( o_container, text=s_tab_text )
+		self.__tab_children.append( o_container )
+		self.__tab_count+=1
+		self.select( o_container )
+
+		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgbp 
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+
+		return
+	#end addPGNeBoxplot
+
+	def addPGNeRegressPlot( self ):
+
+		o_container=Frame( self, padding=self.__container_padding )
+
+		o_canvas=Canvas( o_container )
+
+		o_plot_master_frame=Frame( o_container)
+
+		o_plot_master_frame.grid( row=0, column=0, sticky=( N,S,E,W ) )
+		o_pgbp=pgrp.PGNeEstimationRegressplotInterface( o_plot_master_frame )
+		
+
+		o_scan=FrameContainerScrolled( o_container, o_plot_master_frame, o_canvas, 
+			i_scroll_direction=FrameContainerScrolled.SCROLLBOTH )
+
+		s_tab_text="Estimation Regression Plots " + str( self.__tab_count )
+
+		self.add( o_container, text=s_tab_text )
+		self.__tab_children.append( o_container )
+		self.__tab_count+=1
+		self.select( o_container )
+
+		self.__my_gui_objects_by_tab_text[ s_tab_text ] = o_pgbp 
+		self.__scrolled_frame_objects_by_tab_text[ s_tab_text ] = o_scan
+
+		return
+	#end addPGNeRegressPlot
+
 
 	def exitNotebook( self ):
 		if self.__get_tab_count() > 0:
