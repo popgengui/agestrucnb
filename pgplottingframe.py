@@ -103,6 +103,8 @@ class PGPlottingFrame( Frame ):
 		self.__make_figure()
 		self.__add_plotting_canvas()
 
+		
+
 		return
 	#end __init__
 
@@ -197,6 +199,66 @@ class PGPlottingFrame( Frame ):
 		self.__make_figure()
 		self.__add_plotting_canvas()
 	#end setFigureWidthAndHeight
+
+	def set_x_axis_margin_and_xtick_rotation( self, ls_labels, lv_xtick_vals=None ):
+
+		MAX_LABEL_LEN=10
+
+		NO_ROTATION=0
+		SLIGHT_ROTATION=10
+		HALF_ROTATION=30
+
+		NORMAL_X_MARGIN_ADJUST=0.2
+		HIGH_X_MARGIN_ADJUST=0.3
+
+		SHORT_LABEL=4
+
+		HIGH_LABEL_COUNT=25
+		HIGH_LABEL_COUNT_ANGLE=60
+		HIGH_LABEL_COUNT_MARGIN_ADJ=0.2
+
+		li_rotation_by_length=[ NO_ROTATION for i_length in range( SHORT_LABEL ) ]
+		li_rotation_by_length += [ HALF_ROTATION for i_length in range( SHORT_LABEL + 1, MAX_LABEL_LEN + 1 ) ]
+
+		'''
+		Convenience local def:
+		'''
+		def mylengetter( s_label ):
+			return 0 if s_label=='' else len( s_label )
+		#end mylengetter
+
+		if len( ls_labels ) == 0:
+			i_len_longest_label=0
+		else:
+			i_len_longest_label=max( [ mylengetter(s_label) \
+										for s_label in ls_labels ] )
+		#end if we have no data sets, else at least 1
+
+		if i_len_longest_label > MAX_LABEL_LEN:
+			self.__bottom_margin_adjustment=HIGH_X_MARGIN_ADJUST
+			self.__xtick_rotation_angle=SLIGHT_ROTATION
+		else:
+			self.__bottom_margin_adjustment=NORMAL_X_MARGIN_ADJUST
+			self.__xtick_rotation_angle=li_rotation_by_length[ i_len_longest_label - 1 ]
+		#end if length longer than max, else not
+
+		if len( ls_labels ) >= HIGH_LABEL_COUNT:
+			self.__xtick_rotation_angle = HIGH_LABEL_COUNT_ANGLE
+			self.__bottom_margin_adjustment += HIGH_LABEL_COUNT_MARGIN_ADJ
+		#end if lots of xtick labels, adjust the rotation angle
+
+		self.__figure.subplots_adjust(bottom=self.__bottom_margin_adjustment)
+
+		if lv_xtick_vals is not None:
+			self.__figure.get_axes()[0].set_xticks( lv_xtick_vals )
+		#end if we have a set of xtick values
+
+		o_xticklabels=self.__figure.get_axes()[0].set_xticklabels( 
+														ls_labels, 
+														rotation = self.__xtick_rotation_angle, ha="right")
+		return
+	#end set_x_axis_margin_and_xtick_rotation
+
 #end class PGPlottingFrame
 
 class PGPlottingFrame2DLines( PGPlottingFrame ):
@@ -236,12 +298,13 @@ class PGPlottingFrame2DLines( PGPlottingFrame ):
 									s_xlabel=s_xlabel,
 									s_ylabel=s_ylabel )
 	
-		
 		self.__plot_line_width=f_plot_line_width
 		self.__data_file=s_data_file
 		self.__col_num_x_vals=i_col_num_x_values
 		self.__col_num_y_vals=i_col_num_y_values
 		self.__data_file_col_delimiter="\t"
+
+		return
 
 	#end __init__
 
@@ -267,7 +330,11 @@ class PGPlottingFrame2DLines( PGPlottingFrame ):
 										linestyle='dashed', 
 										marker='o'	)
 
-
+			if "x_labels" in self.current_data[ s_line_name ]:
+				self.set_x_axis_margin_and_xtick_rotation( \
+										self.current_data[ s_line_name ][ "x_labels" ], 
+										lv_xtick_vals=lv_xvals )
+			#end if the line has a set of xtick labels.
 
 		#end for each line, plot the line									
 
@@ -292,13 +359,12 @@ class PGPlottingFrame2DLines( PGPlottingFrame ):
 	#end clearPlot
 
 	def __update_data_from_file( self ):
-		
+
 		self.clearPlot()
 
 		o_file=None	
 
 		NO_DATA={ "line1": { "x":[], "y":[] } }
-
 		
 		self.current_data=NO_DATA
 
@@ -376,6 +442,7 @@ class PGPlottingFrame2DLinesFromFileManager( PGPlottingFrame2DLines ):
 					ls_group_by_column_names=None,
 					def_to_convert_x_vals_to_numeric=None,
 					def_to_convert_y_vals_to_numeric=None,
+					def_to_get_labels_for_x_vals=None,
 					tuple_args_for_animation_call=None,
 					v_init_data={ "line1:":{ "x":None, "y":None } },
 					f_figure_width=5.0,
@@ -422,6 +489,19 @@ class PGPlottingFrame2DLinesFromFileManager( PGPlottingFrame2DLines ):
 		self.__group_by_column_names=ls_group_by_column_names
 		self.__def_to_convert_x_values_to_numeric=def_to_convert_x_vals_to_numeric
 		self.__def_to_convert_y_values_to_numeric=def_to_convert_y_vals_to_numeric
+
+		'''
+		2017_10_27. If the client wants to use, for example file names for x 
+		values, the client can pass a def_to_convert_x_values_to_numeric, and
+		also the following, which can then show a plotted regression line that
+		uses file names for xtic values, each file ordered by the def that 
+		converted x values to numeric.  In our motivating case, the 
+		PGNeEstimationRegressplotInterface instance should, whenever the 
+		client chooses file name as the x value (over which to regress, 
+		instead of pop), store a table with file name in col1 and numeric 
+		value in col 2, and then can convert the file name into a label.
+		'''
+		self.__def_to_get_x_labels_for_x_vals=def_to_get_labels_for_x_vals
 
 		return
 	#end __init__
@@ -554,6 +634,7 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 					ls_group_by_column_names=None,
 					def_to_convert_x_vals_to_numeric=None,
 					def_to_convert_y_vals_to_numeric=None,
+					def_to_get_labels_for_x_vals=None,
 					tuple_args_for_animation_call=None,
 					v_init_data={ "line1:":{ "x":None, "y":None } },
 					f_figure_width=5.0,
@@ -568,7 +649,8 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 					s_data_file=None,
 					i_col_num_x_values=1,
 					i_col_num_y_values=2,
-					s_file_col_delimiter="\t" ):
+					s_file_col_delimiter="\t",
+					s_expected_slope = "auto" ):
 
 		'''
 		Note that we don't use the s_data_file string,
@@ -583,6 +665,7 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 									ls_group_by_column_names=ls_group_by_column_names,
 									def_to_convert_x_vals_to_numeric=def_to_convert_x_vals_to_numeric,
 									def_to_convert_y_vals_to_numeric=def_to_convert_y_vals_to_numeric,
+									def_to_get_labels_for_x_vals=def_to_get_labels_for_x_vals,
 									tuple_args_for_animation_call=tuple_args_for_animation_call,
 									b_do_animate=b_do_animate,
 									v_init_data=v_init_data,
@@ -601,6 +684,8 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 									s_file_col_delimiter=s_file_col_delimiter )
 
 		self.__mangledname="_PGPlottingFrame2DLinesFromFileManager__"
+		self.__expected_slope=s_expected_slope
+
 		return
 	#end __init__
 
@@ -623,7 +708,7 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 		return b_return_value
 	#end __do_have_tsv_file_and_field_names
 
-	def __update_data_from_file( self  ):
+	def __update_regression_data_from_file( self  ):
 
 		NODATA={ "no_data":{ "x":[0], "y":[0] } }
 		INSUFFDATA={ "insufficient_data":{ "x":[0], "y": [ 0 ] } }
@@ -661,27 +746,27 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 											b_skip_header=True )
 
 
-		##### temp
-		s_msg=None
-		if self.current_data is not None and len( self.current_data ) > 0:
-			s_msg=str( list( self.current_data.values() )[0] ) 
-		else:
-			s_msg=str( self.current_data )
-
-		print( "calling current_data_has... with first line data: " + s_msg )
-		#####
-
 		b_do_regression=self.__current_data_has_two_or_more_points_per_line_name() 
+
+		def_to_convert_x_vals=self._PGPlottingFrame2DLinesFromFileManager__def_to_convert_x_values_to_numeric
+		def_to_get_x_labels=self._PGPlottingFrame2DLinesFromFileManager__def_to_get_x_labels_for_x_vals
+
+		if def_to_convert_x_vals is not None:
+			def_to_convert_x_vals( self.current_data )
+		#end if the client passed a converstion def for x values
 		
 		if b_do_regression==True:
 			self.__convert_tsv_line_data_to_regression_data()	
 			self.__sort_current_data()
+			if def_to_get_x_labels is not None:
+				def_to_get_x_labels( self.current_data )
+			#end if the client wants labels for the x values
 		else:
 			self.current_data=INSUFFDATA
 		#end if we have enough data to regress, else not
 			
 		return	
-	#end update_data_from_file
+	#end update_regression_data_from_file
 
 	def __current_data_has_two_or_more_points_per_line_name( self ):
 
@@ -723,25 +808,17 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 			self.current_data[ s_line_name ][ "y" ]=lf_sorted_y
 		
 		#end for each line name
+
+		return
 	#end __sort_current_data
 
 	def __get_regressed_data( self ):
 
-		def_to_conv_x=getattr( self, self.__mangledname \
-							+ "def_to_convert_x_values_to_numeric" )
-		def_to_conv_y=getattr( self, self.__mangledname \
-							+ "def_to_convert_y_values_to_numeric" )
-
-		if def_to_conv_x is None:
-			def_to_conv_x=lambda x : float(x)
-		#end if def to convert x is none, cast as float
-
-		if def_to_conv_y is None:
-			def_to_conv_y=lambda x : float(x)
-		#end if def to convert x is none, cast as float
+		def_to_conv_x=lambda x : float(x)
+		def_to_conv_y=lambda x : float(x)
 
 		DELIMITER=NeEstimationTableFileManager.DELIM_TABLE
-		o_regresser=PGRegresser()
+		o_regresser=PGRegresser( s_expected_slope=self.__expected_slope )
 		dltup_xy_by_group_name={}
 
 		def convert_to_duple_numeric_pair( s_xy_val_string ):
@@ -777,23 +854,12 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 		ls_linenames=list( self.current_data.keys() )
 
 		idx_this_line=0
-
-		##### temp
-#		i_num_lines=len( ls_linenames )
-#		print( "current data keys: " + str( ls_linenames ) )
-#		#print( "i_num_lines: " + str( i_num_lines ) )
-#		print( "num xysets: " + str( len( lltup_regressed_data ) ) )
-		#####
-		
+				
 		i_regress_data_count=0
 		
 		for ltup_xyvals in lltup_regressed_data:
 
 			i_regress_data_count+=1
-
-			##### temp
-#			print( "line number idx: " + str( idx_this_line ) )
-			#####
 
 			ltup_unzipped=zip( *ltup_xyvals )
 
@@ -840,7 +906,6 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 			self.current_data=\
 					self.__convert_regression_data_back_to_plotting_format( \
 															lltup_regressed_data )
-			
 		#end if we have current data
 		return
 	#end __convert_tsv_line_data_to_regression_data
@@ -848,7 +913,7 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 	def updateData( self ):
 		o_tsv_file_manager=getattr( self, self.__mangledname + "tsv_file_manager" )
 		if o_tsv_file_manager is not None:
-			self.__update_data_from_file()
+			self.__update_regression_data_from_file()
 		#end if file manager is not none
 		return
 	#end updateData
@@ -997,7 +1062,7 @@ class PGPlottingFrameBoxplotFromFileManager( PGPlottingFrame ):
 		self.subplot.clear()
 
 		if len( self.current_data[ 'labels' ] ) > 0:
-			self.__set_x_axis_margin_and_xtick_rotation()
+			self.set_x_axis_margin_and_xtick_rotation( self.current_data[ 'labels' ] )
 			self.subplot.set_xlabel(self.xlabel, fontsize=self.label_fontsize )
 			self.subplot.set_ylabel( self.ylabel, fontsize=self.label_fontsize )
 			self.subplot.boxplot( x=self.current_data[ 'value_lists' ],
@@ -1007,7 +1072,7 @@ class PGPlottingFrameBoxplotFromFileManager( PGPlottingFrame ):
 				self._PGPlottingFrame__figure.canvas.draw() 
 			#end if no animation 
 		else:
-			self.__set_x_axis_margin_and_xtick_rotation()
+			self.set_x_axis_margin_and_xtick_rotation( self.current_data[ 'labels' ] )
 			self.subplot.set_xlabel(self.xlabel, fontsize=self.label_fontsize )
 			self.subplot.set_ylabel( self.ylabel, fontsize=self.label_fontsize )
 
@@ -1018,67 +1083,10 @@ class PGPlottingFrameBoxplotFromFileManager( PGPlottingFrame ):
 				self._PGPlottingFrame__figure.canvas.draw() 
 			#end if no animation 
 
-		#end if we have at least one data set
+		#end if we have at least one data set, else not
 		return
 	#end __animate
 
-	def __set_x_axis_margin_and_xtick_rotation( self ):
-
-		MAX_LABEL_LEN=10
-
-		NO_ROTATION=0
-		SLIGHT_ROTATION=10
-		HALF_ROTATION=30
-
-		NORMAL_X_MARGIN_ADJUST=0.2
-		HIGH_X_MARGIN_ADJUST=0.3
-
-		SHORT_LABEL=4
-
-		HIGH_LABEL_COUNT=25
-		HIGH_LABEL_COUNT_ANGLE=60
-		HIGH_LABEL_COUNT_MARGIN_ADJ=0.2
-
-		li_rotation_by_length=[ NO_ROTATION for i_length in range( SHORT_LABEL ) ]
-		li_rotation_by_length += [ HALF_ROTATION for i_length in range( SHORT_LABEL + 1, MAX_LABEL_LEN + 1 ) ]
-
-		'''
-		Convenience local def:
-		'''
-		def mylengetter( s_label ):
-			return 0 if s_label=='' else len( s_label )
-		#end mylengetter
-
-		if len( self.current_data[ 'labels' ] ) == 0:
-			i_len_longest_label=0
-		else:
-			i_len_longest_label=max( [ mylengetter(s_label) \
-					for s_label in self.current_data[ 'labels' ] ] )
-		#end if we have no data sets, else at least 1
-
-		if i_len_longest_label > MAX_LABEL_LEN:
-			self.__bottom_margin_adjustment=HIGH_X_MARGIN_ADJUST
-			self.__xtick_rotation_angle=SLIGHT_ROTATION
-		else:
-			self.__bottom_margin_adjustment=NORMAL_X_MARGIN_ADJUST
-			self.__xtick_rotation_angle=li_rotation_by_length[ i_len_longest_label - 1 ]
-		#end if length longer than max, else not
-
-		if len( self.current_data[ 'labels' ] ) >= HIGH_LABEL_COUNT:
-			##### temp
-		#	print( "adjusting for high label count" )
-			#####
-			self.__xtick_rotation_angle = HIGH_LABEL_COUNT_ANGLE
-			self.__bottom_margin_adjustment += HIGH_LABEL_COUNT_MARGIN_ADJ
-		#end if lots of xtick labels, adjust the rotation angle
-
-		self._PGPlottingFrame__figure.subplots_adjust(bottom=self.__bottom_margin_adjustment)
-
-		o_xticklabels=self._PGPlottingFrame__figure.get_axes()[0].set_xticklabels( 
-														self.current_data[ 'labels' ], 
-														rotation = self.__xtick_rotation_angle, ha="right")
-		return
-	#end __set_x_axis_margin_and_xtick_rotation
 
 	def __update_data_from_file_manager( self ):
 

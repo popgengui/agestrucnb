@@ -43,6 +43,7 @@ from pgneestimationtablefilemanager import NeEstimationTableFileManager
 from pgneestimationtableselectioncombo import PGNeEstTableColumnSelectionCombo
 from pgneestimationtableselectioncombo import PGNeEstTableValueSelectionCombo
 from pgkeyvalueframe import KeyValFrame
+from pgscalewithentry import PGScaleWithEntry
 
 class PGNeEstimationBoxplotInterface( object ):
 
@@ -168,7 +169,14 @@ class PGNeEstimationBoxplotInterface( object ):
 	def __setup_tsv_file_loader( self ):
 
 		ENTRY_WIDTH=70
-		LABEL_WIDTH=10
+		LABEL_WIDTH_NONWIN=10
+		LABEL_WIDTH_WINDOWS=12
+
+		i_label_width=LABEL_WIDTH_NONWIN
+
+		if pgut.is_windows_platform():
+			i_label_width=LABEL_WIDTH_WINDOWS
+		#end if using windows, need wider label
 
 		o_myc=PGNeEstimationBoxplotInterface
 
@@ -183,7 +191,7 @@ class PGNeEstimationBoxplotInterface( object ):
 							v_default_value="",
 							o_master=self.__tsv_file_loader_subframe,
 							i_entrywidth=ENTRY_WIDTH,
-							i_labelwidth=LABEL_WIDTH,
+							i_labelwidth=i_label_width,
 							b_is_enabled=False,
 							s_entry_justify='left',
 							s_label_justify='left',
@@ -316,8 +324,6 @@ class PGNeEstimationBoxplotInterface( object ):
 		return b_return_value
 	#end __looks_like_a_tsv_file_with_data_lines
 
-
-
 	def __get_auto_plot_size( self ):
 		o_myc=PGNeEstimationBoxplotInterface
 	
@@ -347,7 +353,7 @@ class PGNeEstimationBoxplotInterface( object ):
 		self.__make_subframes()
 		self.__make_labels()
 		self.__make_combos()
-		self.__make_y_value_scales()
+		self.__make_scales()
 		self.__make_buttons()
 		self.__make_plot()
 		self.__set_master_frame_grid_weights()
@@ -644,7 +650,8 @@ class PGNeEstimationBoxplotInterface( object ):
 		return s_y_label
 	#end __get_y_label
 	
-	def __make_y_value_scales( self ):
+	def __make_scales( self ):
+
 		SCALE_LENGTH=150
 		o_myclass=PGNeEstimationBoxplotInterface
 
@@ -657,37 +664,42 @@ class PGNeEstimationBoxplotInterface( object ):
 		many of the former's handy attributes.
 		'''
 
-		o_y_lower_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
-							to = df_min_max["max"],
-							command=self.__on_y_scale_change,
-							orient=HORIZONTAL,
-							resolution=f_resolution,
-							bigincrement=f_bigincrement,
-							length=SCALE_LENGTH,
-							label="lower limit y axis values")
-
-		o_y_lower_value_scale.set( df_min_max[ "min" ] )
+		o_y_lower_value_scale=PGScaleWithEntry( 
+							o_master_frame= self.__subframes[ 'y_value' ], 
+							f_scale_from=df_min_max[ "min" ], 
+							f_scale_to = df_min_max["max"],
+							def_scale_command=self.__on_y_scale_change,
+							v_orient=HORIZONTAL,
+							f_resolution=f_resolution,
+							f_bigincrement=f_bigincrement,
+							i_scale_length=SCALE_LENGTH,
+							s_scale_label="lower limit y axis values")
+	
+		o_y_lower_value_scale.scale.set( df_min_max[ "min" ] )
 		o_y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
 											column=o_myclass.COLNUM_YVAL_LOWER_SCALE, 
 																		sticky=( N,W ) )
 
-		o_y_upper_value_scale=tki.Scale( self.__subframes[ 'y_value' ], from_=df_min_max[ "min" ], 
-																			to = df_min_max["max"],
-																			command=self.__on_y_scale_change,
-																			orient=HORIZONTAL,
-																			resolution=f_resolution,
-																			bigincrement=f_bigincrement,
-																			length=SCALE_LENGTH,
-																			label="upper limit y axis values" )
+		o_y_upper_value_scale=PGScaleWithEntry( 
+							o_master_frame= self.__subframes[ 'y_value' ], 
+							f_scale_from=df_min_max[ "min" ], 
+							f_scale_to = df_min_max["max"],
+							def_scale_command=self.__on_y_scale_change,
+							v_orient=HORIZONTAL,
+							f_resolution=f_resolution,
+							f_bigincrement=f_bigincrement,
+							i_scale_length=SCALE_LENGTH,
+							s_scale_label="upper limit y axis values")
 
-		o_y_upper_value_scale.set( df_min_max[ "max" ] )
+
+		o_y_upper_value_scale.scale.set( df_min_max[ "max" ] )
 		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
 											column=o_myclass.COLNUM_YVAL_UPPER_SCALE, 
 																			sticky=( N,W ) )
 		
 		self.__scales={ 'y_value_lower':o_y_lower_value_scale, 'y_value_upper':o_y_upper_value_scale }
 		return
-	#end __make_y_value_scales
+	#end __make_scales
 
 	def __get_range_unfiltered_y_data( self ):
 
@@ -756,17 +768,17 @@ class PGNeEstimationBoxplotInterface( object ):
 			the min (from)  and max (to) will be both set to 0.0. Hence,
 			we must reset the resolution before resetting the from and to.
 			'''
-			self.__scales[ 'y_value_lower' ][ 'resolution' ] = f_resolution
-			self.__scales[ 'y_value_lower' ][ 'bigincrement' ] = f_bigincrement	
-			self.__scales[ 'y_value_lower' ][ 'from' ] = df_min_max[ "min" ] 	
-			self.__scales[ 'y_value_lower' ][ 'to' ]=df_min_max[ "max" ] 
-			self.__scales[ 'y_value_lower' ].set( df_min_max[ "min" ] )
+			self.__scales[ 'y_value_lower' ].scale[ 'resolution' ] = f_resolution
+			self.__scales[ 'y_value_lower' ].scale[ 'bigincrement' ] = f_bigincrement	
+			self.__scales[ 'y_value_lower' ].scale[ 'from' ] = df_min_max[ "min" ] 	
+			self.__scales[ 'y_value_lower' ].scale[ 'to' ]=df_min_max[ "max" ] 
+			self.__scales[ 'y_value_lower' ].scale.set( df_min_max[ "min" ] )
 
-			self.__scales[ 'y_value_upper' ][ 'resolution' ] = f_resolution
-			self.__scales[ 'y_value_upper' ][ 'bigincrement' ] = f_bigincrement
-			self.__scales[ 'y_value_upper' ][ 'from' ] = df_min_max[ "min" ] 	
-			self.__scales[ 'y_value_upper' ][ 'to' ]=df_min_max[ "max" ] 
-			self.__scales[ 'y_value_upper' ].set( df_min_max[ "max" ] )
+			self.__scales[ 'y_value_upper' ].scale[ 'resolution' ] = f_resolution
+			self.__scales[ 'y_value_upper' ].scale[ 'bigincrement' ] = f_bigincrement
+			self.__scales[ 'y_value_upper' ].scale[ 'from' ] = df_min_max[ "min" ] 	
+			self.__scales[ 'y_value_upper' ].scale[ 'to' ]=df_min_max[ "max" ] 
+			self.__scales[ 'y_value_upper' ].scale.set( df_min_max[ "max" ] )
 
 		#end if the y var combo has been created
 	#end __update_y_scales
@@ -806,7 +818,7 @@ class PGNeEstimationBoxplotInterface( object ):
 		self.__plotframe.grid( row=PGNeEstimationBoxplotInterface.ROW_NUM_PLOT, 
 												column=0, columnspan=o_myc.COLSPAN_PLOT, sticky=( N,W ) )
 
-		self.__plotframe.animate()
+		self.__update_results()
 		return
 	#end __make_plot
 
@@ -860,7 +872,7 @@ class PGNeEstimationBoxplotInterface( object ):
 			self.__plotframe.setYValueColumnName( self.__comboboxes[ 'select_y_variable' ].current_value )
 			self.__plotframe.setXLabel( s_x_label )
 			self.__plotframe.setYLabel( s_y_label )
-			self.__plotframe.animate()
+			self.__update_results()
 		#end if plot frame exists
 		return
 	#end __on_group_by_selection_change	
@@ -899,7 +911,7 @@ class PGNeEstimationBoxplotInterface( object ):
 		#end if All values accepted, else filter
 		
 		if self.__plotframe is not None:
-			self.__plotframe.animate()
+			self.__update_results()
 		#end if we have a plot frame, replot
 
 		return
@@ -917,8 +929,8 @@ class PGNeEstimationBoxplotInterface( object ):
 				b_valid=False
 			else:
 				f_value=float( s_value )
-				if f_value <= float( self.__scales[ 'y_value_upper'].get() ) \
-						and f_value >= float( self.__scales[ 'y_value_lower' ].get() ):
+				if f_value <= float( self.__scales[ 'y_value_upper'].scale.get() ) \
+						and f_value >= float( self.__scales[ 'y_value_lower' ].scale.get() ):
 					b_valid=True
 				#end if float in range
 			#end if
@@ -930,7 +942,7 @@ class PGNeEstimationBoxplotInterface( object ):
 																	is_valid_y )
 
 		if self.__plotframe is not None:
-			self.__plotframe.animate()
+			self.__update_results()
 		#end if we have a plotframe, replot the data
 		return		
 	#end __on_y_scale_change
@@ -969,6 +981,21 @@ class PGNeEstimationBoxplotInterface( object ):
 		return
 	#end __convert_labels
 
+	def __update_plot( self ):
+		self.__plotframe.animate()
+		return
+	#end __update_plot
+
+	def __update_results( self ):
+		'''
+		This def is meant to eventually call
+		def __update_plot asynchronously, and 
+		give the user a wait message while the plot
+		updates.  It is not yet implemented.
+		'''
+		self.__update_plot()
+	#end __update_results
+
 	def __destroy_widgets( self, do_dict_of_widgets ):
 		for s_widget_name in do_dict_of_widgets:
 
@@ -996,9 +1023,6 @@ class PGNeEstimationBoxplotInterface( object ):
 		#end for each widget
 
 		return
-	#end __destroy_widgets
-
-
 	#end __destroy_widgets
 
 	def cleanup( self ):
