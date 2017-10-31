@@ -857,7 +857,6 @@ def get_genepop_file_list( s_genepop_files_arg ):
 #end get_genepop_file_list
 
 def parse_args( *args ):
-
 	ls_files=get_genepop_file_list( args[ IDX_GENEPOP_FILES ] )
 
 	ls_invalid_file_names_and_messages=get_invalid_file_names( ls_files )
