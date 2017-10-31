@@ -31,7 +31,8 @@ class PGRegressTableTextFrame( Frame ):
 	def __init__( self, o_master=None, 
 							o_regress_table=None, 
 							i_text_widget_width=40, 
-							i_text_widget_height=20 ):
+							i_text_widget_height=20,
+							b_file_name_only_in_stats_table_col_1=True ):
 
 		Frame.__init__( self, o_master )		
 
@@ -39,6 +40,8 @@ class PGRegressTableTextFrame( Frame ):
 		self.__table=o_regress_table
 		self.__text_widget_width=i_text_widget_width
 		self.__text_widget_height=i_text_widget_height
+		self.__use_file_name_only_in_stats_table_column_1=\
+					b_file_name_only_in_stats_table_col_1
 
 		self.__get_text()
 
@@ -51,10 +54,8 @@ class PGRegressTableTextFrame( Frame ):
 		s_table="No data"
 
 		if self.__table is not None:
-			##### temp
-			print ("self.__table: " + str( self.__table ) )
-			#####
-			s_table=self.__table.getStatsTableAsString()
+			s_table=self.__table.getStatsTableAsString( \
+						self.__use_file_name_only_in_stats_table_column_1 )
 		#end if table is not None
 
 		return s_table
@@ -121,6 +122,10 @@ class PGRegressTableTextFrame( Frame ):
 		#end if we have a text widget
 		return
 	#end updateTextWidgetContents
+
+	def useFileNameOnlyInStatsTableCol1( self, b_true_or_false ):
+		self.__use_file_name_only_in_stats_table_column_1=b_true_or_false
+	#end setFlagUseAllFieldsInStatsTableCol1
 #end class PGRegressTableTextFrame
 
 if __name__ == "__main__":

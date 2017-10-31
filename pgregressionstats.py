@@ -86,7 +86,7 @@ class PGRegressionStats( object ):
 		return b_return_value
 	#end __data_is_sufficient_for_regression
 		
-	def __get_stats_as_string( self ):
+	def __get_stats_as_string( self, b_use_file_name_only_for_column_1=True ):
 		'''
 		Most of this code is copied directly from Brian's
 		def in Viz.LineRegress._neStatsHelper.
@@ -119,7 +119,11 @@ class PGRegressionStats( object ):
 
 				record = table[recordKey]
 
-				s_file_name=self.__get_source_file_name_from_file_manager_key( recordKey )
+				s_file_name=recordKey
+				
+				if b_use_file_name_only_for_column_1:
+					s_file_name=self.__get_source_file_name_from_file_manager_key( recordKey )
+				#end if not b_use_all_key_fields
 				
 				v_return_slope_conf=slopeConfidence( self.__confidence_alpha,record)
 				slope=None; intercept=None; confidence=None
@@ -240,10 +244,10 @@ class PGRegressionStats( object ):
 		return
 	#end convertDataFromTsvDictAndRegress
 
-	def getStatsTableAsString( self ):
+	def getStatsTableAsString( self, b_use_file_name_only_for_column_1=True ):
 		s_table="No data available"
 		if self.__data_table is not None:
-			s_table=self.__get_stats_as_string()
+			s_table=self.__get_stats_as_string( b_use_file_name_only_for_column_1 )
 		#end if we have table data
 		return s_table
 	#end getStatsTableAsString

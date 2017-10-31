@@ -298,7 +298,7 @@ class PGGUIMessageWaitForResultsAndActionOnCancel( TKSimp.Dialog ):
 
 		return
 
-	#end bocy
+	#end body
 
 	def buttonbox(self):
 

@@ -1227,7 +1227,6 @@ class NbAdjustmentRangeAndRate( object ):
 
 	'''
 
-
 	def __init__( self,
 				i_min_valid_cycle, 
 				i_max_valid_cycle, 

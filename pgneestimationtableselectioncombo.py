@@ -123,7 +123,6 @@ class PGNeEstTableSelectionCombo( Combobox ):
 		
 	@property 
 	def current_value( self ):
-		
 		return self.__my_text_var.get()
 	#end current_value
 
@@ -158,7 +157,6 @@ class PGNeEstTableValueSelectionCombo( PGNeEstTableSelectionCombo ):
 		
 	def set_selection_options( self ):
 		o_tsv_manager=self._PGNeEstTableSelectionCombo__tsv_file_manager
-		
 
 		self._PGNeEstTableSelectionCombo__selection_options=( "All", )
 		
@@ -255,31 +253,29 @@ class PGNeEstTableColumnSelectionCombo( PGNeEstTableSelectionCombo ):
 		return s_selected_column_name
 	#end __get_column_name_or_none_from_alias
 
-#	def on_new_combobox_selection( self, v_event=None ):
-#		'''
-#		We overide the parent class version of this def,
-#		since our combox's value will be an alias of a tsv column name,
-#		and we want to return the actual tsv column name.
-#		'''
-#	
-#		s_selected_column_name=self.__get_column_name_or_none_from_current_value()
-#
-#		if self._PGNeEstTableSelectionCombo__def_to_call_on_selection_change is not None:
-#			'''
-#			Note that the client's def requires a first "column_name" arg.
-#			In this child class, which does not use the __column_name attr
-#			to derive a set of value selections.  Hence, it will simply be 
-#			passing the default init value in the parent class, None.
-#			'''
-#			self._PGNeEstTableSelectionCombo__def_to_call_on_selection_change(\
-#											self._PGNeEstTableSelectionCombo__column_name, 
-#											s_selected_column_name,	
-#											self._PGNeEstTableSelectionCombo__tsv_file_manager )
-#		#end if we have a def to call
-#		return
-#
-#	#end on_new_combobox_selection
+	def on_new_combobox_selection( self, v_event=None ):
+		'''
+		We overide the parent class version of this def,
+		since our combox's value will be an alias of a tsv column name,
+		and we want to return the actual tsv column name.
+		'''
+	
+		s_selected_column_name=self.__get_column_name_or_none_from_current_value()
 
+		if self._PGNeEstTableSelectionCombo__def_to_call_on_selection_change is not None:
+			'''
+			Note that the client's def requires a first "column_name" arg.
+			In this child class, which does not use the __column_name attr
+			to derive a set of value selections.  Hence, it will simply be 
+			passing the default init value in the parent class, None.
+			'''
+			self._PGNeEstTableSelectionCombo__def_to_call_on_selection_change(\
+											self._PGNeEstTableSelectionCombo__column_name, 
+											s_selected_column_name,	
+											self._PGNeEstTableSelectionCombo__tsv_file_manager )
+		#end if we have a def to call
+		return
+	#end on_new_combobox_selection
 
 	@property 
 	def current_value( self ):
@@ -287,6 +283,24 @@ class PGNeEstTableColumnSelectionCombo( PGNeEstTableSelectionCombo ):
 		return s_selected_column_name
 	#end property current_value
 
+	'''
+	Note that the following was originally implemented as a setter of 
+	the "current_value property", but the setter did not get called 
+	in python2, though it did in python3.  For cross comaptibility
+	I use a regular class def.
+	'''
+	def resetCurrentValue( self, s_column_name ):
+		ds_aliases_by_col_name=PGNeEstTableColumnSelectionCombo.COL_ALIASES
+		if s_column_name in ds_aliases_by_col_name:
+			s_column_name_alias=ds_aliases_by_col_name[ s_column_name ]
+			if s_column_name_alias in self[ "values" ]:
+				idx_alias=self[ "values" ].index( s_column_name_alias )
+				self.current( idx_alias )
+				self.on_new_combobox_selection()
+			#end if alias is in our option list, set the combo to that selection
+		#end if s_column
+		return
+	#end current_value setter
 #end class PGNeEstTableColumnSelectionCombo
 
 if __name__ == "__main__":
@@ -314,6 +328,5 @@ if __name__ == "__main__":
 
 	mym.mainloop()
 	
-	pass
 #end if main
 
