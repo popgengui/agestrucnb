@@ -25,6 +25,9 @@ Current compatible python versions
 
 	These are the python versions on which the program was developed and tested.  Other versions may work, too.
 
+	The Anaconda 3 (https://www.anaconda.com) python distribution is recommended, especially for its 
+	convenient distribution of simuPOP (see Dependancies, below).
+
 OS-comaptibility
 -----------------
 	1. Linux. The program has been run on Linux (Ubuntu 16.04).
