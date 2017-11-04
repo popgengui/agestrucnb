@@ -33,6 +33,7 @@ SCHEME_CRITERIA_GROUPED="critgrouped"
 SCHEME_COHORTS="cohorts"
 SCHEME_COHORTS_PERC="cohortsperc"
 SCHEME_COHORTS_COUNT="cohortcount"
+SCHEME_COHORTS_COUNT_MAX="cohortsmax"
 SCHEME_RELATEDS="relateds"
 
 #subsampling loci, not individuals
@@ -50,6 +51,7 @@ class CohortSamplingValue( object ):
 
 	TYPE_PROPORTION=1
 	TYPE_COUNT=2
+	TYPE_COUNT_MAX=3
 
 	def __init__( self, i_type, v_value ):
 		
@@ -92,6 +94,8 @@ def make_subsample_tag( v_value, i_replicate_number, s_scheme, s_prefix = None )
 		s_val_initial="t"
 	elif s_scheme==SCHEME_COHORTS_COUNT:
 		s_val_initial="u"
+	elif s_scheme==SCHEME_COHORTS_COUNT_MAX:
+		s_val_initial="x"
 	elif s_scheme==SCHEME_RELATEDS:
 		s_val_initial="r"
 	elif s_scheme==SCHEME_LOCI_MAX_AND_RANGE:
@@ -148,6 +152,8 @@ def get_sample_value_and_replicate_number_from_sample_tag( s_sample_tag, s_schem
 		elif s_scheme==SCHEME_COHORTS_PERC:
 			s_sample_value=ls_fields[ 1 ]
 		elif s_scheme==SCHEME_COHORTS_COUNT:
+			s_sample_value=ls_fields[ 1 ]
+		elif s_scheme==SCHEME_COHORTS_COUNT_MAX:
 			s_sample_value=ls_fields[ 1 ]
 		elif s_scheme==SCHEME_LOCI_MAX_AND_RANGE:
 			s_sample_value=ls_fields[ 1 ]
@@ -845,48 +851,67 @@ class GenepopFileSamplerCohorts( GenepopFileSampler ):
 		Next, it checks for a further subsampling values 
 		as given in this objects GenepopFileSampleParamsCohorts member object. If
 		there ee no sampling values list
+
+		2017_11_04.  Added new CohortSamplingValue type TYPE_COUNT_MAX, which is
+		a identical to TYPE_COUNT, but, instead of throwing an error when the
+		smallest in-range cohort has fewer indiv than the number given by the
+		count value, it samples evenly using the total of the smallest in-range
+		cohort.
 		'''
 		li_individuals=[]
 
 		li_lens_indiv=[ len( li_indivs_count ) \
 							for li_indivs_count in \
 							list( dli_indiv_index_by_age.values() ) ]
-	
+
+		'''
+		For even cohort sampling, the most we can select per-age-class,
+		is the number given by the total individuals in the least populous 
+		age class.
+		'''
 		if len( li_lens_indiv ) > 0:
-			i_max_individuals_per_cohort=min( li_lens_indiv  )
+			i_tot_indiv_to_sample_per_age_class=min( li_lens_indiv  )
 		else:
-			i_max_individuals_per_cohort = 0
+			i_tot_indiv_to_sample_per_age_class = 0
 		#end if we have any indivs in any cohort else no indiv
 
-		#If we have a sampling value, we reduce our max 
+		#If we have a sampling value, we reduce our tot indiv 
 		#individuals to match:
 		if o_sample_value_object is not None:
 			if o_sample_value_object.sampling_type == CohortSamplingValue.TYPE_PROPORTION:
 
-					i_max_individuals_per_cohort=\
-							int( round( float( \
-							i_max_individuals_per_cohort*o_sample_value_object.sampling_value ) ) ) 
+				i_tot_indiv_to_sample_per_age_class=\
+						int( round( float( \
+						i_tot_indiv_to_sample_per_age_class*o_sample_value_object.sampling_value ) ) ) 
 
 			elif o_sample_value_object.sampling_type == CohortSamplingValue.TYPE_COUNT:
-					if i_max_individuals_per_cohort < o_sample_value_object.sampling_value:
-						s_msg="In class GenepopFileSamplerCohorts instance, " \
-									+ "def __get_individuals, " \
-									+ "subsampling value specifying a count of " \
-									+ str( o_sample_value_object.sampling_value ) \
-									+ " individuals per age class is greater than the " \
-									+ "maximum possible even-sampling total for individuals: " \
-									+ str( i_max_individuals_per_cohort ) + "."
-						raise Exception( s_msg )
-					#end if invalid count
-					
-					i_max_individuals_per_cohort=o_sample_value_object.sampling_value
+				if i_tot_indiv_to_sample_per_age_class < o_sample_value_object.sampling_value:
+					s_msg="In class GenepopFileSamplerCohorts instance, " \
+								+ "def __get_individuals, " \
+								+ "subsampling value specifying a count of " \
+								+ str( o_sample_value_object.sampling_value ) \
+								+ " individuals per age class is greater than the " \
+								+ "maximum possible even-sampling total for individuals: " \
+								+ str( i_tot_indiv_to_sample_per_age_class ) + "."
+					raise Exception( s_msg )
+				#end if invalid count
+				
+				i_tot_indiv_to_sample_per_age_class=o_sample_value_object.sampling_value
 
-			#end if we have a proportion type of sample value, else a count
+			elif o_sample_value_object.sampling_type == CohortSamplingValue.TYPE_COUNT_MAX:
+				'''
+				Sample either the count, or, if the min-size age class is smaller, sample
+				by its total instead.
+				'''
+				i_tot_indiv_to_sample_per_age_class=min( o_sample_value_object.sampling_value, 
+															i_tot_indiv_to_sample_per_age_class )
+
+			#end if we have a proportion type of sample value, else a count, else a count-max type
 		#end if we have a sampling value
 
 		for i_age, li_indivs_this_age in list( dli_indiv_index_by_age.items() ):
 			li_individuals.extend( random.sample( li_indivs_this_age, 
-													i_max_individuals_per_cohort ) )
+													i_tot_indiv_to_sample_per_age_class ) )
 		#end for each item in dict of indivs by age
 		
 		return li_individuals
@@ -946,11 +971,10 @@ class GenepopFileSamplerCohorts( GenepopFileSampler ):
 
 	def doSample( self ):
 		'''
-		Sample siblings in age group, for ages < max age. Sample identical numbers per age, 
-		then reduce to meet max indiv per gen or proportion.  See Tiagos code in his 
-		sampleIndivsCohort.py module.  Note that when param "lp" is included, then
-		Tiagos code adds to his lines that print out, gen_number\sindiv, the same lines
-		without a gen number, presumably for downstream filtering when making the final
+		Sample identical numbers per age, then reduce to meet max indiv per gen or proportion.  
+		See Tiagos code in his sampleIndivsCohort.py module.  Note that when param 
+		"lp" is included, then Tiagos code adds to his lines that print out, gen_number\sindiv, 
+		the same lines without a gen number, presumably for downstream filtering when making the final
 		genenpop file. As of 2016_09_12, the output when the "lp" arg is added, is not 
 		implemented.
 
@@ -1172,10 +1196,9 @@ class GenepopFileSamplerIndividualsAgeStructureCohorts( GenepopFileSampler ):
 
 	def doSample( self ):
 		'''
-		Sample siblings in age group, for ages < max age. Sample identical numbers per age, 
-		then reduce to meet max indiv per gen or proportion.  See Tiagos code in his 
-		sampleIndivsCohort.py module.  Note that when param "lp" is included, then
-		Tiagos code adds to his lines that print out, gen_number\sindiv, the same lines
+	 	Sample identical numbers per age, then reduce to meet max indiv per gen or proportion.  
+		See Tiagos code in his sampleIndivsCohort.py module.  Note that when param "lp" is 
+		included, then Tiagos code adds to his lines that print out, gen_number\sindiv, the same lines
 		without a gen number, presumably for downstream filtering when making the final
 		genenpop file. As of 2016_09_12, the output when the "lp" arg is added, is not 
 		implemented.

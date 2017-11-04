@@ -210,7 +210,12 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 								   + "sample from the cohorts." \
 						+ spacer3 + "\niv. \"cohortscount\": two semicolon-delimited values, a single " \
 							+ "integer giving max age of cohorts, and a hyphenated list of numbers " \
-							+ "(ints) v, such that v individuals will be randomly selected from each sampled age class", 
+							+ "(ints) t, such that t individuals will be randomly selected from each sampled age class" \
+						+ spacer3 + "\nv. \"cohortsmax\": Uses the same format as cohortscount, but " \
+							+ "allows sampling pops under the count range, that is, for each count value n, " \
+							+ "it samples minimum of values n and t, where t gives the total number " \
+							+ "of available individuals in the least populous age group  "\
+							+ "within the range given by max age.", 
 		"Minimum pop size (single integer).",
 		"Maximum pop size (single integer).",
 		"Genepop file pop range (hyphenated pair of integers, i-j indicating estimator should evaluate " \
@@ -389,6 +394,7 @@ SAMPLE_BY_CRITERIA="criteria"
 SAMPLE_BY_COHORT="cohorts"
 SAMPLE_BY_COHORT_PERCENTAGE="cohortsperc"
 SAMPLE_BY_COHORT_COUNT="cohortscount"
+SAMPLE_BY_COHORT_COUNT_MAX="cohortsmax"
 SAMPLE_BY_RELATEDS="relateds"
 
 SAMPLE_SCHEMES_NON_CRITERIA=[ SAMPLE_BY_PERCENTAGES, 
@@ -857,6 +863,7 @@ def get_genepop_file_list( s_genepop_files_arg ):
 #end get_genepop_file_list
 
 def parse_args( *args ):
+
 	ls_files=get_genepop_file_list( args[ IDX_GENEPOP_FILES ] )
 
 	ls_invalid_file_names_and_messages=get_invalid_file_names( ls_files )
@@ -889,7 +896,8 @@ def parse_args( *args ):
 			or s_sample_scheme == SAMPLE_BY_COHORT \
 			or s_sample_scheme == SAMPLE_BY_RELATEDS \
 			or s_sample_scheme == SAMPLE_BY_COHORT_PERCENTAGE \
-			or s_sample_scheme == SAMPLE_BY_COHORT_COUNT:
+			or s_sample_scheme == SAMPLE_BY_COHORT_COUNT \
+			or s_sample_scheme == SAMPLE_BY_COHORT_COUNT_MAX:
 
 		lv_sample_values=[ s_val for s_val in args[ IDX_SAMPLE_VALUE_LIST ].split( \
 																SAMPLE_SCHEME_PARAM_DELIMITER ) ]
@@ -1066,6 +1074,8 @@ def get_sample_val_and_rep_number_from_sample_name( s_sample_name, s_sample_sche
 		s_sampler_type=gps.SCHEME_COHORTS_PERC
 	elif s_sample_scheme==SAMPLE_BY_COHORT_COUNT:
 		s_sampler_type=gps.SCHEME_COHORTS_COUNT
+	elif s_sample_scheme==SAMPLE_BY_COHORT_COUNT_MAX:
+		s_sampler_type=gps.SCHEME_COHORTS_COUNT_MAX
 	elif s_sample_scheme==SAMPLE_BY_RELATEDS:
 		s_sampler_type=gps.SCHEME_RELATEDS
 	else:
@@ -1949,12 +1959,17 @@ def do_sample_individuals( o_genepopfile,
 
 		o_sampler=gps.GenepopFileSamplerCohorts( o_genepopfile, o_sample_params )
 
-	elif s_sample_scheme==SAMPLE_BY_COHORT_COUNT:	
+	elif s_sample_scheme==SAMPLE_BY_COHORT_COUNT \
+			or s_sample_scheme==SAMPLE_BY_COHORT_COUNT_MAX:	
 		'''
 		2017_07_21.  This scheme is added to allow a user to request
 		a sample with a constant "t" such that each cohort in range,
 		0 to max_age, will have "t" individuals (instead of the default
 		even sampling where "t" = min( sum_invid( total_indiv) ).
+
+		2017_11_04 Adding scheme cohortsmax, which samples like cohortcount
+		but when the smallest cohort to be samples has fewer indiv than
+		the count, the entire cohort is sampled (instead of throwing error).
 		'''
 		COHORT_PARAM_LIST_DELIMITER=";"
 		COHORT_COUNTS_DELIM="-"
@@ -1990,10 +2005,15 @@ def do_sample_individuals( o_genepopfile,
 		'''
 
 		lo_cohort_sample_value_objects=[]
+		i_sampval_type=gps.CohortSamplingValue.TYPE_COUNT
+		if s_sample_scheme==SAMPLE_BY_COHORT_COUNT_MAX:
+			i_sampval_type=gps.CohortSamplingValue.TYPE_COUNT_MAX
+		#end if we're using min( countval, available-count) instead
+		#of strict countval as sample size per ageclass.
 
 		for i_count in li_counts:
 			o_this_sample_object=gps.CohortSamplingValue( \
-							i_type=gps.CohortSamplingValue.TYPE_COUNT,
+							i_type=i_sampval_type,
 						 	v_value=i_count )
 			lo_cohort_sample_value_objects.append( o_this_sample_object )
 		#end for each count valuie

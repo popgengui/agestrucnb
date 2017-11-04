@@ -25,6 +25,7 @@ import configparser as cp
 from configparser import NoSectionError
 from configparser import NoOptionError
 import sys
+import os
 
 class PGSimuPopResources( object ):
 	'''
@@ -58,6 +59,11 @@ class PGSimuPopResources( object ):
 			try:
 				s_model_name=o_this_parser.get( "model" , "name" )
 			except NoSectionError as nse:
+				'''
+				This can happen when the parser is given
+				a non-existent file, so we'll check:
+				'''
+				b_exists=os.path.exists( s_file )
 				sys.stderr.write( "In PGSimuPopResources instance, def __get_life_tables, " \
 						+ "file: " + s_file \
 						+ ".  Config parser found no \"model\" section " \
