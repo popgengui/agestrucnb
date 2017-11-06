@@ -1,0 +1,27 @@
+\hypertarget{namespacenegui_1_1genepopfilelociinfo}{}\section{negui.\+genepopfilelociinfo Namespace Reference}
+\label{namespacenegui_1_1genepopfilelociinfo}\index{negui.\+genepopfilelociinfo@{negui.\+genepopfilelociinfo}}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classnegui_1_1genepopfilelociinfo_1_1GenepopFileLociInfo}{Genepop\+File\+Loci\+Info}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Description
+2017_01_27
+
+Class to give users an interface to get information about the loci
+in a genepop file.
+
+Motivation: calculate allele frequencies from a genpop file.  The
+fastest implementation would be to add the program genepop to our
+dependancies, but for now, that it's only use would be to caluclate
+allele frequences, we've added allele counts to the info that the
+GenepopFileManager can deliver. 
+
+The class instances use a GenepopFileManager object, and, if
+present in the object, any filters that have been pre-applied to
+exclude pop sections, individuals within pop sections, and/or
+loci, keyed to the object's member tags (see __init__).\end{DoxyVerb}
+ 

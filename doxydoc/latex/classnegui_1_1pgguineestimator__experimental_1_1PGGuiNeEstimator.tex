@@ -1,0 +1,443 @@
+\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator}{}\section{negui.\+pgguineestimator\+\_\+experimental.\+P\+G\+Gui\+Ne\+Estimator Class Reference}
+\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator}\index{negui.\+pgguineestimator\+\_\+experimental.\+P\+G\+Gui\+Ne\+Estimator@{negui.\+pgguineestimator\+\_\+experimental.\+P\+G\+Gui\+Ne\+Estimator}}
+Inheritance diagram for negui.\+pgguineestimator\+\_\+experimental.\+P\+G\+Gui\+Ne\+Estimator\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ad159a3c6dfe76e7895d517ee9c77d405}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+parent, s\+\_\+param\+\_\+names\+\_\+file, s\+\_\+name=\char`\"{}ne\+\_\+estimator\+\_\+gui\char`\"{}, i\+\_\+total\+\_\+processes\+\_\+for\+\_\+est=1, b\+\_\+show\+\_\+progress\+\_\+plots=True)
+\item 
+def \hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a21c83a7e246530f5f0755f59b0c5fcd5}{run\+Estimator} (self)
+\item 
+def {\bfseries cleanup} (self)\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a01d9f49c59d1b1370517b9eb866a8698}{}\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a01d9f49c59d1b1370517b9eb866a8698}
+
+\item 
+def \hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa01a9e1c8464abc2cc421152e7a471c9}{on\+Change\+In\+Nb\+Bias\+Adjustment\+Flag} (self)
+\item 
+def \hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ab1bf1c7d0663393edf9972aab862337d}{on\+Nb\+Ne\+Ratio\+Change} (self)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries output\+\_\+base\+\_\+name}\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa99bb40c806d746401e2b59bbdc7d0a8}{}\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa99bb40c806d746401e2b59bbdc7d0a8}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int {\bfseries R\+U\+N\+\_\+\+N\+O\+T\+\_\+\+R\+E\+A\+DY} = 0\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa1cb966f1cfc098f9eacf608db8085d1}{}\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa1cb966f1cfc098f9eacf608db8085d1}
+
+\item 
+int {\bfseries R\+U\+N\+\_\+\+R\+E\+A\+DY} = 1\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a137d1bcc1d742bda068b0930b4d2b611}{}\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a137d1bcc1d742bda068b0930b4d2b611}
+
+\item 
+int {\bfseries R\+U\+N\+\_\+\+I\+N\+\_\+\+P\+R\+O\+G\+R\+E\+SS} = 2\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a3dee46e63125924a49360860c24595d3}{}\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a3dee46e63125924a49360860c24595d3}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Subclass of PGGuiApp builds a gui,
+makes a PGInputNeEstimator and PGOutNeEstimator 
+object, then, on user command runs an (Ld)Ne-Estimation
+using a PGOpNeEstimator object.
+objects, then on user command   
+\end{DoxyVerb}
+ 
+
+Definition at line 103 of file pgguineestimator\+\_\+experimental.\+py.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator@{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator@{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator}}
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, o\+\_\+parent, s\+\_\+param\+\_\+names\+\_\+file, s\+\_\+name=""ne\+\_\+estimator\+\_\+gui"", i\+\_\+total\+\_\+processes\+\_\+for\+\_\+est=1, b\+\_\+show\+\_\+progress\+\_\+plots=\+True)}{__init__(self, o_parent, s_param_names_file, s_name="ne_estimator_gui", i_total_processes_for_est=1, b_show_progress_plots=True)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgguineestimator\+\_\+experimental.\+P\+G\+Gui\+Ne\+Estimator.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{o\+\_\+parent, }
+\item[{}]{s\+\_\+param\+\_\+names\+\_\+file, }
+\item[{}]{s\+\_\+name = {\ttfamily \char`\"{}ne\+\_\+estimator\+\_\+gui\char`\"{}}, }
+\item[{}]{i\+\_\+total\+\_\+processes\+\_\+for\+\_\+est = {\ttfamily 1}, }
+\item[{}]{b\+\_\+show\+\_\+progress\+\_\+plots = {\ttfamily True}}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ad159a3c6dfe76e7895d517ee9c77d405}{}\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ad159a3c6dfe76e7895d517ee9c77d405}
+\begin{DoxyVerb}param o_parent is the tkinter window that hosts this gui.  
+    It is meant to be the same parent as that 
+    which hosts other pg interfaces, like pgguisimupop objects.
+param s_param_names_file is the file that contains short and long 
+    param names, used to make a PGParamSet object, in turn used to 
+    setup the gpdriveneestimator call.
+param s_name gives the parent PGGuiApp's name 
+    (currently, Fri Aug  5 16:48:08 MDT 2016, of no importance).
+param i_total_processes_for_est, integer given the number of processes 
+    to assign to the ne-estimation, which does each population 
+    in each genepop file in a separate python, mulitiprocessing.process.
+param b_show_progress_plots, added 2017_08_27, will, when an estimation
+is started, add a plot to the interface, plotting the estimations as they
+are written to the pgdriveneestimator.py output *tsv file.
+\end{DoxyVerb}
+ 
+
+Definition at line 121 of file pgguineestimator\+\_\+experimental.\+py.
+
+
+\begin{DoxyCode}
+121                         b\_show\_progress\_plots=\textcolor{keyword}{True} ):
+122 
+123         \textcolor{stringliteral}{'''}
+124 \textcolor{stringliteral}{        param o\_parent is the tkinter window that hosts this gui.  }
+125 \textcolor{stringliteral}{            It is meant to be the same parent as that }
+126 \textcolor{stringliteral}{            which hosts other pg interfaces, like pgguisimupop objects.}
+127 \textcolor{stringliteral}{        param s\_param\_names\_file is the file that contains short and long }
+128 \textcolor{stringliteral}{            param names, used to make a PGParamSet object, in turn used to }
+129 \textcolor{stringliteral}{            setup the gpdriveneestimator call.}
+130 \textcolor{stringliteral}{        param s\_name gives the parent PGGuiApp's name }
+131 \textcolor{stringliteral}{            (currently, Fri Aug  5 16:48:08 MDT 2016, of no importance).}
+132 \textcolor{stringliteral}{        param i\_total\_processes\_for\_est, integer given the number of processes }
+133 \textcolor{stringliteral}{            to assign to the ne-estimation, which does each population }
+134 \textcolor{stringliteral}{            in each genepop file in a separate python, mulitiprocessing.process.}
+135 \textcolor{stringliteral}{        param b\_show\_progress\_plots, added 2017\_08\_27, will, when an estimation}
+136 \textcolor{stringliteral}{        is started, add a plot to the interface, plotting the estimations as they}
+137 \textcolor{stringliteral}{        are written to the pgdriveneestimator.py output *tsv file.}
+138 \textcolor{stringliteral}{        '''}
+139                 
+140         pgg.PGGuiApp.\_\_init\_\_( self, s\_name, o\_parent )
+141 
+142         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aca9e01e24f7ac3622eeea490d6b10569}{\_\_param\_names\_file}=s\_param\_names\_file
+143 
+144         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a6eb55644b1ccacda24ba751800554726}{\_\_show\_progress\_plots}=b\_show\_progress\_plots
+145 
+146         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a2e985776aeb400b6b8b950a3c69ebd01}{\_\_simulation\_is\_in\_progress}=\textcolor{keyword}{False}
+147 
+148         \textcolor{comment}{#ref to the PGParamSet object}
+149         \textcolor{comment}{#created using the param\_names\_file:}
+150         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ae3ea770f2e0d55221c96ea48bf857f9e}{\_\_param\_set}=\textcolor{keywordtype}{None}
+151         
+152         \textcolor{comment}{#a string giving a list }
+153         \textcolor{comment}{#of input files:}
+154         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a6693f13d1e39d94e4eb9db3ec883ef0d}{\_\_genepopfiles}=StringVar()
+155 
+156         \textcolor{comment}{#variables for the output}
+157         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a2f6aee9051e4fa930c78240bd45560c8}{\_\_output\_directory}=StringVar()
+158 
+159         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aaf5cdaff0dd43af6e81c805611680fa6}{\_\_processes}=i\_total\_processes\_for\_est
+160 
+161         \textcolor{comment}{#no StringVar because we want}
+162         \textcolor{comment}{#the KeyValFrame to set this}
+163         \textcolor{comment}{#directly:}
+164         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa99bb40c806d746401e2b59bbdc7d0a8}{output\_base\_name}=\textcolor{stringliteral}{""}
+165 
+166         \textcolor{comment}{#displays the current list of}
+167         \textcolor{comment}{#genepop files loaded and ready}
+168         \textcolor{comment}{#to run:}
+169         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a64dd0ed27ae7141a500bea7103d5899d}{\_\_genepop\_files\_listbox}=\textcolor{keywordtype}{None}
+170 
+171         \textcolor{comment}{#python multiprocessing.Process}
+172         \textcolor{comment}{#spawned in def runEstimator:}
+173         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aaa2c18e3d44dde92b66cb9ebe54463b6}{\_\_op\_process}=\textcolor{keywordtype}{None}
+174 
+175         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ac131c55f1049b06db3754e60657cf621}{\_\_estimation\_in\_progress}=\textcolor{keyword}{False}
+176         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ab9782b5b4071976681cfbd22a8504f87}{\_\_plotting\_program\_needs\_to\_be\_run}=\textcolor{keyword}{False}
+177 
+178         \textcolor{stringliteral}{'''}
+179 \textcolor{stringliteral}{        2017\_03\_27}
+180 \textcolor{stringliteral}{        This attribute is to be set and then passed }
+181 \textcolor{stringliteral}{        to the code that runs the ne estimator, in order}
+182 \textcolor{stringliteral}{        to (better than before) manage the intermediate}
+183 \textcolor{stringliteral}{        files the estimator writes.}
+184 \textcolor{stringliteral}{        '''}
+185         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a3a28a6a754afc8069d729f0d48e044bf}{\_\_temporary\_directory\_for\_estimator}=\textcolor{keywordtype}{None}
+186 
+187         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_adc90b53fb2b4c9aefbcc0391ce7451d7}{\_\_run\_state\_message}=\textcolor{stringliteral}{""}
+188 
+189         \textcolor{comment}{#A way to access one of the interface}
+190         \textcolor{comment}{#input control groups, such as "filelocations",}
+191         \textcolor{comment}{#or "parameters"}
+192         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a363d1b1d4e38372e920f732bfe834b5c}{\_\_interface\_subframes}=\{\}
+193 
+194         \textcolor{stringliteral}{'''}
+195 \textcolor{stringliteral}{        A way to access one of the objecta that}
+196 \textcolor{stringliteral}{        controls the param-value in one or more }
+197 \textcolor{stringliteral}{        entry/list/combo boxes.  This added on 2016\_10\_31, }
+198 \textcolor{stringliteral}{        to get access to their tooltip objects,         }
+199 \textcolor{stringliteral}{        as some of these were persisting after accessing,}
+200 \textcolor{stringliteral}{        then leaving the reloading the param boxes (in particular}
+201 \textcolor{stringliteral}{        the combo boxes). Although the tooltip problem}
+202 \textcolor{stringliteral}{        was solved by simpler changes in the CreateToolTip}
+203 \textcolor{stringliteral}{        class itself, but we'll keep this attribute and append}
+204 \textcolor{stringliteral}{        the objects (kv frames, as created in load\_parm defs)}
+205 \textcolor{stringliteral}{        in case the direct access to these controls is needed.}
+206 \textcolor{stringliteral}{        '''}
+207         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a2073af7a95f481ec2c9ff7e6ebd88cc8}{\_\_param\_value\_frames\_by\_attr\_name}=\{\}
+208 
+209         \textcolor{comment}{#create interface}
+210         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a92ed421bb725480d11cfcf18265e6d7c}{\_\_get\_param\_set}( s\_param\_names\_file )
+211         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a7977b79271c398d9fe901b4fe926b5ed}{\_\_set\_initial\_file\_info}()
+212         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a2b7e06e2b53c101c2d2363c922bce129}{\_\_init\_interface}()
+213         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a837749bf5dc113fac16e84e09852a3b5}{\_\_load\_param\_interface}()
+214         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a2b8aac1608bcf4cb91d46f23345ffbbe}{\_\_update\_genepopfile\_sampling\_params\_interface}()
+215         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a55683e0220823fdb0663e4b08e042cf2}{\_\_update\_genepopfile\_loci\_sampling\_params\_interface}
+      ()
+216         
+217         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a4f894c66d178e1c34e805def6d7c4f30}{\_\_set\_controls\_by\_run\_state}( self.
+      \hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ae85f6ae9ee8842a94eae2d5025f328fc}{\_\_get\_run\_state}() )
+218         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator@{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator}!on\+Change\+In\+Nb\+Bias\+Adjustment\+Flag@{on\+Change\+In\+Nb\+Bias\+Adjustment\+Flag}}
+\index{on\+Change\+In\+Nb\+Bias\+Adjustment\+Flag@{on\+Change\+In\+Nb\+Bias\+Adjustment\+Flag}!negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator@{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator}}
+\subsubsection[{\texorpdfstring{on\+Change\+In\+Nb\+Bias\+Adjustment\+Flag(self)}{onChangeInNbBiasAdjustmentFlag(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgguineestimator\+\_\+experimental.\+P\+G\+Gui\+Ne\+Estimator.\+on\+Change\+In\+Nb\+Bias\+Adjustment\+Flag (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa01a9e1c8464abc2cc421152e7a471c9}{}\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa01a9e1c8464abc2cc421152e7a471c9}
+\begin{DoxyVerb}2017_04_14.  This def was added to be associated with the checkbox
+that give True or False, whether to do an Nb bias adjustment.  We 
+want to disable the Nb/Ne ratio entry when the checkbox has updated
+our local copy of the flag to false.
+\end{DoxyVerb}
+ 
+
+Definition at line 2042 of file pgguineestimator\+\_\+experimental.\+py.
+
+
+\begin{DoxyCode}
+2042     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa01a9e1c8464abc2cc421152e7a471c9}{onChangeInNbBiasAdjustmentFlag}( self ):
+2043         \textcolor{stringliteral}{'''}
+2044 \textcolor{stringliteral}{        2017\_04\_14.  This def was added to be associated with the checkbox}
+2045 \textcolor{stringliteral}{        that give True or False, whether to do an Nb bias adjustment.  We }
+2046 \textcolor{stringliteral}{        want to disable the Nb/Ne ratio entry when the checkbox has updated}
+2047 \textcolor{stringliteral}{        our local copy of the flag to false.}
+2048 \textcolor{stringliteral}{        '''}
+2049         
+2050         s\_param\_name=\textcolor{stringliteral}{"nbne"}
+2051 
+2052         s\_nbne\_ratio\_attribute\_name=ATTRIBUTE\_DEMANLGER + s\_param\_name
+2053 
+2054         \textcolor{keywordflow}{if} s\_nbne\_ratio\_attribute\_name \textcolor{keywordflow}{not} \textcolor{keywordflow}{in} self.
+      \hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a2073af7a95f481ec2c9ff7e6ebd88cc8}{\_\_param\_value\_frames\_by\_attr\_name}:
+2055             s\_msg=\textcolor{stringliteral}{"In PGGuiNeEstimator instance, def onChangeInNbBiasAdjustmentFlag, "} \(\backslash\)
+2056                         + \textcolor{stringliteral}{"the program cannot find a key value frame associated "} \(\backslash\)
+2057                         + \textcolor{stringliteral}{"with the attribute name: "} + s\_nbne\_ratio\_attribute\_name + \textcolor{stringliteral}{"."}
+2058             PGGUIErrorMessage( self, s\_msg )
+2059             \textcolor{keywordflow}{raise} Exception( s\_msg )
+2060         \textcolor{comment}{#end if no key val frame for the nb/ne ratio param}
+2061 
+2062         o\_keyvalueframe=self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a2073af7a95f481ec2c9ff7e6ebd88cc8}{\_\_param\_value\_frames\_by\_attr\_name}[ 
+      s\_nbne\_ratio\_attribute\_name ]
+2063 
+2064         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aec040e3496b5833ae365fbbb4ee94e65}{\_\_do\_bias\_adjustment} == \textcolor{keyword}{False}:
+2065             o\_keyvalueframe.setStateControls( \textcolor{stringliteral}{"disabled"} )
+2066             o\_keyvalueframe.setLabelState( \textcolor{stringliteral}{"disabled"} )
+2067         \textcolor{keywordflow}{else}:
+2068             o\_keyvalueframe.setStateControls( \textcolor{stringliteral}{"enabled"} )
+2069             o\_keyvalueframe.setLabelState( \textcolor{stringliteral}{"enabled"} )
+2070             \textcolor{stringliteral}{'''}
+2071 \textcolor{stringliteral}{            This call will check the input genepop files (if any)}
+2072 \textcolor{stringliteral}{            and the current value in the interface entry for Nb/Ne,}
+2073 \textcolor{stringliteral}{            and will reset it if interface is zero and a unique}
+2074 \textcolor{stringliteral}{            value is available in the input file headers.}
+2075 \textcolor{stringliteral}{            '''}
+2076             self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a9cf7da8bdc2c78bcdba814cb23d600b1}{\_\_evaluate\_nbne\_value}()
+2077         \textcolor{comment}{#end if we are not doing a bias adjustment, else we are }
+2078 
+2079         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+\index{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator@{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator}!on\+Nb\+Ne\+Ratio\+Change@{on\+Nb\+Ne\+Ratio\+Change}}
+\index{on\+Nb\+Ne\+Ratio\+Change@{on\+Nb\+Ne\+Ratio\+Change}!negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator@{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator}}
+\subsubsection[{\texorpdfstring{on\+Nb\+Ne\+Ratio\+Change(self)}{onNbNeRatioChange(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgguineestimator\+\_\+experimental.\+P\+G\+Gui\+Ne\+Estimator.\+on\+Nb\+Ne\+Ratio\+Change (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ab1bf1c7d0663393edf9972aab862337d}{}\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ab1bf1c7d0663393edf9972aab862337d}
+\begin{DoxyVerb}2017_04_20.  Currently no action on value change.
+\end{DoxyVerb}
+ 
+
+Definition at line 2337 of file pgguineestimator\+\_\+experimental.\+py.
+
+
+\begin{DoxyCode}
+2337     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ab1bf1c7d0663393edf9972aab862337d}{onNbNeRatioChange}( self ):
+2338         \textcolor{stringliteral}{'''}
+2339 \textcolor{stringliteral}{        2017\_04\_20.  Currently no action on value change.}
+2340 \textcolor{stringliteral}{        '''}
+2341         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+\index{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator@{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator}!run\+Estimator@{run\+Estimator}}
+\index{run\+Estimator@{run\+Estimator}!negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator@{negui\+::pgguineestimator\+\_\+experimental\+::\+P\+G\+Gui\+Ne\+Estimator}}
+\subsubsection[{\texorpdfstring{run\+Estimator(self)}{runEstimator(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgguineestimator\+\_\+experimental.\+P\+G\+Gui\+Ne\+Estimator.\+run\+Estimator (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a21c83a7e246530f5f0755f59b0c5fcd5}{}\label{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a21c83a7e246530f5f0755f59b0c5fcd5}
+\begin{DoxyVerb}Creates a multiprocessing.Process instance, assigns to member
+self.__op_process.  Creates a multiprocessing.event and passes
+it to the utility function that then calls the driver that
+performs parallized Ne estimations.
+\end{DoxyVerb}
+ 
+
+Definition at line 713 of file pgguineestimator\+\_\+experimental.\+py.
+
+
+\begin{DoxyCode}
+713     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a21c83a7e246530f5f0755f59b0c5fcd5}{runEstimator}( self ):
+714 
+715         \textcolor{stringliteral}{'''}
+716 \textcolor{stringliteral}{        Creates a multiprocessing.Process instance, assigns to member}
+717 \textcolor{stringliteral}{        self.\_\_op\_process.  Creates a multiprocessing.event and passes}
+718 \textcolor{stringliteral}{        it to the utility function that then calls the driver that}
+719 \textcolor{stringliteral}{        performs parallized Ne estimations.}
+720 \textcolor{stringliteral}{        '''}
+721 
+722         \textcolor{keywordflow}{if} VERBOSE:
+723             print( \textcolor{stringliteral}{"in runEstimator..."} )
+724             self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_acf29a8f2d282438cca0d9f1d5081ae05}{\_\_test\_values}()
+725         \textcolor{comment}{#end if very verbose}
+726 
+727         \textcolor{comment}{#Object assembles the sample-scheme related args needed for }
+728         \textcolor{comment}{#the call to the pgdriveneestimator.py module, used by}
+729         \textcolor{comment}{#the run\_driveneestimator\_in\_new\_process def called below.}
+730 
+731         o\_sample\_args=NeEstimatorSamplingSchemeParameterManager( o\_pgguineestimator=self, 
+732                                                                     s\_attr\_prefix=ATTRIBUTE\_DEMANLGER )
+733 
+734         s\_validation\_error\_message=o\_sample\_args.validateArgs()
+735 
+736         \textcolor{keywordflow}{if} s\_validation\_error\_message \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+737             s\_msg=\textcolor{stringliteral}{"\(\backslash\)n\(\backslash\)nIn PGGuiNeEstimator instance, def runEstimator, "} \(\backslash\)
+738                     \textcolor{stringliteral}{"There is an invalid value in the pop sampling "} \(\backslash\)
+739                     \textcolor{stringliteral}{"parameters.  Please check that the following "} \(\backslash\)
+740                     \textcolor{stringliteral}{"criteria are met:\(\backslash\)n\(\backslash\)n"} + s\_validation\_error\_message \(\backslash\)
+741                     + \textcolor{stringliteral}{".\(\backslash\)n\(\backslash\)n"}
+742         
+743             \textcolor{keywordflow}{raise} Exception( s\_msg )
+744         \textcolor{comment}{#end if invalid args}
+745         
+746         \textcolor{comment}{#we return the sample-scheme-specific args as a sequence of strings:}
+747         qs\_sample\_scheme\_args=o\_sample\_args.getSampleSchemeArgsForDriver()
+748 
+749         \textcolor{stringliteral}{'''}
+750 \textcolor{stringliteral}{        For loci sampling (as of 2016\_10\_08) we have no schemes,}
+751 \textcolor{stringliteral}{        only the entery "none" for the scheme attribute.}
+752 \textcolor{stringliteral}{        But neestimator needs a scheme-params args (any string), so:}
+753 \textcolor{stringliteral}{        '''}
+754         \textcolor{comment}{#old version with no samp sechemes except "none":}
+755         \textcolor{comment}{#s\_loci\_sampling\_scheme\_arg="none"}
+756         \textcolor{stringliteral}{'''}
+757 \textcolor{stringliteral}{        Revisions 2016\_11\_07 now use new pgutility class }
+758 \textcolor{stringliteral}{        NeEstimatorLociSamplingSchemeParameterManager}
+759 \textcolor{stringliteral}{        to get loci sampling args:}
+760 \textcolor{stringliteral}{        '''}
+761         o\_loci\_sampling\_args= \(\backslash\)
+762                 NeEstimatorLociSamplingSchemeParameterManager( o\_pgguineestimator= self,
+763                                                                 s\_attr\_prefix=ATTRIBUTE\_DEMANLGER )
+764 
+765         
+766         s\_validation\_error\_message=o\_loci\_sampling\_args.validateArgs()
+767 
+768         \textcolor{keywordflow}{if} s\_validation\_error\_message \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+769             s\_msg=\textcolor{stringliteral}{"\(\backslash\)n\(\backslash\)nIn PGGuiNeEstimator instance, def runEstimator, "} \(\backslash\)
+770                     \textcolor{stringliteral}{"There is an invalid value in the loci sampling "} \(\backslash\)
+771                     \textcolor{stringliteral}{"parameters.  Please check that the following "} \(\backslash\)
+772                     \textcolor{stringliteral}{"criteria are met:\(\backslash\)n\(\backslash\)n"} + s\_validation\_error\_message \(\backslash\)
+773                     + \textcolor{stringliteral}{".\(\backslash\)n\(\backslash\)n"}
+774         
+775             \textcolor{keywordflow}{raise} Exception( s\_msg )
+776         \textcolor{comment}{#end if invalid args}
+777 
+778         qs\_loci\_sample\_scheme\_args=o\_loci\_sampling\_args.getSampleSchemeArgsForDriver()
+779 
+780         \textcolor{stringliteral}{'''}
+781 \textcolor{stringliteral}{        2017\_02\_13. New param nbne ratio needs processing to get correct value.}
+782 \textcolor{stringliteral}{        '''}
+783         s\_nbne\_ratio=self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a272f92766556a42980a831e7fe84244c}{\_\_get\_nbne\_ratio\_as\_string\_for\_call\_to\_estimator}
+      ()
+784 
+785         \textcolor{stringliteral}{'''}
+786 \textcolor{stringliteral}{        2017\_04\_14. New parameter tells pgdriveneestimator.py whether to run}
+787 \textcolor{stringliteral}{        the Nb bias adjustment, aside from whether there is a value present}
+788 \textcolor{stringliteral}{        either in the s\_nbne\_ratio set here, or in  the header(s) of input genpop}
+789 \textcolor{stringliteral}{        file(s).}
+790 \textcolor{stringliteral}{        '''}
+791         s\_do\_nb\_bias\_adjustment=str( self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aec040e3496b5833ae365fbbb4ee94e65}{\_\_do\_bias\_adjustment} )
+792 
+793         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ab0f0be0bc9d8f31b76a0e8e49cce6663}{\_\_neest\_multi\_process\_event}=multiprocessing.Event()
+794 
+795         \textcolor{stringliteral}{'''}
+796 \textcolor{stringliteral}{        2017\_03\_27.  New class attribute \_\_temporary\_directory\_for\_estimator}
+797 \textcolor{stringliteral}{        allows easier cleanup of intermediate files created by the estimator.}
+798 \textcolor{stringliteral}{        The directory is a subdirectory inside the current output directory:}
+799 \textcolor{stringliteral}{        '''}
+800         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a492ea584ff0f5c5e932bfb2a8451feca}{\_\_make\_temporary\_directory\_for\_estimator}( 
+      self.\_\_output\_directory.get() )
+801 
+802 
+803         \textcolor{stringliteral}{'''}
+804 \textcolor{stringliteral}{        2017\_08\_27.  If flag is set, then add a plotting frame to the interface,}
+805 \textcolor{stringliteral}{        which will be updated as results are written to the pgdriveneestimator.py}
+806 \textcolor{stringliteral}{        output *tsv file.}
+807 \textcolor{stringliteral}{        '''}
+808         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a6eb55644b1ccacda24ba751800554726}{\_\_show\_progress\_plots} == \textcolor{keyword}{True}:
+809             s\_output\_tsv\_file\_name=self.\_\_output\_directory.get() \(\backslash\)
+810                                     + \textcolor{stringliteral}{"/"} \(\backslash\)
+811                                     + self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa99bb40c806d746401e2b59bbdc7d0a8}{output\_base\_name} \(\backslash\)
+812                                     + \textcolor{stringliteral}{".ldne.tsv"}
+813             i\_min\_cycle, i\_max\_cycle=o\_sample\_args.getSampleSchemePopRange()
+814 
+815             self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a016e227d075b40ab798238e71ccb735f}{\_\_setup\_plotting\_frame}( s\_output\_tsv\_file\_name, i\_min\_cycle, 
+      i\_max\_cycle )
+816         \textcolor{comment}{#end if client wants a frame with progress plots.}
+817 
+818         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aaa2c18e3d44dde92b66cb9ebe54463b6}{\_\_op\_process}=multiprocessing.Process( \(\backslash\)
+819 
+820                 target=pgut.run\_driveneestimator\_in\_new\_process,
+821                     args= ( \(\backslash\)
+822                             self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ab0f0be0bc9d8f31b76a0e8e49cce6663}{\_\_neest\_multi\_process\_event},
+823                             self.\_\_genepopfiles.get(),
+824                             qs\_sample\_scheme\_args,
+825                             self.\_\_minallelefreq,
+826                             self.\_\_replicates,
+827                             qs\_loci\_sample\_scheme\_args,
+828                             self.\_\_loci\_replicates,
+829                             self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aaf5cdaff0dd43af6e81c805611680fa6}{\_\_processes},
+830                             self.\_\_runmode,
+831                             s\_nbne\_ratio,
+832                             s\_do\_nb\_bias\_adjustment,
+833                             self.\_\_output\_directory.get() \(\backslash\)
+834                                     + \textcolor{stringliteral}{"/"} \(\backslash\)
+835                                     + self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aa99bb40c806d746401e2b59bbdc7d0a8}{output\_base\_name},
+836                             self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a3a28a6a754afc8069d729f0d48e044bf}{\_\_temporary\_directory\_for\_estimator} ) )
+837 
+838         self.\_\_op\_process.start()
+839         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a4f894c66d178e1c34e805def6d7c4f30}{\_\_set\_controls\_by\_run\_state}( self.
+      \hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ae85f6ae9ee8842a94eae2d5025f328fc}{\_\_get\_run\_state}() )
+840         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a2b7e06e2b53c101c2d2363c922bce129}{\_\_init\_interface}( b\_force\_disable=\textcolor{keyword}{True} )
+841         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a837749bf5dc113fac16e84e09852a3b5}{\_\_load\_param\_interface}( b\_force\_disable=\textcolor{keyword}{True} )
+842         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a2b8aac1608bcf4cb91d46f23345ffbbe}{\_\_update\_genepopfile\_sampling\_params\_interface}( 
+      b\_force\_disable=\textcolor{keyword}{True} )
+843         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_a55683e0220823fdb0663e4b08e042cf2}{\_\_update\_genepopfile\_loci\_sampling\_params\_interface}
+      ( b\_force\_disable=\textcolor{keyword}{True} )
+844         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_adc90b53fb2b4c9aefbcc0391ce7451d7}{\_\_run\_state\_message}=\textcolor{stringliteral}{"  "} + ESTIMATION\_RUNNING\_MSG
+845         self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_ab9782b5b4071976681cfbd22a8504f87}{\_\_plotting\_program\_needs\_to\_be\_run}=\textcolor{keyword}{True} 
+846         self.after( 500, self.\hyperlink{classnegui_1_1pgguineestimator__experimental_1_1PGGuiNeEstimator_aca3ec4fc8ec2a5872ef7e1b9048b5684}{\_\_check\_progress\_operation\_process} )
+847 
+848         \textcolor{keywordflow}{if} VERY\_VERBOSE:
+849             print( \textcolor{stringliteral}{"running estimator"} )
+850         \textcolor{comment}{#end if very verbose}
+851 
+852         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgguineestimator\+\_\+experimental.\+py\end{DoxyCompactItemize}

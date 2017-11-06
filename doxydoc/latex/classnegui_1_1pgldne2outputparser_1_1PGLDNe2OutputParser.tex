@@ -1,0 +1,144 @@
+\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser}{}\section{negui.\+pgldne2outputparser.\+P\+G\+L\+D\+Ne2\+Output\+Parser Class Reference}
+\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser}\index{negui.\+pgldne2outputparser.\+P\+G\+L\+D\+Ne2\+Output\+Parser@{negui.\+pgldne2outputparser.\+P\+G\+L\+D\+Ne2\+Output\+Parser}}
+Inheritance diagram for negui.\+pgldne2outputparser.\+P\+G\+L\+D\+Ne2\+Output\+Parser\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+tabular\+\_\+output\+\_\+file\+\_\+basename=None)\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a39d352a812c1ef93699abb84bc106406}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a39d352a812c1ef93699abb84bc106406}
+
+\item 
+def {\bfseries parsed\+\_\+output} (self)\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a62d43f897c0deebe2d3fd270280b905f}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a62d43f897c0deebe2d3fd270280b905f}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries me}\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_afb17a8c1d6cc411a2efd56a554288448}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_afb17a8c1d6cc411a2efd56a554288448}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+string {\bfseries C\+O\+L\+U\+M\+N\+\_\+\+O\+U\+T\+P\+U\+T\+\_\+\+E\+XT} = \char`\"{}x.\+txt\char`\"{}\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a504996c1aa76bb546dddb9315c31a605}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a504996c1aa76bb546dddb9315c31a605}
+
+\item 
+dictionary {\bfseries P\+A\+R\+S\+I\+N\+G\+\_\+\+M\+E\+T\+R\+I\+CS}
+\item 
+dictionary {\bfseries O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM}
+\item 
+dictionary {\bfseries O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+T\+Y\+P\+E\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM}
+\item 
+int {\bfseries F\+I\+L\+E\+\_\+\+L\+O\+O\+K\+S\+\_\+\+V\+A\+L\+ID} = 1\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_aa36d2032d5c8f5b15a8261e8d7f56f8b}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_aa36d2032d5c8f5b15a8261e8d7f56f8b}
+
+\item 
+int {\bfseries F\+I\+L\+E\+\_\+\+L\+O\+O\+K\+S\+\_\+\+I\+N\+V\+A\+L\+ID} = 0\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a1f97b3d288c62a2a6d549321f48fb5ff}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a1f97b3d288c62a2a6d549321f48fb5ff}
+
+\item 
+int {\bfseries F\+I\+L\+E\+\_\+\+H\+A\+S\+\_\+\+N\+O\+\_\+\+D\+A\+T\+A\+\_\+\+L\+I\+N\+ES} = 2\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_ac5b264dbeb2115ca56022c5a76fcd86c}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_ac5b264dbeb2115ca56022c5a76fcd86c}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Our first version of this class uses the
+tabular format output of LDNe2, using the
+configuration file as evaluated by the
+LDNe2 source function "RunMultiCommon".
+
+We assume that:
+    1. The input files are restricted
+    to a single genepop file.  See the class
+    description in module pgldne2controller.py.
+
+    2. Only a single critical value (i.e. min.
+    allele frequency threshold) is used in the
+    estimations. (See the pgldne2controller de-
+    fault settings for the input parameters).
+
+    3. The client has the tabular/columnar LDNe2 
+    output format in a file, and supplies the output file
+    basename (without the tabular file extension)
+    in the __init__ def.
+\end{DoxyVerb}
+ 
+
+Definition at line 27 of file pgldne2outputparser.\+py.
+
+
+
+\subsection{Member Data Documentation}
+\index{negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser@{negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser}!O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM@{O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM}}
+\index{O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM@{O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM}!negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser@{negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser}}
+\subsubsection[{\texorpdfstring{O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM}{OUTPUT_VALUE_KEYS_BY_COLNUM}}]{\setlength{\rightskip}{0pt plus 5cm}dictionary negui.\+pgldne2outputparser.\+P\+G\+L\+D\+Ne2\+Output\+Parser.\+O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a0baccc5dddbc92021e194500cd4f823e}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a0baccc5dddbc92021e194500cd4f823e}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+1 = \{ 1:\textcolor{stringliteral}{"pop\_number"}, 2:\textcolor{stringliteral}{"samp\_size"}, 
+2                                     3:\textcolor{stringliteral}{"weighted\_h\_mean"}, 4:\textcolor{stringliteral}{"indep\_alleles"}, 
+3                                     5:\textcolor{stringliteral}{"r\_squared"}, 6:\textcolor{stringliteral}{"exp\_r\_squared"}, 
+4                                     7:\textcolor{stringliteral}{"ne\_estimate"}, 8:\textcolor{stringliteral}{"ci\_param\_low"}, 
+5                                     9:\textcolor{stringliteral}{"ci\_param\_hi"}, 
+6                                     10:\textcolor{stringliteral}{"ci\_jackknife\_low"}, 
+7                                     11:\textcolor{stringliteral}{"ci\_jackknife\_hi"}, 
+8                                     12:\textcolor{stringliteral}{"eff\_df"} \}
+\end{DoxyCode}
+
+
+Definition at line 80 of file pgldne2outputparser.\+py.
+
+\index{negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser@{negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser}!O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+T\+Y\+P\+E\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM@{O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+T\+Y\+P\+E\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM}}
+\index{O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+T\+Y\+P\+E\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM@{O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+T\+Y\+P\+E\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM}!negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser@{negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser}}
+\subsubsection[{\texorpdfstring{O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+T\+Y\+P\+E\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM}{OUTPUT_VALUE_TYPES_BY_COLNUM}}]{\setlength{\rightskip}{0pt plus 5cm}dictionary negui.\+pgldne2outputparser.\+P\+G\+L\+D\+Ne2\+Output\+Parser.\+O\+U\+T\+P\+U\+T\+\_\+\+V\+A\+L\+U\+E\+\_\+\+T\+Y\+P\+E\+S\+\_\+\+B\+Y\+\_\+\+C\+O\+L\+N\+UM\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_ae6f1338da4df39f8473fc6cf44dd8c95}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_ae6f1338da4df39f8473fc6cf44dd8c95}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+1 = \{ 1:int, 2:float, 3:float, 4:float, 
+2                                     5:float, 6:float, 7:float, 8:float, 
+3                                     9:float, 10:float, 11:float, 12:float \}
+\end{DoxyCode}
+
+
+Definition at line 89 of file pgldne2outputparser.\+py.
+
+\index{negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser@{negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser}!P\+A\+R\+S\+I\+N\+G\+\_\+\+M\+E\+T\+R\+I\+CS@{P\+A\+R\+S\+I\+N\+G\+\_\+\+M\+E\+T\+R\+I\+CS}}
+\index{P\+A\+R\+S\+I\+N\+G\+\_\+\+M\+E\+T\+R\+I\+CS@{P\+A\+R\+S\+I\+N\+G\+\_\+\+M\+E\+T\+R\+I\+CS}!negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser@{negui\+::pgldne2outputparser\+::\+P\+G\+L\+D\+Ne2\+Output\+Parser}}
+\subsubsection[{\texorpdfstring{P\+A\+R\+S\+I\+N\+G\+\_\+\+M\+E\+T\+R\+I\+CS}{PARSING_METRICS}}]{\setlength{\rightskip}{0pt plus 5cm}dictionary negui.\+pgldne2outputparser.\+P\+G\+L\+D\+Ne2\+Output\+Parser.\+P\+A\+R\+S\+I\+N\+G\+\_\+\+M\+E\+T\+R\+I\+CS\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a1c69450c354dc7591f77e200f9a3f9f1}{}\label{classnegui_1_1pgldne2outputparser_1_1PGLDNe2OutputParser_a1c69450c354dc7591f77e200f9a3f9f1}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+1 = \{ \textcolor{stringliteral}{"DATA\_DELIMIT"}: \textcolor{stringliteral}{" "}, 
+2                         \textcolor{stringliteral}{"POPNUM\_DELIMIT"}:\textcolor{stringliteral}{":"},
+3                         \textcolor{stringliteral}{"FIELDNUM\_POPNUM\_IN\_POPNUM\_COLUMN"}:0,
+4                         \textcolor{stringliteral}{"TOTAL\_LINES\_FOLLOWING\_DATA"}:8,
+5                         \textcolor{stringliteral}{"TOTAL\_FIELDS\_PER\_DATA\_LINE"}:12,
+6                         \textcolor{stringliteral}{"TOTAL\_DIVIDER\_LINES\_BEFORE\_DATA"}:4,
+7                         \textcolor{stringliteral}{"REGEX\_PENULT\_HEADER\_LINE"}:\textcolor{stringliteral}{"^[1-9].*"},
+8                         \textcolor{stringliteral}{"REGEX\_LINE\_BEFORE\_DATA"}:\textcolor{stringliteral}{"^-+$"},
+9                         \textcolor{stringliteral}{"REGEX\_LINE\_FOLLOWING\_DATA"}:\textcolor{stringliteral}{"^$"},
+10                         \textcolor{stringliteral}{"REGEX\_SECOND\_LINE\_AFTER\_DATA"}:\textcolor{stringliteral}{"^-+$"},
+11                         \textcolor{stringliteral}{"REGEX\_DIVIDER\_LINE"}:\textcolor{stringliteral}{"^-+$"},
+12                         \textcolor{stringliteral}{"REGEX\_THIRD\_LINE\_AFTER\_DATA"}:\textcolor{stringliteral}{"Total number of populations =.*"},
+13                         \textcolor{stringliteral}{"COLNUM\_POP\_NUMBER"}:1,
+14                         \textcolor{stringliteral}{"COLNUM\_SAMP\_SIZE"}:2,
+15                         \textcolor{stringliteral}{"COLNUM\_WEIGHTED\_H\_MEAN"}:3,
+16                         \textcolor{stringliteral}{"COLNUM\_INDEP\_ALLELES"}:4,
+17                         \textcolor{stringliteral}{"COLNUM\_R\_SQUARED"}:5,
+18                         \textcolor{stringliteral}{"COLNUM\_EXP\_R\_SQUARED"}:6,
+19                         \textcolor{stringliteral}{"COLNUM\_NE\_ESTIMATE"}:7,
+20                         \textcolor{stringliteral}{"COLNUM\_CI\_PARAM\_LOW"}:8,
+21                         \textcolor{stringliteral}{"COLNUM\_CI\_PARAM\_HI"}:9,
+22                         \textcolor{stringliteral}{"COLNUM\_CI\_JACKKNIFE\_LOW"}:10,
+23                         \textcolor{stringliteral}{"COLNUM\_CI\_JACKKNIFE\_HI"}:11,
+24                         \textcolor{stringliteral}{"COLNUM\_EFF\_DF"}:12 \}
+\end{DoxyCode}
+
+
+Definition at line 55 of file pgldne2outputparser.\+py.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgldne2outputparser.\+py\end{DoxyCompactItemize}

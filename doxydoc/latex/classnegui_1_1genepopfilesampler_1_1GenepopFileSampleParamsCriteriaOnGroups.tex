@@ -1,0 +1,125 @@
+\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteriaOnGroups}{}\section{negui.\+genepopfilesampler.\+Genepop\+File\+Sample\+Params\+Criteria\+On\+Groups Class Reference}
+\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteriaOnGroups}\index{negui.\+genepopfilesampler.\+Genepop\+File\+Sample\+Params\+Criteria\+On\+Groups@{negui.\+genepopfilesampler.\+Genepop\+File\+Sample\+Params\+Criteria\+On\+Groups}}
+Inheritance diagram for negui.\+genepopfilesampler.\+Genepop\+File\+Sample\+Params\+Criteria\+On\+Groups\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteriaOnGroups}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteriaOnGroups_ab9e717598c2781a095bfb169b3457879}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+genepop\+\_\+indiv\+\_\+id\+\_\+fields, o\+\_\+genepop\+\_\+indiv\+\_\+id\+\_\+critera, li\+\_\+population\+\_\+numbers, ls\+\_\+field\+\_\+names\+\_\+to\+\_\+group\+\_\+on, s\+\_\+population\+\_\+subsample\+\_\+name=\char`\"{}poplulation\+\_\+numbers\char`\"{}, i\+\_\+replicates=1, i\+\_\+max\+\_\+sampled\+\_\+pop\+\_\+size=None, s\+\_\+sample\+\_\+tag\+\_\+base=None)
+\item 
+def {\bfseries grouped\+\_\+fields} (self)\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteriaOnGroups_aa7daa9e80fe3fedf4ef2303b035fead2}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteriaOnGroups_aa7daa9e80fe3fedf4ef2303b035fead2}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This class extends GenepopFileSampleParamsCriteria
+by adding a grouping function, whereby individuals
+are subsampled into groups according to whether they
+match a set of one or more field values. Other criteria
+can also be applied.  The member GenepopIndivCriteriaCriteria 
+object can also be None, in which case subsampleing will be
+Parameters for sampling scheme such that for each population
+we select individuals that meet one or more criteria as 
+given in the individual ID as processed by the classes in
+genepopindividualid.py. 
+\end{DoxyVerb}
+ 
+
+Definition at line 536 of file genepopfilesampler.\+py.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sample\+Params\+Criteria\+On\+Groups@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sample\+Params\+Criteria\+On\+Groups}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!negui\+::genepopfilesampler\+::\+Genepop\+File\+Sample\+Params\+Criteria\+On\+Groups@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sample\+Params\+Criteria\+On\+Groups}}
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, o\+\_\+genepop\+\_\+indiv\+\_\+id\+\_\+fields, o\+\_\+genepop\+\_\+indiv\+\_\+id\+\_\+critera, li\+\_\+population\+\_\+numbers, ls\+\_\+field\+\_\+names\+\_\+to\+\_\+group\+\_\+on, s\+\_\+population\+\_\+subsample\+\_\+name=""poplulation\+\_\+numbers"", i\+\_\+replicates=1, i\+\_\+max\+\_\+sampled\+\_\+pop\+\_\+size=\+None, s\+\_\+sample\+\_\+tag\+\_\+base=\+None)}{__init__(self, o_genepop_indiv_id_fields, o_genepop_indiv_id_critera, li_population_numbers, ls_field_names_to_group_on, s_population_subsample_name="poplulation_numbers", i_replicates=1, i_max_sampled_pop_size=None, s_sample_tag_base=None)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+genepopfilesampler.\+Genepop\+File\+Sample\+Params\+Criteria\+On\+Groups.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{o\+\_\+genepop\+\_\+indiv\+\_\+id\+\_\+fields, }
+\item[{}]{o\+\_\+genepop\+\_\+indiv\+\_\+id\+\_\+critera, }
+\item[{}]{li\+\_\+population\+\_\+numbers, }
+\item[{}]{ls\+\_\+field\+\_\+names\+\_\+to\+\_\+group\+\_\+on, }
+\item[{}]{s\+\_\+population\+\_\+subsample\+\_\+name = {\ttfamily \char`\"{}poplulation\+\_\+numbers\char`\"{}}, }
+\item[{}]{i\+\_\+replicates = {\ttfamily 1}, }
+\item[{}]{i\+\_\+max\+\_\+sampled\+\_\+pop\+\_\+size = {\ttfamily None}, }
+\item[{}]{s\+\_\+sample\+\_\+tag\+\_\+base = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteriaOnGroups_ab9e717598c2781a095bfb169b3457879}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteriaOnGroups_ab9e717598c2781a095bfb169b3457879}
+\begin{DoxyVerb}param o_genepop_indiv_id_fields, instance of GenepopIndivIdFields,
+param do_genepop_indiv_id_critera, dictionary of instances of 
+type GenepopIndivCriterion, keyed to their member
+property, "name: (__criterionname)
+param li_population_numbers, list of pop numbers (in the genepop file)
+to which we apply the critera.
+param ls_field_names_to_group_on, list of strings, field names, 
+on which to group individuals.  These unique sets of
+field values will then be used as criteria in subsampling.
+param s_population_subsample_name, see parent class
+param i_replicates will usually be "1", since there should be
+no variation between 2 such samplings of a genepop file.
+param i_max_sampled_pop_size, if not None, is meant to be passed
+    to the criteria subsampling def in a GenepopFileManager
+    instance (passed by the GenepopFileSampler Instance using this
+    class), so that, after all indivs have been chosen by the 
+    criteria, the subsample in then reduced (if > i_max_sampled_pop_size),
+    by random selection to be equal to i_max_sampled_pop_size.
+    If None, then we expect the Samper instance to pass None to 
+    the GenepopFileManager instance for the max, and so to ignore
+    the restriction.
+\end{DoxyVerb}
+ 
+
+Definition at line 560 of file genepopfilesampler.\+py.
+
+
+\begin{DoxyCode}
+560                 s\_sample\_tag\_base=\textcolor{keywordtype}{None} ):
+561 
+562         \textcolor{stringliteral}{'''}
+563 \textcolor{stringliteral}{        param o\_genepop\_indiv\_id\_fields, instance of GenepopIndivIdFields,}
+564 \textcolor{stringliteral}{        param do\_genepop\_indiv\_id\_critera, dictionary of instances of }
+565 \textcolor{stringliteral}{                type GenepopIndivCriterion, keyed to their member}
+566 \textcolor{stringliteral}{                property, "name: (\_\_criterionname)}
+567 \textcolor{stringliteral}{        param li\_population\_numbers, list of pop numbers (in the genepop file)}
+568 \textcolor{stringliteral}{                to which we apply the critera.}
+569 \textcolor{stringliteral}{        param ls\_field\_names\_to\_group\_on, list of strings, field names, }
+570 \textcolor{stringliteral}{                on which to group individuals.  These unique sets of}
+571 \textcolor{stringliteral}{                field values will then be used as criteria in subsampling.}
+572 \textcolor{stringliteral}{        param s\_population\_subsample\_name, see parent class}
+573 \textcolor{stringliteral}{        param i\_replicates will usually be "1", since there should be}
+574 \textcolor{stringliteral}{                no variation between 2 such samplings of a genepop file.}
+575 \textcolor{stringliteral}{        param i\_max\_sampled\_pop\_size, if not None, is meant to be passed}
+576 \textcolor{stringliteral}{            to the criteria subsampling def in a GenepopFileManager}
+577 \textcolor{stringliteral}{            instance (passed by the GenepopFileSampler Instance using this}
+578 \textcolor{stringliteral}{            class), so that, after all indivs have been chosen by the }
+579 \textcolor{stringliteral}{            criteria, the subsample in then reduced (if > i\_max\_sampled\_pop\_size),}
+580 \textcolor{stringliteral}{            by random selection to be equal to i\_max\_sampled\_pop\_size.}
+581 \textcolor{stringliteral}{            If None, then we expect the Samper instance to pass None to }
+582 \textcolor{stringliteral}{            the GenepopFileManager instance for the max, and so to ignore}
+583 \textcolor{stringliteral}{            the restriction.}
+584 \textcolor{stringliteral}{        '''}
+585 
+586         GenepopFileSampleParamsCriteria.\_\_init\_\_( \(\backslash\)
+587                     self, 
+588                     o\_genepop\_indiv\_id\_fields,
+589                     o\_genepop\_indiv\_id\_critera,
+590                     li\_population\_numbers=li\_population\_numbers, 
+591                     s\_population\_subsample\_name=s\_population\_subsample\_name,
+592                     i\_replicates=i\_replicates, 
+593                     i\_max\_sampled\_pop\_size=\textcolor{keywordtype}{None},
+594                     s\_sample\_tag\_base=s\_sample\_tag\_base )
+595 
+596         
+597         self.\_\_grouped\_fields
+598         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+genepopfilesampler.\+py\end{DoxyCompactItemize}

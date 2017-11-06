@@ -1,0 +1,199 @@
+\hypertarget{classnegui_1_1pgguiviz_1_1PGGuiViz}{}\section{negui.\+pgguiviz.\+P\+G\+Gui\+Viz Class Reference}
+\label{classnegui_1_1pgguiviz_1_1PGGuiViz}\index{negui.\+pgguiviz.\+P\+G\+Gui\+Viz@{negui.\+pgguiviz.\+P\+G\+Gui\+Viz}}
+Inheritance diagram for negui.\+pgguiviz.\+P\+G\+Gui\+Viz\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1pgguiviz_1_1PGGuiViz}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_ace2dbe2e34a22ee3f571bd51d5ebd1bb}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+parent, s\+\_\+param\+\_\+names\+\_\+file, s\+\_\+name=\char`\"{}viz\+\_\+gui\char`\"{}, i\+\_\+total\+\_\+processes\+\_\+for\+\_\+viz=1)
+\item 
+def {\bfseries run\+Viz} (self)\hypertarget{classnegui_1_1pgguiviz_1_1PGGuiViz_a1cda2dd92cf73236d516c84121fc35f4}{}\label{classnegui_1_1pgguiviz_1_1PGGuiViz_a1cda2dd92cf73236d516c84121fc35f4}
+
+\item 
+def {\bfseries cleanup} (self)\hypertarget{classnegui_1_1pgguiviz_1_1PGGuiViz_aaea72bbc4e508528a954e739a2829213}{}\label{classnegui_1_1pgguiviz_1_1PGGuiViz_aaea72bbc4e508528a954e739a2829213}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries output\+\_\+base\+\_\+name}\hypertarget{classnegui_1_1pgguiviz_1_1PGGuiViz_a38bbcd1793a59cee540c1168db30bc6b}{}\label{classnegui_1_1pgguiviz_1_1PGGuiViz_a38bbcd1793a59cee540c1168db30bc6b}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int {\bfseries R\+U\+N\+\_\+\+N\+O\+T\+\_\+\+R\+E\+A\+DY} = 0\hypertarget{classnegui_1_1pgguiviz_1_1PGGuiViz_a1199bb647ec58223ccbbeee7882e59dc}{}\label{classnegui_1_1pgguiviz_1_1PGGuiViz_a1199bb647ec58223ccbbeee7882e59dc}
+
+\item 
+int {\bfseries R\+U\+N\+\_\+\+R\+E\+A\+DY} = 1\hypertarget{classnegui_1_1pgguiviz_1_1PGGuiViz_a61b766c446b022b66ac5190a970a39ef}{}\label{classnegui_1_1pgguiviz_1_1PGGuiViz_a61b766c446b022b66ac5190a970a39ef}
+
+\item 
+int {\bfseries R\+U\+N\+\_\+\+I\+N\+\_\+\+P\+R\+O\+G\+R\+E\+SS} = 2\hypertarget{classnegui_1_1pgguiviz_1_1PGGuiViz_a18dc085b2121014d459c6cc51b9a06e4}{}\label{classnegui_1_1pgguiviz_1_1PGGuiViz_a18dc085b2121014d459c6cc51b9a06e4}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Subclass of PGGuiApp builds a gui,
+interface to allow users to set up
+and run Brian Trethewey's Viz programs.
+
+As of 2016_12_09, these are run in a 
+Popen generated subprocess, as implemented
+in the pgutilities.py module.
+\end{DoxyVerb}
+ 
+
+Definition at line 88 of file pgguiviz.\+py.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{negui\+::pgguiviz\+::\+P\+G\+Gui\+Viz@{negui\+::pgguiviz\+::\+P\+G\+Gui\+Viz}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!negui\+::pgguiviz\+::\+P\+G\+Gui\+Viz@{negui\+::pgguiviz\+::\+P\+G\+Gui\+Viz}}
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, o\+\_\+parent, s\+\_\+param\+\_\+names\+\_\+file, s\+\_\+name=""viz\+\_\+gui"", i\+\_\+total\+\_\+processes\+\_\+for\+\_\+viz=1)}{__init__(self, o_parent, s_param_names_file, s_name="viz_gui", i_total_processes_for_viz=1)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgguiviz.\+P\+G\+Gui\+Viz.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{o\+\_\+parent, }
+\item[{}]{s\+\_\+param\+\_\+names\+\_\+file, }
+\item[{}]{s\+\_\+name = {\ttfamily \char`\"{}viz\+\_\+gui\char`\"{}}, }
+\item[{}]{i\+\_\+total\+\_\+processes\+\_\+for\+\_\+viz = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgguiviz_1_1PGGuiViz_ace2dbe2e34a22ee3f571bd51d5ebd1bb}{}\label{classnegui_1_1pgguiviz_1_1PGGuiViz_ace2dbe2e34a22ee3f571bd51d5ebd1bb}
+\begin{DoxyVerb}param o_parent is the tkinter window that hosts this gui.  
+    It is meant to be the same parent as that 
+    which hosts other pg interfaces, like pgguisimupop objects.
+param s_param_names_file is the file that contains short and long 
+    param names, used to make a PGParamSet object, in turn used to 
+    setup the viz plotting call.
+param s_name gives the parent PGGuiApp's name 
+    (currently, Fri Aug  5 16:48:08 MDT 2016, of no importance).
+param i_total_processes_for_est, integer given the number of processes 
+    to assign to the ne-estimation, which does each population 
+    in each genepop file in a separate python, mulitiprocessing.process.
+\end{DoxyVerb}
+ 
+
+Definition at line 106 of file pgguiviz.\+py.
+
+
+\begin{DoxyCode}
+106                         i\_total\_processes\_for\_viz=1):
+107 
+108         \textcolor{stringliteral}{'''}
+109 \textcolor{stringliteral}{        param o\_parent is the tkinter window that hosts this gui.  }
+110 \textcolor{stringliteral}{            It is meant to be the same parent as that }
+111 \textcolor{stringliteral}{            which hosts other pg interfaces, like pgguisimupop objects.}
+112 \textcolor{stringliteral}{        param s\_param\_names\_file is the file that contains short and long }
+113 \textcolor{stringliteral}{            param names, used to make a PGParamSet object, in turn used to }
+114 \textcolor{stringliteral}{            setup the viz plotting call.}
+115 \textcolor{stringliteral}{        param s\_name gives the parent PGGuiApp's name }
+116 \textcolor{stringliteral}{            (currently, Fri Aug  5 16:48:08 MDT 2016, of no importance).}
+117 \textcolor{stringliteral}{        param i\_total\_processes\_for\_est, integer given the number of processes }
+118 \textcolor{stringliteral}{            to assign to the ne-estimation, which does each population }
+119 \textcolor{stringliteral}{            in each genepop file in a separate python, mulitiprocessing.process.}
+120 \textcolor{stringliteral}{        '''}
+121                 
+122         pgg.PGGuiApp.\_\_init\_\_( self, s\_name, o\_parent )
+123 
+124         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a42b1b9de230018b721ecd9ca735dc0c7}{\_\_param\_names\_file}=s\_param\_names\_file
+125 
+126         \textcolor{comment}{#ref to the PGParamSet object}
+127         \textcolor{comment}{#created using the param\_names\_file:}
+128         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a8af7c9e5038a25f8a3ef0ccb9a9392f9}{\_\_param\_set}=\textcolor{keywordtype}{None}
+129         
+130         \textcolor{comment}{#a string giving a list }
+131         \textcolor{comment}{#of input files:}
+132         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a3150291d228ac7e88886456738d69a8a}{\_\_tsv\_file}=StringVar()
+133 
+134         \textcolor{comment}{#variables for the output}
+135         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_afc670cfef85fd8e17b6ac4a9fca66834}{\_\_output\_directory}=StringVar()
+136 
+137         \textcolor{comment}{#currently not used, as plotting}
+138         \textcolor{comment}{#is serially programmed}
+139         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_aa00295d5e7e00041ac09da51c4526a5c}{\_\_processes}=i\_total\_processes\_for\_viz
+140 
+141         \textcolor{comment}{#no StringVar because we want}
+142         \textcolor{comment}{#the KeyValFrame to set this}
+143         \textcolor{comment}{#directly:}
+144         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a38bbcd1793a59cee540c1168db30bc6b}{output\_base\_name}=\textcolor{stringliteral}{""}
+145 
+146         \textcolor{stringliteral}{'''}
+147 \textcolor{stringliteral}{        In case user wants to plot regression,}
+148 \textcolor{stringliteral}{        and the tsv file has more than one}
+149 \textcolor{stringliteral}{        subsample value for pop and/or loci,}
+150 \textcolor{stringliteral}{        we update these whenever the user}
+151 \textcolor{stringliteral}{        loads a tsv file.:}
+152 \textcolor{stringliteral}{        '''}
+153         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_aceea1ac2e59eb80acc29c20b8c4fb664}{\_\_pop\_subsample\_values}=[]
+154         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a7f64d2dce87732e2016f75a1ec8fd67f}{\_\_loci\_subsample\_values}=[]
+155     
+156         \textcolor{comment}{#These attributes will be assigned and accessed}
+157         \textcolor{comment}{#when the above lists have > 1 value for pop or loci:}
+158         setattr( self, ATTRIBUTE\_DEMANLGER + POP\_SELECT\_SUBSAMPLE\_ATTR, \textcolor{keywordtype}{None} )
+159         setattr( self, ATTRIBUTE\_DEMANLGER + LOCI\_SELECT\_SUBSAMPLE\_ATTR, \textcolor{keywordtype}{None} )
+160 
+161         \textcolor{comment}{#displays the current tsv file ready}
+162         \textcolor{comment}{#to run:}
+163         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_afb8063440deb9311663ac71f4507ae9e}{\_\_tsv\_file\_listbox}=\textcolor{keywordtype}{None}
+164 
+165         \textcolor{comment}{#python multiprocessing.Process}
+166         \textcolor{comment}{#spawned in def runViz:}
+167         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a428e0ea6bca944c0de1e8d8c571ec81d}{\_\_op\_process}=\textcolor{keywordtype}{None}
+168         \textcolor{comment}{#Event to signal when plotting}
+169         \textcolor{comment}{#is to be aborted.}
+170         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a5cc8ffaa40aef496ac5d9c4c1eeaeac7}{\_\_multi\_process\_event}=\textcolor{keywordtype}{None}
+171         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a96f781375874265f5b89f264ef10c7d3}{\_\_op\_in\_progress}=\textcolor{keyword}{False}
+172 
+173         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_aaf229b337d43c2005b89d47949cb72d7}{\_\_run\_state\_message}=\textcolor{stringliteral}{""}
+174         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_ab848f92fe2c64f16a3539a473bb2ce7f}{\_\_run\_button}=\textcolor{keywordtype}{None}
+175 
+176         \textcolor{comment}{#A way to access one of the interface}
+177         \textcolor{comment}{#input control groups, such as "filelocations",}
+178         \textcolor{comment}{#or "parameters"}
+179         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_abfe9238ef475cd16f880a21834a08c7a}{\_\_interface\_subframes}=\{\}
+180 
+181         \textcolor{stringliteral}{'''}
+182 \textcolor{stringliteral}{        A way to access one of the objecta that}
+183 \textcolor{stringliteral}{        controls the param-value in one or more }
+184 \textcolor{stringliteral}{        entry/list/combo boxes.  This added on 2016\_10\_31, }
+185 \textcolor{stringliteral}{        to get access to their tooltip objects,         }
+186 \textcolor{stringliteral}{        as some of these were persisting after accessing,}
+187 \textcolor{stringliteral}{        then leaving the reloading the param boxes (in particular}
+188 \textcolor{stringliteral}{        the combo boxes). Although the tooltip problem}
+189 \textcolor{stringliteral}{        was solved by simpler changes in the CreateToolTip}
+190 \textcolor{stringliteral}{        class itself, we'll keep this attribute and append}
+191 \textcolor{stringliteral}{        the objects (kv frames, as created in load\_parm defs)}
+192 \textcolor{stringliteral}{        in case the direct access to these controls is needed.}
+193 \textcolor{stringliteral}{        '''}
+194         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a2e6db852b710f29e858d43291471c0e6}{\_\_param\_value\_frames\_by\_attr\_name}=\{\}
+195 
+196         \textcolor{stringliteral}{'''}
+197 \textcolor{stringliteral}{        Objects associated with the asyncronous}
+198 \textcolor{stringliteral}{        fetching of tsv (ne-estimation table) file}
+199 \textcolor{stringliteral}{        info about number of pop and loci subsample}
+200 \textcolor{stringliteral}{        values, in order to get user input for}
+201 \textcolor{stringliteral}{        regression plotting (if needed).}
+202 \textcolor{stringliteral}{        '''}
+203         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a97a073c724f2714a2c12133f4280de7a}{\_\_subsample\_fetcher\_process\_pool}=\textcolor{keywordtype}{None}
+204         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a70888e0afd46435e2adbee5a6d169a05}{\_\_subsample\_fetcher\_map\_result}=\textcolor{keywordtype}{None}
+205 
+206         \textcolor{comment}{#create interface}
+207         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_af015d3d20404d46327e7013e74bc409e}{\_\_get\_param\_set}( s\_param\_names\_file )
+208         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a012371f2fae3b89f2daff29c36a9f19d}{\_\_set\_initial\_file\_info}()
+209         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a59ea2bd8a30cf616d2f7e80d9f52f253}{\_\_init\_interface}()
+210         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_af2ff72c2f608dda04871de880e042fa0}{\_\_load\_viz\_type\_selection\_interface}()
+211         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a40815d3de1c551c37167e071aed6396a}{\_\_load\_params\_interface}()
+212         self.\hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a1b519576f5de6aa751a784156c92d1a9}{\_\_set\_controls\_by\_run\_state}( self.
+      \hyperlink{classnegui_1_1pgguiviz_1_1PGGuiViz_a3aa0495588f28f15e3b9ab7a59dec9b8}{\_\_get\_run\_state}() )
+213         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgguiviz.\+py\end{DoxyCompactItemize}

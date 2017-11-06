@@ -1,0 +1,53 @@
+\hypertarget{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager}{}\section{negui.\+pgplottingframe.\+P\+G\+Plotting\+Frame\+Regression\+Lines\+From\+File\+Manager Class Reference}
+\label{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager}\index{negui.\+pgplottingframe.\+P\+G\+Plotting\+Frame\+Regression\+Lines\+From\+File\+Manager@{negui.\+pgplottingframe.\+P\+G\+Plotting\+Frame\+Regression\+Lines\+From\+File\+Manager}}
+Inheritance diagram for negui.\+pgplottingframe.\+P\+G\+Plotting\+Frame\+Regression\+Lines\+From\+File\+Manager\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5.000000cm]{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+}\hypertarget{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_ae43e3d6e7d570bbcbc2a0ab23fca59fd}{}\label{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_ae43e3d6e7d570bbcbc2a0ab23fca59fd}
+
+\item 
+def {\bfseries update\+Data} (self)\hypertarget{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_ac9f38df6487db0c461f0b0bd146dbbe4}{}\label{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_ac9f38df6487db0c461f0b0bd146dbbe4}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries current\+\_\+data}\hypertarget{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_ae363456ebb3b83eab8083372b659b0b6}{}\label{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_ae363456ebb3b83eab8083372b659b0b6}
+
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries I\+N\+P\+U\+T\+\_\+\+F\+I\+E\+L\+D\+S\+\_\+\+A\+S\+S\+O\+C\+\_\+\+W\+I\+T\+H\+\_\+\+O\+N\+E\+\_\+\+E\+S\+T\+I\+M\+A\+TE} = \textbackslash{}\hypertarget{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_a00b2193469e0f556979e5d3c6a3c1f6c}{}\label{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_a00b2193469e0f556979e5d3c6a3c1f6c}
+
+\item 
+int {\bfseries M\+A\+R\+K\+E\+R\+\_\+\+S\+I\+Z\+E\+\_\+\+P\+AD} = 3\hypertarget{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_a43f26409c5015ce16d878640d4b588d7}{}\label{classnegui_1_1pgplottingframe_1_1PGPlottingFrameRegressionLinesFromFileManager_a43f26409c5015ce16d878640d4b588d7}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}A child of class PGPlottingFrame2DLinesFromFileManager, this class plots data using 
+the data from a NeEstimationTableFileManager object, but processed through
+class PGRegresser to plot regression lines instead of a simple plotting of
+the x and y data points.  It further multiplexes the parent class data updates so
+that the date is grouped for each possible x-value. Thus essential difference 
+from the parent class is the both multiplexing processing of the x,y line data  
+delivered by the parent's "__update_data_from_file"  and then regressing on 
+the multi lines in def," __convert_tsv_line_data_to_regression_data."
+\end{DoxyVerb}
+ 
+
+Definition at line 610 of file pgplottingframe.\+py.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgplottingframe.\+py\end{DoxyCompactItemize}

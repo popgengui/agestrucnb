@@ -1,0 +1,234 @@
+\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts}{}\section{negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts Class Reference}
+\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts}\index{negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts@{negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts}}
+Inheritance diagram for negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+genepopfilemanager, o\+\_\+genepopfilesampleparams)\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_ab997e641e99278377a07624ad847a697}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_ab997e641e99278377a07624ad847a697}
+
+\item 
+def \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a28deaac6347b19f565b2a50f233a6f06}{resize\+\_\+sample\+\_\+to\+\_\+meet\+\_\+size\+\_\+criteria} (self, li\+\_\+indiv\+\_\+by\+\_\+age\+\_\+collected)
+\item 
+def \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a50e96ddae763e7e8dba2ac37fa0c6ce5}{do\+Sample} (self)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This sampler class is meant to implement Tiago's sampling code in his
+sampleIndivsCohort.py module.  It samples  individuals grouped by age.
+The GenepopFileSampleParams object used by instances
+of this class has the values Tiagos module takes at the command line 
+that restrict the total individuals per gen.  His command line params 
+startGen and endGen paramters are already implemented via the Sampler's
+li_population_numbers parameter.
+\end{DoxyVerb}
+ 
+
+Definition at line 1103 of file genepopfilesampler.\+py.
+
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts}!do\+Sample@{do\+Sample}}
+\index{do\+Sample@{do\+Sample}!negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts}}
+\subsubsection[{\texorpdfstring{do\+Sample(self)}{doSample(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts.\+do\+Sample (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a50e96ddae763e7e8dba2ac37fa0c6ce5}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a50e96ddae763e7e8dba2ac37fa0c6ce5}
+\begin{DoxyVerb}Sample identical numbers per age, then reduce to meet max indiv per gen or proportion.  
+See Tiagos code in his sampleIndivsCohort.py module.  Note that when param "lp" is 
+included, then Tiagos code adds to his lines that print out, gen_number\sindiv, the same lines
+without a gen number, presumably for downstream filtering when making the final
+genenpop file. As of 2016_09_12, the output when the "lp" arg is added, is not 
+implemented.
+\end{DoxyVerb}
+ 
+
+Definition at line 1197 of file genepopfilesampler.\+py.
+
+
+\begin{DoxyCode}
+1197     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a50e96ddae763e7e8dba2ac37fa0c6ce5}{doSample}( self ):
+1198         \textcolor{stringliteral}{'''}
+1199 \textcolor{stringliteral}{        Sample identical numbers per age, then reduce to meet max indiv per gen or proportion.  }
+1200 \textcolor{stringliteral}{        See Tiagos code in his sampleIndivsCohort.py module.  Note that when param "lp" is }
+1201 \textcolor{stringliteral}{        included, then Tiagos code adds to his lines that print out, gen\_number\(\backslash\)sindiv, the same lines}
+1202 \textcolor{stringliteral}{        without a gen number, presumably for downstream filtering when making the final}
+1203 \textcolor{stringliteral}{        genenpop file. As of 2016\_09\_12, the output when the "lp" arg is added, is not }
+1204 \textcolor{stringliteral}{        implemented.}
+1205 \textcolor{stringliteral}{        '''}
+1206 
+1207         \textcolor{comment}{#estimator driver needs a pop number subsample when it adds calls to the NeEstimator:}
+1208         self.filemanager.subsamplePopulationsByList( self.sampleparams.population\_numbers,
+1209                                         s\_subsample\_tag=self.sampleparams.population\_subsample\_name )
+1210 
+1211         FIELD\_NAME\_AGE=\textcolor{stringliteral}{"age"}
+1212 
+1213         dli\_indiv\_index\_lists\_by\_pop\_number=\{\}
+1214         
+1215         i\_replicate\_count=self.sampleparams.replicates
+1216 
+1217         \textcolor{keywordflow}{for} i\_replicate\_number \textcolor{keywordflow}{in} range( i\_replicate\_count ):
+1218 
+1219             \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} self.sampleparams.population\_numbers:
+1220 
+1221                 ls\_id\_list=self.filemanager.getListIndividuals( i\_pop\_number )
+1222 
+1223                 \textcolor{stringliteral}{'''}
+1224 \textcolor{stringliteral}{                We assume that the list of Id's in the individual list}
+1225 \textcolor{stringliteral}{                is indexed such that the zeroth id corresponds to the first}
+1226 \textcolor{stringliteral}{                indiv as ordered in the genepop file, the [1] indexed id}
+1227 \textcolor{stringliteral}{                is the second indiv, etc.}
+1228 \textcolor{stringliteral}{                '''}
+1229                 i\_tot\_indiv=len( ls\_id\_list )
+1230 
+1231                 dli\_indiv\_index\_by\_age=\{\}
+1232                 
+1233                 \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( i\_tot\_indiv ):
+1234 
+1235                     s\_id=ls\_id\_list[ idx ]
+1236 
+1237                     o\_id\_vals=GenepopIndivIdVals( s\_id, 
+1238                                         self.sampleparams.fields )
+1239                     
+1240                     \textcolor{comment}{#age may be float or int:}
+1241                     v\_age=o\_id\_vals.getVal( FIELD\_NAME\_AGE )
+1242 
+1243                     \textcolor{keywordflow}{if} v\_age > self.sampleparams.max\_age:
+1244                         \textcolor{keywordflow}{continue}
+1245                     \textcolor{comment}{#end if too old, continue}
+1246 
+1247                     \textcolor{stringliteral}{'''}
+1248 \textcolor{stringliteral}{                    Note that idx+1 gives the number of the individual as ordered by its}
+1249 \textcolor{stringliteral}{                    entry in the "pop" section of this pop in the genepop file, as used}
+1250 \textcolor{stringliteral}{                    by the genepopfilemanager object to point to it's byte address in the file.}
+1251 \textcolor{stringliteral}{                    Thus it's our way of collecting samples of individuals and passing them into the}
+1252 \textcolor{stringliteral}{                    genepop file manager object's subsampling records (its attribute }
+1253 \textcolor{stringliteral}{                    \_\_indiv\_subsamples).}
+1254 \textcolor{stringliteral}{                    '''}
+1255 
+1256                     i\_indiv\_number=idx+1
+1257 
+1258                     dli\_indiv\_index\_by\_age.setdefault( \(\backslash\)
+1259                                 v\_age, [] ).append( i\_indiv\_number ) 
+1260 
+1261                 \textcolor{comment}{#end for each individual's id   }
+1262 
+1263                 li\_indiv\_by\_age\_collected=self.\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a7c5c9e3e3aeb9c9c25c95029781e63d1}{\_\_get\_individuals}( \(\backslash\)
+1264                                                 dli\_indiv\_index\_by\_age ) 
+1265             
+1266                 \textcolor{stringliteral}{'''}
+1267 \textcolor{stringliteral}{                Resize the sample if it exceeds size limits (as given by}
+1268 \textcolor{stringliteral}{                min,max, or, in the case of a proportionaly sampling scheme}
+1269 \textcolor{stringliteral}{                (subclass GenepopFileSamplerIndividualsAgeStructureCohortsPercentage),}
+1270 \textcolor{stringliteral}{                subsample a proportion.  Note that these lists will be sorted by the}
+1271 \textcolor{stringliteral}{                GenepopFileManager in the subsampleIndividualsByNumberList call}
+1272 \textcolor{stringliteral}{                below.}
+1273 \textcolor{stringliteral}{                '''}
+1274 
+1275                 li\_indiv\_by\_age\_sampled=self.\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a28deaac6347b19f565b2a50f233a6f06}{resize\_sample\_to\_meet\_size\_criteria}
+      ( 
+1276                                                             li\_indiv\_by\_age\_collected ) 
+1277 
+1278 
+1279                 \textcolor{comment}{#We rely on the genpopfilemanager object to sort }
+1280                 \textcolor{comment}{#these indices when we pass them to the def,}
+1281                 \textcolor{comment}{#subsampleIndividualsByNumberList (see below).}
+1282                 dli\_indiv\_index\_lists\_by\_pop\_number[ i\_pop\_number ] = \(\backslash\)
+1283                                                     li\_indiv\_by\_age\_sampled
+1284             \textcolor{comment}{#end for each pop number}
+1285             
+1286             s\_this\_subsample\_name=make\_subsample\_tag( \(\backslash\)
+1287                                 self.sampleparams.sample\_param\_value, 
+1288                                 i\_replicate\_number, 
+1289                                 SCHEME\_COHORTS,
+1290                                 s\_prefix=self.sampleparams.sample\_tag\_base )
+1291             
+1292             self.filemanager.subsampleIndividualsByNumberList( \(\backslash\)
+1293                                     dli\_indiv\_index\_lists\_by\_pop\_number,
+1294                                     s\_this\_subsample\_name )
+1295 
+1296         \textcolor{comment}{#end for each replicate}
+1297         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+\index{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts}!resize\+\_\+sample\+\_\+to\+\_\+meet\+\_\+size\+\_\+criteria@{resize\+\_\+sample\+\_\+to\+\_\+meet\+\_\+size\+\_\+criteria}}
+\index{resize\+\_\+sample\+\_\+to\+\_\+meet\+\_\+size\+\_\+criteria@{resize\+\_\+sample\+\_\+to\+\_\+meet\+\_\+size\+\_\+criteria}!negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts}}
+\subsubsection[{\texorpdfstring{resize\+\_\+sample\+\_\+to\+\_\+meet\+\_\+size\+\_\+criteria(self, li\+\_\+indiv\+\_\+by\+\_\+age\+\_\+collected)}{resize_sample_to_meet_size_criteria(self, li_indiv_by_age_collected)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Cohorts.\+resize\+\_\+sample\+\_\+to\+\_\+meet\+\_\+size\+\_\+criteria (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{li\+\_\+indiv\+\_\+by\+\_\+age\+\_\+collected}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a28deaac6347b19f565b2a50f233a6f06}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a28deaac6347b19f565b2a50f233a6f06}
+\begin{DoxyVerb}Given the individuals collected by age, 
+check min/max limits and subsample
+if needed.  If within limits, return
+the original list
+\end{DoxyVerb}
+ 
+
+Definition at line 1146 of file genepopfilesampler.\+py.
+
+
+\begin{DoxyCode}
+1146     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts_a28deaac6347b19f565b2a50f233a6f06}{resize\_sample\_to\_meet\_size\_criteria}( self, 
+      li\_indiv\_by\_age\_collected ):
+1147         \textcolor{stringliteral}{'''}
+1148 \textcolor{stringliteral}{        Given the individuals collected by age, }
+1149 \textcolor{stringliteral}{        check min/max limits and subsample}
+1150 \textcolor{stringliteral}{        if needed.  If within limits, return}
+1151 \textcolor{stringliteral}{        the original list}
+1152 \textcolor{stringliteral}{        '''}
+1153 
+1154         \textcolor{comment}{#If too few we raise an error.  If too many we}
+1155         \textcolor{comment}{#randomly select to reach our max valid pop size}
+1156         i\_tot\_collected=len( li\_indiv\_by\_age\_collected )
+1157 
+1158         li\_indiv\_by\_age\_sampled=\textcolor{keywordtype}{None}
+1159 
+1160         \textcolor{keywordflow}{if} i\_tot\_collected < self.sampleparams.min\_indiv\_per\_gen:
+1161             s\_msg=\textcolor{stringliteral}{"In GenepopFileSamplerIndividualsAgeStructureCohorts instance, "} \(\backslash\)
+1162                     \textcolor{stringliteral}{"after sampling cohorts, total collected, "} \(\backslash\)
+1163                     + str( i\_tot\_collected ) \(\backslash\)
+1164                     + \textcolor{stringliteral}{", is less than the value given for "} \(\backslash\)
+1165                     + \textcolor{stringliteral}{"the minimum pop size, "} \(\backslash\)
+1166                     + str( self.sampleparams.min\_indiv\_per\_gen ) \(\backslash\)
+1167                     + \textcolor{stringliteral}{"."}
+1168             \textcolor{keywordflow}{raise} Exception ( s\_msg )
+1169 
+1170         \textcolor{keywordflow}{elif} i\_tot\_collected > self.sampleparams.max\_indiv\_per\_gen:
+1171             \textcolor{keywordflow}{try}:
+1172 
+1173                 li\_indiv\_by\_age\_sampled=random.sample( \(\backslash\)
+1174                                     li\_indiv\_by\_age\_collected,
+1175                                     self.sampleparams.max\_indiv\_per\_gen )
+1176                                         
+1177             \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} oex:
+1178                 s\_sample\_error\_msg= \(\backslash\)
+1179                     \textcolor{stringliteral}{"In GenepopFileSamplerIndividualsAgeStructureCohorts "} \(\backslash\)
+1180                         + \textcolor{stringliteral}{"instance, def resize\_sample\_to\_meet\_size\_criteria, "}  \(\backslash\)
+1181                         + \textcolor{stringliteral}{"random.sample failed on list of "} \(\backslash\)
+1182                         + str( len( li\_indiv\_by\_age\_collected ) ) \(\backslash\)
+1183                         + \textcolor{stringliteral}{" individuals.  Target total to be sampled: "} \(\backslash\)
+1184                         + str( self.sampleparams.max\_indiv\_per\_gen ) + \textcolor{stringliteral}{"."}
+1185                 s\_msg=s\_sample\_error\_msg \(\backslash\)
+1186                         + \textcolor{stringliteral}{"  Exception message: "} + str( oex ) + \textcolor{stringliteral}{"."}
+1187                 \textcolor{keywordflow}{raise} Exception( s\_msg )
+1188             \textcolor{comment}{#end try . . . except}
+1189         \textcolor{keywordflow}{else}:
+1190             \textcolor{comment}{#within interval min to max pop size, so keep original }
+1191             li\_indiv\_by\_age\_sampled=li\_indiv\_by\_age\_collected
+1192 
+1193         \textcolor{comment}{#end if too few, error, else if too many, sample, else no change}
+1194         \textcolor{keywordflow}{return} li\_indiv\_by\_age\_sampled
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+genepopfilesampler.\+py\end{DoxyCompactItemize}

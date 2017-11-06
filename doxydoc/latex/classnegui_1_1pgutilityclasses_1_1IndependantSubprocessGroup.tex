@@ -1,0 +1,43 @@
+\hypertarget{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup}{}\section{negui.\+pgutilityclasses.\+Independant\+Subprocess\+Group Class Reference}
+\label{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup}\index{negui.\+pgutilityclasses.\+Independant\+Subprocess\+Group@{negui.\+pgutilityclasses.\+Independant\+Subprocess\+Group}}
+Inheritance diagram for negui.\+pgutilityclasses.\+Independant\+Subprocess\+Group\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, lo\+\_\+subprocesses=\mbox{[}$\,$\mbox{]})\hypertarget{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup_ab847e4373b27ae8580a3036c6b91ee01}{}\label{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup_ab847e4373b27ae8580a3036c6b91ee01}
+
+\item 
+def {\bfseries add\+Subprocess} (self, o\+\_\+subprocess)\hypertarget{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup_afae1c628e1a6e7e719148864aeb9fb44}{}\label{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup_afae1c628e1a6e7e719148864aeb9fb44}
+
+\item 
+def {\bfseries get\+Total\+Alive} (self)\hypertarget{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup_ae0b95298715c71ad27fbb50a5c96cdc9}{}\label{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup_ae0b95298715c71ad27fbb50a5c96cdc9}
+
+\item 
+def {\bfseries terminate\+All\+Subprocesses} (self)\hypertarget{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup_a9a9608d560b556d3ea8635832ca7bf87}{}\label{classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup_a9a9608d560b556d3ea8635832ca7bf87}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Minimal Revision of class independantProcessGroup   
+to operate on python subprocess.Popen proccesses.
+
+The main changes include use of kill() instead of 
+terminate in def terminateAllSubprocesses() and
+use poll() (is None) instead of is_alive() to get
+a count of living processes
+\end{DoxyVerb}
+ 
+
+Definition at line 77 of file pgutilityclasses.\+py.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgutilityclasses.\+py\end{DoxyCompactItemize}

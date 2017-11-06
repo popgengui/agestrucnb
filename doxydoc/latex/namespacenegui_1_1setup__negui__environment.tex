@@ -1,0 +1,319 @@
+\hypertarget{namespacenegui_1_1setup__negui__environment}{}\section{negui.\+setup\+\_\+negui\+\_\+environment Namespace Reference}
+\label{namespacenegui_1_1setup__negui__environment}\index{negui.\+setup\+\_\+negui\+\_\+environment@{negui.\+setup\+\_\+negui\+\_\+environment}}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacenegui_1_1setup__negui__environment_a3dc373e848bd3191a1850e9885990e55}{looks\+\_\+like\+\_\+correct\+\_\+program\+\_\+directory} (s\+\_\+path)
+\item 
+def \hyperlink{namespacenegui_1_1setup__negui__environment_a6fe75d5a25f049e0922770c01800bf0f}{resources\+\_\+files\+\_\+are\+\_\+found} (s\+\_\+path)
+\item 
+def {\bfseries negui\+\_\+dir\+\_\+already\+\_\+in\+\_\+env} ()\hypertarget{namespacenegui_1_1setup__negui__environment_a21e603d4e977920cbd11bc02ffb23a36}{}\label{namespacenegui_1_1setup__negui__environment_a21e603d4e977920cbd11bc02ffb23a36}
+
+\item 
+def \hyperlink{namespacenegui_1_1setup__negui__environment_aaedbf956380dc5707c61769abf071c40}{remove\+\_\+any\+\_\+negui\+\_\+program\+\_\+directories\+\_\+from\+\_\+pythonpath} ()
+\item 
+def \hyperlink{namespacenegui_1_1setup__negui__environment_a22a2451db03931ad081654ab38ad0469}{setup\+\_\+environment} (s\+\_\+use\+\_\+path=None)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bfseries U\+S\+E\+\_\+\+G\+U\+I\+\_\+\+E\+R\+R\+O\+R\+\_\+\+M\+E\+S\+S\+A\+G\+I\+NG} = True\hypertarget{namespacenegui_1_1setup__negui__environment_a19b892bf74753eedb02f9e1f46e7f210}{}\label{namespacenegui_1_1setup__negui__environment_a19b892bf74753eedb02f9e1f46e7f210}
+
+\item 
+string {\bfseries V\+A\+R\+P\+Y\+P\+A\+TH} = \char`\"{}P\+Y\+T\+H\+O\+N\+P\+A\+TH\char`\"{}\hypertarget{namespacenegui_1_1setup__negui__environment_a4806870c6e5c9723337da87f5fbf950f}{}\label{namespacenegui_1_1setup__negui__environment_a4806870c6e5c9723337da87f5fbf950f}
+
+\item 
+string {\bfseries V\+A\+R\+P\+A\+TH} = \char`\"{}P\+A\+TH\char`\"{}\hypertarget{namespacenegui_1_1setup__negui__environment_ac126312749bca284ae7b870e89e3b270}{}\label{namespacenegui_1_1setup__negui__environment_ac126312749bca284ae7b870e89e3b270}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Description
+\end{DoxyVerb}
+ 
+
+\subsection{Function Documentation}
+\index{negui\+::setup\+\_\+negui\+\_\+environment@{negui\+::setup\+\_\+negui\+\_\+environment}!looks\+\_\+like\+\_\+correct\+\_\+program\+\_\+directory@{looks\+\_\+like\+\_\+correct\+\_\+program\+\_\+directory}}
+\index{looks\+\_\+like\+\_\+correct\+\_\+program\+\_\+directory@{looks\+\_\+like\+\_\+correct\+\_\+program\+\_\+directory}!negui\+::setup\+\_\+negui\+\_\+environment@{negui\+::setup\+\_\+negui\+\_\+environment}}
+\subsubsection[{\texorpdfstring{looks\+\_\+like\+\_\+correct\+\_\+program\+\_\+directory(s\+\_\+path)}{looks_like_correct_program_directory(s_path)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+setup\+\_\+negui\+\_\+environment.\+looks\+\_\+like\+\_\+correct\+\_\+program\+\_\+directory (
+\begin{DoxyParamCaption}
+\item[{}]{s\+\_\+path}
+\end{DoxyParamCaption}
+)}\hypertarget{namespacenegui_1_1setup__negui__environment_a3dc373e848bd3191a1850e9885990e55}{}\label{namespacenegui_1_1setup__negui__environment_a3dc373e848bd3191a1850e9885990e55}
+\begin{DoxyVerb}A check that the arg s_path gives the correct one in which
+the negui program is installed.
+\end{DoxyVerb}
+ 
+
+Definition at line 41 of file setup\+\_\+negui\+\_\+environment.\+py.
+
+
+\begin{DoxyCode}
+41 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1setup__negui__environment_a3dc373e848bd3191a1850e9885990e55}{looks\_like\_correct\_program\_directory}( s\_path ):
+42     \textcolor{stringliteral}{'''}
+43 \textcolor{stringliteral}{    A check that the arg s\_path gives the correct one in which}
+44 \textcolor{stringliteral}{    the negui program is installed.}
+45 \textcolor{stringliteral}{    '''}
+46 
+47     b\_result\_value=\textcolor{keyword}{True}
+48 
+49     s\_msg=\textcolor{stringliteral}{""}
+50 
+51     \textcolor{stringliteral}{'''}
+52 \textcolor{stringliteral}{    A list of files whose presence}
+53 \textcolor{stringliteral}{    we'll consider sufficient to infer}
+54 \textcolor{stringliteral}{    the arg has the correct path to the}
+55 \textcolor{stringliteral}{    full program installation.}
+56 \textcolor{stringliteral}{    '''}
+57     ls\_filenames\_indicating\_correct\_directory=[ \(\backslash\)
+58                                         \textcolor{stringliteral}{"negui.py"},
+59                                         \textcolor{stringliteral}{"pgguineestimator.py"},
+60                                         \textcolor{stringliteral}{"pgguisimupop.py"},
+61                                         \textcolor{stringliteral}{"pgguiutilities.py"},
+62                                         \textcolor{stringliteral}{"pghostnotebook.py"},
+63                                         \textcolor{stringliteral}{"pgutilities.py"} ]
+64 
+65     b\_path\_exists=os.isdir( s\_path )
+66 
+67     s\_path\_delimiter=os.sep
+68 
+69     \textcolor{keywordflow}{if} b\_path\_exists:
+70         \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_filenames\_indicating\_correct\_directory:
+71             s\_path\_and\_file=os.path.sep.join( [ s\_path, s\_file ] )
+72             \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} os.path.exists( s\_path\_and\_file ):
+73                 b\_result\_value=\textcolor{keyword}{False}
+74                 s\_msg=\textcolor{stringliteral}{"Looking for key program files, missing:, "} \(\backslash\)
+75                                                 + s\_path\_and\_file + \textcolor{stringliteral}{"."}
+76                 \textcolor{keywordflow}{break}
+77             \textcolor{comment}{#end if path does not exist, missing file}
+78         \textcolor{comment}{#end for each file }
+79     \textcolor{keywordflow}{else}:
+80         b\_result\_value=\textcolor{keyword}{False}
+81         s\_msg=\textcolor{stringliteral}{"Path, "} + s\_path + \textcolor{stringliteral}{", does not exist."}
+82     \textcolor{comment}{#end if path exists else not}
+83 
+84     \textcolor{keywordflow}{return} b\_result\_value, s\_msg
+85 \textcolor{comment}{#end looks\_like\_correct\_program\_directory}
+86 
+87 
+\end{DoxyCode}
+\index{negui\+::setup\+\_\+negui\+\_\+environment@{negui\+::setup\+\_\+negui\+\_\+environment}!remove\+\_\+any\+\_\+negui\+\_\+program\+\_\+directories\+\_\+from\+\_\+pythonpath@{remove\+\_\+any\+\_\+negui\+\_\+program\+\_\+directories\+\_\+from\+\_\+pythonpath}}
+\index{remove\+\_\+any\+\_\+negui\+\_\+program\+\_\+directories\+\_\+from\+\_\+pythonpath@{remove\+\_\+any\+\_\+negui\+\_\+program\+\_\+directories\+\_\+from\+\_\+pythonpath}!negui\+::setup\+\_\+negui\+\_\+environment@{negui\+::setup\+\_\+negui\+\_\+environment}}
+\subsubsection[{\texorpdfstring{remove\+\_\+any\+\_\+negui\+\_\+program\+\_\+directories\+\_\+from\+\_\+pythonpath()}{remove_any_negui_program_directories_from_pythonpath()}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+setup\+\_\+negui\+\_\+environment.\+remove\+\_\+any\+\_\+negui\+\_\+program\+\_\+directories\+\_\+from\+\_\+pythonpath (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{namespacenegui_1_1setup__negui__environment_aaedbf956380dc5707c61769abf071c40}{}\label{namespacenegui_1_1setup__negui__environment_aaedbf956380dc5707c61769abf071c40}
+\begin{DoxyVerb}Rebuilds the pythonpath environmental variable to 
+inlcude all current paths except those that look
+like negui program module directories (as evaluated
+above in def looks_like_correct_program_directory.
+
+Note that if the pythonpath environmental variable
+does not exist, this def simply returns.
+\end{DoxyVerb}
+ 
+
+Definition at line 161 of file setup\+\_\+negui\+\_\+environment.\+py.
+
+
+\begin{DoxyCode}
+161 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1setup__negui__environment_aaedbf956380dc5707c61769abf071c40}{remove\_any\_negui\_program\_directories\_from\_pythonpath}
+      ():
+162 
+163     \textcolor{stringliteral}{'''}
+164 \textcolor{stringliteral}{    Rebuilds the pythonpath environmental variable to }
+165 \textcolor{stringliteral}{    inlcude all current paths except those that look}
+166 \textcolor{stringliteral}{    like negui program module directories (as evaluated}
+167 \textcolor{stringliteral}{    above in def looks\_like\_correct\_program\_directory.}
+168 \textcolor{stringliteral}{}
+169 \textcolor{stringliteral}{    Note that if the pythonpath environmental variable}
+170 \textcolor{stringliteral}{    does not exist, this def simply returns.}
+171 \textcolor{stringliteral}{    '''}
+172     i\_total\_paths\_removed = 0
+173 
+174     \textcolor{keywordflow}{if} VARPYPATH \textcolor{keywordflow}{in} os.environ:
+175 
+176         ls\_python\_paths = os.environ[ VARPYPATH ].split( os.pathsep ) 
+177 
+178         ls\_paths\_to\_keep=[]
+179 
+180         \textcolor{keywordflow}{for} s\_dir \textcolor{keywordflow}{in} ls\_python\_paths:
+181             \textcolor{comment}{#We are only interested in whether the path}
+182             \textcolor{comment}{#looks like an negui installation}
+183             b\_looks\_like\_program\_dir, s\_progdir\_msg = \(\backslash\)
+184                         looks\_like\_correct\_program\_directory ( s\_dir )
+185             \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} b\_looks\_like\_program\_dir:
+186                 ls\_paths\_to\_keep.append( s\_dir )
+187             \textcolor{comment}{#end if not an negui program dir}
+188         \textcolor{comment}{#end for each dir in python paths}
+189 
+190         \textcolor{comment}{#Now we reset the python path env variable}
+191         \textcolor{comment}{#with all of its current paths minus any}
+192         \textcolor{comment}{#that hold the negui modules:}
+193         s\_new\_pypath\_var\_value=os.pathsep.join( ls\_paths\_to\_keep )
+194 
+195         os.environ[ VARPYPATH ]=s\_new\_pypath\_var\_value
+196     \textcolor{comment}{#end if there is a python path variable}
+197     \textcolor{keywordflow}{return}
+198 \textcolor{comment}{#end remove\_any\_negui\_program\_directories\_in\_pythonpath}
+199 
+\end{DoxyCode}
+\index{negui\+::setup\+\_\+negui\+\_\+environment@{negui\+::setup\+\_\+negui\+\_\+environment}!resources\+\_\+files\+\_\+are\+\_\+found@{resources\+\_\+files\+\_\+are\+\_\+found}}
+\index{resources\+\_\+files\+\_\+are\+\_\+found@{resources\+\_\+files\+\_\+are\+\_\+found}!negui\+::setup\+\_\+negui\+\_\+environment@{negui\+::setup\+\_\+negui\+\_\+environment}}
+\subsubsection[{\texorpdfstring{resources\+\_\+files\+\_\+are\+\_\+found(s\+\_\+path)}{resources_files_are_found(s_path)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+setup\+\_\+negui\+\_\+environment.\+resources\+\_\+files\+\_\+are\+\_\+found (
+\begin{DoxyParamCaption}
+\item[{}]{s\+\_\+path}
+\end{DoxyParamCaption}
+)}\hypertarget{namespacenegui_1_1setup__negui__environment_a6fe75d5a25f049e0922770c01800bf0f}{}\label{namespacenegui_1_1setup__negui__environment_a6fe75d5a25f049e0922770c01800bf0f}
+\begin{DoxyVerb}We look for the correct resources 
+subdirectory, and then check for important
+resource files.
+\end{DoxyVerb}
+ 
+
+Definition at line 88 of file setup\+\_\+negui\+\_\+environment.\+py.
+
+
+\begin{DoxyCode}
+88 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1setup__negui__environment_a6fe75d5a25f049e0922770c01800bf0f}{resources\_files\_are\_found}( s\_path ):
+89     \textcolor{stringliteral}{'''}
+90 \textcolor{stringliteral}{    We look for the correct resources }
+91 \textcolor{stringliteral}{    subdirectory, and then check for important}
+92 \textcolor{stringliteral}{    resource files.}
+93 \textcolor{stringliteral}{    '''}
+94 
+95     RESOURCES\_DIR\_NAME=\textcolor{stringliteral}{"resources"}
+96 
+97     ls\_important\_resource\_files=[ \(\backslash\)
+98                 \textcolor{stringliteral}{"lineregress.param.names"},
+99                 \textcolor{stringliteral}{"neestimation.param.names"},
+100                 \textcolor{stringliteral}{"simupop.param.names"},
+101                 \textcolor{stringliteral}{"viz.param.names"},
+102                 \textcolor{stringliteral}{"menu\_main\_interface.txt"} ]
+103     s\_msg=\textcolor{stringliteral}{""}
+104     b\_result\_value=\textcolor{keyword}{True}
+105     s\_path\_and\_dir=os.path.sep.join( [ s\_path, RESOURCES\_DIR\_NAME ] )   
+106     b\_resources\_dir\_exits=os.isdir( s\_path\_and\_dir )
+107 
+108     \textcolor{keywordflow}{if} b\_resources\_dir\_exits:
+109         \textcolor{keywordflow}{for} s\_file \textcolor{keywordflow}{in} ls\_important\_resource\_files:
+110             s\_path\_and\_file=os.path.sep.join( [ s\_path\_and\_dir, s\_file ] )
+111             \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} os.path.exists( s\_path\_and\_file ):
+112                 s\_msg=\textcolor{stringliteral}{"Looking for resource files, missing: "} \(\backslash\)
+113                                                 + s\_path\_and\_file + \textcolor{stringliteral}{"."}
+114                 b\_result\_value=\textcolor{keyword}{False}
+115                 \textcolor{keywordflow}{break}
+116             \textcolor{comment}{#end if path does not exist}
+117         \textcolor{comment}{#end for each file}
+118     \textcolor{keywordflow}{else}:
+119         b\_result\_value=\textcolor{keyword}{False}
+120         s\_msg=\textcolor{stringliteral}{"Looking for resource directory, path does not exist: "} \(\backslash\)
+121                                                         + s\_path\_and\_dir \(\backslash\)
+122                                                         + \textcolor{stringliteral}{"."}
+123     \textcolor{comment}{#end if resources dir exists, else not}
+124             
+125     \textcolor{keywordflow}{return}
+126 \textcolor{comment}{#end resources\_files\_are\_found}
+127 
+\end{DoxyCode}
+\index{negui\+::setup\+\_\+negui\+\_\+environment@{negui\+::setup\+\_\+negui\+\_\+environment}!setup\+\_\+environment@{setup\+\_\+environment}}
+\index{setup\+\_\+environment@{setup\+\_\+environment}!negui\+::setup\+\_\+negui\+\_\+environment@{negui\+::setup\+\_\+negui\+\_\+environment}}
+\subsubsection[{\texorpdfstring{setup\+\_\+environment(s\+\_\+use\+\_\+path=\+None)}{setup_environment(s_use_path=None)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+setup\+\_\+negui\+\_\+environment.\+setup\+\_\+environment (
+\begin{DoxyParamCaption}
+\item[{}]{s\+\_\+use\+\_\+path = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}\hypertarget{namespacenegui_1_1setup__negui__environment_a22a2451db03931ad081654ab38ad0469}{}\label{namespacenegui_1_1setup__negui__environment_a22a2451db03931ad081654ab38ad0469}
+\begin{DoxyVerb}We use this def to add to the PYTHONPATH var
+the correct path to the negui modules, which 
+are assumed to be complete and in one directory,
+with resrouces *param.names files and the main
+menu config file present in the resources sub
+directory.
+\end{DoxyVerb}
+ 
+
+Definition at line 200 of file setup\+\_\+negui\+\_\+environment.\+py.
+
+
+\begin{DoxyCode}
+200 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1setup__negui__environment_a22a2451db03931ad081654ab38ad0469}{setup\_environment}( s\_use\_path=None ):
+201     \textcolor{stringliteral}{'''}
+202 \textcolor{stringliteral}{    We use this def to add to the PYTHONPATH var}
+203 \textcolor{stringliteral}{    the correct path to the negui modules, which }
+204 \textcolor{stringliteral}{    are assumed to be complete and in one directory,}
+205 \textcolor{stringliteral}{    with resrouces *param.names files and the main}
+206 \textcolor{stringliteral}{    menu config file present in the resources sub}
+207 \textcolor{stringliteral}{    directory.}
+208 \textcolor{stringliteral}{    '''}
+209 
+210     s\_program\_directory=os.path.dirname( os.path.abspath(\_\_file\_\_) )
+211 
+212     \textcolor{stringliteral}{'''}
+213 \textcolor{stringliteral}{    If the caller gave us a path, we use that instead}
+214 \textcolor{stringliteral}{    of the directory in which this mod resides.}
+215 \textcolor{stringliteral}{    '''}
+216     \textcolor{keywordflow}{if} s\_use\_path \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+217         s\_program\_directory=s\_use\_path
+218     \textcolor{comment}{#end if caller passed a directory name}
+219 
+220     b\_path\_looks\_like\_program\_dir, s\_program\_dir\_msg = \(\backslash\)
+221             \hyperlink{namespacenegui_1_1setup__negui__environment_a3dc373e848bd3191a1850e9885990e55}{looks\_like\_correct\_program\_directory}( s\_program\_directory )
+222 
+223     \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} b\_path\_looks\_like\_program\_dir:
+224         s\_msg=\textcolor{stringliteral}{"In module setup\_negui\_environment, "} \(\backslash\)
+225                         + \textcolor{stringliteral}{"def setup\_environment, "} \(\backslash\)
+226                         + \textcolor{stringliteral}{"failed to find correct "} \(\backslash\)
+227                         + \textcolor{stringliteral}{"program directory.  Message: "} \(\backslash\)
+228                         + s\_program\_dir\_msg 
+229         \textcolor{keywordflow}{if} USE\_GUI\_ERROR\_MESSAGING:
+230             pgge( \textcolor{keywordtype}{None}, s\_msg )
+231         \textcolor{comment}{#end if use gui}
+232 
+233         \textcolor{keywordflow}{raise} Exception( s\_msg )
+234     \textcolor{comment}{#end if not path looks like program dir}
+235 
+236     b\_resources\_found, s\_resources\_check\_msg = \(\backslash\)
+237             \hyperlink{namespacenegui_1_1setup__negui__environment_a6fe75d5a25f049e0922770c01800bf0f}{resources\_files\_are\_found}( s\_program\_directory )
+238 
+239     \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} b\_resources\_found:
+240         s\_msg=\textcolor{stringliteral}{"In module setup\_negui\_environment, "} \(\backslash\)
+241                         + \textcolor{stringliteral}{"def setup\_environment, "} \(\backslash\)
+242                         + \textcolor{stringliteral}{"failed to find resources files "} \(\backslash\)
+243                         + \textcolor{stringliteral}{"Message: "} +  s\_resources\_check\_msg 
+244         \textcolor{keywordflow}{if} USE\_GUI\_ERROR\_MESSAGING:
+245             pgge( \textcolor{keywordtype}{None}, s\_msg )
+246         \textcolor{comment}{#end if use gui messaging}
+247         \textcolor{keywordflow}{raise} Exception( s\_msg )
+248     \textcolor{comment}{#end if resources not found}
+249 
+250     b\_negui\_already\_in\_path, s\_negui\_dir\_present\_msg = \(\backslash\)
+251                     negui\_dir\_already\_in\_env()
+252 
+253     \textcolor{keywordflow}{if} b\_negui\_already\_in\_path:
+254         s\_msg=\textcolor{stringliteral}{"Warning: the program was inferred to already "} \(\backslash\)
+255                         + \textcolor{stringliteral}{"exist in one or more paths: "} \(\backslash\)
+256                         + s\_negui\_dir\_present\_msg \(\backslash\)
+257                         + \textcolor{stringliteral}{"\(\backslash\)nFor the current run the program used will be "} \(\backslash\)
+258                         + \textcolor{stringliteral}{"the installation at, "}  + s\_program\_directory
+259         \textcolor{keywordflow}{if} USE\_GUI\_ERROR\_MESSAGING:
+260             pggw( \textcolor{keywordtype}{None}, s\_msg )
+261         \textcolor{comment}{#end if use gui}
+262         sys.stderr.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
+263 
+264         \textcolor{comment}{#we want only the current installation to be used:}
+265         \hyperlink{namespacenegui_1_1setup__negui__environment_aaedbf956380dc5707c61769abf071c40}{remove\_any\_negui\_program\_directories\_from\_pythonpath}
+      ()
+266     \textcolor{comment}{#end if we find the program already in one or more}
+267     \textcolor{comment}{#pythonpath values}
+268 
+269     \textcolor{comment}{#We add the current program directory to the pythonpath}
+270     \textcolor{comment}{#environmental variable.}
+271     s\_new\_pypath\_value=os.pathsep.join( [ os.environ[ VARPYPATH ], s\_program\_directory ] )
+272     os.environ[ VARPYPATH ]=s\_new\_pypath\_var\_value
+273         
+274     \textcolor{keywordflow}{return} 
+275 \textcolor{comment}{#end setup\_environement}
+276 
+\end{DoxyCode}

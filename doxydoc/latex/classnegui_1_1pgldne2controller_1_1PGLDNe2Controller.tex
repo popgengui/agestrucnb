@@ -1,0 +1,139 @@
+\hypertarget{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller}{}\section{negui.\+pgldne2controller.\+P\+G\+L\+D\+Ne2\+Controller Class Reference}
+\label{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller}\index{negui.\+pgldne2controller.\+P\+G\+L\+D\+Ne2\+Controller@{negui.\+pgldne2controller.\+P\+G\+L\+D\+Ne2\+Controller}}
+Inheritance diagram for negui.\+pgldne2controller.\+P\+G\+L\+D\+Ne2\+Controller\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+executable\+\_\+and\+\_\+path=None, dv\+\_\+params=None)\hypertarget{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a1f021499dd715ba16eee893c7d904059}{}\label{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a1f021499dd715ba16eee893c7d904059}
+
+\item 
+def {\bfseries run\+With\+Common\+Values} (self)\hypertarget{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a1b95e9adb250015f53209507fd315e51}{}\label{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a1b95e9adb250015f53209507fd315e51}
+
+\item 
+def \hyperlink{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_aed495f4f2eed9691295b239e6dcf16ba}{run\+With\+Ne\+Estimator\+Params} (self, s\+\_\+in\+\_\+dir, s\+\_\+gen\+\_\+file, s\+\_\+out\+\_\+dir, s\+\_\+out\+\_\+file, crits=None, LD=True, hets=False, coanc=False, temp=None, monogamy=False, options=None)
+\item 
+def {\bfseries set\+Common\+Value} (self, s\+\_\+common\+\_\+value\+\_\+name, v\+\_\+value)\hypertarget{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a5ee0c7f2d6e24e61aab72001c5ff42ee}{}\label{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a5ee0c7f2d6e24e61aab72001c5ff42ee}
+
+\item 
+def {\bfseries set\+Common\+Values} (self, dv\+\_\+values\+\_\+by\+\_\+param\+\_\+name)\hypertarget{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a6e7ba348c191706f364f1d9eb2bed120}{}\label{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a6e7ba348c191706f364f1d9eb2bed120}
+
+\item 
+def {\bfseries set\+Common\+Values\+From\+Ne\+Estimator\+Params} (self, dv\+\_\+neestimator\+\_\+params)\hypertarget{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a3db1e4decab081138dc09c6302c79b18}{}\label{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a3db1e4decab081138dc09c6302c79b18}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}2017_03_15
+Wrapper to execute the program LDNE2.  This is to be used
+by pgopneestimator.py in the same way it uses the pygenomics 
+class genomics.popgen.ne2.controller.py class called 
+NeEstimator2Controller.  This class has has a def called
+runWithNeEstimatorParams which takes the same set of 
+paramaters as does the pygenomcis controller,
+but of course only uses those it shares with the latter class,
+in order to call the LDNe2 executable with a suitable config 
+file.  See class in module pgopneestimator.py for how objects
+of this class are used instead of the NeEstimator2Controller
+class objects.
+\end{DoxyVerb}
+ 
+
+Definition at line 73 of file pgldne2controller.\+py.
+
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::pgldne2controller\+::\+P\+G\+L\+D\+Ne2\+Controller@{negui\+::pgldne2controller\+::\+P\+G\+L\+D\+Ne2\+Controller}!run\+With\+Ne\+Estimator\+Params@{run\+With\+Ne\+Estimator\+Params}}
+\index{run\+With\+Ne\+Estimator\+Params@{run\+With\+Ne\+Estimator\+Params}!negui\+::pgldne2controller\+::\+P\+G\+L\+D\+Ne2\+Controller@{negui\+::pgldne2controller\+::\+P\+G\+L\+D\+Ne2\+Controller}}
+\subsubsection[{\texorpdfstring{run\+With\+Ne\+Estimator\+Params(self, s\+\_\+in\+\_\+dir, s\+\_\+gen\+\_\+file, s\+\_\+out\+\_\+dir, s\+\_\+out\+\_\+file, crits=\+None, L\+D=\+True, hets=\+False, coanc=\+False, temp=\+None, monogamy=\+False, options=\+None)}{runWithNeEstimatorParams(self, s_in_dir, s_gen_file, s_out_dir, s_out_file, crits=None, LD=True, hets=False, coanc=False, temp=None, monogamy=False, options=None)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgldne2controller.\+P\+G\+L\+D\+Ne2\+Controller.\+run\+With\+Ne\+Estimator\+Params (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{s\+\_\+in\+\_\+dir, }
+\item[{}]{s\+\_\+gen\+\_\+file, }
+\item[{}]{s\+\_\+out\+\_\+dir, }
+\item[{}]{s\+\_\+out\+\_\+file, }
+\item[{}]{crits = {\ttfamily None}, }
+\item[{}]{LD = {\ttfamily True}, }
+\item[{}]{hets = {\ttfamily False}, }
+\item[{}]{coanc = {\ttfamily False}, }
+\item[{}]{temp = {\ttfamily None}, }
+\item[{}]{monogamy = {\ttfamily False}, }
+\item[{}]{options = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_aed495f4f2eed9691295b239e6dcf16ba}{}\label{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_aed495f4f2eed9691295b239e6dcf16ba}
+\begin{DoxyVerb}2017_03_15.  We are adding this class as a means to do LDNe2 as an alternatve to 
+running NeEstimator using Tiago's NeEstimator2Controller in his module 
+genomics/popgen/ne2/controller.py, and want to change the client class (PGOpNeEstimator)
+interface in PGOpNeEstimator instances as little as possible, and retain its ability
+to do the original operations.  So, we are keeping the signature  def identical to that in 
+Tiago's class def "run".
+
+I am also (currently) allowing the same set of options that clients of NeEstimator2Controller
+send into this def, to be sent here.  I will convert those applicable to LDNe (there will
+be some (most of them) not applicable, but unique to NeEstimator), in a special def call, 
+that will also update, where applicable, this objects set of parameter values.
+
+From Tiago's def "run":
+Args:
+    in_dir: The input directory
+    gen_file The genepop file
+    out_dir: The output directory
+    out_file Where the output will be stored
+    LD: Do LD method
+    hets: Do excessive heterozygosity
+    coanc: Do Molecular coancestry
+    temp: List of generations for the temporal method (None = Not do)\end{DoxyVerb}
+ 
+
+Definition at line 316 of file pgldne2controller.\+py.
+
+
+\begin{DoxyCode}
+316                     monogamy=\textcolor{keyword}{False}, options=\textcolor{keywordtype}{None} ):
+317 
+318         \textcolor{stringliteral}{'''}
+319 \textcolor{stringliteral}{        2017\_03\_15.  We are adding this class as a means to do LDNe2 as an alternatve to }
+320 \textcolor{stringliteral}{        running NeEstimator using Tiago's NeEstimator2Controller in his module }
+321 \textcolor{stringliteral}{        genomics/popgen/ne2/controller.py, and want to change the client class (PGOpNeEstimator)}
+322 \textcolor{stringliteral}{        interface in PGOpNeEstimator instances as little as possible, and retain its ability}
+323 \textcolor{stringliteral}{        to do the original operations.  So, we are keeping the signature  def identical to that in }
+324 \textcolor{stringliteral}{        Tiago's class def "run".}
+325 \textcolor{stringliteral}{}
+326 \textcolor{stringliteral}{        I am also (currently) allowing the same set of options that clients of NeEstimator2Controller}
+327 \textcolor{stringliteral}{        send into this def, to be sent here.  I will convert those applicable to LDNe (there will}
+328 \textcolor{stringliteral}{        be some (most of them) not applicable, but unique to NeEstimator), in a special def call, }
+329 \textcolor{stringliteral}{        that will also update, where applicable, this objects set of parameter values.}
+330 \textcolor{stringliteral}{        }
+331 \textcolor{stringliteral}{        From Tiago's def "run":}
+332 \textcolor{stringliteral}{        Args:}
+333 \textcolor{stringliteral}{            in\_dir: The input directory}
+334 \textcolor{stringliteral}{            gen\_file The genepop file}
+335 \textcolor{stringliteral}{            out\_dir: The output directory}
+336 \textcolor{stringliteral}{            out\_file Where the output will be stored}
+337 \textcolor{stringliteral}{            LD: Do LD method}
+338 \textcolor{stringliteral}{            hets: Do excessive heterozygosity}
+339 \textcolor{stringliteral}{            coanc: Do Molecular coancestry}
+340 \textcolor{stringliteral}{            temp: List of generations for the temporal method (None = Not do)}
+341 \textcolor{stringliteral}{}
+342 \textcolor{stringliteral}{        '''}
+343 
+344         self.\hyperlink{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a3e79d1ce0867cd1ad29b611bcf9b659a}{\_\_update\_ldne2\_values\_with\_applicable\_neestimator\_values}
+      (  s\_in\_dir, s\_gen\_file, 
+345                                                                         s\_out\_dir, s\_out\_file, 
+346                                                                         crits, LD, hets, coanc, 
+347                                                                         temp, monogamy, options )
+348         self.\hyperlink{classnegui_1_1pgldne2controller_1_1PGLDNe2Controller_a1b95e9adb250015f53209507fd315e51}{runWithCommonValues}()           
+349 
+350         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgldne2controller.\+py\end{DoxyCompactItemize}

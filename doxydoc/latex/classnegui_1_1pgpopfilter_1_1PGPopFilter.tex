@@ -1,0 +1,128 @@
+\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter}{}\section{negui.\+pgpopfilter.\+P\+G\+Pop\+Filter Class Reference}
+\label{classnegui_1_1pgpopfilter_1_1PGPopFilter}\index{negui.\+pgpopfilter.\+P\+G\+Pop\+Filter@{negui.\+pgpopfilter.\+P\+G\+Pop\+Filter}}
+Inheritance diagram for negui.\+pgpopfilter.\+P\+G\+Pop\+Filter\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classnegui_1_1pgpopfilter_1_1PGPopFilter}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classnegui_1_1pgpopfilter_1_1PGPopFilter_a130cb2250b818bce6073553ddf1b4849}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+parent\+\_\+dir=None)
+\item 
+def \hyperlink{classnegui_1_1pgpopfilter_1_1PGPopFilter_a113b227b9a532f19722810b1a394040c}{get\+Loci\+Total} (self)
+\item 
+def {\bfseries set\+Pop\+As\+Genepop\+Filemanager\+Object} (self)\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter_a8161b7be099e088eca064fd4e987b362}{}\label{classnegui_1_1pgpopfilter_1_1PGPopFilter_a8161b7be099e088eca064fd4e987b362}
+
+\item 
+def {\bfseries pop\+Passes\+Test} (self)\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter_a8c7d2b1e7729680311aa227ce832d294}{}\label{classnegui_1_1pgpopfilter_1_1PGPopFilter_a8c7d2b1e7729680311aa227ce832d294}
+
+\item 
+def {\bfseries add\+Pop\+Line} (self, s\+\_\+line)\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter_a1920e0dca873cca9a80cf7c736852b5d}{}\label{classnegui_1_1pgpopfilter_1_1PGPopFilter_a1920e0dca873cca9a80cf7c736852b5d}
+
+\item 
+def {\bfseries poplines} (self)\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter_aff2ee09bb65dad46875d65ccf00b178c}{}\label{classnegui_1_1pgpopfilter_1_1PGPopFilter_aff2ee09bb65dad46875d65ccf00b178c}
+
+\item 
+def {\bfseries parentdir} (self)\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter_a098265e6617cc753ef2a2f8558d4efbe}{}\label{classnegui_1_1pgpopfilter_1_1PGPopFilter_a098265e6617cc753ef2a2f8558d4efbe}
+
+\item 
+def {\bfseries gp\+\_\+manager} (self)\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter_aa6ebe687b178ac4f15662a8769d29c5c}{}\label{classnegui_1_1pgpopfilter_1_1PGPopFilter_aa6ebe687b178ac4f15662a8769d29c5c}
+
+\item 
+def {\bfseries gp\+\_\+manager} (self, o\+\_\+value)\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter_af84eb54260037e34ba57b646b5c83296}{}\label{classnegui_1_1pgpopfilter_1_1PGPopFilter_af84eb54260037e34ba57b646b5c83296}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+
+
+Definition at line 25 of file pgpopfilter.\+py.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{negui\+::pgpopfilter\+::\+P\+G\+Pop\+Filter@{negui\+::pgpopfilter\+::\+P\+G\+Pop\+Filter}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!negui\+::pgpopfilter\+::\+P\+G\+Pop\+Filter@{negui\+::pgpopfilter\+::\+P\+G\+Pop\+Filter}}
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, s\+\_\+parent\+\_\+dir=\+None)}{__init__(self, s_parent_dir=None)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgpopfilter.\+P\+G\+Pop\+Filter.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{s\+\_\+parent\+\_\+dir = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter_a130cb2250b818bce6073553ddf1b4849}{}\label{classnegui_1_1pgpopfilter_1_1PGPopFilter_a130cb2250b818bce6073553ddf1b4849}
+\begin{DoxyVerb}Param s_parent_dir, if not none,
+    is used as a home for the temp genepop
+    file written in order to perform the test.
+    If None, then the python value for the tmp
+    directory for the user's OS will be used.
+\end{DoxyVerb}
+ 
+
+Definition at line 26 of file pgpopfilter.\+py.
+
+
+\begin{DoxyCode}
+26     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgpopfilter_1_1PGPopFilter_a130cb2250b818bce6073553ddf1b4849}{\_\_init\_\_}( self, s\_parent\_dir=None ):
+27         \textcolor{stringliteral}{'''}
+28 \textcolor{stringliteral}{        Param s\_parent\_dir, if not none,}
+29 \textcolor{stringliteral}{            is used as a home for the temp genepop}
+30 \textcolor{stringliteral}{            file written in order to perform the test.}
+31 \textcolor{stringliteral}{            If None, then the python value for the tmp}
+32 \textcolor{stringliteral}{            directory for the user's OS will be used.}
+33 \textcolor{stringliteral}{        '''}
+34         self.\hyperlink{classnegui_1_1pgpopfilter_1_1PGPopFilter_a97195808c691697d5b6eae50643b7ac6}{\_\_pop\_lines}=[]
+35         self.\hyperlink{classnegui_1_1pgpopfilter_1_1PGPopFilter_a196c73dc15581c2055db80e2662f7f44}{\_\_parent\_dir}=s\_parent\_dir
+36         self.\hyperlink{classnegui_1_1pgpopfilter_1_1PGPopFilter_a6a84ff305557e6d9e3a96a41a180b9f1}{\_\_gp\_manager\_object}=\textcolor{keywordtype}{None}
+37         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::pgpopfilter\+::\+P\+G\+Pop\+Filter@{negui\+::pgpopfilter\+::\+P\+G\+Pop\+Filter}!get\+Loci\+Total@{get\+Loci\+Total}}
+\index{get\+Loci\+Total@{get\+Loci\+Total}!negui\+::pgpopfilter\+::\+P\+G\+Pop\+Filter@{negui\+::pgpopfilter\+::\+P\+G\+Pop\+Filter}}
+\subsubsection[{\texorpdfstring{get\+Loci\+Total(self)}{getLociTotal(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgpopfilter.\+P\+G\+Pop\+Filter.\+get\+Loci\+Total (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgpopfilter_1_1PGPopFilter_a113b227b9a532f19722810b1a394040c}{}\label{classnegui_1_1pgpopfilter_1_1PGPopFilter_a113b227b9a532f19722810b1a394040c}
+\begin{DoxyVerb}This def assumes that we have a consistent number
+of loci entries in all of our pop lines, so that
+we can count the loci in the first pop line, and
+consider it accurate for all pop lines.
+\end{DoxyVerb}
+ 
+
+Definition at line 40 of file pgpopfilter.\+py.
+
+
+\begin{DoxyCode}
+40     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgpopfilter_1_1PGPopFilter_a113b227b9a532f19722810b1a394040c}{getLociTotal}( self ):
+41 
+42         \textcolor{stringliteral}{'''}
+43 \textcolor{stringliteral}{        This def assumes that we have a consistent number}
+44 \textcolor{stringliteral}{        of loci entries in all of our pop lines, so that}
+45 \textcolor{stringliteral}{        we can count the loci in the first pop line, and}
+46 \textcolor{stringliteral}{        consider it accurate for all pop lines.}
+47 \textcolor{stringliteral}{        '''}
+48 
+49         i\_total=0
+50         \textcolor{keywordflow}{if} len( self.\hyperlink{classnegui_1_1pgpopfilter_1_1PGPopFilter_a97195808c691697d5b6eae50643b7ac6}{\_\_pop\_lines} ) == 0:
+51             i\_total = 0
+52         \textcolor{keywordflow}{else}:
+53             s\_line=self.\hyperlink{classnegui_1_1pgpopfilter_1_1PGPopFilter_a97195808c691697d5b6eae50643b7ac6}{\_\_pop\_lines}[ 0 ]
+54 
+55             ls\_id\_and\_loci=s\_line.split( \textcolor{stringliteral}{","} )
+56             \textcolor{comment}{#Split with no args uses white space}
+57             \textcolor{comment}{#and removes empty strings:}
+58             ls\_loci=ls\_id\_and\_loci[ 1 ].split()
+59             i\_total=len( ls\_loci )
+60         \textcolor{comment}{#end if no loci else count them}
+61         \textcolor{keywordflow}{return} i\_total
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgpopfilter.\+py\end{DoxyCompactItemize}

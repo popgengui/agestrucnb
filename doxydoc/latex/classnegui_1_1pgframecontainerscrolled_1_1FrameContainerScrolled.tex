@@ -1,0 +1,94 @@
+\hypertarget{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled}{}\section{negui.\+pgframecontainerscrolled.\+Frame\+Container\+Scrolled Class Reference}
+\label{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled}\index{negui.\+pgframecontainerscrolled.\+Frame\+Container\+Scrolled@{negui.\+pgframecontainerscrolled.\+Frame\+Container\+Scrolled}}
+Inheritance diagram for negui.\+pgframecontainerscrolled.\+Frame\+Container\+Scrolled\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+parent\+\_\+frame, o\+\_\+child\+\_\+frame, o\+\_\+canvas, i\+\_\+scroll\+\_\+direction=S\+C\+R\+O\+L\+L\+V\+E\+R\+T\+I\+C\+AL)\hypertarget{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a9a522fc76132e89237920a9878e826d1}{}\label{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a9a522fc76132e89237920a9878e826d1}
+
+\item 
+def \hyperlink{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a4de903801fd0962b403d29b1653b07c2}{rebind\+Scrollwheel} (self)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int {\bfseries S\+C\+R\+O\+L\+L\+V\+E\+R\+T\+I\+C\+AL} = 0\hypertarget{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a9f8fc6bb77d2973ee318f146b2da7faf}{}\label{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a9f8fc6bb77d2973ee318f146b2da7faf}
+
+\item 
+int {\bfseries S\+C\+R\+O\+L\+L\+H\+O\+R\+I\+Z\+O\+N\+T\+AL} = 1\hypertarget{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a9892a6bde66588412759262fb7d10f95}{}\label{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a9892a6bde66588412759262fb7d10f95}
+
+\item 
+int {\bfseries S\+C\+R\+O\+L\+L\+B\+O\+TH} = 2\hypertarget{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a6b07c9a74064e855296e4f9289b5b765}{}\label{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a6b07c9a74064e855296e4f9289b5b765}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Description
+Objects are arrangements of two Frames and a 
+Canvas, such that one frame contains the 
+canvas and 2nd frame, and the 2nd frame 
+is scrollable, either vertically or horizontally 
+(but not yet both, as of Thu Jun  2 19:59:32 MDT 2016 )
+
+
+Note that this is not a Tkinter object, but
+simply accomplishes the arragnement. 
+
+Note that this uses Fred Lundh's AutoScrollbar class
+(from http://effbot.org/zone/tkinter-autoscrollbar.htm)
+and depends on using only the grid geometry manager to place
+the scrollbar.
+\end{DoxyVerb}
+ 
+
+Definition at line 27 of file pgframecontainerscrolled.\+py.
+
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::pgframecontainerscrolled\+::\+Frame\+Container\+Scrolled@{negui\+::pgframecontainerscrolled\+::\+Frame\+Container\+Scrolled}!rebind\+Scrollwheel@{rebind\+Scrollwheel}}
+\index{rebind\+Scrollwheel@{rebind\+Scrollwheel}!negui\+::pgframecontainerscrolled\+::\+Frame\+Container\+Scrolled@{negui\+::pgframecontainerscrolled\+::\+Frame\+Container\+Scrolled}}
+\subsubsection[{\texorpdfstring{rebind\+Scrollwheel(self)}{rebindScrollwheel(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgframecontainerscrolled.\+Frame\+Container\+Scrolled.\+rebind\+Scrollwheel (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a4de903801fd0962b403d29b1653b07c2}{}\label{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a4de903801fd0962b403d29b1653b07c2}
+\begin{DoxyVerb}This def allows clients to rebind the mouse scrollwheel
+to this object's canvas.  This was necessitated by
+tab swithes in the pghostnotebook.py class object,
+which casue the mouse wheel to be bound to the latest
+tab, and "disconnects" it from all others, so that,
+returning to an older tab, gives an inteface without
+mouse wheel scrolling enabled.
+\end{DoxyVerb}
+ 
+
+Definition at line 138 of file pgframecontainerscrolled.\+py.
+
+
+\begin{DoxyCode}
+138     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_a4de903801fd0962b403d29b1653b07c2}{rebindScrollwheel}(self):
+139         \textcolor{stringliteral}{'''}
+140 \textcolor{stringliteral}{        This def allows clients to rebind the mouse scrollwheel}
+141 \textcolor{stringliteral}{        to this object's canvas.  This was necessitated by}
+142 \textcolor{stringliteral}{        tab swithes in the pghostnotebook.py class object,}
+143 \textcolor{stringliteral}{        which casue the mouse wheel to be bound to the latest}
+144 \textcolor{stringliteral}{        tab, and "disconnects" it from all others, so that,}
+145 \textcolor{stringliteral}{        returning to an older tab, gives an inteface without}
+146 \textcolor{stringliteral}{        mouse wheel scrolling enabled.}
+147 \textcolor{stringliteral}{        '''}
+148 
+149         self.\hyperlink{classnegui_1_1pgframecontainerscrolled_1_1FrameContainerScrolled_acddb919ce697114d9dab8570c8c96ba6}{\_\_bind\_canvas\_to\_scrollwheel}()
+150         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgframecontainerscrolled.\+py\end{DoxyCompactItemize}

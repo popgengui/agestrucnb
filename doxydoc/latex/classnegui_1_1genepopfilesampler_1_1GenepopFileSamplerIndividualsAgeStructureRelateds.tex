@@ -1,0 +1,236 @@
+\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds}{}\section{negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Relateds Class Reference}
+\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds}\index{negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Relateds@{negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Relateds}}
+Inheritance diagram for negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Relateds\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+genepopfilemanager, o\+\_\+genepopfilesampleparams)\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds_aa74e2bb52923a31c31a6a2ca54bda6e0}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds_aa74e2bb52923a31c31a6a2ca54bda6e0}
+
+\item 
+def \hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds_a2c1d8215c48697cf7f81ba45c31435aa}{do\+Sample} (self)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This sampler class meant to implement Tiago's sampling code in his
+sampleIndivsRelated.py module.  It samples pairs of individuals who
+share parentage.  The GenepopFileSampleParams object used by instances
+of this class has the values Tiagos module takes at the command line 
+that restrict the fraction of indiv (per gen) who should be siblings,
+as well as a total individuals per generation.  Note that his
+startGen endGen paramters are already implemented via the Sampler's
+li_population_numbers parameter.
+\end{DoxyVerb}
+ 
+
+Definition at line 1480 of file genepopfilesampler.\+py.
+
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Relateds@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Relateds}!do\+Sample@{do\+Sample}}
+\index{do\+Sample@{do\+Sample}!negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Relateds@{negui\+::genepopfilesampler\+::\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Relateds}}
+\subsubsection[{\texorpdfstring{do\+Sample(self)}{doSample(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+Age\+Structure\+Relateds.\+do\+Sample (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds_a2c1d8215c48697cf7f81ba45c31435aa}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds_a2c1d8215c48697cf7f81ba45c31435aa}
+\begin{DoxyVerb}Sample siblings in pairs/parentage until the percent sibs threshold
+is reached, then pad with non-relateds.  See Tiagos code in his 
+sampleIndivsRelated.py module.
+\end{DoxyVerb}
+ 
+
+Definition at line 1545 of file genepopfilesampler.\+py.
+
+
+\begin{DoxyCode}
+1545     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds_a2c1d8215c48697cf7f81ba45c31435aa}{doSample}( self ):
+1546         \textcolor{stringliteral}{'''}
+1547 \textcolor{stringliteral}{        Sample siblings in pairs/parentage until the percent sibs threshold}
+1548 \textcolor{stringliteral}{        is reached, then pad with non-relateds.  See Tiagos code in his }
+1549 \textcolor{stringliteral}{        sampleIndivsRelated.py module.}
+1550 \textcolor{stringliteral}{        '''}
+1551         FIELD\_NAME\_AGE=\textcolor{stringliteral}{"age"}
+1552         FIELD\_NAME\_MOTHER=\textcolor{stringliteral}{"mother"}
+1553         FIELD\_NAME\_FATHER=\textcolor{stringliteral}{"father"}
+1554 
+1555         \textcolor{comment}{#estimator driver needs a pop number subsample when it adds calls to the NeEstimator:}
+1556         self.filemanager.subsamplePopulationsByList( self.sampleparams.population\_numbers,
+1557                                                     s\_subsample\_tag=
+      self.sampleparams.population\_subsample\_name )
+1558 
+1559         dli\_indiv\_index\_lists\_by\_pop\_number=\{\}
+1560         
+1561         i\_replicate\_count=self.sampleparams.replicates
+1562 
+1563         \textcolor{keywordflow}{for} i\_replicate\_number \textcolor{keywordflow}{in} range(i\_replicate\_count ):
+1564 
+1565             \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} self.sampleparams.population\_numbers:
+1566 
+1567                 ls\_id\_list=self.filemanager.getListIndividuals( i\_pop\_number )
+1568                 \textcolor{stringliteral}{'''}
+1569 \textcolor{stringliteral}{                We assume that the list of Id's in the individual list}
+1570 \textcolor{stringliteral}{                is indexed such that the zeroth id corresponds to the first}
+1571 \textcolor{stringliteral}{                indiv as ordered in the genepop file, the [1] indexed id}
+1572 \textcolor{stringliteral}{                is the second indiv, etc.}
+1573 \textcolor{stringliteral}{                '''}
+1574                 i\_tot\_indiv=len( ls\_id\_list )
+1575 
+1576                 dli\_indiv\_index\_by\_parentage=\{\}
+1577                 li\_all\_indivs\_this\_pop=[]
+1578 
+1579                 \textcolor{stringliteral}{'''}
+1580 \textcolor{stringliteral}{                Note that in py3, you can divide 2 ints, at least}
+1581 \textcolor{stringliteral}{                when one's a literal like "100", and get a float}
+1582 \textcolor{stringliteral}{                but in py2 you get the floor of the ratio, i.e. zero}
+1583 \textcolor{stringliteral}{                for any ratio < 1/1.  Note that Tiago's sampleIndivsRelated.py}
+1584 \textcolor{stringliteral}{                code has the  "int( arg[2] )/100" formulation, so that}
+1585 \textcolor{stringliteral}{                the code is no longer py2 compatible without his import statement:}
+1586 \textcolor{stringliteral}{                from \_\_future\_\_ import division.}
+1587 \textcolor{stringliteral}{}
+1588 \textcolor{stringliteral}{                We try version-neutral syntax:}
+1589 \textcolor{stringliteral}{                '''}
+1590 
+1591                 f\_fraction\_relateds=old\_div(self.sampleparams.percent\_relateds, 100.0)
+1592 
+1593                 \textcolor{keyword}{assert} type( f\_fraction\_relateds ) == float,  \(\backslash\)
+1594                         \textcolor{stringliteral}{"In GenepopFileSamplerIndividualsAgeStructureRelateds Instance, "} \(\backslash\)
+1595                                 + \textcolor{stringliteral}{"def doSample, non-float result of division."}
+1596 
+1597                 \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( i\_tot\_indiv ):
+1598 
+1599                     s\_id=ls\_id\_list[ idx ]
+1600                     o\_id\_vals=GenepopIndivIdVals( s\_id, 
+1601                                         self.sampleparams.fields )
+1602                     i\_age=o\_id\_vals.getVal( FIELD\_NAME\_AGE )
+1603 
+1604                     \textcolor{keywordflow}{if} i\_age > 1:
+1605                         \textcolor{keywordflow}{continue}
+1606                     \textcolor{comment}{#end if too old, continue}
+1607 
+1608                     i\_mother=o\_id\_vals.getVal( FIELD\_NAME\_MOTHER )
+1609                     i\_father=o\_id\_vals.getVal( FIELD\_NAME\_FATHER )
+1610 
+1611                     ti\_parentage=( i\_mother, i\_father )
+1612 
+1613                     \textcolor{stringliteral}{'''}
+1614 \textcolor{stringliteral}{                    Note that idx+1 gives the number of the individual as ordered by its}
+1615 \textcolor{stringliteral}{                    entry in the "pop" section of this pop in the genepop file, as used}
+1616 \textcolor{stringliteral}{                    by the genepopfilemanager object to point to it's byte address in }
+1617 \textcolor{stringliteral}{                    the file.  Thus it's our way of collecting samples of individuals }
+1618 \textcolor{stringliteral}{                    and passing them into the genepop file manager object's subsampling }
+1619 \textcolor{stringliteral}{                    records (its attribute \_\_indiv\_subsamples).}
+1620 \textcolor{stringliteral}{                    '''}
+1621                     i\_indiv\_number=idx+1
+1622                     li\_all\_indivs\_this\_pop.append( i\_indiv\_number )
+1623                     dli\_indiv\_index\_by\_parentage.setdefault( \(\backslash\)
+1624                                 ti\_parentage, [] ).append( i\_indiv\_number ) 
+1625 
+1626                 \textcolor{comment}{#end for each individual's id   }
+1627                 
+1628                 i\_tot\_indivs=len( li\_all\_indivs\_this\_pop )
+1629 
+1630                 i\_target\_total\_indivs=i\_tot\_indivs
+1631 
+1632                 \textcolor{comment}{#If too few indivs, error, else reduce the target total if over}
+1633                 \textcolor{comment}{#the max, to the max}
+1634                 \textcolor{keywordflow}{if} i\_target\_total\_indivs < self.sampleparams.min\_indiv\_per\_gen:
+1635                     s\_msg=\textcolor{stringliteral}{"In GenepopFileSamplerIndividualsAgeStructureRelateds, "} \(\backslash\)
+1636                             + \textcolor{stringliteral}{"instance, total individuals, "} \(\backslash\)
+1637                             + str( i\_tot\_indivs ) \(\backslash\)
+1638                             + \textcolor{stringliteral}{"is under the value given as minimum, "} \(\backslash\)
+1639                             + str( self.sampleparams.min\_indiv\_per\_gen ) \(\backslash\)
+1640                             + \textcolor{stringliteral}{"."}
+1641                     \textcolor{keywordflow}{raise} Exception( s\_msg )
+1642                 \textcolor{keywordflow}{elif} i\_target\_total\_indivs > self.sampleparams.max\_indiv\_per\_gen:
+1643                     i\_target\_total\_indivs=self.sampleparams.max\_indiv\_per\_gen
+1644                 \textcolor{comment}{#end if total individuals under min, error}
+1645 
+1646 
+1647                 i\_target\_total\_relateds=i\_target\_total\_indivs * f\_fraction\_relateds
+1648                 li\_relateds\_collected=self.\hyperlink{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds_af76a2ae0e6f84e4fe8bc8e5856e3a16b}{\_\_get\_siblings}( dli\_indiv\_index\_by\_parentage, 
+1649                                                                     i\_target\_total\_relateds )
+1650             
+1651                 \textcolor{keywordflow}{for} i\_related \textcolor{keywordflow}{in} li\_relateds\_collected:
+1652                     li\_all\_indivs\_this\_pop.remove( i\_related )
+1653                 \textcolor{comment}{#end for each related collected}
+1654 
+1655                 \textcolor{comment}{#rename for clarity}
+1656                 li\_individuals\_with\_relateds\_removed=\(\backslash\)
+1657                                     li\_all\_indivs\_this\_pop
+1658 
+1659                 i\_total\_relateds\_collected=len( li\_relateds\_collected )
+1660 
+1661                 i\_non\_relateds\_needed\_to\_make\_total= i\_target\_total\_indivs \(\backslash\)
+1662                                                     - i\_total\_relateds\_collected
+1663                 li\_non\_relateds\_collected = []
+1664 
+1665                 \textcolor{keywordflow}{if} i\_non\_relateds\_needed\_to\_make\_total > 0:
+1666 
+1667                     \textcolor{keywordflow}{try}:
+1668                         li\_non\_relateds\_collected=random.sample( \(\backslash\)
+1669                                             li\_individuals\_with\_relateds\_removed, 
+1670                                                 i\_non\_relateds\_needed\_to\_make\_total )
+1671                     \textcolor{keywordflow}{except} Exception \textcolor{keyword}{as} oex:
+1672 
+1673                         \textcolor{comment}{#We may be changing the algorithm to test}
+1674                         \textcolor{comment}{#for the sample size vs the length of the list sampled}
+1675                         \textcolor{comment}{#but for now we catch errors:}
+1676                         s\_sample\_error\_msg= \(\backslash\)
+1677                                 \textcolor{stringliteral}{"In GenepopFileSamplerIndividualsAgeStructureRelateds "} \(\backslash\)
+1678                                 + \textcolor{stringliteral}{"instance, def doSample, "}  \(\backslash\)
+1679                                 + \textcolor{stringliteral}{"random.sample failed on list of "} \(\backslash\)
+1680                                 + str( len( li\_individuals\_with\_relateds\_removed ) ) \(\backslash\)
+1681                                 + \textcolor{stringliteral}{" individuals.  Target total to be sampled: "} \(\backslash\)
+1682                                 + str( i\_non\_relateds\_needed\_to\_make\_total ) + \textcolor{stringliteral}{"."}
+1683 
+1684                         s\_msg=s\_sample\_error\_msg + \textcolor{stringliteral}{"  Exception: "} + str( oex ) + \textcolor{stringliteral}{"."}
+1685                         \textcolor{keywordflow}{raise} Exception( s\_msg )
+1686                     \textcolor{comment}{#try . . . except . . . }
+1687 
+1688                 \textcolor{keywordflow}{elif} i\_non\_relateds\_needed\_to\_make\_total < 0:
+1689                     \textcolor{stringliteral}{'''}
+1690 \textcolor{stringliteral}{                    Not sure this case is possible, but suspect it may be}
+1691 \textcolor{stringliteral}{                    due either to rounding, or the pairwise collecting of}
+1692 \textcolor{stringliteral}{                    siblings.  We may after trials, decide to except an overage}
+1693 \textcolor{stringliteral}{                    of one, but for now let's throw an error:}
+1694 \textcolor{stringliteral}{                    '''}
+1695 
+1696                     s\_msg=\textcolor{stringliteral}{"In GenepopFileSamplerIndividualsAgeStructureRelateds "} \(\backslash\)
+1697                                 + \textcolor{stringliteral}{"instance, def doSample, "}  \(\backslash\)
+1698                                 + \textcolor{stringliteral}{"relateds collected, "} \(\backslash\)
+1699                                 + str( i\_total\_relateds\_collected ) \(\backslash\)
+1700                                 + \textcolor{stringliteral}{", exceeds the maximum set as valid, "} \(\backslash\)
+1701                                 + str( self.sampleparams.max\_indiv\_per\_gen ) \(\backslash\)
+1702                                 + \textcolor{stringliteral}{"."}
+1703                     \textcolor{keywordflow}{raise} Exception
+1704                 \textcolor{comment}{#end if need to collect at least one non\_relateds}
+1705 
+1706                 li\_indiv\_sample=li\_relateds\_collected + li\_non\_relateds\_collected
+1707 
+1708                 dli\_indiv\_index\_lists\_by\_pop\_number[ i\_pop\_number ] = li\_indiv\_sample
+1709             \textcolor{comment}{#end for each pop number}
+1710 
+1711             s\_this\_subsample\_name=make\_subsample\_tag( \(\backslash\)
+1712                                 self.sampleparams.sample\_param\_value, 
+1713                                 i\_replicate\_number, 
+1714                                 SCHEME\_RELATEDS,
+1715                                 s\_prefix=self.sampleparams.sample\_tag\_base )
+1716 
+1717             self.filemanager.subsampleIndividualsByNumberList( \(\backslash\)
+1718                                     dli\_indiv\_index\_lists\_by\_pop\_number, 
+1719                                                     s\_this\_subsample\_name )
+1720         \textcolor{comment}{#end for each replicate}
+1721         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+genepopfilesampler.\+py\end{DoxyCompactItemize}

@@ -1,0 +1,144 @@
+\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria}{}\section{negui.\+genepopindividualid.\+Genepop\+Indiv\+Criteria Class Reference}
+\label{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria}\index{negui.\+genepopindividualid.\+Genepop\+Indiv\+Criteria@{negui.\+genepopindividualid.\+Genepop\+Indiv\+Criteria}}
+Inheritance diagram for negui.\+genepopindividualid.\+Genepop\+Indiv\+Criteria\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, lo\+\_\+criteria=None)\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_af2dee1c4395c3be5eb236bb838d79b48}{}\label{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_af2dee1c4395c3be5eb236bb838d79b48}
+
+\item 
+def \hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a8b5b08b5100a7aaa759c26489b87eb34}{all\+Tests\+Are\+True} (self, ls\+\_\+field\+\_\+names, lv\+\_\+field\+\_\+values)
+\item 
+def \hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a30cfe91fa9b4cb481ecf5cab3332ac56}{get\+Subset\+Of\+Criteria\+As\+New\+Criteria\+Object} (self, li\+\_\+criterion\+\_\+indices)
+\item 
+def {\bfseries copy} (self)\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_adb2e780d64d41939ea2918cca0434457}{}\label{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_adb2e780d64d41939ea2918cca0434457}
+
+\item 
+def {\bfseries add\+Criterion} (self, s\+\_\+criterion\+\_\+name, ls\+\_\+field\+\_\+names, s\+\_\+test)\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a871c920cf188bf93e6b3a30e26afb1a2}{}\label{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a871c920cf188bf93e6b3a30e26afb1a2}
+
+\item 
+def {\bfseries criteriacount} (self)\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a20f68e2cf59a14286d038fae4c3547df}{}\label{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a20f68e2cf59a14286d038fae4c3547df}
+
+\item 
+def {\bfseries criteria} (self)\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_af0b41598685d0acf1607b2d1a80d46c7}{}\label{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_af0b41598685d0acf1607b2d1a80d46c7}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Wraps a list of GenepopIndivCriteria.
+Can evaluate all tests when a list of
+field names and values is provided.
+\end{DoxyVerb}
+ 
+
+Definition at line 419 of file genepopindividualid.\+py.
+
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::genepopindividualid\+::\+Genepop\+Indiv\+Criteria@{negui\+::genepopindividualid\+::\+Genepop\+Indiv\+Criteria}!all\+Tests\+Are\+True@{all\+Tests\+Are\+True}}
+\index{all\+Tests\+Are\+True@{all\+Tests\+Are\+True}!negui\+::genepopindividualid\+::\+Genepop\+Indiv\+Criteria@{negui\+::genepopindividualid\+::\+Genepop\+Indiv\+Criteria}}
+\subsubsection[{\texorpdfstring{all\+Tests\+Are\+True(self, ls\+\_\+field\+\_\+names, lv\+\_\+field\+\_\+values)}{allTestsAreTrue(self, ls_field_names, lv_field_values)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+genepopindividualid.\+Genepop\+Indiv\+Criteria.\+all\+Tests\+Are\+True (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{ls\+\_\+field\+\_\+names, }
+\item[{}]{lv\+\_\+field\+\_\+values}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a8b5b08b5100a7aaa759c26489b87eb34}{}\label{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a8b5b08b5100a7aaa759c26489b87eb34}
+\begin{DoxyVerb}Assumes field value list arg is in order such
+that its nth value is corresponds to the nth
+value in the list of field names.
+\end{DoxyVerb}
+ 
+
+Definition at line 467 of file genepopindividualid.\+py.
+
+
+\begin{DoxyCode}
+467     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a8b5b08b5100a7aaa759c26489b87eb34}{allTestsAreTrue}( self, ls\_field\_names, lv\_field\_values ):
+468         \textcolor{stringliteral}{'''}
+469 \textcolor{stringliteral}{        Assumes field value list arg is in order such}
+470 \textcolor{stringliteral}{        that its nth value is corresponds to the nth}
+471 \textcolor{stringliteral}{        value in the list of field names.}
+472 \textcolor{stringliteral}{        '''}
+473         db\_test\_results=self.\hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a1bce8a4201a0935fe6d6ff03f06071ed}{\_\_get\_dict\_list\_test\_results}( ls\_field\_names, 
+      lv\_field\_values )
+474 
+475 
+476         \textcolor{stringliteral}{'''}
+477 \textcolor{stringliteral}{        If the client called this def on an instance}
+478 \textcolor{stringliteral}{        with no criteria to test, raise an exception:}
+479 \textcolor{stringliteral}{        '''}
+480         \textcolor{keywordflow}{if} len( db\_test\_results ) == 0:
+481             s\_msg=\textcolor{stringliteral}{"In GenepopIndivCriteria instance, "} \(\backslash\)
+482                     + \textcolor{stringliteral}{"def allTestsAreTrue, "} \(\backslash\)
+483                     + \textcolor{stringliteral}{"called on an instance with no "} \(\backslash\)
+484                     + \textcolor{stringliteral}{"criterion objects for tests."}
+485             \textcolor{keywordflow}{raise} Exception( s\_msg )
+486         \textcolor{comment}{#end if no test results}
+487 
+488         set\_test\_results=set( db\_test\_results.values() )
+489         \textcolor{keywordflow}{return} set\_test\_results==\{\textcolor{keyword}{True}\}
+490 
+\end{DoxyCode}
+\index{negui\+::genepopindividualid\+::\+Genepop\+Indiv\+Criteria@{negui\+::genepopindividualid\+::\+Genepop\+Indiv\+Criteria}!get\+Subset\+Of\+Criteria\+As\+New\+Criteria\+Object@{get\+Subset\+Of\+Criteria\+As\+New\+Criteria\+Object}}
+\index{get\+Subset\+Of\+Criteria\+As\+New\+Criteria\+Object@{get\+Subset\+Of\+Criteria\+As\+New\+Criteria\+Object}!negui\+::genepopindividualid\+::\+Genepop\+Indiv\+Criteria@{negui\+::genepopindividualid\+::\+Genepop\+Indiv\+Criteria}}
+\subsubsection[{\texorpdfstring{get\+Subset\+Of\+Criteria\+As\+New\+Criteria\+Object(self, li\+\_\+criterion\+\_\+indices)}{getSubsetOfCriteriaAsNewCriteriaObject(self, li_criterion_indices)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+genepopindividualid.\+Genepop\+Indiv\+Criteria.\+get\+Subset\+Of\+Criteria\+As\+New\+Criteria\+Object (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{li\+\_\+criterion\+\_\+indices}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a30cfe91fa9b4cb481ecf5cab3332ac56}{}\label{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a30cfe91fa9b4cb481ecf5cab3332ac56}
+\begin{DoxyVerb}Needed a way to use only one of the criterion objects in an instance of
+this class, to pass into a GenepopFileSampler operation, which requires 
+an Instance of this class.  I didn't want to import this mod into 
+genepopfilesampler.py, and so added this pseudo 'partial copy' operation.
+\end{DoxyVerb}
+ 
+
+Definition at line 493 of file genepopindividualid.\+py.
+
+
+\begin{DoxyCode}
+493     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a30cfe91fa9b4cb481ecf5cab3332ac56}{getSubsetOfCriteriaAsNewCriteriaObject}( self, 
+      li\_criterion\_indices ):
+494         \textcolor{stringliteral}{'''}
+495 \textcolor{stringliteral}{        Needed a way to use only one of the criterion objects in an instance of}
+496 \textcolor{stringliteral}{        this class, to pass into a GenepopFileSampler operation, which requires }
+497 \textcolor{stringliteral}{        an Instance of this class.  I didn't want to import this mod into }
+498 \textcolor{stringliteral}{        genepopfilesampler.py, and so added this pseudo 'partial copy' operation.}
+499 \textcolor{stringliteral}{        '''}
+500         o\_new\_criteria\_object=\textcolor{keywordtype}{None}
+501         lo\_subset\_of\_criterion\_objects=[]
+502 
+503         \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} li\_criterion\_indices:
+504             \textcolor{keywordflow}{if} idx \textcolor{keywordflow}{in} range ( self.\hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a3970df1944e4fa0b8b463c93546799e7}{\_\_criteriacount} ):
+505                 lo\_subset\_of\_criterion\_objects.append( self.\hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a1dc62d416ebd5e5edeb4fd3e494e3b58}{\_\_criteria}[ idx ] )
+506             \textcolor{keywordflow}{else}:
+507                 s\_msg = \textcolor{stringliteral}{"In GenepopIndivCriteria instance, "} \(\backslash\)
+508                         + \textcolor{stringliteral}{"def getSubsetOfCriteriaAsNewCriteriaObject, "} \(\backslash\)
+509                         + \textcolor{stringliteral}{"index passed is out of range for number of criterion objects."} \(\backslash\)
+510                         + \textcolor{stringliteral}{"  Total criterion objects: "} + str( self.
+      \hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria_a3970df1944e4fa0b8b463c93546799e7}{\_\_criteriacount} ) \(\backslash\)
+511                         + \textcolor{stringliteral}{".  List of indices passed: "} + str( li\_criterion\_indices ) \(\backslash\)
+512                         + \textcolor{stringliteral}{"."}
+513 
+514                 \textcolor{keywordflow}{raise} Exception( s\_msg )
+515             \textcolor{comment}{#end if idx in range, else exception}
+516         \textcolor{comment}{#end for each index}
+517 
+518         o\_new\_criteria\_object=\hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndivCriteria}{GenepopIndivCriteria}( lo\_subset\_of\_criterion\_objects )
+519         
+520         \textcolor{keywordflow}{return} o\_new\_criteria\_object
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+genepopindividualid.\+py\end{DoxyCompactItemize}

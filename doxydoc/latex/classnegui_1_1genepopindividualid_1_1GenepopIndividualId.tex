@@ -1,0 +1,75 @@
+\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndividualId}{}\section{negui.\+genepopindividualid.\+Genepop\+Individual\+Id Class Reference}
+\label{classnegui_1_1genepopindividualid_1_1GenepopIndividualId}\index{negui.\+genepopindividualid.\+Genepop\+Individual\+Id@{negui.\+genepopindividualid.\+Genepop\+Individual\+Id}}
+Inheritance diagram for negui.\+genepopindividualid.\+Genepop\+Individual\+Id\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1genepopindividualid_1_1GenepopIndividualId}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+genepop\+\_\+indiv\+\_\+vals, o\+\_\+genepop\+\_\+criteria=None)\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndividualId_a6a5d9b3214414313abf23acdea0e8dbc}{}\label{classnegui_1_1genepopindividualid_1_1GenepopIndividualId_a6a5d9b3214414313abf23acdea0e8dbc}
+
+\item 
+def \hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndividualId_ab25e0ae796fa9574369af186b1e2e6c0}{all\+Criteria\+Are\+True} (self)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Wraps genepop indiv. ids as
+represented by member class instances
+of GenepopIndivIdFields and GenepopIndivCriteria
+\end{DoxyVerb}
+ 
+
+Definition at line 551 of file genepopindividualid.\+py.
+
+
+
+\subsection{Member Function Documentation}
+\index{negui\+::genepopindividualid\+::\+Genepop\+Individual\+Id@{negui\+::genepopindividualid\+::\+Genepop\+Individual\+Id}!all\+Criteria\+Are\+True@{all\+Criteria\+Are\+True}}
+\index{all\+Criteria\+Are\+True@{all\+Criteria\+Are\+True}!negui\+::genepopindividualid\+::\+Genepop\+Individual\+Id@{negui\+::genepopindividualid\+::\+Genepop\+Individual\+Id}}
+\subsubsection[{\texorpdfstring{all\+Criteria\+Are\+True(self)}{allCriteriaAreTrue(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+genepopindividualid.\+Genepop\+Individual\+Id.\+all\+Criteria\+Are\+True (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1genepopindividualid_1_1GenepopIndividualId_ab25e0ae796fa9574369af186b1e2e6c0}{}\label{classnegui_1_1genepopindividualid_1_1GenepopIndividualId_ab25e0ae796fa9574369af186b1e2e6c0}
+\begin{DoxyVerb}Returns True if there are no
+criteria, otherwise the "and"
+operation of all criteria tests
+(see class GenepopIndivCriteria).
+\end{DoxyVerb}
+ 
+
+Definition at line 577 of file genepopindividualid.\+py.
+
+
+\begin{DoxyCode}
+577     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndividualId_ab25e0ae796fa9574369af186b1e2e6c0}{allCriteriaAreTrue}( self ):
+578         \textcolor{stringliteral}{'''}
+579 \textcolor{stringliteral}{        Returns True if there are no}
+580 \textcolor{stringliteral}{        criteria, otherwise the "and"}
+581 \textcolor{stringliteral}{        operation of all criteria tests}
+582 \textcolor{stringliteral}{        (see class GenepopIndivCriteria).}
+583 \textcolor{stringliteral}{        '''}
+584         b\_result=\textcolor{keyword}{True}
+585         ls\_field\_names=self.\_\_values.fieldnames
+586         lv\_field\_values=[]
+587         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1genepopindividualid_1_1GenepopIndividualId_a2052378559bc94b76c8d59a51819ad24}{\_\_criteria} \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+588             \textcolor{keywordflow}{for} s\_field \textcolor{keywordflow}{in} ls\_field\_names:              
+589                 lv\_field\_values.append( \(\backslash\)
+590                         self.\_\_values.getVal( s\_field ) )
+591             \textcolor{comment}{#end for each field, get value}
+592             
+593             b\_result=self.\_\_criteria.allTestsAreTrue( \(\backslash\)
+594                             ls\_field\_names, lv\_field\_values )
+595         \textcolor{comment}{#end if we have criteria to test}
+596 
+597         \textcolor{keywordflow}{return} b\_result
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+genepopindividualid.\+py\end{DoxyCompactItemize}

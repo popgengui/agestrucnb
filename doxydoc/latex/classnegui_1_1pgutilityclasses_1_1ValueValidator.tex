@@ -1,0 +1,59 @@
+\hypertarget{classnegui_1_1pgutilityclasses_1_1ValueValidator}{}\section{negui.\+pgutilityclasses.\+Value\+Validator Class Reference}
+\label{classnegui_1_1pgutilityclasses_1_1ValueValidator}\index{negui.\+pgutilityclasses.\+Value\+Validator@{negui.\+pgutilityclasses.\+Value\+Validator}}
+Inheritance diagram for negui.\+pgutilityclasses.\+Value\+Validator\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1pgutilityclasses_1_1ValueValidator}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, v\+\_\+bool\+\_\+expression\+\_\+or\+\_\+function\+\_\+ref, v\+\_\+value=None)\hypertarget{classnegui_1_1pgutilityclasses_1_1ValueValidator_ae49429c90976660d590d982a54a17fc3}{}\label{classnegui_1_1pgutilityclasses_1_1ValueValidator_ae49429c90976660d590d982a54a17fc3}
+
+\item 
+def {\bfseries is\+Valid} (self)\hypertarget{classnegui_1_1pgutilityclasses_1_1ValueValidator_a61381bce59fbd5633aee3aa2e73ad341}{}\label{classnegui_1_1pgutilityclasses_1_1ValueValidator_a61381bce59fbd5633aee3aa2e73ad341}
+
+\item 
+def {\bfseries report\+Invalidity\+Only} (self)\hypertarget{classnegui_1_1pgutilityclasses_1_1ValueValidator_a9e28ee42625e74bf73cd3e294bfcc1dd}{}\label{classnegui_1_1pgutilityclasses_1_1ValueValidator_a9e28ee42625e74bf73cd3e294bfcc1dd}
+
+\item 
+def {\bfseries value} (self)\hypertarget{classnegui_1_1pgutilityclasses_1_1ValueValidator_a8e3868af377f33e5ffab559920c2b091}{}\label{classnegui_1_1pgutilityclasses_1_1ValueValidator_a8e3868af377f33e5ffab559920c2b091}
+
+\item 
+def {\bfseries value} (self, v\+\_\+value)\hypertarget{classnegui_1_1pgutilityclasses_1_1ValueValidator_a74697f81f532d96a5d27d7ca199aca5d}{}\label{classnegui_1_1pgutilityclasses_1_1ValueValidator_a74697f81f532d96a5d27d7ca199aca5d}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Class to evaluate a value by applying
+a client-supplied def.  The def can be
+supplied either:
+---1. as reference to a function.
+---2. as a string expression
+that will be made into a lambda operation
+by concatenating "lambda x: "
+with the string. 
+
+Class created to use a PGParamSet instance "validation"
+value, from its tag item that
+supplies either a function name for a def that 
+takes a single arg and retirns (evals to) True or False, 
+or a string expression in "x" that does the same
+for example, "type(x)==float and x <= 1.0"
+
+Note that this class' def names and signatures are made
+to match relevant ones in class FloatIntStringParamValidity,
+since, as of 2016_10_03, we are calling them in the KeyValFrame
+class (see def __reset_value) as defined in mod pgguiutilities.py
+\end{DoxyVerb}
+ 
+
+Definition at line 963 of file pgutilityclasses.\+py.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+pgutilityclasses.\+py\end{DoxyCompactItemize}

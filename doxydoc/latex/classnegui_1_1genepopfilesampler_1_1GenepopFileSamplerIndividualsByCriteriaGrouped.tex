@@ -1,0 +1,40 @@
+\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByCriteriaGrouped}{}\section{negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+By\+Criteria\+Grouped Class Reference}
+\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByCriteriaGrouped}\index{negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+By\+Criteria\+Grouped@{negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+By\+Criteria\+Grouped}}
+Inheritance diagram for negui.\+genepopfilesampler.\+Genepop\+File\+Sampler\+Individuals\+By\+Criteria\+Grouped\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByCriteriaGrouped}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+genepopfilemanager, o\+\_\+genepopfilesampleparams)\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByCriteriaGrouped_a47bba07ea5592ffbda7ef58c78e194e2}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByCriteriaGrouped_a47bba07ea5592ffbda7ef58c78e194e2}
+
+\item 
+def {\bfseries do\+Sample} (self)\hypertarget{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByCriteriaGrouped_a6bdd6f8fd7d56c41f14cf9744e862766}{}\label{classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsByCriteriaGrouped_a6bdd6f8fd7d56c41f14cf9744e862766}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Motivaing case:  Need a way to implement Tiago's sibling sampling
+scheme.  As such, I need to group individuals in sim-generated
+pops, from the AgeStructureNe code, by parentage (sibling groups,
+defined, for two individuals,  as indiv_1.mother==indiv_2.mother, 
+and same for father), operating only on individuals of age==1.  
+
+I'm generalizing the case to be able to group indiviudals (in a given
+pop inside a genepop file) by matching their field values, for one or
+more fields.  Further, this sampling would then be followed by applying
+a criteria to each individual.
+\end{DoxyVerb}
+ 
+
+Definition at line 2110 of file genepopfilesampler.\+py.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+genepopfilesampler.\+py\end{DoxyCompactItemize}
