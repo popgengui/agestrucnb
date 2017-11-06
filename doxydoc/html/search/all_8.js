@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['independantprocessgroup',['IndependantProcessGroup',['../classnegui_1_1pgutilityclasses_1_1IndependantProcessGroup.html',1,'negui::pgutilityclasses']]],
-  ['independantsubprocessgroup',['IndependantSubprocessGroup',['../classnegui_1_1pgutilityclasses_1_1IndependantSubprocessGroup.html',1,'negui::pgutilityclasses']]],
-  ['indiv_5fsubsample_5ftags',['indiv_subsample_tags',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#ae77bd8c465db4d95839db838c236f4cd',1,'negui::genepopfilemanager::GenepopFileManager']]]
+  ['has_5frequested_5fcycle_5frange',['has_requested_cycle_range',['../namespacenegui_1_1pgvalidationtests.html#acebbfd32727989f141b02f26e736b41c',1,'negui::pgvalidationtests']]],
+  ['header',['header',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html#a92fb714bb0d1caf2bc9b7c92acf48c40',1,'negui::genepopfilemanager::GenepopFileManager']]]
 ];

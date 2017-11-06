@@ -9,7 +9,7 @@ Inheritance diagram for negui.\+pgoutputneestimator.\+P\+G\+Output\+Ne\+Estimato
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+input\+\_\+file, s\+\_\+run\+\_\+output\+\_\+filename)\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a668859c930e6bd9b31bda4af9bd79c54}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a668859c930e6bd9b31bda4af9bd79c54}
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+input\+\_\+file, s\+\_\+run\+\_\+output\+\_\+filename, o\+\_\+bias\+\_\+adjustor=None, s\+\_\+estimator\+\_\+to\+\_\+use=E\+S\+T\+I\+M\+A\+T\+O\+R\+\_\+\+N\+E\+E\+S\+T\+I\+M\+A\+T\+OR)\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a83a6befe7f70678330a2395b05924174}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a83a6befe7f70678330a2395b05924174}
 
 \item 
 def \hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a7b6885cf565cb604ab24d7082858f57b}{parse\+Output} (self)
@@ -18,6 +18,9 @@ def {\bfseries get\+No\+Dat\+File\+Name} (self)\hypertarget{classnegui_1_1pgoutp
 
 \item 
 def \hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a4f8192c2aacf6e38b2c4c1d80302b643}{parse\+No\+Dat\+File} (self)
+\item 
+def {\bfseries get\+Column\+Number\+For\+Field\+Name} (self, s\+\_\+name)\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a9f13fc3000c3018a20fb38f37c5d9594}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a9f13fc3000c3018a20fb38f37c5d9594}
+
 \item 
 def {\bfseries parsed\+\_\+output} (self)\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ae97f8f35f02d9026bc1796daa3ed7aca}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ae97f8f35f02d9026bc1796daa3ed7aca}
 
@@ -28,7 +31,7 @@ def {\bfseries parsed\+\_\+nodat\+\_\+info} (self)\hypertarget{classnegui_1_1pgo
 def {\bfseries run\+\_\+output\+\_\+file} (self)\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a5e510dccae0f66ae63f86d46e6c46a36}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a5e510dccae0f66ae63f86d46e6c46a36}
 
 \item 
-def {\bfseries ouput\+\_\+file} (self, s\+\_\+name)\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ae1d4e1c9f11e5050f0e839e74968c31f}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ae1d4e1c9f11e5050f0e839e74968c31f}
+def {\bfseries output\+\_\+file} (self, s\+\_\+name)\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a67501f770ac63303d0ed3b69fc148544}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a67501f770ac63303d0ed3b69fc148544}
 
 \item 
 def {\bfseries run\+\_\+input\+\_\+file} (self)\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ac3204c39eb40e0e5a9c16906382d98a5}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ac3204c39eb40e0e5a9c16906382d98a5}
@@ -50,37 +53,15 @@ list {\bfseries N\+O\+D\+A\+T\+\_\+\+F\+I\+E\+L\+DS} = \mbox{[} \char`\"{}Indivi
 \item 
 list {\bfseries O\+U\+T\+P\+U\+T\+\_\+\+T\+I\+A\+G\+O\+\_\+\+A\+B\+B\+R\+E\+VS} = \mbox{[} \char`\"{}ne\char`\"{},\char`\"{}neci05\char`\"{} , \char`\"{}neci975\char`\"{}, \char`\"{}or2\char`\"{}, \char`\"{}sr2\char`\"{}, \char`\"{}indep\char`\"{}, \char`\"{}hmean\char`\"{} \mbox{]}\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a916a47666e6360ea279b944832907b27}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a916a47666e6360ea279b944832907b27}
 
-\item 
-int {\bfseries M\+A\+X\+\_\+\+A\+L\+L\+O\+W\+A\+B\+L\+E\+\_\+\+N\+U\+M\+B\+E\+R\+\_\+\+F\+R\+E\+Q\+S\+\_\+\+U\+S\+ED} = 1\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ab5bcb8ce89a3453910014169865706d2}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ab5bcb8ce89a3453910014169865706d2}
-
-\item 
-list {\bfseries P\+A\+R\+S\+A\+B\+L\+E\+\_\+\+E\+S\+T\+I\+M\+A\+T\+I\+O\+N\+\_\+\+T\+Y\+P\+ES} = \mbox{[} \char`\"{}ld\char`\"{} \mbox{]}\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a004e7b99039d5176bff002232337d4e3}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a004e7b99039d5176bff002232337d4e3}
-
-\item 
-list {\bfseries ds\+\_\+record\+\_\+attribute\+\_\+names} = \mbox{[} \char`\"{}ld\char`\"{}, \char`\"{}het\char`\"{}, \char`\"{}coanc\char`\"{}, \char`\"{}temporal\char`\"{} \mbox{]}\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ac84ab852eaf88c7bebdb5030bb825e7a}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ac84ab852eaf88c7bebdb5030bb825e7a}
-
-\item 
-{\bfseries i\+\_\+total\+\_\+number\+\_\+of\+\_\+allele\+\_\+freq\+\_\+vals\+\_\+used} = len( o\+\_\+record\+\_\+obj.\+freqs\+\_\+used )\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a05eba0b2b40d977f89f692f8669fc186}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a05eba0b2b40d977f89f692f8669fc186}
-
-\item 
-string {\bfseries s\+\_\+msg} = \char`\"{}In \hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator}{P\+G\+Output\+Ne\+Estimator} instance, found estimation results of type, \char`\"{}\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a1f169a14c674802fe24383032eed2bc0}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a1f169a14c674802fe24383032eed2bc0}
-
-\item 
-dictionary {\bfseries ddv\+\_\+results} = \{\}\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a886cc26d58ac9300fa2e04d88248b15e}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a886cc26d58ac9300fa2e04d88248b15e}
-
-\item 
-{\bfseries lv\+\_\+results} = getattr( o\+\_\+record\+\_\+obj, s\+\_\+record\+\_\+attribute\+\_\+name )\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ae3655bfefda334cf3f5e655f594c2c90}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ae3655bfefda334cf3f5e655f594c2c90}
-
-\item 
-{\bfseries i\+\_\+num\+\_\+results} = len( lv\+\_\+results )\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_aa05a2e25820e8c387cbde63aff708d40}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_aa05a2e25820e8c387cbde63aff708d40}
-
 \end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
+\begin{DoxyVerb}Object manages output from the PGOpNeEstimator object
+\end{DoxyVerb}
+ 
 
-
-Definition at line 13 of file pgoutputneestimator.\+py.
+Definition at line 42 of file pgoutputneestimator.\+py.
 
 
 
@@ -122,97 +103,97 @@ located by the line starting with value below in POPLINESTART
 \end{DoxyVerb}
  
 
-Definition at line 219 of file pgoutputneestimator.\+py.
+Definition at line 383 of file pgoutputneestimator.\+py.
 
 
 \begin{DoxyCode}
-219     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a4f8192c2aacf6e38b2c4c1d80302b643}{parseNoDatFile}( self ):
-220         \textcolor{stringliteral}{'''}
-221 \textcolor{stringliteral}{        This def is provisional, since I have only seen}
-222 \textcolor{stringliteral}{        a few of the *NoDat.txt files generated by}
-223 \textcolor{stringliteral}{        NeEstimator (v2). I base the parsing on examples like this:}
-224 \textcolor{stringliteral}{}
-225 \textcolor{stringliteral}{        Population 1 [OmyLGRA12S\_0213]  }
-226 \textcolor{stringliteral}{        -----------------------------------------------------------}
-227 \textcolor{stringliteral}{        Individual       Locus         Genotype     Number of Loci}
-228 \textcolor{stringliteral}{                                          with missing data}
-229 \textcolor{stringliteral}{               1            9             0000             4   }
-230 \textcolor{stringliteral}{        ----------------------------------------------------------  }
-231 \textcolor{stringliteral}{        }
-232 \textcolor{stringliteral}{    }
-233 \textcolor{stringliteral}{        }
-234 \textcolor{stringliteral}{        However thin the ground, this def assumes}
-235 \textcolor{stringliteral}{}
-236 \textcolor{stringliteral}{        1. multipop results will simply have more table entries}
-237 \textcolor{stringliteral}{        like the one above.}
-238 \textcolor{stringliteral}{}
-239 \textcolor{stringliteral}{        2. If a line in the NeEstimator's "*NoDat.txt" file}
-240 \textcolor{stringliteral}{        starts with the value below in COLHEADSTART, and }
-241 \textcolor{stringliteral}{        contains the other column keywords given below}
-242 \textcolor{stringliteral}{        in COLSINCLUDE, that is must be the header and}
-243 \textcolor{stringliteral}{        also that the data follows after one mostly line blank}
-244 \textcolor{stringliteral}{        but for a tag on the last column header}
-245 \textcolor{stringliteral}{}
-246 \textcolor{stringliteral}{        3. Population name entry for each table is uniqely}
-247 \textcolor{stringliteral}{        located by the line starting with value below in POPLINESTART}
-248 \textcolor{stringliteral}{        '''}
-249 
-250 
-251         POPLINESTART=\textcolor{stringliteral}{"Population"}
-252         COLHEADSTART=\textcolor{stringliteral}{"Individual"}       
-253         COLSINCLUDE=[ \textcolor{stringliteral}{"Locus"}, \textcolor{stringliteral}{"Genotype"}, \textcolor{stringliteral}{"Number of Loci"} ]
-254         ENDTABLELINESTART=\textcolor{stringliteral}{"----------------------"}  
-255 
-256         s\_name=self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ab1fea13d322982ecc8b5fbe42741de50}{\_\_get\_name\_nodat\_file}()
-257 
-258         \textcolor{keywordflow}{if} s\_name \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
-259             \textcolor{keywordflow}{return}
-260         \textcolor{comment}{#end return if no nodat file}
-261 
-262         self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_acd31d6f910fc03d1945e38b6c4fa79c0}{\_\_parsed\_nodat\_output}=[]
-263 
-264         o\_file=open( s\_name )
-265 
-266         b\_found\_header=\textcolor{keyword}{False}
-267         i\_table\_lines\_count=0
-268         s\_currpop=\textcolor{stringliteral}{""}
-269         \textcolor{keywordflow}{for} s\_line \textcolor{keywordflow}{in} o\_file:
-270 
-271             i\_num\_match=0
-272             \textcolor{keywordflow}{if} s\_line.startswith( POPLINESTART ):
-273                 \textcolor{comment}{#we replace spaces in the pop name:}
-274                 s\_currpop=s\_line.strip().replace( \textcolor{stringliteral}{" "}, \textcolor{stringliteral}{"\_"} )
-275             \textcolor{keywordflow}{elif} s\_line.startswith(COLHEADSTART):
-276                 lb\_trues=[ s\_col \textcolor{keywordflow}{in} s\_line \textcolor{keywordflow}{for} s\_col \textcolor{keywordflow}{in} COLSINCLUDE ]
-277                 \textcolor{keywordflow}{if} sum( lb\_trues ) == len( COLSINCLUDE ):
-278                     b\_found\_header=\textcolor{keyword}{True}
-279                     i\_table\_lines\_count=0
-280                 \textcolor{comment}{#end if all header names in line}
-281             \textcolor{keywordflow}{else}:
-282                 \textcolor{comment}{#first line after header is more header:}
-283                 \textcolor{keywordflow}{if} b\_found\_header \textcolor{keywordflow}{and} i\_table\_lines\_count > 1:
-284                     \textcolor{comment}{#if end of table for currpop, }
-285                     \textcolor{comment}{#reset flag, line counts}
-286                     \textcolor{keywordflow}{if} s\_line.startswith( ENDTABLELINESTART ):
-287                         b\_found\_header=\textcolor{keyword}{False}
-288                         i\_table\_lines\_count=0
-289                     \textcolor{keywordflow}{else}:
-290                         i\_table\_lines\_count+=1
-291                         \textcolor{comment}{#NoDat.txt files data cols}
-292                         \textcolor{comment}{#are seperated by multiple space chars,}
-293                         \textcolor{comment}{#so we use the default split to}
-294                         \textcolor{comment}{#list only non-space as items:  }
-295                         ls\_vals=s\_line.strip().split() 
-296                         \textcolor{comment}{#first col is the pop name}
-297                         self.\_\_parsed\_nodat\_output.append( [ s\_currpop ] \(\backslash\)
-298                                 + [ s\_val \textcolor{keywordflow}{for} s\_val \textcolor{keywordflow}{in} ls\_vals ] )
-299                     \textcolor{comment}{#end if end-table line, else data}
-300                 \textcolor{comment}{#end if header's been found and we're past the non-date line}
-301             \textcolor{comment}{#end if pop line else header line, else some other line}
-302         \textcolor{comment}{#end for each line in nodat file}
-303 
-304         o\_file.close()
-305         \textcolor{keywordflow}{return}
+383     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a4f8192c2aacf6e38b2c4c1d80302b643}{parseNoDatFile}( self ):
+384         \textcolor{stringliteral}{'''}
+385 \textcolor{stringliteral}{        This def is provisional, since I have only seen}
+386 \textcolor{stringliteral}{        a few of the *NoDat.txt files generated by}
+387 \textcolor{stringliteral}{        NeEstimator (v2). I base the parsing on examples like this:}
+388 \textcolor{stringliteral}{}
+389 \textcolor{stringliteral}{        Population 1 [OmyLGRA12S\_0213]  }
+390 \textcolor{stringliteral}{        -----------------------------------------------------------}
+391 \textcolor{stringliteral}{        Individual       Locus         Genotype     Number of Loci}
+392 \textcolor{stringliteral}{                                          with missing data}
+393 \textcolor{stringliteral}{               1            9             0000             4   }
+394 \textcolor{stringliteral}{        ----------------------------------------------------------  }
+395 \textcolor{stringliteral}{        }
+396 \textcolor{stringliteral}{    }
+397 \textcolor{stringliteral}{        }
+398 \textcolor{stringliteral}{        However thin the ground, this def assumes}
+399 \textcolor{stringliteral}{}
+400 \textcolor{stringliteral}{        1. multipop results will simply have more table entries}
+401 \textcolor{stringliteral}{        like the one above.}
+402 \textcolor{stringliteral}{}
+403 \textcolor{stringliteral}{        2. If a line in the NeEstimator's "*NoDat.txt" file}
+404 \textcolor{stringliteral}{        starts with the value below in COLHEADSTART, and }
+405 \textcolor{stringliteral}{        contains the other column keywords given below}
+406 \textcolor{stringliteral}{        in COLSINCLUDE, that is must be the header and}
+407 \textcolor{stringliteral}{        also that the data follows after one mostly line blank}
+408 \textcolor{stringliteral}{        but for a tag on the last column header}
+409 \textcolor{stringliteral}{}
+410 \textcolor{stringliteral}{        3. Population name entry for each table is uniqely}
+411 \textcolor{stringliteral}{        located by the line starting with value below in POPLINESTART}
+412 \textcolor{stringliteral}{        '''}
+413 
+414 
+415         POPLINESTART=\textcolor{stringliteral}{"Population"}
+416         COLHEADSTART=\textcolor{stringliteral}{"Individual"}       
+417         COLSINCLUDE=[ \textcolor{stringliteral}{"Locus"}, \textcolor{stringliteral}{"Genotype"}, \textcolor{stringliteral}{"Number of Loci"} ]
+418         ENDTABLELINESTART=\textcolor{stringliteral}{"----------------------"}  
+419 
+420         s\_name=self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ab1fea13d322982ecc8b5fbe42741de50}{\_\_get\_name\_nodat\_file}()
+421 
+422         \textcolor{keywordflow}{if} s\_name \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
+423             \textcolor{keywordflow}{return}
+424         \textcolor{comment}{#end return if no nodat file}
+425 
+426         self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_acd31d6f910fc03d1945e38b6c4fa79c0}{\_\_parsed\_nodat\_output}=[]
+427 
+428         o\_file=open( s\_name )
+429 
+430         b\_found\_header=\textcolor{keyword}{False}
+431         i\_table\_lines\_count=0
+432         s\_currpop=\textcolor{stringliteral}{""}
+433         \textcolor{keywordflow}{for} s\_line \textcolor{keywordflow}{in} o\_file:
+434 
+435             i\_num\_match=0
+436             \textcolor{keywordflow}{if} s\_line.startswith( POPLINESTART ):
+437                 \textcolor{comment}{#we replace spaces in the pop name:}
+438                 s\_currpop=s\_line.strip().replace( \textcolor{stringliteral}{" "}, \textcolor{stringliteral}{"\_"} )
+439             \textcolor{keywordflow}{elif} s\_line.startswith(COLHEADSTART):
+440                 lb\_trues=[ s\_col \textcolor{keywordflow}{in} s\_line \textcolor{keywordflow}{for} s\_col \textcolor{keywordflow}{in} COLSINCLUDE ]
+441                 \textcolor{keywordflow}{if} sum( lb\_trues ) == len( COLSINCLUDE ):
+442                     b\_found\_header=\textcolor{keyword}{True}
+443                     i\_table\_lines\_count=0
+444                 \textcolor{comment}{#end if all header names in line}
+445             \textcolor{keywordflow}{else}:
+446                 \textcolor{comment}{#first line after header is more header:}
+447                 \textcolor{keywordflow}{if} b\_found\_header \textcolor{keywordflow}{and} i\_table\_lines\_count > 1:
+448                     \textcolor{comment}{#if end of table for currpop, }
+449                     \textcolor{comment}{#reset flag, line counts}
+450                     \textcolor{keywordflow}{if} s\_line.startswith( ENDTABLELINESTART ):
+451                         b\_found\_header=\textcolor{keyword}{False}
+452                         i\_table\_lines\_count=0
+453                     \textcolor{keywordflow}{else}:
+454                         i\_table\_lines\_count+=1
+455                         \textcolor{comment}{#NoDat.txt files data cols}
+456                         \textcolor{comment}{#are seperated by multiple space chars,}
+457                         \textcolor{comment}{#so we use the default split to}
+458                         \textcolor{comment}{#list only non-space as items:  }
+459                         ls\_vals=s\_line.strip().split() 
+460                         \textcolor{comment}{#first col is the pop name}
+461                         self.\_\_parsed\_nodat\_output.append( [ s\_currpop ] \(\backslash\)
+462                                 + [ s\_val \textcolor{keywordflow}{for} s\_val \textcolor{keywordflow}{in} ls\_vals ] )
+463                     \textcolor{comment}{#end if end-table line, else data}
+464                 \textcolor{comment}{#end if header's been found and we're past the non-date line}
+465             \textcolor{comment}{#end if pop line else header line, else some other line}
+466         \textcolor{comment}{#end for each line in nodat file}
+467 
+468         o\_file.close()
+469         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::pgoutputneestimator\+::\+P\+G\+Output\+Ne\+Estimator@{negui\+::pgoutputneestimator\+::\+P\+G\+Output\+Ne\+Estimator}!parse\+Output@{parse\+Output}}
 \index{parse\+Output@{parse\+Output}!negui\+::pgoutputneestimator\+::\+P\+G\+Output\+Ne\+Estimator@{negui\+::pgoutputneestimator\+::\+P\+G\+Output\+Ne\+Estimator}}
@@ -233,61 +214,59 @@ __get_parsed_output_data, reflects
 an "Infinite" value in the origina Ne estimator output
 and so convert it to "Inf,"  convenient for use in R,
 for example, as R uses Inf for Infinity
+
+2017_03_20.  We revise this def to allow getting parsed 
+data from an LDNe2 run, rather than an NeEstimator run. We 
+move the original code that is processing the ne estimator
+data as retrived using pygenomics.genomics.popgen.ne code,
+to a new def specified for the ne-estimator, 
+__set_parsed_output_using_ne_estimator_data.
+This also involves renaming some existing defs, for example:
+    __get_parsed_output_data -> __get_ne_estimator_parsed_output_data
 \end{DoxyVerb}
  
 
-Definition at line 76 of file pgoutputneestimator.\+py.
+Definition at line 255 of file pgoutputneestimator.\+py.
 
 
 \begin{DoxyCode}
-76     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a7b6885cf565cb604ab24d7082858f57b}{parseOutput}( self ):
-77         \textcolor{stringliteral}{'''}
-78 \textcolor{stringliteral}{        Fri Jul 22 18:07:53 MDT 2016 -- See }
-79 \textcolor{stringliteral}{        def \_\_ne2\_record\_object\_to\_dictionary for details on the}
-80 \textcolor{stringliteral}{        ddv\_results fetched below to unwrap the parsed results,}
-81 \textcolor{stringliteral}{        and the current limitation to estimation type LD}
-82 \textcolor{stringliteral}{}
-83 \textcolor{stringliteral}{        We assume that for the estimated ne value,}
-84 \textcolor{stringliteral}{        and its associated CI values, that a value of None in}
-85 \textcolor{stringliteral}{        the dict returned by ne2.parse def (see above }
-86 \textcolor{stringliteral}{        \_\_get\_parsed\_output\_data, reflects}
-87 \textcolor{stringliteral}{        an "Infinite" value in the origina Ne estimator output}
-88 \textcolor{stringliteral}{        and so convert it to "Inf,"  convenient for use in R,}
-89 \textcolor{stringliteral}{        for example, as R uses Inf for Infinity}
-90 \textcolor{stringliteral}{        '''}
-91 
-92         MISSING\_DATA\_ENTRY=\textcolor{stringliteral}{"NA"}
-93         INFINITE\_VALUE=\textcolor{stringliteral}{"Inf"}
-94 
-95         ddv\_results=self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a70fbaa3f31f7d7c3ec0fdea15e923680}{\_\_get\_parsed\_output\_data}()
-96 
-97         self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a3579f427ddfe05902a6f4e3301704191}{\_\_parsed\_output}=[]
-98 
-99         \textcolor{keywordflow}{for} s\_estimation\_type \textcolor{keywordflow}{in} ddv\_results:
-100             i\_estimate\_count=0
-101             \textcolor{keywordflow}{for} fcases \textcolor{keywordflow}{in} ddv\_results[ s\_estimation\_type ]:
-102                 esttype=s\_estimation\_type
-103                 estnum=str( i\_estimate\_count )
-104                 case = fcases[0] 
-105                 ne = case[\textcolor{stringliteral}{'EstNe'}]  \textcolor{keywordflow}{if} case[ \textcolor{stringliteral}{'EstNe'} ] \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} INFINITE\_VALUE
-106                 or2 = case[\textcolor{stringliteral}{'OvRSquare'}] 
-107                 sr2 = case[\textcolor{stringliteral}{'ExpRSquareSample'}] 
-108                 indep = case[\textcolor{stringliteral}{'IndepComp'}] 
-109                 hmean = case[\textcolor{stringliteral}{'HMean'}] 
-110                 ne05, ne975 = tuple(case[\textcolor{stringliteral}{'ParaNe'}]) 
-111                 \textcolor{comment}{#check the indivicual values of the CI's:}
-112                 ne05=ne05 \textcolor{keywordflow}{if} ne05 \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} INFINITE\_VALUE 
-113                 ne975=ne975 \textcolor{keywordflow}{if} ne975 \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} INFINITE\_VALUE
-114 
-115                 lv\_rawvals=[ esttype, estnum, ne, ne05, ne975, or2, sr2, indep, hmean  ] 
-116                 lv\_vals=[ v\_val \textcolor{keywordflow}{if} v\_val \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None} \textcolor{keywordflow}{else} MISSING\_DATA\_ENTRY \textcolor{keywordflow}{for} v\_val \textcolor{keywordflow}{in} lv\_rawvals ]
-117                 self.\_\_parsed\_output.append(  lv\_vals  )
-118 
-119                 i\_estimate\_count+=1
-120             \textcolor{comment}{#end for each case}
-121         \textcolor{comment}{#end for each estimation type}
-122             
-123         \textcolor{keywordflow}{return}
+255     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a7b6885cf565cb604ab24d7082858f57b}{parseOutput}( self ):
+256         \textcolor{stringliteral}{'''}
+257 \textcolor{stringliteral}{        Fri Jul 22 18:07:53 MDT 2016 -- See }
+258 \textcolor{stringliteral}{        def \_\_ne2\_record\_object\_to\_dictionary for details on the}
+259 \textcolor{stringliteral}{        ddv\_results fetched below to unwrap the parsed results,}
+260 \textcolor{stringliteral}{        and the current limitation to estimation type LD}
+261 \textcolor{stringliteral}{}
+262 \textcolor{stringliteral}{        We assume that for the estimated ne value,}
+263 \textcolor{stringliteral}{        and its associated CI values, that a value of None in}
+264 \textcolor{stringliteral}{        the dict returned by ne2.parse def (see above }
+265 \textcolor{stringliteral}{        \_\_get\_parsed\_output\_data, reflects}
+266 \textcolor{stringliteral}{        an "Infinite" value in the origina Ne estimator output}
+267 \textcolor{stringliteral}{        and so convert it to "Inf,"  convenient for use in R,}
+268 \textcolor{stringliteral}{        for example, as R uses Inf for Infinity}
+269 \textcolor{stringliteral}{        }
+270 \textcolor{stringliteral}{        2017\_03\_20.  We revise this def to allow getting parsed }
+271 \textcolor{stringliteral}{        data from an LDNe2 run, rather than an NeEstimator run. We }
+272 \textcolor{stringliteral}{        move the original code that is processing the ne estimator}
+273 \textcolor{stringliteral}{        data as retrived using pygenomics.genomics.popgen.ne code,}
+274 \textcolor{stringliteral}{        to a new def specified for the ne-estimator, }
+275 \textcolor{stringliteral}{        \_\_set\_parsed\_output\_using\_ne\_estimator\_data.}
+276 \textcolor{stringliteral}{        This also involves renaming some existing defs, for example:}
+277 \textcolor{stringliteral}{            \_\_get\_parsed\_output\_data -> \_\_get\_ne\_estimator\_parsed\_output\_data}
+278 \textcolor{stringliteral}{        '''}
+279         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a4d34bdc2e4c4fdc788722b016348c6ee}{\_\_estimator}==ESTIMATOR\_NEESTIMATOR:
+280             self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a10df28bc24347e441b225c3e5a7f3630}{\_\_set\_parsed\_output\_attribute\_using\_ne\_estimator\_data}
+      ()
+281         \textcolor{keywordflow}{elif} self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a4d34bdc2e4c4fdc788722b016348c6ee}{\_\_estimator}==ESTIMATOR\_LDNE:
+282             self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_ab60141608f13bb990250641db8b3817c}{\_\_set\_parsed\_output\_attribute\_using\_ldne\_data}
+      ()
+283         \textcolor{keywordflow}{else}:
+284             s\_msg=\textcolor{stringliteral}{"In PGOutputNeEstimator instance, def parseOutput, "} \(\backslash\)
+285                             + \textcolor{stringliteral}{"The estimator program name is unknown: "} \(\backslash\)
+286                             + self.\hyperlink{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_a4d34bdc2e4c4fdc788722b016348c6ee}{\_\_estimator}
+287             \textcolor{keywordflow}{raise} Exception( s\_msg )
+288         \textcolor{comment}{#end if neestimator, else ldne}
+289         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 
 
@@ -297,12 +276,13 @@ Definition at line 76 of file pgoutputneestimator.\+py.
 \subsubsection[{\texorpdfstring{O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+E\+L\+DS}{OUTPUT_FIELDS}}]{\setlength{\rightskip}{0pt plus 5cm}list negui.\+pgoutputneestimator.\+P\+G\+Output\+Ne\+Estimator.\+O\+U\+T\+P\+U\+T\+\_\+\+F\+I\+E\+L\+DS\hspace{0.3cm}{\ttfamily [static]}}\hypertarget{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_aa78fb93f7acf4a769ae309f1a3b94302}{}\label{classnegui_1_1pgoutputneestimator_1_1PGOutputNeEstimator_aa78fb93f7acf4a769ae309f1a3b94302}
 {\bfseries Initial value\+:}
 \begin{DoxyCode}
-1 = [ \textcolor{stringliteral}{"est\_type"}, \textcolor{stringliteral}{"case\_number"}, \textcolor{stringliteral}{"est\_ne"},\textcolor{stringliteral}{"95ci\_low"},\textcolor{stringliteral}{"95ci\_high"},\textcolor{stringliteral}{"overall\_rsquared"},
-2                     \textcolor{stringliteral}{"expected\_rsquared"},\textcolor{stringliteral}{"indep\_comparisons"},\textcolor{stringliteral}{"harmon\_mean\_samp\_size"} ]
+1 = [ \textcolor{stringliteral}{"est\_type"}, \textcolor{stringliteral}{"case\_number"}, \textcolor{stringliteral}{"est\_ne"},\textcolor{stringliteral}{"95ci\_low"},\textcolor{stringliteral}{"95ci\_high"}, \textcolor{stringliteral}{"overall\_rsquared"},
+2                     \textcolor{stringliteral}{"expected\_rsquared"},\textcolor{stringliteral}{"indep\_comparisons"},\textcolor{stringliteral}{"harmon\_mean\_samp\_size"}, \textcolor{stringliteral}{"alt\_ci\_low"}, \textcolor{stringliteral}{"
+      alt\_ci\_high"} ]
 \end{DoxyCode}
 
 
-Definition at line 15 of file pgoutputneestimator.\+py.
+Definition at line 48 of file pgoutputneestimator.\+py.
 
 
 

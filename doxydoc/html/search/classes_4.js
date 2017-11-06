@@ -1,9 +1,11 @@
 var searchData=
 [
+  ['genepopfilelociinfo',['GenepopFileLociInfo',['../classnegui_1_1genepopfilelociinfo_1_1GenepopFileLociInfo.html',1,'negui::genepopfilelociinfo']]],
   ['genepopfilemanager',['GenepopFileManager',['../classnegui_1_1genepopfilemanager_1_1GenepopFileManager.html',1,'negui::genepopfilemanager']]],
   ['genepopfilesampleparams',['GenepopFileSampleParams',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParams.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesampleparamsagestructurecohorts',['GenepopFileSampleParamsAgeStructureCohorts',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsAgeStructureCohorts.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesampleparamsagestructurerelateds',['GenepopFileSampleParamsAgeStructureRelateds',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsAgeStructureRelateds.html',1,'negui::genepopfilesampler']]],
+  ['genepopfilesampleparamscohorts',['GenepopFileSampleParamsCohorts',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCohorts.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesampleparamscriteria',['GenepopFileSampleParamsCriteria',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteria.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesampleparamscriteriaongroups',['GenepopFileSampleParamsCriteriaOnGroups',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsCriteriaOnGroups.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesampleparamsloci',['GenepopFileSampleParamsLoci',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsLoci.html',1,'negui::genepopfilesampler']]],
@@ -11,6 +13,7 @@ var searchData=
   ['genepopfilesampleparamsproportion',['GenepopFileSampleParamsProportion',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsProportion.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesampleparamsremoval',['GenepopFileSampleParamsRemoval',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampleParamsRemoval.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesampler',['GenepopFileSampler',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSampler.html',1,'negui::genepopfilesampler']]],
+  ['genepopfilesamplercohorts',['GenepopFileSamplerCohorts',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerCohorts.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesamplerindividualsagestructurecohorts',['GenepopFileSamplerIndividualsAgeStructureCohorts',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohorts.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesamplerindividualsagestructurecohortspercentage',['GenepopFileSamplerIndividualsAgeStructureCohortsPercentage',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureCohortsPercentage.html',1,'negui::genepopfilesampler']]],
   ['genepopfilesamplerindividualsagestructurerelateds',['GenepopFileSamplerIndividualsAgeStructureRelateds',['../classnegui_1_1genepopfilesampler_1_1GenepopFileSamplerIndividualsAgeStructureRelateds.html',1,'negui::genepopfilesampler']]],
@@ -28,5 +31,6 @@ var searchData=
   ['genepopindividagestructure',['GenepopIndivIdAgeStructure',['../classnegui_1_1genepopindividualid_1_1GenepopIndivIdAgeStructure.html',1,'negui::genepopindividualid']]],
   ['genepopindividfields',['GenepopIndivIdFields',['../classnegui_1_1genepopindividualid_1_1GenepopIndivIdFields.html',1,'negui::genepopindividualid']]],
   ['genepopindividualid',['GenepopIndividualId',['../classnegui_1_1genepopindividualid_1_1GenepopIndividualId.html',1,'negui::genepopindividualid']]],
-  ['genepopindividvals',['GenepopIndivIdVals',['../classnegui_1_1genepopindividualid_1_1GenepopIndivIdVals.html',1,'negui::genepopindividualid']]]
+  ['genepopindividvals',['GenepopIndivIdVals',['../classnegui_1_1genepopindividualid_1_1GenepopIndivIdVals.html',1,'negui::genepopindividualid']]],
+  ['genepoppopwriter',['GenepopPopWriter',['../classnegui_1_1pgutilityclasses_1_1GenepopPopWriter.html',1,'negui::pgutilityclasses']]]
 ];

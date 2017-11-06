@@ -6,117 +6,182 @@
 def {\bfseries cleanup\+\_\+gui} (o\+\_\+host)\hypertarget{namespacenegui_1_1negui_a633f9fe59f5e342abb4e0902629dbfd4}{}\label{namespacenegui_1_1negui_a633f9fe59f5e342abb4e0902629dbfd4}
 
 \item 
-def {\bfseries ask\+\_\+before\+\_\+exit} ()\hypertarget{namespacenegui_1_1negui_a2aa2a75db3418b5a53ed437dce9938fb}{}\label{namespacenegui_1_1negui_a2aa2a75db3418b5a53ed437dce9938fb}
+def {\bfseries confirm\+\_\+resources} (s\+\_\+life\+\_\+table\+\_\+glob, s\+\_\+menu\+\_\+config, s\+\_\+param\+\_\+name\+\_\+file\+\_\+dir)\hypertarget{namespacenegui_1_1negui_aa8e9d885a42354240dbcc33d8f06e562}{}\label{namespacenegui_1_1negui_aa8e9d885a42354240dbcc33d8f06e562}
 
+\item 
+def {\bfseries get\+\_\+param\+\_\+file\+\_\+names} (s\+\_\+param\+\_\+name\+\_\+file\+\_\+dir)\hypertarget{namespacenegui_1_1negui_a2b414be2cea7913bf71c4c35b5c1e015}{}\label{namespacenegui_1_1negui_a2b414be2cea7913bf71c4c35b5c1e015}
+
+\item 
+def \hyperlink{namespacenegui_1_1negui_a3ae02c04d1a16d3a3f855196fa2be244}{negui\+\_\+main} ()
 \end{DoxyCompactItemize}
 \subsection*{Variables}
 \begin{DoxyCompactItemize}
 \item 
-float {\bfseries W\+I\+N\+D\+O\+W\+\_\+\+M\+A\+R\+G\+IN} = 0.\+20\hypertarget{namespacenegui_1_1negui_a9b4bed807593f13a45b32cad9ad03302}{}\label{namespacenegui_1_1negui_a9b4bed807593f13a45b32cad9ad03302}
+list {\bfseries P\+A\+R\+A\+M\+\_\+\+N\+A\+M\+E\+\_\+\+F\+I\+L\+ES} = \mbox{[} \char`\"{}simupop.\+param.\+names\char`\"{}, \char`\"{}neestimation.\+param.\+names\char`\"{}, \char`\"{}viz.\+param.\+names\char`\"{} \mbox{]}\hypertarget{namespacenegui_1_1negui_a6257f75fe3ed7fe0b5a4cff4cb694e47}{}\label{namespacenegui_1_1negui_a6257f75fe3ed7fe0b5a4cff4cb694e47}
 
 \item 
-int {\bfseries C\+O\+N\+T\+A\+I\+N\+E\+R\+\_\+\+P\+A\+D\+D\+I\+NG} = 10\hypertarget{namespacenegui_1_1negui_a697772153f0161816728f03911a53ed4}{}\label{namespacenegui_1_1negui_a697772153f0161816728f03911a53ed4}
-
-\item 
-list {\bfseries L\+S\+\_\+\+F\+L\+A\+G\+S\+\_\+\+S\+H\+O\+R\+T\+\_\+\+O\+P\+T\+I\+O\+N\+AL} = \mbox{[} \char`\"{}-\/p\char`\"{}, \char`\"{}-\/l\char`\"{} \mbox{]}\hypertarget{namespacenegui_1_1negui_ae53d15f57c250565845a17a425a90afa}{}\label{namespacenegui_1_1negui_ae53d15f57c250565845a17a425a90afa}
-
-\item 
-list {\bfseries L\+S\+\_\+\+F\+L\+A\+G\+S\+\_\+\+L\+O\+N\+G\+\_\+\+O\+P\+T\+I\+O\+N\+AL} = \mbox{[} \char`\"{}-\/-\/processes\char`\"{}, \char`\"{}-\/-\/lifetable\char`\"{} \mbox{]}\hypertarget{namespacenegui_1_1negui_a46e303892af9fa268c656af527ac1568}{}\label{namespacenegui_1_1negui_a46e303892af9fa268c656af527ac1568}
-
-\item 
-string {\bfseries s\+\_\+help\+\_\+processes\+\_\+option} = \char`\"{}Number of processes to use in the simulation (1 used per replicate, one process \char`\"{}\hypertarget{namespacenegui_1_1negui_aa0b1d5dce29751ae81f30927168edc3c}{}\label{namespacenegui_1_1negui_aa0b1d5dce29751ae81f30927168edc3c}
-
-\item 
-string {\bfseries s\+\_\+help\+\_\+lifetable\+\_\+option} = \char`\"{}life table file or pattern to match multiple life table files (use quotes). \char`\"{}\hypertarget{namespacenegui_1_1negui_afffa3d3a92fb8773a23551764f8f8eaa}{}\label{namespacenegui_1_1negui_afffa3d3a92fb8773a23551764f8f8eaa}
-
-\item 
-list {\bfseries L\+S\+\_\+\+A\+R\+G\+S\+\_\+\+H\+E\+L\+P\+\_\+\+O\+P\+T\+I\+O\+N\+AL} = \mbox{[} s\+\_\+help\+\_\+processes\+\_\+option , s\+\_\+help\+\_\+lifetable\+\_\+option \mbox{]}\hypertarget{namespacenegui_1_1negui_a212525736c85a79708529d797635af9e}{}\label{namespacenegui_1_1negui_a212525736c85a79708529d797635af9e}
-
-\item 
-{\bfseries o\+\_\+parser} = ap.\+Argument\+Parser()\hypertarget{namespacenegui_1_1negui_a0238cdb30b4db858939b3a3547a01291}{}\label{namespacenegui_1_1negui_a0238cdb30b4db858939b3a3547a01291}
-
-\item 
-{\bfseries i\+\_\+total\+\_\+options} = len( L\+S\+\_\+\+F\+L\+A\+G\+S\+\_\+\+S\+H\+O\+R\+T\+\_\+\+O\+P\+T\+I\+O\+N\+AL )\hypertarget{namespacenegui_1_1negui_a755d148e355ee43be3122668737cca98}{}\label{namespacenegui_1_1negui_a755d148e355ee43be3122668737cca98}
-
-\item 
-{\bfseries help}\hypertarget{namespacenegui_1_1negui_ab2f52d57c94461393fe55c281d73c2eb}{}\label{namespacenegui_1_1negui_ab2f52d57c94461393fe55c281d73c2eb}
-
-\item 
-{\bfseries required}\hypertarget{namespacenegui_1_1negui_a997e18ffce4f999fc997cf56e330ca14}{}\label{namespacenegui_1_1negui_a997e18ffce4f999fc997cf56e330ca14}
-
-\item 
-{\bfseries o\+\_\+args} = o\+\_\+parser.\+parse\+\_\+args()\hypertarget{namespacenegui_1_1negui_a13daffa2de8e8d9b13b95a03859f0f17}{}\label{namespacenegui_1_1negui_a13daffa2de8e8d9b13b95a03859f0f17}
-
-\item 
-{\bfseries s\+\_\+my\+\_\+mod\+\_\+path} = os.\+path.\+abspath( \+\_\+\+\_\+file\+\_\+\+\_\+ )\hypertarget{namespacenegui_1_1negui_ac3d503277c8f4b646ff8bc4a88922931}{}\label{namespacenegui_1_1negui_ac3d503277c8f4b646ff8bc4a88922931}
-
-\item 
-{\bfseries s\+\_\+my\+\_\+mod\+\_\+dir} = os.\+path.\+dirname( s\+\_\+my\+\_\+mod\+\_\+path )\hypertarget{namespacenegui_1_1negui_af56cb9927731f0b94f9bf9744ae41e4f}{}\label{namespacenegui_1_1negui_af56cb9927731f0b94f9bf9744ae41e4f}
-
-\item 
-int {\bfseries i\+\_\+total\+\_\+simultaneous\+\_\+processes} = 1\hypertarget{namespacenegui_1_1negui_ac3d7219be606c9a080eeb9b3121c1c85}{}\label{namespacenegui_1_1negui_ac3d7219be606c9a080eeb9b3121c1c85}
-
-\item 
-string {\bfseries s\+\_\+default\+\_\+life\+\_\+tables} = s\+\_\+my\+\_\+mod\+\_\+dir+\char`\"{}/resources/$\ast$life.\+table.\+info\char`\"{}\hypertarget{namespacenegui_1_1negui_aebe3cdf18a6fb06977342427f5bdf539}{}\label{namespacenegui_1_1negui_aebe3cdf18a6fb06977342427f5bdf539}
-
-\item 
-string {\bfseries s\+\_\+menu\+\_\+config} = s\+\_\+my\+\_\+mod\+\_\+dir+\char`\"{}/resources/menu\+\_\+main\+\_\+interface.\+txt\char`\"{}\hypertarget{namespacenegui_1_1negui_a633625b34a8aedc24e0f289b5aaeef80}{}\label{namespacenegui_1_1negui_a633625b34a8aedc24e0f289b5aaeef80}
-
-\item 
-string {\bfseries s\+\_\+param\+\_\+name\+\_\+file} = s\+\_\+my\+\_\+mod\+\_\+dir+\char`\"{}/resources/simupop.\+param.\+names\char`\"{}\hypertarget{namespacenegui_1_1negui_a41ff694cb0b09aa2ce195c71a5756edf}{}\label{namespacenegui_1_1negui_a41ff694cb0b09aa2ce195c71a5756edf}
-
-\item 
-{\bfseries o\+\_\+master} = Tk()\hypertarget{namespacenegui_1_1negui_a2c4f72271479ddc1a76da3f12a7b8ae9}{}\label{namespacenegui_1_1negui_a2c4f72271479ddc1a76da3f12a7b8ae9}
-
-\item 
-{\bfseries i\+\_\+width} = o\+\_\+master.\+winfo\+\_\+screenwidth()\hypertarget{namespacenegui_1_1negui_a6139fe01ac7f460563e2bf187daf3581}{}\label{namespacenegui_1_1negui_a6139fe01ac7f460563e2bf187daf3581}
-
-\item 
-{\bfseries i\+\_\+height} = o\+\_\+master.\+winfo\+\_\+screenheight()\hypertarget{namespacenegui_1_1negui_a100009f5c5614a0af046d1fa5198292c}{}\label{namespacenegui_1_1negui_a100009f5c5614a0af046d1fa5198292c}
-
-\item 
-{\bfseries i\+\_\+geo\+\_\+width} = int( ( i\+\_\+width/2 ) $\ast$ ( 1 -\/ W\+I\+N\+D\+O\+W\+\_\+\+M\+A\+R\+G\+IN ) )\hypertarget{namespacenegui_1_1negui_a58c17801bb71fab5e1065a571592b80c}{}\label{namespacenegui_1_1negui_a58c17801bb71fab5e1065a571592b80c}
-
-\item 
-{\bfseries i\+\_\+geo\+\_\+height} = int( ( i\+\_\+height/2 ) $\ast$ ( 1 -\/ W\+I\+N\+D\+O\+W\+\_\+\+M\+A\+R\+G\+IN ) )\hypertarget{namespacenegui_1_1negui_a3112d1686c284df2d10c0f77c5dc5cbe}{}\label{namespacenegui_1_1negui_a3112d1686c284df2d10c0f77c5dc5cbe}
-
-\item 
-{\bfseries o\+\_\+host}
-\item 
-{\bfseries row}\hypertarget{namespacenegui_1_1negui_a1891ae87fc34f0a97c0a376c1fd7ab36}{}\label{namespacenegui_1_1negui_a1891ae87fc34f0a97c0a376c1fd7ab36}
-
-\item 
-{\bfseries weight}\hypertarget{namespacenegui_1_1negui_aebca42043260f0b71ddc51fafff5b74d}{}\label{namespacenegui_1_1negui_aebca42043260f0b71ddc51fafff5b74d}
-
-\item 
-{\bfseries column}\hypertarget{namespacenegui_1_1negui_a98244dd0790e996e2c692c294289f11d}{}\label{namespacenegui_1_1negui_a98244dd0790e996e2c692c294289f11d}
-
-\item 
-{\bfseries sticky}\hypertarget{namespacenegui_1_1negui_a1ce52a3e7a52079e56727952c374fb22}{}\label{namespacenegui_1_1negui_a1ce52a3e7a52079e56727952c374fb22}
-
+dictionary {\bfseries P\+A\+R\+A\+M\+\_\+\+F\+I\+L\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME}
 \end{DoxyCompactItemize}
 
 
 \subsection{Detailed Description}
 \begin{DoxyVerb}Description
 
-Provisional driver for the negui program
+Driver for the negui program
 \end{DoxyVerb}
  
 
-\subsection{Variable Documentation}
-\index{negui\+::negui@{negui\+::negui}!o\+\_\+host@{o\+\_\+host}}
-\index{o\+\_\+host@{o\+\_\+host}!negui\+::negui@{negui\+::negui}}
-\subsubsection[{\texorpdfstring{o\+\_\+host}{o_host}}]{\setlength{\rightskip}{0pt plus 5cm}negui.\+negui.\+o\+\_\+host}\hypertarget{namespacenegui_1_1negui_ad01236b6cf0c010c914df1d7ee1c96a1}{}\label{namespacenegui_1_1negui_ad01236b6cf0c010c914df1d7ee1c96a1}
-{\bfseries Initial value\+:}
+\subsection{Function Documentation}
+\index{negui\+::negui@{negui\+::negui}!negui\+\_\+main@{negui\+\_\+main}}
+\index{negui\+\_\+main@{negui\+\_\+main}!negui\+::negui@{negui\+::negui}}
+\subsubsection[{\texorpdfstring{negui\+\_\+main()}{negui_main()}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+negui.\+negui\+\_\+main (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\hypertarget{namespacenegui_1_1negui_a3ae02c04d1a16d3a3f855196fa2be244}{}\label{namespacenegui_1_1negui_a3ae02c04d1a16d3a3f855196fa2be244}
+\begin{DoxyVerb}Note, 2016_12_29: I removed all optional arguments for negui.py, by now
+unnecessary.  The optional args were and int giving total processes (now
+defaulting to 1 process, and settable in the indivudual interfaces), and
+a default life table file, which I've discarded in favor of always loading
+all life tables.
+\end{DoxyVerb}
+ 
+
+Definition at line 101 of file negui.\+py.
+
+
 \begin{DoxyCode}
-1 = pgn.PGHostNotebook( o\_master, 
-2             s\_menu\_config, 
-3             s\_param\_name\_file, 
-4             s\_glob\_life\_tables=s\_default\_life\_tables,
-5             i\_max\_process\_total=i\_total\_simultaneous\_processes )
+101 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1negui_a3ae02c04d1a16d3a3f855196fa2be244}{negui\_main}():
+102 
+103     \textcolor{stringliteral}{'''}
+104 \textcolor{stringliteral}{    Note, 2016\_12\_29: I removed all optional arguments for negui.py, by now}
+105 \textcolor{stringliteral}{    unnecessary.  The optional args were and int giving total processes (now}
+106 \textcolor{stringliteral}{    defaulting to 1 process, and settable in the indivudual interfaces), and}
+107 \textcolor{stringliteral}{    a default life table file, which I've discarded in favor of always loading}
+108 \textcolor{stringliteral}{    all life tables.}
+109 \textcolor{stringliteral}{    '''}
+110 
+111     WINDOW\_MARGIN=0.20
+112     CONTAINER\_PADDING=10
+113     
+114     s\_my\_mod\_path=os.path.abspath( \_\_file\_\_ )
+115     
+116     s\_my\_mod\_dir=os.path.dirname( s\_my\_mod\_path )
+117 
+118     i\_total\_simultaneous\_processes=1
+119 
+120     s\_default\_life\_tables = s\_my\_mod\_dir + \textcolor{stringliteral}{"/resources/*life.table.info"}
+121     s\_menu\_config=s\_my\_mod\_dir + \textcolor{stringliteral}{"/resources/menu\_main\_interface.txt"} 
+122     s\_param\_name\_file\_dir=s\_my\_mod\_dir + \textcolor{stringliteral}{"/resources"}
+123 
+124     db\_found\_files=confirm\_resources( s\_default\_life\_tables, 
+125                                                 s\_menu\_config, 
+126                                                 s\_param\_name\_file\_dir )
+127 
+128     \textcolor{comment}{#The program can't run without these files:}
+129     \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} ( db\_found\_files[ \textcolor{stringliteral}{"menu\_file"} ] \textcolor{keywordflow}{and} db\_found\_files[ \textcolor{stringliteral}{"param\_name\_files"} ] ):
+130         s\_msg=\textcolor{stringliteral}{"In negui, def negui\_main, "} \(\backslash\)
+131                 + \textcolor{stringliteral}{"there were resource files not found: "} \(\backslash\)
+132                 + \textcolor{stringliteral}{"\(\backslash\)n"}.join( db\_found\_files[ \textcolor{stringliteral}{"msgs"} ] )
+133         
+134         PGGUIErrorMessage( \textcolor{keywordtype}{None}, s\_msg )
+135         \textcolor{keywordflow}{raise} Exception( s\_msg )
+136     \textcolor{comment}{#end if required file not found}
+137 
+138     \textcolor{stringliteral}{'''}
+139 \textcolor{stringliteral}{    The program can run without life table files loaded,}
+140 \textcolor{stringliteral}{    but we'll send a warning to the console that all}
+141 \textcolor{stringliteral}{    needed params need to be supplied by the config file.}
+142 \textcolor{stringliteral}{    '''}
+143     \textcolor{keywordflow}{if} \textcolor{keywordflow}{not} db\_found\_files[ \textcolor{stringliteral}{"life\_tables"} ]:
+144         s\_msg=\textcolor{stringliteral}{"In negui, def negui\_main, "} \(\backslash\)
+145                         + \textcolor{stringliteral}{"warning: "} \(\backslash\)
+146                         + \textcolor{stringliteral}{"\(\backslash\)n"}.join( db\_found\_files[ \textcolor{stringliteral}{"msgs"} ]  )
+147 
+148         PGGUIWarningMessage( \textcolor{keywordtype}{None}, s\_msg )
+149         sys.stderr.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
+150 
+151         s\_default\_life\_tables=\textcolor{keywordtype}{None}
+152     \textcolor{comment}{#end if param names}
+153 
+154     ds\_param\_file\_names=get\_param\_file\_names( s\_param\_name\_file\_dir )
+155 
+156     \textcolor{keywordflow}{if} pgut.is\_windows\_platform():
+157         \textcolor{keywordflow}{if} s\_default\_life\_tables \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+158             s\_default\_life\_tables=pgut.fix\_windows\_path( s\_default\_life\_tables )
+159         \textcolor{comment}{#end if life table files exist}
+160         s\_menu\_config=pgut.fix\_windows\_path( s\_menu\_config )
+161 
+162         \textcolor{keywordflow}{for} s\_filekey \textcolor{keywordflow}{in} ds\_param\_file\_names:
+163             ds\_param\_file\_names[ s\_filekey ] = \(\backslash\)
+164                     pgut.fix\_windows\_path( \(\backslash\)
+165                             ds\_param\_file\_names[ s\_filekey ] )
+166         \textcolor{comment}{#end for each param file}
+167     \textcolor{comment}{#end if windows, fix paths}
+168 
+169     o\_master=Tk()
+170 
+171     i\_width=o\_master.winfo\_screenwidth()
+172     i\_height=o\_master.winfo\_screenheight()
+173 
+174     i\_geo\_width=int( ( old\_div(i\_width,2) ) * ( 1 - WINDOW\_MARGIN ) )
+175     i\_geo\_height=int( ( old\_div(i\_height,2) ) * ( 1 - WINDOW\_MARGIN ) )
+176 
+177     o\_host=pgn.PGHostNotebook( o\_master, 
+178             s\_menu\_config, 
+179             ds\_param\_file\_names[ \textcolor{stringliteral}{"sim"} ], 
+180             ds\_param\_file\_names[ \textcolor{stringliteral}{"ne"} ], 
+181             ds\_param\_file\_names[ \textcolor{stringliteral}{"viz"} ], 
+182             s\_glob\_life\_tables=s\_default\_life\_tables,
+183             i\_max\_process\_total=i\_total\_simultaneous\_processes )
+184 
+185     o\_host.grid( row=0 )
+186     o\_host.grid\_rowconfigure( 0, weight=1 )
+187     o\_host.grid\_columnconfigure( 0, weight=1 )
+188     o\_host.grid( row=0, column=0, sticky=( N,W,S,E ))
+189 
+190     o\_master.geometry( str(  i\_geo\_width ) + \textcolor{stringliteral}{"x"} + str( i\_geo\_height ) )
+191     o\_master.title( \textcolor{stringliteral}{"Age Structure Nb"} )    
+192     o\_master.grid\_rowconfigure( 0, weight=1 )
+193     o\_master.grid\_columnconfigure( 0, weight=1 )
+194 
+195     atexit.register( cleanup\_gui, o\_host )
+196 
+197 
+198     \textcolor{keyword}{def }ask\_before\_exit():
+199         s\_msg=\textcolor{stringliteral}{"Exiting will kill any unfinished analyses "} \(\backslash\)
+200                 + \textcolor{stringliteral}{"and remove their output files.  Exit anyway?"}
+201 
+202         o\_mbox=PGGUIYesNoMessage( \textcolor{keywordtype}{None}, s\_msg )
+203 
+204         s\_answer=o\_mbox.value
+205 
+206         \textcolor{keywordflow}{if} s\_answer == \textcolor{keyword}{True}:
+207             o\_master.destroy()
+208         \textcolor{comment}{#end if do exit}
+209     \textcolor{comment}{#end ask\_before\_exit}
+210     
+211     o\_master.protocol( \textcolor{stringliteral}{"WM\_DELETE\_WINDOW"}, ask\_before\_exit )
+212 
+213     o\_master.mainloop()
+214 
+215     \textcolor{keywordflow}{return}
+216 \textcolor{comment}{#end def negui\_main}
+217 
 \end{DoxyCode}
 
 
-Definition at line 102 of file negui.\+py.
+\subsection{Variable Documentation}
+\index{negui\+::negui@{negui\+::negui}!P\+A\+R\+A\+M\+\_\+\+F\+I\+L\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME@{P\+A\+R\+A\+M\+\_\+\+F\+I\+L\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME}}
+\index{P\+A\+R\+A\+M\+\_\+\+F\+I\+L\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME@{P\+A\+R\+A\+M\+\_\+\+F\+I\+L\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME}!negui\+::negui@{negui\+::negui}}
+\subsubsection[{\texorpdfstring{P\+A\+R\+A\+M\+\_\+\+F\+I\+L\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME}{PARAM_FILE_KEYS_BY_FILE_NAME}}]{\setlength{\rightskip}{0pt plus 5cm}dictionary negui.\+negui.\+P\+A\+R\+A\+M\+\_\+\+F\+I\+L\+E\+\_\+\+K\+E\+Y\+S\+\_\+\+B\+Y\+\_\+\+F\+I\+L\+E\+\_\+\+N\+A\+ME}\hypertarget{namespacenegui_1_1negui_aaf04079b95df479b9db4dd490352430c}{}\label{namespacenegui_1_1negui_aaf04079b95df479b9db4dd490352430c}
+{\bfseries Initial value\+:}
+\begin{DoxyCode}
+1 = \{ \textcolor{stringliteral}{"simupop.param.names"}:\textcolor{stringliteral}{"sim"}, 
+2                                     \textcolor{stringliteral}{"neestimation.param.names"}:\textcolor{stringliteral}{"ne"}, 
+3                                         \textcolor{stringliteral}{"viz.param.names"}:\textcolor{stringliteral}{"viz"} \}
+\end{DoxyCode}
+
+
+Definition at line 32 of file negui.\+py.
 

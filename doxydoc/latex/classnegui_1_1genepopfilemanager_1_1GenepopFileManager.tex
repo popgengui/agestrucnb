@@ -15,7 +15,7 @@ def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, s\+\_\+filename)\hypertarget
 def {\bfseries write\+Gene\+Pop\+File} (self, s\+\_\+newfilename, s\+\_\+pop\+\_\+subsample\+\_\+tag=None, s\+\_\+indiv\+\_\+subsample\+\_\+tag=None, s\+\_\+loci\+\_\+subsample\+\_\+tag=None, i\+\_\+min\+\_\+pop\+\_\+size=0)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a7390cad5840454284e816679a87d84df}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a7390cad5840454284e816679a87d84df}
 
 \item 
-def {\bfseries print\+Gene\+Pop\+File} (self, s\+\_\+pop\+\_\+subsample\+\_\+tag=None, s\+\_\+indiv\+\_\+subsample\+\_\+tag=None, s\+\_\+loci\+\_\+subsample\+\_\+tag=None, i\+\_\+min\+\_\+pop\+\_\+size=0)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a35aa30c43ab4a5e7762bf8c722314727}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a35aa30c43ab4a5e7762bf8c722314727}
+def {\bfseries print\+Gene\+Pop\+File} (self, s\+\_\+pop\+\_\+subsample\+\_\+tag=None, s\+\_\+indiv\+\_\+subsample\+\_\+tag=None, s\+\_\+loci\+\_\+subsample\+\_\+tag=None, i\+\_\+min\+\_\+pop\+\_\+size=0, o\+\_\+outstream=sys.\+stdout)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a45625a9221c61af610b495b43c235099}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a45625a9221c61af610b495b43c235099}
 
 \item 
 def {\bfseries get\+List\+Individual\+Numbers} (self, i\+\_\+pop\+\_\+number=1, s\+\_\+indiv\+\_\+subsample\+\_\+tag=None)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a652029f0a6e0668e0b75c9683dae0ffd}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a652029f0a6e0668e0b75c9683dae0ffd}
@@ -64,10 +64,13 @@ def \hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a05e723069
 def {\bfseries combine\+Individual\+Subsamples} (self, ls\+\_\+subsample\+\_\+tags, s\+\_\+tag\+\_\+for\+\_\+combined\+\_\+subsample)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a3f62c4250a0aa8a9b810424d0f62c068}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a3f62c4250a0aa8a9b810424d0f62c068}
 
 \item 
-def {\bfseries remove\+Individual\+Subsamples} (ls\+\_\+subsample\+\_\+tags)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae0f452a29252cdd75393effc2baa9299}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae0f452a29252cdd75393effc2baa9299}
+def {\bfseries remove\+Individual\+Subsamples} (self, ls\+\_\+subsample\+\_\+tags)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a29bc63d2fa6273a924598b0c9a7d7742}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a29bc63d2fa6273a924598b0c9a7d7742}
 
 \item 
 def {\bfseries pop\+\_\+total} (self)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_afeefa4552274231bedce1fc6b8c0532d}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_afeefa4552274231bedce1fc6b8c0532d}
+
+\item 
+def {\bfseries loci\+\_\+total} (self)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a3d9ea6e211b53f43bb2b8d1c59090a6f}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a3d9ea6e211b53f43bb2b8d1c59090a6f}
 
 \item 
 def \hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ac3210c8f51c32e9e99e34703afb402d0}{population\+\_\+subsample\+\_\+tags} (self)
@@ -80,6 +83,11 @@ def {\bfseries original\+\_\+file\+\_\+name} (self)\hypertarget{classnegui_1_1ge
 
 \item 
 def \hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_abec8e261bad014e6488162ec43e63ef7}{original\+\_\+file\+\_\+name} (self, s\+\_\+filename)
+\item 
+def {\bfseries get\+Allele\+Counts} (self, s\+\_\+pop\+\_\+subsample\+\_\+tag=None, s\+\_\+indiv\+\_\+subsample\+\_\+tag=None, s\+\_\+loci\+\_\+subsample\+\_\+tag=None, b\+\_\+skip\+\_\+loci\+\_\+with\+\_\+parial\+\_\+data=True)\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a057e6970d1a5adf6a534c9ef8f2997a2}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a057e6970d1a5adf6a534c9ef8f2997a2}
+
+\item 
+def \hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a92fb714bb0d1caf2bc9b7c92acf48c40}{header} (self)
 \end{DoxyCompactItemize}
 \subsection*{Static Public Attributes}
 \begin{DoxyCompactItemize}
@@ -128,7 +136,7 @@ on multiple lines) of the first indiv:
 \end{DoxyVerb}
  
 
-Definition at line 14 of file genepopfilemanager.\+py.
+Definition at line 28 of file genepopfilemanager.\+py.
 
 
 
@@ -150,38 +158,38 @@ the sampling named by the tag.
 \end{DoxyVerb}
  
 
-Definition at line 1402 of file genepopfilemanager.\+py.
+Definition at line 1473 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1402     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a05e723069f5129b21a4d017c2a5317b0}{getIndividualCount}( self, i\_pop\_number, s\_indiv\_subsample\_tag=None ):
-1403         \textcolor{stringliteral}{'''}
-1404 \textcolor{stringliteral}{        Expects 1-based population number.}
-1405 \textcolor{stringliteral}{        Returns the individual count for the ith of N populations, i=1,2,3...N}
-1406 \textcolor{stringliteral}{        If s\_indiv\_subsample\_tag is supplied, then the counts will}
-1407 \textcolor{stringliteral}{        reflect those of the individuals in the ith population after}
-1408 \textcolor{stringliteral}{        the sampling named by the tag.}
-1409 \textcolor{stringliteral}{        '''}
-1410 
-1411         i\_total\_pops\_in\_file=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a51f6dcbd17c80f8e61114b11283b655f}{\_\_get\_count\_populations}()  
-1412 
-1413         \textcolor{keywordflow}{if} i\_pop\_number < 1 \textcolor{keywordflow}{or} i\_pop\_number > i\_total\_pops\_in\_file:
-1414 
-1415             s\_msg=\textcolor{stringliteral}{"In GenepopFileManager instance, def getIndividualCount, "} \(\backslash\)
-1416                     + \textcolor{stringliteral}{"invalid population number for file with total populations, "} \(\backslash\)
-1417                     + str( i\_total\_pops\_in\_file ) \(\backslash\)
-1418                     + \textcolor{stringliteral}{".  Pop number requested: "} + str( i\_pop\_number ) + \textcolor{stringliteral}{"."}
-1419 
-1420             \textcolor{keywordflow}{raise} Exception( s\_msg )
-1421 
-1422         \textcolor{comment}{#end if  invalid population number}
-1423 
-1424         li\_counts=\textcolor{keywordtype}{None}
-1425 
-1426         li\_counts=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a8efe11151549d7da2bc024f836491af4}{\_\_get\_count\_indiv\_per\_pop}( s\_indiv\_subsample\_tag )
-1427         \textcolor{comment}{#end if we get counts from subsample}
-1428 
-1429         \textcolor{keywordflow}{return} li\_counts[ i\_pop\_number - 1 ]
+1473     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a05e723069f5129b21a4d017c2a5317b0}{getIndividualCount}( self, i\_pop\_number, s\_indiv\_subsample\_tag=None ):
+1474         \textcolor{stringliteral}{'''}
+1475 \textcolor{stringliteral}{        Expects 1-based population number.}
+1476 \textcolor{stringliteral}{        Returns the individual count for the ith of N populations, i=1,2,3...N}
+1477 \textcolor{stringliteral}{        If s\_indiv\_subsample\_tag is supplied, then the counts will}
+1478 \textcolor{stringliteral}{        reflect those of the individuals in the ith population after}
+1479 \textcolor{stringliteral}{        the sampling named by the tag.}
+1480 \textcolor{stringliteral}{        '''}
+1481 
+1482         i\_total\_pops\_in\_file=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a51f6dcbd17c80f8e61114b11283b655f}{\_\_get\_count\_populations}()  
+1483 
+1484         \textcolor{keywordflow}{if} i\_pop\_number < 1 \textcolor{keywordflow}{or} i\_pop\_number > i\_total\_pops\_in\_file:
+1485 
+1486             s\_msg=\textcolor{stringliteral}{"In GenepopFileManager instance, def getIndividualCount, "} \(\backslash\)
+1487                     + \textcolor{stringliteral}{"invalid population number for file with total populations, "} \(\backslash\)
+1488                     + str( i\_total\_pops\_in\_file ) \(\backslash\)
+1489                     + \textcolor{stringliteral}{".  Pop number requested: "} + str( i\_pop\_number ) + \textcolor{stringliteral}{"."}
+1490 
+1491             \textcolor{keywordflow}{raise} Exception( s\_msg )
+1492 
+1493         \textcolor{comment}{#end if  invalid population number}
+1494 
+1495         li\_counts=\textcolor{keywordtype}{None}
+1496 
+1497         li\_counts=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a8efe11151549d7da2bc024f836491af4}{\_\_get\_count\_indiv\_per\_pop}( s\_indiv\_subsample\_tag )
+1498         \textcolor{comment}{#end if we get counts from subsample}
+1499 
+1500         \textcolor{keywordflow}{return} li\_counts[ i\_pop\_number - 1 ]
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!get\+Individual\+Counts@{get\+Individual\+Counts}}
 \index{get\+Individual\+Counts@{get\+Individual\+Counts}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -205,32 +213,32 @@ in each pop as subsampled.
 \end{DoxyVerb}
  
 
-Definition at line 1380 of file genepopfilemanager.\+py.
+Definition at line 1451 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1380     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aca743749002b9828cd66730e42db4387}{getIndividualCounts}( self, s\_pop\_subsample\_tag=None, s\_indiv\_subsample\_tag=None 
+1451     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aca743749002b9828cd66730e42db4387}{getIndividualCounts}( self, s\_pop\_subsample\_tag=None, s\_indiv\_subsample\_tag=None 
       ):
-1381 
-1382         \textcolor{stringliteral}{'''}
-1383 \textcolor{stringliteral}{        Returns a list of individual counts (total individuals) for each of N populations}
-1384 \textcolor{stringliteral}{        numbered 1,2,3,...N, representing the "pop" entries in order in the genepop file}
-1385 \textcolor{stringliteral}{        to which this GenepopFileManager instance corresponds.}
-1386 \textcolor{stringliteral}{}
-1387 \textcolor{stringliteral}{        If s\_pop\_subsample\_tag is not None, then the list will contain counts for each}
-1388 \textcolor{stringliteral}{        population in some subset of the original N, as listed by population nunber }
-1389 \textcolor{stringliteral}{        list associated with the population subsample tag.}
-1390 \textcolor{stringliteral}{}
-1391 \textcolor{stringliteral}{        If s\_indiv\_subsample\_tag is not None, then the counts will be for the individuals}
-1392 \textcolor{stringliteral}{        in each pop as subsampled.}
-1393 \textcolor{stringliteral}{        '''}
-1394         li\_counts=\textcolor{keywordtype}{None}
-1395 
-1396         li\_counts=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a8efe11151549d7da2bc024f836491af4}{\_\_get\_count\_indiv\_per\_pop}( s\_indiv\_subsample\_tag, 
+1452 
+1453         \textcolor{stringliteral}{'''}
+1454 \textcolor{stringliteral}{        Returns a list of individual counts (total individuals) for each of N populations}
+1455 \textcolor{stringliteral}{        numbered 1,2,3,...N, representing the "pop" entries in order in the genepop file}
+1456 \textcolor{stringliteral}{        to which this GenepopFileManager instance corresponds.}
+1457 \textcolor{stringliteral}{}
+1458 \textcolor{stringliteral}{        If s\_pop\_subsample\_tag is not None, then the list will contain counts for each}
+1459 \textcolor{stringliteral}{        population in some subset of the original N, as listed by population nunber }
+1460 \textcolor{stringliteral}{        list associated with the population subsample tag.}
+1461 \textcolor{stringliteral}{}
+1462 \textcolor{stringliteral}{        If s\_indiv\_subsample\_tag is not None, then the counts will be for the individuals}
+1463 \textcolor{stringliteral}{        in each pop as subsampled.}
+1464 \textcolor{stringliteral}{        '''}
+1465         li\_counts=\textcolor{keywordtype}{None}
+1466 
+1467         li\_counts=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a8efe11151549d7da2bc024f836491af4}{\_\_get\_count\_indiv\_per\_pop}( s\_indiv\_subsample\_tag, 
       s\_pop\_subsample\_tag ) 
-1397 
-1398         \textcolor{keywordflow}{return} li\_counts
-1399 
+1468 
+1469         \textcolor{keywordflow}{return} li\_counts
+1470 
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!get\+List\+Tuples\+Values\+Indiv\+Id\+Fields@{get\+List\+Tuples\+Values\+Indiv\+Id\+Fields}}
 \index{get\+List\+Tuples\+Values\+Indiv\+Id\+Fields@{get\+List\+Tuples\+Values\+Indiv\+Id\+Fields}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -262,57 +270,95 @@ As of 2016_09_08, this not yet implemented
 \end{DoxyVerb}
  
 
-Definition at line 1306 of file genepopfilemanager.\+py.
+Definition at line 1377 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1306                             ls\_field\_names ):
-1307 
-1308         \textcolor{stringliteral}{'''}
-1309 \textcolor{stringliteral}{        Need a method to get the set (i.e. unique tuple) of }
-1310 \textcolor{stringliteral}{        existing values for seom combo of ID fields }
-1311 \textcolor{stringliteral}{        (may be only one field).  This would }
-1312 \textcolor{stringliteral}{        be step one in a generalized implementation of Tiago's }
-1313 \textcolor{stringliteral}{        sampleIndivsRelated.py code. Once we have the set of tuples }
-1314 \textcolor{stringliteral}{        giving existing values, we can then use criteria matching }
-1315 \textcolor{stringliteral}{        to subsample pops by testing each indiv for (a) matching }
-1316 \textcolor{stringliteral}{        field value(s), using def subsampleIndividualsByIdCriteria.  }
-1317 \textcolor{stringliteral}{        Note that we can add criteria to the tests, for example, }
-1318 \textcolor{stringliteral}{        to add age==1 to a criteria that also requires a father==i }
-1319 \textcolor{stringliteral}{        and mother==j match, each i and j supplied by this def.}
-1320 \textcolor{stringliteral}{}
-1321 \textcolor{stringliteral}{        arg o\_genepop\_indiv\_id\_fields, an instance of GenepopIndivIdFields}
-1322 \textcolor{stringliteral}{        arg ls\_field\_names, a list of strings that ell which of the field names}
-1323 \textcolor{stringliteral}{                in o\_genepop\_indiv\_id\_fields gives the fields to group to find}
-1324 \textcolor{stringliteral}{                all uniq value combos.}
-1325 \textcolor{stringliteral}{}
-1326 \textcolor{stringliteral}{        As of 2016\_09\_08, this not yet implemented}
-1327 \textcolor{stringliteral}{        '''}
-1328 
-1329         li\_pop\_numbers=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a0cd3178624c652968b4d319f12e5df6e}{\_\_get\_pop\_list}() 
-1330         set\_tuples\_values=set()
-1331 
-1332         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} li\_pop\_numbers:
-1333             ls\_indiv\_ids\_this\_pop=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aa6993dde24163002aeae55005437711d}{getListIndividuals}( i\_pop\_number=i\_pop\_number )
-1334 
-1335             \textcolor{keywordflow}{for} s\_id \textcolor{keywordflow}{in} ls\_indiv\_ids\_this\_pop:
-1336 
-1337                 o\_genepop\_id\_vals=GenepopIndivIdVals( s\_id, o\_genepop\_indiv\_id\_fields )
-1338 
-1339                 tv\_vals\_this\_id=tuple() 
-1340 
-1341                 \textcolor{keywordflow}{for} s\_field\_name \textcolor{keywordflow}{in} ls\_field\_names:
-1342                     v\_val\_this\_field=o\_genepop\_id\_vals.getVal( s\_field\_name )
-1343                     tv\_vals\_this\_id += ( v\_val, )
-1344                 \textcolor{comment}{#end for each field, add to tuple}
-1345 
-1346                 set\_tuples\_values.union( \{ tv\_vals\_this\_id \} )
-1347 
-1348             \textcolor{comment}{#end for indiv id in this pop}
-1349         \textcolor{comment}{#end for each pop in file}
-1350 
-1351         \textcolor{keywordflow}{return} list( set\_tuples\_values )
-1352 
+1377                             ls\_field\_names ):
+1378 
+1379         \textcolor{stringliteral}{'''}
+1380 \textcolor{stringliteral}{        Need a method to get the set (i.e. unique tuple) of }
+1381 \textcolor{stringliteral}{        existing values for seom combo of ID fields }
+1382 \textcolor{stringliteral}{        (may be only one field).  This would }
+1383 \textcolor{stringliteral}{        be step one in a generalized implementation of Tiago's }
+1384 \textcolor{stringliteral}{        sampleIndivsRelated.py code. Once we have the set of tuples }
+1385 \textcolor{stringliteral}{        giving existing values, we can then use criteria matching }
+1386 \textcolor{stringliteral}{        to subsample pops by testing each indiv for (a) matching }
+1387 \textcolor{stringliteral}{        field value(s), using def subsampleIndividualsByIdCriteria.  }
+1388 \textcolor{stringliteral}{        Note that we can add criteria to the tests, for example, }
+1389 \textcolor{stringliteral}{        to add age==1 to a criteria that also requires a father==i }
+1390 \textcolor{stringliteral}{        and mother==j match, each i and j supplied by this def.}
+1391 \textcolor{stringliteral}{}
+1392 \textcolor{stringliteral}{        arg o\_genepop\_indiv\_id\_fields, an instance of GenepopIndivIdFields}
+1393 \textcolor{stringliteral}{        arg ls\_field\_names, a list of strings that ell which of the field names}
+1394 \textcolor{stringliteral}{                in o\_genepop\_indiv\_id\_fields gives the fields to group to find}
+1395 \textcolor{stringliteral}{                all uniq value combos.}
+1396 \textcolor{stringliteral}{}
+1397 \textcolor{stringliteral}{        As of 2016\_09\_08, this not yet implemented}
+1398 \textcolor{stringliteral}{        '''}
+1399 
+1400         li\_pop\_numbers=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a0cd3178624c652968b4d319f12e5df6e}{\_\_get\_pop\_list}() 
+1401         set\_tuples\_values=set()
+1402 
+1403         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} li\_pop\_numbers:
+1404             ls\_indiv\_ids\_this\_pop=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aa6993dde24163002aeae55005437711d}{getListIndividuals}( i\_pop\_number=i\_pop\_number )
+1405 
+1406             \textcolor{keywordflow}{for} s\_id \textcolor{keywordflow}{in} ls\_indiv\_ids\_this\_pop:
+1407 
+1408                 o\_genepop\_id\_vals=GenepopIndivIdVals( s\_id, o\_genepop\_indiv\_id\_fields )
+1409 
+1410                 tv\_vals\_this\_id=tuple() 
+1411 
+1412                 \textcolor{keywordflow}{for} s\_field\_name \textcolor{keywordflow}{in} ls\_field\_names:
+1413                     v\_val\_this\_field=o\_genepop\_id\_vals.getVal( s\_field\_name )
+1414                     tv\_vals\_this\_id += ( v\_val\_this\_field, )
+1415                 \textcolor{comment}{#end for each field, add to tuple}
+1416 
+1417                 set\_tuples\_values.union( \{ tv\_vals\_this\_id \} )
+1418 
+1419             \textcolor{comment}{#end for indiv id in this pop}
+1420         \textcolor{comment}{#end for each pop in file}
+1421 
+1422         \textcolor{keywordflow}{return} list( set\_tuples\_values )
+1423 
+\end{DoxyCode}
+\index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!header@{header}}
+\index{header@{header}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
+\subsubsection[{\texorpdfstring{header(self)}{header(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+genepopfilemanager.\+Genepop\+File\+Manager.\+header (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a92fb714bb0d1caf2bc9b7c92acf48c40}{}\label{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a92fb714bb0d1caf2bc9b7c92acf48c40}
+\begin{DoxyVerb}This getter was added 2017_02_12 to allow clients to get
+the header string, and so look for an Nb/Ne value in the 
+header text.  The current implementation stores this
+value for the Nb estimation in the header line
+as the final text, reading "nbne=<value>".  See 
+pgdriveneestimator.py, def 
+get_nbne_ratio_from_genepop_file_header.
+\end{DoxyVerb}
+ 
+
+Definition at line 1718 of file genepopfilemanager.\+py.
+
+
+\begin{DoxyCode}
+1718     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a92fb714bb0d1caf2bc9b7c92acf48c40}{header}( self ):
+1719         \textcolor{stringliteral}{'''}
+1720 \textcolor{stringliteral}{        This getter was added 2017\_02\_12 to allow clients to get}
+1721 \textcolor{stringliteral}{        the header string, and so look for an Nb/Ne value in the }
+1722 \textcolor{stringliteral}{        header text.  The current implementation stores this}
+1723 \textcolor{stringliteral}{        value for the Nb estimation in the header line}
+1724 \textcolor{stringliteral}{        as the final text, reading "nbne=<value>".  See }
+1725 \textcolor{stringliteral}{        pgdriveneestimator.py, def }
+1726 \textcolor{stringliteral}{        get\_nbne\_ratio\_from\_genepop\_file\_header.}
+1727 \textcolor{stringliteral}{        '''}
+1728         o\_origfile=open( self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a2f6cd645e29db938befdf961d0819777}{\_\_filename}, \textcolor{stringliteral}{'r' )}
+1729 \textcolor{stringliteral}{        o\_origfile.seek( self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1deae3b37e8e5d7ceec2a821b0e98cfd}{\_\_header\_and\_loci\_byte\_addresses}[0] )}
+1730 \textcolor{stringliteral}{        s\_line\_stripped=( o\_origfile.readline() ).strip()}
+1731 \textcolor{stringliteral}{        }\textcolor{keywordflow}{return} s\_line\_stripped
+1732 \textcolor{comment}{#end class GenepopFileManager}
+1733 
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!indiv\+\_\+subsample\+\_\+tags@{indiv\+\_\+subsample\+\_\+tags}}
 \index{indiv\+\_\+subsample\+\_\+tags@{indiv\+\_\+subsample\+\_\+tags}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -326,16 +372,16 @@ we return a list of their tags:
 \end{DoxyVerb}
  
 
-Definition at line 1472 of file genepopfilemanager.\+py.
+Definition at line 1548 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1472     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae77bd8c465db4d95839db838c236f4cd}{indiv\_subsample\_tags}( self ):
-1473         \textcolor{stringliteral}{'''}
-1474 \textcolor{stringliteral}{        so user can iterate over subsamples,}
-1475 \textcolor{stringliteral}{        we return a list of their tags:}
-1476 \textcolor{stringliteral}{        '''}
-1477         \textcolor{keywordflow}{return} [ s\_tag \textcolor{keywordflow}{for} s\_tag \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples} ]
+1548     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae77bd8c465db4d95839db838c236f4cd}{indiv\_subsample\_tags}( self ):
+1549         \textcolor{stringliteral}{'''}
+1550 \textcolor{stringliteral}{        so user can iterate over subsamples,}
+1551 \textcolor{stringliteral}{        we return a list of their tags:}
+1552 \textcolor{stringliteral}{        '''}
+1553         \textcolor{keywordflow}{return} [ s\_tag \textcolor{keywordflow}{for} s\_tag \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples} ]
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!loci\+\_\+subsample\+\_\+tags@{loci\+\_\+subsample\+\_\+tags}}
 \index{loci\+\_\+subsample\+\_\+tags@{loci\+\_\+subsample\+\_\+tags}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -349,16 +395,16 @@ we return a list of their tags:
 \end{DoxyVerb}
  
 
-Definition at line 1481 of file genepopfilemanager.\+py.
+Definition at line 1557 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1481     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a9818ed890508a24026ea37fa734c898e}{loci\_subsample\_tags}( self ):
-1482         \textcolor{stringliteral}{'''}
-1483 \textcolor{stringliteral}{        so user can iterate over subsamples,}
-1484 \textcolor{stringliteral}{        we return a list of their tags:}
-1485 \textcolor{stringliteral}{        '''}
-1486         \textcolor{keywordflow}{return} [ s\_tag \textcolor{keywordflow}{for} s\_tag \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples} ]
+1557     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a9818ed890508a24026ea37fa734c898e}{loci\_subsample\_tags}( self ):
+1558         \textcolor{stringliteral}{'''}
+1559 \textcolor{stringliteral}{        so user can iterate over subsamples,}
+1560 \textcolor{stringliteral}{        we return a list of their tags:}
+1561 \textcolor{stringliteral}{        '''}
+1562         \textcolor{keywordflow}{return} [ s\_tag \textcolor{keywordflow}{for} s\_tag \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples} ]
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!original\+\_\+file\+\_\+name@{original\+\_\+file\+\_\+name}}
 \index{original\+\_\+file\+\_\+name@{original\+\_\+file\+\_\+name}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -374,20 +420,20 @@ given by param s_filename
 \end{DoxyVerb}
  
 
-Definition at line 1495 of file genepopfilemanager.\+py.
+Definition at line 1571 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1495     \textcolor{keyword}{def }original\_file\_name( self, s\_filename ):
-1496         \textcolor{stringliteral}{'''}
-1497 \textcolor{stringliteral}{        this setter essentially creates a new object}
-1498 \textcolor{stringliteral}{        based on the genepop file with the filename }
-1499 \textcolor{stringliteral}{        given by param s\_filename}
-1500 \textcolor{stringliteral}{        '''}
-1501         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a2f6cd645e29db938befdf961d0819777}{\_\_filename}=s\_filename
-1502         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a77a97fe40279f37b14f23c5e4180abc5}{\_\_setup\_addresses}( s\_filename )
-1503         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ab05c5daa99f1b294c019769b1e60ae20}{\_\_init\_subsamples}()
-1504         \textcolor{keywordflow}{return}
+1571     \textcolor{keyword}{def }original\_file\_name( self, s\_filename ):
+1572         \textcolor{stringliteral}{'''}
+1573 \textcolor{stringliteral}{        this setter essentially creates a new object}
+1574 \textcolor{stringliteral}{        based on the genepop file with the filename }
+1575 \textcolor{stringliteral}{        given by param s\_filename}
+1576 \textcolor{stringliteral}{        '''}
+1577         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a2f6cd645e29db938befdf961d0819777}{\_\_filename}=s\_filename
+1578         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a77a97fe40279f37b14f23c5e4180abc5}{\_\_setup\_addresses}( s\_filename )
+1579         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ab05c5daa99f1b294c019769b1e60ae20}{\_\_init\_subsamples}()
+1580         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!population\+\_\+subsample\+\_\+tags@{population\+\_\+subsample\+\_\+tags}}
 \index{population\+\_\+subsample\+\_\+tags@{population\+\_\+subsample\+\_\+tags}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -401,16 +447,16 @@ as subsampled
 \end{DoxyVerb}
  
 
-Definition at line 1463 of file genepopfilemanager.\+py.
+Definition at line 1539 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1463     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ac3210c8f51c32e9e99e34703afb402d0}{population\_subsample\_tags}( self ):
-1464         \textcolor{stringliteral}{'''}
-1465 \textcolor{stringliteral}{        so user can iterate over populations}
-1466 \textcolor{stringliteral}{        as subsampled}
-1467 \textcolor{stringliteral}{        '''}
-1468         \textcolor{keywordflow}{return} [ s\_tag \textcolor{keywordflow}{for} s\_tag \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a3a99a5030db49684ac320b1dc456c1fd}{\_\_pop\_subsamples} ]
+1539     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ac3210c8f51c32e9e99e34703afb402d0}{population\_subsample\_tags}( self ):
+1540         \textcolor{stringliteral}{'''}
+1541 \textcolor{stringliteral}{        so user can iterate over populations}
+1542 \textcolor{stringliteral}{        as subsampled}
+1543 \textcolor{stringliteral}{        '''}
+1544         \textcolor{keywordflow}{return} [ s\_tag \textcolor{keywordflow}{for} s\_tag \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a3a99a5030db49684ac320b1dc456c1fd}{\_\_pop\_subsamples} ]
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!subsample\+Individuals\+By\+Id\+Criteria@{subsample\+Individuals\+By\+Id\+Criteria}}
 \index{subsample\+Individuals\+By\+Id\+Criteria@{subsample\+Individuals\+By\+Id\+Criteria}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -437,82 +483,82 @@ original genepop file.
 \end{DoxyVerb}
  
 
-Definition at line 1159 of file genepopfilemanager.\+py.
+Definition at line 1230 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1159                                             i\_max\_pop\_sample\_size=\textcolor{keywordtype}{None} ):
-1160         \textcolor{stringliteral}{'''}
-1161 \textcolor{stringliteral}{        param o\_genepop\_indiv\_id\_fields, an instance of GenepopIndivIdFields}
-1162 \textcolor{stringliteral}{}
-1163 \textcolor{stringliteral}{        param o\_genepop\_indiv\_criteria, a GenepopIndivCriteria instance,}
-1164 \textcolor{stringliteral}{            itself a list of GenepopIndivCriterion instances, with}
-1165 \textcolor{stringliteral}{            the ability to perform all criterion tests and return True or False}
-1166 \textcolor{stringliteral}{}
-1167 \textcolor{stringliteral}{        Assumes that the list of individual (ids)}
-1168 \textcolor{stringliteral}{        from call to getListIndividuals gives ids}
-1169 \textcolor{stringliteral}{        in the same order as they occur in the }
-1170 \textcolor{stringliteral}{        original genepop file.}
-1171 \textcolor{stringliteral}{        '''}
-1172         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ]=\{\}
-1173 
-1174         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae24c2bdd19136a345bdb42fd49c5d91f}{\_\_pop\_byte\_addresses}:
-1175 
-1176             ls\_individuals=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aa6993dde24163002aeae55005437711d}{getListIndividuals}( i\_pop\_number )
-1177 
-1178             li\_indiv\_numbers=[]
-1179 
-1180             \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( len( ls\_individuals ) ):
-1181                 s\_this\_id=ls\_individuals[ idx ]
-1182                 o\_genepop\_id\_vals=GenepopIndivIdVals( s\_this\_id, 
-1183                                             o\_genepop\_indiv\_id\_fields )
-1184 
-1185                 o\_genepop\_individual\_id=GenepopIndividualId( o\_genepop\_id\_vals, o\_genepop\_indiv\_criteria )
-1186                 
-1187                 \textcolor{keywordflow}{if} o\_genepop\_individual\_id.allCriteriaAreTrue():
-1188 
-1189                     \textcolor{comment}{#recall that the indices into individuals }
-1190                     \textcolor{comment}{#start with "1", since the 0th individual}
-1191                     \textcolor{comment}{#is the "pop" entry itself:}
-1192                     li\_indiv\_numbers.append( idx + 1 )
-1193                 \textcolor{comment}{#end if criteria all True, add indiv to subsample}
-1194             \textcolor{comment}{#end for each individual}
-1195 
-1196             \textcolor{comment}{#we always include the "pop" entry, and we sort the subsample}
-1197             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number]= \(\backslash\)
-1198                                                  [ 0 ] +  li\_indiv\_numbers
-1199 
-1200             \textcolor{keywordflow}{if} i\_max\_pop\_sample\_size \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-1201 
-1202                 i\_indiv\_count=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ac7cc98fe56efee82b4ffd4dc816a4704}{\_\_get\_count\_indiv}( self.
+1230                                             i\_max\_pop\_sample\_size=\textcolor{keywordtype}{None} ):
+1231         \textcolor{stringliteral}{'''}
+1232 \textcolor{stringliteral}{        param o\_genepop\_indiv\_id\_fields, an instance of GenepopIndivIdFields}
+1233 \textcolor{stringliteral}{}
+1234 \textcolor{stringliteral}{        param o\_genepop\_indiv\_criteria, a GenepopIndivCriteria instance,}
+1235 \textcolor{stringliteral}{            itself a list of GenepopIndivCriterion instances, with}
+1236 \textcolor{stringliteral}{            the ability to perform all criterion tests and return True or False}
+1237 \textcolor{stringliteral}{}
+1238 \textcolor{stringliteral}{        Assumes that the list of individual (ids)}
+1239 \textcolor{stringliteral}{        from call to getListIndividuals gives ids}
+1240 \textcolor{stringliteral}{        in the same order as they occur in the }
+1241 \textcolor{stringliteral}{        original genepop file.}
+1242 \textcolor{stringliteral}{        '''}
+1243         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ]=\{\}
+1244 
+1245         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae24c2bdd19136a345bdb42fd49c5d91f}{\_\_pop\_byte\_addresses}:
+1246 
+1247             ls\_individuals=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aa6993dde24163002aeae55005437711d}{getListIndividuals}( i\_pop\_number )
+1248 
+1249             li\_indiv\_numbers=[]
+1250 
+1251             \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( len( ls\_individuals ) ):
+1252                 s\_this\_id=ls\_individuals[ idx ]
+1253                 o\_genepop\_id\_vals=GenepopIndivIdVals( s\_this\_id, 
+1254                                             o\_genepop\_indiv\_id\_fields )
+1255 
+1256                 o\_genepop\_individual\_id=GenepopIndividualId( o\_genepop\_id\_vals, o\_genepop\_indiv\_criteria )
+1257                 
+1258                 \textcolor{keywordflow}{if} o\_genepop\_individual\_id.allCriteriaAreTrue():
+1259 
+1260                     \textcolor{comment}{#recall that the indices into individuals }
+1261                     \textcolor{comment}{#start with "1", since the 0th individual}
+1262                     \textcolor{comment}{#is the "pop" entry itself:}
+1263                     li\_indiv\_numbers.append( idx + 1 )
+1264                 \textcolor{comment}{#end if criteria all True, add indiv to subsample}
+1265             \textcolor{comment}{#end for each individual}
+1266 
+1267             \textcolor{comment}{#we always include the "pop" entry, and we sort the subsample}
+1268             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number]= \(\backslash\)
+1269                                                  [ 0 ] +  li\_indiv\_numbers
+1270 
+1271             \textcolor{keywordflow}{if} i\_max\_pop\_sample\_size \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+1272 
+1273                 i\_indiv\_count=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ac7cc98fe56efee82b4ffd4dc816a4704}{\_\_get\_count\_indiv}( self.
       \hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number ] )
-1203 
-1204                 
-1205                 \textcolor{keywordflow}{if} i\_indiv\_count> i\_max\_pop\_sample\_size:
-1206 
-1207                     li\_reduced\_indiv\_list=self.
+1274 
+1275                 
+1276                 \textcolor{keywordflow}{if} i\_indiv\_count> i\_max\_pop\_sample\_size:
+1277 
+1278                     li\_reduced\_indiv\_list=self.
       \hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a9818467c9cb40f8e1de0c6cc7f52e263}{\_\_sample\_individuals\_randomly\_from\_one\_pop}( \(\backslash\)
-1208                                                             i\_pop\_number=i\_pop\_number,
-1209                                                             i\_sample\_size=i\_max\_pop\_sample\_size,
-1210                                                             s\_subsample\_tag=s\_subsample\_tag )
-1211 
-1212                     self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number ] = \(\backslash\)
-1213                                                         [0] + li\_reduced\_indiv\_list
-1214                 \textcolor{comment}{#end if we're over the max and need to randomly select}
-1215             \textcolor{comment}{#end if we have a max value for indiv count}
-1216 
-1217             \textcolor{comment}{#Reduce to no individuals if we have a min pop size and our sampled pop}
-1218             \textcolor{comment}{#is under the minimum.}
-1219             \textcolor{keywordflow}{if} i\_min\_pop\_sample\_size \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-1220                 i\_indiv\_count=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ac7cc98fe56efee82b4ffd4dc816a4704}{\_\_get\_count\_indiv}( self.
+1279                                                             i\_pop\_number=i\_pop\_number,
+1280                                                             i\_sample\_size=i\_max\_pop\_sample\_size,
+1281                                                             s\_subsample\_tag=s\_subsample\_tag )
+1282 
+1283                     self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number ] = \(\backslash\)
+1284                                                         [0] + li\_reduced\_indiv\_list
+1285                 \textcolor{comment}{#end if we're over the max and need to randomly select}
+1286             \textcolor{comment}{#end if we have a max value for indiv count}
+1287 
+1288             \textcolor{comment}{#Reduce to no individuals if we have a min pop size and our sampled pop}
+1289             \textcolor{comment}{#is under the minimum.}
+1290             \textcolor{keywordflow}{if} i\_min\_pop\_sample\_size \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+1291                 i\_indiv\_count=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ac7cc98fe56efee82b4ffd4dc816a4704}{\_\_get\_count\_indiv}( self.
       \hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number ] )
-1221                 \textcolor{keywordflow}{if} i\_indiv\_count < i\_min\_pop\_sample\_size:
-1222                     self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number ] = [0]
-1223                 \textcolor{comment}{#end if under min count, reduce to no individuals}
-1224             \textcolor{comment}{#end if we have a minimum indiv count number}
-1225         \textcolor{comment}{#end for each pop number}
-1226 
-1227         \textcolor{keywordflow}{return}
+1292                 \textcolor{keywordflow}{if} i\_indiv\_count < i\_min\_pop\_sample\_size:
+1293                     self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number ] = [0]
+1294                 \textcolor{comment}{#end if under min count, reduce to no individuals}
+1295             \textcolor{comment}{#end if we have a minimum indiv count number}
+1296         \textcolor{comment}{#end for each pop number}
+1297 
+1298         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!subsample\+Individuals\+By\+Number\+List@{subsample\+Individuals\+By\+Number\+List}}
 \index{subsample\+Individuals\+By\+Number\+List@{subsample\+Individuals\+By\+Number\+List}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -533,43 +579,43 @@ numbers exist in the genepop file, but not among the dictionary keys.
 \end{DoxyVerb}
  
 
-Definition at line 1232 of file genepopfilemanager.\+py.
+Definition at line 1303 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1232             s\_subsample):
-1233         \textcolor{stringliteral}{'''}
-1234 \textcolor{stringliteral}{        param dli\_individual\_numbers, dictionary keyed to population}
-1235 \textcolor{stringliteral}{                numbers.  For each key the value is an ordered list}
-1236 \textcolor{stringliteral}{                of increasing ints i, 1<=i<=N, that make a set of individual}
-1237 \textcolor{stringliteral}{                numbers for the population in the kay.}
-1238 \textcolor{stringliteral}{}
-1239 \textcolor{stringliteral}{        Note that this subsampling will put an empty list in populations whose}
-1240 \textcolor{stringliteral}{        numbers exist in the genepop file, but not among the dictionary keys.}
-1241 \textcolor{stringliteral}{        '''}
-1242 
-1243         li\_all\_population\_numbers=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a0cd3178624c652968b4d319f12e5df6e}{\_\_get\_pop\_list}()
-1244         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample ] = \{\}
-1245         \textcolor{keywordflow}{for} i\_pop\_num \textcolor{keywordflow}{in} li\_all\_population\_numbers:
-1246             \textcolor{stringliteral}{'''}
-1247 \textcolor{stringliteral}{            If caller's dictionary keys lack this pop number}
-1248 \textcolor{stringliteral}{            the subsample is an empty list, except for the}
-1249 \textcolor{stringliteral}{            "pop" line (item 0 in any given indiv list):}
-1250 \textcolor{stringliteral}{            '''}
-1251             li\_this\_indiv\_list=[0]
-1252             \textcolor{keywordflow}{if} i\_pop\_num \textcolor{keywordflow}{in} dli\_individual\_numbers:
-1253                 
-1254                 \textcolor{comment}{#all indiv subsample lists include the zeroth item,}
-1255                 \textcolor{comment}{#the "pop" entry}
-1256                 li\_this\_indiv\_list =  [ 0 ] +  dli\_individual\_numbers[ i\_pop\_num ] 
-1257 
-1258                 \textcolor{comment}{#we always store sorted indiv ordinals}
-1259                 \textcolor{comment}{#in the subsample lists:}
-1260                 li\_this\_indiv\_list.sort()
-1261             \textcolor{comment}{#end if we have a list of indiv for this pop}
-1262             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample ] [ i\_pop\_num ] = li\_this\_indiv\_list
-1263         \textcolor{comment}{#end for each pop number in file}
-1264         \textcolor{keywordflow}{return}
+1303             s\_subsample):
+1304         \textcolor{stringliteral}{'''}
+1305 \textcolor{stringliteral}{        param dli\_individual\_numbers, dictionary keyed to population}
+1306 \textcolor{stringliteral}{                numbers.  For each key the value is an ordered list}
+1307 \textcolor{stringliteral}{                of increasing ints i, 1<=i<=N, that make a set of individual}
+1308 \textcolor{stringliteral}{                numbers for the population in the kay.}
+1309 \textcolor{stringliteral}{}
+1310 \textcolor{stringliteral}{        Note that this subsampling will put an empty list in populations whose}
+1311 \textcolor{stringliteral}{        numbers exist in the genepop file, but not among the dictionary keys.}
+1312 \textcolor{stringliteral}{        '''}
+1313 
+1314         li\_all\_population\_numbers=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a0cd3178624c652968b4d319f12e5df6e}{\_\_get\_pop\_list}()
+1315         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample ] = \{\}
+1316         \textcolor{keywordflow}{for} i\_pop\_num \textcolor{keywordflow}{in} li\_all\_population\_numbers:
+1317             \textcolor{stringliteral}{'''}
+1318 \textcolor{stringliteral}{            If caller's dictionary keys lack this pop number}
+1319 \textcolor{stringliteral}{            the subsample is an empty list, except for the}
+1320 \textcolor{stringliteral}{            "pop" line (item 0 in any given indiv list):}
+1321 \textcolor{stringliteral}{            '''}
+1322             li\_this\_indiv\_list=[0]
+1323             \textcolor{keywordflow}{if} i\_pop\_num \textcolor{keywordflow}{in} dli\_individual\_numbers:
+1324                 
+1325                 \textcolor{comment}{#all indiv subsample lists include the zeroth item,}
+1326                 \textcolor{comment}{#the "pop" entry}
+1327                 li\_this\_indiv\_list =  [ 0 ] +  dli\_individual\_numbers[ i\_pop\_num ] 
+1328 
+1329                 \textcolor{comment}{#we always store sorted indiv ordinals}
+1330                 \textcolor{comment}{#in the subsample lists:}
+1331                 li\_this\_indiv\_list.sort()
+1332             \textcolor{comment}{#end if we have a list of indiv for this pop}
+1333             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample ] [ i\_pop\_num ] = li\_this\_indiv\_list
+1334         \textcolor{comment}{#end for each pop number in file}
+1335         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!subsample\+Individuals\+By\+Pop\+Size@{subsample\+Individuals\+By\+Pop\+Size}}
 \index{subsample\+Individuals\+By\+Pop\+Size@{subsample\+Individuals\+By\+Pop\+Size}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -589,48 +635,48 @@ individuals aret randomly sampled .
 \end{DoxyVerb}
  
 
-Definition at line 1267 of file genepopfilemanager.\+py.
+Definition at line 1338 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1267     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_afdad8528d7b19a8b2eeca447bb95a5a0}{subsampleIndividualsByPopSize}( self, i\_min\_pop\_size, i\_max\_pop\_size, 
+1338     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_afdad8528d7b19a8b2eeca447bb95a5a0}{subsampleIndividualsByPopSize}( self, i\_min\_pop\_size, i\_max\_pop\_size, 
       s\_subsample ):
-1268         \textcolor{stringliteral}{'''}
-1269 \textcolor{stringliteral}{        For each pop, sample is identical to original, unless }
-1270 \textcolor{stringliteral}{        its indiv count is under i\_min\_pop\_size, in which case}
-1271 \textcolor{stringliteral}{        it is reduced to zero individuals, or its indiv count}
-1272 \textcolor{stringliteral}{        exceeds i\_max\_pop\_size, in which case i\_max\_pop\_size }
-1273 \textcolor{stringliteral}{        individuals aret randomly sampled .}
-1274 \textcolor{stringliteral}{        '''}
-1275 
-1276         li\_all\_population\_numbers=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a0cd3178624c652968b4d319f12e5df6e}{\_\_get\_pop\_list}()
-1277         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample ] = \{\}
-1278 
-1279         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} li\_all\_population\_numbers:
-1280 
-1281             li\_sample\_this\_pop=\textcolor{keywordtype}{None}
-1282 
-1283             i\_indiv\_count=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a05e723069f5129b21a4d017c2a5317b0}{getIndividualCount}( i\_pop\_number )
-1284 
-1285             \textcolor{keywordflow}{if} i\_indiv\_count < i\_min\_pop\_size:
-1286                 li\_sample\_this\_pop=[0]
-1287 
-1288             \textcolor{keywordflow}{else}:               
-1289                 \textcolor{keywordflow}{if} i\_indiv\_count <= i\_max\_pop\_size:
-1290                     li\_sample\_this\_pop=[ 0 ] + self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a4615769e9db90aa477aa3fd865408f54}{\_\_get\_list\_indiv\_numbers}( 
+1339         \textcolor{stringliteral}{'''}
+1340 \textcolor{stringliteral}{        For each pop, sample is identical to original, unless }
+1341 \textcolor{stringliteral}{        its indiv count is under i\_min\_pop\_size, in which case}
+1342 \textcolor{stringliteral}{        it is reduced to zero individuals, or its indiv count}
+1343 \textcolor{stringliteral}{        exceeds i\_max\_pop\_size, in which case i\_max\_pop\_size }
+1344 \textcolor{stringliteral}{        individuals aret randomly sampled .}
+1345 \textcolor{stringliteral}{        '''}
+1346 
+1347         li\_all\_population\_numbers=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a0cd3178624c652968b4d319f12e5df6e}{\_\_get\_pop\_list}()
+1348         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample ] = \{\}
+1349 
+1350         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} li\_all\_population\_numbers:
+1351 
+1352             li\_sample\_this\_pop=\textcolor{keywordtype}{None}
+1353 
+1354             i\_indiv\_count=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a05e723069f5129b21a4d017c2a5317b0}{getIndividualCount}( i\_pop\_number )
+1355 
+1356             \textcolor{keywordflow}{if} i\_indiv\_count < i\_min\_pop\_size:
+1357                 li\_sample\_this\_pop=[0]
+1358 
+1359             \textcolor{keywordflow}{else}:               
+1360                 \textcolor{keywordflow}{if} i\_indiv\_count <= i\_max\_pop\_size:
+1361                     li\_sample\_this\_pop=[ 0 ] + self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a4615769e9db90aa477aa3fd865408f54}{\_\_get\_list\_indiv\_numbers}( 
       i\_pop\_number )
-1291                 \textcolor{keywordflow}{else}:
-1292                     li\_sample\_this\_pop= [ 0 ] + \(\backslash\)
-1293                             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a9818467c9cb40f8e1de0c6cc7f52e263}{\_\_sample\_individuals\_randomly\_from\_one\_pop}
+1362                 \textcolor{keywordflow}{else}:
+1363                     li\_sample\_this\_pop= [ 0 ] + \(\backslash\)
+1364                             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a9818467c9cb40f8e1de0c6cc7f52e263}{\_\_sample\_individuals\_randomly\_from\_one\_pop}
       ( \(\backslash\)
-1294                                                                  i\_pop\_number=i\_pop\_number,
-1295                                                                  i\_sample\_size=i\_max\_pop\_size )
-1296                 \textcolor{comment}{#end if indiv count under or equal to max, else over}
-1297             \textcolor{comment}{#end if under min, no indiv sampled, else sample}
-1298 
-1299             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample ][ i\_pop\_number ]=li\_sample\_this\_pop
-1300         \textcolor{comment}{#end for each pop}
-1301         \textcolor{keywordflow}{return}
+1365                                                                  i\_pop\_number=i\_pop\_number,
+1366                                                                  i\_sample\_size=i\_max\_pop\_size )
+1367                 \textcolor{comment}{#end if indiv count under or equal to max, else over}
+1368             \textcolor{comment}{#end if under min, no indiv sampled, else sample}
+1369 
+1370             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample ][ i\_pop\_number ]=li\_sample\_this\_pop
+1371         \textcolor{comment}{#end for each pop}
+1372         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!subsample\+Individuals\+Leave\+Nth\+Out\+From\+Pop@{subsample\+Individuals\+Leave\+Nth\+Out\+From\+Pop}}
 \index{subsample\+Individuals\+Leave\+Nth\+Out\+From\+Pop@{subsample\+Individuals\+Leave\+Nth\+Out\+From\+Pop}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -649,58 +695,58 @@ we enter an empty list for the pop for ths given subsample tag.
 \end{DoxyVerb}
  
 
-Definition at line 1105 of file genepopfilemanager.\+py.
+Definition at line 1176 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1105                                                     s\_indiv\_subsample\_tag ):
-1106         \textcolor{stringliteral}{'''}
-1107 \textcolor{stringliteral}{        Remove the nth of M individuals, }
-1108 \textcolor{stringliteral}{        where individuals are numbered 1,2,3...M}
-1109 \textcolor{stringliteral}{}
-1110 \textcolor{stringliteral}{        Requires value for i\_n, 0<i\_n.  If i\_n > pop size,}
-1111 \textcolor{stringliteral}{        we enter an empty list for the pop for ths given subsample tag.}
-1112 \textcolor{stringliteral}{        '''}
-1113 
-1114         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_indiv\_subsample\_tag ] = \{\}
-1115 
-1116         li\_all\_population\_numbers=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a0cd3178624c652968b4d319f12e5df6e}{\_\_get\_pop\_list}()
-1117         
-1118         li\_indiv\_list\_copy=\textcolor{keywordtype}{None}
-1119 
-1120         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} li\_all\_population\_numbers:
-1121 
-1122             li\_indiv\_list=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a4615769e9db90aa477aa3fd865408f54}{\_\_get\_list\_indiv\_numbers}( i\_pop\_number, 
+1176                                                     s\_indiv\_subsample\_tag ):
+1177         \textcolor{stringliteral}{'''}
+1178 \textcolor{stringliteral}{        Remove the nth of M individuals, }
+1179 \textcolor{stringliteral}{        where individuals are numbered 1,2,3...M}
+1180 \textcolor{stringliteral}{}
+1181 \textcolor{stringliteral}{        Requires value for i\_n, 0<i\_n.  If i\_n > pop size,}
+1182 \textcolor{stringliteral}{        we enter an empty list for the pop for ths given subsample tag.}
+1183 \textcolor{stringliteral}{        '''}
+1184 
+1185         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_indiv\_subsample\_tag ] = \{\}
+1186 
+1187         li\_all\_population\_numbers=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a0cd3178624c652968b4d319f12e5df6e}{\_\_get\_pop\_list}()
+1188         
+1189         li\_indiv\_list\_copy=\textcolor{keywordtype}{None}
+1190 
+1191         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} li\_all\_population\_numbers:
+1192 
+1193             li\_indiv\_list=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a4615769e9db90aa477aa3fd865408f54}{\_\_get\_list\_indiv\_numbers}( i\_pop\_number, 
       s\_indiv\_subsample\_tag=\textcolor{keywordtype}{None} )
-1123 
-1124             i\_pop\_size=len( li\_indiv\_list )
-1125 
-1126             \textcolor{keywordflow}{if}  i\_n < 1:
-1127                 s\_msg=\textcolor{stringliteral}{"In GenepopFileManager instance, def "} \(\backslash\)
-1128                         + \textcolor{stringliteral}{"subsampleIndividualsLeaveNthOutFromPop, "} \(\backslash\)
-1129                         + \textcolor{stringliteral}{"invalid N.  With "} + str( i\_pop\_size ) \(\backslash\)
-1130                         + \textcolor{stringliteral}{" individuals, and N = "} \(\backslash\)
-1131                         + str( i\_n ) + \textcolor{stringliteral}{"."}
-1132 
-1133                 \textcolor{keywordflow}{raise} Exception ( s\_msg )
-1134             \textcolor{keywordflow}{elif} i\_n>i\_pop\_size:
-1135                 \textcolor{comment}{#Can't leave out nth indiv, since n too large,}
-1136                 \textcolor{comment}{#so we assign an emtpy list for this pop:}
-1137                 li\_indiv\_list\_copy=[]
-1138 
-1139             \textcolor{keywordflow}{else}:   
-1140                 \textcolor{comment}{#want a copy of the list:}
-1141                 li\_indiv\_list\_copy = [ i\_indiv \textcolor{keywordflow}{for} i\_indiv \textcolor{keywordflow}{in} li\_indiv\_list ]
-1142                 li\_indiv\_list\_copy.remove( i\_n )
-1143             \textcolor{comment}{#end if n < 1, n>pop size, else in range}
-1144             
-1145             \textcolor{comment}{#to any sample we always add the zeroth}
-1146             \textcolor{comment}{#indiviudal number, which is the "pop"}
-1147             \textcolor{comment}{#entry}
-1148             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_indiv\_subsample\_tag ] [ i\_pop\_number ] = \(\backslash\)
-1149                     [0] + li\_indiv\_list\_copy
-1150         \textcolor{comment}{#end for each pop number}
-1151         \textcolor{keywordflow}{return}
+1194 
+1195             i\_pop\_size=len( li\_indiv\_list )
+1196 
+1197             \textcolor{keywordflow}{if}  i\_n < 1:
+1198                 s\_msg=\textcolor{stringliteral}{"In GenepopFileManager instance, def "} \(\backslash\)
+1199                         + \textcolor{stringliteral}{"subsampleIndividualsLeaveNthOutFromPop, "} \(\backslash\)
+1200                         + \textcolor{stringliteral}{"invalid N.  With "} + str( i\_pop\_size ) \(\backslash\)
+1201                         + \textcolor{stringliteral}{" individuals, and N = "} \(\backslash\)
+1202                         + str( i\_n ) + \textcolor{stringliteral}{"."}
+1203 
+1204                 \textcolor{keywordflow}{raise} Exception ( s\_msg )
+1205             \textcolor{keywordflow}{elif} i\_n>i\_pop\_size:
+1206                 \textcolor{comment}{#Can't leave out nth indiv, since n too large,}
+1207                 \textcolor{comment}{#so we assign an emtpy list for this pop:}
+1208                 li\_indiv\_list\_copy=[]
+1209 
+1210             \textcolor{keywordflow}{else}:   
+1211                 \textcolor{comment}{#want a copy of the list:}
+1212                 li\_indiv\_list\_copy = [ i\_indiv \textcolor{keywordflow}{for} i\_indiv \textcolor{keywordflow}{in} li\_indiv\_list ]
+1213                 li\_indiv\_list\_copy.remove( i\_n )
+1214             \textcolor{comment}{#end if n < 1, n>pop size, else in range}
+1215             
+1216             \textcolor{comment}{#to any sample we always add the zeroth}
+1217             \textcolor{comment}{#indiviudal number, which is the "pop"}
+1218             \textcolor{comment}{#entry}
+1219             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_indiv\_subsample\_tag ] [ i\_pop\_number ] = \(\backslash\)
+1220                     [0] + li\_indiv\_list\_copy
+1221         \textcolor{comment}{#end for each pop number}
+1222         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!subsample\+Individuals\+Randomly\+By\+Proportion@{subsample\+Individuals\+Randomly\+By\+Proportion}}
 \index{subsample\+Individuals\+Randomly\+By\+Proportion@{subsample\+Individuals\+Randomly\+By\+Proportion}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -720,39 +766,39 @@ self.__indiv_subsamples[ s_subsample_tag ][ i_pop_number ]
 \end{DoxyVerb}
  
 
-Definition at line 1035 of file genepopfilemanager.\+py.
+Definition at line 1106 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1035     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a5c85ac4838fd6919be1c408bcd39f54e}{subsampleIndividualsRandomlyByProportion}( self, 
+1106     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a5c85ac4838fd6919be1c408bcd39f54e}{subsampleIndividualsRandomlyByProportion}( self, 
       f\_proportion\_to\_sample, s\_subsample\_tag ):
-1036         \textcolor{stringliteral}{'''}
-1037 \textcolor{stringliteral}{        for each "pop" in the original genepop file,}
-1038 \textcolor{stringliteral}{        randomly select round( total\_indiv\_in\_this\_pop * f\_proportion\_to\_sample )}
-1039 \textcolor{stringliteral}{        }
-1040 \textcolor{stringliteral}{        if zero is the subsample size, then an empty list will be assoc with the pop number}
-1041 \textcolor{stringliteral}{        stores the subset list of individuals as ints, ordered as they are in the orig, as      }
-1042 \textcolor{stringliteral}{        self.\_\_indiv\_subsamples[ s\_subsample\_tag ][ i\_pop\_number ]}
-1043 \textcolor{stringliteral}{        '''}
-1044 
-1045         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ]=\{\}
-1046 
-1047         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae24c2bdd19136a345bdb42fd49c5d91f}{\_\_pop\_byte\_addresses}:
-1048 
-1049             i\_pop\_size=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ac7cc98fe56efee82b4ffd4dc816a4704}{\_\_get\_count\_indiv}( self.
+1107         \textcolor{stringliteral}{'''}
+1108 \textcolor{stringliteral}{        for each "pop" in the original genepop file,}
+1109 \textcolor{stringliteral}{        randomly select round( total\_indiv\_in\_this\_pop * f\_proportion\_to\_sample )}
+1110 \textcolor{stringliteral}{        }
+1111 \textcolor{stringliteral}{        if zero is the subsample size, then an empty list will be assoc with the pop number}
+1112 \textcolor{stringliteral}{        stores the subset list of individuals as ints, ordered as they are in the orig, as      }
+1113 \textcolor{stringliteral}{        self.\_\_indiv\_subsamples[ s\_subsample\_tag ][ i\_pop\_number ]}
+1114 \textcolor{stringliteral}{        '''}
+1115 
+1116         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ]=\{\}
+1117 
+1118         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae24c2bdd19136a345bdb42fd49c5d91f}{\_\_pop\_byte\_addresses}:
+1119 
+1120             i\_pop\_size=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ac7cc98fe56efee82b4ffd4dc816a4704}{\_\_get\_count\_indiv}( self.
       \hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae24c2bdd19136a345bdb42fd49c5d91f}{\_\_pop\_byte\_addresses}[ i\_pop\_number ] )
-1050 
-1051             i\_sample\_size=int( round( i\_pop\_size * f\_proportion\_to\_sample ) )
-1052 
-1053             li\_subsample=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a9818467c9cb40f8e1de0c6cc7f52e263}{\_\_sample\_individuals\_randomly\_from\_one\_pop}
+1121 
+1122             i\_sample\_size=int( round( i\_pop\_size * f\_proportion\_to\_sample ) )
+1123 
+1124             li\_subsample=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a9818467c9cb40f8e1de0c6cc7f52e263}{\_\_sample\_individuals\_randomly\_from\_one\_pop}
       ( i\_pop\_number,i\_sample\_size )
-1054 
-1055             \textcolor{comment}{#we always include the "pop" entry, and we sort the subsample}
-1056             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number]= \(\backslash\)
-1057                      [ 0 ] +  li\_subsample
-1058         \textcolor{comment}{#end for each pop number}
-1059 
-1060         \textcolor{keywordflow}{return}
+1125 
+1126             \textcolor{comment}{#we always include the "pop" entry, and we sort the subsample}
+1127             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number]= \(\backslash\)
+1128                      [ 0 ] +  li\_subsample
+1129         \textcolor{comment}{#end for each pop number}
+1130 
+1131         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!subsample\+Loci\+By\+Range\+And\+Max@{subsample\+Loci\+By\+Range\+And\+Max}}
 \index{subsample\+Loci\+By\+Range\+And\+Max@{subsample\+Loci\+By\+Range\+And\+Max}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -773,73 +819,75 @@ for a given pop/indiv.  Given we have a set of N loci l_x in a
 genepop file listed in order l_1, l_2, l_3...l_N.
 
 param i_min_loci_position : integer giving lower index for range of loci numbers
-param i_min_loci_position : integer giving upper index for range of loci numbers
+param i_max_loci_position : integer giving upper index for range of loci numbers
 param i_min_total: sample at least this many loci, or throw error
 param i_max_total: sample at most this many loci, randomly select if range exceeds
 param b_truncate_max_to_total : boolean, if True, then, when the param i_max_loci_position
-                        exceeds N, we set it to N.  If false then we keep the max
-                        position, in order to throw an error if it exceeds N
-                        (see def __get_range_loci_nums).\end{DoxyVerb}
+                        exceeds the total available loci, N, we set it to N.  
+                        If false then we keep the max position, in order to 
+                        throw an error if it exceeds N (see def __get_range_loci_nums), 
+                        default is True.\end{DoxyVerb}
  
 
-Definition at line 849 of file genepopfilemanager.\+py.
+Definition at line 911 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-849             b\_truncate\_max\_to\_total=\textcolor{keyword}{True} ):
-850             
-851         \textcolor{stringliteral}{'''}
-852 \textcolor{stringliteral}{        Generate list of integers that stand for loci positions,}
-853 \textcolor{stringliteral}{        and as such allow for printing all or a subset of the loci}
-854 \textcolor{stringliteral}{        for a given pop/indiv.  Given we have a set of N loci l\_x in a}
-855 \textcolor{stringliteral}{        genepop file listed in order l\_1, l\_2, l\_3...l\_N.}
-856 \textcolor{stringliteral}{}
-857 \textcolor{stringliteral}{        param i\_min\_loci\_position : integer giving lower index for range of loci numbers}
-858 \textcolor{stringliteral}{        param i\_min\_loci\_position : integer giving upper index for range of loci numbers}
-859 \textcolor{stringliteral}{        param i\_min\_total: sample at least this many loci, or throw error}
-860 \textcolor{stringliteral}{        param i\_max\_total: sample at most this many loci, randomly select if range exceeds}
-861 \textcolor{stringliteral}{        param b\_truncate\_max\_to\_total : boolean, if True, then, when the param i\_max\_loci\_position}
-862 \textcolor{stringliteral}{                                        exceeds N, we set it to N.  If false then we keep the max}
-863 \textcolor{stringliteral}{                                        position, in order to throw an error if it exceeds N}
-864 \textcolor{stringliteral}{                                        (see def \_\_get\_range\_loci\_nums).}
-865 \textcolor{stringliteral}{}
-866 \textcolor{stringliteral}{        '''}
-867 
-868         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples}[ s\_loci\_subsample\_tag ]=[]
-869 
-870         o\_range\_to\_sample=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aaa92e1946fdacb522325a288e00eac71}{\_\_get\_range\_loci\_nums}( i\_min\_loci\_position, 
-871                                                             i\_max\_loci\_position,
-872                                                             b\_truncate\_max\_to\_total )
-873         
-874         i\_loci\_range\_interval\_size=len( o\_range\_to\_sample )
-875 
-876         i\_sample\_size=i\_loci\_range\_interval\_size 
-877 
-878         \textcolor{keywordflow}{if} i\_min\_total\_loci \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-879             \textcolor{keywordflow}{if} i\_sample\_size < i\_min\_total\_loci:
-880                 s\_msg=\textcolor{stringliteral}{"In GenepopFileManager instance, def "} \(\backslash\)
-881                             + \textcolor{stringliteral}{"subsampleLociByRangeAndMax "} \(\backslash\)
-882                             + \textcolor{stringliteral}{"loci sample size, "} \(\backslash\)
-883                             + str( i\_sample\_size )  \(\backslash\)
-884                             + \textcolor{stringliteral}{", is less than the minimum "} \(\backslash\)
-885                             + \textcolor{stringliteral}{"given by the passed argument: "}  \(\backslash\)
-886                             + str( i\_min\_total\_loci ) + \textcolor{stringliteral}{"."}
-887                 \textcolor{keywordflow}{raise} Exception( s\_msg )
-888             \textcolor{comment}{#end if sample size under min}
-889         \textcolor{comment}{#end if min total loci is not None}
-890 
-891         \textcolor{keywordflow}{if} i\_max\_total\_loci \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-892             i\_sample\_size=\(\backslash\)
-893                     min( i\_loci\_range\_interval\_size, i\_max\_total\_loci ) 
-894         \textcolor{comment}{#end if we have a value for max total loci }
-895 
-896         li\_subsample=random.sample( o\_range\_to\_sample, i\_sample\_size )
-897 
-898         li\_subsample.sort()
-899 
-900         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples}[ s\_loci\_subsample\_tag ]=li\_subsample
-901 
-902         \textcolor{keywordflow}{return}
+911             b\_truncate\_max\_to\_total=\textcolor{keyword}{True} ):
+912             
+913         \textcolor{stringliteral}{'''}
+914 \textcolor{stringliteral}{        Generate list of integers that stand for loci positions,}
+915 \textcolor{stringliteral}{        and as such allow for printing all or a subset of the loci}
+916 \textcolor{stringliteral}{        for a given pop/indiv.  Given we have a set of N loci l\_x in a}
+917 \textcolor{stringliteral}{        genepop file listed in order l\_1, l\_2, l\_3...l\_N.}
+918 \textcolor{stringliteral}{}
+919 \textcolor{stringliteral}{        param i\_min\_loci\_position : integer giving lower index for range of loci numbers}
+920 \textcolor{stringliteral}{        param i\_max\_loci\_position : integer giving upper index for range of loci numbers}
+921 \textcolor{stringliteral}{        param i\_min\_total: sample at least this many loci, or throw error}
+922 \textcolor{stringliteral}{        param i\_max\_total: sample at most this many loci, randomly select if range exceeds}
+923 \textcolor{stringliteral}{        param b\_truncate\_max\_to\_total : boolean, if True, then, when the param i\_max\_loci\_position}
+924 \textcolor{stringliteral}{                                        exceeds the total available loci, N, we set it to N.  }
+925 \textcolor{stringliteral}{                                        If false then we keep the max position, in order to }
+926 \textcolor{stringliteral}{                                        throw an error if it exceeds N (see def \_\_get\_range\_loci\_nums), }
+927 \textcolor{stringliteral}{                                        default is True.}
+928 \textcolor{stringliteral}{}
+929 \textcolor{stringliteral}{        '''}
+930 
+931         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples}[ s\_loci\_subsample\_tag ]=[]
+932 
+933         o\_range\_to\_sample=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aaa92e1946fdacb522325a288e00eac71}{\_\_get\_range\_loci\_nums}( i\_min\_loci\_position, 
+934                                                             i\_max\_loci\_position,
+935                                                             b\_truncate\_max\_to\_total )
+936         
+937         i\_loci\_range\_interval\_size=len( o\_range\_to\_sample )
+938 
+939         i\_sample\_size=i\_loci\_range\_interval\_size 
+940 
+941         \textcolor{keywordflow}{if} i\_min\_total\_loci \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+942             \textcolor{keywordflow}{if} i\_sample\_size < i\_min\_total\_loci:
+943                 s\_msg=\textcolor{stringliteral}{"In GenepopFileManager instance, def "} \(\backslash\)
+944                             + \textcolor{stringliteral}{"subsampleLociByRangeAndMax "} \(\backslash\)
+945                             + \textcolor{stringliteral}{"loci sample size, "} \(\backslash\)
+946                             + str( i\_sample\_size )  \(\backslash\)
+947                             + \textcolor{stringliteral}{", is less than the minimum "} \(\backslash\)
+948                             + \textcolor{stringliteral}{"given by the passed argument: "}  \(\backslash\)
+949                             + str( i\_min\_total\_loci ) + \textcolor{stringliteral}{"."}
+950                 \textcolor{keywordflow}{raise} Exception( s\_msg )
+951             \textcolor{comment}{#end if sample size under min}
+952         \textcolor{comment}{#end if min total loci is not None}
+953 
+954         \textcolor{keywordflow}{if} i\_max\_total\_loci \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+955             i\_sample\_size=\(\backslash\)
+956                     min( i\_loci\_range\_interval\_size, i\_max\_total\_loci ) 
+957         \textcolor{comment}{#end if we have a value for max total loci }
+958 
+959         li\_subsample=random.sample( o\_range\_to\_sample, i\_sample\_size )
+960 
+961         li\_subsample.sort()
+962 
+963         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples}[ s\_loci\_subsample\_tag ]=li\_subsample
+964 
+965         \textcolor{keywordflow}{return}
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!subsample\+Loci\+By\+Range\+And\+Proportion@{subsample\+Loci\+By\+Range\+And\+Proportion}}
 \index{subsample\+Loci\+By\+Range\+And\+Proportion@{subsample\+Loci\+By\+Range\+And\+Proportion}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -862,55 +910,55 @@ max loci number, when the given value exceeds.  Otherwise,
 if max is out of range an error will be thrown.\end{DoxyVerb}
  
 
-Definition at line 911 of file genepopfilemanager.\+py.
+Definition at line 974 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-911             b\_truncate\_max\_to\_total=\textcolor{keyword}{True} ):
-912             
-913         \textcolor{stringliteral}{'''}
-914 \textcolor{stringliteral}{        Generate list of integers that stand for loci positions,}
-915 \textcolor{stringliteral}{        and as such allow for printing the given proportion of loci}
-916 \textcolor{stringliteral}{        with the indices range given.  Flag b\_truncate\_max\_to\_total}
-917 \textcolor{stringliteral}{        when True will truncate the max-loci-position param to the}
-918 \textcolor{stringliteral}{        max loci number, when the given value exceeds.  Otherwise,}
-919 \textcolor{stringliteral}{        if max is out of range an error will be thrown.}
-920 \textcolor{stringliteral}{}
-921 \textcolor{stringliteral}{        '''}
-922 
-923         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples}[ s\_loci\_subsample\_tag ]=[]
-924 
-925         o\_range\_to\_sample=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aaa92e1946fdacb522325a288e00eac71}{\_\_get\_range\_loci\_nums}( i\_min\_loci\_position, 
-926                                                             i\_max\_loci\_position,
-927                                                             b\_truncate\_max\_to\_total )
-928         
-929         i\_loci\_range\_interval\_size=len( o\_range\_to\_sample )
-930 
-931         f\_proportion\_of\_sample=float (i\_loci\_range\_interval\_size  ) * f\_proportion\_of\_total\_loci 
-932 
-933         i\_sample\_size=int( round(  f\_proportion\_of\_sample ) )
-934         
-935         \textcolor{keywordflow}{if} i\_min\_total\_loci \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-936             \textcolor{keywordflow}{if} i\_sample\_size < i\_min\_total\_loci:
-937                 s\_msg=\textcolor{stringliteral}{"In GenepopFileManager instance, def "} \(\backslash\)
-938                             + \textcolor{stringliteral}{"subsampleLociByRangeAndProportion, "} \(\backslash\)
-939                             + \textcolor{stringliteral}{"loci sample size, "} \(\backslash\)
-940                             + str( i\_sample\_size )  \(\backslash\)
-941                             + \textcolor{stringliteral}{" is less than the minimum "} \(\backslash\)
-942                             + \textcolor{stringliteral}{"given by the passed argument: "}  \(\backslash\)
-943                             + str( i\_min\_total\_loci ) + \textcolor{stringliteral}{"."}
-944                 \textcolor{keywordflow}{raise} Exception( s\_msg )
-945             \textcolor{comment}{#end if sample size under min}
-946         \textcolor{comment}{#end if i\_min\_total\_loci is not None}
-947 
-948         li\_subsample=random.sample( o\_range\_to\_sample, i\_sample\_size )
-949 
-950         li\_subsample.sort()
-951 
-952         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples}[ s\_loci\_subsample\_tag ]=li\_subsample
-953 
-954         \textcolor{keywordflow}{return}
-955 
+974             b\_truncate\_max\_to\_total=\textcolor{keyword}{True} ):
+975             
+976         \textcolor{stringliteral}{'''}
+977 \textcolor{stringliteral}{        Generate list of integers that stand for loci positions,}
+978 \textcolor{stringliteral}{        and as such allow for printing the given proportion of loci}
+979 \textcolor{stringliteral}{        with the indices range given.  Flag b\_truncate\_max\_to\_total}
+980 \textcolor{stringliteral}{        when True will truncate the max-loci-position param to the}
+981 \textcolor{stringliteral}{        max loci number, when the given value exceeds.  Otherwise,}
+982 \textcolor{stringliteral}{        if max is out of range an error will be thrown.}
+983 \textcolor{stringliteral}{}
+984 \textcolor{stringliteral}{        '''}
+985 
+986         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples}[ s\_loci\_subsample\_tag ]=[]
+987 
+988         o\_range\_to\_sample=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_aaa92e1946fdacb522325a288e00eac71}{\_\_get\_range\_loci\_nums}( i\_min\_loci\_position, 
+989                                                             i\_max\_loci\_position,
+990                                                             b\_truncate\_max\_to\_total )
+991         
+992         i\_loci\_range\_interval\_size=len( o\_range\_to\_sample )
+993 
+994         f\_proportion\_of\_sample=float (i\_loci\_range\_interval\_size  ) * f\_proportion\_of\_total\_loci 
+995 
+996         i\_sample\_size=int( round(  f\_proportion\_of\_sample ) )
+997         
+998         \textcolor{keywordflow}{if} i\_min\_total\_loci \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+999             \textcolor{keywordflow}{if} i\_sample\_size < i\_min\_total\_loci:
+1000                 s\_msg=\textcolor{stringliteral}{"In GenepopFileManager instance, def "} \(\backslash\)
+1001                             + \textcolor{stringliteral}{"subsampleLociByRangeAndProportion, "} \(\backslash\)
+1002                             + \textcolor{stringliteral}{"loci sample size, "} \(\backslash\)
+1003                             + str( i\_sample\_size )  \(\backslash\)
+1004                             + \textcolor{stringliteral}{" is less than the minimum "} \(\backslash\)
+1005                             + \textcolor{stringliteral}{"given by the passed argument: "}  \(\backslash\)
+1006                             + str( i\_min\_total\_loci ) + \textcolor{stringliteral}{"."}
+1007                 \textcolor{keywordflow}{raise} Exception( s\_msg )
+1008             \textcolor{comment}{#end if sample size under min}
+1009         \textcolor{comment}{#end if i\_min\_total\_loci is not None}
+1010 
+1011         li\_subsample=random.sample( o\_range\_to\_sample, i\_sample\_size )
+1012 
+1013         li\_subsample.sort()
+1014 
+1015         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_af867ba70728e8a3aaf0097ddd6399e28}{\_\_loci\_subsamples}[ s\_loci\_subsample\_tag ]=li\_subsample
+1016 
+1017         \textcolor{keywordflow}{return}
+1018 
 \end{DoxyCode}
 \index{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}!subsample\+N\+Individuals\+Randomly\+From\+Each\+Pop@{subsample\+N\+Individuals\+Randomly\+From\+Each\+Pop}}
 \index{subsample\+N\+Individuals\+Randomly\+From\+Each\+Pop@{subsample\+N\+Individuals\+Randomly\+From\+Each\+Pop}!negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager@{negui\+::genepopfilemanager\+::\+Genepop\+File\+Manager}}
@@ -931,34 +979,34 @@ self.__indiv_subsamples[ s_subsample_tag ][ i_pop_number ]
 \end{DoxyVerb}
  
 
-Definition at line 1063 of file genepopfilemanager.\+py.
+Definition at line 1134 of file genepopfilemanager.\+py.
 
 
 \begin{DoxyCode}
-1063     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_affaeb9457d84736dc1f289d600808f56}{subsampleNIndividualsRandomlyFromEachPop}( self, i\_n, 
+1134     \textcolor{keyword}{def }\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_affaeb9457d84736dc1f289d600808f56}{subsampleNIndividualsRandomlyFromEachPop}( self, i\_n, 
       s\_subsample\_tag ):
-1064 
-1065         \textcolor{stringliteral}{'''}
-1066 \textcolor{stringliteral}{        for each "pop" in the original genepop file,}
-1067 \textcolor{stringliteral}{        randomly select N individuals}
-1068 \textcolor{stringliteral}{        }
-1069 \textcolor{stringliteral}{        if N is larger than a given population, an error is thrown}
-1070 \textcolor{stringliteral}{        by random.sample.  The sampled pops are stored as }
-1071 \textcolor{stringliteral}{        the subset list ints, ordered as they are in the orig, as       }
-1072 \textcolor{stringliteral}{        self.\_\_indiv\_subsamples[ s\_subsample\_tag ][ i\_pop\_number ]}
-1073 \textcolor{stringliteral}{        '''}
-1074 
-1075         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ] = \{\}
-1076 
-1077         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae24c2bdd19136a345bdb42fd49c5d91f}{\_\_pop\_byte\_addresses}:
-1078             
-1079             li\_subsample=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a9818467c9cb40f8e1de0c6cc7f52e263}{\_\_sample\_individuals\_randomly\_from\_one\_pop}
-      ( i\_pop\_number, i\_N )
-1080 
-1081             \textcolor{comment}{#we always include the "pop" entry, and we sort the subsample}
-1082             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number]= \(\backslash\)
-1083                      [ 0 ] +  li\_subsample
-1084         \textcolor{comment}{#end for each pop number}
+1135 
+1136         \textcolor{stringliteral}{'''}
+1137 \textcolor{stringliteral}{        for each "pop" in the original genepop file,}
+1138 \textcolor{stringliteral}{        randomly select N individuals}
+1139 \textcolor{stringliteral}{        }
+1140 \textcolor{stringliteral}{        if N is larger than a given population, an error is thrown}
+1141 \textcolor{stringliteral}{        by random.sample.  The sampled pops are stored as }
+1142 \textcolor{stringliteral}{        the subset list ints, ordered as they are in the orig, as       }
+1143 \textcolor{stringliteral}{        self.\_\_indiv\_subsamples[ s\_subsample\_tag ][ i\_pop\_number ]}
+1144 \textcolor{stringliteral}{        '''}
+1145 
+1146         self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ] = \{\}
+1147 
+1148         \textcolor{keywordflow}{for} i\_pop\_number \textcolor{keywordflow}{in} self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_ae24c2bdd19136a345bdb42fd49c5d91f}{\_\_pop\_byte\_addresses}:
+1149             
+1150             li\_subsample=self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a9818467c9cb40f8e1de0c6cc7f52e263}{\_\_sample\_individuals\_randomly\_from\_one\_pop}
+      ( i\_pop\_number, i\_n )
+1151 
+1152             \textcolor{comment}{#we always include the "pop" entry, and we sort the subsample}
+1153             self.\hyperlink{classnegui_1_1genepopfilemanager_1_1GenepopFileManager_a1e8379bcee4902ca9314ff53fcb71644}{\_\_indiv\_subsamples}[ s\_subsample\_tag ][ i\_pop\_number]= \(\backslash\)
+1154                      [ 0 ] +  li\_subsample
+1155         \textcolor{comment}{#end for each pop number}
 \end{DoxyCode}
 
 

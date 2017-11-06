@@ -5,7 +5,7 @@
 %%For: 
 %Magnification: 1.00
 %%Orientation: Portrait
-%%BoundingBox: 0 0 500 254.237288
+%%BoundingBox: 0 0 500 275.423729
 %%Pages: 0
 %%BeginSetup
 %%EndSetup
@@ -19,12 +19,12 @@
 /marginwidth 10 def
 /distx 20 def
 /disty 40 def
-/boundaspect 1.966667 def  % aspect ratio of the BoundingBox (width/height)
+/boundaspect 1.815385 def  % aspect ratio of the BoundingBox (width/height)
 /boundx 500 def
 /boundy boundx boundaspect div def
 /xspacing 0 def
 /yspacing 0 def
-/rows 12 def
+/rows 13 def
 /cols 2 def
 /scalefactor 0 def
 /boxfont /Times-Roman findfont fontheight scalefont def
@@ -175,6 +175,7 @@ boxfont setfont
 1 boundaspect scale
 (negui.genepopfilesampler.GenepopFileSampler) cw
 (object) cw
+(negui.genepopfilesampler.GenepopFileSamplerCohorts) cw
 (negui.genepopfilesampler.GenepopFileSamplerIndividualsAgeStructureCohorts) cw
 (negui.genepopfilesampler.GenepopFileSamplerIndividualsAgeStructureRelateds) cw
 (negui.genepopfilesampler.GenepopFileSamplerIndividualsByCriteria) cw
@@ -196,8 +197,9 @@ boundx scalefactor div boundy scalefactor div scale
 
 % ----- classes -----
 
- (negui.genepopfilesampler.GenepopFileSampler) 0.000000 10.000000 box
- (object) 0.000000 11.000000 box
+ (negui.genepopfilesampler.GenepopFileSampler) 0.000000 11.000000 box
+ (object) 0.000000 12.000000 box
+ (negui.genepopfilesampler.GenepopFileSamplerCohorts) 1.000000 10.000000 box
  (negui.genepopfilesampler.GenepopFileSamplerIndividualsAgeStructureCohorts) 1.000000 9.000000 box
 1.000000 9.000000 mark
  (negui.genepopfilesampler.GenepopFileSamplerIndividualsAgeStructureRelateds) 1.000000 8.000000 box
@@ -213,11 +215,13 @@ boundx scalefactor div boundy scalefactor div scale
 % ----- relations -----
 
 solid
-0 0.000000 10.000000 out
+0 0.000000 11.000000 out
 solid
-1 0.000000 11.000000 in
+1 0.000000 12.000000 in
 solid
-1 0.000000 9.250000 out
+1 0.000000 10.250000 out
+solid
+0 0.000000 10.500000 hedge
 solid
 0 0.000000 9.500000 hedge
 solid
@@ -239,4 +243,4 @@ solid
 solid
 0 0.000000 0.500000 hedge
 solid
-0.000000 10.000000 0.500000 vedge
+0.000000 11.000000 0.500000 vedge

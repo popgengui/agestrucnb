@@ -92,65 +92,65 @@ arg 3 expects a list of strings, in order, any optional args
 \end{DoxyVerb}
  
 
-Definition at line 40 of file indiv.\+from.\+perc.\+and.\+rep.\+num.\+py.
+Definition at line 42 of file indiv.\+from.\+perc.\+and.\+rep.\+num.\+py.
 
 
 \begin{DoxyCode}
-40         s\_note=\textcolor{keywordtype}{None}):
-41     \textcolor{stringliteral}{'''}
-42 \textcolor{stringliteral}{    arg 1 expects sys.argv, or a copy}
-43 \textcolor{stringliteral}{    arg 2 expects a list strings, in order, required args}
-44 \textcolor{stringliteral}{    arg 3 expects a list of strings, in order, any optional args}
-45 \textcolor{stringliteral}{    '''}
-46     i\_num\_args\_required = len( ls\_required\_arg\_descriptions )
-47     i\_num\_args\_optional = len( ls\_optional\_arg\_descriptions )
-48     i\_max\_poss\_num\_args = i\_num\_args\_required + i\_num\_args\_optional 
-49     i\_num\_args\_passed = len( ls\_this\_argv ) - 1  
-50     s\_usage\_string = \textcolor{stringliteral}{""}
-51     s\_arg\_delimit=\textcolor{stringliteral}{""}
-52     \textcolor{keywordflow}{if} b\_multi\_line\_msg == \textcolor{keyword}{True}:
-53         s\_arg\_delimit=OUTPUT\_ENDLINE
-54     \textcolor{comment}{#end if we put each arg descript on a }
-55     \textcolor{comment}{#separate line of output}
-56 
-57     \textcolor{keywordflow}{if} i\_num\_args\_passed <  i\_num\_args\_required  \(\backslash\)
-58             \textcolor{keywordflow}{or} (i\_num\_args\_passed > i\_max\_poss\_num\_args \textcolor{keywordflow}{and} b\_unlimited\_final\_args == \textcolor{keyword}{False} ): 
-59     
-60         \textcolor{keyword}{import} os
-61         
-62         s\_scriptname = os.path.basename( ls\_this\_argv[ 0 ] )    
-63         s\_usage\_string = \textcolor{stringliteral}{"usage: "} + s\_scriptname 
-64 
-65         \textcolor{keywordflow}{if} b\_multi\_line\_msg:
-66             s\_usage\_string=\textcolor{stringliteral}{"usage: "} + s\_scriptname \(\backslash\)
-67                     + OUTPUT\_ENDLINE + \textcolor{stringliteral}{"args:"} + OUTPUT\_ENDLINE
-68         \textcolor{keywordflow}{else}:
-69             s\_usage\_string = \textcolor{stringliteral}{"usage: "} + s\_scriptname 
-70         \textcolor{comment}{#end if multi line else not}
-71 
-72         \textcolor{keywordflow}{for} s\_arg \textcolor{keywordflow}{in} ls\_required\_arg\_descriptions:
+42         s\_note=\textcolor{keywordtype}{None}):
+43     \textcolor{stringliteral}{'''}
+44 \textcolor{stringliteral}{    arg 1 expects sys.argv, or a copy}
+45 \textcolor{stringliteral}{    arg 2 expects a list strings, in order, required args}
+46 \textcolor{stringliteral}{    arg 3 expects a list of strings, in order, any optional args}
+47 \textcolor{stringliteral}{    '''}
+48     i\_num\_args\_required = len( ls\_required\_arg\_descriptions )
+49     i\_num\_args\_optional = len( ls\_optional\_arg\_descriptions )
+50     i\_max\_poss\_num\_args = i\_num\_args\_required + i\_num\_args\_optional 
+51     i\_num\_args\_passed = len( ls\_this\_argv ) - 1  
+52     s\_usage\_string = \textcolor{stringliteral}{""}
+53     s\_arg\_delimit=\textcolor{stringliteral}{""}
+54     \textcolor{keywordflow}{if} b\_multi\_line\_msg == \textcolor{keyword}{True}:
+55         s\_arg\_delimit=OUTPUT\_ENDLINE
+56     \textcolor{comment}{#end if we put each arg descript on a }
+57     \textcolor{comment}{#separate line of output}
+58 
+59     \textcolor{keywordflow}{if} i\_num\_args\_passed <  i\_num\_args\_required  \(\backslash\)
+60             \textcolor{keywordflow}{or} (i\_num\_args\_passed > i\_max\_poss\_num\_args \textcolor{keywordflow}{and} b\_unlimited\_final\_args == \textcolor{keyword}{False} ): 
+61     
+62         \textcolor{keyword}{import} os
+63         
+64         s\_scriptname = os.path.basename( ls\_this\_argv[ 0 ] )    
+65         s\_usage\_string = \textcolor{stringliteral}{"usage: "} + s\_scriptname 
+66 
+67         \textcolor{keywordflow}{if} b\_multi\_line\_msg:
+68             s\_usage\_string=\textcolor{stringliteral}{"usage: "} + s\_scriptname \(\backslash\)
+69                     + OUTPUT\_ENDLINE + \textcolor{stringliteral}{"args:"} + OUTPUT\_ENDLINE
+70         \textcolor{keywordflow}{else}:
+71             s\_usage\_string = \textcolor{stringliteral}{"usage: "} + s\_scriptname 
+72         \textcolor{comment}{#end if multi line else not}
 73 
-74             s\_usage\_string += \textcolor{stringliteral}{" <"} \(\backslash\)
-75                 + s\_arg + \textcolor{stringliteral}{">"} \(\backslash\)
-76                 + s\_arg\_delimit
-77         \textcolor{comment}{#end for each requried arg}
-78 
-79         \textcolor{keywordflow}{for} s\_arg \textcolor{keywordflow}{in} ls\_optional\_arg\_descriptions:
+74         \textcolor{keywordflow}{for} s\_arg \textcolor{keywordflow}{in} ls\_required\_arg\_descriptions:
+75 
+76             s\_usage\_string += \textcolor{stringliteral}{" <"} \(\backslash\)
+77                 + s\_arg + \textcolor{stringliteral}{">"} \(\backslash\)
+78                 + s\_arg\_delimit
+79         \textcolor{comment}{#end for each requried arg}
 80 
-81             s\_usage\_string += \textcolor{stringliteral}{" <(optional) "} \(\backslash\)
-82                 + s\_arg + \textcolor{stringliteral}{">"} \(\backslash\)
-83                 + s\_arg\_delimit
-84         \textcolor{comment}{#end for each required arg}
-85 
-86     \textcolor{comment}{#end if number of args is out of range}
+81         \textcolor{keywordflow}{for} s\_arg \textcolor{keywordflow}{in} ls\_optional\_arg\_descriptions:
+82 
+83             s\_usage\_string += \textcolor{stringliteral}{" <(optional) "} \(\backslash\)
+84                 + s\_arg + \textcolor{stringliteral}{">"} \(\backslash\)
+85                 + s\_arg\_delimit
+86         \textcolor{comment}{#end for each required arg}
 87 
-88     \textcolor{keywordflow}{if} s\_usage\_string != \textcolor{stringliteral}{""} \textcolor{keywordflow}{and} s\_note \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
-89         s\_usage\_string=s\_usage\_string + OUTPUT\_ENDLINE + s\_note
-90     \textcolor{comment}{#end if note }
-91 
-92     \textcolor{keywordflow}{return}  s\_usage\_string 
-93 \textcolor{comment}{#def do\_usage\_check}
-94 
+88     \textcolor{comment}{#end if number of args is out of range}
+89 
+90     \textcolor{keywordflow}{if} s\_usage\_string != \textcolor{stringliteral}{""} \textcolor{keywordflow}{and} s\_note \textcolor{keywordflow}{is} \textcolor{keywordflow}{not} \textcolor{keywordtype}{None}:
+91         s\_usage\_string=s\_usage\_string + OUTPUT\_ENDLINE + s\_note
+92     \textcolor{comment}{#end if note }
+93 
+94     \textcolor{keywordflow}{return}  s\_usage\_string 
+95 \textcolor{comment}{#def do\_usage\_check}
+96 
 \end{DoxyCode}
 \index{negui\+::indiv@{negui\+::indiv}!get\+\_\+proportion\+\_\+col\+\_\+number@{get\+\_\+proportion\+\_\+col\+\_\+number}}
 \index{get\+\_\+proportion\+\_\+col\+\_\+number@{get\+\_\+proportion\+\_\+col\+\_\+number}!negui\+::indiv@{negui\+::indiv}}
@@ -168,45 +168,45 @@ returns None if the s_proportion has no match in the field names
 \end{DoxyVerb}
  
 
-Definition at line 95 of file indiv.\+from.\+perc.\+and.\+rep.\+num.\+py.
+Definition at line 97 of file indiv.\+from.\+perc.\+and.\+rep.\+num.\+py.
 
 
 \begin{DoxyCode}
-95 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1indiv_ae7fb810142ce304fc6d7c59e8062d1a5}{get\_proportion\_col\_number}( s\_first\_line\_in\_table, s\_proportion ):
-96     \textcolor{stringliteral}{'''}
-97 \textcolor{stringliteral}{    returns the zero-based index of the column number}
-98 \textcolor{stringliteral}{    that gives replicate number lists asssociated with}
-99 \textcolor{stringliteral}{    the s\_proportion}
-100 \textcolor{stringliteral}{}
-101 \textcolor{stringliteral}{    returns None if the s\_proportion has no match in the field names}
-102 \textcolor{stringliteral}{    '''}
-103 
-104     ls\_first\_line\_in\_table=s\_first\_line\_in\_table.strip().split( DELIM\_TABLE )
-105     i\_num\_fields=len( ls\_first\_line\_in\_table )
-106     i\_col\_num=\textcolor{keywordtype}{None}
-107 
-108     \textcolor{comment}{#first 2 cols are filename and indiv name, so we search idx 2..end:}
-109     \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( 2, i\_num\_fields ):
-110 
-111         \textcolor{keywordflow}{if} ls\_first\_line\_in\_table[ idx ] == s\_proportion:
-112             i\_col\_num=idx
-113             \textcolor{keywordflow}{break}
-114         \textcolor{comment}{#end if match}
-115     \textcolor{comment}{#end}
-116 
-117     \textcolor{keywordflow}{if} i\_col\_num \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
+97 \textcolor{keyword}{def }\hyperlink{namespacenegui_1_1indiv_ae7fb810142ce304fc6d7c59e8062d1a5}{get\_proportion\_col\_number}( s\_first\_line\_in\_table, s\_proportion ):
+98     \textcolor{stringliteral}{'''}
+99 \textcolor{stringliteral}{    returns the zero-based index of the column number}
+100 \textcolor{stringliteral}{    that gives replicate number lists asssociated with}
+101 \textcolor{stringliteral}{    the s\_proportion}
+102 \textcolor{stringliteral}{}
+103 \textcolor{stringliteral}{    returns None if the s\_proportion has no match in the field names}
+104 \textcolor{stringliteral}{    '''}
+105 
+106     ls\_first\_line\_in\_table=s\_first\_line\_in\_table.strip().split( DELIM\_TABLE )
+107     i\_num\_fields=len( ls\_first\_line\_in\_table )
+108     i\_col\_num=\textcolor{keywordtype}{None}
+109 
+110     \textcolor{comment}{#first 2 cols are filename and indiv name, so we search idx 2..end:}
+111     \textcolor{keywordflow}{for} idx \textcolor{keywordflow}{in} range( 2, i\_num\_fields ):
+112 
+113         \textcolor{keywordflow}{if} ls\_first\_line\_in\_table[ idx ] == s\_proportion:
+114             i\_col\_num=idx
+115             \textcolor{keywordflow}{break}
+116         \textcolor{comment}{#end if match}
+117     \textcolor{comment}{#end}
 118 
-119         s\_msg=\textcolor{stringliteral}{"Can't match given proportion "} + s\_proportion + \textcolor{stringliteral}{"."} \(\backslash\)
-120                 + \textcolor{stringliteral}{"Here are the proportions: "} \(\backslash\)
-121                 + \textcolor{stringliteral}{", "}.join( ls\_first\_line\_in\_table[ 2: ] ) \(\backslash\)
-122                 + \textcolor{stringliteral}{"  Please match number of digits exactly."}
-123             
-124         sys.stderr.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
-125         sys.exit()
-126     \textcolor{comment}{#end if no match}
-127 
-128     \textcolor{keywordflow}{return} i\_col\_num 
+119     \textcolor{keywordflow}{if} i\_col\_num \textcolor{keywordflow}{is} \textcolor{keywordtype}{None}:
+120 
+121         s\_msg=\textcolor{stringliteral}{"Can't match given proportion "} + s\_proportion + \textcolor{stringliteral}{"."} \(\backslash\)
+122                 + \textcolor{stringliteral}{"Here are the proportions: "} \(\backslash\)
+123                 + \textcolor{stringliteral}{", "}.join( ls\_first\_line\_in\_table[ 2: ] ) \(\backslash\)
+124                 + \textcolor{stringliteral}{"  Please match number of digits exactly."}
+125             
+126         sys.stderr.write( s\_msg + \textcolor{stringliteral}{"\(\backslash\)n"} )
+127         sys.exit()
+128     \textcolor{comment}{#end if no match}
 129 
-130 \textcolor{comment}{#end get\_proportion\_col\_number}
+130     \textcolor{keywordflow}{return} i\_col\_num 
 131 
+132 \textcolor{comment}{#end get\_proportion\_col\_number}
+133 
 \end{DoxyCode}

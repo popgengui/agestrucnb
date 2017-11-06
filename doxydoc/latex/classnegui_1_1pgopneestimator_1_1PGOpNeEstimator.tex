@@ -9,15 +9,27 @@ Inheritance diagram for negui.\+pgopneestimator.\+P\+G\+Op\+Ne\+Estimator\+:\beg
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+input=None, o\+\_\+output=None)\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a64c3a02daa164ffaeb9466fb1a7ee300}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a64c3a02daa164ffaeb9466fb1a7ee300}
-
+def \hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_afa820d0b45ef47e2fd9b5dbbc3978375}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, o\+\_\+input=None, o\+\_\+output=None, s\+\_\+estimator\+\_\+name=N\+E\+E\+S\+T\+I\+M\+A\+T\+OR, s\+\_\+parent\+\_\+dir\+\_\+for\+\_\+workspace=None)
 \item 
 def \hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a37628c8a837a75a542ae82947dc367fd}{prepare\+Op} (self)
 \item 
-def {\bfseries do\+Op} (self)\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a08032c5f1aec98e9da5b258287e67bcc}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a08032c5f1aec98e9da5b258287e67bcc}
-
+def \hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a08032c5f1aec98e9da5b258287e67bcc}{do\+Op} (self)
 \item 
 def \hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ad20919b3cfce1fae03d64ae2aa19981f}{deliver\+Results} (self)
+\item 
+def \hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a34594cb054d2b281775aa080eec7caa5}{get\+Output\+Column\+Number\+For\+Field\+Name} (self, s\+\_\+field\+\_\+name)
+\item 
+def {\bfseries ldne\+\_\+path} (self)\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a12a6709fe65b29ec5fbf022667f64671}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a12a6709fe65b29ec5fbf022667f64671}
+
+\item 
+def {\bfseries ldne\+\_\+path} (self, s\+\_\+value)\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_aae78d9adba5ab40a6483fcc41ff804c9}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_aae78d9adba5ab40a6483fcc41ff804c9}
+
+\item 
+def {\bfseries neestimator\+\_\+path} (self)\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a4ea2e58f1bdc996c503d510af6105671}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a4ea2e58f1bdc996c503d510af6105671}
+
+\item 
+def {\bfseries neestimator\+\_\+path} (self, s\+\_\+value)\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ad24778e5b8ec1da97f140a9d6cb04226}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ad24778e5b8ec1da97f140a9d6cb04226}
+
 \end{DoxyCompactItemize}
 
 
@@ -26,11 +38,92 @@ def \hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ad20919b3cfce1fa
 that takes simupop-operation results (from the pgopsimupop
 object), and performes and ldne analysis using Tiago Antao's
 ne.py code and his other utilitites.
+
+2017_03_15. We are revising this class to add the option to use
+the program LDNe (beta version) instead of NeEstimator.  New
+__init__ parameter tells the object which program is to be used.\end{DoxyVerb}
+ 
+
+Definition at line 84 of file pgopneestimator.\+py.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator@{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator@{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator}}
+\subsubsection[{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+(self, o\+\_\+input=\+None, o\+\_\+output=\+None, s\+\_\+estimator\+\_\+name=\+N\+E\+E\+S\+T\+I\+M\+A\+T\+O\+R, s\+\_\+parent\+\_\+dir\+\_\+for\+\_\+workspace=\+None)}{__init__(self, o_input=None, o_output=None, s_estimator_name=NEESTIMATOR, s_parent_dir_for_workspace=None)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgopneestimator.\+P\+G\+Op\+Ne\+Estimator.\+\_\+\+\_\+init\+\_\+\+\_\+ (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{o\+\_\+input = {\ttfamily None}, }
+\item[{}]{o\+\_\+output = {\ttfamily None}, }
+\item[{}]{s\+\_\+estimator\+\_\+name = {\ttfamily NEESTIMATOR}, }
+\item[{}]{s\+\_\+parent\+\_\+dir\+\_\+for\+\_\+workspace = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_afa820d0b45ef47e2fd9b5dbbc3978375}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_afa820d0b45ef47e2fd9b5dbbc3978375}
+\begin{DoxyVerb}2017_03_27. Adding parameter s_parent_dir_for_workspace to allow
+for the gui to use a temp directory.  This object will run still
+run the estimator in a separate temporary dir, but it will put
+that directory inside that given by s_parent_dir_for_workspace,
+if it is not None
 \end{DoxyVerb}
  
 
-Definition at line 34 of file pgopneestimator.\+py.
+Definition at line 99 of file pgopneestimator.\+py.
 
+
+\begin{DoxyCode}
+99                                     s\_parent\_dir\_for\_workspace=\textcolor{keywordtype}{None} ):
+100 
+101         \textcolor{stringliteral}{'''}
+102 \textcolor{stringliteral}{        2017\_03\_27. Adding parameter s\_parent\_dir\_for\_workspace to allow}
+103 \textcolor{stringliteral}{        for the gui to use a temp directory.  This object will run still}
+104 \textcolor{stringliteral}{        run the estimator in a separate temporary dir, but it will put}
+105 \textcolor{stringliteral}{        that directory inside that given by s\_parent\_dir\_for\_workspace,}
+106 \textcolor{stringliteral}{        if it is not None}
+107 \textcolor{stringliteral}{        '''}
+108         super( PGOpNeEstimator, self ).\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_afa820d0b45ef47e2fd9b5dbbc3978375}{\_\_init\_\_}( o\_input, o\_output )
+109 
+110         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a3ff367d5058faad36ad0d4ac1d420e53}{\_\_indir}=\textcolor{keywordtype}{None}
+111         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a428a0896f7303229c34071c963e1be58}{\_\_outdir}=\textcolor{keywordtype}{None}
+112         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ad467601bda091e5759650b801a509612}{\_\_infile}=\textcolor{keywordtype}{None}
+113         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a0e1f25befda8ec3b052e98ed4db9ea5d}{\_\_outfile}=\textcolor{keywordtype}{None}
+114 
+115         \textcolor{stringliteral}{'''}
+116 \textcolor{stringliteral}{        2017\_03\_29.  To allow passing the executable path}
+117 \textcolor{stringliteral}{        into the controller objects.  Motivated by a problem}
+118 \textcolor{stringliteral}{        finding the path to the LDNe2 executable during}
+119 \textcolor{stringliteral}{        instantiation of the object.}
+120 \textcolor{stringliteral}{        '''}
+121         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a3e78995efb0929fd49e1d574577be1bf}{\_\_ldne\_path}=\textcolor{keywordtype}{None}
+122         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a3b01d4a2bccff9d1799675f64cf07d42}{\_\_neestimator\_path}=\textcolor{keywordtype}{None}
+123 
+124         \textcolor{stringliteral}{'''}
+125 \textcolor{stringliteral}{        2017\_03\_27.  This is set in doOp(), so that the}
+126 \textcolor{stringliteral}{        curdir can be saved, and then returned-to after}
+127 \textcolor{stringliteral}{        changing to a temp directory, which now may be}
+128 \textcolor{stringliteral}{        different than a subdirectdory inside the curdir.}
+129 \textcolor{stringliteral}{        '''}
+130         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a97a4b47997530ac8dcd56bff004be4ca}{\_\_original\_op\_path}=\textcolor{keywordtype}{None}
+131         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_aa476bb7b0bf29096dd7c91a67d37d8ad}{\_\_parent\_dir\_for\_workspace}=s\_parent\_dir\_for\_workspace
+132 
+133         \textcolor{keywordflow}{if} s\_estimator\_name \textcolor{keywordflow}{not} \textcolor{keywordflow}{in} [ NEESTIMATOR, LDNE\_ESTIMATION ]:
+134             s\_msg=\textcolor{stringliteral}{"In PGOpNeEstimator instance, def \_\_init\_\_, "} \(\backslash\)
+135                         + \textcolor{stringliteral}{"caller passed unknown estimator name: "} \(\backslash\)
+136                         + s\_estimator\_name + \textcolor{stringliteral}{"."}
+137             \textcolor{keywordflow}{raise} Exception( s\_msg )
+138         \textcolor{keywordflow}{elif} s\_estimator\_name == NEESTIMATOR \textcolor{keywordflow}{and} \_\_REQUIRE\_PYGENOMICS\_\_ == \textcolor{keyword}{False}:
+139             s\_msg=\textcolor{stringliteral}{"In PGOpNeEstimator instance, def \_\_init\_\_, "} \(\backslash\)
+140                         + \textcolor{stringliteral}{"the caller has selected "} + NEESTIMATOR \(\backslash\)
+141                         + \textcolor{stringliteral}{" as for LDNe estimations, "} \(\backslash\)
+142                         + \textcolor{stringliteral}{" but this module has its \_\_REQUIRE\_PYGENOMICS\_\_ "} \(\backslash\)
+143                         + \textcolor{stringliteral}{" flag set to false."}
+144             \textcolor{keywordflow}{raise} Exception( s\_msg )
+145         \textcolor{keywordflow}{else}:
+146             self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a77a1d96335902820fda22a07c902045e}{\_\_estimator\_to\_use}=s\_estimator\_name
+147         \textcolor{comment}{#end if unknown name else known}
+148 
+149         \textcolor{keywordflow}{return}
+\end{DoxyCode}
 
 
 \subsection{Member Function Documentation}
@@ -41,20 +134,130 @@ Definition at line 34 of file pgopneestimator.\+py.
 \item[{}]{self}
 \end{DoxyParamCaption}
 )}\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ad20919b3cfce1fae03d64ae2aa19981f}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ad20919b3cfce1fae03d64ae2aa19981f}
-\begin{DoxyVerb}abstract base class requres this def
+\begin{DoxyVerb}abstract base class requires this def
 \end{DoxyVerb}
  
 
-Definition at line 230 of file pgopneestimator.\+py.
+Definition at line 444 of file pgopneestimator.\+py.
 
 
 \begin{DoxyCode}
-230     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ad20919b3cfce1fae03d64ae2aa19981f}{deliverResults}( self ):
-231         \textcolor{stringliteral}{'''}
-232 \textcolor{stringliteral}{        abstract base class requres this def}
-233 \textcolor{stringliteral}{        '''}
-234         \textcolor{keywordflow}{return} self.output.parsed\_output
-235 
+444     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ad20919b3cfce1fae03d64ae2aa19981f}{deliverResults}( self ):
+445         \textcolor{stringliteral}{'''}
+446 \textcolor{stringliteral}{        abstract base class requires this def}
+447 \textcolor{stringliteral}{        '''}
+448         \textcolor{keywordflow}{return} self.output.parsed\_output
+\end{DoxyCode}
+\index{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator@{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator}!do\+Op@{do\+Op}}
+\index{do\+Op@{do\+Op}!negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator@{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator}}
+\subsubsection[{\texorpdfstring{do\+Op(self)}{doOp(self)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgopneestimator.\+P\+G\+Op\+Ne\+Estimator.\+do\+Op (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a08032c5f1aec98e9da5b258287e67bcc}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a08032c5f1aec98e9da5b258287e67bcc}
+\begin{DoxyVerb}2017_03_15.  Adding an option to use the LDNe program
+instead of NeEstimator.
+\end{DoxyVerb}
+ 
+
+Definition at line 381 of file pgopneestimator.\+py.
+
+
+\begin{DoxyCode}
+381     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a08032c5f1aec98e9da5b258287e67bcc}{doOp}( self ): 
+382         \textcolor{stringliteral}{'''}
+383 \textcolor{stringliteral}{        2017\_03\_15.  Adding an option to use the LDNe program}
+384 \textcolor{stringliteral}{        instead of NeEstimator.}
+385 \textcolor{stringliteral}{        '''}
+386         \textcolor{keywordflow}{if} self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a77a1d96335902820fda22a07c902045e}{\_\_estimator\_to\_use} == NEESTIMATOR:
+387             o\_op\_object=self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a8cc2ed983113c0da42ded5cadb65666e}{\_\_get\_op\_neestimator}()
+388         \textcolor{keywordflow}{elif} self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a77a1d96335902820fda22a07c902045e}{\_\_estimator\_to\_use} == LDNE\_ESTIMATION:
+389             o\_op\_object=self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_aa91c28f7accf7f30bad7b9e088b11cc6}{\_\_get\_op\_ldne}()
+390         \textcolor{keywordflow}{else}:
+391             s\_msg=\textcolor{stringliteral}{"In PGOpNeEstimator instance, def doOp, "} \(\backslash\)
+392                         + \textcolor{stringliteral}{"Unknown estimator name: "} \(\backslash\)
+393                         + self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a77a1d96335902820fda22a07c902045e}{\_\_estimator\_to\_use} + \textcolor{stringliteral}{"."}
+394             \textcolor{keywordflow}{raise} Exception( s\_msg )
+395         \textcolor{comment}{#end if NeEstimator, else LDNe, else unknown}
+396 
+397         \textcolor{comment}{#This gives our instance attributes}
+398         \textcolor{comment}{#values for dirnames and filenames}
+399         \textcolor{comment}{#for the input genepop file and the}
+400         \textcolor{comment}{#output base name:}
+401         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a20394c87d9eb505576da113bb7a60d86}{\_\_extract\_file\_in\_out\_info}()
+402     
+403         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a09141dc4c7966b39562e64b81eaa1067}{\_\_set\_original\_op\_directory\_path}()
+404 
+405         \textcolor{comment}{#run the estimator in a temporary directory, per Tiago's recommendation:}
+406         s\_temp\_dir=self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a542f0fb6df8e19293ed2e2e75305a807}{\_\_change\_current\_directory\_to\_temporary\_directory}
+      ()
+407 
+408         s\_temp\_in, s\_temp\_out=self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a0242b3d35cd51d8c9e7db35c334ebdfd}{\_\_copy\_genepop\_input\_and\_get\_temp\_file\_names}
+      ()   
+409 
+410         \textcolor{comment}{#run estimator -- give it full path to currdir:}
+411         s\_currdir=os.path.abspath( os.curdir )
+412 
+413         \textcolor{stringliteral}{'''}
+414 \textcolor{stringliteral}{        2017\_03\_20.  Signature of the NeEstimator2Controller.run and our}
+415 \textcolor{stringliteral}{        PGLDNe2Controller.runWithNeEstimatorParams is the same.}
+416 \textcolor{stringliteral}{        We call the def with our estimator controller instance as the first}
+417 \textcolor{stringliteral}{        arg.  }
+418 \textcolor{stringliteral}{        '''}
+419         RUN\_DEF\_BY\_ESTIMATOR[ self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a77a1d96335902820fda22a07c902045e}{\_\_estimator\_to\_use} ]( o\_op\_object,
+420                                                         s\_currdir, s\_temp\_in, 
+421                                                         s\_currdir, s\_temp\_out, 
+422                                                     **( self.input.run\_params  ) )
+423 
+424         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a4a1a0f7ebbd7c1ebd72255fc8f7748b9}{\_\_copy\_results\_to\_orig\_dir}( s\_temp\_out )
+425             
+426         \textcolor{comment}{#make the current directory the original, before the change to a temporary dir:}
+427         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a084e6f1689e71b1abf7184c2c9f98955}{\_\_return\_to\_original\_non\_temporary\_directory}()
+428 
+429         self.\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_ab5416e660197ec2854e7e78baba67361}{\_\_remove\_temporary\_directory\_and\_all\_of\_its\_contents}
+      ( s\_temp\_dir )
+430         
+431         self.output.parseOutput()
+432 
+433         \textcolor{comment}{#in case the NeEstimator}
+434         \textcolor{comment}{#generated a NoDat.txt file}
+435         \textcolor{comment}{#we parse (output object}
+436         \textcolor{comment}{#checks for NoDat.txt file,}
+437         \textcolor{comment}{#does nothing if there is }
+438         \textcolor{comment}{#no file)}
+439         self.output.parseNoDatFile()
+440         
+441         \textcolor{keywordflow}{return}
+\end{DoxyCode}
+\index{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator@{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator}!get\+Output\+Column\+Number\+For\+Field\+Name@{get\+Output\+Column\+Number\+For\+Field\+Name}}
+\index{get\+Output\+Column\+Number\+For\+Field\+Name@{get\+Output\+Column\+Number\+For\+Field\+Name}!negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator@{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator}}
+\subsubsection[{\texorpdfstring{get\+Output\+Column\+Number\+For\+Field\+Name(self, s\+\_\+field\+\_\+name)}{getOutputColumnNumberForFieldName(self, s_field_name)}}]{\setlength{\rightskip}{0pt plus 5cm}def negui.\+pgopneestimator.\+P\+G\+Op\+Ne\+Estimator.\+get\+Output\+Column\+Number\+For\+Field\+Name (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{s\+\_\+field\+\_\+name}
+\end{DoxyParamCaption}
+)}\hypertarget{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a34594cb054d2b281775aa080eec7caa5}{}\label{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a34594cb054d2b281775aa080eec7caa5}
+\begin{DoxyVerb}2017_02_11. In implementing a bias adjustment to NeEstimator
+ldne estimates, in pgdriveneestimator, we need a way to
+easily get the Nb (i.e. Nb when Ne calculated on a cohort),
+value from this object, since we want to keep the PGOutputNeEstimator
+objecte well hidden inside this "Op" object.
+\end{DoxyVerb}
+ 
+
+Definition at line 451 of file pgopneestimator.\+py.
+
+
+\begin{DoxyCode}
+451     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a34594cb054d2b281775aa080eec7caa5}{getOutputColumnNumberForFieldName}( self, s\_field\_name ):
+452         \textcolor{stringliteral}{'''}
+453 \textcolor{stringliteral}{        2017\_02\_11. In implementing a bias adjustment to NeEstimator}
+454 \textcolor{stringliteral}{        ldne estimates, in pgdriveneestimator, we need a way to}
+455 \textcolor{stringliteral}{        easily get the Nb (i.e. Nb when Ne calculated on a cohort),}
+456 \textcolor{stringliteral}{        value from this object, since we want to keep the PGOutputNeEstimator}
+457 \textcolor{stringliteral}{        objecte well hidden inside this "Op" object.}
+458 \textcolor{stringliteral}{        '''}
+459         \textcolor{keywordflow}{return} self.output.getColumnNumberForFieldName (s\_field\_name )
 \end{DoxyCode}
 \index{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator@{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator}!prepare\+Op@{prepare\+Op}}
 \index{prepare\+Op@{prepare\+Op}!negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator@{negui\+::pgopneestimator\+::\+P\+G\+Op\+Ne\+Estimator}}
@@ -67,15 +270,15 @@ Definition at line 230 of file pgopneestimator.\+py.
 \end{DoxyVerb}
  
 
-Definition at line 53 of file pgopneestimator.\+py.
+Definition at line 152 of file pgopneestimator.\+py.
 
 
 \begin{DoxyCode}
-53     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a37628c8a837a75a542ae82947dc367fd}{prepareOp}( self ):
-54         \textcolor{stringliteral}{'''}
-55 \textcolor{stringliteral}{        abstract base class requires this def}
-56 \textcolor{stringliteral}{        '''}
-57         \textcolor{keywordflow}{raise} Exception( \textcolor{stringliteral}{"def not implemented"} )
+152     \textcolor{keyword}{def }\hyperlink{classnegui_1_1pgopneestimator_1_1PGOpNeEstimator_a37628c8a837a75a542ae82947dc367fd}{prepareOp}( self ):
+153         \textcolor{stringliteral}{'''}
+154 \textcolor{stringliteral}{        abstract base class requires this def}
+155 \textcolor{stringliteral}{        '''}
+156         \textcolor{keywordflow}{raise} Exception( \textcolor{stringliteral}{"def not implemented"} )
 \end{DoxyCode}
 
 
