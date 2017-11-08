@@ -71,7 +71,7 @@ Dependencies
 
 		iv.  psutil
 		
-		v.   for python 2 only, configparser.y. This is a backported python 3 package, different 
+		v.   for python 2 only, configparser. This is a backported python 3 package, different 
 		     than the default python2 ConfigParser package. 
 
 		vi.  for python2 only, if not already in your distribution, the ttk package.  The pip package
