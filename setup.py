@@ -8,13 +8,10 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 from setuptools import setup, find_packages
 
-import os
-import glob
-
 setup(
     name = 'agestrucne',
     packages = [ 'agestrucne', 'agestrucne/asnviz' ],
-    version = '0.0.24',     
+    version = '0.0.25',     
 	license = 'AGPLv3',
 	description = "GUI and command line program for simulating populations, " \
 				+  "estimating Nb and Ne using LDNe, and vizualizing the results.",
