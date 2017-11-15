@@ -3,7 +3,7 @@
 overview
 --------
 
-	our program is a front end that incorporates the simulation and ldne
+	Our program is a front end that incorporates the simulation and LDNe
 	based population genetics functions provided by tiago antao's python program at
 	https://github.com/tiagoantao/agestructurene.git, enhanced by multiple methods
 	for population subsampling when performing ld-based ne and nb estimations from
@@ -16,6 +16,14 @@ overview
 	interfaces.  further, within simulations, it can run simulation replicates
 	simultaneously, and, within ne or nb estimation sessions, it allows
 	simultaneously running genepop-file population sections. 
+
+	The core functionality for simulation is provided by the python simuPOP
+	package (Peng, B. & Kimmel, M. simuPOP: a forward-time population genetics
+	simulation environment. Bioinformatics 21, 3686–3687, 2005), and the LDNe
+	estimation by version 2 of the LDNe program (Waples, R. S. & Do, C.  LDNe: a
+	program for estimating effective population size from data on linkage
+	disequilibrium. Molecular Ecology Resources 8, 753–756, 2008).
+	
 
 current compatible python versions
 ----------------------------------
@@ -46,9 +54,9 @@ os-comaptibility
 
 dependencies
 ------------
-	the following are the python packages on which our program depends.
+	The following are the python packages on which our program depends.
 	aside from the installation of simupop, dependancies are automatically
-	installed when you use one of the preferred installation methods enumerated in
+	installed when you use one of the preferred installation methods listed in
 	the installation section below.
 	
 
@@ -58,21 +66,17 @@ dependencies
 	   your distribution does not include them, please see
 	   https://packaging.python.org/tutorials/installing-packages/.  
 
-	2.  SimuPOP, a python package, available at
-	    http://simupop.sourceforge.net. See the installation instructions at
-	    http://simupop.sourceforge.net/Main/Download.  The SimuPOP installation page
-	    recommends using an Anaconda Python installation, since the conda package
-	    distribution collection includes a pre-compiled simuPOP package.   
-	    Python 3.6 users using the Anaconda3 distribution can easily install simuPOP with 
+	2.  SimuPOP, a python package, hosted at
+	    http://simupop.sourceforge.net.  See our instllation section below
+	    for recommendations on aquiring this package. As we note below, the
+	    easiest way to install simuPOP is through the 64-bit, Anaconda3 python3
+	    distribution, with the following. 
 
 		conda config --add channels conda-forge
 		conda install simupop
 		
-	    The Anaconda python3 distribution is escpecially recommended for Windows users.
-	    Aquiring simupop without using the conda package manager requires compiling simuPOP 
-	    source code, which can difficult in Windows.  See the simuPOP web page, noted above, 
-	    for details.
-		
+	    This not only the fastest way to install it, but, for 64-bit Windows users, by far the most convenient.		
+
 	3. Other python packages, available through pip with the command "pip
 	install <package>", or, if you use the Anaconda distribution of python,
 	"conda install <package>".
@@ -95,6 +99,7 @@ dependencies
 
 Installation  
 ------------
+
 	A. Download the configuration files and manual.  The data branch of our
 	   github repository supplies a collection of simulation configuration files that
 	   will get you started in the program pipeline (see the manual for details on how
@@ -106,6 +111,7 @@ Installation
 		   screen, and labeled, "Clone or download."
 	
 	B. Install the program
+
 		1. Methods.  There are several ways to
 		   install agestrucne, listed here.  Then, see the Platform-based details directly
 		   following to match a method with a platform/python combination.
@@ -113,23 +119,31 @@ Installation
 			i. Single command method with pip:  
 			   a. Open a terminal and type
 			      "pip install agestrucne."
+
 			ii. Single command method with setup.py:
+
 				a. Download the program files (or use "git clone")
 				   from the repostitory at from https://github.com/popgengui/agestrucne			  	
+
 				b. From a terminal whose current directory is inside
 				   outermost agestrucne directory (which contains the
 				   "setup.py" file), type the command "python3 setup.py install."
+
 			iii. simuPOP installation followed by pip.
+
 				a. Install simuPOP into your python distribution
 				   following the instructions at
 				   http://simupop.sourceforge.net/Main/Download.
+
 					1. If you are using python3 from an Anaconda 3 installation,
 					   you can install simuPOP quickly with these 2
 					   commands at a terminal:
 						conda config --add channels conda-forge
 						conda install simupop
+
 				b. Install the program and remaining dependancies with
 				   "pip install agestrucne" 
+
 			iv. simuPOP installation followed by setup.py.  This method is
 			    the same as (iii), but, after you've installed simuPOP, then
 			    use the method (ii) instructions to download the program
@@ -137,23 +151,37 @@ Installation
 
 		2.  Platform/python combination specifics. These refer to the
 		    installation methods listed above.
+
 			i. Linux, python3, with setuptools and pip3 installed.
+
 				a. Use method (i) or (ii) above.		
+
 			ii. Linux, python3, using the Anaconda3 distribution.
+
 				a. Use any method, but note that simuPOP will be
 				   installed much more quickly if you use method (iii),
 				   and the "conda" commands noted above.
+
 			iii. Linux python 2 any distribution.
+
 				a. use method (iii). 
+
 			iv. Windows, 64-bit, with python3 through an Anaconda3 installation.
+
 				a. Use method (iii) or (iv).
+
 			v.  Windows, 32-bit installations, or any Windows version using
 			    python2.	
+
 				a. Use method (iii) or (iv).
+
 			vi. OS X, python3, using the Anaconda3 distribution.
+
 			    a. Use method (i) or (ii).
+
 			vii. OS X, any python3 or python2, using a non-Anaconda
 			     distribution.
+
 			    a. Use methods (iii) or (iv).
 Starting the program
 --------------------
@@ -161,13 +189,26 @@ Starting the program
 	1. From a console, a terminal in Linux in OS X, or a DOS or Anaconda
 	   prompt in Windows, you can start the program with the command,
 	   "agestrucne."  The python pip installer should have added this
- 	   command to your PATH variable in your environment.
+ 	   command to your PATH variable in your user environment. 
 
-	2. In windows from its File Explorer program, if you navigate the
-	   programs main directory, you can double-click on the negui.py file.
+		i.  Note that when you open the program, the current directory of your
+		   terminal will determine where the file-loading dialog will be initially
+		   set, as you locate, for example, a configuration file to load into
+		   the simulation interface.
+	
+	2. In addition to "agestrucne,"  the installation should also add two
+	   more commands to your user environment, which offer non-graphical
+	   ways to run simulations and LDNe estimations. 
+
+		i. Command "pgdrivesimulation.py" performs simulations from the
+		   terminal, as specified in the user manual.
+
+		ii. Command "pgdriveneestimator.py" performs LDNe estimations
+		   from the terminal, as specified in the user manual.
 
 Using the program	
 -----------------
+
 	To run a simulation, calculate Nb or Ne estimates, or plot results, load one
 	load one of the three interfaces by clicking "New" on the main menu.
 
