@@ -35,7 +35,8 @@ current compatible python versions
 
 	python 2.7 (python 3 is recommended, as 2.7 requires building an older version of simupop)
 
-	the above are the python versions on which the program was developed and tested.  other versions may work, too.
+	the above are the python versions on which the program was developed
+	and tested.  other versions may work, too.
 
 os-comaptibility
 -----------------
@@ -75,7 +76,8 @@ dependencies
 		conda config --add channels conda-forge
 		conda install simupop
 		
-	    This not only the fastest way to install it, but, for 64-bit Windows users, by far the most convenient.		
+	    This not only the fastest way to install it, but, for 64-bit
+	    Windows users, by far the most convenient.		
 
 	3. Other python packages, available through pip with the command "pip
 	install <package>", or, if you use the Anaconda distribution of python,
