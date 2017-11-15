@@ -1,0 +1,22 @@
+[model]
+name=primrose
+[pop]
+popSize=300
+ages=ages["primrose"]
+N0=100
+#newborns always survive
+#olds always die
+survival.male=survivalMale["primrose"]
+survival.female=survivalFemale["primrose"]
+#newborns are not fecund
+fecundity.male=fecMale["primrose"]
+fecundity.female=fecFemale["primrose"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+[sim]
+gens=100
+reps=1
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

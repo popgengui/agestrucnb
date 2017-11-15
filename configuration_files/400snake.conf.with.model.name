@@ -1,0 +1,22 @@
+[model]
+name=snake
+[pop]
+popSize=375
+ages=ages["snake"]
+N0=400
+#newborns always survive
+#olds always die
+survival.male=survivalMale["snake"]
+survival.female=survivalFemale["snake"]
+#newborns are not fecund
+fecundity.male=fecMale["snake"]
+fecundity.female=fecFemale["snake"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+[sim]
+gens=100
+reps=1
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

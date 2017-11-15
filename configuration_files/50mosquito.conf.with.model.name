@@ -1,0 +1,24 @@
+[model]
+name=mosquito
+[pop]
+popSize=1505
+ages=ages["mosquito"]
+N0=50
+#newborns always survive
+#olds always die
+survival.male=survivalMale["mosquito"]
+survival.female=survivalFemale["mosquito"]
+#newborns are not fecund
+fecundity.male=fecMale["mosquito"]
+fecundity.female=fecFemale["mosquito"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+#mutFreq=1.01E-4
+[sim]
+gens=100
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

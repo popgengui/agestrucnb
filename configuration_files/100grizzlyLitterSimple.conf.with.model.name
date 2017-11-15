@@ -1,0 +1,25 @@
+[model]
+name=grizzly
+[pop]
+popSize=792
+ages=31
+N0=100
+litter=[100]
+#newborns always survive
+#olds always die
+survival.male=[0.817]+[0.823]*14+[0]*28
+survival.female=[0.817]+[0.922]*28
+#newborns are not fecund
+fecundity.male=[0]*3+[0.695]*13+[0]*14
+fecundity.female=[0]*3+[0.253]*27
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+#mutFreq=1.01E-4
+[sim]
+gens=100
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

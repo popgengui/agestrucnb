@@ -1,0 +1,25 @@
+[model]
+name=lturtle
+[pop]
+popSize=30000
+ages=ages["lturtle"]
+N0=5000
+skip=[100,100,100,100]
+#newborns always survive
+#olds always die
+survival.male=survivalMale["lturtle"]
+survival.female=survivalFemale["lturtle"]
+#newborns are not fecund
+fecundity.male=fecMale["lturtle"]
+fecundity.female=fecFemale["lturtle"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+#mutFreq=1.01E-4
+[sim]
+gens=150
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

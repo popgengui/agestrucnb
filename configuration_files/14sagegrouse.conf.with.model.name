@@ -1,0 +1,23 @@
+[model]
+name=sagegrouse
+[pop]
+popSize=35
+ages=ages["sagegrouse"]
+N0=14
+#newborns always survive
+#olds always die
+survival.male=survivalMale["sagegrouse"]
+survival.female=survivalFemale["sagegrouse"]
+#newborns are not fecund
+fecundity.male=fecMale["sagegrouse"]
+fecundity.female=fecFemale["sagegrouse"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+numSNPs=400
+[sim]
+gens=1000
+reps=1
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

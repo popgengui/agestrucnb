@@ -1,0 +1,25 @@
+[model]
+name=seaweed
+[pop]
+popSize=220
+ages=ages["synseaweed"]
+N0=81
+#newborns always survive
+#olds always die
+survival.male=survivalMale["synseaweed"]
+survival.female=survivalFemale["synseaweed"]
+#newborns are not fecund
+fecundity.male=fecMale["synseaweed"]
+fecundity.female=fecFemale["synseaweed"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+numSNPs=400
+#mutFreq=1.01E-4
+[sim]
+gens=5000
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

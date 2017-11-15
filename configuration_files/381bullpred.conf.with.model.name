@@ -1,0 +1,25 @@
+[model]
+name=bullpred
+[pop]
+popSize=900
+ages=ages["bullpred"]
+N0=381
+#newborns always survive
+#olds always die
+survival.male=survivalMale["bullpred"]
+survival.female=survivalFemale["bullpred"]
+#newborns are not fecund
+fecundity.male=fecFemale["bullpred"]
+fecundity.female=fecFemale["bullpred"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+#mutFreq=1.01E-4
+numSNPs=400
+[sim]
+gens=1000
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

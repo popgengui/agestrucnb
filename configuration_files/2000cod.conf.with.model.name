@@ -1,0 +1,22 @@
+[model]
+name=cod
+[pop]
+popSize=3000
+ages=ages["cod"]
+N0=2000
+#newborns always survive
+#olds always die
+survival.male=survivalMale["cod"]
+survival.female=survivalFemale["cod"]
+#newborns are not fecund
+fecundity.male=fecMale["cod"]
+fecundity.female=fecFemale["cod"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+[sim]
+gens=100
+reps=1
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

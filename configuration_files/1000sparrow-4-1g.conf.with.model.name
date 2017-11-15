@@ -1,0 +1,26 @@
+[model]
+name=sparrow
+[pop]
+popSize=1367
+ages=ages["sparrow"]
+N0=1000
+gamma.a.male=gammaAMale["sparrow"][4]
+gamma.b.male=gammaBMale["sparrow"][4]
+gamma.a.female=gammaAFemale["sparrow"][1]
+gamma.b.female=gammaBFemale["sparrow"][1]
+#newborns always survive
+#olds always die
+survival.male=survivalMale["sparrow"]
+survival.female=survivalFemale["sparrow"]
+#newborns are not fecund
+fecundity.male=fecMale["sparrow"]
+fecundity.female=fecFemale["sparrow"]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+[sim]
+gens=100
+reps=1
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp

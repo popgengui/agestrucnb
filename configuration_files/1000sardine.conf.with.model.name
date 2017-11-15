@@ -1,0 +1,23 @@
+[model]
+name=sardine
+[pop]
+popSize=2412
+ages=14
+N0=1000
+#newborns always survive
+#olds always die
+survival=[0.47]+[0.67]*11
+#newborns are not fecund
+fecundity.male=[0,146,388,599,849,1167,1487,1617,1887,2156,2156,2156,2156]
+fecundity.female=[0,146,388,599,849,1167,1487,1617,1887,2156,2156,2156,2156]
+[genome]
+numMSats=100
+startAlleles=10
+mutFreq=0
+#mutFreq=1.01E-4
+[sim]
+gens=100
+reps=1
+sampleStrats=[(60,10),(60,20),(120,10),(120,20),(60,50),]
+binaries=/home/tiago/bio
+dataDir=/home/tiago/tmp
