@@ -19,7 +19,7 @@ overview
 
 current compatible python versions
 ----------------------------------
-	python 3.5 and 3.6.  on windows platforms especially, we recommend using
+	python 3.5 and 3.6.  on Windows 64-bit platforms, we strongly recommend using
 	the anaconda 3 python distribution, as it's "conda" installer supplies a
 	pre-compiled version of simupop, which is often difficult to install on windows, 
 	when you try to install through pip and setuptools (see item 2. in the dependancies
@@ -148,11 +148,10 @@ Installation
 			iv. Windows, 64-bit, with python3 through an Anaconda3 installation.
 				a. Use method (iii) or (iv).
 			v.  Windows, 32-bit installations, or any Windows version using
-			    python2, or Windows.	
+			    python2.	
 				a. Use method (iii) or (iv).
 			vi. OS X, python3, using the Anaconda3 distribution.
 			    a. Use method (i) or (ii).
-
 			vii. OS X, any python3 or python2, using a non-Anaconda
 			     distribution.
 			    a. Use methods (iii) or (iv).
