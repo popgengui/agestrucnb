@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 setup(
     name = 'agestrucne',
     packages = [ 'agestrucne', 'agestrucne/asnviz' ],
-    version = '0.0.25',     
+    version = '0.1.0',     
 	license = 'AGPLv3',
 	description = "GUI and command line program for simulating populations, " \
 				+  "estimating Nb and Ne using LDNe, and vizualizing the results.",
@@ -28,8 +28,9 @@ setup(
 						"psutil", 
 						"natsort", 
 						'configparser;python_version=="2.7"', 
-						'pyttk;python_version=="2.7"' ],
-	python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, >=3.4, <=4',
+						'pyttk;python_version=="2.7"',
+						'simupop;python_version>="3.0"' ],
+	python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*,<=4',
 	entry_points={ 'console_scripts': [ 'agestrucne=agestrucne.negui:negui_main' ] },
 	scripts=[ 'agestrucne/pgdriveneestimator.py', 'agestrucne/pgdrivesimulation.py' ]
 )

@@ -113,6 +113,10 @@ Installation
 		   screen, and labeled, "Clone or download."
 	
 	B. Install the program
+		1.  Easiest install method, if you are using python3 on Linux:
+
+			i. From a terminal, type "pip3 install agestrucne".
+
 
 		1. Methods.  There are several ways to
 		   install agestrucne, listed here.  Then, see the Platform-based details directly
@@ -124,12 +128,15 @@ Installation
 
 			ii. Single command method with setup.py:
 
-				a. Download the program files (or use "git clone")
-				   from the repostitory at from https://github.com/popgengui/agestrucne			  	
+				a. Download the program files  available at	
+					https://github.com/popgengui/agestrucne/tree/pypirelease	
+				   by clicking on the green button on the
+				   right side of the screen labelled "clone or download"
 
-				b. From a terminal whose current directory is inside
-				   outermost agestrucne directory (which contains the
-				   "setup.py" file), type the command "python3 setup.py install."
+				b. From a terminal whose current directory is
+				   download's main  directory, "agestrucne"
+				   which contains the "setup.py" file), type the
+				   command "python setup.py install."
 
 			iii. simuPOP installation followed by pip.
 
@@ -138,10 +145,22 @@ Installation
 				   http://simupop.sourceforge.net/Main/Download.
 
 					1. If you are using python3 from an Anaconda 3 installation,
-					   you can install simuPOP quickly with these 2
+					   you can install simuPOP quickly with these
 					   commands at a terminal:
 						conda config --add channels conda-forge
 						conda install simupop
+
+					2. Note If you are using python2, pip
+					   will not install the correct version
+					   of simupop.  Our solution, under
+					   Ubuntu Linux 16.04, has been to
+					   download the program files from 
+					   https://github.com/BoPeng/simuPOP/tree/python2,
+					   and use the "python setup.py install"
+					   command from inside the simuPOP folder.  
+					   After we installed a missing dependancy 
+					   in our Linux installation, "sudo apt install swig", 
+					   we were able to complete the installation. 
 
 				b. Install the program and remaining dependancies with
 				   "pip install agestrucne" 
