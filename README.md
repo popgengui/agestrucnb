@@ -118,7 +118,7 @@ Installation
 			i. From a terminal, type "pip3 install agestrucne".
 
 
-		1. Methods.  There are several ways to
+		2. Methods.  There are several ways to
 		   install agestrucne, listed here.  Then, see the Platform-based details directly
 		   following to match a method with a platform/python combination.
 
@@ -170,7 +170,7 @@ Installation
 			    use the method (ii) instructions to download the program
 			    source and intall with the setup.py module.
 
-		2.  Platform/python combination specifics. These refer to the
+		3.  Platform/python combination specifics. These refer to the
 		    installation methods listed above.
 
 			i. Linux, python3, with setuptools and pip3 installed.
