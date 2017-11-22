@@ -23,7 +23,8 @@ overview
 	estimation by version 2 of the LDNe program (Waples, R. S. & Do, C.  LDNe: a
 	program for estimating effective population size from data on linkage
 	disequilibrium. Molecular Ecology Resources 8, 753–756, 2008).
-	
+
+	Please direct questions/issues to our program's email account, agestrucne@gmail.com
 
 current compatible python versions
 ----------------------------------
@@ -71,14 +72,8 @@ dependencies
 	    http://simupop.sourceforge.net.  See our instllation section below
 	    for recommendations on aquiring this package. As we note below, the
 	    easiest way to install simuPOP is through the 64-bit, Anaconda3 python3
-	    distribution, with the following. 
-
-		conda config --add channels conda-forge
-		conda install simupop
-		
-	    This not only the fastest way to install it, but, for 64-bit
-	    Windows users, by far the most convenient.		
-
+	    distribution. See the installation section below.	
+	
 	3. Other python packages, available through pip with the command "pip
 	install <package>", or, if you use the Anaconda distribution of python,
 	"conda install <package>".
@@ -113,14 +108,26 @@ Installation
 		   screen, and labeled, "Clone or download."
 	
 	B. Install the program
-		1.  Easiest install method, if you are using python3 on Linux:
+		1. Easiest install method, if you are using python3 on 64-bit Linux:
 
 			i. From a terminal, type "pip3 install agestrucne".
 
+			ii. Note:  according to the speed and RAM capacity of your computer,
+				simupop can take many minutes to be compiled and installed.
+		
+		2. Easy and fastest, if you are using a 64-bit OS and an
+		   Anaconda3 python installation, you can type (in the order
+		   given) from a terminal:
+			
+			i. conda config --add channels conda-forge"
 
-		2. Methods.  There are several ways to
-		   install agestrucne, listed here.  Then, see the Platform-based details directly
-		   following to match a method with a platform/python combination.
+			ii. conda install simupop
+
+			iii. pip install agestrucne
+
+		3. Installation methods, in general.  These can be used, along with the
+		   platform-based details directly following to match a method
+		   with a platform/python combination.
 
 			i. Single command method with pip:  
 			   a. Open a terminal and type
@@ -196,18 +203,18 @@ Installation
 
 				a. Use method (iii) or (iv).
 
-			vi. OS X, python3, using the Anaconda3 distribution.
+			vi. (Untested) OS X, python3, using the Anaconda3 distribution.
 
 			    a. Use method (i) or (ii).
 
-			vii. OS X, any python3 or python2, using a non-Anaconda
+			vii. (Untested) OS X, any python3 or python2, using a non-Anaconda
 			     distribution.
 
 			    a. Use methods (iii) or (iv).
 Starting the program
 --------------------
 
-	1. From a console, a terminal in Linux in OS X, or a DOS or Anaconda
+	1. From a console, a terminal in Linux,  a DOS or Anaconda
 	   prompt in Windows, you can start the program with the command,
 	   "agestrucne."  The python pip installer should have added this
  	   command to your PATH variable in your user environment. 
@@ -235,3 +242,4 @@ Using the program
 
 	For details about running the different interfaces, see the
 	user manual.
+
