@@ -11,12 +11,12 @@ from setuptools import setup, find_packages
 setup(
     name = 'agestrucne',
     packages = [ 'agestrucne', 'agestrucne/asnviz' ],
-    version = '0.1.0',     
+    version = '0.1.2',     
 	license = 'AGPLv3',
 	description = "GUI and command line program for simulating populations, " \
 				+  "estimating Nb and Ne using LDNe, and vizualizing the results.",
     author = 'several people',
-    author_email = 'frankcuisine@gmail.com',
+    author_email = 'agestrucne@gmail.com',
 	url = '',
     download_url = 'https://github.com/popgengui/agestrucne/archive/v0.0.0a.tar.gz',
     keywords = ['population genetics', 'simuPOP', 'LDNe', 'AgeStructureNe'],

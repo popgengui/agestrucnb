@@ -72,8 +72,6 @@ class SimInputParamValueHolder(object):
 					het_filter=None,
 					do_het_filter=None):
 
-
-
 		self.__values_by_param_name={ "model_name":model_name, 
 									"popSize":popSize, 
 									"ages":ages, 
@@ -179,7 +177,19 @@ def get_params_file_location():
 
 	s_params_file_name="resources/simupop.param.names"
 
-	s_this_mod_path_and_name=os.path.abspath( __file__ )
+	'''
+	2017_11_20.  Having packed the modules inside
+	the agestrucne folder, and also automated the
+	installation using pypi and setuptools, this 
+	script is now automatically placed in a scrips
+	or executable subdir separage from the package
+	subdirectory.  Hence, we need to use a non-exectutable
+	module to get the path to the agestrucne installation
+	directory (and, so, too, the resources subdir).	Arbitrarily 
+	we'll use the pgparamset module to get the path to the 
+	installation:
+	'''
+	s_this_mod_path_and_name=os.path.abspath( pgparams.__file__ )
 	
 	s_this_mod_path=os.path.dirname( s_this_mod_path_and_name )
 
@@ -191,7 +201,7 @@ def get_params_file_location():
 						+ "It is expected to be in a subdirectory called " \
 						+ "\"resources\", inside the directory that holds " \
 						+ "this module, that is, the main program directory."
-		raise Exception
+		raise Exception ( s_msg )
 	#end if not such file, error
 
 	return s_params_file_path_and_name
@@ -210,7 +220,8 @@ def get_input_object( s_config_file,
 						b_do_het_filter,
 						s_het_filter,
 						i_popsize,
-						s_cull_method ):
+						s_cull_method,
+						s_num_snps ):
 
 	o_paramInfo=pgparams.PGParamSet( s_param_names_file )
 
@@ -242,7 +253,8 @@ def get_input_object( s_config_file,
 										do_het_filter=b_do_het_filter,
 										het_filter=s_het_filter,
 										popSize=i_popsize,
-										cull_method=s_cull_method)
+										cull_method=s_cull_method,
+										numSNPs=s_num_snps )
 
 	o_input_manager = SimInputParamResetManager( o_simInput, o_value_holder )
 
@@ -268,7 +280,8 @@ def drive_sims( s_config_file,
 					i_output_mode,
 					s_het_filter,
 					i_popsize,
-					s_cull_method ):
+					s_cull_method,
+					s_num_snps ):
 
 	check_for_existing_output_files( s_output_base )
 
@@ -308,7 +321,8 @@ def drive_sims( s_config_file,
 						b_do_het_filter=( i_output_mode==OUTPUT_USE_HET_FILTER ),
 						s_het_filter=s_het_filter,
 						i_popsize=i_popsize,
-						s_cull_method=s_cull_method )
+						s_cull_method=s_cull_method,
+						s_num_snps=s_num_snps )
 
 
 	print( "Writing a temp configuration file for the simulation..." )
@@ -363,9 +377,10 @@ if __name__ == "__main__":
 
 	VALUE_LIST_IS_IMPLEMENTED=False
 
-	OPT_SHORT=[ "-b", "-n" , "-t", "-r", "-s", "-p", "-g", "-u", "-z", "-i", "-m" ]
+	OPT_SHORT=[ "-b", "-n" , "-t", "-r", "-s", "-p", "-g", "-u", "-z", "-i", "-m", "-e" ]
 	OPT_LONG=[ "--burnin", "--nb", "--nbtolerance", "--replicates", "--startsave", "--processes" , 
-													"--cycles", "--outputmode", "--hetfilter", "--popsize", "--cullmethod" ]
+													"--cycles", "--outputmode", "--hetfilter", 
+													"--popsize", "--cullmethod", "--numsnps" ]
 
 
 	s_chelp="configuration file.  Typically one of the files in the \"resources\\simulation\" " \
@@ -418,7 +433,8 @@ if __name__ == "__main__":
 										+ "currently are deleted, which makes this mode currently unneeded), " \
 										+ ", 2 = conf and genepop file only (the default), " \
 										+ "3 = conf and genepop file with het filter"
-	s_zhelp="Het filter.  String of 3 comma-separated numbers of the  form \"n,x,t\", " \
+	s_zhelp="Het filter.  Ignored unless OUTPUTMODE (-u) is set to 3. " \
+								+ "String of 3 comma-separated numbers of the  form \"n,x,t\", " \
 								+ "where n is a float that gives a minimum " \
 								+ "value for mean heterozygosity (mean het), " \
 								+ "x is a float giving a maximum mean het value, " \
@@ -434,10 +450,10 @@ if __name__ == "__main__":
 	s_ihelp="Pop size.  The size of the initial population.  This value will replace the \"popSize\" value in the " \
 				+ "configuration file."
 
+	s_ehelp="Number of SNPs.  Set the number of SNPs for the simulation.  This value will replace the \"numSNPs\" value " \
+				+ "in the configuration file."
 
 	s_vhelp_table_of_parameters=""
-
-	
 
 	#Optional values, defaults if not supplied:
 	lv_value_list=None
@@ -452,11 +468,13 @@ if __name__ == "__main__":
 	s_hetfilter=None
 	i_popsize=None
 	s_cull_method=None
-
+	s_num_snps=None
 
 	REQUIRED_HELP=[ s_chelp, s_lhelp, s_ohelp ]
 
-	OPT_HELP=[ s_bhelp, s_nhelp, s_thelp, s_rhelp, s_shelp, s_phelp, s_ghelp, s_uhelp, s_zhelp, s_ihelp, s_mhelp ]
+	OPT_HELP=[ s_bhelp, s_nhelp, s_thelp, s_rhelp, 
+				s_shelp, s_phelp, s_ghelp, s_uhelp, 
+				s_zhelp, s_ihelp, s_mhelp, s_ehelp ]
 
 	o_parser=ap.ArgumentParser()
 
@@ -500,11 +518,9 @@ if __name__ == "__main__":
 		i_burnin = int( o_args.burnin )
 	#end if burnin arg supplied		
 
-	
 	if o_args.nb is not None:
 		i_Nb=int( o_args.nb )
 	#end if Nb arg supplied
-
 
 	if o_args.nbtolerance is not None:
 		f_Nb_tolerance=float( o_args.nbtolerance )
@@ -534,6 +550,10 @@ if __name__ == "__main__":
 		s_cull_method=o_args.cullmethod
 	#end if cull method set
 
+	if o_args.numsnps is not None:
+		s_num_snps=o_args.numsnps
+	#end if num snps set
+
 	drive_sims( s_config_file, 
 				s_life_table_file, 
 				s_output_base, 
@@ -548,7 +568,8 @@ if __name__ == "__main__":
 				i_output_mode=i_output_mode,
 				s_het_filter=s_hetfilter,
 				i_popsize=i_popsize,
-				s_cull_method=s_cull_method )
+				s_cull_method=s_cull_method,
+				s_num_snps=s_num_snps )
 			
 
 #end if main

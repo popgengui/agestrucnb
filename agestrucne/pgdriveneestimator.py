@@ -3496,7 +3496,15 @@ def set_mod_level_var_to_ldne2_executable_path():
 
 	s_platform=pgut.get_platform()
 
-	s_dist_path=os.path.dirname( os.path.abspath(  __file__ ) )
+	'''
+	With the packaging of modules inside the "agestrucne"
+	module, and the automated installation using pip and 
+	setuptools, this module is now separated from the main
+	program dir and so we need to use a non-executable
+	module to get the path to the main install.
+	'''
+
+	s_dist_path=os.path.dirname( os.path.abspath(  pgne.__file__ ) )
 
 	s_path_inside_dist=pgne.LDNE_DEFAULT_LOC_IN_DIST
 

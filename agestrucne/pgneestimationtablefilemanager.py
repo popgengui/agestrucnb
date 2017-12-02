@@ -86,7 +86,6 @@ class NeEstimationTableFileManager(object):
 	MAX_NUM_GROUPING_FIELDS=4
 	MAX_NUM_GROUPINGS=3000
 
-
 	'''
 	2017_10_07. These are added for clients who need
 	to show users self-explanatory column names, rather
@@ -147,7 +146,6 @@ class NeEstimationTableFileManager(object):
 	INPUT_FIELDS_ASSOC_WITH_ONE_ESTIMATE=[ 'original_file', 'pop', 'sample_value',
 													'replicate_number', 'loci_sample_value',
 													'loci_replicate_number' ]
-														
 
 	def __init__( self, s_file_name, 
 					i_header_is_first_n_lines=1,
