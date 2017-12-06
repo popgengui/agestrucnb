@@ -124,7 +124,7 @@ class GenepopFileManager( object ):
 		i_loci_line_count=len( self.__header_and_loci_byte_addresses ) - 1
 
 		'''
-		If the file has only one header line, then
+		If the file has only one loci line, then
 		then all loci will be on this one line,
 		comma-separated.
 		'''
@@ -425,21 +425,43 @@ class GenepopFileManager( object ):
 			#end if no such population subsample tag
 			li_pop_numbers=self.__pop_subsamples[ s_pop_subsample_tag ]
 		#end if all pops to be written, else only those subsampled
+
+		ls_subsampled_single_line_loci=None
 		
 		if s_loci_subsample_tag is None:
 			li_header_and_loci_lines=list(self.__header_and_loci_byte_addresses.keys())
+		elif len( self.__header_and_loci_byte_addresses ) == 2:
+			'''
+			This elsif conditional added 2017_12_05, to handle subsampled loci
+			when the input file has all of its loci entered on line 2,
+			with comma separators. Note that in this case the header and loci
+			byte address dict will have only 2 keys, indicating two lines preceed
+			the first "pop" entry.
+			'''
+			li_header_and_loci_lines=[ self.__header_and_loci_byte_addresses[ 0 ] ]
+			o_origfile.seek( self.__header_and_loci_byte_addresses[ 1 ] )
+			v_line_stripped=( o_origfile.readline() ).strip()
+			if type( v_line_stripped ) == bytes:
+				v_line_stripped=v_line_stripped.decode( SYSENCODING )
+			#end if bytes type, decode
+			ls_all_loci_on_one_line=v_line_stripped.split( "," )
+			#loci subsampling is 1-based, but we have zero-based indexes
+			#(e.g. loci 1 is the zeroth item in our list):
+			ls_subsampled_single_line_loci=[ ls_all_loci_on_one_line[idx-1] \
+					for idx in self.__loci_subsamples[ s_loci_subsample_tag ] ]
 		else:
 			l_header_address=self.__header_and_loci_byte_addresses[ 0 ]
 			li_header_and_loci_lines=[ l_header_address ] \
 					+ [ idx for idx in  self.__loci_subsamples[ s_loci_subsample_tag ] ]
 		#end if we include all loci, else subsample
-		
+
 		#write header and loci list:
 		for i_line_number in li_header_and_loci_lines:
+
 			o_origfile.seek( self.__header_and_loci_byte_addresses[ i_line_number ] )
 
 			'''
-			In python 3, realine() will deliver a bytes object, which
+			In python 3, readline() will deliver a bytes object, which
 			has the strip() method, just like a string in python 2.
 			'''
 			v_line_stripped=( o_origfile.readline() ).strip()
@@ -450,11 +472,22 @@ class GenepopFileManager( object ):
 
 			o_newfile.write( v_line_stripped + UNIX_ENDLINE )
 
-			##### temp
 			o_newfile.flush()
-			#####
 
 		#end for each line in the header and loci section
+
+		'''
+		Added 2017_12_05, with new conditional above,
+		when our original file uses single line loci entry.
+		In this case only the header was written in the
+		for loop above, and we now write the loci line
+		that was computed in the conditional.
+		'''
+		if ls_subsampled_single_line_loci is not None:
+			o_newfile.write( \
+					",".join( ls_subsampled_single_line_loci ) \
+					+ UNIX_ENDLINE )
+		#end if we have subsampled, single-line loci entries.
 
 		#write pops:
 		for i_pop_number in li_pop_numbers:

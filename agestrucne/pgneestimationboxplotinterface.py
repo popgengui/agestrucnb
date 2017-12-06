@@ -385,8 +385,10 @@ class PGNeEstimationBoxplotInterface( object ):
 	#end __set_master_frame_grid_weights
 
 	def __make_tsv_file_manager( self ):
+
 		self.__tsv_file_manager=\
 				NeEstimationTableFileManager( self.__tsv_file_name )
+
 		return
 	#end __make_tsv_file_manager 
 
