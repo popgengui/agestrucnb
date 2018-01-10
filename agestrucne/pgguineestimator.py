@@ -891,10 +891,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		we'll use half the available cpus.
 		'''
 		if self.__processes is None:
-			##### temp
-			print( "calcing procs using total: " + str( i_tot_procs ) )
-			#####
-
 			i_floor=int( i_tot_procs/2.0 )
 			self.__processes=1 if i_floor == 0 else i_floor
 		#end assign min if not set

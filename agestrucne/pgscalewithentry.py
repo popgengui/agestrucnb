@@ -112,30 +112,6 @@ class PGScaleWithEntry( Frame ):
 		myc=PGScaleWithEntry
 		self.__entry_value=float( self.__scale.get() )
 
-#		'''
-#		THis local def will be used by the ValueValidator
-#		as invoked by KeyValFrame, to test new entry-box
-#		values.
-#		'''
-#		def entry_value_test( v_value ):
-#			f_min, f_max=self.__get_current_scale_range()
-#			f_val=None
-#			try:
-#				f_val=float( v_value )
-#			except ValueError as ove:
-#				return False
-#			#end try...except
-#
-#			if f_min<=f_val and f_max>=f_val:
-#				return True
-#			else:
-#				return False
-#			#end if in range
-#
-#			return False
-#		#end def entry_value_test
-#
-#		o_validator=ValueValidator( entry_value_test, self.__entry_value )
 		o_validator=None
 
 		o_config_kv=KeyValFrame( s_name="Set scale to:", 
@@ -198,18 +174,9 @@ class PGScaleWithEntry( Frame ):
 		PRECISION=1e-10
 		f_current_scale_val=float( self.__scale.get() )
 
-		##### temp
-		print( "---------in PGScaleWithEntry def __on_scale_change " )
-		print( "entry val: " + str( self.__entry_value ) )
-		print( "scale val: " + str( f_current_scale_val ) )
-		##### end temp
-
 		if self.__entry is not None:
 			if self.__entry_value is not None:
 				if abs( self.__entry_value - f_current_scale_val ) > PRECISION:
-					##### temp
-					print( "calling manuallyUpdateValue with scale val, "  + str( f_current_scale_val ) )
-					#####
 					self.__entry.manuallyUpdateValue( f_current_scale_val )
 				#end if scale value and entry value are not effectively  the same, reset the entry
 			#end if we have an entry value
@@ -225,10 +192,6 @@ class PGScaleWithEntry( Frame ):
 		or large, else we set scale to entry value (or closest resolved
 		value as determined by resolutioin and bigincrement).
 		'''
-		##### temp
-		print( "in __on_entry_change with entry value: "  + str( self.__entry_value) + \
-					" and scale val: " +  str( self.__scale.get() ) )
-		#####
 		
 		f_temp_old_scale_val=self.__scale.get()
 

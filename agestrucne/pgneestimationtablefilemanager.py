@@ -179,7 +179,7 @@ class NeEstimationTableFileManager(object):
 		self.__load_file_into_array()
 				
 		'''
-		Dictionary of functions keyed to column numbers. Valid
+		Dictionary of references to functions keyed to column numbers. Valid
 		values are None or a ref to a def that takes a single 
 		string value and returns a boolean.  This dictionary 
 		is used to write a filtered version of the input file 

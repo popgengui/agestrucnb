@@ -21,6 +21,8 @@ __filename__ = "pgparallelopmanager.py"
 __date__ = "20171112"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
+VERBOSE=False
+
 import sys
 import os
 import subprocess

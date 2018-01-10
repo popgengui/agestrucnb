@@ -400,9 +400,6 @@ class PGOpSimuPop( modop.APGOperation ):
 				self.__setup_genepop_file()
 
 				if self.input.do_het_filter == True:
-					##### temp
-					print( "calling __set_het_filter_params()" )
-					#####
 					self.__set_het_filter_params()
 				#end if het filter is to be applied
 
@@ -422,6 +419,30 @@ class PGOpSimuPop( modop.APGOperation ):
 				raise Exception( s_msg )
 			#end if orig out, else gp only, else error.
 
+			'''
+			2017_02_07
+			We are revising to try to use a targeted Nb, but instead of NbVar being a fixed int, 
+			we want to use a float f, 0.0 <= f <= 1.0.  We want to warn users when we've loaded
+			an NbVar from the original configuration files, that uses an integer, for the original
+			tolerance test that simply took the abs(diff) between the calc'd Nb and the target 
+			Nb - NbVar.  Thus some config files may load inappropriatly large NbVar values:
+
+			2018_01_09
+			This check and warning was moved from the pginputsimupop.py module, def get_config(),
+			which was formerly issued on loading the param from a conf file, even though
+			the actual value used in the simulation may be a revised value, one entered by 
+			the user into the GUI, or revised as an optional arg to pgdrivesimupop.py.
+			'''
+			if self.input.NbVar > 1.0:
+				s_msg="Warning:  in PGOpSimuPop instance, def prepareOp, " \
+												+ "the Nb tolerance value looks high at " \
+												+ str( self.input.NbVar ) + ".  " \
+												+ "This will allow populations with " \
+												+ "Nb values varying substantially " \
+												+ "(i.e by at or more than the target Nb value)." 
+
+				sys.stderr.write( s_msg + "\n" )
+			# end if NbVar > 1
 			self.__createSim()
 			self.__is_prepared=True
 
@@ -1104,7 +1125,6 @@ class PGOpSimuPop( modop.APGOperation ):
 			number after which we apply our nb test, to the 
 			gen post burn in
 			'''
-
 			first_gen_to_include = 0 \
 					if self.input.startLambda >= PGOpSimuPop.VALUE_TO_IGNORE \
 					else self.input.startLambda

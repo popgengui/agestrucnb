@@ -352,7 +352,17 @@ class PGInputSimuPop( object ):
 			self.lbd = config.getfloat("pop", "lambda")
 			#self.lbd = mp.mpf(config.get("pop", "lambda"))
 		else:
-			self.startLambda = START_LAMBDA_IGNORE
+			'''
+			2018_01_09. We change the default so that if the conf file has no startLambda 
+			(i.e.  total burn-in cycles), instead of setting it to START_LAMBDA_IGNORE, 
+			we'll set it equal to to the number of age classes, the usually appropriate
+			value for this param. This change depends on the self.ages attribute being 
+			already read-in and/or set earlier in this def (see also 
+			def __reset_start_lambda_using_ages).
+			'''
+			#self.startLambda = START_LAMBDA_IGNORE
+			self.startLambda=None
+			self.__reset_start_lambda_using_ages()
 			#self.lbd = mp.mpf(1.0)
 			self.lbd = LAMBDA_IGNORE
 		#end if startLambda, else not
@@ -404,25 +414,6 @@ class PGInputSimuPop( object ):
 		else:
 			self.NbVar=DEFAULT_NB_VAR
 		#end if NbVar present, else use default
-
-
-		'''
-		2017_02_07
-		We are revising to try to use a targeted Nb, but instead of NbVar being a fixed int, 
-		we want to use a float f, 0.0 <= f <= 1.0.  We want to warn users when we've loaded
-		an NbVar from the original configuration files, that uses an integer, for the original
-		tolerance test that simply took the abs(diff) between the calc'd Nb and the target 
-		Nb - NbVar.  Thus some config files may load inappropriatly large NbVar values:
-		'''
-		if self.NbVar > 1.0:
-			s_msg="Warning:  in PGInputSimuPop instance, def get_config, Nb tolerance value looks high at " \
-													+ str( self.NbVar ) + ".  " \
-													+ "This will allow populations with " \
-													+ "Nb values varying substantially " \
-													+ "(i.e by at or more than the target Nb value)." 
-
-			sys.stderr.write( s_msg + "\n" )
-		# end if NbVar > 1
 
 		self.__update_attribute_config_file_info( "_PGInputSimuPop__Nb_from_pop_section", "pop", "Nb" )
 		self.__update_attribute_config_file_info( "NbVar", "pop", "NbVar" )
@@ -608,14 +599,23 @@ class PGInputSimuPop( object ):
 		the tolerance test is applied.
 
 		This def is called by def self.makeInputConfig 
+	
+		2018_01_09.  This call created a bug, since the GUI and the
+		pgdrivesimulation.py module both allow users to set the burn-in
+		(i.e. startLambda) parameter, but this call was resetting it to
+		the number of age classes.  We revise it now to only set it to
+		the number of age classes if its current value is None.
 		'''
-		s_errmsg="In PGInputSimuPop instance " \
-						+ "def __reset_start_lambda_using_ages, " \
-						+ "a reset of the start lambda (burn-in setting) " \
-						+ "failed.  No \"ages\" parameter was found."
-		assert self.ages, s_errmsg 
 
-		self.startLambda=self.ages
+		if self.startLambda is None:
+			s_errmsg="In PGInputSimuPop instance " \
+							+ "def __reset_start_lambda_using_ages, " \
+							+ "a reset of the start lambda (burn-in setting) " \
+							+ "failed.  No \"ages\" parameter was found."
+			assert self.ages, s_errmsg 
+
+			self.startLambda=self.ages
+		#end if no startLambda, set it to total ages
 				 
 		return
 	#end __reset_start_lambda_using_ages
@@ -832,6 +832,13 @@ class PGInputSimuPop( object ):
 		Added 2017_02_25, to enable a default start lambda 
 		(the burn-in cycles total) that is compatible with
 		the new default use of the PGOpSimuPop __restrictedGenerator.
+
+		2018_01_09. In resolving the bug that this caused, i.e. that
+		resetting the value of startLambda in the GUI or the pgdrivesimulation.py
+		module was not taking effect (rather, the call below was resetting
+		it to the number of age classes), we've changed the reset def (see) 
+		to keep any non-None value for startLambda, and only revert to ages
+		if startLambda is currently python's None value.
 		'''
 		self.__reset_start_lambda_using_ages()
 		return
