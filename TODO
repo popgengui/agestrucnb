@@ -102,3 +102,46 @@ should be written directly to a genepop.  I see no reason to date to retain any 
 files currently output (and from which the genepop file is constructed after they have been written).
 I think a good strategy would be to write the data to data struct like a class, and every N cycles
 update a genepop output file.
+
+Mon May 15 17:54:51 MDT 2017
+1. Add textbox to viz interface so that user can name a stats-out file.
+
+2. Subsampling value cbox in Viz regression interface reverts to min val after 
+   hitting run button, despite the user having chosen a different value (though
+   the chosen value is the one used in the plotting).
+
+Tue May 16 19:04:03 MDT 2017
+
+1. Make ages editable in the simulation interface, such that the user can change
+the value, with the result that the survival and fecundity  lists change
+item-count accordingly (perhaps adding copies of the last value to fill in
+additional items, when the lists are lengthened.
+
+19 May 2017 21:03:27
+
+1. If the GUI is in full screen during a procedure, it seems that sometimes the error windows created 
+   independant of the main GUI, are hidden by it, so that the user will not know that a procedure has
+   been interrupted.  One consequence of using these GUI error messages, is that the console window 
+   (if present) will not show the error until the GUI error windows is clicked closed ("OK").
+   I wonder if there is some way to get a handle at least on the main GUI window and,
+   on error, put it behind the error message(?)
+Sat May 20 18:53:52 MDT 2017
+1.  We need a way to show the user progress, at least in the simulations, 
+because simuPOP can hang (or enter an endless loop), and the user has no
+way of knowing that over time period t the simulation has not cycled at all.
+Might be most simply a file with one line giving one integer, named after 
+the temp_config file, and after each sim cycle, the current cycle number 
+replaces the last in the file.  The sim gui checks the file during its
+"sim in progress" state.
+
+Tue May 23 21:00:22 MDT 2017
+1. I need to test the nb/ne estimators correct use of input genepop files in which the loci
+   are listed on one line, rather than one to a line (as is the case for all input we've used
+   so far.
+Thu Jul 20 14:34:47 MDT 2017
+1. In the current Nb estimation logic, for schemes "cohorts" and "individual
+   criteria", the paramters min and max pop indiv totals, are tested after the
+   sampling (i.e. tested using total chort individuals sampled) and, if the
+   sample is out of range [min,max] an error is thrown and the estimation is
+   aborted.  We should simply skip the pop and write a message to *msgs output, 
+   and proceed to the next pop.

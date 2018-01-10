@@ -74,10 +74,12 @@ dependencies
 	    easiest way to install simuPOP is through the 64-bit, Anaconda3 python3
 	    distribution. See the installation section below.	
 	
-	3. Other python packages, available through pip with the command "pip
-	install <package>", or, if you use the Anaconda distribution of python,
-	"conda install <package>".
-				
+	3. Other python packages, which should be automatically installed when you use the pip 
+	   installer, or the "setup.py install" command (see Installation, below), can also be installed
+	   one at a time through pip with the command "pip
+	   install <package>", or, if you use the Anaconda distribution of python,
+	   "conda install <package>".
+		
 		i.   numpy	
 
 		ii.  scipy
@@ -136,7 +138,7 @@ Installation
 			ii. Single command method with setup.py:
 
 				a. Download the program files  available at	
-					https://github.com/popgengui/agestrucne/tree/pypirelease	
+					https://github.com/popgengui/agestrucne/tree/master	
 				   by clicking on the green button on the
 				   right side of the screen labelled "clone or download"
 
@@ -238,7 +240,7 @@ Using the program
 -----------------
 
 	To run a simulation, calculate Nb or Ne estimates, or plot results, load one
-	load one of the three interfaces by clicking "New" on the main menu.
+	of the three interfaces by clicking "New" on the main menu.
 
 	For details about running the different interfaces, see the
 	user manual.

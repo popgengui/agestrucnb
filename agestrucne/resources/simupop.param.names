@@ -61,7 +61,7 @@ reps	Replicates;Simulation;4;1;1;1;int;None;None;Replicates;entry;None;type(x)==
 skip	Skip breeding probability;Simulation;4;1;1;None;listfloat;None;None;Skip breeding probability;entry;None;x is None or ( type(x)==float and x>=0.0 and x<=1.0 );None;disabled;None
 startAlleles	Starting Msat allele total;Genome;3;1;1;0;int;None;None;Starting microsat allele total;entry;None;type(x)==int and x >= 0;None;enabled;None
 #Note that "startLambda" has morphed into a burn-in parameter.  Because we no longer are offering a "lambda" as it was applied in earlier versions, the user interface label has been renamed, but the original input attribute is retained to avoid changing the configuration files.
-startLambda	Cycles of burn-in;Simulation;5;1;1;99999;int;None;None;Burn-in cycles, during which no Nb tolerance test is applied.~~99999 means there will be no burn-in cycles.;entry;None;None;None;enabled;None
+startLambda	Cycles of burn-in;Simulation;5;1;1;99999;int;None;None;Burn-in cycles, during which no Nb tolerance test is applied.~~99999 means there will be no burn-in cycles.;entry;None;type(x)==int and x>=0;None;enabled;None
 #2017_04_05.  Now implementing startSAve, which untill now has been suppressed and set to zero
 startSave	Start recording at cycle;Simulation;5;1;1;1;int;None;None;The number of the cycle at which to start recording population data.~~Number N should satisfy 1<=N<=total reproductive cycles.;entry;None;validateStartSave;None;enabled;None
 survivalFemale	Female survival;Population;2;1;1;None;listfloat;None;None;Female Survival;entry;None;x is None or ( type(x)==float );updateN0EntryBox;enabled;None
