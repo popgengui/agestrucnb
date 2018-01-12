@@ -126,7 +126,12 @@ Installation
 			ii. conda install simupop
 
 			iii. pip install agestrucne
-
+			
+			iv. Recent testing (01/11/2018) shows some problem with pip-
+			    based installations in Windows 8 and 10 for Anaconda3.
+			    Our solution, after installing simupop, is to use setup.py 
+			    (see Single command method with setup.py section below).
+			    
 		3. Installation methods, in general.  These can be used, along with the
 		   platform-based details directly following to match a method
 		   with a platform/python combination.
@@ -138,7 +143,7 @@ Installation
 			ii. Single command method with setup.py:
 
 				a. Download the program files  available at	
-					https://github.com/popgengui/agestrucne/tree/master	
+					https://github.com/popgengui/agestrucne
 				   by clicking on the green button on the
 				   right side of the screen labelled "clone or download"
 
@@ -179,7 +184,7 @@ Installation
 			    use the method (ii) instructions to download the program
 			    source and intall with the setup.py module.
 
-		3.  Platform/python combination specifics. These refer to the
+		4.  Platform/python combination specifics. These refer to the
 		    installation methods listed above.
 
 			i. Linux, python3, with setuptools and pip3 installed.
@@ -213,6 +218,25 @@ Installation
 			     distribution.
 
 			    a. Use methods (iii) or (iv).
+
+		5.   We found some Windows/Anaconda3 installations the installers fail  to 
+		     add the agestrucne executanble environmental PATH variable, you can add 
+		     it to your PATH variable yourself (see your Windows help), or run the 
+		     program by specifying, at a 
+
+			    command prompt: "/Users/Me/Anaconda3/Scripts/agestrucne"
+
+		     substituting "/Users/Me" for the path to your Anaconda3 installation.
+		     You can also run the command line scripts pgdrivesimulation.py and
+		     pgdriveneestimator.py with a similar command:
+
+				"python /Users/Me/Anaconda3/Scripts/agestrucne/scriptname.py"
+
+		    substituting the script name for pgscript.py.  We have not had this problem
+		    in Linux and OS X, and have only used Anaconda3 in Windows, so do not have
+		    a solution for non-Anaconda installations that fail to add the executables,
+		    but otherwise succeed.
+			
 Starting the program
 --------------------
 
@@ -235,6 +259,9 @@ Starting the program
 
 		ii. Command "pgdriveneestimator.py" performs LDNe estimations
 		   from the terminal, as specified in the user manual.
+
+	3. If the installer completes but has not added the paths to the commands,
+	   see item 5 under the section, "Install the program." 
 
 Using the program	
 -----------------
