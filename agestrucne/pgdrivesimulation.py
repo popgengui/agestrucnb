@@ -70,7 +70,9 @@ class SimInputParamValueHolder(object):
 					cull_method=None,
 					nbadjustment=None,
 					het_filter=None,
-					do_het_filter=None):
+					do_het_filter=None,
+					het_init_snp=None,
+					het_init_msat=None ):
 
 		self.__values_by_param_name={ "model_name":model_name, 
 									"popSize":popSize, 
@@ -103,7 +105,9 @@ class SimInputParamValueHolder(object):
 									"gens":gens,
 									"cull_method":cull_method,
 									"het_filter":het_filter,
-									"do_het_filter":do_het_filter }
+									"do_het_filter":do_het_filter,
+									"het_init_snp":het_init_snp,
+									"het_init_msat":het_init_msat }
 							
 		return
 	#end __init__
@@ -221,7 +225,10 @@ def get_input_object( s_config_file,
 						s_het_filter,
 						i_popsize,
 						s_cull_method,
-						s_num_snps ):
+						i_num_snps,
+						f_het_init_snp,
+						i_num_msats,
+						f_het_init_msat ):
 
 	o_paramInfo=pgparams.PGParamSet( s_param_names_file )
 
@@ -254,7 +261,11 @@ def get_input_object( s_config_file,
 										het_filter=s_het_filter,
 										popSize=i_popsize,
 										cull_method=s_cull_method,
-										numSNPs=s_num_snps )
+										numSNPs=i_num_snps,
+										het_init_snp=f_het_init_snp,
+										numMSats=i_num_msats,
+										het_init_msat = f_het_init_msat )
+
 
 	o_input_manager = SimInputParamResetManager( o_simInput, o_value_holder )
 
@@ -281,7 +292,10 @@ def drive_sims( s_config_file,
 					s_het_filter,
 					i_popsize,
 					s_cull_method,
-					s_num_snps ):
+					i_num_snps,
+					f_het_init_snp,
+					i_num_msats,
+					f_het_init_msat ):
 
 	check_for_existing_output_files( s_output_base )
 
@@ -322,7 +336,10 @@ def drive_sims( s_config_file,
 						s_het_filter=s_het_filter,
 						i_popsize=i_popsize,
 						s_cull_method=s_cull_method,
-						s_num_snps=s_num_snps )
+						i_num_snps=i_num_snps,
+						f_het_init_snp=f_het_init_snp,
+						i_num_msats=i_num_msats,
+						f_het_init_msat=f_het_init_msat )
 
 
 	print( "Writing a temp configuration file for the simulation..." )
@@ -367,7 +384,7 @@ def drive_sims( s_config_file,
 	pgut.remove_files( [ s_temp_config_file_for_running_replicates ] )
 
 	return
-#end def drive_sims
+#end def drive_simso
 
 if __name__ == "__main__":
 
@@ -377,10 +394,12 @@ if __name__ == "__main__":
 
 	VALUE_LIST_IS_IMPLEMENTED=False
 
-	OPT_SHORT=[ "-b", "-n" , "-t", "-r", "-s", "-p", "-g", "-u", "-z", "-i", "-m", "-e" ]
+	OPT_SHORT=[ "-b", "-n" , "-t", "-r", "-s", "-p", "-g", "-u", "-z", "-i", "-m", "-e", "-H", "-M", "-T" ]
+
 	OPT_LONG=[ "--burnin", "--nb", "--nbtolerance", "--replicates", "--startsave", "--processes" , 
 													"--cycles", "--outputmode", "--hetfilter", 
-													"--popsize", "--cullmethod", "--numsnps" ]
+													"--popsize", "--cullmethod", "--numsnps", 
+													"--hetinitsnp", "--nummsats", "--hetinitmsat" ]
 
 
 	s_chelp="configuration file.  Typically one of the files in the \"resources\\simulation\" " \
@@ -452,6 +471,14 @@ if __name__ == "__main__":
 
 	s_ehelp="Number of SNPs.  Set the number of SNPs for the simulation.  This value will replace the \"numSNPs\" value " \
 				+ "in the configuration file."
+	
+	s_Hhelp="Initial expected heterozygosity for SNPs.  This value will replacde the \"init_het_snp\" value in the configuration file."
+
+	s_Mhelp="Number of mirosats.  Set the number of microsatellites for the simulation.  This value will replace the \"numMSats\" " \
+			 	+ "value in the configuration file."
+
+	s_Thelp="Initial expected heterozygosity for Microsats.  This value will replace the \"init_het_msat\" " \
+				+ "value in the configuration file.  Values valid in interval (0.0,0.85]"
 
 	s_vhelp_table_of_parameters=""
 
@@ -468,13 +495,17 @@ if __name__ == "__main__":
 	s_hetfilter=None
 	i_popsize=None
 	s_cull_method=None
-	s_num_snps=None
+	i_num_snps=None
+	f_het_init_snp=None
+	i_num_msats=None
+	f_het_init_msat=None
 
 	REQUIRED_HELP=[ s_chelp, s_lhelp, s_ohelp ]
 
 	OPT_HELP=[ s_bhelp, s_nhelp, s_thelp, s_rhelp, 
 				s_shelp, s_phelp, s_ghelp, s_uhelp, 
-				s_zhelp, s_ihelp, s_mhelp, s_ehelp ]
+				s_zhelp, s_ihelp, s_mhelp, s_ehelp,
+				s_Hhelp, s_Mhelp, s_Thelp ]
 
 	o_parser=ap.ArgumentParser()
 
@@ -543,7 +574,7 @@ if __name__ == "__main__":
 	#end if hetfilter string supplied
 
 	if o_args.popsize is not None:
-		i_popsize = o_args.popsize
+		i_popsize = int( o_args.popsize )
 	#end if popsize set
 
 	if o_args.cullmethod is not None:
@@ -551,8 +582,20 @@ if __name__ == "__main__":
 	#end if cull method set
 
 	if o_args.numsnps is not None:
-		s_num_snps=o_args.numsnps
+		i_num_snps=int( o_args.numsnps )
 	#end if num snps set
+
+	if o_args.hetinitsnp is not None:
+		f_het_init_snp=float( o_args.hetinitsnp )
+	#end if het_init_snp set
+	
+	if o_args.hetinitmsat is not None:
+		f_het_init_msat=float( o_args.hetinitmsat )
+	#end if het_init_snp set
+
+	if o_args.nummsats is not None:
+		i_num_msats=int( o_args.nummsats )
+	#end if num msats set	
 
 	drive_sims( s_config_file, 
 				s_life_table_file, 
@@ -569,7 +612,10 @@ if __name__ == "__main__":
 				s_het_filter=s_hetfilter,
 				i_popsize=i_popsize,
 				s_cull_method=s_cull_method,
-				s_num_snps=s_num_snps )
+				i_num_snps=i_num_snps,
+				f_het_init_snp=f_het_init_snp,
+				i_num_msats=i_num_msats,
+				f_het_init_msat=f_het_init_msat )
 			
 
 #end if main

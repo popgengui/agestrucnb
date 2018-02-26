@@ -1897,7 +1897,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		o_keyvalueframe=self.__param_key_value_frames[ s_het_filter_attribute_name ]
 
-		if self.__input.do_het_filter == False:
+		if self.__input.do_het_filter == False or self.__simulation_is_in_progress:
 			o_keyvalueframe.setStateControls( "disabled" )
 			o_keyvalueframe.setLabelState( "disabled" )
 		else:

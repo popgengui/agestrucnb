@@ -259,6 +259,16 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		self.__file_for_het_filter=None
 
+
+		'''
+		2018_02_18.  This flag will be setin def 
+		outputAge, when a het filter is active and
+		the min mean het is greater than the current
+		pops' mean het. It will be tested at each evolve
+		step in def __keep_collecting_filtered_pops.
+		'''
+		self.min_het_filter_greater_than_current_pop_het=False
+
 		
 		if self.__write_nb_and_age_count_files:
 			s_nb_values_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
@@ -294,7 +304,8 @@ class PGOpSimuPop( modop.APGOperation ):
 		recursive imports and/or TKinter threading conflicts.
 		However, we can use these classes when this object is 
 		run in a new python process -- see the creation of this
-		object in pgutilities def do_pgopsimupop_replicate_from_files.
+		object in pgparallelopmanager.py def 
+		do_pgopsimupop_replicate_from_files.
 		'''
 
 		from agestrucne.pgguiutilities import PGGUIInfoMessage as guiinfo
@@ -610,12 +621,47 @@ class PGOpSimuPop( modop.APGOperation ):
 		numSNPs = self.input.numSNPs
 
 		maxAlleleN = 100
+
 		#print "Mutation model is most probably not correct", numMSats, numSNPs
 		loci = (numMSats + numSNPs) * [1]
 		initOps = []
+	
+		'''
+		2018_02_18.  We are adding a new parameter "het_init_msat",
+		which allows the user to enter a value in (0.0,0.85]
+		which will be used to compute a set off	allele frequencies 
+		totaling the value in startAlleles, and whose expected
+		heterozygosity is within a tolerance (0.001 as of now)
+		of the parameter.
+
+		The new pgutilities def get_dirichlet_allele_dist_for_expected_het,
+		uses a heuristic set of alpha values, applied according to the desired
+		het value, to repeatedly try to extract a set of dirichlet distributed
+		freqs that achieve the target het.
+		'''
 
 		for msat in range(numMSats):
-			diri = numpy.random.mtrand.dirichlet([1.0] * self.input.startAlleles)
+			'''
+			Old call to get dirichlet on 1.0 alpha now replaced by call
+			to achieve an expected het:
+			'''
+			#diri = numpy.random.mtrand.dirichlet([1.0] * self.input.startAlleles)
+			diri = pgut.get_dirichlet_allele_dist_for_expected_het( \
+														self.input.het_init_msat,
+														self.input.startAlleles )
+
+			'''
+			Check added 2018_02_18, to make sure our heurisitic
+			returned a set of allele freqs:
+			'''
+			if diri is None:
+				s_msg="In PGOpSimuPop instance, def __createGenome, " \
+							+ "The program did not produce a set of allele frequencies " \
+							+ "for thecould"
+				raise Exception( s_msg )
+			#end if no
+
+
 			if type(diri[0]) == float:
 				diriList = diri
 			else:
@@ -628,8 +674,54 @@ class PGOpSimuPop( modop.APGOperation ):
 					loci=msat))
 		#end for msat
 
+		'''
+		2018_02_08.  We are adding a new parameter "het_init_snp",
+		which allows the user to enter a value in [0.0,0.5]
+		which will be used to compute a pair of (diallelic)
+		allele frequencies assigned instead of the former 
+		hard-coded 0.5 (which is still the default.)
+		The call to the new pgutilities def get_roots_quadratic,
+		uses coefficients derived from solving for He in the
+		expected Het calculation for a loci:
+			He = 1 - [ freq_allele_1 ^ 2 + freq_allele_2 ^ 2 ]
+		where freq_allele_2 = 1 - freq_allele_1, to get
+
+		-freq^2 + freq - He/2 = 0
+
+		'''
+
+		lf_roots=pgut.get_roots_quadratic( -1, 1, -1*(self.input.het_init_snp)/2 )
+
+		f_init_snp_freq=None
+		
+		'''
+		We can use either root, since 
+		one root gives the freq for one
+		allele, whose diallelic partner
+		will be the 2nd root and their sum
+		will be one.  (Note that for the special
+		case of He=0.5, then we'll have one root
+		equal to -0.5 and the other to 0.5.  Hence
+		we test for a positive root.
+		'''
+		for f_root in lf_roots:
+			if f_root >= 0.0 and f_root <= 0.5:
+				f_init_snp_freq=f_root
+				break
+			#end if positive root
+		#end for each root	
+
+		if f_init_snp_freq is None:
+			s_msg="In pgOpSimuPop instance, def __createGenome, " \
+					+ "the program failed to get an initial allele " \
+					+ "frequence for the initial expected heterozygosity " \
+					+ "value set at, " + str ( self.input.het_init_snp ) + "."
+
+			raise Exception( s_msg )
+		#end if no init frequency
+
 		for snp in range(numSNPs):
-			freq = 0.5
+			freq = f_init_snp_freq
 			initOps.append(
 					sp.InitGenotype(
 					#Position 0 is coded as 0, not good for genepop
@@ -802,9 +894,43 @@ class PGOpSimuPop( modop.APGOperation ):
 		This pyOperator is used when the output mode is OUTPUT_GENEPOP_ONLY
 		'''
 
-		b_result=self.total_filtered_pops_saved < self.total_filtered_pops_to_save
+		b_filtered_total_not_reached= \
+				self.total_filtered_pops_saved < self.total_filtered_pops_to_save
 
-		return  b_result
+		b_filter_min_het_still_below_pop_het=\
+				not( self.min_het_filter_greater_than_current_pop_het )
+
+		#As of 2018_02_24 non-zero mutation frequencies apply only to msats.
+		b_pop_het_can_increase=self.input.numMSats > 0 and self.input.mutFreq > 0		
+
+		b_filter_range_still_achievable=b_filter_min_het_still_below_pop_het \
+														or b_pop_het_can_increase
+		
+		#For the case when the pop hets will no
+		#longer be able to meet the filter,
+		#we want to notify the user:
+		if not ( b_filter_range_still_achievable ):
+			s_pop_number=str( pop.dvars().gen ) 
+
+			s_msg="The simulation's current pop, number " \
+					+ s_pop_number \
+					+ ", has an expected " \
+					+ "heterozygosity less than the minimum, " \
+					+ str( self.min_mean_heterozygosity )  \
+					+ ", as set in the heterozygosity filter.  " \
+					+ "With no mutation rate and/or no microsats, " \
+					+ "the program currently stops the simulation, " \
+					+ "under the assumption that mean " \
+					+ "expected heterozygisity will only decrease " \
+					+ "as the simulation evolves further, and cannot " \
+					+ "produce a pop whose mean het meets the filter " \
+					+ "criteria."
+
+			self.__write_interruption_file( s_msg )
+		#end if het can't meed filter criteria
+
+		return  b_filtered_total_not_reached and b_filter_range_still_achievable
+
 	#end keep_collecting_filtered_pops
 
 	def __calcDemo( self, gen, pop ):
@@ -1735,9 +1861,20 @@ class PGOpSimuPop( modop.APGOperation ):
 						self.total_filtered_pops_saved += 1
 						self.__file_for_het_filter.write( str( gen ) + "\t" \
 														+ str( f_mean_het ) + "\n" )
+					elif f_mean_het < self.min_mean_heterozygosity:	
+					
+						'''
+						This flag will be tested in the stopOp
+						call to def __keep_collecting_filtered_pops
+						'''
+						self.min_het_filter_greater_than_current_pop_het=True
+						
+						
+						return True
+
 					else:
 						return True
-					#end if het in range, else return.
+					#end if het in range, else if pop's het less than filter's min, else return.
 				#end if not het filter in effect, else test
 			#end if output mode is genepop only, check whether het filter
 
@@ -2085,6 +2222,43 @@ class PGOpSimuPop( modop.APGOperation ):
 		return
 	#end __createAge
 
+	def __write_interruption_file( self, s_fail_notice ):
+
+		ERR_NOTICE_FILE_EXT="sim.interruption.msg"
+
+		if hasattr( self.output, "basename" ):
+			s_err_file_name=self.output.basename + "." + ERR_NOTICE_FILE_EXT
+			try:
+				o_err_file=open( s_err_file_name, 'w' )
+				o_err_file.write( s_fail_notice + "\n" )
+				o_err_file.close()
+			except IOError as oei:
+
+				'''
+				We don't want to rase an exception, since this 
+				def is meant to be called before throwing an exception,
+				so we know there is a more pertinent error to be thrown
+				by the caller.
+				'''
+				
+				s_msg="Warning, in PGOpSimuPop instance, def __cleanup_on_failure, " \
+							+ "failed to write file, "  + s_err_file_name \
+							+ ", with message: " + s_fail_notice + "." 
+
+				sys.stderr.write( s_msg + "\n" )
+			#end try...except IO error
+		else:
+			s_msg="Warning, in PGOpSimuPop instance, def __write_interruption_file, " \
+							+ "failed to find output file basename, to write message: " \
+							+ " s_fail_notice." 
+
+			sys.stderr.write( s_msg + "\n" )
+
+		#end if basename exists, else warning
+
+		return
+	#end __write_interruption_file
+
 	def __cleanup_on_failure( self, s_reason="Nb tolerance test failure."  ):
 		'''
 		2017_06_11.  This def was added on request from 
@@ -2096,8 +2270,9 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		s_fail_notice="\nError:  output interrupted due to " + s_reason + "\n"
 
-		if self.output:
+		self.__write_interruption_file( s_fail_notice )
 
+		if self.output:
 			for s_outfile in [ "out", "err", "megaDB", "genepop" ]:	
 				if hasattr( self.output, s_outfile ):
 					o_file=getattr( self.output, s_outfile )
@@ -2114,28 +2289,6 @@ class PGOpSimuPop( modop.APGOperation ):
 					pgut.remove_files( [ s_outfile_name ] )
 				#end if file name available, close it if exists
 			#end for each of the sim output files (except conf and age/pwop records)
-
-			if hasattr( self.output, "basename" ):
-				s_err_file_name=self.output.basename + "." + ERR_NOTICE_FILE_EXT
-				try:
-					o_err_file=open( s_err_file_name, 'w' )
-					o_err_file.write( s_fail_notice )
-					o_err_file.close()
-				except IOError as oei:
-
-					'''
-					We don't want to rase an exception, since this 
-					def is meant to be called before throwing an exception,
-					so we know there is a more pertinent error to be thrown
-					by the caller.
-					'''
-					
-					s_msg="Warning, in PGOpSimuPop instance, def __cleanup_on_failure, " \
-								+ "failed to write file, "  + s_err_file_name \
-								+ ", with message: " + s_fail_notice + "." 
-
-					sys.stderr.write( s_msg + "\n" )
-				#end check for IO error
 		#end if we have an output object
 			
 		if self.__file_for_nb_records is not None:

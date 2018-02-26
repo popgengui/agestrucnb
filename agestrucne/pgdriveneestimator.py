@@ -3925,7 +3925,6 @@ if __name__ == "__main__":
 	multiproc event arg is added, so that the IDX_<arg> constants
 	used in def parse_args are not accurately reflected here.
 	'''
-
 	ls_args_passed+=[ sys.stdout, sys.stderr, s_temp_dir, "False" ]
 
 	mymain( *( ls_args_passed ) )

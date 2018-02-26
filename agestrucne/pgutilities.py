@@ -56,6 +56,15 @@ import traceback
 from agestrucne.pgutilityclasses import IndependantSubprocessGroup 
 from agestrucne.pgneestimationtablefilemanager import NeEstimationTableFileManager 
 
+#for getting roots of quadratic, for
+#calls from pgopsimupop, to get initial
+#allele frequencies, given a het value.
+from numpy import sqrt as npsqrt
+
+#For estimating microsat allele frequencies
+#given an expected heterozygosity:
+from numpy.random.mtrand import dirichlet 
+
 '''
 2017_04_27
 For python 2 and 3 compatibility,
@@ -1641,12 +1650,104 @@ def get_memory_virtual_available():
 	return tup_meminfo.available
 #end get_memory_virtual_available
 
+def get_roots_quadratic( f_a, f_b, f_c ):
+
+	lf_roots=[]
+
+	for i_coeff in [ 1, -1 ]:
+		#quadratic equation
+		try:
+			lf_roots.append( ( -f_b + i_coeff * npsqrt( f_b**2 - 4*f_a*f_c ) )/2*f_a ) 
+		except Exception as oex:
+
+			if i_coeff==1:
+				s_formula="( -b + sqrt( b^2 - 4ac ) )/2a"
+			else:
+				s_formula="( -b - sqrt( b^2 - 4ac ) )/2a"
+			#end if adding top 2 terms, else subtraction
+
+			s_msg="In pgutilities, def get_roots_quadratic, error calculating root, " \
+						+ "with a = " + str( f_a ) + ", b = " + str( f_b ) + ", c = " \
+						+  str( f_c ) + ", and using formula: "  + s_formula + ".\n" \
+						+ "Exception thrown with message: " + str( oex ) + "."
+			raise Exception( s_msg )
+	#end for each sign
+
+	return lf_roots
+
+#end get_roots_quadratic
+
+def get_dirichlet_allele_dist_for_expected_het( f_expected_het,  
+													i_num_alleles, 
+														f_tolerance=0.001 ):
+	'''
+	Heuristic uses the dirichlet distribution to find a set
+	of i_num_alleles allele frequencies whose expected heterozygosity
+	is within f_tolerance of f_expected_het.
+
+	The alpha value assignment determined by the ranges seen below
+	was constructed using trials, using script testdiri.py (in our
+	programs supplementary_scripts directory).
+	'''
+
+	lf_freqs=None
+
+	TRIALS=3000
+	MAX_TRIALS=10
+
+	f_myalpha=None
+
+	if f_expected_het < 0.0:
+		s_msg="The program currently does not " \
+					+ "generate allele frequencies " \
+					+ "for an expected heterozygosity " \
+					+ "of zero."
+		raise Exception( s_msg )
+
+	elif f_expected_het > 0.85:
+		s_msg="The program currently does not " \
+					+ "generate allele frequencies " \
+					+ "for an expected heterozygosity " \
+					+ "greather than 0.85."
+		raise Exception( s_msg )
+	elif f_expected_het <= 0.01:
+		f_myalpha=0.01
+	elif f_expected_het <= 0.3:
+		f_myalpha=0.05
+	elif f_expected_het <= 0.7:
+		f_myalpha=0.1
+	else:
+		f_myalpha=0.5
+	#end if expected het 0, else over max else...
+
+	b_achieved_het=False
+	for i_trial_number in range( MAX_TRIALS ):
+
+		if b_achieved_het:
+			break
+		#end if done, break
+
+		for i_trial in range( TRIALS ):
+			lf_these_freqs=dirichlet( [ f_myalpha ] * i_num_alleles )
+			f_het=1-( sum ( [ f_freq * f_freq for f_freq in lf_these_freqs ] ) )
+
+			if abs( f_expected_het - f_het ) <= f_tolerance: 
+				lf_freqs=lf_these_freqs
+				b_achieved_het=True
+				break
+			#end if
+		#end for each trial
+	#end for each trial number
+
+	return lf_freqs 
+#end get_dirichlet_allele_dist_for_expected_het
+
 if __name__ == "__main__":
-
-    s_exec_name=sys.argv[ 1 ]
-
-    print( confirm_executable_is_in_path( sys.argv[1] ) )
-
+	for het in  [ 0.001, 0.003, 0.2, 0.3, 0.45, 0.55, 0.65, 0.85 ]:
+		print( str(het) + ":--------------" )	
+		dl= get_dirichlet_allele_dist_for_expected_het( het, 10 ) 
+		print( "calc het: " + str( 1 - sum( [ x*x for x in dl ] ) ) )
+	#end for each het
 #end if main
 
 

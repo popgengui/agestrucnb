@@ -18,6 +18,8 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 START_LAMBDA_IGNORE=99999
 LAMBDA_IGNORE=1.0
 DEFAULT_NB_VAR=0.05
+DEFAULT_SNP_HET_INIT=0.5
+DEFAULT_MSAT_HET_INIT=0.8
 
 import sys
 import os
@@ -496,7 +498,6 @@ class PGInputSimuPop( object ):
 
 		self.__update_attribute_config_file_info( "N0", "pop", "N0" )
 
-
 		if config.has_option("sim", "cull_method"):
 			self.cull_method = config.get("sim", "cull_method")
 		else:
@@ -569,6 +570,30 @@ class PGInputSimuPop( object ):
 			self.het_filter="0.00,1.00,99999"
 		#end if config has sim, cull_method
 		self.__update_attribute_config_file_info( "het_filter", "sim", "het_filter" )
+
+		'''
+		2018_02_08.  We are adding a parameter, "het_init_snp", which will 
+		then determine the initial SNP allele frequencies. (See pgopsimupop.py,
+		def??)
+		'''
+		if config.has_option( "sim", "het_init_snp" ):
+			self.het_init_snp=config.getfloat("sim", "het_init_snp")
+		else:
+			self.het_init_snp=DEFAULT_SNP_HET_INIT
+		#end if we have an initial expected het
+		self.__update_attribute_config_file_info( "het_init_snp", "sim", "het_init_snp" )
+
+		'''
+		2018_02_18.  We also adding a parameter, "het_init_msat", which will 
+		then determine the initial Msat allele frequencies. 
+		'''
+		if config.has_option( "sim", "het_init_msat" ):
+			self.het_init_msat=config.getfloat("sim", "het_init_msat")
+		else:
+			self.het_init_msat=DEFAULT_MSAT_HET_INIT
+		#end if we have an initial expected het
+
+		self.__update_attribute_config_file_info( "het_init_msat", "sim", "het_init_msat" )
 
 		return
 	#end __get_config
