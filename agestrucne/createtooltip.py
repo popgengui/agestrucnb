@@ -10,9 +10,15 @@ tested with Python27 and Python34  by  vegaseat  09sep2014
 from future import standard_library
 standard_library.install_aliases()
 from builtins import object
+from sys import platform
+
 __filename__ = "tooltip.py"
 __date__ = "20160605"
 __author__ = " vegaseat on DANIWEB, https://www.daniweb.com/members/19440/vegaseat"
+
+#For special treatement of this widget in python
+#(see def enter):
+OSX_NAME_ACCORDING_TO_PYTHON="darwin"
 
 try:
 	# for Python2
@@ -64,6 +70,16 @@ class CreateToolTip(object):
 		'''
 		self.widget.bind( "<FocusOut>", self.close)
 		self.font_size=i_font_size
+		self.using_osx=False
+
+		'''
+		Ted added 20180225, to treat use of this class in OSX
+		differently (see rems in def enter).
+		'''
+		if platform == OSX_NAME_ACCORDING_TO_PYTHON:
+		    self.using_osx=True
+		#end if on OS X
+
 	#end __init__
 
 	def enter(self, event=None):
@@ -85,6 +101,7 @@ class CreateToolTip(object):
 		it.
 		'''
 		if self.tw is None:
+
 			'''
 			I added 2016_10_31
 			constants used below,
@@ -102,6 +119,18 @@ class CreateToolTip(object):
 			# Leaves only the label and removes the app window
 			self.tw.wm_overrideredirect(True)
 			self.tw.wm_geometry("+%d+%d" % (x, y))
+
+			'''
+			OS X problem only -- when window decorators are removed
+			via wm_overrideredirect() call, then OX X won't show the 
+			window without help, one solution at least is this
+			call to lift() see, https://stackoverflow.com/questions
+			/44969674/remove-title-bar-in-python-3-tkinter-toplevel
+			'''
+			if self.using_osx:
+				self.tw.lift()
+			#end if we're on OS X, need this call to makee
+
 			label = tk.Label(self.tw, text=self.text, justify='left',
 						   background='yellow', relief='solid', borderwidth=1,
 						   font=("times", self.font_size, "normal"))

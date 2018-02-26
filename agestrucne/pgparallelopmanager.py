@@ -36,6 +36,7 @@ import agestrucne.pginputsimupop as pgin
 import agestrucne.pgoutputsimupop as pgout
 import agestrucne.pgparamset as pgpar
 
+import glob
 
 def prep_and_call_do_pgopsimupop_replicate( s_config_file, 
 											s_life_table_files, 
