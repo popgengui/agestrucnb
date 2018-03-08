@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 setup(
     name = 'agestrucne',
     packages = [ 'agestrucne', 'agestrucne/asnviz' ],
-    version = '0.1.5',     
+    version = '0.1.6',     
 	license = 'AGPLv3',
 	description = "GUI and command line program for simulating populations, " \
 				+  "estimating Nb and Ne using LDNe, and vizualizing the results.",
