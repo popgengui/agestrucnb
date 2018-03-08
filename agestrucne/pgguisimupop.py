@@ -1483,10 +1483,16 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			2017_09_04. We have eliminated the het filter string as an arg passed to the pgutilities
 			def.  It now will be accessed directly from the input config file.
 			
-			2017_11_12.  We now call the new mod pgparallelopmanager.py, which now has the defs that
+			2017_11_12. We now call the new mod pgparallelopmanager.py, which now has the defs that
 			used to be in pgutilities, and which use pgopsimupop and similar modules.
+
+			2018_03_08. We disable gui messaging, as it looks like Nb tolerance failures will be common
+			enough that errors can potentially block entire runs, without the user manually clicking
+			on the error messages (i.e. number of error dialogs raised is greather than the number of
+			cores in use, so that no new replicates can be started).
 			'''
-			b_do_use_gui_messaging=True
+			#b_do_use_gui_messaging=True
+			b_do_use_gui_messaging=False
 			i_output_mode=pgpar.pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY
 			s_het_filter_string=None
 
