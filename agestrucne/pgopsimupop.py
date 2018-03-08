@@ -544,12 +544,11 @@ class PGOpSimuPop( modop.APGOperation ):
 				raise Exception( "PGOpSimuPop object not prepared to operate (see def prepareOp)." )
 			#end  if prepared, do op else exception
 		except Exception as oex:
-			
-			if self.__guierr is not None:
-				o_traceback=sys.exc_info()[ 2 ]
-				s_err_info=pgut.get_traceback_info_about_offending_code( o_traceback )
-				s_msg="In PGOpSimupop instance, an exception was raised with message: " \
+			o_traceback=sys.exc_info()[ 2 ]
+			s_err_info=pgut.get_traceback_info_about_offending_code( o_traceback )
+			s_msg="In PGOpSimupop instance, an exception was raised with message: " \
 							+ str( oex ) + "\nThe error origin info is:\n" + s_err_info
+			if self.__guierr is not None:
 				self.__guierr( None, s_msg )
 			#end if using gui messaging
 			raise oex
@@ -689,6 +688,16 @@ class PGOpSimuPop( modop.APGOperation ):
 		-freq^2 + freq - He/2 = 0
 
 		'''
+
+		if self.input.het_init_snp < 0.0 or self.input.het_init_snp > 0.5:
+			s_msg="In PGOpSimuPop instance, def __createGenome, " \
+						+ "The value for heterozygosity initialization " \
+						+ "for SNPs is invalid at " \
+						+ str( self.input.het_init_snp )  \
+						+ ".  Values are valid in [0.0,0.5]"
+			
+			raise Exception ( s_msg )
+		#end if invalid snp het init value
 
 		lf_roots=pgut.get_roots_quadratic( -1, 1, -1*(self.input.het_init_snp)/2 )
 

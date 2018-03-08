@@ -1216,8 +1216,21 @@ class PGInputSimuPop( object ):
 			b_return_value=False
 		#end if inconsistent fecundity list length
 
-		if i_num_female_survival_values != i_num_ages - 2 \
-			 or i_num_male_survival_values != i_num_ages - 2: 
+		'''
+		2018_03_07.  Although all the rest of our provided configuration
+		files have survival entries totalling 2 less than the ages total,
+		We have two configuration files, for the bighorn (100 and 200), 
+		in which the number of survial entries is equal to the number of fecundity 
+		entries, hence only 1 less than the ages value, so we change our test:
+		'''
+#		if i_num_female_survival_values != i_num_ages - 2 \
+#			 or i_num_male_survival_values != i_num_ages - 2: 
+		i_ages_minus_female_survival_entries=i_num_ages-i_num_female_survival_values	
+		i_ages_minus_male_survival_entries=i_num_ages-i_num_male_survival_values	
+		b_male_survival_in_range=( i_ages_minus_male_survival_entries  in [ 1,2 ] )
+		b_female_survival_in_range=( i_ages_minus_female_survival_entries in [ 1,2 ] )
+
+		if not( b_male_survival_in_range and b_female_survival_in_range ):
 			 
 			s_msg+="\n\n There are inconsistent age/survival values, " \
 						+ "The number of female and/or male survival values " \
