@@ -119,10 +119,9 @@ Installation
 
 				conda install SimuPop
 
-				pip install agestrucne
-
 			ii. Clone (using the git program) or download the zip archive from 
 			    our master repository at, https://github.com/popgengui/agestrucne.
+
 			iii. Open the Anaconda Prompt window, and use "cd" to move to the directory
 			     conaining the unzipped files, into the directory in which the setup.py
                              file.  Type the following command:
