@@ -122,8 +122,8 @@ Installation
 			ii. Clone (using the git program) or download the zip archive from 
 			    our master repository at, https://github.com/popgengui/agestrucne.
 
-			iii. Open the Anaconda Prompt window, and use "cd" to move to the directory
-			     conaining the unzipped files, into the directory in which the setup.py
+			iii. Open the Anaconda Prompt window, and use "cd" to move to the "agestrucne" 
+			     directory contain unzipped files, in particular look for the "setup.py"
                              file.  Type the following command:
 				
 				python setup.py install
@@ -208,7 +208,7 @@ Installation
 					   of SimuPop, and you will need to compile it from source.  
 					   This procedure can be difficult and fraught with missing 
 					   dependancies, especially in Windows. It is a
-					   procedure beyond the scope of these instruction 
+					   procedure beyond the scope of these instructions. 
 
 				b. Install the program and remaining dependancies with
 				   "pip install agestrucne" 
