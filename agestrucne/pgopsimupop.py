@@ -1014,10 +1014,6 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __litterSkipGenerator( self, pop, subPop ):
 
-		##### temp
-		print( "In litter skip generator" )
-		#####
-
 		if VERY_VERY_VERBOSE:
 			print( "In __litterSkipGenerator on gen: " + str( pop.dvars().gen ) )
 		#end if very very verbose
@@ -1405,9 +1401,6 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		for ind in pop.individuals():
 			if ind.sex() == 1:  # male
-				##### temp
-				print( "doing gamma" )
-				#####
 				a = self.input.gammaAMale[int(ind.age) - 1]
 				b = self.input.gammaBMale[int(ind.age) - 1]
 				if a:
