@@ -289,6 +289,17 @@ class PGOpSimuPop( modop.APGOperation ):
 		is used by def __harvest
 		'''
 		self.__nb_and_census_adjustment_by_cycle=None
+
+		'''
+		2018_03_13.  In the rare case of using a gamma distribution to assign
+		fecundity in the __fitnessGenerator, and also use the Nb tolerance test,
+		we need to change the way we assign generators in __createAge, such that
+		if we have a target Nb, then we always call __restrictedGenerator, but we
+		assign the following, according to the presense/absense of gamma values,
+		assigning __fitnessGenerator in for former, __litterSkipGenerator in the
+		latter:
+		'''
+		self.__generator_called_by_restricted_generator=None
 		
 		return
 	#end __init__
@@ -1239,7 +1250,18 @@ class PGOpSimuPop( modop.APGOperation ):
 		while not nbOK:
 
 			pair = []
-			gen = self.__litterSkipGenerator(pop, subPop)
+			'''
+			2018_03_13.  Change, now using this attribute,
+			__generator_called_by_restricted_generator,
+			set in def __createAge, so that we now are either 
+			calling the (default) __litterSkipGenerator, or,
+			if the input includes doNegBinom and gamma lists, 
+			then, this call is assigned to the __fitnessGenerator
+
+			'''
+			#gen = self.__litterSkipGenerator(pop, subPop)
+			gen=self.__generator_called_by_restricted_generator( pop, subPop )
+
 			#print 1, pop.dvars().gen, nb
 
 
@@ -2146,15 +2168,41 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__set_nb_tolerance()	
 
 		self.__selected_generator=None
+		'''
+		Added 2018_03_13, so that if using NegBinom
+		(and gamma list), and also have a target
+		Nb, we can havce the restrictedGenerator
+		call the fitnessGenerator, which computes using
+		gammas.
+		'''
+		self.__generator_called_by_restricted_generator=None
 
 		'''
 		Select a generator based on the input parameters,
 		and whether we have a target Nb:
 		'''
 		if( self.input.doNegBinom ):
-			self.__selected_generator = self.__fitnessGenerator
+			'''
+			Changed 2018_03_13, see above.
+			'''
+			if self.__targetNb is not None:
+				self.__selected_generator=self.__restrictedGenerator
+				self.__generator_called_by_restricted_generator=self.__fitnessGenerator
+				pass
+			else:
+				self.__selected_generator = self.__fitnessGenerator
+			#end use the retricted if target Nb, else don't
 		elif self.__targetNb is not None:
 			self.__selected_generator = self.__restrictedGenerator
+			'''
+			Added 2018_03_13, to specify our default litterSkip
+			generator, so that as above we can also allow use of the 
+			fitness generator as part of the restricted generator's
+			tolerance testingm  if the user
+			wants a neg binom based fecundity calc and also wants
+			to use tolerance testing (see above).
+			'''
+			self.__generator_called_by_restricted_generator=self.__litterSkipGenerator
 		else:
 			self.__selected_generator = self.__litterSkipGenerator 
 		#end if we want fitness gen,else restricted, else litter skip

@@ -1222,13 +1222,19 @@ class PGInputSimuPop( object ):
 		We have two configuration files, for the bighorn (100 and 200), 
 		in which the number of survial entries is equal to the number of fecundity 
 		entries, hence only 1 less than the ages value, so we change our test:
+
+		2018_03_16.  We changed our minds, and will not allow a diff of 1 in the
+		ages total minus survival.  Instead we are removing the last entry in 
+		the survival list for the bighorn (value is 0.0), to bring it into
+		line with the other conf files, so that ages minus num-survival-vals.
+		is 2.
 		'''
 #		if i_num_female_survival_values != i_num_ages - 2 \
 #			 or i_num_male_survival_values != i_num_ages - 2: 
 		i_ages_minus_female_survival_entries=i_num_ages-i_num_female_survival_values	
 		i_ages_minus_male_survival_entries=i_num_ages-i_num_male_survival_values	
-		b_male_survival_in_range=( i_ages_minus_male_survival_entries  in [ 1,2 ] )
-		b_female_survival_in_range=( i_ages_minus_female_survival_entries in [ 1,2 ] )
+		b_male_survival_in_range=( i_ages_minus_male_survival_entries  in [ 2 ] )
+		b_female_survival_in_range=( i_ages_minus_female_survival_entries in [ 2 ] )
 
 		if not( b_male_survival_in_range and b_female_survival_in_range ):
 			 

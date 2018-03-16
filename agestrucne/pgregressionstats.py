@@ -25,7 +25,13 @@ import os
 
 from numpy import mean, median, isnan
 
-from agestrucne.asnviz.LineRegress import slopeConfidence
+'''
+Now using revised versions of the viz files
+from Brian T, so that slopeConfidence 
+is now slope_confidence:
+'''
+#from agestrucne.asnviz.LineRegress import slopeConfidence
+from agestrucne.asnviz.LineRegress import slope_confidence
 
 from agestrucne.pgneestimationtablefilemanager import NeEstimationTableFileManager
 
@@ -125,7 +131,7 @@ class PGRegressionStats( object ):
 					s_file_name=self.__get_source_file_name_from_file_manager_key( recordKey )
 				#end if not b_use_all_key_fields
 				
-				v_return_slope_conf=slopeConfidence( self.__confidence_alpha,record)
+				v_return_slope_conf=slope_confidence( self.__confidence_alpha,record)
 				slope=None; intercept=None; confidence=None
 				ls_vals_for_table=None
 
