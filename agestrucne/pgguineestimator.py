@@ -785,14 +785,21 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		'''
 		self.__make_temporary_directory_for_estimator( self.__output_directory.get() )
 
-		self.__op_process=multiprocessing.Process( \
+		'''
+		2018_03_15. We add new parameter used in the call
+		to LDNe2, boolean value self.__monogamy. We put
+		the arg in the order just after the allele_freq
+		parmameter.
+		'''
 
+		self.__op_process=multiprocessing.Process( \
 				target=pgut.run_driveneestimator_in_new_process,
 					args= ( \
 							self.__neest_multi_process_event,
 							self.__genepopfiles.get(),
 							qs_sample_scheme_args,
 							self.__minallelefreq,
+							self.__monogamy,
 							self.__replicates,
 							qs_loci_sample_scheme_args,
 							self.__loci_replicates,
@@ -2054,6 +2061,19 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 
 		return
 	#end def onChangeInNbBiasAdjustmentFlag
+
+	def onChangeInMonogamyFlag( self ):
+		'''
+		2018_03_15.  This def was added to be associated with the checkbox
+		that give True or False, whether to send LDNe2's monogamy=True or
+		monogamy=False. Currently there is no action needed when the flag
+		state is changed.
+		'''
+		pass
+	
+		return
+	#end def onChangeInMonogamyFlag
+
 
 	def __get_handle_to_param_frame( self, s_param_name ):
 

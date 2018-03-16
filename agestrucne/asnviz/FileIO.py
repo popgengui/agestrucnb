@@ -21,29 +21,28 @@ def scrapePower(fileName):
 
 def scrapeSlopes(fileName):
     statFile  = open(fileName)
-    slopeRegex = re.compile('^([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?)\s*([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?)\s*(\(([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?),\s([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?)\))',re.MULTILINE)
+    slopeRegex = re.compile('^([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?)\s*([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?)\s*(\(([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?),\s([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?)\))\s*([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?)',re.MULTILINE)
     fileText = statFile.read()
     matches = slopeRegex.findall(fileText)
     slopeResults = []
     for match in  matches:
         matchDict ={}
-        print(match)
         matchDict['slope'] = float(match[0])
         matchDict['intercept'] = float(match[1])
         matchDict['lowerCI'] = float(match[3])
         matchDict['upperCI'] = float(match[4])
+        matchDict['p_val'] = float(match[5])
         slopeResults.append(matchDict)
-        print(matchDict)
     slopeArray = [dict['slope'] for dict in slopeResults]
     interceptArray = [dict['intercept'] for dict in slopeResults]
     lowerCIArray=[dict['lowerCI']for dict in slopeResults]
     upperCIArray = [dict['upperCI'] for dict in slopeResults]
-    resultDict = {"slope":slopeArray,"intercept":interceptArray,"lowerCI":lowerCIArray,"upperCI":upperCIArray}
-    print(resultDict)
+    p_val_array = [dict['p_val'] for dict in slopeResults]
+    resultDict = {"slope":slopeArray,"intercept":interceptArray,"lowerCI":lowerCIArray,"upperCI":upperCIArray,"p_val":p_val_array}
     statFile.close()
     return slopeResults, resultDict
 
-def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0):
+def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0,lastVal = 0):
     '''
     2017_04_27.  Note from Ted: Python3's csv reader chokes on the bytes-type
     reads returned when its file object is opened 'rb'. I've 
@@ -97,12 +96,14 @@ def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0):
 
         popKeys = list(replicateDict.keys())
         popKeys.sort()
+
         for popKey in popKeys:
             if popKey >= firstVal:
-                # print popKey
-                replicateVctr.append((popKey, replicateDict[popKey]))
-                individualCountVctr.append((popKey, individualCountDict[popKey]))
-                errorVctr.append((popKey,(minRepDict[popKey],maxRepDict[popKey])))
+                if lastVal == 0 or popKey <= lastVal:
+                    #print(popKey)
+                    replicateVctr.append((popKey, replicateDict[popKey]))
+                    individualCountVctr.append((popKey, individualCountDict[popKey]))
+                    errorVctr.append((popKey,(minRepDict[popKey],maxRepDict[popKey])))
         resultTable[replicate] = replicateVctr
         individualCountTable[replicate] = individualCountVctr
         errorTable[replicate] = errorVctr
@@ -130,6 +131,7 @@ def configRead(filename):
     fileOrder = None
     sortBy = "pop"
     significantCycle = 1
+    endDataCollect = 0
 
     config = configparser.ConfigParser()
     config.readfp(open(filename))
@@ -201,6 +203,8 @@ def configRead(filename):
     if config.has_section("data"):
         if config.has_option("data","startCollect"):
             startDataCollect = config.getint("data","startCollect")
+        if config.has_option("data", "endCollect"):
+            endDataCollect = config.getint("data", "endCollect")
         if config.has_option("data","ordering"):
             fileOrder = config.get("data","ordering")
         if config.has_option("data", "OrderSignificantCycle"):
@@ -234,6 +238,10 @@ def configRead(filename):
     configDict["yLims"] = yLims
     configDict["alpha"] = alphaVal
     configDict["startData"] = startDataCollect
+    ##### temp
+    print ( "assigning configDict[\"endData\"]= " + str( endDataCollect ) )
+    #####
+    configDict["endData"] = endDataCollect
     configDict["statsFilename"] = statFileOut
     configDict["sigSlope"] = sigSlope
     configDict["sortBy"] = sortBy

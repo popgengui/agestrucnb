@@ -20,12 +20,16 @@ from numpy import mean, median, isnan
 import csv
 import sys
 import os
+'''
+Location moved to agestrucne.asnviz:
+'''
+#from Viz.FileIO import scrapeNE, configRead, readFileOrder, makeOutlierDict, writeOutliers
 from agestrucne.asnviz.FileIO import scrapeNE, configRead, readFileOrder, makeOutlierDict, writeOutliers
 
 
 #function to perform the linear regression and store the results in a dictionary
-def lineRegress(linePoints):
-    xArray, yArray = _pointsToVectors(linePoints)
+def line_regress(line_points):
+    xArray, yArray = _pointsToVectors(line_points)
     slope, intercept, r_value, p_value, std_err = stats.linregress(xArray, yArray)
     result  = {}
     result["slope"] = slope
@@ -193,61 +197,110 @@ def createBoxPlot(table,title = None, xlab = None, yLab= None, dest = "show", ou
     writeOutliers(outliers,outlierFile)
     return
 
+
+    # get s(b1)  == (MSE)/sum(xi-mean(x))^2)
+    # this estimates the variation of the system
+def calculate_s_score(linePoints):
+    regression = line_regress(linePoints)
+    xVctr, yVctr = _pointsToVectors(linePoints)
+    MSE = _MSE(regression["slope"], regression["intercept"], linePoints)
+    xMean = mean(xVctr)
+    xMeanDiffArray = []
+    for x in xVctr:
+        xDiff = x - xMean
+        xDiffSq = xDiff * xDiff
+        xMeanDiffArray.append(xDiffSq)
+    xDiffSum = sum(xMeanDiffArray)
+    sSqVal = old_div(MSE, xDiffSum)
+    sVal = math.sqrt(sSqVal)
+    return  sVal
+    
+
 #method to get teh confidence interval around the Slope of the regression
 #uses the formula t((1-alpha/2):DoF)(s(b1))
 #alpha: desired probability
 #linePoints: list of touples defining the x and y coordinates of a point
 #returns 3 variables, the slope of the regression, the intercept of the regression, and a touple containing the upper and lower bounds of the confidence interval of the slope
-def slopeConfidence(alpha, linePoints):
-    if len(linePoints)<=2:
+def slope_confidence(alpha, line_points):
+    if len(line_points)<=2:
         return "Error: not enough points for calculation"
     #if len(linePoints)==2:
     #    regression = lineRegress(linePoints)
     #    return regression["slope"], regression["intercept"],(regression["slope"],regression["slope"])
     #get linear regression for points
-    regression = lineRegress(linePoints)
+    regression = line_regress(line_points)
     #get Tscore
-    tScore = stats.t.ppf((1-old_div(alpha,2)), len(linePoints)-2)
+    t_score = stats.t.ppf((1-old_div(alpha,2)), len(line_points) - 2)
 
 
     #get s(b1)  == (MSE)/sum(xi-mean(x))^2)
-    xVctr, yVctr = _pointsToVectors(linePoints)
-    MSE = _MSE(regression["slope"], regression["intercept"],linePoints)
-    xMean = mean(xVctr)
-    xMeanDiffArray = []
-    for x in xVctr:
-        xDiff = x - xMean
-        xDiffSq = xDiff *xDiff
-        xMeanDiffArray.append(xDiffSq)
-    xDiffSum = sum(xMeanDiffArray)
-    sSqVal = old_div(MSE,xDiffSum)
-    sVal = math.sqrt(sSqVal)
-    deltaConfidence = tScore*sVal
-    confidenceInterval = (regression["slope"]-deltaConfidence,regression["slope"]+deltaConfidence)
-    return regression["slope"], regression["intercept"], confidenceInterval
+
+    s_val = calculate_s_score(line_points)
+    deltaConfidence = t_score*s_val
+    confidence_interval = (regression["slope"]-deltaConfidence,regression["slope"]+deltaConfidence)
+    return regression["slope"], regression["intercept"], confidence_interval
+
+    #confidence test for null hypothesis **only works for 0 right now**
+#alpha: desired probability
+#linePoints: list of touples defining the x and y coordinates of a point
+#hypothesis_slope: slope  defined by null hypothesis, assumed to be 0  and doesnt work right now, here for extensibility
+def alpha_test(alpha, linePoints, hypothesis_slope = 0):
+    alpha_result= 0
+    regression = line_regress(linePoints)
+    #get t_ test score
+    t_score = stats.t.ppf((1-old_div(alpha,2)), len(linePoints)-2)
+    s_val = calculate_s_score(linePoints)
+    t_star = abs(old_div(regression['slope'],s_val))
+    if t_star > t_score:
+        alpha_result  = 1
+    return alpha_result
+
+#calculate beta error given a known expected slope assumes null mean value is 0
+#alpha: desired probability
+#linePoints: list of touples defining the x and y coordinates of a point
+# #expected: the expected slope of the system
+#null_mean: the mean defined by the null hypothesis  currently assumed to be 0
+def beta_test(alpha, linePoints, expected, null_mean = 0):
+    beta_value =0
+    #get regression data
+    regression = line_regress(linePoints)
+    #get T score
+    t_score = stats.t.ppf((1-old_div(alpha,2)), len(linePoints)-2)
+    #get sVAL 
+    s_val = calculate_s_score(linePoints)
+    # just for completion
+    #print(expected)
+    hypothesis_mean_offset = abs(null_mean - expected)
+    delta = old_div(hypothesis_mean_offset,s_val)
+    t_offset =t_score- delta
+    beta_value = stats.t.cdf(t_offset,len(linePoints)-2)
+    return beta_value
 
 
+
+
+    
 #get MSE of a regression
 #slope: slope of calculated regression
 #intercept: intercept of calculated regression
 #yPoints: An array of the points used to create the regression
 #xVctr: an array of the values
 #returns MSE
-def _MSE(slope, intercept,linePoints):
-    errorArray = []
+def _MSE(slope, intercept, line_points):
+    error_array = []
 
-    #get  sigma error squared
-    for point in linePoints:
-        xVal = point[0]
-        yVal = point[1]
-        expectedY = slope * xVal + intercept
-        difference  = yVal - expectedY
+    #get sigma error squared
+    for point in line_points:
+        x_val = point[0]
+        y_val = point[1]
+        expected_y = slope * x_val + intercept
+        difference  = y_val - expected_y
         squareDifference  = difference*difference
-        errorArray.append(squareDifference)
-    errorSum = sum(errorArray)
+        error_array.append(squareDifference)
+    error_sum = sum(error_array)
 
     #devide by DoF (n-2)
-    MSE = old_div(errorSum,(len(linePoints)-2))
+    MSE = old_div(error_sum, (len(line_points) - 2))
     return MSE
 
 
@@ -284,16 +337,16 @@ def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
     #get linear regression stats for all datasets
     LineStats = []
     for line in list(dataVctrs.values()):
-        data = lineRegress(line)
+        data = line_regress(line)
         LineStats.append(data)
     #flatten the array
-    allpoints = [val for sublist in list(dataVctrs.values())  for val in sublist]
+    all_points = [val for sublist in list(dataVctrs.values())  for val in sublist]
     #unzip to obtain x and y value vectors for all points
-    xVals, yVals = list(zip(*allpoints))
+    xVals, yVals = list(zip(*all_points))
 
     minX = min(xVals)
     maxX = max(xVals)+1
-    xVctr = list(set(allpoints))
+    xVctr = list(set(all_points))
     if maxX - minX>1:
 
         xVctr = list(range(int(math.floor(minX)),int(math.ceil(maxX))))
@@ -308,11 +361,11 @@ def _NeRegressionGraphCalc(dataVctrs, expectedSlope = None, popTable = None):
         if expectedSlope == "pop":
             if popTable:
                 averagePopPoints = []
-                allpoints = [val for sublist in popTable for val in popTable[sublist]]
-                xVals, yVals = list(zip(*allpoints))
+                all_points = [val for sublist in popTable for val in popTable[sublist]]
+                xVals, yVals = list(zip(*all_points))
                 xSet = set(xVals)
                 for x in xSet:
-                    pointYSet = [point[1] for point in allpoints if point[0] == x]
+                    pointYSet = [point[1] for point in all_points if point[0] == x]
                     averageY = mean(pointYSet)
                     averagePopPoints.append((x,averageY))
             expectedPoints = averagePopPoints
@@ -431,41 +484,72 @@ def _enviromentalFactor(table, factorTable):
 #outFileName: resulting file location for file results, will overwrite existing file.
 #significantValue: value of comparison w/ regards to slope. should be 0 for every test, but can be changed if needed.
 #testFlag: flag that disables file write and prints stats to console instead, used for test functions
-def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,testFlag = False):
+def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt", significantValue = 0, firstVal = 0,expected = 0,testFlag = False):
 
-    tableFormat = "{:<30}{:<30}{:<50}{:<80}\n"
+    tableFormat = "{:<20}{:<20}{:<50}{:<20}{:<80}\n"
     confPercent = (1 - confidenceAlpha)*100
-    tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)","Source File")
+    tableString =tableFormat.format("Slope","Intercept","Confidence Interval("+str(confPercent)+"%)","P value", "Source File")
     slopeVctr = []
     confidenceVctr = []
+    alpha_vctr =[]
+    s_score_vctr= []
 
     Uncountable = 0
     for recordKey in list(table.keys()):
+
         record = table[recordKey]
-        slope, intercept, confidence  = slopeConfidence(confidenceAlpha,record)
+        slope, intercept, confidence  = slope_confidence(confidenceAlpha, record)
+
+
+        # perform alpha test
+        alpha_result = alpha_test(confidenceAlpha, record)
+        if alpha_result == 0:
+            alpha_vctr.append(0)
+        elif slope > 0:
+            alpha_vctr.append(1)
+        else:
+            alpha_vctr.append(-1)
+
+        #get std dev estimate
+        s_val = calculate_s_score(record)
+        s_score_vctr.append(s_val)
+        t_star = old_div(slope,s_val)
+        #calculate p value DF = num points-2
+        p_score = stats.t.sf(t_star,len(record)-2)
+
         #Ted edit 2017_05_12. For python3, we have to cast the confidence tuple 
         #as a string. Looks like py3 provides no tuple handling in the format 
         #method for the string.
-        tableString+=tableFormat.format(slope,  intercept ,  str( confidence ) , recordKey[0])
+        tableString+=tableFormat.format(slope,  intercept ,  str( confidence ) ,p_score,  recordKey[0]+"\n")
         if isnan(slope):
             Uncountable +=1
         else:
-            slopeVctr.append(slope) 
+            slopeVctr.append(slope)
             confidenceVctr.append(confidence)
     maxSlope = max(slopeVctr)
     minSlope = min(slopeVctr)
     meanSlope = mean(slopeVctr)
     medSlope = median(slopeVctr)
+    averageSscore = mean(s_score_vctr)
     negativeCount=0
     zeroCount=0
     positiveCount=0
-    for cI in confidenceVctr:
-        if cI[0]>significantValue:
+
+    #change for alpha test
+    for value in alpha_vctr:
+        if value>0:
             positiveCount+=1
-        elif cI[1]<significantValue:
+        elif value<0:
             negativeCount+=1
         else:
             zeroCount+=1
+    # for cI in confidenceVctr:
+    #     if cI[0] > significantValue:
+    #            positiveCount += 1
+    #     elif cI[1] < significantValue:
+    #         negativeCount += 1
+    #     else:
+    #         zeroCount += 1
     if testFlag:
         print(slopeVctr)
         print(confidenceVctr)
@@ -477,10 +561,11 @@ def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt",
     outFile = open(outFileName,"w")
     outFile.write("File:"+neFile+"\n")
     outFile.write("\n")
-    outFile.write("Max Regression Slope:\t\t"+str(maxSlope)+"\n")
-    outFile.write("Min Regression Slope:\t\t"+str(minSlope)+"\n")
-    outFile.write("Mean Regression Slope:\t\t"+str(meanSlope)+"\n")
-    outFile.write("Meadian Regression Slope:\t"+str(medSlope)+"\n")
+    outFile.write("Max Regression Slope:\t\t\t"+str(maxSlope)+"\n")
+    outFile.write("Min Regression Slope:\t\t\t"+str(minSlope)+"\n")
+    outFile.write("Mean Regression Slope:\t\t\t"+str(meanSlope)+"\n")
+    outFile.write("Meadian Regression Slope:\t\t"+str(medSlope)+"\n")
+    outFile.write("Mean Variance Estimate:\t\t\t"+str(averageSscore)+"\n")
     outFile.write("\n")
     outFile.write("Comparison to a slope of: "+str(significantValue)+"  at alpha =  "+str(confidenceAlpha)+"\n")
     outFile.write("Positive Slopes:\t"+str(positiveCount)+"\t\tNeutral Slopes:\t"+str(zeroCount)+"\t\tNegative Slopes:\t"+str(negativeCount)+"\n")
@@ -498,7 +583,7 @@ def neStats(neFile, configFile = None, testFlag = False):
         return _neStatsHelper(table,neFile,0.05)
 
     configVals = configRead(configFile)
-    neTable,countsTable, errorTable = scrapeNE(neFile,configVals["startData"])
+    neTable,countsTable, errorTable = scrapeNE(neFile,configVals["startData"],lastVal=configVals["endData"])
     if configVals["ordering"]:
 
         orderingTable = readFileOrder(configVals["ordering"])
@@ -506,7 +591,7 @@ def neStats(neFile, configFile = None, testFlag = False):
 
     return _neStatsHelper(neTable,neFile,configVals["alpha"], outFileName=configVals["statsFilename"],significantValue=configVals["sigSlope"],firstVal=configVals["startData"], testFlag= testFlag)
 
-#gets teh minumum of the maximum of the number of subpops for the table
+#gets thh minumum of the maximum of the number of subpops for the table
 def _getSubpopLimit(table,itemList=None):
     identTuples = list(table.keys())
     maxDict = {}
@@ -615,7 +700,13 @@ def neRun(neFile,configFile):
         _neStatsHelper(table,0.5)
         return True
     configs = configRead(configFile)
-    table,countsTable, errorTable = scrapeNE(neFile,configs["startData"])
+
+    ##### temp
+    print( "-------------" )
+    print( "got back dictfrom configread: " + str( configs ) )
+    ##### end temp
+
+    table,countsTable, errorTable = scrapeNE(neFile,configs["startData"],lastVal=configs["endData"])
     if configs["ordering"]:
         SelectRandom()
         orderingTable = readFileOrder(configs["ordering"])
@@ -628,7 +719,7 @@ def neRun(neFile,configFile):
     neGraphMaker(table,expectedSlope=configs["expected"],title= configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["dest"],xLim=configs["xLims"],yLim=configs["yLims"], countTable = countsTable)
     createBoxPlot(table,title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["boxplot"],outlierFile=outlierFile)
     createScatterPlot(table, errorTable, title =  configs['title'],xlab=configs["xLab"],yLab=configs["yLab"],dest=configs["scatter"])
-    _neStatsHelper(table,neFile,configs["alpha"], outFileName=configs["statsFilename"],significantValue=configs["sigSlope"],firstVal=configs["startData"])
+    _neStatsHelper(table,neFile,configs["alpha"], outFileName=configs["statsFilename"],significantValue=configs["sigSlope"],firstVal=configs["startData"],expected=configs["expected"])
     return createBoxPlot(table, title=configs['title'], xlab=configs["xLab"], yLab=configs["yLab"], dest=configs["boxplot"],
                   outlierFile=outlierFile)
 
@@ -641,19 +732,19 @@ if __name__ == "__main__":
     xVct = list(range(10))
     yVct  = list(range(10))
     table = list(zip(xVct,yVct))
-    result = lineRegress(table)
+    result = line_regress(table)
     assert result["slope"] == 1.0
     assert result["intercept"] == 0.0
     assert result["r_val"] ==1.0
     yVct = list(range(0,20,2))
     table = list(zip(xVct,yVct))
-    result = lineRegress(table)
+    result = line_regress(table)
     assert result["slope"] == 2.0
     assert result["intercept"] == 0.0
     assert result["r_val"] == 1.0
     yVct = list(range(10,20,1))
     table = list(zip(xVct,yVct))
-    result = lineRegress(table)
+    result = line_regress(table)
     assert result["slope"] == 1.0
     assert result["intercept"] == 10.0
     assert result["r_val"] ==1.0
@@ -663,19 +754,19 @@ if __name__ == "__main__":
     xVct = list(range(10))
     yVct  = list(range(10,0,-1))
     table = list(zip(xVct,yVct))
-    result = lineRegress(table)
+    result = line_regress(table)
     assert result["slope"] == -1.0
     assert result["intercept"] == 10.0
     assert result["r_val"] == -1.0
     yVct = list(range(20,0,-2))
     table = list(zip(xVct,yVct))
-    result = lineRegress(table)
+    result = line_regress(table)
     assert result["slope"] == -2.0
     assert result["intercept"] == 20.0
     assert result["r_val"] ==-1.0
     yVct = list(range(0,-10,-1))
     table = list(zip(xVct,yVct))
-    result = lineRegress(table)
+    result = line_regress(table)
     assert result["slope"] == -1.0
     assert result["intercept"] == 0.0
     assert result["r_val"] ==-1.0
@@ -691,21 +782,21 @@ if __name__ == "__main__":
     xVct = list(range(5))
     yVct  = list(range(5))
     table = list(zip(xVct,yVct))
-    print(slopeConfidence(0.05,table))
+    print(slope_confidence(0.05, table))
     xVct = list(range(5))
     yVct  = list(range(5))
     yVct[0]-=1
     table = list(zip(xVct,yVct))
-    print(slopeConfidence(0.01,table))
-    print(slopeConfidence(0.05, table))
-    print(slopeConfidence(0.1,table))
+    print(slope_confidence(0.01, table))
+    print(slope_confidence(0.05, table))
+    print(slope_confidence(0.1, table))
     xVct = list(range(10))
     yVct  = list(range(10))
     yVct[0]-=1
     table = list(zip(xVct,yVct))
-    print(slopeConfidence(0.01,table))
-    print(slopeConfidence(0.05, table))
-    print(slopeConfidence(0.1,table))
+    print(slope_confidence(0.01, table))
+    print(slope_confidence(0.05, table))
+    print(slope_confidence(0.1, table))
     print("Confidence Tests passed")
 
     print("getLineGraph Tests")

@@ -748,6 +748,7 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 										s_genepop_files,
 										qs_sample_scheme_args,
 										f_min_allele_freq,
+										b_monogamy,
 										i_replicates,
 										qs_loci_sampling_scheme_args,
 										i_loci_replicates,
@@ -769,6 +770,10 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	spawns only a single OS process, that calls python to execute pgdriveneestimator.py,
 	which itself multiplexes the NeAnlaysis of multiple genepop files and (likely) multiple
 	pops per file using python.multiprocessing.Process objects.
+
+
+	2018_03_15.  We add the flag b_monogamy to the arg set, to assign it to LDNe2's
+	monomgamy boolean parameter (see pgdriveneestimator.py, def __add_to_set_of_calls, etc.
 	'''
 
 	try:
@@ -819,9 +824,13 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 
 		#join tuples of arguments in the proper order
 		#for the call to pgdriveneestimator.py:
+		'''
+		2018_03_15. The arg set now includes b_monogamy, 
+		to send a value for the LDNe2 param Monogamy.
+		'''
 		seq_arg_set=qs_files_args \
 						+ qs_sample_scheme_args \
-						+ ( str( f_min_allele_freq ), str( i_replicates ) ) \
+						+ ( str( f_min_allele_freq ), str( b_monogamy), str( i_replicates ) ) \
 						+ qs_loci_sampling_scheme_args \
 						+ ( str( i_loci_replicates ), str( i_num_processes ), s_runmode, s_nbne_ratio, s_do_nb_bias_adjustment ) 
 
@@ -1406,6 +1415,12 @@ def run_plotting_program( s_type, s_estimates_table_file, s_plotting_config_file
 						+ "def, run_plotting_program, " \
 						+ "An exception was caught, with origin:\\n" \
 						+ s_err_info + "\\n"
+
+		'''
+		For sending the string into a new process,  we need to escape 
+		any quotes in the error message:
+		'''
+		s_prefix=s_prefix.replace( "\"", "\\\""	)
 		show_error_in_messagebox_in_new_process( oex, s_msg_prefix=s_prefix )
 		raise ( oex )
 	#end try...except

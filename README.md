@@ -2,10 +2,10 @@ overview
 --------
 	For more details about the program, see the manual.pdf file distributed
 	with the program. Briefly, our program is a front end that incorporates the
-	simulation and LDNe based population genetics functions provided by tiago
-	antao's python program at https://github.com/tiagoantao/agestructurene.git,
+	simulation and LDNe based population genetics functions provided by Tiago
+	Antao's python program at https://github.com/tiagoantao/agestructurene.git,
 	enhanced by multiple methods for population subsampling when performing LD-based
-	Ne and Nb estimations from genepop file inputs.  further, we have added
+	Ne and Nb estimations from genepop file inputs.  Further, we have added
 	simulation functionality and subsampling methods and interfaces for LDNe
 	estimation, as well as  plotting interfaces to show estimate distributions and
 	regression lines. 
@@ -18,7 +18,7 @@ overview
 
 	The core functionality for simulation is provided by the python simuPOP
 	package (Peng, B. & Kimmel, M. simuPOP: a forward-time population genetics
-	simulation environment. Bioinformatics 21, 3686–3687, 2005), and the LDNe
+	simulation environment. Bioinformatics 21, 3686–3687, 2005). The LDNe
 	estimation by version 2 of the LDNe program (Waples, R. S. & Do, C.  LDNe: a
 	program for estimating effective population size from data on linkage
 	disequilibrium. Molecular Ecology Resources 8, 753–756, 2008).
@@ -27,12 +27,12 @@ overview
 
 current compatible python versions
 ----------------------------------
-	i.  python 3.5 and 3.6.  On Windows 64-bit and OS X platforms , we strongly recommend using
+	1.  python 3.5 and 3.6.  On Windows 64-bit and OS X platforms , we strongly recommend using
 	    the Anaconda 3 python distribution, as it's "conda" installer supplies a
 	    pre-compiled version of SimuPop, which is often difficult to install 
 	    through pip and setuptools.
 
-	ii. python 2.7 Note that python 3 is the recommended environment, since 2.7 requires building
+	2. python 2.7 Note that python 3 is the recommended environment, since 2.7 requires building
 	    an older version of SimuPop, which can be difficult, especially in Windows (see
 	    the Dependancies and Installation sections, below.) the above are the python
 	    versions on which the program was developed and tested.  other versions may
@@ -53,7 +53,7 @@ os-comaptibility
 dependencies
 ------------
 	The following are the python packages on which our program depends.
-	Aside from the installation of SimuPop, pip and setup tools dependancies 
+	Aside from the installation of SimuPop, pip and setup tools,  dependancies 
         are automatically installed when you use python's pip installer, or the 
 	setup.py method (see the Installation section, below).
 
@@ -83,7 +83,7 @@ dependencies
 
 		iv.  psutil
 		
-		v.   for python 2 only, configparser.y. This is a backported python 3 package, different 
+		v.   for python 2 only, configparser. This is a backported python 3 package, different 
 		     than the default python2 ConfigParser package. 
 
 		vi.  for python2 only, if not already in your distribution, the ttk package.  The pip package
@@ -93,25 +93,24 @@ dependencies
 
 Installation  
 ------------
-
-	A. Download the configuration files, README.md file (this file), and manual from 
+	1. Download the configuration files, README.md file (this file), and manual from 
 	   https://github.com/popgengui/agestrucne/tree/data.  On the web page you will see
-	   green button on the right side of the screen, and labeled, "Clone or download."
+	   a green button on the right side of the screen, and labeled, "Clone or download."
            Besides the program manual and README.md file, this data branch of our github 
-	   repository, supplies simulation configuration files that will get you started 
+	   repository supplies simulation configuration files that will get you started 
            in the program pipeline (see the manual for details on how to load and edit the 
 	   configuration files).
 
-	B. Recommended Installation procedures, by platform.
+	2. Recommended Installation procedures, by platform.
 
-		1. Linux, 64-bit, python3:
+		A. Linux, 64-bit, python3:
 
 			i. From a terminal, type "pip3 install agestrucne".
 
 			ii. Note:  according to the speed and RAM capacity of your computer,
 				SimuPop can take many minutes to be compiled and installed.
 		
-		2. Windows, 64-bit, Anaconda3 python installation, 
+		B. Windows, 64-bit, Anaconda3 python installation, 
 			i. from the Anaconda Prompt program window, type
 			   the following commands:
 			
@@ -123,13 +122,13 @@ Installation
 			    our master repository at, https://github.com/popgengui/agestrucne.
 
 			iii. Open the Anaconda Prompt window, and use "cd" to move to the "agestrucne" 
-			     directory contain unzipped files, in particular look for the "setup.py"
+			     directory containing the unzipped files, in particular look for the "setup.py"
                              file.  Type the following command:
 				
 				python setup.py install
 
-			iv. Our testing shows that while the main program executable "agestrucne", 
-			    will be available directly at from the Anaconda
+			iv. Our testing shows that, after the installation,  the main program executable, 
+			    "agestrucne", will be available directly at from the Anaconda
 			    Prompt, the console-based exectuables, "pgdriveneestimator.py" and
 			    "pgdrivesimulation.py" will need to be invoked by using the path to the
 			    "Scripts" subdirectory of your Anaconda installation.  (See the manual
@@ -141,15 +140,13 @@ Installation
 			    For which you should substitute the name of your home directory under 
 			    the Users directory, and one of the two script names noted above.
 
-		3. OS X, Anaconda3 python installation, 
+		C. OS X, Anaconda3 python installation, 
 
 			i. from OX X Terminal window, type the following commands:
 			
 				conda config --add channels conda-forge
 
 				conda install SimuPop
-
-				pip install agestrucne
 
 			ii. Clone (using the git program) or download the zip archive from 
 			    our master repository at, https://github.com/popgengui/agestrucne.
@@ -160,7 +157,7 @@ Installation
 				
 				python setup.py install
 
-		4. Installation methods, in general, if your platform and python
+		D. Installation methods, in general, if your platform and python
 		   installations do not match the above.
 
 			i. Single command method with pip:  
@@ -172,7 +169,7 @@ Installation
 			ii. Single command method with setup.py:
 
 				a. Download the program files  available at	
-					https://github.com/popgengui/agestrucne
+				   https://github.com/popgengui/agestrucne
 				   by clicking on the green button on the
 				   right side of the screen labelled "clone or download."
 
@@ -226,7 +223,7 @@ Starting the program
 	   "agestrucne."  The python pip installer should have added this
  	   command to your PATH variable in your user environment. 
 
-		i. Note that when you open the program, the current directory of your
+		A. Note that when you open the program, the current directory of your
 		   terminal will determine where the file-loading dialog will be initially
 		   set, as you locate, for example, a configuration file to load into
 		   the simulation interface.
@@ -237,10 +234,10 @@ Starting the program
 	   may fail to add these commands under Anaconda3.  In this case, see
            the Note in the Installation section B.2.iv.
 
-		i. Command "pgdrivesimulation.py" performs simulations from the
+		A. Command "pgdrivesimulation.py" performs simulations from the
 		   terminal, as specified in the user manual.
 
-		ii. Command "pgdriveneestimator.py" performs LDNe estimations
+		B. Command "pgdriveneestimator.py" performs LDNe estimations
 		   from the terminal, as specified in the user manual.
 
 Using the program	

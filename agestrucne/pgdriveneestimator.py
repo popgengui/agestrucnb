@@ -176,10 +176,10 @@ spacer="   "
 spacer2="   "
 spacer3="  "
 
-LS_FLAGS_SHORT_REQUIRED=[ "-f",  "-s", "-p", "-m", "-a", "-r", "-e", "-c", "-l", "-i",  "-n", "-x", "-g","-q" ]
+LS_FLAGS_SHORT_REQUIRED=[ "-f",  "-s", "-p", "-m", "-a", "-r", "-e", "-M", "-c", "-l", "-i",  "-n", "-x", "-g","-q" ]
 
 LS_FLAGS_LONG_REQUIRED=[ "--gpfiles", "--scheme", "--params", "--minpopsize", "--maxpopsize", "--poprange", 
-						"--minallelefreq", "--replicates", "--locischeme", "--locischemeparams",  
+						"--minallelefreq",  "--monogamy",  "--replicates", "--locischeme", "--locischemeparams",  
 						"--mintotalloci", "--maxtotalloci", "--locirange", "--locireplicates" ]
 
 LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes. " \
@@ -221,6 +221,8 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 		"Genepop file pop range (hyphenated pair of integers, i-j indicating estimator should evaluate " \
 				+ "the ith through the jth pops in each genepop file).",
 		"Float, minimum allele frequency, one of NeEstimator's \"crit\" values.",
+		"\"True\" or \"False\", value to assign to LDNe2's mating parameter, \"True\" sets the parameter " \
+				+ "to \"monogamy\", and \"False\" to random mating.",
 		"Integer, total sampling replicates (for the individual sampling scheme) " \
 				+ "to run (Note: under the \"remove\" scheme," \
 				+ "when sampling by removing one individual from a pop of size p, " \
@@ -243,7 +245,7 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 		"Integer, Number of loci sampling replicates (value of 1 means one loci subsample " \
 								+ "per loci sampling param, per individual replicate)." ]
 
-LS_FLAGS_SHORT_OPTIONAL=[  "-o", "-d", "-b", "-j"  ]
+LS_FLAGS_SHORT_OPTIONAL=[  "-o", "-d", "-b", "-j" ]
 
 LS_FLAGS_LONG_OPTIONAL=[ "--processes", "--mode", "--nbneratio", "--donbbiasadjust" ]
 
@@ -254,7 +256,7 @@ LS_ARGS_HELP_OPTIONAL=[  "total processes to use (single integer) Default is 1 p
 				+ "Other modes except \"testmulti\", run non-parallelized, with increasing output.  " \
 				+ "Debug 3, for example, adds to the output a table listing, for each indiv. " \
 				+ "in each file, which replicate Ne estimates include the individual.  It also preserves " \
-				+ "the intermediate genepop and NeEstimator output files",
+				+ "the intermediate genepop and LDNe2's output files",
 				"An Nb/Ne ratio, if supplied, will be used in a bias adjustment to the LDNE " \
 				+ "estimates (after Waples, 2014).  Ignored if --donbbiasadjust is \"False.\"  " \
 					+ "If you use 0.0 here, the program will look in the genepop file " \
@@ -270,23 +272,27 @@ IDX_MIN_POP_SIZE=3
 IDX_MAX_POP_SIZE=4
 IDX_POP_RANGE=5
 IDX_MIN_ALLELE_FREQ=6
-IDX_REPLICATES=7
-IDX_LOCI_SAMPLING_SCHEME=8
-IDX_LOCI_SCHEME_PARAM=9
-IDX_LOCI_MIN_TOTAL=10
-IDX_LOCI_MAX_TOTAL=11
-IDX_LOCI_RANGE=12
-IDX_LOCI_SAMPLE_REPLICATES=13
-IDX_PROCESSES=14
-IDX_DEBUG_MODE=15
-IDX_NBNE_RATIO=16
+'''
+This parmeter was added on 2018_03_15.
+'''
+IDX_MONOGAMY=7
+IDX_REPLICATES=8
+IDX_LOCI_SAMPLING_SCHEME=9
+IDX_LOCI_SCHEME_PARAM=10
+IDX_LOCI_MIN_TOTAL=11
+IDX_LOCI_MAX_TOTAL=12
+IDX_LOCI_RANGE=13
+IDX_LOCI_SAMPLE_REPLICATES=14
+IDX_PROCESSES=15
+IDX_DEBUG_MODE=16
+IDX_NBNE_RATIO=17
 '''
 This parameter was added on 2017_04_14.
 '''
-IDX_DO_BIAS_ADJUST=17
-IDX_MAIN_OUTFILE=18
-IDX_SECONDARY_OUTFILE=19
-IDX_MULTIPROCESSING_EVENT=20
+IDX_DO_BIAS_ADJUST=18
+IDX_MAIN_OUTFILE=19
+IDX_SECONDARY_OUTFILE=20
+IDX_MULTIPROCESSING_EVENT=21
 '''
 2017_03_27.  This new argument allows the intermediate
 genepop files created by this module before it runs
@@ -296,14 +302,14 @@ It is set to None when called from the console, but
 when def mymain is called from pgutilities def 
 run_driveneestimator_in_new_process.
 '''
-IDX_TEMPORARY_DIRECTORY=21
+IDX_TEMPORARY_DIRECTORY=22
 
 '''
 2017_05_31. This new argument allows the console
 command to prevent the module from importing
 and using the GUI messaging classes.
 '''
-IDX_USE_GUI_MESSAGING=22
+IDX_USE_GUI_MESSAGING=23
 
 #Def mymain uses this index to test and pass
 #the correct file/multiprocessing_event information
@@ -335,6 +341,7 @@ code when python calls it as __main__:
 DEFAULT_NUM_PROCESSES="1"
 DEFAULT_DEBUG_MODE="no_debug"
 DEFAULT_NBNE_VAL="None"
+
 
 '''
 In order to properly name the subsampled
@@ -546,12 +553,17 @@ class ArgSet( object ):
 		the actral list of genepop files instead of a glob,
 		which may have been passed at the command line( See 
 		def drive_estimator).
+
+
+		2018_03_15. We added the b_monogamy flag, to follow
+		the min_allele_frequency in order.
 		'''
 		self.param_names_in_order= \
 				[ "genepop_files", "pop_sampling_scheme",
 						"pop_sampling_values",
 						"min_pop_size", "max_pop_size",
 						"pop_num_range", "min_allele_frequency",
+						"monogamy",
 						"pop_sampling_replicates", "loci_sampling_scheme",
 						"loci_sampling_values", "loci_min_total",
 						"loci_max_total", "loci_num_range", 
@@ -940,6 +952,15 @@ def parse_args( *args ):
 	#end if we have a range (rather than "all")
 
 	f_min_allele_freq = float( args[ IDX_MIN_ALLELE_FREQ ] )
+	
+	if args[ IDX_MONOGAMY ] not in [ "True", "False" ]:
+		s_msg="In pgdriveneestimator.py, def parse_args, " \
+						+ "unrecognized value for monogamy parameter: "  \
+						+ args[ IDX_MONOGAMY ] \
+						+ ". Expecting either \"True\" or \"False.\""
+		raise Exception( s_msg )
+	#end if monogamy value invalid
+	b_monogamy=True if args[ IDX_MONOGAMY ] =="True" else False
 	i_total_replicates=int( args[ IDX_REPLICATES ] )
 	i_total_processes=int( args[ IDX_PROCESSES ] )
 	o_debug_mode=set_debug_mode ( args[ IDX_DEBUG_MODE ] )
@@ -1032,6 +1053,7 @@ def parse_args( *args ):
 								i_min_pop_range,
 								i_max_pop_range,
 								f_min_allele_freq, 
+								b_monogamy,
 								i_total_replicates, 
 								s_loci_sampling_scheme,
 								v_loci_sampling_scheme_param,
@@ -1248,7 +1270,7 @@ def do_estimate(xxx_todo_changeme ):
 	'''
 	( o_genepopfile, o_ne_estimator, 
 					s_sample_param_val, s_loci_sample_value,
-					f_min_allele_freq, s_subsample_tag, 
+					f_min_allele_freq, b_monogamy, s_subsample_tag, 
 					s_loci_sample_tag, s_population_number, 
 					s_census, i_replicate_number, 
 					s_loci_replicate_number, o_debug_mode, 
@@ -2320,6 +2342,7 @@ SNPs, whichever was specified using loci range.
 def add_to_set_of_calls_to_do_estimate( o_genepopfile, 
 											s_sample_scheme,
 											f_min_allele_freq, 
+											b_monogamy,
 											i_min_pop_size,
 											i_max_pop_size,
 											i_min_loci_position,
@@ -2495,8 +2518,12 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 				s_run_output_file=s_genepop_file_subsample + "_ne_run.txt"
 
 				o_neinput=pgin.PGInputNeEstimator( s_genepop_file_subsample )
-
-				o_neinput.run_params={ "crits":[ f_min_allele_freq ]  }
+				
+				'''
+				2018_03_15.  Note that we have added a  new parameter "monogamy", to 
+				be passed to LDNe2 (see pginputneestimator class ).
+				'''
+				o_neinput.run_params={ "crits":[ f_min_allele_freq ] , "monogamy": b_monogamy }
 
 				o_neoutput=pgout.PGOutputNeEstimator( s_genepop_file_subsample, 
 														s_run_output_file, 
@@ -2516,6 +2543,7 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 									s_sample_value, 
 									s_loci_sample_value,
 									f_min_allele_freq, 
+									b_monogamy,
 									s_indiv_sample, 
 									s_loci_subsample_tag,
 									s_this_pop_number, 
@@ -2966,6 +2994,7 @@ def add_file_to_current_set( s_filename,
 							b_do_nb_bias_adjustment, 
 							f_nbne_ratio,
 							f_min_allele_freq,
+							b_monogamy,
 							o_debug_mode,
 							IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 							i_genepop_file_count,
@@ -3048,6 +3077,7 @@ def add_file_to_current_set( s_filename,
 		add_to_set_of_calls_to_do_estimate( o_genepopfile, 
 												s_sample_scheme,
 												f_min_allele_freq, 
+												b_monogamy,
 												i_min_pop_size,
 												i_max_pop_size,
 												i_min_loci_position,
@@ -3204,6 +3234,7 @@ def drive_estimator( *args ):
 				i_min_pop_range, 
 				i_max_pop_range,
 				f_min_allele_freq, 
+				b_monogamy,
 				i_total_replicates, 
 				s_loci_sampling_scheme,
 				v_loci_sampling_scheme_param,
@@ -3319,6 +3350,7 @@ def drive_estimator( *args ):
 							b_do_nb_bias_adjustment=b_do_nb_bias_adjustment,
 							f_nbne_ratio=f_nbne_ratio,
 							f_min_allele_freq=f_min_allele_freq,
+							b_monogamy=b_monogamy,
 							o_debug_mode=o_debug_mode,
 							IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 							i_genepop_file_count=i_genepop_file_count,
