@@ -24,6 +24,7 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 import os
 
 from numpy import mean, median, isnan
+from scipy import stats
 
 '''
 Now using revised versions of the viz files
@@ -31,7 +32,7 @@ from Brian T, so that slopeConfidence
 is now slope_confidence:
 '''
 #from agestrucne.asnviz.LineRegress import slopeConfidence
-from agestrucne.asnviz.LineRegress import slope_confidence
+from agestrucne.asnviz.LineRegress import slope_confidence, alpha_test, calculate_s_score
 
 from agestrucne.pgneestimationtablefilemanager import NeEstimationTableFileManager
 
@@ -111,13 +112,22 @@ class PGRegressionStats( object ):
 			#tableFormat = "{:<30}{:<30}{:<50}{:<80}\n"
 			confPercent = (1.0 - self.__confidence_alpha)*100.0
 			tableString="-----Table of per-line values-----\n"
+
+			'''
+			2018_03_17.  Brian T has revised his def _neStatsHelper to
+			include a p-value. We accordingly modify this def to include
+			his revisions.
+			'''
 			tableString+=STATS_TABLE_DELIM.join( [ "Source",
 													"Slope",
 													"Intercept" ,
 													"CI("+str(confPercent)+"%)", 
+													"P value",
 													"\n" ] )
 			slopeVctr = []
 			confidenceVctr = []
+			alpha_vctr=[]
+			s_score_vctr=[]
 
 			Uncountable = 0
 			ls_keys_sorted=sorted( list(table.keys()) )
@@ -132,24 +142,53 @@ class PGRegressionStats( object ):
 				#end if not b_use_all_key_fields
 				
 				v_return_slope_conf=slope_confidence( self.__confidence_alpha,record)
+
+				
+
 				slope=None; intercept=None; confidence=None
 				ls_vals_for_table=None
 
 				if type( v_return_slope_conf ) == tuple:
 					#We assume we got numbers if a tuple was returned.
 					slope, intercept, confidence  = v_return_slope_conf 
+					'''
+
+					2018_03_17.  New code from Brian T's 
+					latest _neStatsHelper
+					'''
+					# perform alpha test
+					alpha_result = alpha_test(self.__significant_value, record)
+					if alpha_result == 0:
+						alpha_vctr.append(0)
+					elif slope > 0:
+						alpha_vctr.append(1)
+					else:
+						alpha_vctr.append(-1)
+
+					#get std dev estimate
+					s_val = calculate_s_score(record)
+					s_score_vctr.append(s_val)
+					t_star = old_div(slope,s_val)
+					#calculate p value DF = num points-2
+					p_score = stats.t.sf(t_star,len(record)-2)
+
+				
 					 
 					'''
 					Note that the "float" cast was need (at least in py3 ), 
 					else negative numbers don't get rounded.
 					'''
-					s_rounded_confidence=STATS_TABLE_DELIM.join( \
-							[ str( round( float( v_val ) , PRECISION ) ) \
-													for v_val in confidence ] )
+					ls_rounded_confidence=[ str( round( float( v_val ) , PRECISION ) )  \
+																for v_val in confidence  ]
+					s_rounded_confidence=", ".join( ls_rounded_confidence  )
+
+					s_rounded_confidence="(" +  s_rounded_confidence + ")"
+
 					ls_vals_for_table=[ s_file_name,
 											str( round( slope, PRECISION ) ),  
 											str( round( intercept, PRECISION ) ) ,  
 											s_rounded_confidence, 
+											str( round( p_score, PRECISION) ),
 											"\n" ]
 					if isnan(slope):
 						Uncountable +=1
@@ -160,7 +199,7 @@ class PGRegressionStats( object ):
 
 				else:
 
-					ls_vals_for_table=[ s_file_name, "NA", "NA", "NA", "\n" ]
+					ls_vals_for_table=[ s_file_name, "NA", "NA", "NA", p_score,"\n" ]
 				#end if slopeConf returned a tuple or couldn't compute
 				
 				tableString+=STATS_TABLE_DELIM.join( ls_vals_for_table )
@@ -171,24 +210,47 @@ class PGRegressionStats( object ):
 			minSlope = min(slopeVctr)
 			meanSlope = mean(slopeVctr)
 			medSlope = median(slopeVctr)
+			'''
+			2018_03_17. New quantity from Brian T's new
+			version:
+			'''
+			averageSscore=mean( s_score_vctr )
 
 			negativeCount=0
 			zeroCount=0
 			positiveCount=0
 
-			for cI in confidenceVctr:
-				if cI[0]>self.__significant_value:
+			'''
+
+			2018_03_17 Remmed out and replaced by new code 
+			by Brian T:
+			'''
+#			for cI in confidenceVctr:
+#				if cI[0]>self.__significant_value:
+#					positiveCount+=1
+#				elif cI[1]<self.__significant_value:
+#					negativeCount+=1
+#				else:
+#					zeroCount+=1
+#			#end for each cI
+			#change for alpha test
+			for value in alpha_vctr:
+				if value>0:
 					positiveCount+=1
-				elif cI[1]<self.__significant_value:
+				elif value<0:
 					negativeCount+=1
 				else:
 					zeroCount+=1
-			#end for each cI
+				#end if val>0 else less else
+			#end for alpha val
+
 			
 			s_stats_string = "Max Regression Slope: "+str( round( maxSlope, PRECISION ) )+"\n"
 			s_stats_string +="Min Regression Slope: "+str( round( minSlope, PRECISION ) )+"\n"
 			s_stats_string +="Mean Regression Slope: " +str( round( meanSlope, PRECISION ) )+"\n"
 			s_stats_string +="Median Regression Slope: "+str( round( medSlope, PRECISION ) )+"\n"
+			s_stats_string += "Mean Variance Estimate:"+str( round( averageSscore) ) +"\n" 
+
 			s_stats_string +="\n"
 			s_stats_string +="Comparison to a slope of "+str( round( self.__significant_value, PRECISION ) ) \
 					+ " at alpha =  " \
