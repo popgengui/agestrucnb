@@ -199,74 +199,83 @@ class PGRegressionStats( object ):
 
 				else:
 
-					ls_vals_for_table=[ s_file_name, "NA", "NA", "NA", p_score,"\n" ]
+					ls_vals_for_table=[ s_file_name, "NA", "NA", "NA", "NA","\n" ]
+
 				#end if slopeConf returned a tuple or couldn't compute
 				
 				tableString+=STATS_TABLE_DELIM.join( ls_vals_for_table )
 				
 			#end for each recordKey
 
-			maxSlope = max(slopeVctr)
-			minSlope = min(slopeVctr)
-			meanSlope = mean(slopeVctr)
-			medSlope = median(slopeVctr)
-			'''
-			2018_03_17. New quantity from Brian T's new
-			version:
-			'''
-			averageSscore=mean( s_score_vctr )
+			if len( slopeVctr ) == 0:
+				
+				s_return= "Insufficient data."
 
-			negativeCount=0
-			zeroCount=0
-			positiveCount=0
+			else:	
 
-			'''
+				maxSlope = max(slopeVctr)
+				minSlope = min(slopeVctr)
+				meanSlope = mean(slopeVctr)
+				medSlope = median(slopeVctr)
 
-			2018_03_17 Remmed out and replaced by new code 
-			by Brian T:
-			'''
-#			for cI in confidenceVctr:
-#				if cI[0]>self.__significant_value:
-#					positiveCount+=1
-#				elif cI[1]<self.__significant_value:
-#					negativeCount+=1
-#				else:
-#					zeroCount+=1
-#			#end for each cI
-			#change for alpha test
-			for value in alpha_vctr:
-				if value>0:
-					positiveCount+=1
-				elif value<0:
-					negativeCount+=1
-				else:
-					zeroCount+=1
-				#end if val>0 else less else
-			#end for alpha val
+				'''
+				2018_03_17. New quantity from Brian T's new
+				version:
+				'''
+				averageSscore=mean( s_score_vctr )
 
-			
-			s_stats_string = "Max Regression Slope: "+str( round( maxSlope, PRECISION ) )+"\n"
-			s_stats_string +="Min Regression Slope: "+str( round( minSlope, PRECISION ) )+"\n"
-			s_stats_string +="Mean Regression Slope: " +str( round( meanSlope, PRECISION ) )+"\n"
-			s_stats_string +="Median Regression Slope: "+str( round( medSlope, PRECISION ) )+"\n"
-			s_stats_string += "Mean Variance Estimate:"+str( round( averageSscore) ) +"\n" 
+				negativeCount=0
+				zeroCount=0
+				positiveCount=0
 
-			s_stats_string +="\n"
-			s_stats_string +="Comparison to a slope of "+str( round( self.__significant_value, PRECISION ) ) \
-					+ " at alpha =  " \
-					+ str( round( self.__confidence_alpha, PRECISION ) )+"\n"
-			s_stats_string +=BULLET_INDENTED \
-							+ "Positive Slopes: "+str( round( positiveCount, PRECISION ) )\
-							+ "\n" +  BULLET_INDENTED \
-							+ "Neutral Slopes: "+str( round( zeroCount, PRECISION ) ) \
-							+ "\n" + BULLET_INDENTED \
-							+ "Negative Slopes: "+str( round( negativeCount, PRECISION ) ) \
-							+ "\n" + BULLET_INDENTED \
-							+ "Non-Number Slopes: "+str( round( Uncountable, PRECISION ) )
-			s_stats_string +="\n\n"
-			s_stats_string +=tableString
+				'''
 
-			s_return=s_stats_string
+				2018_03_17 Remmed out and replaced by new code 
+				by Brian T:
+				'''
+	#			for cI in confidenceVctr:
+	#				if cI[0]>self.__significant_value:
+	#					positiveCount+=1
+	#				elif cI[1]<self.__significant_value:
+	#					negativeCount+=1
+	#				else:
+	#					zeroCount+=1
+	#			#end for each cI
+				#change for alpha test
+				for value in alpha_vctr:
+					if value>0:
+						positiveCount+=1
+					elif value<0:
+						negativeCount+=1
+					else:
+						zeroCount+=1
+					#end if val>0 else less else
+				#end for alpha val
+
+				
+				s_stats_string = "Max Regression Slope: "+str( round( maxSlope, PRECISION ) )+"\n"
+				s_stats_string +="Min Regression Slope: "+str( round( minSlope, PRECISION ) )+"\n"
+				s_stats_string +="Mean Regression Slope: " +str( round( meanSlope, PRECISION ) )+"\n"
+				s_stats_string +="Median Regression Slope: "+str( round( medSlope, PRECISION ) )+"\n"
+				s_stats_string += "Mean Variance Estimate:"+str( round( averageSscore) ) +"\n" 
+
+				s_stats_string +="\n"
+				s_stats_string +="Comparison to a slope of "+str( round( self.__significant_value, PRECISION ) ) \
+						+ " at alpha =  " \
+						+ str( round( self.__confidence_alpha, PRECISION ) )+"\n"
+				s_stats_string +=BULLET_INDENTED \
+								+ "Positive Slopes: "+str( round( positiveCount, PRECISION ) )\
+								+ "\n" +  BULLET_INDENTED \
+								+ "Neutral Slopes: "+str( round( zeroCount, PRECISION ) ) \
+								+ "\n" + BULLET_INDENTED \
+								+ "Negative Slopes: "+str( round( negativeCount, PRECISION ) ) \
+								+ "\n" + BULLET_INDENTED \
+								+ "Non-Number Slopes: "+str( round( Uncountable, PRECISION ) )
+				s_stats_string +="\n\n"
+				s_stats_string +=tableString
+
+				s_return=s_stats_string
+			#end if no slopes were calc'd, else if slopes calcd
 		else:
 			s_return= "Insufficient data."
 		#end if our table has sufficient data else not 
