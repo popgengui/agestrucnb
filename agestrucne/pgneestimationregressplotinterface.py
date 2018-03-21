@@ -13,6 +13,10 @@ __filename__ = "pgboxplotinterface.py"
 __date__ = "20170929"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
+
+PLOTLABELFONTSIZE=12
+TICKLABELFONTSIZE=9
+
 '''
 We need the tkinter.Scale widget,
 not the ttk.Scale, so we need the
@@ -853,7 +857,9 @@ class PGNeEstimationRegressplotInterface( object ):
 											s_ylabel=s_y_label,
 											i_figure_dpi=o_myc.PLOT_FIGURE_DOTS_PER_INCH,
 											f_figure_width=self.__plot_width,
-											f_figure_height=self.__plot_height )
+											f_figure_height=self.__plot_height,
+											i_labelfontsize=PLOTLABELFONTSIZE,
+											i_ticklabelsize=TICKLABELFONTSIZE )
 		
 		self.__plotframe.grid( \
 					row=o_myc.ROW_NUM_PLOT, 
