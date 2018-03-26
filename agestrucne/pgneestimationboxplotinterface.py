@@ -14,8 +14,8 @@ __date__ = "20170929"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 
-PLOTLABELFONTSIZE=13
-TICKLABELFONTSIZE=10
+PLOTLABELFONTSIZE=25
+TICKLABELFONTSIZE=20
 
 '''
 We need the tkinter.Scale widget,
