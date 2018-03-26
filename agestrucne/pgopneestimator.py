@@ -244,6 +244,7 @@ class PGOpNeEstimator( APGOperation ):
 		'''
 
 		CORRECT_TMP_DIR_PREFIX="tmp"
+		CORRECT_TEMP_FILE_PREFIX="temp"
 		NUMBER_SUBDIRS_EXPECTED=0
 		SUSPICOUSLY_HIGH_FILE_COUNT=4
 
@@ -260,10 +261,13 @@ class PGOpNeEstimator( APGOperation ):
 
 				raise Exception(  s_msg )
 		#end if non-tmp name
+		
+		ls_files=pgut.get_list_file_objects( s_temp_dir )
 
 		i_num_subdirs=len( pgut.get_list_subdirectories( s_temp_dir ) )
-		i_num_files=len( pgut.get_list_file_objects( s_temp_dir ) )
-		
+		i_num_files=len( ls_files )
+
+		#Abort if path looks wrong:				
 		if i_num_subdirs > NUMBER_SUBDIRS_EXPECTED \
 				or i_num_files >= SUSPICOUSLY_HIGH_FILE_COUNT:
 				s_msg="in PGOpNeEstimator instance, " \
@@ -274,9 +278,49 @@ class PGOpNeEstimator( APGOperation ):
 							+ "file count, " + str( i_num_files )  \
 							+ ", and/or subdirectory count, " + str(i_num_subdirs ) + "."
 				raise Exception( s_msg )
+		#end if dir/file counts look wrong
+
+		#Abort if any file name looks wrong
+		for s_file in ls_files:
+
+			if not ( s_file.startswith( CORRECT_TEMP_FILE_PREFIX ) ):
+				s_msg="in PGOpNeEstimator instance, " \
+							+ "def __remove_temporary_directory_and_all_its_contents, " \
+							+ "temp dir: " + s_temp_dir \
+							+ ", not able to remove temp directory. " \
+							+ "The program found that it contains a file that does " \
+							+ "not start with the correct prefix.  File: " \
+							+ s_file \
+							+ ", correct prefix: " + CORRECT_TMP_DIR_PREFIX + "."
+				
+				raise Exception( s_msg )
+			#end if file does not appear to be a temp file, abort	
+		#end for each file
+
+		'''
+		2018_03_23 Sometimes, for reasons I do not understand, Windows will not remove
+		one of these temp files because of a permissions error, which will then interrupt
+		the program.  If we are using windows, we'll try callinbg rmtreecheck the permissions status of the files, 
+		and, if we find the program can't delete we call rmtree with the flag set
+		to ignore errors.
+		'''
+		if pgut.is_windows_platform():
+			try:
+				pgut.do_shutil_rmtree( s_temp_dir, b_ignore_errors=False )
+			except WindowsError as owex:
+				s_msg="Warning:  In PGOutputNeEstimator instance, def " \
+							+ "__remove_temporary_directory_and_all_its_contents, " \
+							+ "the call to do_shutil_rmtree idn the pgutilities module " \
+							+ "generated a Windows Error with message, " \
+							+ str( owex ) \
+							+ "  The program is now calling do_shutil_rmtree again, " \
+							+ "this time with the flag set to ignore errors."
+				sys.stderr.write( s_msg + "\n" )
+				pgut.do_shutil_rmtree( s_temp_dir, b_ignore_errors=True )
+			#end try...except
 		else:
-				pgut.do_shutil_rmtree( s_temp_dir )
-		#end if high file or subdir count, error, else remove 
+			pgut.do_shutil_rmtree( s_temp_dir, b_ignore_errors=False)
+		#end if using windows os else not
 
 		return
 	#end __remove_temporary_directory_and_all_its_contents
@@ -353,6 +397,7 @@ class PGOpNeEstimator( APGOperation ):
 		#end for each file prefixed with our temp output file name
 
 		return
+
 	#end __copy_results_to_orig_dir
 
 	def __get_op_neestimator( self ):

@@ -126,7 +126,6 @@ get_mean_het_based_on_allele_freqs
 '''
 import agestrucne.genepopfilelociinfo as gpl
 
-
 import agestrucne.pgutilities as pgut
 
 VERBOSE=False
@@ -140,7 +139,6 @@ are assigned in def set_messaging_procedures
 ACTIVATE_GUI_MESSAGING=None
 GUIERR=None
 GUIINFO=None
-
 
 '''
 2017_03_16.  We are adding, as the default
@@ -3431,6 +3429,7 @@ def drive_estimator( *args ):
 						b_do_nb_bias_adjustment=b_do_nb_bias_adjustment,
 						f_nbne_ratio=f_nbne_ratio,
 						f_min_allele_freq=f_min_allele_freq,
+						b_monogamy=b_monogamy,
 						o_debug_mode=o_debug_mode,
 						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 						i_genepop_file_count=i_genepop_file_count,

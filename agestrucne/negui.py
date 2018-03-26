@@ -87,6 +87,31 @@ def confirm_resources( s_life_table_glob, s_menu_config, s_param_name_file_dir )
 					"msgs":ls_msgs }
 #end confirm_resources
 
+def get_title( s_startup_info_file ):
+	s_title="Age Structure Ne"
+	
+	b_have_info_file=os.path.exists( s_startup_info_file)
+
+	VERSIONPARAM="progversion"
+	PARAM_VAL_DELIMIT="="
+	IDX_VAL=1
+
+	if  b_have_info_file:
+		o_file=open( s_startup_info_file )
+		for s_line in o_file:
+			if s_line.startswith( VERSIONPARAM ):
+				s_version=s_line.strip().split( PARAM_VAL_DELIMIT )[ IDX_VAL ]
+				if s_version != "":
+					s_title += " (v. "  + s_version + ")"
+				#end if we have a version string
+			#end if we have a version entry
+		#end for each line
+		o_file.close()
+	#end if we have a startup info file
+
+	return s_title
+#end
+
 def get_param_file_names( s_param_name_file_dir ):
 	ds_param_file_names={}
 
@@ -120,6 +145,7 @@ def negui_main():
 	s_default_life_tables = s_my_mod_dir + "/resources/*life.table.info"
 	s_menu_config=s_my_mod_dir + "/resources/menu_main_interface.txt" 
 	s_param_name_file_dir=s_my_mod_dir + "/resources"
+	s_startup_info_file=s_my_mod_dir + "/resources/startup.info"
 
 	db_found_files=confirm_resources( s_default_life_tables, 
 												s_menu_config, 
@@ -188,12 +214,12 @@ def negui_main():
 	o_host.grid( row=0, column=0, sticky=( N,W,S,E ))
 
 	o_master.geometry( str(  i_geo_width ) + "x" + str( i_geo_height ) )
-	o_master.title( "Age Structure Nb" )	
+	s_title=get_title( s_startup_info_file )
+	o_master.title( s_title )	
 	o_master.grid_rowconfigure( 0, weight=1 )
 	o_master.grid_columnconfigure( 0, weight=1 )
 
 	atexit.register( cleanup_gui, o_host )
-
 
 	def ask_before_exit():
 		s_msg="Exiting will kill any unfinished analyses " \

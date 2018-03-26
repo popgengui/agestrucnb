@@ -265,7 +265,7 @@ def do_shutil_move( s_source, s_destination ):
 #end do_shutil_copy
 
 
-def do_shutil_rmtree( s_path ):
+def do_shutil_rmtree( s_path, b_ignore_errors=False ):
 	'''
 	This wrapper around the shutil.rmtree guards
 	against the Windows win32 api limit of 255
@@ -290,8 +290,8 @@ def do_shutil_rmtree( s_path ):
 		#end if path too long
 	#end if windows platform
 
-	shutil.rmtree( s_path )
-
+	shutil.rmtree( s_path, ignore_errors=b_ignore_errors )
+	
 	return
 #end do_shutil_copy
 
@@ -377,7 +377,7 @@ def get_list_subdirectories( s_parent_dir ):
 	ls_dir_contents=get_listdir( s_parent_dir )
 
 	for s_item in ls_dir_contents:
-		if os.path.isdir( s_item ):
+		if os.path.isdir( s_parent_dir + "/" + s_item ):
 			ls_subdirs.append( s_item )
 		#end if is directory, add to list
 	return ls_subdirs
@@ -387,7 +387,7 @@ def get_list_file_objects( s_parent_dir ):
 	ls_files=[]
 	ls_dir_contents=get_listdir( s_parent_dir )
 	for s_item in ls_dir_contents:
-		if os.path.isfile( s_item ):
+		if os.path.isfile( s_parent_dir + "/" + s_item ):
 			ls_files.append( s_item )
 		#end if item is file, add to list
 	#end for each item

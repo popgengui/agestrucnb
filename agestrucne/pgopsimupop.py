@@ -86,8 +86,11 @@ class PGOpSimuPop( modop.APGOperation ):
 	2017_02_13. For the restrictedGenerator, the maximum
 	number of tries to obtain a pop with and Nb within tolerance
 	of a target.
+	2018_03_23.  We incrase the value from 100 to 10000.  Brian 
+	reports success with some of the more difficult species/tolerance
+	values with this allowance.
 	'''
-	MAX_TRIES_AT_NB=100
+	MAX_TRIES_AT_NB=10000
 
 	'''
 	2017_08_04.  New parameter the class object usess
