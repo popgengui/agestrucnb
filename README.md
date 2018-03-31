@@ -34,13 +34,13 @@ current compatible python versions
 
 	2. python 2.7 Note that python 3 is the recommended environment, since 2.7 requires building
 	    an older version of SimuPop, which can be difficult, especially in Windows (see
-	    the Dependancies and Installation sections, below.) the above are the python
+	    the dependancies and installation sections, below.) the above are the python
 	    versions on which the program was developed and tested.  other versions may
 	    work, too.
 
 os-comaptibility
 -----------------
-	1. Linux. the program has been run on linux (ubuntu 16.04).
+	1. Linux. the program has been run on Linux (ubuntu 16.04).
 
 	2. OS X. The program has been run successfully on OS X, v10.13 (High Sierra).
 
@@ -91,7 +91,7 @@ dependencies
 
 		vii. natsort
 
-Installation  
+installation  
 ------------
 	1. Download the configuration files, README.md file (this file), and manual from 
 	   https://github.com/popgengui/agestrucne/tree/data.  On the web page you will see
@@ -214,8 +214,65 @@ Installation
 			    the same as (iii), but, after you've installed simuPOP, then
 			    use the method (ii) instructions to download the program
 			    source and intall with the setup.py module.
+
+			v.  If you can't install our program with pip or setup.py.
+			    
+			    We have seen some older python installations whose setup tools are 
+			    not compatible with the setup.py we currently use.  In those cases,
+			    you can use pip to install the dependancy packages (see the dependancies
+			    section above), then download the master branch of our github
+			    repository at https://github.com/popgengui/agestrucne. You can
+			    run the program directly using a terminal from the downloaded directories using 
+			    the applicable one of these methods: 
+
+				a. In Windows, with an Anaconda distribution of python, open an 
+				   Anaconda prompt and use cd, to move into the outermost "agestrucne" 
+				   folder in the github repository you downloaded.  
+				   Then, type these commands:				   
+
+					set PYTHONPATH=%PYTHONPATH%;%cd%
+					set NEPATH=%cd%\agestrucne
 				
-Starting the program
+				   Now, you can cd into any folder you'd like and execute the
+				   program with:
+					
+					python %NEPATH%\negui.py
+				
+				   You can also invoke the console-based
+				   modules, pgdrivesimulation.py and pgdriveneestimation.py using
+					
+					python %NEPATH%\<module name>	
+				
+				b. In Windows with a non-Anaconda python distribution, use a DOS command
+				   prompt and use the same procedure as above in (a).  However, just
+				   typing "python" may fail if your distrubution does not add python
+				   to your console's environmental variables.  If so, 
+				   when you issue a python command, you may need to fully type the
+				   path to your python executable, where ever your disribution places
+				   it during the installation.	
+
+				c. In linux you can open a terminal and cd into the outermost
+				   "agestrucne" directory of the programs github directories.
+				   Then you can type the following command:
+					
+					PYTHONPATH=$PYTHONPATH:$(pwd); export PYTHONPATH; NEPATH=$(pwd)/agestrucne 	
+				   
+				    This terminal will then be able to execute the program interface
+				    or the console-based modules from any directory by typing
+
+					python $NEPATH/<module name>	
+
+				    where <module name> is negui.py, pgdrivesimulation.py, or
+				    pgdriveneestimation.py
+
+			   Note that with this method that uses the uninstalled modules, the PYTHONPATH and
+		    	   NEPATH variables will need to be set every time you open a new console to
+			   run the program. If you are conversant with setting environmental
+			   variables for your user environment, you can add the agestrucne path to 
+			   the PYTHONPATH path, and NEPATH to your enviroment so that they are available 
+			   automatically when you open a console windows.
+				
+starting the program
 --------------------
 
 	1. From terminal in Linux or OS X, or  an Anaconda
@@ -240,7 +297,7 @@ Starting the program
 		B. Command "pgdriveneestimator.py" performs LDNe estimations
 		   from the terminal, as specified in the user manual.
 
-Using the program	
+using the program	
 -----------------
 
 	To run a simulation, calculate Nb or Ne estimates, or plot results, load one
