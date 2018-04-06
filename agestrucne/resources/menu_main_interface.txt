@@ -7,10 +7,11 @@ menu_underline=0
 #which accelorator key for the menu:
 menu_accelerator="\"\""
 #which character to underline on the item
-label=[ "Add new simulation", "Add new Nb estimation", "Add new plotting interface", "Add new boxplot interface", "Add new regress plot interface" ]
-underline=[ 8, 8, 8, 8, 8 ]
-accelerator=[ "Ctrl+S", "Ctrl+N", "Ctrl+P", "Ctrl+B", "Ctrl+R" ]
-command=[ "addPGGuiSimupop", "addPGGuiNeEstimation" , "addPGGuiViz", "addPGNeBoxplot", "addPGNeRegressPlot" ]
+#2018_04_05. We are no longer offering the original plotting interface, so we remove it from the lists:
+label=[ "Add new simulation", "Add new Nb estimation", "Add new boxplot interface", "Add new regress plot interface" ]
+underline=[ 8, 8, 8, 8 ]
+accelerator=[ "Ctrl+S", "Ctrl+N", "Ctrl+B", "Ctrl+R" ]
+command=[ "addPGGuiSimupop", "addPGGuiNeEstimation" , "addPGNeBoxplot", "addPGNeRegressPlot" ]
 
 #Close menu
 [Close]
