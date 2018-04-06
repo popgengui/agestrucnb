@@ -402,18 +402,12 @@ if __name__ == "__main__":
 													"--hetinitsnp", "--nummsats", "--hetinitmsat" ]
 
 
-	s_chelp="configuration file.  Typically one of the files in the \"resources\\simulation\" " \
-							+ "subdirectory of the main program directory, and with a name ending in " \
-							+ "\"conf.with.model.name\", or a *.conf file written by our program " \
-							+ "after a simulation has been run."
+	s_chelp="configuration file.  Typically one of the files in the \"configuration_files\" " \
+							+ "subdirectory of the program's gihub data branch release.  " \
+							+ "You can also load any *conf file produced by a prior run,"
 
-	s_lhelp="life table file.  You can typically find the life table that matches your " \
-						+ "configuration files \"model\" entry (e.g. wfrog, grizzley) in the " \
-						+ "\"resources\" subdirectory inside the programs main directory. "\
-						+ "The life table files have names ending with \"life table info.\"  " \
-						+ "You can use \"none\" in place of the life table file name " \
-						+ "if the configuration file was written by a run of our " \
-						+ "program (i.e. has all the needed parameter settings)."
+	s_lhelp="life table file.  For configuration files that lack life table information,  This parameter is now " \
+				+ "usually not needed.  Please use \"none\" for its value. "
 
 	s_ohelp="file giving the base name for output files (resulting files will have extensions " \
 																		+ "*.genepop and *.conf)."
@@ -468,7 +462,8 @@ if __name__ == "__main__":
 	s_ehelp="Number of SNPs.  Set the number of SNPs for the simulation.  This value will replace the \"numSNPs\" value " \
 				+ "in the configuration file."
 	
-	s_Hhelp="Initial expected heterozygosity for SNPs.  This value will replacde the \"init_het_snp\" value in the configuration file."
+	s_Hhelp="Initial expected heterozygosity for SNPs.  This value will replace the \"init_het_snp\" value in the configuration file.  " \
+				+ "Values are valid in the interval (0.0,0.5]."
 
 	s_Mhelp="Number of mirosats.  Set the number of microsatellites for the simulation.  This value will replace the \"numMSats\" " \
 			 	+ "value in the configuration file."

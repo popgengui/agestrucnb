@@ -158,6 +158,11 @@ class PGOpSimuPop( modop.APGOperation ):
 				replicates (see warning in __createSinglePop).  This avoids
 				the gui producing a series of blocking warning windows, one
 				for each replicate, restating the warning.
+				2018_04_01. Although we leave this parameter in the
+				list, it is no longer needed since we changed
+				the behavior of this class to no longer use GUI error
+				messageing, to avoid blocking runs indef when use is
+				not present to click on the error.
 			i_output_mode.  This param was added 2017_08_04 to speed up
 				the output and skip writing the *gen *db and *sim files used
 				by Tiago in his original pipeline.  
@@ -272,19 +277,24 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		self.min_het_filter_greater_than_current_pop_het=False
 
-		
-		if self.__write_nb_and_age_count_files:
-			s_nb_values_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
-			s_age_counts_file_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "age_counts" ]
-
-			self.__file_for_nb_records=open( self.output.basename + s_nb_values_ext, 'w' )
-			self.__file_for_age_counts=open( self.output.basename + s_age_counts_file_ext, 'w' )
-
-			s_header="\t".join( [ "generation" ] \
-						+ [ "age" + str( idx ) for idx \
-							in range( 1, self.__total_ages_for_age_file + 1 ) ] )
-
-			self.__file_for_age_counts.write( s_header + "\n" )
+		'''
+		2018_04_01. The if block opening sim_nb_estimates and age_counts files if
+		the flag to write  then is True, has been moved to def prepareOp, in order
+		to now include the replicate number in their names (see the outbase is 
+		tagged with a replicate number in def prepareOp)
+		'''
+#		if self.__write_nb_and_age_count_files:
+#			s_nb_values_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
+#			s_age_counts_file_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "age_counts" ]
+#
+#			self.__file_for_nb_records=open( self.output.basename + s_nb_values_ext, 'w' )
+#			self.__file_for_age_counts=open( self.output.basename + s_age_counts_file_ext, 'w' )
+#
+#			s_header="\t".join( [ "generation" ] \
+#						+ [ "age" + str( idx ) for idx \
+#							in range( 1, self.__total_ages_for_age_file + 1 ) ] )
+#
+#			self.__file_for_age_counts.write( s_header + "\n" )
 		#end if we are to write age counts and pwop nb values to file
 
 		'''
@@ -303,6 +313,15 @@ class PGOpSimuPop( modop.APGOperation ):
 		latter:
 		'''
 		self.__generator_called_by_restricted_generator=None
+
+		'''
+		2018_04_01.  We add this member attribute to be assigned in
+		def __restrictedGenerator, and used in def __outputAge, when
+		the flag __write_nb_and_age_count_files is True, to record
+		the pwop Nb to file when (and only when) the pop is also being
+		written.
+		'''
+		self.__current_pwop_nb=None
 		
 		return
 	#end __init__
@@ -415,6 +434,30 @@ class PGOpSimuPop( modop.APGOperation ):
 			#end if VERY_VERBOSE
 
 			self.output.basename=s_basename_without_replicate_number + s_tag_out
+
+			'''
+			2018_04_01.  This if block was moved here from the __init__ def,
+			so that the sim_nb_estimates and age_counts file name will include
+			the replicate number.  Formerly, because these files were meant only to be
+			recorded on replicate 1, we put no replicate number in their names.  Now,
+			in case we want to write these for each replicate, we want to name and 
+			open then after have ing appended the replicate s_tag_out to the bsic
+			output file base name.
+			'''
+			if self.__write_nb_and_age_count_files:
+				s_nb_values_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
+				s_age_counts_file_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "age_counts" ]
+
+				self.__file_for_nb_records=open( self.output.basename + s_nb_values_ext, 'w' )
+				self.__file_for_age_counts=open( self.output.basename + s_age_counts_file_ext, 'w' )
+
+				s_header="\t".join( [ "generation" ] \
+							+ [ "age" + str( idx ) for idx \
+								in range( 1, self.__total_ages_for_age_file + 1 ) ] )
+
+				self.__file_for_age_counts.write( s_header + "\n" )
+			#end if we are to write age counts and pwop nb values to file
+
 
 			if self.__output_mode == PGOpSimuPop.OUTPUT_ORIG:
 				self.output.openOut()
@@ -934,12 +977,19 @@ class PGOpSimuPop( modop.APGOperation ):
 		#we want to notify the user:
 		if not ( b_filter_range_still_achievable ):
 			s_pop_number=str( pop.dvars().gen ) 
+			
+			'''
+			2018_04_01. Added to let user know what the
+			mean het value was, to compare with their
+			filter minimum.
+			'''
+			f_mean_expected_het=self.__get_mean_heterozygosity_over_all_loci( pop )
 
 			s_msg="The simulation's current pop, number " \
 					+ s_pop_number \
 					+ ", has an expected " \
 					+ "heterozygosity less than the minimum, " \
-					+ str( self.min_mean_heterozygosity )  \
+					+ str( f_mean_expected_het )  \
 					+ ", as set in the heterozygosity filter.  " \
 					+ "With no mutation rate and/or no microsats, " \
 					+ "the program currently stops the simulation, " \
@@ -1313,19 +1363,17 @@ class PGOpSimuPop( modop.APGOperation ):
 				For comparing Nb values as calculated
 				(and accepted) on the pops as generated by simuPop, 
 				to those created downstream by NeEstimator.
+
+				Note 2018_04_01.  The if block that was here and
+				tested the __write_nb_and_age_count_files flag, 
+				and if true writes the pwop nb to file has been 
+				moved to __outputAge, so now we simply record it:
+				The move reduced the number of these values written
+				by restricting them to those pops also being written
+				to output in the genepop file.
 				'''
-				if self.__write_nb_and_age_count_files:
-					s_thisNb=str( nb )
-					s_thisgen=str( pop.dvars().gen ) 
-					self.__file_for_nb_records.write( \
-							"\t".join( [ s_thisgen, s_thisNb ] ) \
-							+ "\n" )
-					'''
-					Added 2017_08_24 to allow constantly updated plotting
-					in PGGuiSimuPop instances.
-					'''
-					self.__file_for_nb_records.flush()
-				#end if we are to write the nb value file
+				self.__current_pwop_nb = nb	
+
 
 				nbOK = True
 
@@ -1912,6 +1960,29 @@ class PGOpSimuPop( modop.APGOperation ):
 				#end if not het filter in effect, else test
 			#end if output mode is genepop only, check whether het filter
 
+			'''
+			For comparing Nb values as calculated
+			(and accepted) on the pops as generated by simuPop, 
+			to those created downstream by NeEstimator.
+			2018_04_01.  We moved this if block from __restrictedGenerator
+			so that the only pwop nbs written correspond to pops
+			that are also being written to output file (genepop, or
+			the old output file collection).
+			'''
+			if self.__write_nb_and_age_count_files:
+				s_thisNb=str( self.__current_pwop_nb )
+				s_thisgen=str( gen ) 
+				self.__file_for_nb_records.write( \
+						"\t".join( [ s_thisgen, s_thisNb ] ) \
+						+ "\n" )
+				'''
+				Added 2017_08_24 to allow constantly updated plotting
+				in PGGuiSimuPop instances.
+				'''
+				self.__file_for_nb_records.flush()
+			#end if we are to write the nb value file
+
+
 			for i in pop.individuals():
 				'''
 				2017_08_04. I'm adding a new output mode, to 
@@ -2218,7 +2289,6 @@ class PGOpSimuPop( modop.APGOperation ):
 									sexMode=(sp.PROB_OF_MALES, self.input.maleProb)), weight=1),
 									sp.CloneMating(subPops=mySubPops, weight=-1) ],
 								subPopSize=self.__calcDemo )
-
 
 		##### Code Remm'd out
 		'''

@@ -68,7 +68,11 @@ class PGNeEstimationBoxplotInterface( object ):
 						'loci_sample_value',
 						'loci_replicate_number' ]
 
-	Y_AXIS_VALUE_COLUMNS=[ 'ne_est_adj', '95ci_low', '95ci_high', 'est_ne'  ]
+	'''
+	2018_04_04.  We add new tsv colums 95ci_low_adj and 95ci_high_adj to our
+	available columns for the y axis values
+	'''
+	Y_AXIS_VALUE_COLUMNS=[ 'ne_est_adj', '95ci_low_adj', '95ci_high_adj', 'est_ne', '95ci_low', '95ci_high'   ]
 
 	VALUE_FILTERABLE_COLUMNS=[ 'original_file','replicate_number',
 								'loci_replicate_number','sample_value', 

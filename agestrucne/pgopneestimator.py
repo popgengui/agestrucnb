@@ -263,21 +263,30 @@ class PGOpNeEstimator( APGOperation ):
 		#end if non-tmp name
 		
 		ls_files=pgut.get_list_file_objects( s_temp_dir )
+		ls_directories=pgut.get_list_subdirectories( s_temp_dir )
 
-		i_num_subdirs=len( pgut.get_list_subdirectories( s_temp_dir ) )
+		i_num_subdirs=len( ls_directories  )
 		i_num_files=len( ls_files )
 
 		#Abort if path looks wrong:				
 		if i_num_subdirs > NUMBER_SUBDIRS_EXPECTED \
-				or i_num_files >= SUSPICOUSLY_HIGH_FILE_COUNT:
-				s_msg="in PGOpNeEstimator instance, " \
-							+ "def __remove_temporary_directory_and_all_its_contents, " \
-							+ "temp dir: " + s_temp_dir \
-							+ ", not able to remove temp directory " \
-							+ "due to unexpectedly high " \
-							+ "file count, " + str( i_num_files )  \
-							+ ", and/or subdirectory count, " + str(i_num_subdirs ) + "."
-				raise Exception( s_msg )
+						or i_num_files >= SUSPICOUSLY_HIGH_FILE_COUNT:
+			s_msg="in PGOpNeEstimator instance, " \
+						+ "def __remove_temporary_directory_and_all_its_contents, " \
+						+ "temp dir: " + s_temp_dir \
+						+ ", not able to remove temp directory " \
+						+ "due to unexpectedly high " \
+						+ "file count, " + str( i_num_files )  \
+						+ ", and/or subdirectory count, " + str(i_num_subdirs ) + "."
+
+			'''
+			2018_04_02. For easier debugging, we add the file and subdirectory lists 
+			to the error message. 
+			'''
+			s_msg += "  Subdirectory names: " + str( ls_directories ) \
+					+ ".  File names: " + str( ls_files ) + "." 
+
+			raise Exception( s_msg )
 		#end if dir/file counts look wrong
 
 		#Abort if any file name looks wrong

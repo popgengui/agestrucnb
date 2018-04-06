@@ -480,6 +480,19 @@ in the given entry.
 '''
 COL_NAME_HET_VALUE="mean_het"
 
+'''
+2018_04_04.  Requested by Brian and Gordon,
+we add bias adjusted low and high CI, by
+applying the same transorm to the 95ci_low 
+and 95ci_high columns that we are already
+applying to the "est_ne" to get the "ne_est_adj"
+column's value.
+'''
+COL_NAME_NEESTIMATOR_CI_HI="95ci_high"
+COL_NAME_NEESTIMATOR_CI_LOW="95ci_low"
+COL_NAME_BIAS_ADJUSTED_CI_HI="95ci_high_adj"
+COL_NAME_BIAS_ADJUSTED_CI_LOW="95ci_low_adj"
+
 
 '''
 2017_04_20.  For comparing floating point values to zero.
@@ -1019,7 +1032,7 @@ def parse_args( *args ):
 						+ "the value for the nb/ne ratio cannot " \
 						+ "be cast as a float type.  Value: " \
 						+ s_nbne_ratio + "."
-			raise Exeption( s_msg )
+			raise Exception( s_msg )
 		#end try ... except
 	#end if nb/ne ratio value is none else cast as float
 
@@ -1170,7 +1183,15 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator,
 	estimate.  Otherwise, we 
 	'''
 
-	s_bias_adjusted_value="None"
+	s_bias_adjusted_ne_value="None"
+
+	'''
+	2018_04_04.  We add adjustments to CIs:
+	'''
+
+	s_bias_adjusted_ne_value="None"
+	s_bias_adjusted_ci_hi_value="None"
+	s_bias_adjusted_ci_low_value="None"
 
 
 	'''
@@ -1186,14 +1207,32 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator,
 	i_col_ne_est=\
 				o_ne_estimator.getOutputColumnNumberForFieldName( \
 											COL_NAME_NEESTIMATOR_NE_ESTIMATE )
+	'''
+	2018_04_04.  We are adding adjusted values for the
+	high and low jackknifed CI values.
+	'''
+	i_col_ci_hi=o_ne_estimator.getOutputColumnNumberForFieldName( \
+											COL_NAME_NEESTIMATOR_CI_HI )
+
+	i_col_ci_low=o_ne_estimator.getOutputColumnNumberForFieldName( \
+											COL_NAME_NEESTIMATOR_CI_LOW )
 
 	f_unadjusted_estimate=float( lv_results_list[ i_col_ne_est ] )
+	f_ci_hi=float( lv_results_list[ i_col_ci_hi ] )
+	f_ci_low=float( lv_results_list[ i_col_ci_low ] )
 
 	if f_nbne_ratio is not None:
+
 		f_adj_estimate=do_ldne_bias_adjustment( f_unadjusted_estimate,
 															f_nbne_ratio )
+		f_ci_hi_adjusted=do_ldne_bias_adjustment( f_ci_hi,
+														f_nbne_ratio )
+		f_ci_low_adjusted=do_ldne_bias_adjustment( f_ci_low,
+														f_nbne_ratio )
 
-		s_bias_adjusted_value=str( round( f_adj_estimate, 3 ) ) 
+		s_bias_adjusted_ne_value=str( round( f_adj_estimate, 3 ) ) 
+		s_bias_adjusted_ci_hi_value=str( round( f_ci_hi_adjusted, 3 ) ) 
+		s_bias_adjusted_ci_low_value=str( round( f_ci_low_adjusted, 3 ) ) 
 	else:
 		'''
 		2017_02_15.  Instead of writing "None" as the bias-adjusted estimate, 
@@ -1204,10 +1243,12 @@ def get_string_values_ldne_ratio_and_bias_adjustment( o_ne_estimator,
 		he does not have to use conditional language to find 
 		his Ne estimate.
 		'''
-		s_bias_adjusted_value=str( f_unadjusted_estimate )
+		s_bias_adjusted_ne_value=str( f_unadjusted_estimate )
+		s_bias_adjusted_ci_hi_value=str( f_ci_hi )
+		s_bias_adjusted_ci_low_value=str( f_ci_low  )
 
 	#end if we have a nb/ne ratio, do bias adjustment 
-	return str( f_nbne_ratio ), s_bias_adjusted_value
+	return str( f_nbne_ratio ), s_bias_adjusted_ne_value, s_bias_adjusted_ci_hi_value, s_bias_adjusted_ci_low_value
 #end get_string_values_ldne_ratio_and_bias_adjustment
 
 def get_nbne_ratio_from_genepop_file_header( o_genepopfile ):
@@ -1376,7 +1417,7 @@ def do_estimate(xxx_todo_changeme ):
 				is done on a per-original-genepop file basis in def run_estimator.
 				'''
 
-				s_ratio_used_for_adjustment, s_bias_adjusted_value=\
+				s_ratio_used_for_adjustment, s_bias_adjusted_ne_value, s_bias_adjusted_ci_hi_value, s_bias_adjusted_ci_low_value=\
 							get_string_values_ldne_ratio_and_bias_adjustment( \
 																	o_ne_estimator,
 																	lv_output,
@@ -1384,7 +1425,9 @@ def do_estimate(xxx_todo_changeme ):
 
 				
 				ls_fields_to_report.append( s_ratio_used_for_adjustment )
-				ls_fields_to_report.append( s_bias_adjusted_value )
+				ls_fields_to_report.append( s_bias_adjusted_ne_value )
+				ls_fields_to_report.append( s_bias_adjusted_ci_low_value )
+				ls_fields_to_report.append( s_bias_adjusted_ci_hi_value )
 				ls_fields_to_report.append( s_this_het )
 				ls_stdout.append( OUTPUT_DELIMITER.join(  ls_runinfo + ls_fields_to_report )  )
 
@@ -2882,7 +2925,13 @@ def write_header_main_table( IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP, o_main_outf
 
 	ls_reported_fields.append( COL_NAME_NBNE_RATIO_FOR_BIAS_ADJUST )
 	ls_reported_fields.append( COL_NAME_BIAS_ADJUSTED_LDNE )
-
+	'''
+	2018_04_04.  We add hi and low CI values adjusted using the
+	same tranform as that used to get the LDNe estimate bias 
+	adjustment.
+	'''
+	ls_reported_fields.append( COL_NAME_BIAS_ADJUSTED_CI_LOW )
+	ls_reported_fields.append( COL_NAME_BIAS_ADJUSTED_CI_HI )
 	'''
 	2017_06_30.  We add a het calc value to the tsv:
 	'''

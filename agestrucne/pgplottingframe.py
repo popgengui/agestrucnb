@@ -218,7 +218,18 @@ class PGPlottingFrame( Frame ):
 		HIGH_LABEL_COUNT_MARGIN_ADJ=0.2
 
 		li_rotation_by_length=[ NO_ROTATION for i_length in range( SHORT_LABEL ) ]
-		li_rotation_by_length += [ HALF_ROTATION for i_length in range( SHORT_LABEL + 1, MAX_LABEL_LEN + 1 ) ]
+		li_rotation_by_length += [ HALF_ROTATION for i_length 
+								in range( SHORT_LABEL + 1, MAX_LABEL_LEN + 1 ) ]
+
+		'''
+		2018_04_03.  Need to adjust alignment of xtick labels.  Currently
+		always 'right' justification, but when labels are not rotated,
+		we need to center them:
+		'''
+		s_xtick_label_alignment='right'
+		ls_alignment_by_length= [ 'center' for i_length in range( SHORT_LABEL ) ]
+		ls_alignment_by_length += [ 'right' for i_length \
+								in range( SHORT_LABEL + 1, MAX_LABEL_LEN + 1 ) ]
 
 		'''
 		Convenience local def:
@@ -237,9 +248,11 @@ class PGPlottingFrame( Frame ):
 		if i_len_longest_label > MAX_LABEL_LEN:
 			self.__bottom_margin_adjustment=HIGH_X_MARGIN_ADJUST
 			self.__xtick_rotation_angle=SLIGHT_ROTATION
+			s_xtick_label_alignment='right'
 		else:
 			self.__bottom_margin_adjustment=NORMAL_X_MARGIN_ADJUST
 			self.__xtick_rotation_angle=li_rotation_by_length[ i_len_longest_label - 1 ]
+			s_xtick_label_alignment=ls_alignment_by_length[ i_len_longest_label - 1 ]
 		#end if length longer than max, else not
 
 		if len( ls_labels ) >= HIGH_LABEL_COUNT:
@@ -255,7 +268,7 @@ class PGPlottingFrame( Frame ):
 
 		o_xticklabels=self.__figure.get_axes()[0].set_xticklabels( 
 														ls_labels, 
-														rotation = self.__xtick_rotation_angle, ha="right")
+														rotation = self.__xtick_rotation_angle, ha=s_xtick_label_alignment )
 		return
 	#end set_x_axis_margin_and_xtick_rotation
 
