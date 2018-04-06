@@ -90,9 +90,15 @@ class NeEstimationTableFileManager(object):
 	2017_10_07. These are added for clients who need
 	to show users self-explanatory column names, rather
 	than those used in the tsv file.
+
+	Changing alias for column "pop" from "pop" to "cycle",
+	at the request of brian hand, who wanted it especially
+	for the regression plot, on his idea that the regression
+	is over "time-steps" (generations of populations).
 	'''
+
 	COLUMN_NAME_ALIASES_BY_COLUMN_NAME={ 'original_file':'genepop file',
-						'pop':'pop',
+						'pop':'cycle',
 						'census':'total indiv',
 						'indiv_count':'total indiv sampled',
 						'sample_value':'pop subsample value',
@@ -112,10 +118,12 @@ class NeEstimationTableFileManager(object):
 						'alt_ci_high':'alternate high 95% CI',
 						'nbne':'Nb/Ne',
 						'ne_est_adj':'adjusted LDNe estimation',
+						'95ci_low_adj':'adjusted low 95% CI',
+						'95ci_high_adj':'adjusted high 95% CI',
 						'mean_het':'pop mean expected heterozygosity' }
 		
 	COLUMN_NAMES_BY_ALIAS={ 'genepop file':'original_file',
-						'pop':'pop',
+						'cycle':'pop',
 						'total indiv':'census',
 						'total indiv sampled':'indiv_count',
 						'pop subsample value':'sample_value',
@@ -135,6 +143,8 @@ class NeEstimationTableFileManager(object):
 						'alternate high 95% CI':'alt_ci_high',
 						'Nb/Ne':'nbne',
 						'adjusted LDNe estimation':'ne_est_adj',
+						'adjusted low 95% CI':'95ci_low_adj',
+						'adjusted high 95% CI':'95ci_high_adj',
 						'pop mean expected heterozygosity':'mean_het' }
 
 	'''

@@ -91,32 +91,43 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 												b_use_gui_messaging=True, 
 												i_output_mode=pgsim.PGOpSimuPop.OUTPUT_GENEPOP_ONLY ):
 	'''
-	necessitated by fact that python2 (and 3?) was not able to pickle 
-	a class-instance def to be used to run replicates of the pgopsimupop
-	doOp().  Python also failed to pickle SWIG-based code used in Simupop.
-	Thus the better design, in which  multiprocessing Pools would stay  encapsulated 
-	inside a class object seem problematic, though may be implement-able using 
-	reg_copy -- but I'm not confident in state of regcopy of imported simuPop code,
-	and so  I think is the safer solution, though it
-	does create a depandancy of the pgguisimupop object on this outside def.  
+	necessitated by fact that python2 (and 3?) was not able to pickle a
+	class-instance def to be used to run replicates of the pgopsimupop doOp().
+	Python also failed to pickle SWIG-based code used in Simupop.  Thus the
+	better design, in which  multiprocessing Pools would stay  encapsulated
+	inside a class object seem problematic, though may be implement-able using
+	reg_copy -- but I'm not confident in state of regcopy of imported simuPop
+	code, and so  I think is the safer solution, though it does create a
+	depandancy of the pgguisimupop object on this outside def.  
 
 	Note that this def runs a simupop operation using all the param values as
 	given in the config file arg, except for the "reps" attribute, with is reset to 1,
 	whatever the value in the configuration file.
 
-	Tue Jul 26 22:01:07 MDT 2016
-	updated to be called by a driver that creates a new OS process, then calls this def to do the replicate.  No longer
-	uses the dv_input_parm_values_by_attribute, but instead relies on reading a complete and up-to-date (i.e. all values
-	as changed or edited on the gui interface) configuration files (that includes the "life table" params).
+	Tue Jul 26 22:01:07 MDT 2016 updated to be called by a driver that creates
+	a new OS process, then calls this def to do the replicate.  No longer uses
+	the dv_input_parm_values_by_attribute, but instead relies on reading a
+	complete and up-to-date (i.e. all values as changed or edited on the gui
+	interface) configuration files (that includes the "life table" params).
 
-	2017_05_30. Added def param b_use_gui_messaging with default value True, to accomodate new
-	module pgdrivesimulation.py which needs to call with False, to avoid gui messaging in
-	a server setting.
+	2017_05_30. Added def param b_use_gui_messaging with default value True, to
+	accomodate new module pgdrivesimulation.py which needs to call with False,
+	to avoid gui messaging in a server setting.
 	'''
 
 	s_tag_out=""
 
 	NUMBER_FIRST_REPLICATE=1
+
+	'''
+	2018_04_05. For some of the testing and figures used in the manuscript for
+	the program note, we set this to True, and for each pop output, we get the
+	pwop-based Nb value for the pop written to a file, and we also get the
+	totals for each age class written to a file.  If set to False, the default
+	behavior is to write these files only for replicate 1
+	of the simulation.
+	'''
+	ALWAYS_WRITE_NB_AND_AGE_TABLES=False
 
 	'''
 	As of 2016_08_23 the *sim, *gen, *db files
@@ -133,7 +144,6 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 
 	if i_replicate_number is not None:
 		s_tag_out=pgut.SIMULATION_OUTPUT_FILE_REPLICATE_TAG + str( i_replicate_number )
-
 	#end if rep number is not none
 
 	'''
@@ -160,17 +170,26 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	#we only write the configuraton file if the replicate number is 1:
 	if i_replicate_number == NUMBER_FIRST_REPLICATE:
 		b_write_conf_file=True
-		'''
-		2017_04_07.  These are files that, as the sim proceeds,
-		write two tables, one giving the pwop Nb values, the 
-		other giving a per-age cound of individuals for each pop.
-
-		These were intitially temporoary included files for testing,
-		but are useful enought to warrant inclusion in the output,
-		at least for the first replicate.
-		'''
-		b_write_nb_and_age_tables=True
 	#end if first replicate number
+
+	'''
+	2017_04_07.  These are files that, as the sim proceeds,
+	write two tables, one giving the pwop Nb values, the 
+	other giving a per-age cound of individuals for each pop.
+	These were intitially temporoary included files for testing,
+	but are useful enought to warrant inclusion in the output,
+	at least for the first replicate.
+
+	2018_04_01.  We move the setting of the b_write_nb_and_age_tables
+	flag from the above test to write the conf file, to the following,
+	so that we can write them for every replicate just by setting the
+	constant in this def:
+	'''
+
+	if i_replicate_number == NUMBER_FIRST_REPLICATE \
+				or ALWAYS_WRITE_NB_AND_AGE_TABLES==True:
+		b_write_nb_and_age_tables=True
+	#end if we should wtie nb and age tables	
 
 	#reset reps to 1
 	#as we are executing only one
@@ -255,7 +274,6 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 	pgdrivesimulation.py), and set the flag to false, without having to
 	revise the call from the GUI pgguisimupop.py.
 
-
 	'''	
 
 	'''	
@@ -264,7 +282,6 @@ def do_simulation_reps_in_subprocesses( o_multiprocessing_event,
 	simulation setup and execution code. When we catch exceptions 
 	below, we send an error message to a gui message box, then
 	re-raise the exception.	
-
 	 
 	2017_08_07.  I've added the params i_output_mode and s_pop_het_filter_string,
 	to allow callers to this def to set these new parameters in the PGOpSimuPop
@@ -460,6 +477,7 @@ def remove_simulation_replicate_output_files( s_basename ):
 
 	#type is to coerce python 3, despite fact that any iterable
 	#would probably suffice:
+
 	ls_output_extentions=list( \
 			pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS.values() )
 
@@ -472,7 +490,13 @@ def remove_simulation_replicate_output_files( s_basename ):
 	s_age_counts_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "age_counts" ]
 	s_sim_nb_vals_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
 
-	ls_non_replicate_extensions=[ s_age_counts_ext, s_sim_nb_vals_ext ]
+	'''
+	2018_04_01.  We have added the replicate number to both the
+	age_counts and the sim_nb_estimates files, so we rem this out
+	and leave the non-rep ext list empty
+	'''
+	#ls_non_replicate_extensions=[ s_age_counts_ext, s_sim_nb_vals_ext ]
+	ls_non_replicate_extensions=[]
 
 	for s_ext in ls_output_extentions:
 		s_unzipped_file_pattern=None	

@@ -88,6 +88,7 @@ class PGOutputNeEstimator( object ):
 			s_msg="In PGOutputNeEstimator instance, def __init__, " \
 						+ "caller passed unknown estimator name: " \
 						+ s_estimator_name + "."
+
 			raise Exception( s_msg )
 
 		elif self.__estimator ==  ESTIMATOR_NEESTIMATOR \
@@ -98,10 +99,14 @@ class PGOutputNeEstimator( object ):
 						+ " as for LDNe estimations, " \
 						+ " but this module has its __REQUIRE_PYGENOMICS__ " \
 						+ " flag set to false."
+
 			raise Exception( s_msg )
+
 		#end  if unknown estimator, or if neestimator but no pygenomics
 
 		self.__validate_filenames()
+
+		return
 
 	#end __init__
 
@@ -250,6 +255,7 @@ class PGOutputNeEstimator( object ):
 				i_estimate_count+=1
 			#end for each case
 		#end for each estimation type
+		return
 	#end def __set_parsed_output_attribute_using_ne_estimator_data
 
 	def parseOutput( self ):
