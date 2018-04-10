@@ -495,8 +495,11 @@ def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt",
     s_score_vctr= []
 
     Uncountable = 0
+    negativeCount=0
+    zeroCount=0
+    positiveCount=0
     for recordKey in list(table.keys()):
-
+	print(recordKey)
         record = table[recordKey]
         slope, intercept, confidence  = slope_confidence(confidenceAlpha, record)
 
@@ -510,12 +513,22 @@ def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt",
         else:
             alpha_vctr.append(-1)
 
+
         #get std dev estimate
         s_val = calculate_s_score(record)
         s_score_vctr.append(s_val)
         t_star = old_div(slope,s_val)
         #calculate p value DF = num points-2
         p_score = stats.t.sf(t_star,len(record)-2)
+        #calculate significant from CDF(p-value)
+        alpha_check = 1-(abs(p_score-0.5)*2)
+        if confidenceAlpha > alpha_check:
+            if slope > 0:
+                positiveCount+=1
+            else:
+                negativeCount+=1
+        else:
+            zeroCount+=1
 
         #Ted edit 2017_05_12. For python3, we have to cast the confidence tuple 
         #as a string. Looks like py3 provides no tuple handling in the format 
@@ -531,18 +544,16 @@ def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt",
     meanSlope = mean(slopeVctr)
     medSlope = median(slopeVctr)
     averageSscore = mean(s_score_vctr)
-    negativeCount=0
-    zeroCount=0
-    positiveCount=0
+
 
     #change for alpha test
-    for value in alpha_vctr:
-        if value>0:
-            positiveCount+=1
-        elif value<0:
-            negativeCount+=1
-        else:
-            zeroCount+=1
+    #for value in alpha_vctr:
+    #    if value>0:
+    #        positiveCount+=1
+    #    elif value<0:
+    #        negativeCount+=1
+    #    else:
+    #        zeroCount+=1
     # for cI in confidenceVctr:
     #     if cI[0] > significantValue:
     #            positiveCount += 1

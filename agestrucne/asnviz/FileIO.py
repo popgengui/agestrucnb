@@ -67,8 +67,9 @@ def scrapeNE(filename, firstVal=0,popSub = 0, lociSub = 0,lastVal = 0):
         minError = float(item['95ci_low'])
         subpopReplicate = return_float_or_string(item['replicate_number'])
         lociPopReplicate = return_float_or_string(item['loci_replicate_number'])
-
-        sourceName = (sourceName,subpopReplicate,lociPopReplicate)
+        subpopCount = return_float_or_string(item['sample_value'])
+        lociPopCount = return_float_or_string(item['loci_sample_value'])
+        sourceName = (sourceName,subpopCount,subpopReplicate,lociPopCount,lociPopReplicate)
         # if neEst == "NaN":
         #    neEst = sys.maxint
         if not sourceName in dataDict:
