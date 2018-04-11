@@ -33,6 +33,9 @@ class PGRegressTableTextFrame( Frame ):
 							i_text_widget_width=40, 
 							i_text_widget_height=20,
 							b_file_name_only_in_stats_table_col_1=True ):
+		'''
+		Arg o_regress_table is an instance of PGRegressionStats.
+		'''
 
 		Frame.__init__( self, o_master )		
 

@@ -100,7 +100,15 @@ class PGRegressionStats( object ):
 		'''
 		PRECISION=3
 		STATS_TABLE_DELIM="\t"
-		BULLET=u'\u2022'
+
+		'''
+		2018_04_11.  Using the bullet character causes some OS 
+		python installs to throw  the unicode-to-ascii error, 
+		but not in others. Here I take the lazy way out by using 
+		an asterisk instead.
+		'''
+#		BULLET=u'\u2022'
+		BULLET="*"
 		BULLET_INDENTED="    " + BULLET + " "
 
 		s_return=None
@@ -130,7 +138,19 @@ class PGRegressionStats( object ):
 			s_score_vctr=[]
 
 			Uncountable = 0
+			'''
+			2018_04_11.  Revisions as posted by Brian T to
+			repository today or yesterday.
+			'''
+			negativeCount=0
+			zeroCount=0
+			positiveCount=0
+			'''
+			end revisions
+			'''
+
 			ls_keys_sorted=sorted( list(table.keys()) )
+
 			for recordKey in ls_keys_sorted:
 
 				record = table[recordKey]
@@ -172,7 +192,24 @@ class PGRegressionStats( object ):
 					#calculate p value DF = num points-2
 					p_score = stats.t.sf(t_star,len(record)-2)
 
-				
+					'''
+					2018_04_11.  From Brian T's revisions as
+					posted to master repository today or yesterday.
+					'''
+					#calculate significant from CDF(p-value)
+					alpha_check = 1-(abs(p_score-0.5)*2)
+					if self.__confidence_alpha > alpha_check:
+						if slope > 0:
+							positiveCount+=1
+						else:
+							negativeCount+=1
+					else:
+						zeroCount+=1
+
+					#end if confidence alpha > alpha check
+					'''
+					End revisions 2018_04_11.
+					'''
 					 
 					'''
 					Note that the "float" cast was need (at least in py3 ), 
@@ -224,12 +261,16 @@ class PGRegressionStats( object ):
 				'''
 				averageSscore=mean( s_score_vctr )
 
-				negativeCount=0
-				zeroCount=0
-				positiveCount=0
+				'''
+				2018_04_11.  These assignments form the 2018_03_17
+				are now commented out, by Brian T's revisions
+				from today or yesterday:
+				'''
+#				negativeCount=0
+#				zeroCount=0
+#				positiveCount=0
 
 				'''
-
 				2018_03_17 Remmed out and replaced by new code 
 				by Brian T:
 				'''
@@ -242,13 +283,17 @@ class PGRegressionStats( object ):
 	#					zeroCount+=1
 	#			#end for each cI
 				#change for alpha test
-				for value in alpha_vctr:
-					if value>0:
-						positiveCount+=1
-					elif value<0:
-						negativeCount+=1
-					else:
-						zeroCount+=1
+				'''
+				2018_04_11. Change from 2018_03_17,
+				this for loop is now commented out.
+				'''
+#				for value in alpha_vctr:
+#					if value>0:
+#						positiveCount+=1
+#					elif value<0:
+#						negativeCount+=1
+#					else:
+#						zeroCount+=1
 					#end if val>0 else less else
 				#end for alpha val
 
