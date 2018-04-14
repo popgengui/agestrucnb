@@ -9,7 +9,6 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 VERBOSE=False
 VERY_VERBOSE=False
 
-
 def validateNbAdjustment( s_adjustment, i_highest_cycle_number=1e20 ):
 	'''
 	2017_03_08. This def is created to handle the PGInputSimuPop
@@ -178,7 +177,6 @@ def validateHetFilter( s_het_filter ):
 		#end if we have no problems so far.
 	#end if we have the proper number of values
 	
-
 	if len( ls_problems ) > 0:
 		 b_return_value = False
 	else:

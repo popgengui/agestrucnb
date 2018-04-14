@@ -374,6 +374,24 @@ class PGRegressionStats( object ):
 		return s_table
 	#end getStatsTableAsString
 
+	'''
+	2018_04_13. We've added an alpha text box to the 
+	PGNeEstimationRegressplotInterface class, and we
+	want to be able to update this class attribute when the user
+	changes the alpha value.
+	'''
+
+	@property 
+	def confidence_alpha( self ):
+		return self.__confidence_alpha
+	#end property confidence_alpha
+
+	@confidence_alpha.setter
+	def confidence_alpha( self, f_value ):
+		self.__confidence_alpha=f_value 
+		return
+	#end def confidence_alpha
+
 #end class PGRegressionStats
 
 if __name__ == "__main__":

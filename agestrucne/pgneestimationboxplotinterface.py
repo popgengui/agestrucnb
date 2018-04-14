@@ -99,7 +99,16 @@ class PGNeEstimationBoxplotInterface( object ):
 	ROW_NUM_YVAL_LOWER_SCALE=1
 	ROW_NUM_SAVE_PLOT_BUTTON=1
 
-	NUM_VALS_IN_SCALE=3000
+	'''
+	2018_04_13.   Was setting scale
+	at too-coarse a resolution, so 
+	that some values could be trimmed
+	off the plot due to not being slightly
+	over the max or under the min.  Also
+	made this change in the regression interface.
+	'''
+#	NUM_VALS_IN_SCALE=3000
+	NUM_VALS_IN_SCALE=int( 1e10 )
 
 	COLNUM_SUBFRAME_TSV_LOADER=0
 	COLNUM_SUBFRAME_Y_VALUE=0
@@ -749,15 +758,23 @@ class PGNeEstimationBoxplotInterface( object ):
 		f_range_size=( f_max-f_min )
 		f_resolution=f_range_size/o_myc.NUM_VALS_IN_SCALE
 
-		if f_resolution < 1:
-			f_resolution = 1
+		'''
+		No longer rounding up from franctional values,
+		so we do not miss some values:
+		'''
+#		if f_resolution < 1:
+#			f_resolution = 1
 		#end if res less than unity
 
 		return f_resolution
 	#end __get_scale_resolution
 
 	def __get_scale_bigincrement( self, f_min, f_max ):
-		f_bigincrement=10
+		'''
+		2018_04_13.  Resetting this increment value to 0,
+		so that we see all values.
+		'''
+		f_bigincrement=0
 		return f_bigincrement
 	#end __get_scale_bigincrement
 
