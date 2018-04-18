@@ -13,7 +13,6 @@ __filename__ = "pgboxplotinterface.py"
 __date__ = "20170929"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-
 PLOTLABELFONTSIZE=18
 TICKLABELFONTSIZE=14
 
@@ -49,6 +48,12 @@ from agestrucne.pgkeyvalueframe import KeyValFrame
 from agestrucne.pgregresstabletextframe import PGRegressTableTextFrame
 from agestrucne.pgregressionstats import PGRegressionStats
 from agestrucne.pgscalewithentry import PGScaleWithEntry
+'''
+2018_04_13. We use this class to validate user entries for the
+new text boxes for user-setting of min and max cycle number, 
+and alpha value.
+'''
+from agestrucne.pgutilityclasses import ValueValidator
 
 '''
 See def __destroy_all_widgets.  Tkinter apparently
@@ -105,6 +110,9 @@ class PGNeEstimationRegressplotInterface( object ):
 	ROW_NUM_FILTER_LABELS=0
 	ROW_NUM_FILTER_COMBOS=1
 	ROW_NUM_X_VALUE_LABEL=0
+	ROW_NUM_MIN_CYCLE_TEXT_BOX=0
+	ROW_NUM_MAX_CYCLE_TEXT_BOX=1
+	ROW_NUM_ALPHA_TEXT_BOX=2
 	ROW_NUM_YVAL_LABEL=0
 	ROW_NUM_YVAL_LOWER_SCALE_LABEL=0
 	ROW_NUM_YVAL_UPPER_SCALE_LABEL=0
@@ -115,7 +123,8 @@ class PGNeEstimationRegressplotInterface( object ):
 	ROW_NUM_PLOT=0
 	ROW_NUM_STATS_TEXT=0
 
-	NUM_VALS_IN_SCALE=3000
+	#NUM_VALS_IN_SCALE=3000
+	NUM_VALS_IN_SCALE=int( 1e10 )
 
 	COLNUM_SUBFRAME_TSV_LOADER=0
 	COLNUM_SUBFRAME_Y_VALUE=0
@@ -132,6 +141,9 @@ class PGNeEstimationRegressplotInterface( object ):
 	COLNUM_SAVE_PLOT_BUTTON=0
 	COLNUM_PLOT=0
 	COLNUM_STATS_TEXT=0
+	COLNUM_MIN_CYCLE_TEXT_BOX=1
+	COLNUM_MAX_CYCLE_TEXT_BOX=1
+	COLNUM_ALPHA_TEXT_BOX=1
 
 	COLSPAN_SUBFRAME_TSV_LOADER=3
 	COLSPAN_SUBFRAME_GROUPY=4
@@ -174,12 +186,29 @@ class PGNeEstimationRegressplotInterface( object ):
 		self.__expected_slope=s_expected_slope
 		self.__significant_slope=f_significant_slope
 
+		'''
+		2018_04_13. We add these for new 
+		text boxes that allow the user to change
+		the cycle range over which to regress.
+		They are initially set in def __make_text_boxes.
+		'''
+		self.__min_tsv_cycle_number=None
+		self.__max_tsv_cycle_number=None
+		self.__min_cycle_number=None
+		self.__max_cycle_number=None
+
 		self.__labels=None
 		self.__comboboxes=None
 		self.__buttons=None
 		self.__scales=None
 		self.__entries=None
 		self.__subframes=None
+		'''
+		2018_04_13. Adding text boxes
+		to allow user entry of cycle ranges
+		and and alpha value.
+		'''
+		self.__text_boxes=None
 
 		'''
 		When the user selects the file name field 
@@ -205,6 +234,7 @@ class PGNeEstimationRegressplotInterface( object ):
 		#end if we are missing one or more plot
 
 		self.__get_auto_text_size()
+
 		#size dimensions
 
 		self.__setup_tsv_file_loader()
@@ -218,7 +248,8 @@ class PGNeEstimationRegressplotInterface( object ):
 				s_msg="In PGNeEstimationRegressplotInterface instance, " \
 						+ "def __init__, the tsv file passed to this object " \
 						+ ", " + self.__tsv_file_name + ", "  \
-						+ "does not appear to be a tsv file with data line in it. " \
+						+ "does not appear to be an LDNe tsv file with correct " \
+						+ "data lines in it. " \
 						+ "No tsv file will be loaded."
 				PGGUIInfoMessage( self.__master_frame, s_msg )
 			#end if the file looks right
@@ -238,7 +269,6 @@ class PGNeEstimationRegressplotInterface( object ):
 		if pgut.is_windows_platform():
 			i_label_width=LABEL_WIDTH_WINDOWS
 		#end if using windows, need wider label
-	
 
 		o_myc=PGNeEstimationRegressplotInterface
 
@@ -451,6 +481,8 @@ class PGNeEstimationRegressplotInterface( object ):
 				#end if at least one item dict
 			#end if dict exists
 		#end for each widget dict
+
+		return
 	#end __destroy_all_widgets
 
 	def __setup_plotting_interface( self ):
@@ -459,6 +491,12 @@ class PGNeEstimationRegressplotInterface( object ):
 		self.__make_labels()
 		self.__make_combos()
 		self.__make_entries()
+		'''
+		2018_04_13. New text boxes to allow
+		user-entry of min and max cycles,
+		and an alpha value.
+		'''
+		self.__make_text_boxes()
 		self.__make_scales()
 		self.__make_buttons()
 		'''
@@ -527,7 +565,6 @@ class PGNeEstimationRegressplotInterface( object ):
 				relief=FRAME_STYLE,
 				text=STATS_TEXT_FRAME_LABEL )
 
-
 		self.__subframes[ 'filter' ].grid( row=o_myc.ROW_NUM_SUBFRAME_FILTER, 
 														column=o_myc.COLNUM_SUBFRAME_FILTER, 
 														columnspan=o_myc.COLSPAN_SUBFRAME_FILTER, 
@@ -542,11 +579,11 @@ class PGNeEstimationRegressplotInterface( object ):
 													column=o_myc.COLNUM_SUBFRAME_X_VALUE, 
 													columnspan=o_myc.COLSPAN_SUBFRAME_X_VALUE, 
 													sticky=(N,W) )
+
 		self.__subframes[ 'plot' ].grid( row=o_myc.ROW_NUM_SUBFRAME_PLOT, 
 													column=o_myc.COLNUM_SUBFRAME_PLOT, 
 													columnspan=o_myc.COLSPAN_SUBFRAME_PLOT, 
 													sticky=(N,W) )
-
 		
 		self.__subframes[ 'stats_text' ].grid( row=o_myc.ROW_NUM_SUBFRAME_STATS_TEXT, 
 													column=o_myc.COLNUM_SUBFRAME_STATS_TEXT, 
@@ -564,6 +601,16 @@ class PGNeEstimationRegressplotInterface( object ):
 									text="X axis variable", padding=o_myc.LABEL_PADDING )
 
 		self.__labels[ 'x_value' ].grid( row = o_myc.ROW_NUM_X_VALUE_LABEL, column = 0, sticky=( N,W ) )
+
+#		self.__labels[ 'min_cycle' ]=Label( self.__subframes[ 'x_value' ],
+#									text="Min cycle number", padding=o_myc.LABEL_PADDING )
+#
+#		self.__labels[ 'x_value' ].grid( row = o_myc.ROW_NUM_MIN_CYCLE_LABEL, column = 0, sticky=( N,W ) )
+#
+#		self.__labels[ 'max_cycle' ]=Label( self.__subframes[ 'x_value' ],
+#									text="Max cycle number", padding=o_myc.LABEL_PADDING )
+#
+#		self.__labels[ 'x_value' ].grid( row = o_myc.ROW_NUM_MAX_CYCLE_LABEL, column = 0, sticky=( N,W ) )
 
 		self.__value_filterable_combo_labels={}
 		i_colnum_val_filt_labels=0
@@ -586,10 +633,8 @@ class PGNeEstimationRegressplotInterface( object ):
 															text= "Y axis value" , 
 															padding=o_myc.LABEL_PADDING)
 	
-	
 		self.__labels[ 'select_y_variable' ].grid( row = o_myc.ROW_NUM_YVAL_LABEL, 
 																column=0, sticky=( N,W ) )
-
 		return
 	#end __make labels
 
@@ -656,6 +701,151 @@ class PGNeEstimationRegressplotInterface( object ):
 	def __make_entries( self ):
 		return
 	#end __make_entries
+
+	def __make_text_boxes( self ):
+		'''
+		Added 20180413 to allow user
+		setting a range of cycles over which
+		to regress, and to set the alpha value.
+		'''
+
+		MIN_ALPHA=0.0
+		MAX_ALPHA=1.0
+
+		CYCLE_BOX_LABEL_WIDTH=8
+		ALPHA_BOX_LABEL_WIDTH=8
+
+		KEYVAL_SUBFRAME_PADDING=10
+
+		self.__text_boxes={}
+
+		o_myc=PGNeEstimationRegressplotInterface
+
+		s_demangler="_PGNeEstimationRegressplotInterface__"
+
+		ls_cycle_numbers=self.__tsv_file_manager.pop_numbers
+		li_cycle_numbers=[ int( i_num ) for i_num in ls_cycle_numbers ]
+
+		#We keep a copy of the entire range, in case we want
+		#to reset to these (e.g. in def __reset_cycle_number_filter )
+		self.__min_tsv_cycle_number=min( li_cycle_numbers )
+		self.__max_tsv_cycle_number=max( li_cycle_numbers )
+		
+		#These are the attribute variables
+		#we associate with the text boxes:
+		self.__min_cycle_number=min( li_cycle_numbers )
+		self.__max_cycle_number=max( li_cycle_numbers )
+
+		
+		s_cycle_range_lambda="x >= " + str( self.__min_cycle_number ) \
+									+	" and x<= " + str( self.__max_cycle_number ) 
+
+		s_valid_alpha="x >= " + str( MIN_ALPHA ) + " and x <= " + str( MAX_ALPHA )
+			
+		o_validity_test_for_cycle_range=ValueValidator( s_cycle_range_lambda )
+		o_validity_test_for_alpha=ValueValidator( s_valid_alpha ) 
+
+		self.__text_boxes[ 'min_cycle' ]=KeyValFrame( s_name="min_cycle", 
+						v_value=self.__min_cycle_number,
+						o_type=int,
+						v_default_value="1",
+						o_master=self.__subframes[ 'x_value' ],
+						o_associated_attribute_object=self,
+						s_associated_attribute=s_demangler+"min_cycle_number",
+						b_is_enabled=True,
+						b_force_disable=False,
+						def_entry_change_command=self.__on_min_cycle_change,
+						o_validity_tester=o_validity_test_for_cycle_range,
+						s_tooltip = "Use this as the minimum cycle number for the x values",
+						i_labelwidth=CYCLE_BOX_LABEL_WIDTH,
+						i_subframe_padding=KEYVAL_SUBFRAME_PADDING )
+
+		self.__text_boxes[ 'min_cycle' ].grid( row = o_myc.ROW_NUM_MIN_CYCLE_TEXT_BOX, 
+								column = o_myc.COLNUM_MIN_CYCLE_TEXT_BOX, sticky=( N,W ) )
+
+		self.__text_boxes[ 'max_cycle' ]=KeyValFrame( s_name="max_cycle", 
+						v_value=self.__max_cycle_number,
+						o_type=int,
+						v_default_value="1",
+						o_master=self.__subframes[ 'x_value' ],
+						o_associated_attribute_object=self,
+						s_associated_attribute=s_demangler+"max_cycle_number",
+						b_is_enabled=True,
+						b_force_disable=False,
+						def_entry_change_command=self.__on_max_cycle_change,
+						o_validity_tester=o_validity_test_for_cycle_range,
+						s_tooltip = "Use this as the maximum cycle number for the x values",
+						i_labelwidth=CYCLE_BOX_LABEL_WIDTH,
+						i_subframe_padding=KEYVAL_SUBFRAME_PADDING )
+
+		self.__text_boxes[ 'max_cycle' ].grid( row = o_myc.ROW_NUM_MAX_CYCLE_TEXT_BOX, 
+								column = o_myc.COLNUM_MAX_CYCLE_TEXT_BOX, sticky=( N,W ) )
+
+		self.__text_boxes[ 'alpha' ] =KeyValFrame( s_name="alpha", 
+								v_value=self.__alpha,
+								o_type=float,
+								v_default_value=self.__alpha,
+								o_master=self.__subframes[ 'x_value' ],
+								o_associated_attribute_object=self,
+								s_associated_attribute=s_demangler+"alpha",
+								b_is_enabled=True,
+								b_force_disable=False,
+								def_entry_change_command=self.__on_alpha_change,
+								o_validity_tester=o_validity_test_for_alpha,
+								s_tooltip = "Use this as the alpha value for the regression.",
+								i_labelwidth=ALPHA_BOX_LABEL_WIDTH,
+								i_subframe_padding=KEYVAL_SUBFRAME_PADDING )
+
+		
+		self.__text_boxes[ 'alpha' ].grid( row = o_myc.ROW_NUM_ALPHA_TEXT_BOX, 
+								column = o_myc.COLNUM_ALPHA_TEXT_BOX, sticky=( N,W ) )
+		return
+	#end __make_text_boxes
+	
+	def __reset_cycle_number_filter( self ):
+
+		if self.__min_cycle_number<=self.__max_cycle_number:
+
+			def_range=lambda x: int( x ) >= self.__min_cycle_number \
+										and int( x ) <= self.__max_cycle_number
+			self.__tsv_file_manager.setFilter( 'pop', def_range )
+
+		else:
+			s_msg="In PGNeEstimationRegressplotInterface instance, "  \
+							+ "def __reset_cycle_number_filter, " \
+							+ "the program can't reset the cycle filter " \
+							+ "because the minimum is not less than or equal " \
+							+ "to the maximum.  The minimum range is being reset to " \
+							+ "cycle the smallest cycle number in the tsv file."
+
+			PGGUIInfoMessage( self.__master_frame, s_msg )
+
+			self.__min_cycle_number=self.__min_tsv_cycle_number
+
+			self.__text_boxes[ 'min_cycle' ].manuallyUpdateValue( self.__min_tsv_cycle_number )
+
+		#end if valid min, max else info message
+
+		return
+	#end __reset_cycle_number_filter	
+		
+	def __on_min_cycle_change( self ):
+		self.__reset_cycle_number_filter()
+		self.__update_plot_and_stats_text()
+		return
+	#end __on_min_cycle_change
+
+	def __on_max_cycle_change( self ):
+		self.__reset_cycle_number_filter()
+		self.__update_plot_and_stats_text()
+		return
+	#end __on_max_cycle_change
+
+	def __on_alpha_change( self ):
+		self.__regress_stats_maker.confidence_alpha=self.__alpha
+		self.__update_plot_and_stats_text()
+		return
+	#end __on_alpha_change
 
 	def __get_x_label( self ):
 		s_x_label=None
@@ -730,7 +920,6 @@ class PGNeEstimationRegressplotInterface( object ):
 							i_scale_length=SCALE_LENGTH,
 							s_scale_label="upper limit y axis values")
 
-
 		o_y_upper_value_scale.scale.set( df_min_max[ "max" ] )
 		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
 											column=o_myclass.COLNUM_YVAL_UPPER_SCALE, 
@@ -780,15 +969,20 @@ class PGNeEstimationRegressplotInterface( object ):
 		f_range_size=( f_max-f_min )
 		f_resolution=f_range_size/o_myc.NUM_VALS_IN_SCALE
 
-		if f_resolution < 1:
-			f_resolution = 1
-		#end if res less than unity
+		'''
+		2018_04_13. This is commented out in order to
+		keep the resolution fine enough that no 
+		values get trimmed in the ranges specified.
+		'''
+#		if f_resolution < 1:
+#			f_resolution = 1
+#		#end if res less than unity
 
 		return f_resolution
 	#end __get_scale_resolution
 
 	def __get_scale_bigincrement( self, f_min, f_max ):
-		f_bigincrement=10
+		f_bigincrement=0
 		return f_bigincrement
 	#end __get_scale_bigincrement
 
@@ -822,6 +1016,8 @@ class PGNeEstimationRegressplotInterface( object ):
 			self.__scales[ 'y_value_upper' ].scale.set( df_min_max[ "max" ] )
 
 		#end if the y var combo has been created
+
+		return
 	#end __update_y_scales
 
 	def __make_plot( self ):
@@ -841,7 +1037,6 @@ class PGNeEstimationRegressplotInterface( object ):
 											o_tsv_file_manager=self.__tsv_file_manager,
 											def_to_convert_x_vals_to_numeric=\
 													self.__convert_file_name_x_values_to_numeric_values,
-
 											def_to_convert_y_vals_to_numeric=None,
 											def_to_get_labels_for_x_vals=\
 													self.__get_x_labels_for_numeric_values_representing_file_names,
@@ -995,8 +1190,10 @@ class PGNeEstimationRegressplotInterface( object ):
 	#end __on_click_save_plot_button
 
 	def __on_group_by_selection_change( self, s_column_name, s_value, o_tsv_file_manager  ):
-
-		
+		'''
+		From this module's inception up to 2018_04_11, there are no group by selectors.
+		'''
+		pass
 		return
 	#end __on_group_by_selection_change	
 
@@ -1044,8 +1241,20 @@ class PGNeEstimationRegressplotInterface( object ):
 			if s_value == 'original_file':
 				self.__make_file_name_numeric_value_table()
 				self.__statstext.useFileNameOnlyInStatsTableCol1( False )
+				'''
+				2018_04_13. We add code to disable the new controls
+				that users can use to set cycle ranges, and remove 
+				the cycle range.
+				'''
+				self.__text_boxes[ 'min_cycle' ].setStateControls( 'disabled' )
+				self.__text_boxes[ 'max_cycle' ].setStateControls( 'disabled' )
+				self.__tsv_file_manager.setFilter( 'pop', None )
 			else:
 				self.__statstext.useFileNameOnlyInStatsTableCol1( True )
+				self.__text_boxes[ 'min_cycle' ].setStateControls( 'enabled' )
+				self.__text_boxes[ 'max_cycle' ].setStateControls( 'enabled' )
+				self.__reset_cycle_number_filter()
+				 
 			#end if the user wants to regress over file names
 			
 			self.__update_plot_and_stats_text()
@@ -1181,9 +1390,9 @@ class PGNeEstimationRegressplotInterface( object ):
 		we sort the names by natural sort (and, so, assume the user
 		has named files such that the sort will represent, for example,
 		populations over time, progressing in one temporal direction,
-		such as earliest->latest.
+		most likely as earliest->latest.
 
-		We assume that ths is called by a 
+		We assume that this is called by a 
 		PGPlottingFrameRegressionLinesFromFileManager
 		instance, and which has passed a dict with
 		keys being concattenated Ne estimation input values other than
@@ -1243,7 +1452,6 @@ class PGNeEstimationRegressplotInterface( object ):
 		return s_file_name
 	#end __get_file_name_from_number
 
-
 	def __get_x_labels_for_numeric_values_representing_file_names( self, dict_data ):
 		'''
 		This def should be called by an instance of 
@@ -1293,6 +1501,7 @@ class PGNeEstimationRegressplotInterface( object ):
 
 			dict_data[ s_line_name ][ "x_labels" ] = ls_these_labels
 			#end if user has selected file name for x value
+		#end if original file column
 		return
 	#end __get_x_labels_for_numeric_values_representing_file_names
 
@@ -1352,7 +1561,6 @@ class PGNeEstimationRegressplotInterface( object ):
 		#end for each widget
 
 		return
-
 	#end __destroy_widgets
 
 	def cleanup( self ):
@@ -1366,7 +1574,9 @@ class PGNeEstimationRegressplotInterface( object ):
 #end PGNeEstTableValueSelectionCombo
 
 if __name__ == "__main__":
+
 	s_tsv_file="/home/ted/documents/source_code/python/negui/temp_data/frogs.estimates.ldne.tsv"
+
 	omaster=Tk()
 
 	o_myinterface=PGNeEstimationRegressplotInterface( o_master_frame=omaster,

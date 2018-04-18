@@ -499,7 +499,7 @@ def _neStatsHelper(table,neFile,confidenceAlpha, outFileName = "neStatsOut.txt",
     zeroCount=0
     positiveCount=0
     for recordKey in list(table.keys()):
-	print(recordKey)
+        print(recordKey)
         record = table[recordKey]
         slope, intercept, confidence  = slope_confidence(confidenceAlpha, record)
 
