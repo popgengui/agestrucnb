@@ -13,7 +13,6 @@ __filename__ = "pgboxplotinterface.py"
 __date__ = "20170929"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-
 PLOTLABELFONTSIZE=18
 TICKLABELFONTSIZE=14
 
@@ -235,6 +234,7 @@ class PGNeEstimationRegressplotInterface( object ):
 		#end if we are missing one or more plot
 
 		self.__get_auto_text_size()
+
 		#size dimensions
 
 		self.__setup_tsv_file_loader()
@@ -269,7 +269,6 @@ class PGNeEstimationRegressplotInterface( object ):
 		if pgut.is_windows_platform():
 			i_label_width=LABEL_WIDTH_WINDOWS
 		#end if using windows, need wider label
-	
 
 		o_myc=PGNeEstimationRegressplotInterface
 
@@ -482,6 +481,8 @@ class PGNeEstimationRegressplotInterface( object ):
 				#end if at least one item dict
 			#end if dict exists
 		#end for each widget dict
+
+		return
 	#end __destroy_all_widgets
 
 	def __setup_plotting_interface( self ):
@@ -564,7 +565,6 @@ class PGNeEstimationRegressplotInterface( object ):
 				relief=FRAME_STYLE,
 				text=STATS_TEXT_FRAME_LABEL )
 
-
 		self.__subframes[ 'filter' ].grid( row=o_myc.ROW_NUM_SUBFRAME_FILTER, 
 														column=o_myc.COLNUM_SUBFRAME_FILTER, 
 														columnspan=o_myc.COLSPAN_SUBFRAME_FILTER, 
@@ -579,11 +579,11 @@ class PGNeEstimationRegressplotInterface( object ):
 													column=o_myc.COLNUM_SUBFRAME_X_VALUE, 
 													columnspan=o_myc.COLSPAN_SUBFRAME_X_VALUE, 
 													sticky=(N,W) )
+
 		self.__subframes[ 'plot' ].grid( row=o_myc.ROW_NUM_SUBFRAME_PLOT, 
 													column=o_myc.COLNUM_SUBFRAME_PLOT, 
 													columnspan=o_myc.COLSPAN_SUBFRAME_PLOT, 
 													sticky=(N,W) )
-
 		
 		self.__subframes[ 'stats_text' ].grid( row=o_myc.ROW_NUM_SUBFRAME_STATS_TEXT, 
 													column=o_myc.COLNUM_SUBFRAME_STATS_TEXT, 
@@ -633,10 +633,8 @@ class PGNeEstimationRegressplotInterface( object ):
 															text= "Y axis value" , 
 															padding=o_myc.LABEL_PADDING)
 	
-	
 		self.__labels[ 'select_y_variable' ].grid( row = o_myc.ROW_NUM_YVAL_LABEL, 
 																column=0, sticky=( N,W ) )
-
 		return
 	#end __make labels
 
@@ -747,7 +745,6 @@ class PGNeEstimationRegressplotInterface( object ):
 		o_validity_test_for_cycle_range=ValueValidator( s_cycle_range_lambda )
 		o_validity_test_for_alpha=ValueValidator( s_valid_alpha ) 
 
-	
 		self.__text_boxes[ 'min_cycle' ]=KeyValFrame( s_name="min_cycle", 
 						v_value=self.__min_cycle_number,
 						o_type=int,
@@ -821,13 +818,13 @@ class PGNeEstimationRegressplotInterface( object ):
 							+ "to the maximum.  The minimum range is being reset to " \
 							+ "cycle the smallest cycle number in the tsv file."
 
-
 			PGGUIInfoMessage( self.__master_frame, s_msg )
 
 			self.__min_cycle_number=self.__min_tsv_cycle_number
-			self.__text_boxes[ 'min_cycle' ].manallyUpdateValue( self.__min_tsv_cycle_number )
+
+			self.__text_boxes[ 'min_cycle' ].manuallyUpdateValue( self.__min_tsv_cycle_number )
+
 		#end if valid min, max else info message
-					
 
 		return
 	#end __reset_cycle_number_filter	
@@ -923,7 +920,6 @@ class PGNeEstimationRegressplotInterface( object ):
 							i_scale_length=SCALE_LENGTH,
 							s_scale_label="upper limit y axis values")
 
-
 		o_y_upper_value_scale.scale.set( df_min_max[ "max" ] )
 		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
 											column=o_myclass.COLNUM_YVAL_UPPER_SCALE, 
@@ -973,6 +969,11 @@ class PGNeEstimationRegressplotInterface( object ):
 		f_range_size=( f_max-f_min )
 		f_resolution=f_range_size/o_myc.NUM_VALS_IN_SCALE
 
+		'''
+		2018_04_13. This is commented out in order to
+		keep the resolution fine enough that no 
+		values get trimmed in the ranges specified.
+		'''
 #		if f_resolution < 1:
 #			f_resolution = 1
 #		#end if res less than unity
@@ -1015,6 +1016,8 @@ class PGNeEstimationRegressplotInterface( object ):
 			self.__scales[ 'y_value_upper' ].scale.set( df_min_max[ "max" ] )
 
 		#end if the y var combo has been created
+
+		return
 	#end __update_y_scales
 
 	def __make_plot( self ):
@@ -1449,7 +1452,6 @@ class PGNeEstimationRegressplotInterface( object ):
 		return s_file_name
 	#end __get_file_name_from_number
 
-
 	def __get_x_labels_for_numeric_values_representing_file_names( self, dict_data ):
 		'''
 		This def should be called by an instance of 
@@ -1499,6 +1501,7 @@ class PGNeEstimationRegressplotInterface( object ):
 
 			dict_data[ s_line_name ][ "x_labels" ] = ls_these_labels
 			#end if user has selected file name for x value
+		#end if original file column
 		return
 	#end __get_x_labels_for_numeric_values_representing_file_names
 
@@ -1558,7 +1561,6 @@ class PGNeEstimationRegressplotInterface( object ):
 		#end for each widget
 
 		return
-
 	#end __destroy_widgets
 
 	def cleanup( self ):
@@ -1572,7 +1574,9 @@ class PGNeEstimationRegressplotInterface( object ):
 #end PGNeEstTableValueSelectionCombo
 
 if __name__ == "__main__":
+
 	s_tsv_file="/home/ted/documents/source_code/python/negui/temp_data/frogs.estimates.ldne.tsv"
+
 	omaster=Tk()
 
 	o_myinterface=PGNeEstimationRegressplotInterface( o_master_frame=omaster,
