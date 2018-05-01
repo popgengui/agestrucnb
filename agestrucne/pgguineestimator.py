@@ -800,7 +800,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		2018_04_28.  We  new parameters giving either
 		the full path to a file giving chromosome/loci 
 		associations, or "None", and a loci pairing scheme
-		(used by LDNe2), for now initialized at load, to 2=use allele pairs
+		(used by LDNe2), for now initialized at load, to 2=use loci pairs
 		derived from different chroms. We set it here to zero, i.e. 
 		all pairs are on different chromosomes, when no chrom loci file is used.
 		2018_04_30.  If our use chrom file flag is false, despite any file name
@@ -813,7 +813,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		#end if the flag says do not use a chrom loci file
 	
 		if self.__chromlocifile == NO_CHROMLOCI_FILE:
-			self.__allele_pairing_scheme=0
+			self.__loci_pairing_scheme=0
 		#end if no chromlocifile, unrestricted pairing
 
 		self.__op_process=multiprocessing.Process( \
@@ -825,7 +825,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 							self.__minallelefreq,
 							self.__monogamy,
 							s_chrom_loci_file,
-							self.__allele_pairing_scheme,
+							self.__loci_pairing_scheme,
 							self.__replicates,
 							qs_loci_sample_scheme_args,
 							self.__loci_replicates,
@@ -2466,7 +2466,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		'''
 		2018_04_27.  For new parameter that loads path/name
 		of a chromosome/loci table file, used by LDNe2 to
-		eval only allele pairs whose members are associated
+		eval only loci pairs whose members are associated
 		with different chromosomes.
 		'''
 		try:
