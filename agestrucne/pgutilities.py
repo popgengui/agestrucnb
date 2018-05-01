@@ -749,6 +749,8 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 										qs_sample_scheme_args,
 										f_min_allele_freq,
 										b_monogamy,
+										s_chromlocifile,
+										i_allele_pairing_scheme,
 										i_replicates,
 										qs_loci_sampling_scheme_args,
 										i_loci_replicates,
@@ -772,8 +774,13 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 	pops per file using python.multiprocessing.Process objects.
 
 
-	2018_03_15.  We add the flag b_monogamy to the arg set, to assign it to LDNe2's
+	2018_03_18.  We add the flag b_monogamy to the arg set, to assign it to LDNe2's
 	monomgamy boolean parameter (see pgdriveneestimator.py, def __add_to_set_of_calls, etc.
+
+	2018_04_18.  We add the string arg s_chromlocifile, after monogamy, to allow LDNE2 to use
+	(optionally, when the param != "None") a chromosome/loci table, and the int arg i_allele_pairing_scheme,
+	which tells LDNe2 how to use chrom info to pair (or avoid pairing) alleles.
+
 	'''
 
 	try:
@@ -827,10 +834,19 @@ def run_driveneestimator_in_new_process( o_multiprocessing_event,
 		'''
 		2018_03_15. The arg set now includes b_monogamy, 
 		to send a value for the LDNe2 param Monogamy.
+
+		2018_04_28. The arg set now also includes s_chromlocifile,
+		with vaule either "None" or a path to a file 
+		giving chromosome/loci associations, for LDNe2's
+		use in limiting pairwise calcs to independant pairs
+		of alleles, and i_allele_pairing_scheme, which 
+		tells LDNe2 how to limit pairing, such that 0=no retriction,
+		1=pair only loci l1,l2 on chroms c1,c2 when c1==c2, and 2=
+		paiur only loci l1,l2 on c1,c2, when c1!=c2.
 		'''
 		seq_arg_set=qs_files_args \
 						+ qs_sample_scheme_args \
-						+ ( str( f_min_allele_freq ), str( b_monogamy), str( i_replicates ) ) \
+						+ ( str( f_min_allele_freq ), str( b_monogamy), s_chromlocifile, str( i_allele_pairing_scheme ), str( i_replicates ) ) \
 						+ qs_loci_sampling_scheme_args \
 						+ ( str( i_loci_replicates ), str( i_num_processes ), s_runmode, s_nbne_ratio, s_do_nb_bias_adjustment ) 
 
@@ -1716,7 +1732,7 @@ def get_dirichlet_allele_dist_for_expected_het( f_expected_het,
 		s_msg="The program currently does not " \
 					+ "generate allele frequencies " \
 					+ "for an expected heterozygosity " \
-					+ "of zero."
+					+ "less than zero."
 		raise Exception( s_msg )
 
 	elif f_expected_het > 0.85:

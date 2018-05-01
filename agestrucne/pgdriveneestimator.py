@@ -174,10 +174,11 @@ spacer="   "
 spacer2="   "
 spacer3="  "
 
-LS_FLAGS_SHORT_REQUIRED=[ "-f",  "-s", "-p", "-m", "-a", "-r", "-e", "-M", "-c", "-l", "-i",  "-n", "-x", "-g","-q" ]
+LS_FLAGS_SHORT_REQUIRED=[ "-f",  "-s", "-p", "-m", "-a", "-r", "-e", "-M", "-h", "-P", "-c", "-l", "-i",  "-n", "-x", "-g","-q" ]
 
 LS_FLAGS_LONG_REQUIRED=[ "--gpfiles", "--scheme", "--params", "--minpopsize", "--maxpopsize", "--poprange", 
-						"--minallelefreq",  "--monogamy",  "--replicates", "--locischeme", "--locischemeparams",  
+						"--minallelefreq",  "--monogamy",  "--chromlocifile", "--allelepairingscheme", 
+						"--replicates", "--locischeme", "--locischemeparams",  
 						"--mintotalloci", "--maxtotalloci", "--locirange", "--locireplicates" ]
 
 LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes. " \
@@ -221,6 +222,11 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 		"Float, minimum allele frequency, one of NeEstimator's \"crit\" values.",
 		"\"True\" or \"False\", value to assign to LDNe2's mating parameter, \"True\" sets the parameter " \
 				+ "to \"monogamy\", and \"False\" to random mating.",
+		"String, path and file name (or \"None\" ) of a file that gives chromosome <tab> loci pairs, for all loci " \
+				+ "as named in the genepop file(s).  LDNe2 will ignore allele pairs such that both are on the same chromosome." \
+				+ "  \"None\" will mean that LDNe2 will use all allele pairs in its estimate calculations.",
+		"Integer, allele (loci) pairing scheme for LDNe2, 0=all pairs, 1=loci sharing chrom, 2=loci on diff chroms.  " \
+				+ "If chrom loci file is \"None\", then this param is ignored, and all pairs are used (i.e. same as value 0).",
 		"Integer, total sampling replicates (for the individual sampling scheme) " \
 				+ "to run (Note: under the \"remove\" scheme," \
 				+ "when sampling by removing one individual from a pop of size p, " \
@@ -274,23 +280,25 @@ IDX_MIN_ALLELE_FREQ=6
 This parmeter was added on 2018_03_15.
 '''
 IDX_MONOGAMY=7
-IDX_REPLICATES=8
-IDX_LOCI_SAMPLING_SCHEME=9
-IDX_LOCI_SCHEME_PARAM=10
-IDX_LOCI_MIN_TOTAL=11
-IDX_LOCI_MAX_TOTAL=12
-IDX_LOCI_RANGE=13
-IDX_LOCI_SAMPLE_REPLICATES=14
-IDX_PROCESSES=15
-IDX_DEBUG_MODE=16
-IDX_NBNE_RATIO=17
+IDX_CHROMLOCI_FILE=8
+IDX_ALLELE_PAIRING_SCHEME=9
+IDX_REPLICATES=10
+IDX_LOCI_SAMPLING_SCHEME=11
+IDX_LOCI_SCHEME_PARAM=12
+IDX_LOCI_MIN_TOTAL=13
+IDX_LOCI_MAX_TOTAL=14
+IDX_LOCI_RANGE=15
+IDX_LOCI_SAMPLE_REPLICATES=16
+IDX_PROCESSES=17
+IDX_DEBUG_MODE=18
+IDX_NBNE_RATIO=19
 '''
 This parameter was added on 2017_04_14.
 '''
-IDX_DO_BIAS_ADJUST=18
-IDX_MAIN_OUTFILE=19
-IDX_SECONDARY_OUTFILE=20
-IDX_MULTIPROCESSING_EVENT=21
+IDX_DO_BIAS_ADJUST=20
+IDX_MAIN_OUTFILE=21
+IDX_SECONDARY_OUTFILE=22
+IDX_MULTIPROCESSING_EVENT=23
 '''
 2017_03_27.  This new argument allows the intermediate
 genepop files created by this module before it runs
@@ -300,14 +308,14 @@ It is set to None when called from the console, but
 when def mymain is called from pgutilities def 
 run_driveneestimator_in_new_process.
 '''
-IDX_TEMPORARY_DIRECTORY=22
+IDX_TEMPORARY_DIRECTORY=24
 
 '''
 2017_05_31. This new argument allows the console
 command to prevent the module from importing
 and using the GUI messaging classes.
 '''
-IDX_USE_GUI_MESSAGING=23
+IDX_USE_GUI_MESSAGING=25
 
 #Def mymain uses this index to test and pass
 #the correct file/multiprocessing_event information
@@ -568,6 +576,10 @@ class ArgSet( object ):
 
 		2018_03_15. We added the b_monogamy flag, to follow
 		the min_allele_frequency in order.
+
+		2018_04_28.  We added the s_chromlocifile string arg,
+		that follows the monogamy flag, and also the allele_pairing_scheme
+		integer.
 		'''
 		self.param_names_in_order= \
 				[ "genepop_files", "pop_sampling_scheme",
@@ -575,6 +587,8 @@ class ArgSet( object ):
 						"min_pop_size", "max_pop_size",
 						"pop_num_range", "min_allele_frequency",
 						"monogamy",
+						"chromlocifile",
+						"allele_pairing_scheme",
 						"pop_sampling_replicates", "loci_sampling_scheme",
 						"loci_sampling_values", "loci_min_total",
 						"loci_max_total", "loci_num_range", 
@@ -972,6 +986,9 @@ def parse_args( *args ):
 		raise Exception( s_msg )
 	#end if monogamy value invalid
 	b_monogamy=True if args[ IDX_MONOGAMY ] =="True" else False
+
+	s_chromlocifile=args[ IDX_CHROMLOCI_FILE ]
+	i_allele_pairing_scheme=int( args[ IDX_ALLELE_PAIRING_SCHEME ] )
 	i_total_replicates=int( args[ IDX_REPLICATES ] )
 	i_total_processes=int( args[ IDX_PROCESSES ] )
 	o_debug_mode=set_debug_mode ( args[ IDX_DEBUG_MODE ] )
@@ -1065,6 +1082,8 @@ def parse_args( *args ):
 								i_max_pop_range,
 								f_min_allele_freq, 
 								b_monogamy,
+								s_chromlocifile,
+								i_allele_pairing_scheme,
 								i_total_replicates, 
 								s_loci_sampling_scheme,
 								v_loci_sampling_scheme_param,
@@ -1309,7 +1328,8 @@ def do_estimate(xxx_todo_changeme ):
 	'''
 	( o_genepopfile, o_ne_estimator, 
 					s_sample_param_val, s_loci_sample_value,
-					f_min_allele_freq, b_monogamy, s_subsample_tag, 
+					f_min_allele_freq, b_monogamy,
+					s_subsample_tag, 
 					s_loci_sample_tag, s_population_number, 
 					s_census, i_replicate_number, 
 					s_loci_replicate_number, o_debug_mode, 
@@ -2384,6 +2404,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 											s_sample_scheme,
 											f_min_allele_freq, 
 											b_monogamy,
+											s_chromlocifile,
+											i_allele_pairing_scheme,
 											i_min_pop_size,
 											i_max_pop_size,
 											i_min_loci_position,
@@ -2565,6 +2587,14 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 				be passed to LDNe2 (see pginputneestimator class ).
 				'''
 				o_neinput.run_params={ "crits":[ f_min_allele_freq ] , "monogamy": b_monogamy }
+
+				'''
+				2018_04_28.  New parameter used by LDNe2.
+				'''
+				if ESTIMATOR_TO_USE==LDNE2:
+					o_neinput.ldne2_only_params= {"chromlocifile":s_chromlocifile, 
+											"allele_pairing_scheme":i_allele_pairing_scheme }
+				#end if we're using ldne2, add the chromlocifile value
 
 				o_neoutput=pgout.PGOutputNeEstimator( s_genepop_file_subsample, 
 														s_run_output_file, 
@@ -3042,6 +3072,8 @@ def add_file_to_current_set( s_filename,
 							f_nbne_ratio,
 							f_min_allele_freq,
 							b_monogamy,
+							s_chromlocifile,
+							i_allele_pairing_scheme,
 							o_debug_mode,
 							IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 							i_genepop_file_count,
@@ -3119,12 +3151,17 @@ def add_file_to_current_set( s_filename,
 		2017_06_16. Since we moved the call to execute_ne_for_each_sample inside 
 		this loop, so that we now execute on a per-genepop-file basis, we re-create 
 		a new list of args for this genepop file.
+
+		2018_04_29. Note added args s_chromlocifile and i_allele_pairing_scheme
+		added to call.
 		'''
 
 		add_to_set_of_calls_to_do_estimate( o_genepopfile, 
 												s_sample_scheme,
 												f_min_allele_freq, 
 												b_monogamy,
+												s_chromlocifile,
+												i_allele_pairing_scheme,
 												i_min_pop_size,
 												i_max_pop_size,
 												i_min_loci_position,
@@ -3282,6 +3319,8 @@ def drive_estimator( *args ):
 				i_max_pop_range,
 				f_min_allele_freq, 
 				b_monogamy,
+				s_chromlocifile,
+				i_allele_pairing_scheme,
 				i_total_replicates, 
 				s_loci_sampling_scheme,
 				v_loci_sampling_scheme_param,
@@ -3398,6 +3437,8 @@ def drive_estimator( *args ):
 							f_nbne_ratio=f_nbne_ratio,
 							f_min_allele_freq=f_min_allele_freq,
 							b_monogamy=b_monogamy,
+							s_chromlocifile=s_chromlocifile,
+							i_allele_pairing_scheme=i_allele_pairing_scheme,
 							o_debug_mode=o_debug_mode,
 							IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 							i_genepop_file_count=i_genepop_file_count,
@@ -3479,6 +3520,8 @@ def drive_estimator( *args ):
 						f_nbne_ratio=f_nbne_ratio,
 						f_min_allele_freq=f_min_allele_freq,
 						b_monogamy=b_monogamy,
+						s_chromlocifile=s_chromlocifile,
+						i_allele_pairing_scheme=i_allele_pairing_scheme,
 						o_debug_mode=o_debug_mode,
 						IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP=IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
 						i_genepop_file_count=i_genepop_file_count,

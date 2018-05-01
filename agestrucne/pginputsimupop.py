@@ -21,6 +21,16 @@ DEFAULT_NB_VAR=0.05
 DEFAULT_SNP_HET_INIT=0.5
 DEFAULT_MSAT_HET_INIT=0.8
 
+'''
+2018_04_18.  Adding new parameter
+that allows users to simulate
+loci distributed over >1 chromosome.
+The default value of zero results in
+all loci being "placed" on different
+chromsomes.
+'''
+DEFAULT_NUM_CHROMS=0
+
 import sys
 import os
 from configparser import ConfigParser
@@ -437,8 +447,20 @@ class PGInputSimuPop( object ):
 
 		self.__update_attribute_config_file_info( "numSNPs", "genome", "numSNPs" )
 
+		'''
+		2018_04_18. This new input parameter allows the user to distribute loci 
+		over chromosomes:
+		'''
+		if config.has_option("genome","numChroms" ):
+			self.numChroms = config.getint( "genome", "numChroms" )
+		else:
+			self.numChroms=DEFAULT_NUM_CHROMS
+		#end if conf file has a numChroms value else set as default
+		self.__update_attribute_config_file_info( "numChroms", "genome", "numChroms" )
+
 		self.reps = config.getint("sim", "reps")
 		self.__update_attribute_config_file_info( "reps", "sim", "reps" )
+
 		if config.has_option("sim", "startSave"):
 			self.startSave = config.getint("sim", "startSave")
 			'''
@@ -455,9 +477,10 @@ class PGInputSimuPop( object ):
 			2017_04_05.  As we re-activate the startSave feature,
 			with a control on the GUI interface, we now use 1-indexed
 			cycle numbers, so that the code during the simulation will 
-			(before writing results) check whether the gen number equals 
-			the startSave - 1.  Thus, the default startSave, to record all 
-			cycles, is now 1 instead of zero.
+			(before writing results) adjust the gen number to one-indexing,
+			then test that the current gen is >= startSave.  Thus, the 
+			default startSave, to record all cycles, is now 1 instead 
+			of zero.
 			'''
 			self.startSave = 1
 		#end if config has startSave

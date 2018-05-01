@@ -14,6 +14,10 @@ import tempfile
 
 '''
 Constants used by the class objects.
+2018_04_28.  We add new params "chromlocifile",
+and allele_pairing_scheme, inserted in the config 
+file submitted to LDNe2, after "locus_range" and before
+"output_file_name"
 '''
 
 COMMON_VALUE_KEYS_ORDERED= ["number_of_crits",
@@ -24,6 +28,8 @@ COMMON_VALUE_KEYS_ORDERED= ["number_of_crits",
 									"max_indiv_per_pop",
 									"pop_range",
 									"locus_range",
+									"allele_pairing_scheme",
+									"chromlocifile",
 									"output_file_name",
 									"input_file_name" ]
 
@@ -50,6 +56,8 @@ COMMON_VALUE_VALIDATIONS={ \
 									and type( eval( x.split()[ 0 ] ) )== int \
 									and type( eval( x.split()[ 1 ] ) ) == int \
 									and int( x.split()[ 0 ] ) <= int( x.split()[1] ) ),
+				"allele_pairing_scheme":lambda x:  type(x)==int and x in [ 0, 1, 2 ], 
+				"chromlocifile":lambda x: type(x)==str and x != "" and ( x == "None" or ( os.path.exists( x ) ) ),
 				"output_file_name":lambda x: type(x)==str and x != "" and not( os.path.exists( x ) ),
 				"input_file_name":lambda x: type(x)==str and x != "" and os.path.exists( x ) }
 
@@ -61,6 +69,8 @@ EXTRA_VALIDITY_INFO= { "number_of_crits":None,
 									"max_indiv_per_pop":None,
 									"pop_range":None,
 									"locus_range":None,
+									"allele_pairing_scheme":None,
+									"chromlocifile":"value names a file that exists or \"None\"",
 									"output_file_name":"value must name a file that does not exist",
 									"input_file_name":"value must name a file that does not exist" }
 
@@ -104,17 +114,27 @@ class PGLDNe2Controller( object ):
 		"c:<configfile>" in the command command.  These comments 
 		head the source function RunMultiCommon, called when main()
 		parses the args noted above:
+
+		2018_04_28. Note that our LDNe2 param list now includes
+		the allele (loci) pairing scheme integer parameter, 
+		and also chromlocifile parameter, unique to our version of LDNe2,
+		and absent in the original calls Tiago made to NeEstimator.
+
 			// 1. Number of (positive) critical values
 			// 2. Critical values if applicable (i.e., number on line 2 is positive)
-			// 3. Plan/Generations for Temporal if applicable.
-			// 4. Tabular-format output file(s)
-			// 5. CI or not (parameter and non-parameter)
-			// 6. Random/Monogamy for LD if applicable
-			// 7. Max individuals per pop.
-			// 8. Population range
-			// 9. Locus ranges to run
-			// 10. Common output file name
-			// Then the rest, at each line, are input file names including paths
+			// -- from source comment but found to be not present -- 3. Plan/Generations for Temporal if applicable.
+			// 3. Tabular-format output file(s)
+			// 4. CI or not (parameter and non-parameter)
+			// 5. Random/Monogamy for LD if applicable
+			// 6. Max individuals per pop.
+			// 7. Population range
+			// 8. Locus ranges to run
+			// 9. Allele pairing scheme (2019_04_28, new param added by
+			       our revision to LDNe2 source).
+			// 10. Chrom loci file name (2018_04_28, a new param added by 
+			       our revision to LDNe2 source).
+			// 11. Common output file name
+			// 12. Then the rest, at each line, are input file names including paths
 			// if necessary.
 
 		Trials show that line 3 turns tab files on/off, and
@@ -127,6 +147,13 @@ class PGLDNe2Controller( object ):
 		For most values we initialize to 0 for the default, 
 		but we default to 1 critical value, 0.0, and
 		1 to elicit CI's, and 1 to get a tabular output file.
+
+		2018_04_28.  New parameter added, chromlocifile,
+		used by our customized version of LDNe2, which
+		now can use chrom/loci associations to avoid
+		loci pairs whose members are "on" the same
+		chromosome.
+
 		'''
 
 		self.__common_values={ "number_of_crits":1,
@@ -137,6 +164,8 @@ class PGLDNe2Controller( object ):
 									"max_indiv_per_pop":0,
 									"pop_range":0,
 									"locus_range":0,
+									"allele_pairing_scheme":0,
+									"chromlocifile":"None",
 									"output_file_name":"",
 									"input_file_name":"" }
 
@@ -227,7 +256,6 @@ class PGLDNe2Controller( object ):
 			else:		 
 				o_file.write( str( self.__common_values[ s_key ] ) + "\n" )
 			#end if crits else not
-
 		#end for each common value 
 
 		o_file.close()
@@ -345,6 +373,7 @@ class PGLDNe2Controller( object ):
 																		s_out_dir, s_out_file, 
 																		crits, LD, hets, coanc, 
 																		temp, monogamy, options )
+		
 		self.runWithCommonValues()			
 
 		return
@@ -424,6 +453,20 @@ class PGLDNe2Controller( object ):
 		self.__update_ldne2_values_with_applicable_neestimator_values( dv_neestimator_params )
 		return
 	#end setCommonValuesFromNeEstimatorParams
+
+	'''
+	2018_04_28.  We have added a new parameter, for LDNe2 only 
+	i.e. is not accounted for in the call structure used for
+	NeEstimator, namely, param called "chromlocifile," which,
+	if not "None," is used by LDNe2 to avoid using allele pairs
+	in its estimations, that share a chromosome.
+	'''
+	def setLDNE2Values( self, dv_ldne2_params ):
+		for s_key in dv_ldne2_params:
+			self.__common_values[ s_key ] =  dv_ldne2_params[ s_key ]
+		#end for each key
+		return
+	#end setLDNE2Values
 		
 #end PGLDNe2Controller
 

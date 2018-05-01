@@ -61,8 +61,6 @@ class PGKeyControlFrame( Frame ):
 		return
 	#end setLabelState
 
-
-
 #end class PGKeyControlFrame
 
 if __name__ == "__main__":

@@ -166,7 +166,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			i_output_mode.  This param was added 2017_08_04 to speed up
 				the output and skip writing the *gen *db and *sim files used
 				by Tiago in his original pipeline.  
-			'''
+		'''
 
 		self.__guiinfo=None
 		self.__guierr=None
@@ -448,7 +448,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			the replicate number.  Formerly, because these files were meant only to be
 			recorded on replicate 1, we put no replicate number in their names.  Now,
 			in case we want to write these for each replicate, we want to name and 
-			open then after have ing appended the replicate s_tag_out to the bsic
+			open then after having appended the replicate s_tag_out to the bsic
 			output file base name.
 			'''
 			if self.__write_nb_and_age_count_files:
@@ -493,6 +493,18 @@ class PGOpSimuPop( modop.APGOperation ):
 						+ str( self.__output_mode ) + "."
 				raise Exception( s_msg )
 			#end if orig out, else gp only, else error.
+
+
+			'''
+			2018_04_25. We write the new output file that LDNe2 will use
+			to apply chromosome/loci associations.
+			2018_04_27. We won't write the table if user has specified
+			zero chromosomes (i.e. default, original scenario)
+			'''
+			if self.input.numChroms > 0:	
+				self.__write_chromosome_loci_table( self.__pop )
+			#end if user specified non-zero chromosome total, write table
+
 
 			'''
 			2017_02_07
@@ -816,7 +828,178 @@ class PGOpSimuPop( modop.APGOperation ):
 		return
 	#end __createGenome
 
+	def __get_dict_chromosome_number_by_loci_number_evenly_distributed ( self,
+																			i_number_of_loci, 
+																			i_number_of_chromosomes ):
+
+		'''
+		2018_04_18. We're adding chromosome/loci
+		associations in order to leverage LDNe2's
+		feature that computes Ne using chromosome/loci
+		information.  Note that the easy, default way
+		to get simupop to evenly  assign, say, 30 loci 
+		to 5 chromosomes, "loci=[10,10,10],
+		chromtypes=[Autosome]*5", means that if our user
+		is using both q Msats and r snps, and since we always
+		assign the first q loci to be msats and the last r
+		to be snps, the default chrom assignments will tend to
+		bunch the msats together on the same (few) first 
+		chromosomes and the snps on the last.  We thus
+		will distribute them using the addLoci and addChrom
+		methods of the pop struct (see __createSinglePop).
+		In order to hold these assignments
+		steady among replicates, we, rather than using any 
+		random assignment, we assign N loci 0,1,2...N-1 to 
+		M chromosomes 0,1,2...M-1, in order, i=1,2,3...N, 
+		assigning loci i to chromsome i mod M, which puts 
+		an additional loci on each of the first T chromosomes 
+		where T = N mod M. 
+
+		Note: if the number of chromosomes exceeds the number
+		of loci, we trim the number of chromosomes to equal
+		the number of loci.
+		'''
+
+		di_chromosome_number_by_loci_number={}
+
+		if i_number_of_loci < i_number_of_chromosomes:
+			i_number_of_chromosomes=i_number_of_loci
+		#end if more chromosomes thatn loci, get rid of excess
+		#chromosomes
+
+		for idx in range( i_number_of_loci ):
+
+			i_chromosome_number=( idx % i_number_of_chromosomes )
+
+			di_chromosome_number_by_loci_number[ idx ]=i_chromosome_number
+
+		#end for each loci index
+
+		return di_chromosome_number_by_loci_number
+	#end __get_dict_chromosome_number_by_loci_number_evenly_distributed
+
+	def __get_loci_positions_by_loci_number( self, di_chromosome_number_by_loci_number ):
+
+		'''
+		2018_04_18.  This def is added to assist in assigning chromosomes
+		to loci. The loci position on the chrom, per simuPOP is a non-united
+		value, left to the user's discretion and use.  For now we simply
+		use floats between 0 and 1.0, and space the loci evenly across the
+		chromosome.
+
+		This def assumes that the lists given by list( mydict.keys() ) and 
+		list( mydict.values() ) have indices such that mydict.values()[i] 
+		always equals mydict[ mydict.keys()[i] ].
+		'''
+
+		di_loci_position_by_loci_number={}
+		
+		li_loci_numbers=list( di_chromosome_number_by_loci_number.keys() )
+		li_chromosome_numbers=list( di_chromosome_number_by_loci_number.values() )
+
+		set_chromosome_numbers=set( li_chromosome_numbers )
+
+		array_chromosome_numbers=numpy.array( li_chromosome_numbers )
+
+		for i_chromosome_number in set_chromosome_numbers:
+
+			array_idx_this_chrom_number=\
+					( numpy.where( array_chromosome_numbers == i_chromosome_number ) )[0]
+
+			i_total_loci_on_this_chrom=len( array_idx_this_chrom_number )
+			
+			f_position_increment=1.0/float( i_total_loci_on_this_chrom )
+			
+			f_current_position=0.0
+
+			for idx in array_idx_this_chrom_number: 	
+
+					di_loci_position_by_loci_number[ li_loci_numbers[ idx ] ]=f_current_position
+
+					f_current_position+=f_position_increment
+			#end for each index in the chrom number list
+		#end for each i_chromosome_number
+
+		return di_loci_position_by_loci_number
+
+	#end __get_loci_positions_by_loci_number
+
+	def __add_loci_and_chromosomes_to_pop( self, 
+											pop, 
+											i_number_of_loci, 
+											i_number_of_chromosomes, 
+											li_chrom_type_list  ):
+		'''
+		2018_04_18. We now associate a chromosome with each loci.
+		For more details, see comments heading def,  
+		__get_dict_chromosome_number_by_loci_number_evenly_distributed, 
+		and the simuPOP manual page at 
+		http://simupop.sourceforge.net/manual_svn/build/userGuide_ch4_sec3.html
+		'''
+		di_chromosome_number_by_loci_number=\
+					self.__get_dict_chromosome_number_by_loci_number_evenly_distributed( \
+																		i_number_of_loci,
+																		i_number_of_chromosomes )
+		
+		i_tot_chroms_already_created=0
+
+		'''
+		These position floats, for no particular reason
+		representing N even pieces of each chrom as proportion of
+		[0.0,1.0], with N = max(number-of-loci).  These parameters
+		are required when using the addLoci and addChrom methods
+		of the Population object. Further, one can't assign the same
+		postiion to two loci,  Even further, we may in the future want 
+		to use loci positional information within chromosomes
+		'''
+
+		di_loci_position_by_loci_number= \
+				self.__get_loci_positions_by_loci_number( \
+										di_chromosome_number_by_loci_number )
+		
+		li_sorted_loci_numbers=sorted( list( di_chromosome_number_by_loci_number.keys() ) )
+
+		for i_loci_number in li_sorted_loci_numbers:
+
+			i_chromosome_number=di_chromosome_number_by_loci_number[ i_loci_number ] 
+			
+			'''
+			Zero indexing of chrom numbers means if we've created N chromosomes,
+			then the last chrom created was number N-1
+
+			'''
+			if i_chromosome_number >= i_tot_chroms_already_created:
+				'''
+				Chromomsome not yet created, create.
+				'''	
+				pop.addChrom( lociPos=[], chromType=li_chrom_type_list[ i_chromosome_number ]  )
+
+				i_tot_chroms_already_created+=1
+
+			#end if chromosome not yet created
+			
+			'''
+			Note we name the N loci using l0, l1, l2...l(N-1). They will then 
+			correctly correspond to the current Genpopfile Header loci names, 
+			as written in the pgooutputsimupop.py 
+			def writeGenepopFileHeaderAndLociList.
+			'''
+			pop.addLoci( i_chromosome_number, 
+							pos=di_loci_position_by_loci_number[ i_loci_number ],
+							lociNames= "l" + str( i_loci_number ))
+
+		#end for each loci number
+
+		return
+	#end __add_loci_and_chromosomes_to_pop
+
+	def __write_chromosome_loci_table( self, o_simupop_population ):
+		self.output.writeLociChromTable( o_simupop_population )
+		return
+	#end __write_chromosome_loci_table
+
 	def __createSinglePop( self ):
+
 		popSize=self.input.popSize
 		nLoci=self.input.numMSats + self.input.numSNPs
 		startLambda=self.input.startLambda
@@ -893,12 +1076,42 @@ class PGOpSimuPop( modop.APGOperation ):
 		#end if lambda < VALUE_NO_LAMBA
 
 		postOps = []
+		
+		'''
+		2018_04_19. We now assign loci to chromosomes, and, in 
+		order not to put all M mstats (always the first M loci)
+		on just a few chromosomes, and similarly with S SNPs (the
+		last S loci created, we're creating chromosomes and loci
+		using the simuPOP.addChrom and simuPOP.addLoci (see def
+		__add_loci_and_chromosome_to_pop.  We rem out the original
+		pop creation, and replace with stripped down initialization,
+		then assign loci and chroms after:
+		
+		2018_04_27.  Revise the chrom-total handlingrevert to 
+		the original pop creation statement when number of chromsomes 
+		is zero.  Note, too, that when this total is zero, we will 
+		not write a chrom/loci table.
+		'''
 
-		pop = sp.Population(popSize, ploidy=2, loci=[1] * nLoci,
-					chromTypes=[sp.AUTOSOME] * nLoci,
-					infoFields=["ind_id", "father_id", "mother_id",
-					"age", "breed", "rep_succ",
-					"mate", "force_skip"])
+		if self.input.numChroms==0:
+			pop = sp.Population(popSize, ploidy=2, loci=[1] * nLoci,
+						chromTypes=[sp.AUTOSOME] * nLoci,
+						infoFields=["ind_id", "father_id", "mother_id",
+						"age", "breed", "rep_succ",
+						"mate", "force_skip"])
+		else:
+
+			pop = sp.Population( popSize, ploidy=2, 					
+									infoFields=["ind_id", "father_id", "mother_id",
+														"age", "breed", "rep_succ",
+																"mate", "force_skip"])
+			
+			li_chrom_types=[ sp.AUTOSOME for i in range( self.input.numChroms ) ]
+
+			self.__add_loci_and_chromosomes_to_pop( pop, nLoci, 
+													self.input.numChroms, 
+																li_chrom_types  )
+		#end if user specifies zero chroms, else divvy up loci among some N>0 chromosomes
 
 		for ind in pop.individuals():
 			ind.breed = -1000
@@ -1220,7 +1433,6 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __litterSkipGenerator
 
 	def __calcNb( self, pop, pair ):
-
 		
 		'''
 		2017_03_02 This float tolerance is added
@@ -1293,13 +1505,11 @@ class PGOpSimuPop( modop.APGOperation ):
 			print( "in restrictedGenerator with target: " + str( self.__targetNb ) )
 			print( "in restrictedGenerator with tolerance " + str( self.__toleranceNb ) )
 		#end if very verbose
-			
 
 		"""No monogamy, skip or litter"""
 		nbOK = False
 		nb = None
 		attempts = 0
-
 		
 		if VERY_VERBOSE:
 
@@ -2030,7 +2240,6 @@ class PGOpSimuPop( modop.APGOperation ):
 					#end if het in range, else if pop's het less than filter's min, else return.
 				#end if not het filter in effect, else test
 			#end if output mode is genepop only, check whether het filter
-
 
 			for i in pop.individuals():
 				'''

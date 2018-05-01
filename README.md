@@ -4,11 +4,10 @@ overview
 	with the program. Briefly, our program is a front end that incorporates the
 	simulation and LDNe based population genetics functions provided by Tiago
 	Antao's python program at https://github.com/tiagoantao/agestructurene.git,
-	enhanced by multiple methods for population subsampling when performing LD-based
-	Ne and Nb estimations from genepop file inputs.  Further, we have added
-	simulation functionality and subsampling methods and interfaces for LDNe
-	estimation, as well as  plotting interfaces to show estimate distributions and
-	regression lines. 
+	enhanced by multiple methods for population and loci subsampling when performing
+	LD-based Ne and Nb estimations from genepop file inputs, and plotting facilities
+	to show estimate distributions and regression lines.  We have implemented all of
+	the the functionality in GUI interfaces.
 
 	The program uses multi-processing to allow an arbitrary number of
 	simultaneous simulation, LD-based Nb and Ne estimations, and plotting

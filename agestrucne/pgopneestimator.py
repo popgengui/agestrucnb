@@ -440,7 +440,16 @@ class PGOpNeEstimator( APGOperation ):
 		if self.__estimator_to_use == NEESTIMATOR:
 			o_op_object=self.__get_op_neestimator()
 		elif self.__estimator_to_use == LDNE_ESTIMATION:
+			
 			o_op_object=self.__get_op_ldne()
+
+			'''
+			2018_04_28.  We've added 2 LDNe2-only
+			parameters, chromlocifile and allele_pairing_scheme, 
+			that we must set before running.
+			'''
+			o_op_object.setLDNE2Values( self.input.ldne2_only_params )
+
 		else:
 			s_msg="In PGOpNeEstimator instance, def doOp, " \
 						+ "Unknown estimator name: " \
