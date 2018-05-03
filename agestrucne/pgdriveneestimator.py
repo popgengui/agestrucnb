@@ -229,7 +229,8 @@ LS_ARGS_HELP_REQUIRED=[ "Glob pattern to match genepop files, enclosed in quotes
 		"\"True\" or \"False\", value to assign to LDNe2's mating parameter, \"True\" sets the parameter " \
 				+ "to \"monogamy\", and \"False\" to random mating.",
 		"String, path and file name (or \"None\" ) of a file that gives chromosome <tab> loci pairs, for all loci " \
-				+ "as named in the genepop file(s).  LDNe2 will ignore allele pairs such that both are on the same chromosome." \
+				+ "as named in the genepop file(s).  LDNe2 will treat loci pairs according to the scheme selected " \
+				+ "(see the parameter description for ALLELEPAIRINGSCHEME (allele pairing scheme)."
 				+ "  \"None\" will mean that LDNe2 will use all allele pairs in its estimate calculations.",
 		"Integer, allele (loci) pairing scheme for LDNe2, 0=all pairs, 1=loci sharing chrom, 2=loci on diff chroms.  " \
 				+ "If chrom loci file is \"None\", then this param is ignored, and all pairs are used (i.e. same as value 0).",
