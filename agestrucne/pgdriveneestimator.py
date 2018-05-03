@@ -128,6 +128,12 @@ import agestrucne.genepopfilelociinfo as gpl
 
 import agestrucne.pgutilities as pgut
 
+'''
+2018_05_02. New class to check the chromloci file
+argument (see below, def validate_chromlocifile).
+'''
+import agestrucne.pgchromlocifilemanager as pgclf
+
 VERBOSE=False
 VERY_VERBOSE=False
 
@@ -174,7 +180,7 @@ spacer="   "
 spacer2="   "
 spacer3="  "
 
-LS_FLAGS_SHORT_REQUIRED=[ "-f",  "-s", "-p", "-m", "-a", "-r", "-e", "-M", "-h", "-P", "-c", "-l", "-i",  "-n", "-x", "-g","-q" ]
+LS_FLAGS_SHORT_REQUIRED=[ "-f",  "-s", "-p", "-m", "-a", "-r", "-e", "-M", "-H", "-P", "-c", "-l", "-i",  "-n", "-x", "-g","-q" ]
 
 LS_FLAGS_LONG_REQUIRED=[ "--gpfiles", "--scheme", "--params", "--minpopsize", "--maxpopsize", "--poprange", 
 						"--minallelefreq",  "--monogamy",  "--chromlocifile", "--allelepairingscheme", 
@@ -987,8 +993,22 @@ def parse_args( *args ):
 	#end if monogamy value invalid
 	b_monogamy=True if args[ IDX_MONOGAMY ] =="True" else False
 
-	s_chromlocifile=args[ IDX_CHROMLOCI_FILE ]
+	s_arg_chromlocifile=args[ IDX_CHROMLOCI_FILE ]	
+	s_chromlocifile=None
+
+	if s_arg_chromlocifile.lower() == pgclf.NO_CHROM_LOCI_FILE.lower():
+		s_chromlocifile=s_arg_chromlocifile
+		pass
+	else:
+		#use the absolute path to the chrom loci file, so that LDNe2
+		#can open it from a temp dir:
+		s_chromlocifile=os.path.abspath( s_arg_chromlocifile  )
+
+		validate_chromlocifile( s_chromlocifile, ls_files )
+	#end if no chromloci file, else we have one
+
 	i_allele_pairing_scheme=int( args[ IDX_ALLELE_PAIRING_SCHEME ] )
+
 	i_total_replicates=int( args[ IDX_REPLICATES ] )
 	i_total_processes=int( args[ IDX_PROCESSES ] )
 	o_debug_mode=set_debug_mode ( args[ IDX_DEBUG_MODE ] )
@@ -1102,6 +1122,13 @@ def parse_args( *args ):
 								b_do_nb_bias_adjustment )
 	
 #end parse_args
+
+def validate_chromlocifile( s_chromlocifile, ls_genepop_files ):
+	o_chromlocifilemanager=pgclf.ChromLociFileManager( s_file_name = s_chromlocifile,
+											ls_genepop_files_that_use_the_file=ls_genepop_files )
+	o_chromlocifilemanager.validateFile()
+	return
+#dnd def validate_chromlocifile
 
 def write_parms_to_file( lv_params ):
 	return

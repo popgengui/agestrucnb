@@ -303,6 +303,10 @@ def is_file_and_executable( s_path ):
 	return ( os.path.isfile( s_path ) and os.access( s_path, os.X_OK ) )
 #end is_file_and_executable
 
+def is_file( s_path ):
+	return( os.path.isfile( s_path ) )
+#end is_file
+
 def confirm_executable_is_in_path( s_exectuable_file_name ):
     b_return_val=False
 

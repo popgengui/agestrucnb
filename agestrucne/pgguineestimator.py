@@ -30,13 +30,6 @@ DELIMITER_GENEPOP_FILES=","
 #and __give_user_nbne_value_message
 INIT_GENEPOP_FILE_NAME="none"
 
-'''
-2018_04_29. In runEstimator, we check the value
-of our new param chromlocifile, to see if the
-user loaded a name:
-'''
-NO_CHROMLOCI_FILE="None"
-
 ROW_NUM_FILE_LOCATIONS_FRAME=0
 ROW_NUM_FILE_INFO_FRAME=1
 ROW_NUM_PARAMETERS_FRAME=2
@@ -98,6 +91,11 @@ from agestrucne.pgutilityclasses import NeEstimatorLociSamplingSchemeParameterMa
 from agestrucne.pgutilityclasses import NbNeReader
 
 from agestrucne.pglineregressconfigfilemaker import PGLineRegressConfigFileMaker
+
+'''
+2018_05_02. For constants used to define chromloci file:
+'''
+import agestrucne.pgchromlocifilemanager as pgclf
 
 class PGGuiNeEstimator( pgg.PGGuiApp ):
 	'''
@@ -809,10 +807,10 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		'''
 		s_chrom_loci_file=self.__chromlocifile
 		if self.__usechromfile==False:
-			s_chrom_loci_file=NO_CHROMLOCI_FILE
+			s_chrom_loci_file=pgclf.NO_CHROM_LOCI_FILE
 		#end if the flag says do not use a chrom loci file
 	
-		if self.__chromlocifile == NO_CHROMLOCI_FILE:
+		if self.__chromlocifile == pgclf.NO_CHROM_LOCI_FILE:
 			self.__loci_pairing_scheme=0
 		#end if no chromlocifile, unrestricted pairing
 
