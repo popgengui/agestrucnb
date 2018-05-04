@@ -17,6 +17,15 @@ PLOTLABELFONTSIZE=18
 TICKLABELFONTSIZE=14
 
 '''
+2018_05_04. To define range for the new
+scales added to allow user to set font
+sizes for axis and tic labels.
+'''
+MINFONTSIZE=8
+MAXFONTSIZE=40
+
+
+'''
 We need the tkinter.Scale widget,
 not the ttk.Scale, so we need the
 tkinter space name, otherwise
@@ -104,6 +113,11 @@ class PGNeEstimationRegressplotInterface( object ):
 	ROW_NUM_SUBFRAME_X_VALUE=3
 	ROW_NUM_SUBFRAME_PLOT=4 
 	ROW_NUM_SUBFRAME_STATS_TEXT=4
+	'''
+	2018_05_04. New subframe for setting font sizes
+	via scales:
+	'''
+	ROW_NUM_SUBFRAME_PLOT_APPEARANCE=3
 
 	ROW_NUM_GROUPBY_LABELS=0
 	ROW_NUM_GROUPBY_COMBOS=1
@@ -122,6 +136,12 @@ class PGNeEstimationRegressplotInterface( object ):
 	ROW_NUM_SAVE_PLOT_BUTTON=1
 	ROW_NUM_PLOT=0
 	ROW_NUM_STATS_TEXT=0
+	'''
+	2018_05_04. New scales to change font size
+	of labels:
+	'''
+	ROW_NUM_SET_FONT_SIZE_AXIS_LABEL_SCALE=1
+	ROW_NUM_SET_FONT_SIZE_TIC_LABEL_SCALE=1
 
 	#NUM_VALS_IN_SCALE=3000
 	NUM_VALS_IN_SCALE=int( 1e10 )
@@ -133,6 +153,10 @@ class PGNeEstimationRegressplotInterface( object ):
 	COLNUM_SUBFRAME_GROUPBY=0
 	COLNUM_SUBFRAME_PLOT=0
 	COLNUM_SUBFRAME_STATS_TEXT=5
+	'''
+	2018_05_04. New subframe for setting font sizes:
+	'''
+	COLNUM_SUBFRAME_PLOT_APPEARANCE=2
 
 	COLNUM_YVAL_LOWER_SCALE_LABEL=1
 	COLNUM_YVAL_UPPER_SCALE_LABEL=2
@@ -144,6 +168,11 @@ class PGNeEstimationRegressplotInterface( object ):
 	COLNUM_MIN_CYCLE_TEXT_BOX=1
 	COLNUM_MAX_CYCLE_TEXT_BOX=1
 	COLNUM_ALPHA_TEXT_BOX=1
+	'''
+	2018_05_04. New scalsed for setting font sizes:
+	'''
+	COLNUM_SET_FONT_SIZE_AXIS_LABEL_SCALE=1
+	COLNUM_SET_FONT_SIZE_TIC_LABEL_SCALE=2
 
 	COLSPAN_SUBFRAME_TSV_LOADER=3
 	COLSPAN_SUBFRAME_GROUPY=4
@@ -537,6 +566,7 @@ class PGNeEstimationRegressplotInterface( object ):
 		Y_VALUE_FRAME_LABEL="Y-axis Data"
 		STATS_TEXT_FRAME_LABEL="Regression Stats"
 		PLOT_FRAME_LABEL="Plot"
+		PLOT_APPEARANCE_FRAME_LABEL="Other settings"
 
 		FRAME_PADDING=PGNeEstimationRegressplotInterface.SUBFRAME_PADDING
 
@@ -565,6 +595,15 @@ class PGNeEstimationRegressplotInterface( object ):
 				relief=FRAME_STYLE,
 				text=STATS_TEXT_FRAME_LABEL )
 
+		'''
+		2018_05_04. New subframe on which we place scales to set font sizes:
+		'''
+		self.__subframes[ 'plot_appearance' ]=LabelFrame( self.__master_frame,
+				padding=FRAME_PADDING,
+				relief=FRAME_STYLE,
+				text=PLOT_APPEARANCE_FRAME_LABEL )
+
+
 		self.__subframes[ 'filter' ].grid( row=o_myc.ROW_NUM_SUBFRAME_FILTER, 
 														column=o_myc.COLNUM_SUBFRAME_FILTER, 
 														columnspan=o_myc.COLSPAN_SUBFRAME_FILTER, 
@@ -587,6 +626,13 @@ class PGNeEstimationRegressplotInterface( object ):
 		
 		self.__subframes[ 'stats_text' ].grid( row=o_myc.ROW_NUM_SUBFRAME_STATS_TEXT, 
 													column=o_myc.COLNUM_SUBFRAME_STATS_TEXT, 
+													sticky=(N,W) )
+		'''
+		2018_05_04. New subframe for setting the plot's label font sizes.
+		'''
+
+		self.__subframes[ 'plot_appearance' ].grid( row=o_myc.ROW_NUM_SUBFRAME_PLOT_APPEARANCE, 
+													column=o_myc.COLNUM_SUBFRAME_PLOT_APPEARANCE, 
 													sticky=(N,W) )
 		return
 	#end __make_subframes
@@ -927,9 +973,71 @@ class PGNeEstimationRegressplotInterface( object ):
 		
 		self.__scales={ 'y_value_lower':o_y_lower_value_scale, 'y_value_upper':o_y_upper_value_scale }
 
+
+		'''
+		2018_05_04.  New scales allow user to set the font size for axis and tic labels:
+		'''
+		o_axis_label_font_size_scale=PGScaleWithEntry( 
+							o_master_frame= self.__subframes[ 'plot_appearance' ], 
+							f_scale_from=MINFONTSIZE, 
+							f_scale_to = MAXFONTSIZE,
+							def_scale_command=self.__on_font_size_axis_label_change,
+							v_orient=HORIZONTAL,
+							f_resolution=1,
+							i_scale_length=SCALE_LENGTH,
+							s_scale_label="axis label font size" )
+
+		o_axis_label_font_size_scale.scale.set( PLOTLABELFONTSIZE )
+
+		o_axis_label_font_size_scale.grid( row=o_myclass.ROW_NUM_SET_FONT_SIZE_AXIS_LABEL_SCALE, 
+											column=o_myclass.COLNUM_SET_FONT_SIZE_AXIS_LABEL_SCALE, 
+																			sticky=( N,W ) )
+		self.__scales[ 'font_size_labels_axis' ] = o_axis_label_font_size_scale
+
+		'''
+		New scales allow user to set the font size for axis and tic labels:
+		'''
+		o_tic_label_font_size_scale=PGScaleWithEntry( 
+							o_master_frame= self.__subframes[ 'plot_appearance' ], 
+							f_scale_from=MINFONTSIZE, 
+							f_scale_to = MAXFONTSIZE,
+							def_scale_command=self.__on_font_size_tic_label_change,
+							v_orient=HORIZONTAL,
+							f_resolution=1,
+							i_scale_length=SCALE_LENGTH,
+							s_scale_label="tic label font size" )
+
+		o_tic_label_font_size_scale.scale.set( TICKLABELFONTSIZE )
+
+		o_tic_label_font_size_scale.grid( row=o_myclass.ROW_NUM_SET_FONT_SIZE_TIC_LABEL_SCALE, 
+											column=o_myclass.COLNUM_SET_FONT_SIZE_TIC_LABEL_SCALE, 
+																			sticky=( N,W ) )
+		self.__scales[ 'font_size_labels_tic' ] = o_tic_label_font_size_scale
+
+
+
 		return
 
 	#end __make_scales
+
+
+	def __on_font_size_axis_label_change( self, o_event=None ):
+		if self.__plotframe is not None:
+			i_font_size=int( self.__scales[ 'font_size_labels_axis'].scale.get()  )
+			self.__plotframe.setFontSizeAxisLabels( i_font_size )
+			self.__update_plot_and_stats_text()
+		#end if we have a plot frame
+		return
+	#end __on_font_size_axis_lable_change
+
+	def __on_font_size_tic_label_change( self, o_event=None ):
+		if self.__plotframe is not None:
+			i_font_size=int( self.__scales[ 'font_size_labels_tic'].scale.get()  )
+			self.__plotframe.setFontSizeTicLabels( i_font_size )
+			self.__update_plot_and_stats_text()
+		#end if we have a plot frame
+		return
+	#end __on_font_size_axis_lable_change
 
 	def __get_range_unfiltered_y_data( self ):
 

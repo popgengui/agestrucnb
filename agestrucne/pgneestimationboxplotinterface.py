@@ -18,10 +18,19 @@ PLOTLABELFONTSIZE=25
 TICKLABELFONTSIZE=20
 
 '''
+2018_05_04. To define range for the new
+scales added to allow user to set font
+sizes for axis and tic labels.
+'''
+MINFONTSIZE=8
+MAXFONTSIZE=40
+
+
+'''
 We need the tkinter.Scale widget,
 not the ttk.Scale, so we need the
 tkinter space name, otherwise
-the ttk boject will be instantiated:
+the ttk oject will be instantiated:
 '''
 import tkinter as tki
 from tkinter import *
@@ -97,7 +106,14 @@ class PGNeEstimationBoxplotInterface( object ):
 	ROW_NUM_YVAL_COMBO=1
 	ROW_NUM_YVAL_UPPER_SCALE=1
 	ROW_NUM_YVAL_LOWER_SCALE=1
-	ROW_NUM_SAVE_PLOT_BUTTON=1
+	'''
+	2018_05_04. New scales to set the
+	fond sizes for axis and tic labels.
+	the plot-save button is moved down:
+	'''
+	ROW_NUM_SET_FONT_SIZE_AXIS_LABEL_SCALE=1
+	ROW_NUM_SET_FONT_SIZE_TIC_LABEL_SCALE=1
+	ROW_NUM_SAVE_PLOT_BUTTON=3
 
 	'''
 	2018_04_13.   Was setting scale
@@ -120,6 +136,13 @@ class PGNeEstimationBoxplotInterface( object ):
 	COLNUM_YVAL_UPPER_SCALE_LABEL=2
 	COLNUM_YVAL_LOWER_SCALE=1
 	COLNUM_YVAL_UPPER_SCALE=2
+	'''
+	2018_05_04. New scales to set
+	font size, placed in the same subframe
+	and column as the plot save button:
+	'''
+	COLNUM_SET_FONT_SIZE_AXIS_LABEL_SCALE=2
+	COLNUM_SET_FONT_SIZE_TIC_LABEL_SCALE=3
 	COLNUM_SAVE_PLOT_BUTTON=2
 
 	COLSPAN_SUBFRAME_TSV_LOADER=3
@@ -503,7 +526,7 @@ class PGNeEstimationBoxplotInterface( object ):
 
 		self.__labels[ 'select_y_variable' ] = Label( self.__subframes[ 'y_value' ], 
 															text= "Y axis value" , 
-#															padding=o_myc.LABEL_PADDING)
+															padding=o_myc.LABEL_PADDING)
 #	
 #		self.__labels[ 'y_lower_scale' ]=Label( self.__subframes[ 'y_value' ], 
 #												text="Lower limit Y axis values", 
@@ -511,7 +534,7 @@ class PGNeEstimationBoxplotInterface( object ):
 #		
 #		self.__labels[ 'y_upper_scale' ]=Label( self.__subframes[ 'y_value' ], 
 #												text="Upper limit Y axis values", 
-														padding=o_myc.LABEL_PADDING )
+#														padding=o_myc.LABEL_PADDING )
 	
 
 		self.__labels[ 'select_y_variable' ].grid( row = o_myc.ROW_NUM_YVAL_LABEL, 
@@ -524,6 +547,7 @@ class PGNeEstimationBoxplotInterface( object ):
 #		self.__labels[ 'y_upper_scale' ].grid( row=o_myc.ROW_NUM_YVAL_UPPER_SCALE_LABEL, 
 #												column=o_myc.COLNUM_YVAL_UPPER_SCALE_LABEL, 
 #																				sticky=( N,W ) )
+	
 
 		return
 	#end __make labels
@@ -717,8 +741,69 @@ class PGNeEstimationBoxplotInterface( object ):
 																			sticky=( N,W ) )
 		
 		self.__scales={ 'y_value_lower':o_y_lower_value_scale, 'y_value_upper':o_y_upper_value_scale }
+
+
+		'''
+		New scales allow user to set the font size for axis and tic labels:
+		'''
+		o_axis_label_font_size_scale=PGScaleWithEntry( 
+							o_master_frame= self.__subframes[ 'save_plot' ], 
+							f_scale_from=MINFONTSIZE, 
+							f_scale_to = MAXFONTSIZE,
+							def_scale_command=self.__on_font_size_axis_label_change,
+							v_orient=HORIZONTAL,
+							f_resolution=1,
+							i_scale_length=SCALE_LENGTH,
+							s_scale_label="axis label font size" )
+
+		o_axis_label_font_size_scale.scale.set( PLOTLABELFONTSIZE )
+
+		o_axis_label_font_size_scale.grid( row=o_myclass.ROW_NUM_SET_FONT_SIZE_AXIS_LABEL_SCALE, 
+											column=o_myclass.COLNUM_SET_FONT_SIZE_AXIS_LABEL_SCALE, 
+																			sticky=( N,W ) )
+		self.__scales[ 'font_size_labels_axis' ] = o_axis_label_font_size_scale
+
+		'''
+		New scales allow user to set the font size for axis and tic labels:
+		'''
+		o_tic_label_font_size_scale=PGScaleWithEntry( 
+							o_master_frame= self.__subframes[ 'save_plot' ], 
+							f_scale_from=MINFONTSIZE, 
+							f_scale_to = MAXFONTSIZE,
+							def_scale_command=self.__on_font_size_tic_label_change,
+							v_orient=HORIZONTAL,
+							f_resolution=1,
+							i_scale_length=SCALE_LENGTH,
+							s_scale_label="tic label font size" )
+
+		o_tic_label_font_size_scale.scale.set( TICKLABELFONTSIZE )
+
+		o_tic_label_font_size_scale.grid( row=o_myclass.ROW_NUM_SET_FONT_SIZE_TIC_LABEL_SCALE, 
+											column=o_myclass.COLNUM_SET_FONT_SIZE_TIC_LABEL_SCALE, 
+																			sticky=( N,W ) )
+		self.__scales[ 'font_size_labels_tic' ] = o_tic_label_font_size_scale
+
 		return
 	#end __make_scales
+
+	def __on_font_size_axis_label_change( self, o_event=None ):
+		if self.__plotframe is not None:
+			i_font_size=int( self.__scales[ 'font_size_labels_axis'].scale.get()  )
+			self.__plotframe.setFontSizeAxisLabels( i_font_size )
+			self.__update_results()
+		#end if we have a plot frame
+		return
+	#end __on_font_size_axis_lable_change
+
+	def __on_font_size_tic_label_change( self, o_event=None ):
+		if self.__plotframe is not None:
+			i_font_size=int( self.__scales[ 'font_size_labels_tic'].scale.get()  )
+			self.__plotframe.setFontSizeTicLabels( i_font_size )
+			self.__update_results()
+		#end if we have a plot frame
+		return
+	#end __on_font_size_axis_lable_change
+
 
 	def __get_range_unfiltered_y_data( self ):
 
@@ -859,7 +944,7 @@ class PGNeEstimationBoxplotInterface( object ):
 
 		self.__buttons[ 'save_plot_to_file' ]=Button( \
 				self.__subframes[ 'save_plot' ],
-				text="Save",
+				text="Save Plot to File",
 				command=self.__on_click_save_plot_button )
 
 		self.__buttons[ 'save_plot_to_file' ].grid( \

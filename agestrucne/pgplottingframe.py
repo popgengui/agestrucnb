@@ -268,9 +268,36 @@ class PGPlottingFrame( Frame ):
 
 		o_xticklabels=self.__figure.get_axes()[0].set_xticklabels( 
 														ls_labels, 
-														rotation = self.__xtick_rotation_angle, ha=s_xtick_label_alignment )
+														rotation = self.__xtick_rotation_angle, 
+														ha=s_xtick_label_alignment )
 		return
 	#end set_x_axis_margin_and_xtick_rotation
+
+	def set_tic_lable_size( self ):
+		self.subplot.tick_params( labelsize=self.__ticklabelsize )
+		return
+	#end set_y_axis_tic_lable_size
+
+	def setFontSizeAxisLabels( self, i_font_size ):
+		'''
+		2018_05_04.  This def is added to accomodate
+		new controls (scales with entry boxes) in plotting GUI
+		to change font sizes on labels.
+		'''
+		self.label_fontsize=i_font_size
+
+		return
+	#end def setFontSizeAxisLabels
+
+	def setFontSizeTicLabels( self, i_font_size ):
+		'''
+		2018_05_04.  This def is added to accomodate
+		new controls (scales with entry boxes) in plotting GUI
+		to change font sizes on labels.
+		'''
+		self.__ticklabelsize=i_font_size
+		return
+	#end def setFontSizeAxisLabels
 
 #end class PGPlottingFrame
 
@@ -328,6 +355,7 @@ class PGPlottingFrame2DLines( PGPlottingFrame ):
 		self.subplot.clear()
 		self.subplot.set_xlabel(self.xlabel, fontsize=self.label_fontsize )
 		self.subplot.set_ylabel( self.ylabel, fontsize=self.label_fontsize )
+		self.set_tic_lable_size()
 		self._PGPlottingFrame__figure.subplots_adjust(bottom=MARGIN_ADJUST)
 
 		for s_line_name in self.current_data:
@@ -1075,6 +1103,7 @@ class PGPlottingFrameBoxplotFromFileManager( PGPlottingFrame ):
 		self.subplot.clear()
 
 		if len( self.current_data[ 'labels' ] ) > 0:
+			self.set_tic_lable_size()
 			self.set_x_axis_margin_and_xtick_rotation( self.current_data[ 'labels' ] )
 			self.subplot.set_xlabel(self.xlabel, fontsize=self.label_fontsize )
 			self.subplot.set_ylabel( self.ylabel, fontsize=self.label_fontsize )
@@ -1085,12 +1114,14 @@ class PGPlottingFrameBoxplotFromFileManager( PGPlottingFrame ):
 				self._PGPlottingFrame__figure.canvas.draw() 
 			#end if no animation 
 		else:
+			self._tic_lable_size()
 			self.set_x_axis_margin_and_xtick_rotation( self.current_data[ 'labels' ] )
 			self.subplot.set_xlabel(self.xlabel, fontsize=self.label_fontsize )
 			self.subplot.set_ylabel( self.ylabel, fontsize=self.label_fontsize )
 
 			self.subplot.boxplot( x=NO_BOXPLOT_DATA[ 'value_lists' ],
 										labels=NO_BOXPLOT_DATA[ 'labels' ] )
+
 			if self._PGPlottingFrame__do_animate==False:
 				#self.subplot.draw( renderer=self._PGPlottingFrame__figure.canvas.draw() )
 				self._PGPlottingFrame__figure.canvas.draw() 
