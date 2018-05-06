@@ -109,15 +109,20 @@ class PGNeEstimationRegressplotInterface( object ):
 	ROW_NUM_SUBFRAME_TSV_FILE_LOADER=0
 	ROW_NUM_SUBFRAME_GROUPBY=1
 	ROW_NUM_SUBFRAME_FILTER=2
-	ROW_NUM_SUBFRAME_Y_VALUE=3
-	ROW_NUM_SUBFRAME_X_VALUE=3
+	ROW_NUM_SUBFRAME_Y_VALUE=0
+	ROW_NUM_SUBFRAME_X_VALUE=0
 	ROW_NUM_SUBFRAME_PLOT=4 
 	ROW_NUM_SUBFRAME_STATS_TEXT=4
 	'''
 	2018_05_04. New subframe for setting font sizes
 	via scales:
 	'''
-	ROW_NUM_SUBFRAME_PLOT_APPEARANCE=3
+	ROW_NUM_SUBFRAME_PLOT_APPEARANCE=0
+	'''
+	2018_05_05. New subframe to contain the
+	3 subframes y_value, x_value, and plot_appearance.
+	'''
+	ROW_NUM_SUBFRAME_ROW_3_SUBFRAME=3
 
 	ROW_NUM_GROUPBY_LABELS=0
 	ROW_NUM_GROUPBY_COMBOS=1
@@ -148,15 +153,22 @@ class PGNeEstimationRegressplotInterface( object ):
 
 	COLNUM_SUBFRAME_TSV_LOADER=0
 	COLNUM_SUBFRAME_Y_VALUE=0
-	COLNUM_SUBFRAME_X_VALUE=1
+	COLNUM_SUBFRAME_X_VALUE=2
 	COLNUM_SUBFRAME_FILTER=0
 	COLNUM_SUBFRAME_GROUPBY=0
 	COLNUM_SUBFRAME_PLOT=0
-	COLNUM_SUBFRAME_STATS_TEXT=5
+	COLNUM_SUBFRAME_STATS_TEXT=4
 	'''
 	2018_05_04. New subframe for setting font sizes:
 	'''
-	COLNUM_SUBFRAME_PLOT_APPEARANCE=2
+	COLNUM_SUBFRAME_PLOT_APPEARANCE=3
+
+	'''
+	2018_05_05. New subframe to contain the
+	3 subframes y_value, x_value, and plot_appearance.
+	'''
+	COLNUM_SUBFRAME_ROW_3_SUBFRAME=0
+
 
 	COLNUM_YVAL_LOWER_SCALE_LABEL=1
 	COLNUM_YVAL_UPPER_SCALE_LABEL=2
@@ -174,14 +186,20 @@ class PGNeEstimationRegressplotInterface( object ):
 	COLNUM_SET_FONT_SIZE_AXIS_LABEL_SCALE=1
 	COLNUM_SET_FONT_SIZE_TIC_LABEL_SCALE=2
 
-	COLSPAN_SUBFRAME_TSV_LOADER=3
-	COLSPAN_SUBFRAME_GROUPY=4
-	COLSPAN_SUBFRAME_FILTER=8
-	COLSPAN_SUBFRAME_Y_VALUE=1
+	COLSPAN_SUBFRAME_TSV_LOADER=30
+	COLSPAN_SUBFRAME_FILTER=30
+	COLSPAN_SUBFRAME_Y_VALUE=2
 	COLSPAN_SUBFRAME_X_VALUE=1
-	COLSPAN_SUBFRAME_SAVE_PLOT=1
 	COLSPAN_SUBFRAME_PLOT=4
-	COLSPAN_SUBFRAME_STATS_TEXT=1
+	COLSPAN_SUBFRAME_STATS_TEXT=30
+	COLSPAN_SUBFRAME_PLOT_APPEARANCE=30
+	'''
+	2018_05_05. New subframe to contain the
+	3 subframes y_value, x_value, and plot_appearance.
+	'''
+	COLSPAN_SUBFRAME_ROW_3_SUBFRAME=30
+
+
 
 	SUBFRAME_STYLE="groove"
 	SUBFRAME_PADDING=10
@@ -570,17 +588,31 @@ class PGNeEstimationRegressplotInterface( object ):
 
 		FRAME_PADDING=PGNeEstimationRegressplotInterface.SUBFRAME_PADDING
 
+
+		'''
+		2018_05_05.  This new frame is added to simplify the spacing
+		of the 3 subframes that constitute row 3 of the GUI's main grid.
+		Note that these 3 subframs (y_value, x_value, and plot_appearance),
+		are still added to the self.__subrames dict, so they are accessible
+		from it, even though their master frame has been changed to the row_3_subframe.
+		Note, too, that this new subrame is of type Frame instead of LabelFrame,
+		and so will lack any relief or label.
+		'''
+		o_row_3_subframe=Frame( self.__master_frame )
+
+		self.__subframes[ 'row_3_subframe' ] = o_row_3_subframe 
+
 		self.__subframes[ 'filter' ]=LabelFrame( self.__master_frame,
 				padding=FRAME_PADDING,
 				relief=FRAME_STYLE,
 				text=GROUPBY_FILTER_FRAME_LABEL )
 
-		self.__subframes[ 'y_value' ]=LabelFrame( self.__master_frame,
+		self.__subframes[ 'y_value' ]=LabelFrame( o_row_3_subframe,
 				padding=FRAME_PADDING,
 				relief=FRAME_STYLE,
 				text=Y_VALUE_FRAME_LABEL )
 
-		self.__subframes[ 'x_value' ]=LabelFrame( self.__master_frame,
+		self.__subframes[ 'x_value' ]=LabelFrame( o_row_3_subframe,
 				padding=FRAME_PADDING,
 				relief=FRAME_STYLE,
 				text=X_VALUE_FRAME_LABEL )
@@ -598,11 +630,19 @@ class PGNeEstimationRegressplotInterface( object ):
 		'''
 		2018_05_04. New subframe on which we place scales to set font sizes:
 		'''
-		self.__subframes[ 'plot_appearance' ]=LabelFrame( self.__master_frame,
+		self.__subframes[ 'plot_appearance' ]=LabelFrame( o_row_3_subframe,
 				padding=FRAME_PADDING,
 				relief=FRAME_STYLE,
 				text=PLOT_APPEARANCE_FRAME_LABEL )
 
+
+		'''
+		2018_05_05. New subframe contains the y_value, x_value, and plot_appearance subframes
+		'''
+		self.__subframes[ 'row_3_subframe' ].grid( row=o_myc.ROW_NUM_SUBFRAME_ROW_3_SUBFRAME,
+														column=o_myc.COLNUM_SUBFRAME_ROW_3_SUBFRAME,
+														columnspan=o_myc.COLSPAN_SUBFRAME_ROW_3_SUBFRAME,
+														sticky=(N,W) )
 
 		self.__subframes[ 'filter' ].grid( row=o_myc.ROW_NUM_SUBFRAME_FILTER, 
 														column=o_myc.COLNUM_SUBFRAME_FILTER, 
@@ -626,6 +666,7 @@ class PGNeEstimationRegressplotInterface( object ):
 		
 		self.__subframes[ 'stats_text' ].grid( row=o_myc.ROW_NUM_SUBFRAME_STATS_TEXT, 
 													column=o_myc.COLNUM_SUBFRAME_STATS_TEXT, 
+													columnspan=o_myc.COLSPAN_SUBFRAME_STATS_TEXT, 
 													sticky=(N,W) )
 		'''
 		2018_05_04. New subframe for setting the plot's label font sizes.
@@ -633,6 +674,7 @@ class PGNeEstimationRegressplotInterface( object ):
 
 		self.__subframes[ 'plot_appearance' ].grid( row=o_myc.ROW_NUM_SUBFRAME_PLOT_APPEARANCE, 
 													column=o_myc.COLNUM_SUBFRAME_PLOT_APPEARANCE, 
+													columnspan=o_myc.COLSPAN_SUBFRAME_PLOT_APPEARANCE,
 													sticky=(N,W) )
 		return
 	#end __make_subframes
