@@ -64,6 +64,17 @@ from numpy import sqrt as npsqrt
 #For estimating microsat allele frequencies
 #given an expected heterozygosity:
 from numpy.random.mtrand import dirichlet 
+#For varying snp expected het values
+#around a mean:
+from numpy.random import binomial 
+from numpy import mean as npmean
+
+'''
+For sampling from a truncated normal
+distribution
+'''
+import scipy.stats as scistats
+from numpy import searchsorted
 
 '''
 2017_04_27
@@ -466,9 +477,19 @@ def get_platform():
 	return s_platform_informal
 #end get_platform
 
+def is_linux_platform():
+	s_os_platform_name=get_platform()
+	return ( s_os_platform_name == SYS_LINUX )
+#end is_linux_platform
+
+def is_mac_platform():
+	s_os_platform_name=get_platform()
+	return ( s_os_platform_name == SYS_MAC )
+#end is_mac_platform
+
 def is_windows_platform():
-	s_os_plaform_name=get_platform()	
-	return ( s_os_plaform_name == SYS_WINDOWS )
+	s_os_platform_name=get_platform()	
+	return ( s_os_platform_name == SYS_WINDOWS )
 #end is_windows_platform
 
 def fix_windows_path( s_path ):
@@ -1685,6 +1706,245 @@ def get_memory_virtual_available():
 	return tup_meminfo.available
 #end get_memory_virtual_available
 
+def get_binomial_dist_values_with_mean_within_tolerance( i_trials, 
+														f_target_value, 
+														i_num_vals,
+														f_tolerance=0.01 ):
+	'''
+	2018_05_22.
+	This def is added to allow pgopsimupop.py to get a set of expected heterozygosity
+	values (as integers=het*100), such that their mean value is with a tolerance,
+	so that these can then each be used to get a set of allele frequences for a SNP
+	(we may want to use this to get some variation among the allele frequencies
+	for microsats, too).
+
+	2018_05_24.  We deprecate this def for SNP allele-freq finding, in favor
+	of selecting frequencies from a truncated normal distribution (see def
+	get_sample_trunc_normal_distribution, below).
+	'''
+	MAX_TRIES_TO_HIT_MEAN=1000
+	f_prob_success=f_target_value/float( i_trials )
+	b_found_a_mean_witin_tolerance=False
+	li_binomial_dist_values=None
+
+	for i in range( MAX_TRIES_TO_HIT_MEAN ):
+
+		li_binomial_dist_values=list( binomial( i_trials, f_prob_success, i_num_vals ) )
+
+		f_mean=npmean( li_binomial_dist_values )
+
+		if abs( f_mean - f_target_value ) <= f_tolerance:
+			b_found_a_mean_witin_tolerance=True
+			break
+		#end if within tolerance, stop tries
+	#end for each try
+	
+	if not b_found_a_mean_witin_tolerance:
+		raise Exception( "In pgutilities.py, " \
+						+ "def get_binomial_dist_with_mean_value_within_tolerance, " \
+						+ "the tries to reach a set of binomially distributed values " \
+						+ "with a mean within the set tolerance failed."  )
+	#end if no mean within tolerance was found
+
+	return li_binomial_dist_values
+#end get_binomial_dist_with_mean_value_within_tolerance 
+
+def get_snp_allele_freqs_from_het_value_using_truncnorm_dist( f_this_het_value,
+																		i_num_freqs,
+																		f_tolerance=0.01 ):
+
+		'''
+		2018_05_24.  This def is created in order
+		to avoid our former scheme which initiated all
+		SNPs at the same allele frequencies (a uniform f 
+		for each allele frequency pair (f, 1-f)).  At the
+		same time we want to adhere to an intitial mean 
+		expected heterozygosity.  To this end we use
+		the quadratic eq. to get an exact f, 1-f to meet
+		the het value, then, for N snps we draw N samples
+		from (currently, using a truncated normal distribution 
+		whose mean is f. Note that we use a heuristic 
+		selection of the standard deviation of the distribution, 
+		as we want as wide a spread as possible, but also to 
+		keep the mean of the expected heterozygosity of the 
+		snp frequencies within (curretnly) 0.01 of our target. 
+		'''
+
+		'''
+		2018_02_08.  We are adding a new parameter "het_init_snp",
+		which allows the user to enter a value in [0.0,0.5]
+		which will be used to compute a pair of (diallelic)
+		allele frequencies assigned instead of the former 
+		hard-coded 0.5 (which is still the default.)
+		The call to the new pgutilities def get_roots_quadratic,
+		uses coefficients derived from solving for He in the
+		expected Het calculation for a loci:
+			He = 1 - [ freq_allele_1 ^ 2 + freq_allele_2 ^ 2 ]
+		where freq_allele_2 = 1 - freq_allele_1, to get
+
+		-freq^2 + freq - He/2 = 0
+
+		Note: (2018_05_24) this code, to get the freqs for
+		an init expected heterozygosity value, was moved here
+		from the def __createGenome in pgopsimupop.py, in order 
+		to implement the scheme that provides a non-identical 
+		set of initial SNP allele frequencies.
+		
+		'''
+
+		if f_this_het_value < 0.0 or f_this_het_value > 0.5:
+			s_msg="In pgutilities, def __get_snp_allele_frequenciesuencies, " \
+						+ "The value for heterozygosity initialization " \
+						+ "for SNPs is invalid at " \
+						+ str( f_this_het_value )  \
+						+ ".  Values are valid in [0.0,0.5]"
+			
+			raise Exception ( s_msg )
+		#end if invalid snp het init value
+
+		lf_roots=get_roots_quadratic( -1, 1, -1*(f_this_het_value)/2 )
+
+		f_init_snp_freq=None
+		
+		'''
+		We can use either root, since 
+		one root gives the freq for one
+		allele, whose diallelic partner
+		will be the 2nd root and their sum
+		will be one.  (Note that for the special
+		case of He=0.5, then we'll have one root
+		equal to -0.5 and the other to 0.5.  Hence
+		we test for a positive root.
+		'''
+		for f_root in lf_roots:
+			if f_root >= 0.0 and f_root <= 0.5:
+				f_init_snp_freq=f_root
+				break
+			#end if positive root
+		#end for each root	
+
+		lf_frequencies=get_sample_trunc_normal_allele_frequencies( \
+												f_mean_allele_freq=f_init_snp_freq,
+												f_target_het_value=f_this_het_value,
+												i_num_freqs=i_num_freqs,
+												f_tolerance=f_tolerance )
+		
+		return lf_frequencies
+
+#end get_snp_allele_freqs_from_het_value_using_truncnorm_dist
+
+def get_sample_trunc_normal_allele_frequencies( f_mean_allele_freq,
+													f_target_het_value,
+													i_num_freqs,
+													f_tolerance ):
+		'''
+		These are target (allele frequencies) values derived
+		from a series of increasing expected het values 
+		that in trials (see supplementary script,
+		test.truncnorm.freq.scheme.py), showed very aprox
+		the largest standard deviation that would get a collection
+		of 100 SNPs whose allele freqs gave a mean expected het
+		within 0.01 of the target het value.
+
+		'''
+		NUM_TRIES=int( 1e4 )
+		MIN_RANGE=0.0
+		MAX_RANGE=1.0
+
+		'''
+		2018_05_26. Rem out old boundary vals, replace with boundaries that requrire
+		only a 5% success rate.
+		'''
+#		FREQ_VALUE_SDEV_BOUNDARIES=[ 0.0, 0.005, 0.025, 0.052, 0.081,  0.11, 0.14, 0.27 ]
+#		SDEV_BY_BOUNDARY={ 1:0.001, 2:0.01, 3:0.02, 4:0.03, 5:0.05, 6:0.07, 7:0.1, 8:0.07  } 
+
+		FREQ_VALUE_SDEV_BOUNDARIES=[ 0.0, 0.005, 0.025, 0.052, 0.081, 0.11, 0.34, 0.37 ]
+		SDEV_BY_BOUNDARY={ 1:0.005, 2:0.01, 3:0.02, 4:0.05, 5:0.07, 6:0.01, 7:0.1, 8:0.07  }
+		lf_random_freqs=None
+
+		i_boundry_this_freq=searchsorted( FREQ_VALUE_SDEV_BOUNDARIES, f_mean_allele_freq, side='right' )
+
+		try:
+			f_std_dev=SDEV_BY_BOUNDARY[ i_boundry_this_freq ]
+		except KeyError as oke:
+			s_msg = "In pgutilities, def get_sample_trunc_normal_allele_frequencies, " \
+						+ "the program cannot find a standard deviation value associated " \
+						+ "with the frequency: " \
+						+ str( f_mean_allele_freq )
+			raise Exception( s_msg )
+		#end try...except
+
+		o_generator=get_sample_trunc_normal_distribution_generator( f_mean_allele_freq, 
+																				f_std_dev, 
+																				MIN_RANGE,
+																				MAX_RANGE )
+		for idx in range( NUM_TRIES ):
+
+			lf_random_freqs=o_generator.rvs( i_num_freqs ) 
+
+			f_mean_expected_het=get_mean_expected_het_for_set_of_biallelic_freqs( lf_random_freqs )
+
+			if abs( f_mean_expected_het - f_target_het_value ) <= f_tolerance:
+				break
+			#end if within tolerance
+		#end for each try
+
+		if lf_random_freqs is None:
+
+			s_msg = "In pgutilities, def get_sample_trunc_normal_allele_frequencies, " \
+						+ "the program could not get a list of frequencies with mean, " \
+						+ str( f_mean_allele_freq ) \
+						+ " and tolerance set at " \
+						+ str( f_tolerance ) \
+						+ " in " + str( NUM_TRIES ) + " tries."
+
+
+			raise Exception( s_msg )
+		#end if no freq list was within tolerance
+
+		return lf_random_freqs										
+
+#end  get_sample_trunc_normal_allele_frequencies
+
+def get_sample_trunc_normal_distribution_generator( f_mean,
+												f_std_dev,
+												f_distribution_min_value,
+												f_distribution_max_value ):
+		'''
+		2018_05_24.  This def is created to be called 
+		by pgopsimupop.py def __get_snp_allele_frequencies,
+		It supplies a generator from which the caller can 
+		draw samples from a truncated normal 
+		distribution. 
+
+		These terms are defined in the scipy.stats.truncorm help
+		output:
+		'''
+		f_term1=( f_distribution_min_value-f_mean )/f_std_dev
+		f_term2=( f_distribution_max_value-f_mean )/f_std_dev
+
+		o_generator=scistats.truncnorm( f_term1, f_term2, loc=f_mean, scale=f_std_dev )
+		
+		return o_generator
+#end get_sample_trunc_normal_distribution_generator
+
+def get_mean_expected_het_for_set_of_biallelic_freqs( lf_biallelic_freqs ):
+	lf_expected_het_values=[]
+
+	for f_freq in lf_biallelic_freqs:
+
+		f_this_expected_het=1 - sum( [ f_afreq * f_afreq  \
+								for f_afreq in [ f_freq, 1 - f_freq ] ] )
+
+		lf_expected_het_values.append( f_this_expected_het )
+
+	#end for each frequency
+
+	f_mean_expected_het=npmean( lf_expected_het_values )
+
+	return f_mean_expected_het
+#end get_mean_expected_het_for_set_of_biallelic_freqs
+
 def get_roots_quadratic( f_a, f_b, f_c ):
 
 	lf_roots=[]
@@ -1706,6 +1966,7 @@ def get_roots_quadratic( f_a, f_b, f_c ):
 						+  str( f_c ) + ", and using formula: "  + s_formula + ".\n" \
 						+ "Exception thrown with message: " + str( oex ) + "."
 			raise Exception( s_msg )
+		#end try...except
 	#end for each sign
 
 	return lf_roots

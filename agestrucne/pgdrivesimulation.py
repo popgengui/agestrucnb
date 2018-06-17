@@ -72,7 +72,8 @@ class SimInputParamValueHolder(object):
 					het_filter=None,
 					do_het_filter=None,
 					het_init_snp=None,
-					het_init_msat=None ):
+					het_init_msat=None,
+					numChroms=None ):
 
 		self.__values_by_param_name={ "model_name":model_name, 
 									"popSize":popSize, 
@@ -107,7 +108,8 @@ class SimInputParamValueHolder(object):
 									"het_filter":het_filter,
 									"do_het_filter":do_het_filter,
 									"het_init_snp":het_init_snp,
-									"het_init_msat":het_init_msat }
+									"het_init_msat":het_init_msat,
+									"numChroms":numChroms }
 							
 		return
 	#end __init__
@@ -228,7 +230,8 @@ def get_input_object( s_config_file,
 						i_num_snps,
 						f_het_init_snp,
 						i_num_msats,
-						f_het_init_msat ):
+						f_het_init_msat,
+						i_num_chroms ):
 
 	o_paramInfo=pgparams.PGParamSet( s_param_names_file )
 
@@ -264,7 +267,8 @@ def get_input_object( s_config_file,
 										numSNPs=i_num_snps,
 										het_init_snp=f_het_init_snp,
 										numMSats=i_num_msats,
-										het_init_msat = f_het_init_msat )
+										het_init_msat = f_het_init_msat,
+										numChroms=i_num_chroms )
 
 
 	o_input_manager = SimInputParamResetManager( o_simInput, o_value_holder )
@@ -295,7 +299,8 @@ def drive_sims( s_config_file,
 					i_num_snps,
 					f_het_init_snp,
 					i_num_msats,
-					f_het_init_msat ):
+					f_het_init_msat,
+					i_num_chroms ):
 
 	check_for_existing_output_files( s_output_base )
 
@@ -339,7 +344,8 @@ def drive_sims( s_config_file,
 						i_num_snps=i_num_snps,
 						f_het_init_snp=f_het_init_snp,
 						i_num_msats=i_num_msats,
-						f_het_init_msat=f_het_init_msat )
+						f_het_init_msat=f_het_init_msat,
+						i_num_chroms=i_num_chroms )
 
 
 	print( "Writing a temp configuration file for the simulation..." )
@@ -394,12 +400,12 @@ if __name__ == "__main__":
 
 	VALUE_LIST_IS_IMPLEMENTED=False
 
-	OPT_SHORT=[ "-b", "-n" , "-t", "-r", "-s", "-p", "-g", "-u", "-z", "-i", "-m", "-e", "-H", "-M", "-T" ]
+	OPT_SHORT=[ "-b", "-n" , "-t", "-r", "-s", "-p", "-g", "-u", "-z", "-i", "-m", "-e", "-H", "-M", "-T", "-C" ]
 
 	OPT_LONG=[ "--burnin", "--nb", "--nbtolerance", "--replicates", "--startsave", "--processes" , 
 													"--cycles", "--outputmode", "--hetfilter", 
 													"--popsize", "--cullmethod", "--numsnps", 
-													"--hetinitsnp", "--nummsats", "--hetinitmsat" ]
+													"--hetinitsnp", "--nummsats", "--hetinitmsat", "--numchroms" ]
 
 
 	s_chelp="configuration file.  Typically one of the files in the \"configuration_files\" " \
@@ -470,10 +476,18 @@ if __name__ == "__main__":
 
 	s_Thelp="Initial expected heterozygosity for Microsats.  This value will replace the \"init_het_msat\" " \
 				+ "value in the configuration file.  Values valid in interval (0.0,0.85]"
+	'''
+	2018_06_06 adding the number of chromosomes as an optional parameter. 
+	'''
+	s_Chelp="Number of chromosomes. Set the number of chromosomes for the simulation.  This value will replace the \"numChroms\" " \
+				+ "value in the configuration file.  If you set this to zero chromosomes, the sim will create one chromosome per " \
+				+ "loci.  See the manual for details."
 
 	s_vhelp_table_of_parameters=""
 
-	#Optional values, defaults if not supplied:
+	#Optional values, defaults if not supplied,
+	#"None" means the sim will use the  value
+	#in the conf file:
 	lv_value_list=None
 	i_processes=1
 	i_Nb=None
@@ -490,13 +504,18 @@ if __name__ == "__main__":
 	f_het_init_snp=None
 	i_num_msats=None
 	f_het_init_msat=None
+	'''
+	2018_06_06. Add num chroms to 
+	optional vals.
+	'''
+	i_num_chroms=None
 
 	REQUIRED_HELP=[ s_chelp, s_lhelp, s_ohelp ]
 
 	OPT_HELP=[ s_bhelp, s_nhelp, s_thelp, s_rhelp, 
 				s_shelp, s_phelp, s_ghelp, s_uhelp, 
 				s_zhelp, s_ihelp, s_mhelp, s_ehelp,
-				s_Hhelp, s_Mhelp, s_Thelp ]
+				s_Hhelp, s_Mhelp, s_Thelp, s_Chelp ]
 
 	o_parser=ap.ArgumentParser()
 
@@ -587,6 +606,12 @@ if __name__ == "__main__":
 	if o_args.nummsats is not None:
 		i_num_msats=int( o_args.nummsats )
 	#end if num msats set	
+	'''
+	2018_06_06 Adding number of chroms to optionals:
+	'''
+	if o_args.numchroms is not None:
+		i_num_chroms=int( o_args.numchroms )
+	#end if num msats set
 
 	drive_sims( s_config_file, 
 				s_life_table_file, 
@@ -606,7 +631,9 @@ if __name__ == "__main__":
 				i_num_snps=i_num_snps,
 				f_het_init_snp=f_het_init_snp,
 				i_num_msats=i_num_msats,
-				f_het_init_msat=f_het_init_msat )
+				f_het_init_msat=f_het_init_msat,
+				i_num_chroms=i_num_chroms )
+
 			
 
 #end if main

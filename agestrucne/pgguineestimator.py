@@ -1396,6 +1396,7 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					o_validity_tester=o_validity_checker,
 					b_force_disable=b_force_disable,
 					b_use_list_editor=True )
+
 			elif s_param_control_type == "entrywithbutton":
 
 				'''
@@ -2486,7 +2487,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 			s_trace= \
 				pgut.get_traceback_info_about_offending_code( o_traceback )
 
-			s_msg="In PGGuiSimuPop instance, def load_config_file " \
+			s_msg="In PGGuiNeEstimator instance, " \
+					+ "def __on_button_press_load_chrom_loci_file " \
 					+ "an exception was raised: " + str( oex ) \
 					+ "\nwith traceback info: " + s_trace
 

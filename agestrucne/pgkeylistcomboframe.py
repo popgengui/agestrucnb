@@ -25,6 +25,11 @@ common to the key-value-frame classes, we add a second parent class.
 '''
 from agestrucne.pgkeycontrolframe import PGKeyControlFrame
 
+'''
+2018_06_03. For getting OS in use, for unbinding the scroll from the combo,
+'''
+import agestrucne.pgutilities as pgut
+
 class KeyListComboFrame( PGKeyControlFrame ):
 
 	'''
@@ -208,6 +213,7 @@ class KeyListComboFrame( PGKeyControlFrame ):
 		o_combobox[ 'values' ] = self.__choices
 
 		o_combobox.bind("<<ComboboxSelected>>", self.__on_new_combobox_selection )
+
 		'''
 		Putatively, says tkk dpocuments, to fire when mouse pointer leaves
 		the widget, but, in Linux at least, it does not fire.
@@ -219,6 +225,26 @@ class KeyListComboFrame( PGKeyControlFrame ):
 		o_combobox.bind( '<FocusOut>', self.__on_new_combobox_selection )
 		o_combobox.bind( '<Return>', self.__on_new_combobox_selection )
 		o_combobox.bind( '<Tab>', self.__on_new_combobox_selection )
+
+
+		'''
+		2018_06_03.  This is meant to disablel the combobox (will
+		affect all comboboxes in the app) scroll binding, so that
+		the user wil not accidentally change the cbox setting when
+		it's the last control in focus before a scroll.  Scrolling
+		was affecting cbox, not matter where the mouse pointer
+		was.  This is from https://stackoverflow.com/questions/
+		44268882/remove-ttk-combobox-mousewheel-binding?  utm_medium=
+		organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+		
+		'''
+
+		if pgut.is_windows_platform():
+			o_combobox.unbind_class( "TCombobox", "<MouseWheel>" )
+		else:
+			o_combobox.unbind_class( "TCombobox", "<ButtonPress-4>" )
+			o_combobox.unbind_class( "TCombobox", "<ButtonPress-5>" )
+		#end if windows else non-windows
 
 		#For PGParamSet object-derived text, we need to
 		#substiture double-tildes with newlines.

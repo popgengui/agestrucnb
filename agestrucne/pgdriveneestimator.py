@@ -996,19 +996,26 @@ def parse_args( *args ):
 
 	s_arg_chromlocifile=args[ IDX_CHROMLOCI_FILE ]	
 	s_chromlocifile=None
+	b_need_to_validate_chromlocifile=False
 
 	if s_arg_chromlocifile.lower() == pgclf.NO_CHROM_LOCI_FILE.lower():
-		s_chromlocifile=s_arg_chromlocifile
-		pass
+		'''
+		We can accept none, NONE, and None, but we send in
+		the correct case as expected by LDNe2:
+		'''
+		s_chromlocifile=pgclf.NO_CHROM_LOCI_FILE
 	else:
 		#use the absolute path to the chrom loci file, so that LDNe2
 		#can open it from a temp dir:
 		s_chromlocifile=os.path.abspath( s_arg_chromlocifile  )
-
-		validate_chromlocifile( s_chromlocifile, ls_files )
+		b_need_to_validate_chromlocifile=True
 	#end if no chromloci file, else we have one
 
 	i_allele_pairing_scheme=int( args[ IDX_ALLELE_PAIRING_SCHEME ] )
+
+	if b_need_to_validate_chromlocifile:
+		validate_chromlocifile( s_chromlocifile, ls_files, i_allele_pairing_scheme )
+	#end if we need to validate the chromloci file
 
 	i_total_replicates=int( args[ IDX_REPLICATES ] )
 	i_total_processes=int( args[ IDX_PROCESSES ] )
@@ -1124,10 +1131,13 @@ def parse_args( *args ):
 	
 #end parse_args
 
-def validate_chromlocifile( s_chromlocifile, ls_genepop_files ):
+def validate_chromlocifile( s_chromlocifile, ls_genepop_files,  i_allele_pairing_scheme ):
+
 	o_chromlocifilemanager=pgclf.ChromLociFileManager( s_file_name = s_chromlocifile,
-											ls_genepop_files_that_use_the_file=ls_genepop_files )
+											ls_genepop_files_that_use_the_file=ls_genepop_files, 
+											i_ldne_pairing_scheme=i_allele_pairing_scheme )
 	o_chromlocifilemanager.validateFile()
+
 	return
 #dnd def validate_chromlocifile
 

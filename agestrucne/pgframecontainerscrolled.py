@@ -32,7 +32,6 @@ class FrameContainerScrolled( object ):
 	canvas and 2nd frame, and the 2nd frame 
 	is scrollable, either vertically or horizontally 
 	(but not yet both, as of Thu Jun  2 19:59:32 MDT 2016 )
-	
 
 	Note that this is not a Tkinter object, but
 	simply accomplishes the arragnement. 
@@ -209,17 +208,12 @@ class FrameContainerScrolled( object ):
 				self.__canvas.yview( 'scroll', 1, 'units' )
 			#end if event num is 4 else 5
 		elif s_platform == pgut.SYS_MAC:
-			self.__canvas.yview_scroll( old_div(event.delta,120) , 'units' )
+			self.__canvas.yview_scroll( 1 * event.delta, 'units' )
 		elif s_platform == pgut.SYS_WINDOWS:
 			self.__canvas.yview_scroll( -1 * ( old_div(event.delta,120) ), 'units' )
 		#end if linux, else mac, else windows
 		return
 #end class FrameContainerScrolled
-
-
-
-
-
 
 if __name__ == "__main__":
 	pass

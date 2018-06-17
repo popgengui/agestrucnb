@@ -8,18 +8,29 @@ __filename__ = "pgchromlocifilemanager.py"
 __date__ = "20180502"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
-#This string designates that
-#there is no chrom loci file
+'''
+This string designates that
+there is no chrom loci file,
+in the case expected by LDNe2:
+'''
+
 NO_CHROM_LOCI_FILE="None"
 
 CHROM_TOTAL_ZERO=0
-CHROM_TOTAL_NO_LOCI_PAIRS=1
 
 CHROM_LOCI_FILE_DELIMITER="\t"
 
 #Field order in the file
 IDX_CHROM_NAME=0
 IDX_LOCI_NAME=1
+
+LDNE_LOCI_PAIRING_SCHEME_IGNORE_CHROM=0
+LDNE_LOCI_PAIRING_SCHEME_SAME_CHROM=1
+LDNE_LOCI_PAIRING_SCHEME_DIFF_CHROM=2
+
+LOCI_PAIRING_SCHEME_DESCRIPT={ LDNE_LOCI_PAIRING_SCHEME_IGNORE_CHROM:"use all pairs",
+					LDNE_LOCI_PAIRING_SCHEME_SAME_CHROM:"loci pair p1,p2 must be from the same chromosome",
+					LDNE_LOCI_PAIRING_SCHEME_DIFF_CHROM:"loci pair p1,p2, must be from different chromosomes" }
 
 import os
 
@@ -92,6 +103,7 @@ class GenepopLociScraper( object ):
 	#end property loci_list
 
 #end class GenepopLociScraper
+
 class ChromLociFileManager( object ):
 	'''
 	2018_05_02.  This class is created, inititally,
@@ -103,18 +115,26 @@ class ChromLociFileManager( object ):
 	the string that designates that no such 
 	file is to be used, and which chromosome
 	totals are invalid (see mod-level assignments).
-
 	'''
+
 	def __init__( self, 
 					s_file_name=NO_CHROM_LOCI_FILE,
-					ls_genepop_files_that_use_the_file=[] ):
+					ls_genepop_files_that_use_the_file=[],
+					i_ldne_pairing_scheme=None ):
 
 		self.__filename=s_file_name
-		self.__genepop_files=ls_genepop_files_that_use_the_file.copy()
+
+		'''
+		Note -- no list.copy() def for python2:
+		'''
+		self.__genepop_files=[ v_item for v_item 
+							in ls_genepop_files_that_use_the_file ]
 
 		self.__total_chromosomes=None
 		self.__chromloci_table=None
 		self.__unlisted_loci=[]
+		self.__loci_pairing_scheme=i_ldne_pairing_scheme
+
 		return
 	#end __init__
 
@@ -128,23 +148,25 @@ class ChromLociFileManager( object ):
 
 		if b_is_file:
 
-			b_valid_chrom_total=self.__file_has_valid_number_of_chromosomes()
+			self.__get_total_chromosomes()
 
 			b_each_loci_paired_with_one_chromosome=\
 					self.__each_loci_is_assigned_to_exactly_one_chromosome()
 
 			b_all_loci_listed=self.__all_genepop_loci_are_listed()
 
-
-			if not b_valid_chrom_total:
-				s_error_message += "\nTotal chromosomes, " \
-									+ "(" + str( self.__total_chromosomes ) + ")" \
-									+ "in chrom/loci file, " \
-									+ self.__filename + ", " \
-									+ "is not a valid total."
-			#end if invalid number of chromosomes
-
-
+			'''
+			2018_05_07. The only loci pairing violation detected so far,
+			occurs when the client has a chrom/loci file that contains just one
+			chromosome, and also requests the loci pairing sheme that requires
+			pairs l1,l2, from chrom c1,c2, have c1 != c2.
+			'''
+			b_pairing_violation=\
+					self.__loci_pairing_scheme is not None \
+					and self.__loci_pairing_scheme \
+									== LDNE_LOCI_PAIRING_SCHEME_DIFF_CHROM \
+					and self.__total_chromosomes == 1
+			
 			if not b_each_loci_paired_with_one_chromosome:
 
 					s_error_message += "\nAt least one loci is paired with " \
@@ -159,6 +181,19 @@ class ChromLociFileManager( object ):
 									+ "assigned to chromosomes: \n" \
 									+ str( self.__unlisted_loci )
 			#end if some loci unlisted
+
+			if b_pairing_violation:
+				s_error_message += "\n" \
+									+ " in chrom/loci file, " \
+									+ self.__filename + ", " \
+									+ " the chromosome total, " \
+									+ str( self.__total_chromosomes ) \
+									+ ", is incompatible with the " \
+									+ "loci pairing scheme: " \
+									+ LOCI_PAIRING_SCHEME_DESCRIPT[ \
+												self.__loci_pairing_scheme ]
+			#end if loci pairing violation						 
+
 		else:
 			s_error_message="\nFile, " + self.__filename + "does not exist."
 			
@@ -234,20 +269,6 @@ class ChromLociFileManager( object ):
 
 		return b_all_listed
 	#end __all_genepop_loci_are_listed
-
-	def __file_has_valid_number_of_chromosomes( self ):
-
-		b_valid_total=True
-
-		self.__get_total_chromosomes()
-
-		if self.__total_chromosomes in [ CHROM_TOTAL_ZERO,
-										CHROM_TOTAL_NO_LOCI_PAIRS ]:
-			b_valid_total=False
-		#end if invalid number
-
-		return b_valid_total
-	#end __file_has_valid_number_of_chromosomes
 
 	def __each_loci_is_assigned_to_exactly_one_chromosome( self ):
 

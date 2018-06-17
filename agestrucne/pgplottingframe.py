@@ -1114,7 +1114,7 @@ class PGPlottingFrameBoxplotFromFileManager( PGPlottingFrame ):
 				self._PGPlottingFrame__figure.canvas.draw() 
 			#end if no animation 
 		else:
-			self._tic_lable_size()
+			self.set_tic_lable_size()
 			self.set_x_axis_margin_and_xtick_rotation( self.current_data[ 'labels' ] )
 			self.subplot.set_xlabel(self.xlabel, fontsize=self.label_fontsize )
 			self.subplot.set_ylabel( self.ylabel, fontsize=self.label_fontsize )

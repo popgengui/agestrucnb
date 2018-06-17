@@ -979,43 +979,49 @@ class PGNeEstimationRegressplotInterface( object ):
 		'''
 		Note that we want the tkinter.Scale, not the ttk.Scale, which lacks
 		many of the former's handy attributes.
+
+		2018_05_07.  We are removing the y-values scale from the gui -- users
+		will only be able to regress on the whole data set:
 		'''
 
-		o_y_lower_value_scale=PGScaleWithEntry( 
-							o_master_frame= self.__subframes[ 'y_value' ], 
-							f_scale_from=df_min_max[ "min" ], 
-							f_scale_to = df_min_max["max"],
-							def_scale_command=self.__on_y_scale_change,
-							v_orient=HORIZONTAL,
-							f_resolution=f_resolution,
-							f_bigincrement=f_bigincrement,
-							i_scale_length=SCALE_LENGTH,
-							s_scale_label="lower limit y axis values")
-
-		o_y_lower_value_scale.scale.set( df_min_max[ "min" ] )
-		o_y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
-											column=o_myclass.COLNUM_YVAL_LOWER_SCALE, 
-																		sticky=( N,W ) )
-
-		o_y_upper_value_scale=PGScaleWithEntry( 
-							o_master_frame= self.__subframes[ 'y_value' ], 
-							f_scale_from=df_min_max[ "min" ], 
-							f_scale_to = df_min_max["max"],
-							def_scale_command=self.__on_y_scale_change,
-							v_orient=HORIZONTAL,
-							f_resolution=f_resolution,
-							f_bigincrement=f_bigincrement,
-							i_scale_length=SCALE_LENGTH,
-							s_scale_label="upper limit y axis values")
-
-		o_y_upper_value_scale.scale.set( df_min_max[ "max" ] )
-		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
-											column=o_myclass.COLNUM_YVAL_UPPER_SCALE, 
-																			sticky=( N,W ) )
-		
-		self.__scales={ 'y_value_lower':o_y_lower_value_scale, 'y_value_upper':o_y_upper_value_scale }
-
-
+#		o_y_lower_value_scale=PGScaleWithEntry( 
+#							o_master_frame= self.__subframes[ 'y_value' ], 
+#							f_scale_from=df_min_max[ "min" ], 
+#							f_scale_to = df_min_max["max"],
+#							def_scale_command=self.__on_y_scale_change,
+#							v_orient=HORIZONTAL,
+#							f_resolution=f_resolution,
+#							f_bigincrement=f_bigincrement,
+#							i_scale_length=SCALE_LENGTH,
+#							s_scale_label="lower limit y axis values")
+#
+#		o_y_lower_value_scale.scale.set( df_min_max[ "min" ] )
+#		o_y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
+#											column=o_myclass.COLNUM_YVAL_LOWER_SCALE, 
+#																		sticky=( N,W ) )
+#
+#		o_y_upper_value_scale=PGScaleWithEntry( 
+#							o_master_frame= self.__subframes[ 'y_value' ], 
+#							f_scale_from=df_min_max[ "min" ], 
+#							f_scale_to = df_min_max["max"],
+#							def_scale_command=self.__on_y_scale_change,
+#							v_orient=HORIZONTAL,
+#							f_resolution=f_resolution,
+#							f_bigincrement=f_bigincrement,
+#							i_scale_length=SCALE_LENGTH,
+#							s_scale_label="upper limit y axis values")
+#
+#		o_y_upper_value_scale.scale.set( df_min_max[ "max" ] )
+#		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
+#											column=o_myclass.COLNUM_YVAL_UPPER_SCALE, 
+#																			sticky=( N,W ) )
+#		
+#		self.__scales={ 'y_value_lower':o_y_lower_value_scale, 'y_value_upper':o_y_upper_value_scale }
+#
+		'''
+		Required now that we've removed the y_value scales::
+		'''
+		self.__scales={}
 		'''
 		2018_05_04.  New scales allow user to set the font size for axis and tic labels:
 		'''
@@ -1137,35 +1143,37 @@ class PGNeEstimationRegressplotInterface( object ):
 	#end __get_scale_bigincrement
 
 	def __update_y_scales( self ):
-
-		if self.__comboboxes is not None and 'select_y_variable' in self.__comboboxes:
-			
-			df_min_max=self.__get_range_unfiltered_y_data()
-
-			f_resolution=self.__get_scale_resolution( df_min_max[ 'min' ], df_min_max[ 'max' ]  )
-			f_bigincrement=self.__get_scale_bigincrement( df_min_max[ 'min' ], df_min_max[ 'max' ] )
-
-			'''
-			Note that the order of these re-settings matters, because,
-			if the current resolution (in cases where this reset is called
-			after a change in y variable) is larger than the range
-			we got from __get_range_unfiltered_y_data, then
-			the min (from)  and max (to) will be both set to 0.0. Hence,
-			we must reset the resolution before resetting the from and to.
-			'''
-			self.__scales[ 'y_value_lower' ].scale[ 'resolution' ] = f_resolution
-			self.__scales[ 'y_value_lower' ].scale[ 'bigincrement' ] = f_bigincrement	
-			self.__scales[ 'y_value_lower' ].scale[ 'from' ] = df_min_max[ "min" ] 	
-			self.__scales[ 'y_value_lower' ].scale[ 'to' ]=df_min_max[ "max" ] 
-			self.__scales[ 'y_value_lower' ].scale.set( df_min_max[ "min" ] )
-
-			self.__scales[ 'y_value_upper' ].scale[ 'resolution' ] = f_resolution
-			self.__scales[ 'y_value_upper' ].scale[ 'bigincrement' ] = f_bigincrement
-			self.__scales[ 'y_value_upper' ].scale[ 'from' ] = df_min_max[ "min" ] 	
-			self.__scales[ 'y_value_upper' ].scale[ 'to' ]=df_min_max[ "max" ] 
-			self.__scales[ 'y_value_upper' ].scale.set( df_min_max[ "max" ] )
-
-		#end if the y var combo has been created
+		'''
+		2018_05_07. we are removing the y-value scales:
+		'''
+#		if self.__comboboxes is not None and 'select_y_variable' in self.__comboboxes:
+#			
+#			df_min_max=self.__get_range_unfiltered_y_data()
+#
+#			f_resolution=self.__get_scale_resolution( df_min_max[ 'min' ], df_min_max[ 'max' ]  )
+#			f_bigincrement=self.__get_scale_bigincrement( df_min_max[ 'min' ], df_min_max[ 'max' ] )
+#
+#			'''
+#			Note that the order of these re-settings matters, because,
+#			if the current resolution (in cases where this reset is called
+#			after a change in y variable) is larger than the range
+#			we got from __get_range_unfiltered_y_data, then
+#			the min (from)  and max (to) will be both set to 0.0. Hence,
+#			we must reset the resolution before resetting the from and to.
+#			'''
+#			self.__scales[ 'y_value_lower' ].scale[ 'resolution' ] = f_resolution
+#			self.__scales[ 'y_value_lower' ].scale[ 'bigincrement' ] = f_bigincrement	
+#			self.__scales[ 'y_value_lower' ].scale[ 'from' ] = df_min_max[ "min" ] 	
+#			self.__scales[ 'y_value_lower' ].scale[ 'to' ]=df_min_max[ "max" ] 
+#			self.__scales[ 'y_value_lower' ].scale.set( df_min_max[ "min" ] )
+#
+#			self.__scales[ 'y_value_upper' ].scale[ 'resolution' ] = f_resolution
+#			self.__scales[ 'y_value_upper' ].scale[ 'bigincrement' ] = f_bigincrement
+#			self.__scales[ 'y_value_upper' ].scale[ 'from' ] = df_min_max[ "min" ] 	
+#			self.__scales[ 'y_value_upper' ].scale[ 'to' ]=df_min_max[ "max" ] 
+#			self.__scales[ 'y_value_upper' ].scale.set( df_min_max[ "max" ] )
+#
+#		#end if the y var combo has been created
 
 		return
 	#end __update_y_scales
@@ -1429,27 +1437,29 @@ class PGNeEstimationRegressplotInterface( object ):
 	#end __on_filter_value_combo_change
 
 	def __on_y_scale_change(self, o_event=None ):
-
-		def is_valid_y( s_value ):
-			b_valid=False
-			if s_value == "NA":
-				b_valid=False
-			else:
-				f_value=float( s_value )
-				if f_value <= float( self.__scales[ 'y_value_upper' ].scale.get() ) \
-						and f_value >= float( self.__scales[ 'y_value_lower' ].scale.get() ):
-					b_valid= True
-				#end if float in range
-			#end if
-			return b_valid
-		#end local def is_valid_y
-	
-		self.__tsv_file_manager.setFilter( self.__comboboxes[ 'select_y_variable' ].current_value, 
-											 is_valid_y )
-
-		if self.__plotframe is not None:
-			self.__update_plot_and_stats_text()
-		#end if we have a plotframe, replot the data
+		'''
+		2018_05_07. we are removing the y value scales:
+		'''
+#		def is_valid_y( s_value ):
+#			b_valid=False
+#			if s_value == "NA":
+#				b_valid=False
+#			else:
+#				f_value=float( s_value )
+#				if f_value <= float( self.__scales[ 'y_value_upper' ].scale.get() ) \
+#						and f_value >= float( self.__scales[ 'y_value_lower' ].scale.get() ):
+#					b_valid= True
+#				#end if float in range
+#			#end if
+#			return b_valid
+#		#end local def is_valid_y
+#	
+#		self.__tsv_file_manager.setFilter( self.__comboboxes[ 'select_y_variable' ].current_value, 
+#											 is_valid_y )
+#
+#		if self.__plotframe is not None:
+#			self.__update_plot_and_stats_text()
+#		#end if we have a plotframe, replot the data
 		return		
 	#end __on_y_scale_change
 

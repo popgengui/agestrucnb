@@ -369,7 +369,7 @@ class PGOutputSimuPop( object ):
 	
 		'''
 		2017_04_21.  We change the way we name the temp file, so that it will be written
-		int he output base path, rather than the currdir. Note that we define the var
+		in the output base path, rather than the currdir. Note that we define the var
 		here, but create the name just before using, as the check for duplicate file names,
 		which is perfomred in the call to our new def __get_temp_file_name, 
 		should be done just before we then open the file.
