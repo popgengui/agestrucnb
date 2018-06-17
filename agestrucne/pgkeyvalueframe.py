@@ -696,6 +696,33 @@ class KeyValFrame( PGKeyControlFrame ):
 		return i_len_entryvals == i_len_vals
 	#end __are_valid_lists
 
+	def setButtonState( self, s_state ):
+		'''
+		2018_04_27. We add this "public" def 
+		to allow users to set the button state
+		independantly of the label and/or entry
+		and/or objecgt control state.		
+		'''
+		if self.__button_object is not None:
+			self.__button_object.configure( state=s_state )
+		#end if we have a buttofd
+		return
+	#end def setButtonState
+
+	def setEntryState( self, s_state ):
+		'''
+		2018_04_27. We add this "public" def 
+		to allow users to set the entry box or
+		boxes state(s) independantly of the 
+		label and/or button, and/or class object 
+		state.		
+		'''
+		for o_entry_box in self.__entry_boxes:
+			o_entry_box.configure( state=s_state )
+		#end for each entry box
+		return
+	#end def setButtonState
+
 	def setStateControls( self, s_state ):
 		'''
 		Set the state of all this objects
@@ -715,6 +742,14 @@ class KeyValFrame( PGKeyControlFrame ):
 
 		return
 	#end disableControls
+
+	def setEntryFontColor( self, s_color ):
+
+		for o_entry_box in self.__entry_boxes:
+			o_entry_box.configure( foreground=s_color )
+		#end for each entry box
+
+	#end setEntryFontColor
 
 	def getControlStates( self ):
 		ls_states=[]

@@ -21,10 +21,53 @@ DEFAULT_NB_VAR=0.05
 DEFAULT_SNP_HET_INIT=0.5
 DEFAULT_MSAT_HET_INIT=0.8
 
+'''
+2018_04_18.  Adding new parameter
+that allows users to simulate
+loci distributed over >1 chromosome.
+The default value of zero results in
+all loci being "placed" on different
+chromsomes.
+'''
+DEFAULT_NUM_CHROMS=0
+
+'''
+2018_05_16. These defaults
+are for the new parameter,
+"tolerance_tries".  We
+allow it to be set to one
+of 3 values, 100, 1000, 
+10000"  We are storing
+the value here as a string,
+in order to use the combobox
+in the GUI.  We depend on our
+client PGOpSimuPop to convert 
+it before use:
+'''
+VALID_TOLERANCE_TRIES=[ "100", "1000", "10000" ]
+DEFAULT_TOLERANCE_TRIES="1000"
+
+'''
+2018_05_17. New parameter gives a value for simuPOP's
+Recombinators "intensity" parameter.  We default to
+0.0, in which case the recombinator will not be used
+(see def __createAge in module pgopsimupop.py).
+'''
+DEFAULT_RECOMBINATION_INTENSITY=0.0
+
 import sys
 import os
 from configparser import ConfigParser
 from agestrucne.pgutilityclasses import NbAdjustmentRangeAndRate
+'''
+2018_05_27.  We import this mod to get the
+constant so we can assign a default value
+to our new parameter loci_file_name, when
+it is not present in a config file being
+read in:
+'''
+import pgsimupoplociinfo as simloci
+NO_LOCI_FILE=simloci.NO_LOCI_FILE
 
 class PGInputSimuPop( object ):
 
@@ -41,7 +84,13 @@ class PGInputSimuPop( object ):
 	#Add prefix "CONST" so pgguisimupop instances
 	#can ignore these as non-parameterized attributes
 	CONST_CULL_METHOD_SURVIVIAL_RATES="survival_rates"
-	CONST_CULL_METHOD_EQUAL_SEX_RATIOS="equal_sex_ratio"
+	'''
+	2018_05_07.  Per Brian, we're chaning the name 
+	of our alternative cull method from "equal_sex_ratio"
+	to "maintain_distribution"
+	'''
+#	CONST_CULL_METHOD_EQUAL_SEX_RATIOS="equal_sex_ratio"
+	CONST_CULL_METHOD_EQUAL_SEX_RATIOS="maintain_distribution"
 
 	def __init__( self, s_config_file = None, o_model_resources = None, o_param_names=None ):
 		'''
@@ -417,6 +466,22 @@ class PGInputSimuPop( object ):
 			self.NbVar=DEFAULT_NB_VAR
 		#end if NbVar present, else use default
 
+		'''
+		2018_05_16.  We add a new parameter so that the user can select a maximum for the number
+		of tries made to get a population (cycle) whose PWoP-calculated Nb value is within the tolerance
+		(given by NbVar).  Note that we store the integer value as a string, in order to use
+		the combobox in the GUI.  Hence we expect our client PGOpSimuPop to convert it for use.
+		'''
+
+		if config.has_option( "sim", "tolerance_tries" ):
+			self.tolerance_tries=config.get( "sim", "tolerance_tries" )
+			self.__convert_tolerance_tries_to_valid_value()
+		else:
+			self.tolerance_tries=DEFAULT_TOLERANCE_TRIES
+		#end if we have value fo tolerance tries
+
+		self.__update_attribute_config_file_info( "tolerance_tries", "sim", "tolerance_tries" )
+
 		self.__update_attribute_config_file_info( "_PGInputSimuPop__Nb_from_pop_section", "pop", "Nb" )
 		self.__update_attribute_config_file_info( "NbVar", "pop", "NbVar" )
 
@@ -425,6 +490,20 @@ class PGInputSimuPop( object ):
 
 		self.mutFreq = config.getfloat("genome", "mutFreq")
 		self.__update_attribute_config_file_info( "mutFreq", "genome", "mutFreq" )
+
+		'''
+		2018_05_17. New parameter gives a recomination "intensity", as used by simuPOP's
+		Recombinator object -- see 
+		http://simupop.sourceforge.net/manual_svn/build/userGuide_ch5_sec5.html
+		'''
+		if config.has_option( "genome", "recombination_intensity" ):
+			self.recombination_intensity = config.getfloat("genome", "recombination_intensity")
+		else:
+			self.recombination_intensity=DEFAULT_RECOMBINATION_INTENSITY
+		#end if config file has a recombination_intensity, else use default	
+
+		self.__update_attribute_config_file_info( "recombination_intensity", "genome", "recombination_intensity" )
+
 
 		self.numMSats = config.getint("genome", "numMSats")
 		self.__update_attribute_config_file_info( "numMSats", "genome", "numMSats" )
@@ -437,8 +516,20 @@ class PGInputSimuPop( object ):
 
 		self.__update_attribute_config_file_info( "numSNPs", "genome", "numSNPs" )
 
+		'''
+		2018_04_18. This new input parameter allows the user to distribute loci 
+		over chromosomes:
+		'''
+		if config.has_option("genome","numChroms" ):
+			self.numChroms = config.getint( "genome", "numChroms" )
+		else:
+			self.numChroms=DEFAULT_NUM_CHROMS
+		#end if conf file has a numChroms value else set as default
+		self.__update_attribute_config_file_info( "numChroms", "genome", "numChroms" )
+
 		self.reps = config.getint("sim", "reps")
 		self.__update_attribute_config_file_info( "reps", "sim", "reps" )
+
 		if config.has_option("sim", "startSave"):
 			self.startSave = config.getint("sim", "startSave")
 			'''
@@ -455,9 +546,10 @@ class PGInputSimuPop( object ):
 			2017_04_05.  As we re-activate the startSave feature,
 			with a control on the GUI interface, we now use 1-indexed
 			cycle numbers, so that the code during the simulation will 
-			(before writing results) check whether the gen number equals 
-			the startSave - 1.  Thus, the default startSave, to record all 
-			cycles, is now 1 instead of zero.
+			(before writing results) adjust the gen number to one-indexing,
+			then test that the current gen is >= startSave.  Thus, the 
+			default startSave, to record all cycles, is now 1 instead 
+			of zero.
 			'''
 			self.startSave = 1
 		#end if config has startSave
@@ -500,6 +592,15 @@ class PGInputSimuPop( object ):
 
 		if config.has_option("sim", "cull_method"):
 			self.cull_method = config.get("sim", "cull_method")
+			'''
+			2018_05_07. As of now we've changed the cull_method called
+			"equal_sex_ratio" to "maintain_distribution"  In order 
+			to avoid a validation error when we load old(er) configuration
+			files, we do the conversion:
+			'''
+			if self.cull_method=="equal_sex_ratio":
+				self.cull_method=PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS
+			#end if config file has old name for alt cull method
 		else:
 			self.cull_method = DEFAULT_CULL_METHOD
 		#end if config has sim, cull_method
@@ -595,8 +696,55 @@ class PGInputSimuPop( object ):
 
 		self.__update_attribute_config_file_info( "het_init_msat", "sim", "het_init_msat" )
 
+		'''
+		2018_05_26.  We added a flag and a value for a file name indicating
+		the user has a loci information file that will give loci_name, chromosome, and position
+		value.  This simulation is then to use these entries in place of the simpler totals
+		numSNPs, numMSats and numChroms, to intitialize the genome:
+		'''
+		if config.has_option("genome", "use_loci_file" ):
+			self.use_loci_file = config.getboolean("genome", "use_loci_file")
+		else:
+			self.use_loci_file=False
+		#end if config has genome, use_loci_filed
+		self.__update_attribute_config_file_info( "use_loci_file", "genome", "use_loci_file" )
+
+
+
+		if config.has_option("genome", "loci_file_name"):
+			self.loci_file_name = config.get("genome", "loci_file_name")
+		else:
+			self.loci_file_name = NO_LOCI_FILE
+		#end if config has genome, loci_file_name
+
+		self.__update_attribute_config_file_info( "loci_file_name", "genome", "loci_file_name" )
+
 		return
+
 	#end __get_config
+
+	def __convert_tolerance_tries_to_valid_value( self ):
+		'''
+		2018_05_16. In case a config file has set this params
+		value outside the three we want to offer, we find the
+		nearest valid value and reset it. Note that we store the
+		value as a string, as it is managed by a combo box in the
+		main GUI:
+		'''
+
+		li_diffs=[ abs( int( self.tolerance_tries ) - int( s_value)  ) \
+								for s_value in VALID_TOLERANCE_TRIES ]
+
+		i_min_diff=min( li_diffs )
+
+		idx_valid_value=li_diffs.index( i_min_diff )
+
+		self.tolerance_tries=VALID_TOLERANCE_TRIES[ idx_valid_value ]
+
+		#reset tolerance_tries to the exact valid value:
+
+		return
+	#end def __convert_tolerance_tries_to_valid_value
 
 	def __correct_min_cycle_in_nb_adjustment_list( self ):
 		for idx in range( len(  self.nbadjustment ) ):

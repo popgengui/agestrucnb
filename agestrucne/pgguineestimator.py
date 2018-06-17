@@ -92,6 +92,11 @@ from agestrucne.pgutilityclasses import NbNeReader
 
 from agestrucne.pglineregressconfigfilemaker import PGLineRegressConfigFileMaker
 
+'''
+2018_05_02. For constants used to define chromloci file:
+'''
+import agestrucne.pgchromlocifilemanager as pgclf
+
 class PGGuiNeEstimator( pgg.PGGuiApp ):
 	'''
 	Subclass of PGGuiApp builds a gui,
@@ -748,7 +753,6 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				NeEstimatorLociSamplingSchemeParameterManager( o_pgguineestimator= self,
 																s_attr_prefix=ATTRIBUTE_DEMANLGER )
 
-		
 		s_validation_error_message=o_loci_sampling_args.validateArgs()
 
 		if s_validation_error_message is not None:
@@ -790,7 +794,25 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		to LDNe2, boolean value self.__monogamy. We put
 		the arg in the order just after the allele_freq
 		parmameter.
+
+		2018_04_28.  We  new parameters giving either
+		the full path to a file giving chromosome/loci 
+		associations, or "None", and a loci pairing scheme
+		(used by LDNe2), for now initialized at load, to 2=use loci pairs
+		derived from different chroms. We set it here to zero, i.e. 
+		all pairs are on different chromosomes, when no chrom loci file is used.
+		2018_04_30.  If our use chrom file flag is false, despite any file name
+		in the entry box, We send filename "None", which is the keyword LDNe2 uses
+		(in our revised version) to know to skip getting a chrom/loci table from file:
 		'''
+		s_chrom_loci_file=self.__chromlocifile
+		if self.__usechromfile==False:
+			s_chrom_loci_file=pgclf.NO_CHROM_LOCI_FILE
+		#end if the flag says do not use a chrom loci file
+	
+		if self.__chromlocifile == pgclf.NO_CHROM_LOCI_FILE:
+			self.__loci_pairing_scheme=0
+		#end if no chromlocifile, unrestricted pairing
 
 		self.__op_process=multiprocessing.Process( \
 				target=pgut.run_driveneestimator_in_new_process,
@@ -800,6 +822,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 							qs_sample_scheme_args,
 							self.__minallelefreq,
 							self.__monogamy,
+							s_chrom_loci_file,
+							self.__loci_pairing_scheme,
 							self.__replicates,
 							qs_loci_sample_scheme_args,
 							self.__loci_replicates,
@@ -1246,8 +1270,8 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 				'''
 				We also want to retain the state flag:
 				'''
-
 				if self.__param_frame_reference_is_available( s_param ):
+
 					b_current_val_for_enabled=\
 							self.__get_enabled_state_flag_value_for_param_control( s_param )
 
@@ -1373,6 +1397,106 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 					b_force_disable=b_force_disable,
 					b_use_list_editor=True )
 
+			elif s_param_control_type == "entrywithbutton":
+
+				'''
+				2018_04_27. This control type was added to the param list 
+				given in resources/neestimator.param.names, for the parameter
+				that gives a name of a chromosome/loci table file.  For this
+				control, we disable the entry, and instead of assigning the
+				pgparamset member s_param_assoc_def to the def_entry_change_command
+				param of the keyvalframe, we assign to def_button_command 
+				parameter.  We also apply the param label to the button:
+				'''
+				
+
+				#For the entrywithbutton config, we use this
+				#as the button command rather than the entry
+				#change def::
+				def_for_button_press=v_param_assoc_def \
+									if v_param_assoc_def is not None \
+													else self.__test_values
+
+				if s_param_assoc_def != "None":
+					def_on_entry_change=getattr( self,  s_param_assoc_def )
+				#end if we have a named def in the param set
+
+				'''
+				This should be automated, but so far this is the only
+				entry with label implemented via the keyvalframe class.
+				'''
+				i_this_label_width=LABEL_WIDTH
+				s_label_name=None
+				if  s_param=="chromlocifile":
+					i_width_this_entry=70
+					s_button_text="Load chrom/loci file"
+					#we let the button's text serve as the label
+					s_label_name=""
+					i_this_label_width=0
+				#end if this is the chrom loci file entry control
+
+				o_this_keyval=KeyValFrame( s_name=s_param_longname,
+					v_value=v_value_for_entry_control,
+					o_type=o_param_type,
+					v_default_value=v_default_item_value,
+					o_master=o_params_subframe,
+					o_associated_attribute_object=self,
+					def_entry_change_command=None,
+					s_associated_attribute=s_attr_name,
+					i_entrywidth=i_width_this_entry,
+					i_labelwidth=i_this_label_width,
+					b_is_enabled=( s_state_to_use == "enabled" ),
+					s_entry_justify=s_this_entry_justify,
+					s_label_justify='left',
+					s_tooltip=s_param_tooltip,
+					o_validity_tester=o_validity_checker,
+					b_force_disable=b_force_disable,
+					b_use_list_editor=True,
+					s_button_text = s_param_longname,
+					def_button_command = def_for_button_press,
+					s_label_name=s_label_name )
+
+				'''
+				2018_04_27. As above, this should be automated by
+				adding to fields in the param.names file, but for now
+				we treat it as a special case.  On init we keep all of its
+				component states, except the label, disabled, and let the 
+				user enable with the new checkbox that sets the flag 
+				__usechromfile:				
+				'''
+				if s_param=="chromlocifile":
+
+					o_this_keyval.setLabelState("enabled" )
+
+					b_have_chromloci_flag=hasattr( self, "_PGGuiNeEstimator__usechromfile" )
+
+					if b_have_chromloci_flag:
+
+						if b_force_disable==False \
+								and self.__usechromfile==True:
+
+							o_this_keyval.setEntryState( "disabled" )
+							o_this_keyval.setButtonState( "enabled" )
+							o_this_keyval.setEntryFontColor( "black" )
+						else:
+							o_this_keyval.setButtonState( "disabled" )
+							o_this_keyval.setEntryFontColor( "gray" )
+						#end if don't force-disable, else do
+
+					else:
+						'''
+						2018_04_27. The default in a KeyValFrame object 
+						with a button object is to  instantiate the button 
+						enabled, despite a disabled entry box or boxes.  We
+						want the button disabled too.  Further, when the flag
+						__usechromfile is not present, we default to "None" for
+						the file name, as this indicates an initial interface:
+						'''
+						o_this_keyval.setButtonState( "disabled" )
+						o_this_keyval.manuallyUpdateValue( "None" )
+						o_this_keyval.setEntryFontColor( "gray" )
+					#end if our flag is true, enabel button, else disable all but label	
+				#end if chrom loci file control	
 			elif s_param_control_type.startswith( "cbox" ):
 				s_state_this_cbox=None
 				if s_param_control_type=="cboxnormal":
@@ -2336,6 +2460,86 @@ class PGGuiNeEstimator( pgg.PGGuiApp ):
 		'''
 		return
 	#end onNbNeRatioChange
+
+	def __on_button_press_load_chrom_loci_file( self ):
+		'''
+		2018_04_27.  For new parameter that loads path/name
+		of a chromosome/loci table file, used by LDNe2 to
+		eval only loci pairs whose members are associated
+		with different chromosomes.
+		'''
+		try:
+			s_current_value=self.__chromlocifile
+
+			s_chrom_loci_file=tkfd.askopenfilename(  \
+					title='Load a Chromosome/Loci table file' )
+
+			if pgut.dialog_returns_nothing( s_chrom_loci_file ):
+				return
+			#end if no file selected, return
+			
+			self.__param_value_frames_by_attr_name\
+						[  "_PGGuiNeEstimator__chromlocifile" ]\
+								.manuallyUpdateValue( s_chrom_loci_file ) 
+			
+		except Exception as oex:
+			o_traceback=sys.exc_info()[ 2 ]
+			s_trace= \
+				pgut.get_traceback_info_about_offending_code( o_traceback )
+
+			s_msg="In PGGuiNeEstimator instance, " \
+					+ "def __on_button_press_load_chrom_loci_file " \
+					+ "an exception was raised: " + str( oex ) \
+					+ "\nwith traceback info: " + s_trace
+
+			PGGUIErrorMessage( self, s_msg )
+
+			raise ( oex )
+
+		#end try...except
+		return
+	#end __on_button_press_load_chrom_loci_file
+
+	def __on_change_in_use_chrom_file_flag( self ):
+
+		s_param_name="chromlocifile"
+
+		s_attribute_name=ATTRIBUTE_DEMANLGER + s_param_name
+
+		if s_attribute_name not in self.__param_value_frames_by_attr_name:
+			s_msg="In PGGuiNeEstimator instance, def __on_change_in_use_chrom_file_flag, " \
+						+ "the program cannot find a key value frame associated " \
+						+ "with the attribute name: " + s_attribute_name + "."
+			PGGUIErrorMessage( self, s_msg )
+			raise Exception( s_msg )
+		#end if no key val frame for the nb/ne ratio param
+
+		o_keyvalueframe=self.__param_value_frames_by_attr_name[ s_attribute_name ]
+
+		if self.__usechromfile== False:
+			o_keyvalueframe.setStateControls( "disabled" )
+			o_keyvalueframe.setLabelState( "disabled" )
+			'''
+			We replace any file name with "None"
+			so the user does not think that a chrom file will
+			be used when the chrom file flag is false:
+			2018_04_30.  Remming out the reset of file name.
+			We decide to keep the current value
+			in the entry box, but we will send "None" to LDNe2, 
+			using code in def runEstimator
+			'''
+			o_keyvalueframe.setEntryFontColor( "gray" )
+			#o_keyvalueframe.manuallyUpdateValue( "None" )
+		else:
+			o_keyvalueframe.setStateControls( "enabled" )
+			#The entry box is always disabled
+			o_keyvalueframe.setEntryState( "disabled" )
+			o_keyvalueframe.setLabelState( "enabled" )
+			o_keyvalueframe.setEntryFontColor( "black" )
+		#end if we are not using the chrom loci file, else we are 
+
+		return
+	#end def __on_change_in_use_chrom_file_flag
 
 #end class PGGuiNeEstimator 
 

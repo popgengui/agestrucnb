@@ -165,7 +165,10 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	o_input.makeInputConfig()
 	
 	b_write_conf_file=False
-	b_write_nb_and_age_tables=False
+	'''
+	2018_05_09. Renamed from b_write_nb_and_age_tables:
+	'''
+	b_write_the_once_only_files=False
 
 	#we only write the configuraton file if the replicate number is 1:
 	if i_replicate_number == NUMBER_FIRST_REPLICATE:
@@ -180,7 +183,7 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 	but are useful enought to warrant inclusion in the output,
 	at least for the first replicate.
 
-	2018_04_01.  We move the setting of the b_write_nb_and_age_tables
+	2018_04_01.  We move the setting of the b_write_the_once_only_files
 	flag from the above test to write the conf file, to the following,
 	so that we can write them for every replicate just by setting the
 	constant in this def:
@@ -188,7 +191,7 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 
 	if i_replicate_number == NUMBER_FIRST_REPLICATE \
 				or ALWAYS_WRITE_NB_AND_AGE_TABLES==True:
-		b_write_nb_and_age_tables=True
+		b_write_the_once_only_files=True
 	#end if we should wtie nb and age tables	
 
 	#reset reps to 1
@@ -228,7 +231,7 @@ def do_pgopsimupop_replicate_from_files(  s_configuration_file,
 			b_remove_db_gen_sim_files=REMOVE_NON_GENEPOP_SIM_OUTPUT_FILES,
 			b_write_input_as_config_file=b_write_conf_file,
 			b_do_gui_messaging=b_use_gui_messaging,
-			b_write_nb_and_ages_files=b_write_nb_and_age_tables,
+			b_write_the_once_only_files=b_write_the_once_only_files,
 			b_is_replicate_1 = ( i_replicate_number == 1 ),
 			i_output_mode=i_output_mode )
 

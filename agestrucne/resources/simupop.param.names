@@ -32,6 +32,8 @@ NbNe	Nb/Ne;Population;0;0;1;0.0;float;None;None;Nb/Ne ratio.  This value is pass
 N0	N0 (Newborns);Population;2;1;1;0;int;None;None;Newborns per cycle. If not editable then calculated using Nb, Nb/Nc, survival rates, and male birth probability.;entry;None;type(x)==int and x >= 0;None;enabled;None
 Nb	Nb;Population;2;0;1;0;int;None;None;"Nb";entry;None;type(x)==int and x>= 0;updateN0EntryBox;enabled;None
 NbVar	Nb tolerance;Population;0;0;1;0.05;float;None;None;The calculated population Nb, for each cycle after burn-in, must be within this proportion of the expected Nb;entry;None;type(x)==float and x >= 0.0;None;enabled;None
+#2018_05_16.  New combobox allows user to select how many tries at meeting tolerance test each population gets.  We offer 3 values, since more precision is not needed, and the combobox will keep garbage entries out:
+tolerance_tries	Tolerance tries;Simulation;5;1;1;'1000';str;None;None;For each repro cycle, sets the maximum number of tries allowed for a pop to meet the Nb tolerance.;cboxreadonly;( '100', '1000', '10000' );x in [ '100', '1000', '10000' ];None;enabled;None
 ages	Ages;Population;2;1;1;0;int;None;None;Ages;entry;None;type(x)==int and x >= 0;None;disabled;None
 config_file	Configuration File;Configuration Info;1;1;1;"none";str;None;None;Configuration file;entry;None;type(x)==str;None;enabled;None
 life_table_glob	Life Table File(s);Configuration Info;1;1;1;"none";str;None;None;Life table files;entry;None;type(x)==str;None;enabled;None
@@ -50,10 +52,19 @@ lbd	Lambda (after burn-in);suppress;4;1;1;1.0;float;None;None;Lambda after burn 
 # 2017_03_09. We replaced the single harvest rate float with a list of range/rate combinations.  See param nbadjustment below.
 #harvestrate	Harvest rate (after burn-in);Simulation;4;1;1;0.0;float;None;None;After the burn-in cycles, at each culling, additionaly reduce the population evenly across ages and sexes at this rate;entry;None;type(x)==float and x>=0;None;enabled
 litter	Proportional Litter Sizes;Population;2;1;1;None;listint;None;None;When not "None," this list of integers affects litter sizes in one of two ways.~~  1.  If the list has a single, negative number, then its absolute value gives the maximum litter size for any female.~~  2. If positive values totalling n, then each value, with index idx in 1,2,3...n, gives the chance,~~     proportional to the other values, that the next idx offspring, as long as N0 is not reached, will have the same mother.;entry;None;x is None or ( type(x)==int );None;disabled;None
-maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth.  If cull method is equal_sex_ratio, this value is forced to 0.5.;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;onUpdateMaleProb;enabled;onLoadingMaleProb
+#Note, 2018_05_07, tooltip, "equal_sex_ratio" now called "maintain_distribution".
+maleProb	Probability male birth;Population;2;1;1;0.5;float;0;1;Probability male birth.  If cull method is maintain_distribution, this value is forced to 0.5.;entry;None;type(x)==float and x >= 0.0 and x <= 1.0;onUpdateMaleProb;enabled;onLoadingMaleProb
 model_name	Model;Configuration Info;1;1;1;"none";str;None;None;Model name;entry;None;type(x)==str;None;enabled;None
+#2018_05_26.  We add a flag to allow user to load a file listing loci/chrom/position, to replace our automated loci init using
+#summary quants numSNps, numMSats, and numChroms:
+use_loci_file	Use Loci File;Genome;3;2;2;False;bool;None;None;Use a file giving  loci names, chromosome names, and loci positions.~~If checked, the file indicated in the loci file entry will be used~~to initialize the simulation using biallelic SNPs with the name, chromosome, and positions given in the file.;checkbutton;None;type(x)==bool;_PGGuiSimuPop__on_change_in_use_loci_file_flag;enabled;None
+#2018_05_26.  We add control to load a file whose lines give comma-delimited columns loci-name,chromosome,position
+loci_file_name	Loci File;Genome;3;2;2;"None";str;None;None;When enabled by checking "Use Loci File", this box locates a table file whose lines give 3, comma-delimited values without spaces, loci_name, chromosome_name, position.~~The table is used by the simulation to intiialize the genome with, for each entry a biallelic SNP on the indicated chromosome, at the indicated position.~~When the Chrom Loci File box is unchecked, or the value for the file is "None", the simulated genome will be intitialized using the quantities given by the totals~~for SNPs, microsats, and chromosomes given in the textboxes;entrywithbutton;None;type(x)==str;_PGGuiSimuPop__on_button_press_load_loci_file;disabled;None;
+numChroms	Number of chromosomes;Genome;3;2;2;0;int;None;None;Number of chromosomes (loci will be evenly distributed across chromosomes).~~The default value, 0, will result in no chrom/loci table file being written.~~(see the LDNe interface:  when no chrom/loci file is provided all loci pairs are considred independent of each other, and are used in the estimation).~~A reminder: a value of 1 chromosome will generate a chrom/loci table that cannot be used by LDNe2 to calculate over loci pairs from different chromosomes.;entry;None;type(x)==int and x >= 0;None;enabled;None
 numSNPs	Number of SNPs;Genome;3;1;1;0;int;None;None;Number of SNPs;entry;None;type(x)==int and x >= 0;None;enabled;None
 mutFreq	Mutation frequency;Genome;3;1;1;0.0;float;None;None;Mutation Frequency;entry;None;type(x)==float;None;enabled;None
+#2018_05_17. New value to be used as recombination intensity in the simulation:
+recombination_intensity	Recombination intensity;Genome;3;1;1;0.0;float;None;None;Recombination intensity, as defined in the simuPOP documentation, gives the recombination rate between two adjacent loci as the product of this intensity times the distance between them.;entry;None;type(x)==float and x >= 0.0;None;enabled;None
 numMSats	Number of microsatellites;Genome;3;1;1;0;int;None;None;Number of Microsats;entry;None;type(x)==int and x >= 0;None;enabled;None
 param_names	param names object;suppress;0;0;0;0;str;None;None;"";entry;None;type(x)==str;None;enabled;None
 popSize	Population size;Population;2;1;1;0;int;None;None;Populaion Size;entry;None;type(x)==int and x >= 0;None;enabled;None
@@ -73,7 +84,8 @@ gammaBMale	Male gamma B;Population;2;1;1;None;listfloat;None;None;Male Gamma B;e
 #this is a dummy entry, for an Nb param value that is assigned, checked and calculated within the input object, and accessed only
 #by the pgopsimupop object:
 Nb_orig_from_pop_section	Nb derived from supplied params, for generator assignment;suppress;0;0;0;0;int;None;None;"";entry;None;type(x)==int;None;enabled;None
-cull_method	Cull method;Simulation;6;1;1;"equal_sex_ratio";str;None;None;Method of culling individuals after each reproductive cycle.~~1. Survival rates:  cull using age-specified survival rates.~~2. Equal sex ratio:  cull uses survival rates and forces an approx. equal sex ratio.;cboxreadonly;( "survival_rates", "equal_sex_ratio" );x in [ 'survival_rates', 'equal_sex_ratio' ];onCullMethodSelectionChange;enabled;None
+#Note, 2018_05_07, cull method "equal_sex_ratio" now called "maintain_distribution"
+cull_method	Cull method;Simulation;6;1;1;"maintain_distribution";str;None;None;Method of culling individuals after each reproductive cycle.~~1. Survival rates:  cull using age-specified survival rates.~~2. Maintain distribution:  strictly maintain the sex and age class distribution.;cboxreadonly;( "survival_rates", "maintain_distribution" );x in [ 'survival_rates', 'maintain_distribution' ];onCullMethodSelectionChange;enabled;None
 #old param entry:
 #harvest	Harvest;Simulation;7;1;1;None;liststr;None;None;For each cycle-number:proportion numeric pair N:i, with population size p, remove i*p individuals at cycle N;entry;None; [ type(eval(i) for i in x.split( ":" ) ] == [ int, float ];onHarvestInputChange;enabled
 #

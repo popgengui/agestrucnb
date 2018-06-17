@@ -17,6 +17,15 @@ PLOTLABELFONTSIZE=18
 TICKLABELFONTSIZE=14
 
 '''
+2018_05_04. To define range for the new
+scales added to allow user to set font
+sizes for axis and tic labels.
+'''
+MINFONTSIZE=8
+MAXFONTSIZE=40
+
+
+'''
 We need the tkinter.Scale widget,
 not the ttk.Scale, so we need the
 tkinter space name, otherwise
@@ -100,10 +109,20 @@ class PGNeEstimationRegressplotInterface( object ):
 	ROW_NUM_SUBFRAME_TSV_FILE_LOADER=0
 	ROW_NUM_SUBFRAME_GROUPBY=1
 	ROW_NUM_SUBFRAME_FILTER=2
-	ROW_NUM_SUBFRAME_Y_VALUE=3
-	ROW_NUM_SUBFRAME_X_VALUE=3
+	ROW_NUM_SUBFRAME_Y_VALUE=0
+	ROW_NUM_SUBFRAME_X_VALUE=0
 	ROW_NUM_SUBFRAME_PLOT=4 
 	ROW_NUM_SUBFRAME_STATS_TEXT=4
+	'''
+	2018_05_04. New subframe for setting font sizes
+	via scales:
+	'''
+	ROW_NUM_SUBFRAME_PLOT_APPEARANCE=0
+	'''
+	2018_05_05. New subframe to contain the
+	3 subframes y_value, x_value, and plot_appearance.
+	'''
+	ROW_NUM_SUBFRAME_ROW_3_SUBFRAME=3
 
 	ROW_NUM_GROUPBY_LABELS=0
 	ROW_NUM_GROUPBY_COMBOS=1
@@ -122,17 +141,34 @@ class PGNeEstimationRegressplotInterface( object ):
 	ROW_NUM_SAVE_PLOT_BUTTON=1
 	ROW_NUM_PLOT=0
 	ROW_NUM_STATS_TEXT=0
+	'''
+	2018_05_04. New scales to change font size
+	of labels:
+	'''
+	ROW_NUM_SET_FONT_SIZE_AXIS_LABEL_SCALE=1
+	ROW_NUM_SET_FONT_SIZE_TIC_LABEL_SCALE=1
 
 	#NUM_VALS_IN_SCALE=3000
 	NUM_VALS_IN_SCALE=int( 1e10 )
 
 	COLNUM_SUBFRAME_TSV_LOADER=0
 	COLNUM_SUBFRAME_Y_VALUE=0
-	COLNUM_SUBFRAME_X_VALUE=1
+	COLNUM_SUBFRAME_X_VALUE=2
 	COLNUM_SUBFRAME_FILTER=0
 	COLNUM_SUBFRAME_GROUPBY=0
 	COLNUM_SUBFRAME_PLOT=0
-	COLNUM_SUBFRAME_STATS_TEXT=5
+	COLNUM_SUBFRAME_STATS_TEXT=4
+	'''
+	2018_05_04. New subframe for setting font sizes:
+	'''
+	COLNUM_SUBFRAME_PLOT_APPEARANCE=3
+
+	'''
+	2018_05_05. New subframe to contain the
+	3 subframes y_value, x_value, and plot_appearance.
+	'''
+	COLNUM_SUBFRAME_ROW_3_SUBFRAME=0
+
 
 	COLNUM_YVAL_LOWER_SCALE_LABEL=1
 	COLNUM_YVAL_UPPER_SCALE_LABEL=2
@@ -144,15 +180,26 @@ class PGNeEstimationRegressplotInterface( object ):
 	COLNUM_MIN_CYCLE_TEXT_BOX=1
 	COLNUM_MAX_CYCLE_TEXT_BOX=1
 	COLNUM_ALPHA_TEXT_BOX=1
+	'''
+	2018_05_04. New scalsed for setting font sizes:
+	'''
+	COLNUM_SET_FONT_SIZE_AXIS_LABEL_SCALE=1
+	COLNUM_SET_FONT_SIZE_TIC_LABEL_SCALE=2
 
-	COLSPAN_SUBFRAME_TSV_LOADER=3
-	COLSPAN_SUBFRAME_GROUPY=4
-	COLSPAN_SUBFRAME_FILTER=8
-	COLSPAN_SUBFRAME_Y_VALUE=1
+	COLSPAN_SUBFRAME_TSV_LOADER=30
+	COLSPAN_SUBFRAME_FILTER=30
+	COLSPAN_SUBFRAME_Y_VALUE=2
 	COLSPAN_SUBFRAME_X_VALUE=1
-	COLSPAN_SUBFRAME_SAVE_PLOT=1
 	COLSPAN_SUBFRAME_PLOT=4
-	COLSPAN_SUBFRAME_STATS_TEXT=1
+	COLSPAN_SUBFRAME_STATS_TEXT=30
+	COLSPAN_SUBFRAME_PLOT_APPEARANCE=30
+	'''
+	2018_05_05. New subframe to contain the
+	3 subframes y_value, x_value, and plot_appearance.
+	'''
+	COLSPAN_SUBFRAME_ROW_3_SUBFRAME=30
+
+
 
 	SUBFRAME_STYLE="groove"
 	SUBFRAME_PADDING=10
@@ -537,20 +584,35 @@ class PGNeEstimationRegressplotInterface( object ):
 		Y_VALUE_FRAME_LABEL="Y-axis Data"
 		STATS_TEXT_FRAME_LABEL="Regression Stats"
 		PLOT_FRAME_LABEL="Plot"
+		PLOT_APPEARANCE_FRAME_LABEL="Other settings"
 
 		FRAME_PADDING=PGNeEstimationRegressplotInterface.SUBFRAME_PADDING
+
+
+		'''
+		2018_05_05.  This new frame is added to simplify the spacing
+		of the 3 subframes that constitute row 3 of the GUI's main grid.
+		Note that these 3 subframs (y_value, x_value, and plot_appearance),
+		are still added to the self.__subrames dict, so they are accessible
+		from it, even though their master frame has been changed to the row_3_subframe.
+		Note, too, that this new subrame is of type Frame instead of LabelFrame,
+		and so will lack any relief or label.
+		'''
+		o_row_3_subframe=Frame( self.__master_frame )
+
+		self.__subframes[ 'row_3_subframe' ] = o_row_3_subframe 
 
 		self.__subframes[ 'filter' ]=LabelFrame( self.__master_frame,
 				padding=FRAME_PADDING,
 				relief=FRAME_STYLE,
 				text=GROUPBY_FILTER_FRAME_LABEL )
 
-		self.__subframes[ 'y_value' ]=LabelFrame( self.__master_frame,
+		self.__subframes[ 'y_value' ]=LabelFrame( o_row_3_subframe,
 				padding=FRAME_PADDING,
 				relief=FRAME_STYLE,
 				text=Y_VALUE_FRAME_LABEL )
 
-		self.__subframes[ 'x_value' ]=LabelFrame( self.__master_frame,
+		self.__subframes[ 'x_value' ]=LabelFrame( o_row_3_subframe,
 				padding=FRAME_PADDING,
 				relief=FRAME_STYLE,
 				text=X_VALUE_FRAME_LABEL )
@@ -564,6 +626,23 @@ class PGNeEstimationRegressplotInterface( object ):
 				padding=FRAME_PADDING,
 				relief=FRAME_STYLE,
 				text=STATS_TEXT_FRAME_LABEL )
+
+		'''
+		2018_05_04. New subframe on which we place scales to set font sizes:
+		'''
+		self.__subframes[ 'plot_appearance' ]=LabelFrame( o_row_3_subframe,
+				padding=FRAME_PADDING,
+				relief=FRAME_STYLE,
+				text=PLOT_APPEARANCE_FRAME_LABEL )
+
+
+		'''
+		2018_05_05. New subframe contains the y_value, x_value, and plot_appearance subframes
+		'''
+		self.__subframes[ 'row_3_subframe' ].grid( row=o_myc.ROW_NUM_SUBFRAME_ROW_3_SUBFRAME,
+														column=o_myc.COLNUM_SUBFRAME_ROW_3_SUBFRAME,
+														columnspan=o_myc.COLSPAN_SUBFRAME_ROW_3_SUBFRAME,
+														sticky=(N,W) )
 
 		self.__subframes[ 'filter' ].grid( row=o_myc.ROW_NUM_SUBFRAME_FILTER, 
 														column=o_myc.COLNUM_SUBFRAME_FILTER, 
@@ -587,6 +666,15 @@ class PGNeEstimationRegressplotInterface( object ):
 		
 		self.__subframes[ 'stats_text' ].grid( row=o_myc.ROW_NUM_SUBFRAME_STATS_TEXT, 
 													column=o_myc.COLNUM_SUBFRAME_STATS_TEXT, 
+													columnspan=o_myc.COLSPAN_SUBFRAME_STATS_TEXT, 
+													sticky=(N,W) )
+		'''
+		2018_05_04. New subframe for setting the plot's label font sizes.
+		'''
+
+		self.__subframes[ 'plot_appearance' ].grid( row=o_myc.ROW_NUM_SUBFRAME_PLOT_APPEARANCE, 
+													column=o_myc.COLNUM_SUBFRAME_PLOT_APPEARANCE, 
+													columnspan=o_myc.COLSPAN_SUBFRAME_PLOT_APPEARANCE,
 													sticky=(N,W) )
 		return
 	#end __make_subframes
@@ -891,45 +979,113 @@ class PGNeEstimationRegressplotInterface( object ):
 		'''
 		Note that we want the tkinter.Scale, not the ttk.Scale, which lacks
 		many of the former's handy attributes.
+
+		2018_05_07.  We are removing the y-values scale from the gui -- users
+		will only be able to regress on the whole data set:
 		'''
 
-		o_y_lower_value_scale=PGScaleWithEntry( 
-							o_master_frame= self.__subframes[ 'y_value' ], 
-							f_scale_from=df_min_max[ "min" ], 
-							f_scale_to = df_min_max["max"],
-							def_scale_command=self.__on_y_scale_change,
+#		o_y_lower_value_scale=PGScaleWithEntry( 
+#							o_master_frame= self.__subframes[ 'y_value' ], 
+#							f_scale_from=df_min_max[ "min" ], 
+#							f_scale_to = df_min_max["max"],
+#							def_scale_command=self.__on_y_scale_change,
+#							v_orient=HORIZONTAL,
+#							f_resolution=f_resolution,
+#							f_bigincrement=f_bigincrement,
+#							i_scale_length=SCALE_LENGTH,
+#							s_scale_label="lower limit y axis values")
+#
+#		o_y_lower_value_scale.scale.set( df_min_max[ "min" ] )
+#		o_y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
+#											column=o_myclass.COLNUM_YVAL_LOWER_SCALE, 
+#																		sticky=( N,W ) )
+#
+#		o_y_upper_value_scale=PGScaleWithEntry( 
+#							o_master_frame= self.__subframes[ 'y_value' ], 
+#							f_scale_from=df_min_max[ "min" ], 
+#							f_scale_to = df_min_max["max"],
+#							def_scale_command=self.__on_y_scale_change,
+#							v_orient=HORIZONTAL,
+#							f_resolution=f_resolution,
+#							f_bigincrement=f_bigincrement,
+#							i_scale_length=SCALE_LENGTH,
+#							s_scale_label="upper limit y axis values")
+#
+#		o_y_upper_value_scale.scale.set( df_min_max[ "max" ] )
+#		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
+#											column=o_myclass.COLNUM_YVAL_UPPER_SCALE, 
+#																			sticky=( N,W ) )
+#		
+#		self.__scales={ 'y_value_lower':o_y_lower_value_scale, 'y_value_upper':o_y_upper_value_scale }
+#
+		'''
+		Required now that we've removed the y_value scales::
+		'''
+		self.__scales={}
+		'''
+		2018_05_04.  New scales allow user to set the font size for axis and tic labels:
+		'''
+		o_axis_label_font_size_scale=PGScaleWithEntry( 
+							o_master_frame= self.__subframes[ 'plot_appearance' ], 
+							f_scale_from=MINFONTSIZE, 
+							f_scale_to = MAXFONTSIZE,
+							def_scale_command=self.__on_font_size_axis_label_change,
 							v_orient=HORIZONTAL,
-							f_resolution=f_resolution,
-							f_bigincrement=f_bigincrement,
+							f_resolution=1,
 							i_scale_length=SCALE_LENGTH,
-							s_scale_label="lower limit y axis values")
+							s_scale_label="axis label font size" )
 
-		o_y_lower_value_scale.scale.set( df_min_max[ "min" ] )
-		o_y_lower_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_LOWER_SCALE, 
-											column=o_myclass.COLNUM_YVAL_LOWER_SCALE, 
-																		sticky=( N,W ) )
+		o_axis_label_font_size_scale.scale.set( PLOTLABELFONTSIZE )
 
-		o_y_upper_value_scale=PGScaleWithEntry( 
-							o_master_frame= self.__subframes[ 'y_value' ], 
-							f_scale_from=df_min_max[ "min" ], 
-							f_scale_to = df_min_max["max"],
-							def_scale_command=self.__on_y_scale_change,
-							v_orient=HORIZONTAL,
-							f_resolution=f_resolution,
-							f_bigincrement=f_bigincrement,
-							i_scale_length=SCALE_LENGTH,
-							s_scale_label="upper limit y axis values")
-
-		o_y_upper_value_scale.scale.set( df_min_max[ "max" ] )
-		o_y_upper_value_scale.grid( row=o_myclass.ROW_NUM_YVAL_UPPER_SCALE, 
-											column=o_myclass.COLNUM_YVAL_UPPER_SCALE, 
+		o_axis_label_font_size_scale.grid( row=o_myclass.ROW_NUM_SET_FONT_SIZE_AXIS_LABEL_SCALE, 
+											column=o_myclass.COLNUM_SET_FONT_SIZE_AXIS_LABEL_SCALE, 
 																			sticky=( N,W ) )
-		
-		self.__scales={ 'y_value_lower':o_y_lower_value_scale, 'y_value_upper':o_y_upper_value_scale }
+		self.__scales[ 'font_size_labels_axis' ] = o_axis_label_font_size_scale
+
+		'''
+		New scales allow user to set the font size for axis and tic labels:
+		'''
+		o_tic_label_font_size_scale=PGScaleWithEntry( 
+							o_master_frame= self.__subframes[ 'plot_appearance' ], 
+							f_scale_from=MINFONTSIZE, 
+							f_scale_to = MAXFONTSIZE,
+							def_scale_command=self.__on_font_size_tic_label_change,
+							v_orient=HORIZONTAL,
+							f_resolution=1,
+							i_scale_length=SCALE_LENGTH,
+							s_scale_label="tic label font size" )
+
+		o_tic_label_font_size_scale.scale.set( TICKLABELFONTSIZE )
+
+		o_tic_label_font_size_scale.grid( row=o_myclass.ROW_NUM_SET_FONT_SIZE_TIC_LABEL_SCALE, 
+											column=o_myclass.COLNUM_SET_FONT_SIZE_TIC_LABEL_SCALE, 
+																			sticky=( N,W ) )
+		self.__scales[ 'font_size_labels_tic' ] = o_tic_label_font_size_scale
+
+
 
 		return
 
 	#end __make_scales
+
+
+	def __on_font_size_axis_label_change( self, o_event=None ):
+		if self.__plotframe is not None:
+			i_font_size=int( self.__scales[ 'font_size_labels_axis'].scale.get()  )
+			self.__plotframe.setFontSizeAxisLabels( i_font_size )
+			self.__update_plot_and_stats_text()
+		#end if we have a plot frame
+		return
+	#end __on_font_size_axis_lable_change
+
+	def __on_font_size_tic_label_change( self, o_event=None ):
+		if self.__plotframe is not None:
+			i_font_size=int( self.__scales[ 'font_size_labels_tic'].scale.get()  )
+			self.__plotframe.setFontSizeTicLabels( i_font_size )
+			self.__update_plot_and_stats_text()
+		#end if we have a plot frame
+		return
+	#end __on_font_size_axis_lable_change
 
 	def __get_range_unfiltered_y_data( self ):
 
@@ -987,35 +1143,37 @@ class PGNeEstimationRegressplotInterface( object ):
 	#end __get_scale_bigincrement
 
 	def __update_y_scales( self ):
-
-		if self.__comboboxes is not None and 'select_y_variable' in self.__comboboxes:
-			
-			df_min_max=self.__get_range_unfiltered_y_data()
-
-			f_resolution=self.__get_scale_resolution( df_min_max[ 'min' ], df_min_max[ 'max' ]  )
-			f_bigincrement=self.__get_scale_bigincrement( df_min_max[ 'min' ], df_min_max[ 'max' ] )
-
-			'''
-			Note that the order of these re-settings matters, because,
-			if the current resolution (in cases where this reset is called
-			after a change in y variable) is larger than the range
-			we got from __get_range_unfiltered_y_data, then
-			the min (from)  and max (to) will be both set to 0.0. Hence,
-			we must reset the resolution before resetting the from and to.
-			'''
-			self.__scales[ 'y_value_lower' ].scale[ 'resolution' ] = f_resolution
-			self.__scales[ 'y_value_lower' ].scale[ 'bigincrement' ] = f_bigincrement	
-			self.__scales[ 'y_value_lower' ].scale[ 'from' ] = df_min_max[ "min" ] 	
-			self.__scales[ 'y_value_lower' ].scale[ 'to' ]=df_min_max[ "max" ] 
-			self.__scales[ 'y_value_lower' ].scale.set( df_min_max[ "min" ] )
-
-			self.__scales[ 'y_value_upper' ].scale[ 'resolution' ] = f_resolution
-			self.__scales[ 'y_value_upper' ].scale[ 'bigincrement' ] = f_bigincrement
-			self.__scales[ 'y_value_upper' ].scale[ 'from' ] = df_min_max[ "min" ] 	
-			self.__scales[ 'y_value_upper' ].scale[ 'to' ]=df_min_max[ "max" ] 
-			self.__scales[ 'y_value_upper' ].scale.set( df_min_max[ "max" ] )
-
-		#end if the y var combo has been created
+		'''
+		2018_05_07. we are removing the y-value scales:
+		'''
+#		if self.__comboboxes is not None and 'select_y_variable' in self.__comboboxes:
+#			
+#			df_min_max=self.__get_range_unfiltered_y_data()
+#
+#			f_resolution=self.__get_scale_resolution( df_min_max[ 'min' ], df_min_max[ 'max' ]  )
+#			f_bigincrement=self.__get_scale_bigincrement( df_min_max[ 'min' ], df_min_max[ 'max' ] )
+#
+#			'''
+#			Note that the order of these re-settings matters, because,
+#			if the current resolution (in cases where this reset is called
+#			after a change in y variable) is larger than the range
+#			we got from __get_range_unfiltered_y_data, then
+#			the min (from)  and max (to) will be both set to 0.0. Hence,
+#			we must reset the resolution before resetting the from and to.
+#			'''
+#			self.__scales[ 'y_value_lower' ].scale[ 'resolution' ] = f_resolution
+#			self.__scales[ 'y_value_lower' ].scale[ 'bigincrement' ] = f_bigincrement	
+#			self.__scales[ 'y_value_lower' ].scale[ 'from' ] = df_min_max[ "min" ] 	
+#			self.__scales[ 'y_value_lower' ].scale[ 'to' ]=df_min_max[ "max" ] 
+#			self.__scales[ 'y_value_lower' ].scale.set( df_min_max[ "min" ] )
+#
+#			self.__scales[ 'y_value_upper' ].scale[ 'resolution' ] = f_resolution
+#			self.__scales[ 'y_value_upper' ].scale[ 'bigincrement' ] = f_bigincrement
+#			self.__scales[ 'y_value_upper' ].scale[ 'from' ] = df_min_max[ "min" ] 	
+#			self.__scales[ 'y_value_upper' ].scale[ 'to' ]=df_min_max[ "max" ] 
+#			self.__scales[ 'y_value_upper' ].scale.set( df_min_max[ "max" ] )
+#
+#		#end if the y var combo has been created
 
 		return
 	#end __update_y_scales
@@ -1279,27 +1437,29 @@ class PGNeEstimationRegressplotInterface( object ):
 	#end __on_filter_value_combo_change
 
 	def __on_y_scale_change(self, o_event=None ):
-
-		def is_valid_y( s_value ):
-			b_valid=False
-			if s_value == "NA":
-				b_valid=False
-			else:
-				f_value=float( s_value )
-				if f_value <= float( self.__scales[ 'y_value_upper' ].scale.get() ) \
-						and f_value >= float( self.__scales[ 'y_value_lower' ].scale.get() ):
-					b_valid= True
-				#end if float in range
-			#end if
-			return b_valid
-		#end local def is_valid_y
-	
-		self.__tsv_file_manager.setFilter( self.__comboboxes[ 'select_y_variable' ].current_value, 
-											 is_valid_y )
-
-		if self.__plotframe is not None:
-			self.__update_plot_and_stats_text()
-		#end if we have a plotframe, replot the data
+		'''
+		2018_05_07. we are removing the y value scales:
+		'''
+#		def is_valid_y( s_value ):
+#			b_valid=False
+#			if s_value == "NA":
+#				b_valid=False
+#			else:
+#				f_value=float( s_value )
+#				if f_value <= float( self.__scales[ 'y_value_upper' ].scale.get() ) \
+#						and f_value >= float( self.__scales[ 'y_value_lower' ].scale.get() ):
+#					b_valid= True
+#				#end if float in range
+#			#end if
+#			return b_valid
+#		#end local def is_valid_y
+#	
+#		self.__tsv_file_manager.setFilter( self.__comboboxes[ 'select_y_variable' ].current_value, 
+#											 is_valid_y )
+#
+#		if self.__plotframe is not None:
+#			self.__update_plot_and_stats_text()
+#		#end if we have a plotframe, replot the data
 		return		
 	#end __on_y_scale_change
 

@@ -25,6 +25,15 @@ class PGInputNeEstimator (object):
 		self.__run_params={ "crits":None, "LD":True, 
 							"hets":False, "coanc":False, 
 							"temp":None, "monogamy":False, "options":None }
+
+		'''
+		2018_04_28.  These new params are passed to LDNe2, and are not part
+		of the original set of params Tiago used calling NeEstimator. 
+		Note that NeEstimator, then or in later versions, does implement
+		the loci/chrom table, but we have implemented a direct call to LDNe2
+		customized for our program, to take these params.
+		'''
+		self.__ldne2_only_params={ "chromlocifile":"None", "allele_pairing_scheme":0 }
 		return
 	#end __init__
 	
@@ -47,6 +56,25 @@ class PGInputNeEstimator (object):
 		#end for each param
 		return
 	#end setRunParams
+
+	'''
+	2018_04_28. Added to implement new chromlocifile
+	and allele_pairing_scheme parameters passed to LDNe2.
+	'''
+	@property
+	def ldne2_only_params( self ):
+		#not to be used as a setter
+		#for parms, so pass a deep copy
+		return copy.deepcopy( self.__ldne2_only_params )
+	#end property ldne2_only_params
+
+	@ldne2_only_params.setter
+	def ldne2_only_params( self, dv_params ):
+		for s_name in dv_params:
+			self.__ldne2_only_params[ s_name ] = dv_params[ s_name ]
+		#end for each param
+		return
+	#end setter for ldne2_only_params
 
 #end class PgInputNeEstimator
 

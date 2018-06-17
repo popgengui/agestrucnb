@@ -12,7 +12,7 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 __REQUIRE_PYGENOMICS__=False
 
 import sys
-
+import os
 
 '''
 2017_04_15. This test and the __REQUIRE_PYGENOMICS__ flag added above
@@ -41,8 +41,6 @@ from agestrucne.pgoutputneestimator import PGOutputNeEstimator
 
 import agestrucne.pgutilities as pgut
 
-import sys
-import os
 #so we can the NeEstimator session in its own
 #temporary directory:
 import tempfile
@@ -235,6 +233,73 @@ class PGOpNeEstimator( APGOperation ):
 		return
 	#end __return_to_original_non_temporary_directory
 
+	def __is_windows_filecount_anomaly( self, s_temp_dir, ls_file_list ):
+		'''
+		This def is created to deal with a state that seems
+		to be Windows specific, whereby the call to pgut.get_list_file_objects
+		in this module's def __remove_temporary_directory_and_all_of_its_contents,m
+		results is a list of 4 files (expected are 3 files), one of which has 
+		a tmp.* name that is almost certainly a file name created by the temp file
+		name generator, but with origin unknown.  Further, when I tested I
+		found that trying to open the file results in a file not found error.  Hence
+		We will test for this anomaly and return a flag, so that we can avoid 
+		throwing an invalid-temp-dir-contents related exceptionm, which would
+		abort the estimation run.
+		'''
+
+		b_is_anomaly=False
+
+		i_num_files_start_with_temp=0
+		i_num_files_start_with_tmp=0
+		i_num_files_start_with_tmp_and_exist=0
+
+		i_len_file_list=len( ls_file_list )
+
+		##### temp
+		s_tmpfilename=None
+		#####
+
+		if pgut.is_windows_platform():	
+			if i_len_file_list == 4:
+				for s_file_name in ls_file_list:
+					if s_file_name.startswith( "temp" ):
+						i_num_files_start_with_temp+=1
+					elif s_file_name.startswith( "tmp" ):
+						if os.path.exists( s_temp_dir + "/" + s_file_name ):
+							#####temp
+							s_tmpfilename=s_temp_dir + "/" + s_file_name 
+							#####
+							i_num_files_start_with_tmp_and_exist+=1
+						#end if file exists
+					#end if file name starts with "tmp"
+				#end for each file in the list
+			#end if file count is 4
+		#end if we're using Windows
+
+		#This is the filt total in the anomolous condition:
+		b_have_expected_num_files_with_predicted_names=( i_len_file_list==4 ) \
+						and ( i_num_files_start_with_temp==3 )  \
+						and (i_num_files_start_with_tmp==1 ) \
+
+		if b_have_expected_num_files_with_predicted_names:
+			#The anomolous conditioin is that the "tmp" file
+			#no longer exists after we've  fetched the file names:
+			if i_num_files_start_with_tmp_and_exist==0:
+				b_is_anaomaly=True
+			#end if no 4th file still exists
+		#end if we have 4 files with expected names
+		
+		
+		##### temp
+		if s_tmpfilename is not None:
+			print( "in __is_windows_filecount_anomaly, with 4th file existing, with contents: " )
+			of=open( s_tmpfilename)
+			print( str( of.readlines() ) )
+		#end temp
+
+		return b_is_anomaly
+	#end __is_windows_filecount_anomaly
+
 	def __remove_temporary_directory_and_all_of_its_contents( self, s_temp_dir ):
 
 		'''
@@ -286,13 +351,37 @@ class PGOpNeEstimator( APGOperation ):
 			s_msg += "  Subdirectory names: " + str( ls_directories ) \
 					+ ".  File names: " + str( ls_files ) + "." 
 
-			raise Exception( s_msg )
+			'''
+			2018_04_04. Added this check to avoid raising an exception
+			in the case (see def __is_windows_filecount_anomaly) that
+			the there are 4 files in our list 4th has a tmp* name, 
+			and does not exist.
+			'''
+			if i_num_files >= SUSPICOUSLY_HIGH_FILE_COUNT:
+				b_is_windows_anomaly=self.__is_windows_filecount_anomaly( s_temp_dir, ls_files )
+			#end if high file count
+
+			if b_is_windows_anomaly:
+				s_msg="INFO: In PGOpNeEstimator instance,  " \
+						+ "def __remove_temporary_directory_and_all_its_contents, " \
+						+ "an extra file was included in python's listdir file object " \
+						+ "list, but is now found to be missing.  The program ignores " \
+						+ "this anomaly and removes the temporary directory." 
+				sys.stderr.write( s_msg + "\n" )	
+			#end if anomaly
+
+			b_high_file_count_not_explained=not( b_is_windows_anomaly )
+
+			if ( i_num_subdirs > NUMBER_SUBDIRS_EXPECTED ) or b_high_file_count_not_explained:
+				raise Exception( s_msg )
+			#end if subdir count invalid or high file count but not the windows anomaly
 		#end if dir/file counts look wrong
 
 		#Abort if any file name looks wrong
 		for s_file in ls_files:
 
 			if not ( s_file.startswith( CORRECT_TEMP_FILE_PREFIX ) ):
+				b_windows
 				s_msg="in PGOpNeEstimator instance, " \
 							+ "def __remove_temporary_directory_and_all_its_contents, " \
 							+ "temp dir: " + s_temp_dir \
@@ -302,7 +391,24 @@ class PGOpNeEstimator( APGOperation ):
 							+ s_file \
 							+ ", correct prefix: " + CORRECT_TMP_DIR_PREFIX + "."
 				
-				raise Exception( s_msg )
+				'''
+				2018_04_04. We don't raise an exception is the temp_dir state is that
+				seen in testing, so that there is only 1 extra file name, and it meets
+				the criteria for the anomaly defined above, and so removal is still valid.
+				'''
+				b_is_windows_anomaly=self.__is_windows_filecount_anomaly( s_temp_dir, ls_files )
+
+				if not( b_is_windows_anomaly ):
+					raise Exception( s_msg )
+				else:
+					s_msg="INFO: In PGOpNeEstimator instance,  " \
+								+ "def __remove_temporary_directory_and_all_its_contents, " \
+								+ "an extra file was included in python's listdir file object " \
+								+ "list, but is now found to be missing.  The program ignores " \
+								+ "this anomaly and removes the temporary directory." 
+					sys.stderr.write( s_msg + "\n" )
+				#end if file names invalid and not the windows anomaly
+
 			#end if file does not appear to be a temp file, abort	
 		#end for each file
 
@@ -440,7 +546,16 @@ class PGOpNeEstimator( APGOperation ):
 		if self.__estimator_to_use == NEESTIMATOR:
 			o_op_object=self.__get_op_neestimator()
 		elif self.__estimator_to_use == LDNE_ESTIMATION:
+			
 			o_op_object=self.__get_op_ldne()
+
+			'''
+			2018_04_28.  We've added 2 LDNe2-only
+			parameters, chromlocifile and allele_pairing_scheme, 
+			that we must set before running.
+			'''
+			o_op_object.setLDNE2Values( self.input.ldne2_only_params )
+
 		else:
 			s_msg="In PGOpNeEstimator instance, def doOp, " \
 						+ "Unknown estimator name: " \

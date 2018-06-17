@@ -76,9 +76,31 @@ import tkinter.filedialog as tkfd
 and onUpdateMaleProb, to properly set
 the male probablity number and the enabled/disabled
 state its entry box, given the cull method selected.
+
+2018_05_07.  We've changed the name "equal_sex_ratio"
+to "maintain_distribution".  Also we'll now use the
+constants in the PGInputSimuPop class, so lower the
+number of places these text values are assigned:
 '''
-CBOX_EQUAL_SEX_RATIO_TEXT="equal_sex_ratio"
-CBOX_SURVIVAL_RATE_TEXT="survival_rates"
+#CBOX_EQUAL_SEX_RATIO_TEXT="equal_sex_ratio"
+#CBOX_SURVIVAL_RATE_TEXT="survival_rates"
+CBOX_EQUAL_SEX_RATIO_TEXT=pgin.PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS
+CBOX_SURVIVAL_RATE_TEXT=pgin.PGInputSimuPop.CONST_CULL_METHOD_SURVIVIAL_RATES
+
+'''
+2018_06_02.  New parameter input.loci_file_name has a default value
+that signifies no file name.  We need to test for this value and so
+we import the module's constant that sets this string:
+'''
+from pgsimupoplociinfo import NO_LOCI_FILE
+
+
+'''
+2018_06_02. To manage the state of controls related to loci totals,
+as a fucntion of the state of the new parameter use_loci_file flag,
+which, when true, makes these parameters irrelevant:
+'''
+LOCI_RELATED_TOTALS_CONTROLS=[ "numSNPs", "numMSats", "numChroms", "startAlleles" ]
 
 class PGGuiSimuPop( pgg.PGGuiApp ):
 
@@ -435,6 +457,14 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				borderwidth=BORDERWIDTH_FOR_CATEGORY_FRAME,
 				text="Other" )
 		
+
+		'''
+		2018_05_26. We add a subframe to go inside the genome subframe, to keep
+		the flag and file loader controls for the loci file together:
+		'''
+		self.__loci_file_sub_subframe=Frame( do_category_frames[ "Genome" ] )
+		self.__loci_file_sub_subframe.grid()
+
 		return do_category_frames
 	#end __make_category_subframes
 
@@ -474,6 +504,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	#end __place_category_frames
 
 	def __load_values_into_interface( self, b_force_disable=False ):
+
 		'''
 		in isolating the attributes
 		that are strictly model params
@@ -553,6 +584,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.__category_frames=self.__make_category_subframes( \
 				set( ls_sections ) )	
 
+		
 		for s_param in ls_input_params:
 			
 			PADPIX=0
@@ -649,6 +681,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 				if s_section_name not in self.__category_frames:
 					o_frame_for_this_param=self.__category_frames[ "none" ]
+				elif s_param == "loci_file_name" or s_param == "use_loci_file":
+					o_frame_for_this_param=self.__loci_file_sub_subframe
 				else:
 					o_frame_for_this_param=self.__category_frames[ s_section_name ]
 				#end if no nametag or name tag not in frame categories
@@ -747,6 +781,35 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 								b_force_disable=b_force_disable,
 								s_tooltip=s_tooltip,
 								b_use_list_editor=True if s_param=="nbadjustment" else False )
+
+				elif s_param_control_type=="entrywithbutton":
+
+					'''
+					2018_05_26. This control type was added with the addition to the genome
+					subframe, the ability of the user to use, in place of numSNPs and numChroms,
+					a file that gives loci information.  We copied the code to setup the "entrywithbutton"
+					control from the pgguineestimator.py, and, becausez it is a large piece of code,
+					offload it into a separate def:
+					'''
+					o_kv=self.__setup_entry_with_button( \
+								s_param=s_param,
+								s_param_longname = s_longname,
+								v_value_for_entry_control=v_val,
+								o_param_type=o_param_type,
+								v_default_item_value=v_default_value,
+								o_subframe=o_frame_for_this_param,
+								s_attr_name=s_attribute_to_update,
+								o_attribute_object=self.__input,
+								i_width_this_entry=i_entry_width,
+								i_this_label_width=i_width_labelname,
+								s_state_to_use=b_allow_entry_change,
+								s_this_entry_justify='left',
+								s_param_tooltip=s_tooltip,
+								o_validity_checker=o_validity_checker,
+								b_force_disable=b_force_disable,
+								b_use_list_editor=True,
+								o_param_assoc_def=def_to_call_on_change )
+
 				#cbox types are specified as cboxreadonly or cboxnormal, so we test for prefix:	
 				elif s_param_control_type.startswith( "cbox" ):
 					'''
@@ -770,7 +833,8 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 					if v_val not in qs_control_list:
 						s_msg="Current value for parameter " \
-							 	+ s_param + " is not found " \
+							 	+ s_param + ", " + str( v_val ) \
+								+ ", is not found " \
 								+ "among the values listed as valid: " \
 								+ str( qs_control_list ) + ""
 						raise Exception( s_msg )
@@ -822,6 +886,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 										b_is_enabled=b_allow_entry_change,
 										b_force_disable=b_force_disable,
 										s_tooltip=s_tooltip )
+
 				elif s_param_control_type=="checkbutton":
 				
 					'''
@@ -857,9 +922,20 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 					o_kv.setLabelState( "enabled" )
 				#end if labels should always be non-grayed-out
 
-				
+				'''
+				2018_05_26. We've put a subframe inside the Genome
+				to hold the flag and entry box for the loci info
+				file.  We want the controls in this order:
+				'''
+				i_final_row=i_row	
+				if s_param=="use_loci_file":
+					i_final_row=1
+				elif s_param=="loci_file_name":
+					i__final_row=2
+				#end if it's a pram we put in a sub-subframe, 
+				#then we want the indicated order 
 
-				o_kv.grid( row=i_row, sticky=(NW) )
+				o_kv.grid( row=i_final_row, sticky=(NW) )
 				self.__param_key_value_frames[ s_param ] = o_kv
 
 				#Execute the def to be run on loading the param,
@@ -874,9 +950,29 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.__place_category_frames( self.__category_frames )
 		self.grid_columnconfigure( 0, weight=1 )
 		self.grid_rowconfigure( 0, weight=1 )
-
+		
+		'''
+		2018_06_02.  Now that all params have controls, we
+		need to reset loci related totals according to the 
+		state of the use_loci_file flag:
+		'''
+		if not( b_force_disable ):
+			self.__reset_controls_whose_state_depends_on_state_of_other_controls()
+		#end if not force disabling all controls, reset other-control-state-dependant controls
 		return
 	#end __load_values_into_interface
+
+	def __reset_controls_whose_state_depends_on_state_of_other_controls( self ):
+		'''
+		2018_06_02. This def was added to manage the inititalization of loci-related 
+		controls, whose enabled state depends on the state of our new param, 
+		use_loci_file. Note that improvements in this code may include moving
+		code from other defs that set control states depending on others' states.
+
+		'''
+		self.__initialize_state_of_loci_related_totals_controls()
+		return
+	#end __reset_controls_whose_state_depends_on_state_of_other_controls
 
 	def onCullMethodSelectionChange( self ):
 		'''
@@ -1591,116 +1687,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.__remove_temporary_config_file()
 	#end cleanup
 
-	##### temp rem out
-	'''
-	2017_03_26.
-	This def remm'd out as I debug a problem
-	with the validation of the NbAdjustment param.
-	Validation code, when user enters invalid value
-	and then presses tabkey, goes into a long recursive
-	series of re-vaidations.
-	'''
-#	def validateNbAdjustment( self, s_adjustment ):
-#
-#		'''
-#		2017_03_08. This def is created to handle the PGInputSimuPop
-#		parameter nbadjustment, which requires a more elaborate
-#		validation than do the others that can be validated using
-#		a simple boolean statement.
-#		We test the user's entry into the list of strings that give
-#		the cycle range and adjustment rate by creating an 
-#		NbAdjustmentRangeAndRate object, solely to test it using
-#		that objects validation code.  See the class description
-#		and code for NbAdjustmentRangeAndRate in module pgutilityclasses.
-#		'''
-#
-#		b_return_val=True
-#		i_lowest_cycle_number=1
-#		i_highest_cycle_number=self.__input.gens
-#
-#		s_msg="In PGGuiSimuPop instance, def validateNbAdjustment, " \
-#							+ "there was an error in the range " \
-#							+ "and rate entry. The entry was: " \
-#							+ s_adjustment + ".  " \
-#							+ "\n\nThe correct format is min-max:rate, where " \
-#							+ "min is a starting cycle number, " \
-#							+ "max is an ending cycle number, " \
-#							+ "and rate is the proportion by which to " \
-#							+ "multiply Nb and the age/class individual counts " \
-#							+ "to be applied for each cycle in the range." 
-#
-#
-#		if VERY_VERBOSE:
-#			print( "--------------------" )
-#			print( "in pgguisimupop, validateNbAdjustment" )
-#		#end very verbose 
-#
-#
-#		if self.__input is None:
-#
-#			if VERY_VERBOSE:
-#				print( "returning false on no input object" )
-#			#end if very verbose
-#
-#			#Change message:
-#			s_msg="In PGGuiSimuPop instance, def validateNbAdjustment, " \
-#					"no input object found."
-#			b_return_val = False
-#
-#		
-#
-#		elif i_highest_cycle_number < i_lowest_cycle_number:
-#
-#			if VERY_VERBOSE:
-#				print( "returning false on cycle number test" )
-#			#end if very verbose
-#
-#			s_msg="In PGGuiSimuPop instance, def validateNbAdjustment, " \
-#					"cannot validate cycle range:  current setting for " \
-#					+ "total generations is less than 1."
-#			b_return_val = False
-#
-#		else:
-#			ls_adj_vals=s_adjustment.split( ":" )
-#
-#			if len( ls_adj_vals ) != 2:
-#				b_return_val = False
-#			else:
-#
-#				s_cycle_range=ls_adj_vals[ 0 ]
-#
-#				ls_min_max=s_cycle_range.split( "-" )			
-#
-#				if len( ls_min_max ) != 2:
-#					b_return_val = False
-#
-#				else:
-#
-#					try:
-#						i_min=int( ls_min_max[ 0 ] )
-#
-#						i_max=int( ls_min_max[ 1 ] )
-#						
-#						if i_min < 1 \
-#								or i_max > i_highest_cycle_number \
-#								or i_min > i_max:
-#							b_return_val = False
-#						#end if min-max invalid range
-#
-#					except ValueError as ove:
-#						b_return_val = False
-#					#end try except
-#
-#				#end if min-max list not 2 items
-#			#end if entry not colon-splittable into 2 items
-#		#end if no input, else if current input.gens < 1, else test entry
-#
-#		if b_return_val == False:
-#			PGGUIInfoMessage( self, s_msg )
-#		#end if problem, give message			
-#		return b_return_val
-#	#end validateNbAdjustment
-
 	def __create_validity_checker( self, v_init_value, s_validity_expression ):
 		'''
 		2017_02_07. This def added as I incrementally bring the param handling in this interface 
@@ -1849,7 +1835,9 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		entry box is created, then the latter
 		can't be set to disabled, and equal to 0.5,
 		its proper state when the cull method is 
-		"equal_sex_ratio."
+		"equal_sex_ratio." (Note as of  2018_05_07,
+		"equal_sex_ratio" now renamed in the GUI
+		and conf files as "maintain_distribution").
 		'''
 		s_result=self.__disable_or_enable_maleprob_according_to_cull_method()	
 		#we also need to recalculate the N0
@@ -1906,13 +1894,248 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		if self.__input.do_het_filter == False or self.__simulation_is_in_progress:
 			o_keyvalueframe.setStateControls( "disabled" )
 			o_keyvalueframe.setLabelState( "disabled" )
+			o_keyvalueframe.setEntryFontColor( "gray" )
 		else:
 			o_keyvalueframe.setStateControls( "enabled" )
 			o_keyvalueframe.setLabelState( "enabled" )
+			o_keyvalueframe.setEntryFontColor( "black" )
 		#end if we are not doing a bias adjustment, else we are 
+
 		return
-	#end def onChangeInNbBiasAdjustmentFlag
+	#end def onChangeInHetFilterFlag
+
+	def __on_change_in_use_loci_file_flag( self ):
+		'''
+		2018_05_26. Now allowing input of a file giveing loci info.
+		'''
+		s_param_name="loci_file_name"
 
 
+		if s_param_name not in self.__param_key_value_frames:
+			s_msg="In PGGuiSimuPop instance, def __on_change_in_use_loci_file_flag, " \
+						+ "the program cannot find a key value frame associated " \
+						+ "with the param name: " + s_param_name + "."
+			PGGUIErrorMessage( self, s_msg )
+			raise Exception( s_msg )
+		#end if no key val frame for the nb/ne ratio param
+
+		o_loci_file_control=self.__param_key_value_frames[ "loci_file_name" ]
+
+		if self.__input.use_loci_file == False:
+			self.__disable_loci_file_controls( o_loci_file_control )
+			self.__set_state_of_loci_related_totals_controls( "enabled" )
+		else:
+			self.__enable_loci_file_controls( o_loci_file_control )
+			self.__set_state_of_loci_related_totals_controls( "disabled" )
+		#end if we are not using the chrom loci file, else we are 
+
+		return
+	#end __on_change_in_use_loci_file_flag
+
+	def __set_state_of_loci_related_totals_controls( self, s_state ):
+
+		lo_loci_related_total_controls=[]
+
+		for s_param in LOCI_RELATED_TOTALS_CONTROLS:
+			if s_param in self.__param_key_value_frames:
+				lo_loci_related_total_controls.append( \
+								self.__param_key_value_frames[ s_param ] )
+			#end if we have a control for the param
+		#end for each param
+
+		s_entry_font_color="black" if s_state=="enabled" else "gray"
+
+		for o_control in lo_loci_related_total_controls:
+				o_control.setStateControls( s_state )
+				o_control.setEntryFontColor( s_entry_font_color )
+				o_control.setLabelState( s_state )
+		#end for each loci total control	
+
+		return
+	#end __change_state_of_loci_related_totals_controls
+
+	def __on_button_press_load_loci_file( self ):
+		'''
+		2018_05_26. Now allowing input of a file giveing loci info.
+		This code is from pgguineestimator, 
+		def __on_button_press_load_chrom_loci_file
+		For new parameter that loads path/name
+		of a loci info file, used by LDNe2 to
+		eval only loci pairs whose members are associated
+		with different chromosomes.
+		'''
+		try:
+			s_current_value=self.__input.loci_file_name
+
+			s_loci_file_name=tkfd.askopenfilename(  \
+					title='Load a loci info file' )
+
+			if pgut.dialog_returns_nothing( s_loci_file_name ):
+				return
+			#end if no file selected, return
+			
+			self.__param_key_value_frames[ "loci_file_name" \
+								].manuallyUpdateValue( s_loci_file_name ) 
+
+		except Exception as oex:
+			o_traceback=sys.exc_info()[ 2 ]
+			s_trace= \
+				pgut.get_traceback_info_about_offending_code( o_traceback )
+
+			s_msg="In PGGuiSimuPop instance, " \
+					+ "def __on_button_press_load_loci_file " \
+					+ "an exception was raised: " + str( oex ) \
+					+ "\nwith traceback info: " + s_trace
+
+			PGGUIErrorMessage( self, s_msg )
+
+			raise ( oex )
+
+		#end try...except
+		return
+	#end __on_button_press_load_loci_file
+
+	def __setup_entry_with_button( self,
+									s_param,
+									s_param_longname,
+									v_value_for_entry_control,
+									o_param_type,
+									v_default_item_value,
+									o_subframe,
+									s_attr_name,
+									o_attribute_object,
+									i_width_this_entry,
+									i_this_label_width,
+									s_state_to_use,
+									s_this_entry_justify,
+									s_param_tooltip,
+									o_validity_checker,
+									b_force_disable,
+									b_use_list_editor,
+									o_param_assoc_def ):
+
+		'''
+		2018_05_26. This code was copied from pgguineestimator.py, 
+		for the parameter that gives a name of a loci info.  For this
+		control, we disable the entry, and instead of assigning the
+		pgparamset member s_param_assoc_def to the def_entry_change_command
+		param of the keyvalframe, we assign to def_button_command 
+		parameter.  We also apply the param label to the button:
+		'''
+
+		#For the entrywithbutton config, we use this
+		#as the button command rather than the entry
+		#change def::
+		def_for_button_press=o_param_assoc_def \
+							if o_param_assoc_def is not None \
+											else self.__test_values
+
+#		if o_param_assoc_def != "None":
+#			def_on_entry_change=getattr( self,  s_param_assoc_def )
+#		#end if we have a named def in the param set
+
+		'''
+		This should be automated, but so far this is the only
+		entry with label implemented via the keyvalframe class.
+		'''
+		s_label_name=None
+		if  s_param=="loci_file_name":
+			i_width_this_entry=70
+			s_button_text="Load loci file"
+			#we let the button's text serve as the label
+			s_label_name=""
+			i_this_label_width=0
+		#end if this is the chrom loci file entry control
+		
+		o_this_keyval=KeyValFrame( s_name=s_param_longname,
+			v_value=v_value_for_entry_control,
+			o_type=o_param_type,
+			v_default_value=v_default_item_value,
+			o_master=o_subframe,
+			def_entry_change_command=None,
+			o_associated_attribute_object=o_attribute_object,
+			s_associated_attribute=s_attr_name,
+			i_entrywidth=i_width_this_entry,
+			i_labelwidth=i_this_label_width,
+			b_is_enabled=( s_state_to_use == "enabled" ),
+			s_entry_justify=s_this_entry_justify,
+			s_label_justify='left',
+			s_tooltip=s_param_tooltip,
+			o_validity_tester=o_validity_checker,
+			b_force_disable=b_force_disable,
+			b_use_list_editor=True,
+			s_button_text = s_param_longname,
+			def_button_command = def_for_button_press,
+			s_label_name=s_label_name )
+
+		'''
+		2018_04_27. As above, this should be automated by
+		adding to fields in the param.names file, but for now
+		we treat it as a special case.  On init we keep all of its
+		component states, except the label, disabled, and let the 
+		user enable with the new checkbox that sets the flag 
+		__usechromfile:				
+		
+		'''
+
+		if s_param=="loci_file_name":
+
+			b_enable_if_no_flag_attribute = \
+						not( b_force_disable ) \
+						and s_state_to_use == "enabled" 
+		
+			b_have_flag_attribute=hasattr( self.__input, "use_loci_file" )
+
+			if b_have_flag_attribute:
+				if self.__input.use_loci_file and not( b_force_disable ):
+					self.__enable_loci_file_controls( o_this_keyval )
+					self.__set_state_of_loci_related_totals_controls( "disabled" )
+				else:
+					self.__disable_loci_file_controls( o_this_keyval )
+					if not( b_force_disable ):
+						self.__set_state_of_loci_related_totals_controls( "enabled" )
+				#end if flag true, else false
+
+			elif b_enable_if_no_flag_attribute:
+				self.__enable_loci_file_controls( o_this_keyval )
+				self.__set_state_of_loci_related_totals_controls( "disabled" )
+			else:
+				self.__disable_loci_file_controls( o_this_keyval )
+				if not(b_force_disable):
+					self.__set_state_of_loci_related_totals_controls( "enabled" )
+			#end if b_have_flag_attribute
+
+		return o_this_keyval
+	#def __setup_entry_with_button	
+
+	def __enable_loci_file_controls( self, o_keyval ):
+		o_keyval.setLabelState("enabled" )
+		o_keyval.setEntryState( "disabled" )
+		o_keyval.setButtonState( "enabled" )
+		o_keyval.setEntryFontColor( "black" )
+		return
+	#end __enable_loci_file_controls
+
+	def __disable_loci_file_controls( self, o_keyval ):
+		o_keyval.setButtonState( "disabled" )
+		o_keyval.setEntryFontColor( "gray" )
+		o_keyval.setButtonState( "disabled" )
+		return
+	#end __disable_loci_file_controls
+
+	def __initialize_state_of_loci_related_totals_controls( self ):
+		'''
+		2018_06_02. When the flag for the use_loci_file parameter is True, 
+		we want to disable the loci related total controls.
+		'''
+		if hasattr( self.__input, "use_loci_file" ):
+			if self.__input.use_loci_file == True:
+				self.__set_state_of_loci_related_totals_controls( "disabled" )
+			else:
+				self.__set_state_of_loci_related_totals_controls( "enabled" )
+			#end if we are using a loci file
+		#end if we have the flag telling whether we use a loci file
+		return
+	#end __initialize_state_of_loci_related_totals_controls
 
 #end class PGGuiSimuPop

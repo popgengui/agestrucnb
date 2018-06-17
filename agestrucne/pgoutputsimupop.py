@@ -70,6 +70,11 @@ class PGOutputSimuPop( object ):
 
 	2017_08_08.  Adding to output file etendsions a file created when
 	the new PGOpSimuPop.OUTPUT_GENEPOP_HET_FILTERED output mode is used.
+
+	2018_04_19 With the addition of chromosome/loci associations to the 
+	pgopsimupop.py module's simuPOP PopulationAdding to output file 
+	extensions a file that  gives, in column 1 a loci name (e.g. "l0" 
+	or "l2" ), and in column 2, a chromosome number.  
 	'''
 	
 	DICT_OUTPUT_FILE_EXTENSIONS={ "simfile":"sim",
@@ -79,7 +84,9 @@ class PGOutputSimuPop( object ):
 									"genepop":"genepop",
 									"age_counts":"_age_counts_by_gen.tsv",
 									"sim_nb_estimates":"_nb_values_calc_by_gen.tsv",
-									"het_filter_info": "_het_value_by_cycle_number.tsv" }
+									"het_filter_info":"_het_value_by_cycle_number.tsv",
+									"loci_chrom_pairs":"_loci_and_chromosome.tsv" }
+
 
 	COMPRESSION_FILE_EXTENSION="bz2"
 
@@ -362,7 +369,7 @@ class PGOutputSimuPop( object ):
 	
 		'''
 		2017_04_21.  We change the way we name the temp file, so that it will be written
-		int he output base path, rather than the currdir. Note that we define the var
+		in the output base path, rather than the currdir. Note that we define the var
 		here, but create the name just before using, as the check for duplicate file names,
 		which is perfomred in the call to our new def __get_temp_file_name, 
 		should be done just before we then open the file.
@@ -499,6 +506,47 @@ class PGOutputSimuPop( object ):
 
 		return
 	#end gen2Popgene
+
+	def writeLociChromTable( self, o_simupop_population ):
+
+		#In the tuples returned by chromLocusPair:
+
+		IDX_CHROM=0
+
+		DELIMITER="\t"
+
+		s_file_name=self.basename \
+				+ PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ \
+												'loci_chrom_pairs' ]
+
+		o_file=open( s_file_name,  'w' )
+
+		tup_loci_names=o_simupop_population.lociNames()
+
+		i_num_loci=len( tup_loci_names )
+
+		for idx in range( i_num_loci ):
+
+			tup_chrom_and_loci = \
+					o_simupop_population.chromLocusPair( idx )
+			
+			s_loci_name=tup_loci_names[ idx ] 
+
+			s_chrom_number=str( tup_chrom_and_loci[ 0 ] )
+
+			'''
+			Note that the ordering here reflects the 
+			Input procedure used by LDNe2, see its
+			function GetChromo"
+			'''
+			o_file.write( s_chrom_number + DELIMITER + s_loci_name + "\n" )
+
+		#end for each loci index 
+
+		o_file.close()
+
+		return
+	#end writeLociChromTable
 
 	def __remove_output_file( self, s_file ):
 		os.remove( s_file )

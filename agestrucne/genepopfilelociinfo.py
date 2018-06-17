@@ -78,7 +78,7 @@ class GenepopFileLociInfo( object ):
 				i_total_allele_instances=sum( di_allele_counts.values() )
 
 				'''
-				2017_07_12.  Revmoved the assert and exception when a loci has no 
+				2017_07_12.  Removed the assert and exception when a loci has no 
 				allieles (i.e. the entries are all-zeros for all individuals). We now
 				simply skip the loci.
 				'''

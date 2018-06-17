@@ -15,6 +15,42 @@ VERBOSE=False
 VERY_VERBOSE=False
 VERY_VERY_VERBOSE=False
 PRINT_CULL_TOTALS=False
+'''
+2018_05_16. When set to True,
+call simupops "dump(pop)"
+in outputAge, for every cycle,
+prints the default limited num
+indiv = 100.
+'''
+DUMP_POPS=False
+
+'''
+2018_06_08. For testing we
+want to aadd a def that computes LD
+on a given number of loci pairs.
+def __outputAge passes these
+params to def __write_ld_on_sample:
+'''
+LD_WRITE_SAMPLE=False
+LD_SAMPLE_LOCI_LINKED=True
+LD_SAMPLE_LOCI_UNLINKED=False
+LD_NUM_PAIRS=200000
+
+'''
+simuPOP offers these lD metrics (see
+http://simupop.sourceforge.net/manual_svn/build/
+userGuide_ch5_sec11.html):
+'LD', 'LD_prime', 'R2', 'LD_ChiSq', 
+'LD_ChiSq_p', 'CramerV',
+'LD_prime_sp', 'LD_ChiSq_p_sp 
+'''
+LD_METHOD='R2'
+
+#if empty and LD_WRITE_SAMPLE is true,
+#outputAge will write LD sample for all
+#cycles for which the pop is written
+#to output
+LD_CYCLES_LIST=[]
 
 USE_GUI_MESSAGING=False
 
@@ -44,6 +80,28 @@ import random
 import numpy
 import copy
 import os
+
+'''
+2018_05_27. This new object manages extracting
+the information from a loci table file that
+lists loci_name, chromosome, and position. If
+present, then this info will be used to intialize
+the simulated genome. The module also provides
+the constant given the string ("None") designating
+no loci file is to be used.
+'''
+import pgsimupoplociinfo as pgsimloci
+NO_LOCI_FILE=pgsimloci.NO_LOCI_FILE
+
+'''
+2018_06_06.  A central location to set
+the precision to apply to the inititialization
+of Microsat frequencies and, separately, SNP
+frequencies, according to their 
+respective initial mean heterozygosity values.
+'''
+MSAT_INIT_HET_PRECISION=0.001
+SNP_INIT_HET_PRECISION=0.01
 
 '''
 2017_03_26. This mod-level def
@@ -89,8 +147,14 @@ class PGOpSimuPop( modop.APGOperation ):
 	2018_03_23.  We incrase the value from 100 to 10000.  Brian 
 	reports success with some of the more difficult species/tolerance
 	values with this allowance.
+	
+	2018_05_16.  We no longer use the mod-level
+	value MAX_TRIES_AT_NB.  This param is now
+	user selectable, is derived from the input
+	object, and is set in this mod's
+	def prepareOp
 	'''
-	MAX_TRIES_AT_NB=10000
+	#MAX_TRIES_AT_NB=10000
 
 	'''
 	2017_08_04.  New parameter the class object usess
@@ -106,6 +170,7 @@ class PGOpSimuPop( modop.APGOperation ):
 										"total_filtered_pops_to_save" ]
 
 	HET_FILTER_PARAM_TYPES_IN_ORDER= [ float, float, int ]
+
 	POP_HET_FILTER_STRING_DELIM=","
 
 
@@ -113,7 +178,7 @@ class PGOpSimuPop( modop.APGOperation ):
 									b_remove_db_gen_sim_files=False,
 									b_write_input_as_config_file=True,
 									b_do_gui_messaging=False,
-									b_write_nb_and_ages_files=False,
+									b_write_the_once_only_files=False,
 									b_is_replicate_1=False,
 									i_output_mode=OUTPUT_GENEPOP_ONLY ):  
 
@@ -147,7 +212,7 @@ class PGOpSimuPop( modop.APGOperation ):
 				program negui.py throws an import error if this module,
 				which is also used by the main interface,
 				tries to import the PGGUI* classes.  
-			b_write_nb_and_ages_files.  This param was added 20150407
+			b_write_the_once_only_files.  This param was added 20150407
 				to allow the pgutilities.py def, 
 				do_pgopsimupop_replicate_from_files , to produce
 				the age counts and pwob nb values files only for
@@ -166,7 +231,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			i_output_mode.  This param was added 2017_08_04 to speed up
 				the output and skip writing the *gen *db and *sim files used
 				by Tiago in his original pipeline.  
-			'''
+		'''
 
 		self.__guiinfo=None
 		self.__guierr=None
@@ -193,7 +258,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__compress_output=b_compress_output
 		self.__remove_db_gen_sim_files=b_remove_db_gen_sim_files
 		self.__write_input_as_config_file=b_write_input_as_config_file
-		self.__write_nb_and_age_count_files=b_write_nb_and_ages_files
+		self.__write_once_only_files=b_write_the_once_only_files
 		self.__is_first_replicate=b_is_replicate_1
 		
 		'''
@@ -283,7 +348,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		to now include the replicate number in their names (see the outbase is 
 		tagged with a replicate number in def prepareOp)
 		'''
-#		if self.__write_nb_and_age_count_files:
+#		if self.__write_once_only_files:
 #			s_nb_values_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
 #			s_age_counts_file_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "age_counts" ]
 #
@@ -317,7 +382,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		2018_04_01.  We add this member attribute to be assigned in
 		def __restrictedGenerator, and used in def __outputAge, when
-		the flag __write_nb_and_age_count_files is True, to record
+		the flag __write_once_only_files is True, to record
 		the pwop Nb to file when (and only when) the pop is also being
 		written.
 
@@ -329,6 +394,31 @@ class PGOpSimuPop( modop.APGOperation ):
 		cull in def __harvest producing ->	Pop_(i+1) -> write
 		->etc, we can never record a pwop on Pop_0 in outputAge.
 		'''
+
+		'''
+		2018_05_16. This is a new way to get the maximum number
+		of tries to allow the __restrictedGenerator to add the
+		pop, when its PWOP Nb calc is within tolerance.  This
+		attribute comes from the new PGInputSimuPop attribute
+		"tolerance_tries," which itself is a string value, so
+		we set this as the int-coverted value, in prepareOp:
+		'''
+		self.__max_tries_at_tolerance=None
+
+		'''
+		2018_05_27. We have added a new parameter,
+		locating a file that lists on each line a
+		loci_name,chrom_name,position.  If given,
+		we initialize the genome iwth these values.
+		Otherwise we use the already present loci
+		creation code. When a validated file name
+		is present (see prepareOp), this object
+		will be instantiated as a PGSimupopLociInfo
+		object.
+
+		'''
+		self.__user_supplied_loci_info=None
+
 		
 		return
 	#end __init__
@@ -365,7 +455,21 @@ class PGOpSimuPop( modop.APGOperation ):
 			f_this_nbne=self.input.NbNe
 		#end if we have an NbNe value, use it.
 
-		i_total_loci=self.input.numMSats + self.input.numSNPs
+		'''
+		2018_05_28.
+		We now get total depending on the 
+		way the genome was intitialized:
+		'''
+
+		i_total_loci = None
+
+		if self.__user_supplied_loci_info is None:
+
+			i_total_loci=self.input.numMSats + self.input.numSNPs
+		else:
+			i_total_loci=self.__user_supplied_loci_info.total_loci
+		#end if genome intitialized using totals, else user
+		#supplied per-loci info.
 
 		self.output.writeGenepopFileHeaderAndLociList( \
 												self.output.genepop,
@@ -421,17 +525,69 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __set_het_filter_params
 
 	def prepareOp( self, s_tag_out="" ):
-		'''
-		2017_03_08.  This call converts the list
-		of cycle range and rate entries in the 
-		list attribite nbadjustment into a list
-		of per-cycle rate adjustments, used by
-		this objects def __harvest.
-		'''
+		
 		try:
+			'''
+			2018_05_16. This new attribute, __max_tries_at_tolerance, 
+			is provided by  the input object, which stores the value
+			as a string, (because the main GUI uses a combobox to 
+			limit the values available). Hence we must convert in order
+			to use it in def __restrictedGenerator:
+			'''
+			self.__max_tries_at_tolerance=int( self.input.tolerance_tries )
+
+			'''
+			2017_03_08.  This call converts the list
+			of cycle range and rate entries in the 
+			list attribite nbadjustment into a list
+			of per-cycle rate adjustments, used by
+			this objects def __harvest.
+			'''
+
 			self.__nb_and_census_adjustment_by_cycle=self.input.makePerCycleNbAdjustmentList()
+
+
+
+
+			'''
+			2018_05_27.  We have added a new input parameter, loci_file_name, which
+			if not the NO_LOCI_FILE value (i.e. "None"), then should be a file with
+			lines that give 3 comma-delimited fields, loci_name, chromosome, position.
+			Here we check whether a file name is present,  If present, we validate the file
+			and set the flag that tells this def to use the __createGenomeFromLociFile 
+			instead of the original def __createGenome.
+			
+			2018_06_04.  Bugfix, by adding the use_loci_file flag to the test as to whether 
+			we sould create aa PGSimupopLociInfo object.  Note that after that object is 
+			made, then the test as to whether we initialize a genome using a loci file 
+			is to test that this PGOpSimuPop's attribute __user_supplied_loci_info is 
+			not None.
+			'''
+			if self.input.use_loci_file==True \
+					and ( self.input.loci_file_name.lower() != NO_LOCI_FILE.lower() ):
+				'''
+				This call will throw an exception if
+				the file fails any of its validation
+				tests:
+				'''
+				pgsimloci.PGSimupopLociInfoFileManager.validateFile( 
+												self.input.loci_file_name )
+				'''
+				This object supplies the loc info in lists and a dict
+				'''
+				self.__user_supplied_loci_info=pgsimloci.PGSimupopLociInfo( \
+														self.input.loci_file_name )
+			#end if we are using a loci info file, validate it, and make a loci info object.
+
 			self.__createSinglePop()
-			self.__createGenome()
+
+			if self.__user_supplied_loci_info is not None:
+				self.__createGenomeFromUserSuppliedLociInfo()
+			else:
+				self.__createGenome()
+			#end if we are using a loci info file,
+			#else no such file
+
 			self.__createAge()	
 			
 			s_basename_without_replicate_number=self.output.basename	
@@ -448,10 +604,10 @@ class PGOpSimuPop( modop.APGOperation ):
 			the replicate number.  Formerly, because these files were meant only to be
 			recorded on replicate 1, we put no replicate number in their names.  Now,
 			in case we want to write these for each replicate, we want to name and 
-			open then after have ing appended the replicate s_tag_out to the bsic
+			open then after having appended the replicate s_tag_out to the bsic
 			output file base name.
 			'''
-			if self.__write_nb_and_age_count_files:
+			if self.__write_once_only_files:
 				s_nb_values_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
 				s_age_counts_file_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "age_counts" ]
 
@@ -495,6 +651,19 @@ class PGOpSimuPop( modop.APGOperation ):
 			#end if orig out, else gp only, else error.
 
 			'''
+			2018_04_25. We write the new output file that LDNe2 will use
+			to apply chromosome/loci associations.
+			2018_04_27. We won't write the table if user has specified
+			zero chromosomes (i.e. default, original scenario)
+			2018_06_02. Add a test for a chrom loci file.  If we
+			have one, we write the chrom loci table for LDNe2:
+			'''
+			if self.input.numChroms > 0 \
+					or ( self.__user_supplied_loci_info is not None ):	
+				self.__write_chromosome_loci_table( self.__pop )
+			#end if user specified non-zero chromosome total, write table
+
+			'''
 			2017_02_07
 			We are revising to try to use a targeted Nb, but instead of NbVar being a fixed int, 
 			we want to use a float f, 0.0 <= f <= 1.0.  We want to warn users when we've loaded
@@ -518,14 +687,26 @@ class PGOpSimuPop( modop.APGOperation ):
 
 				sys.stderr.write( s_msg + "\n" )
 			# end if NbVar > 1
+
 			self.__createSim()
+			
 			self.__is_prepared=True
 
 		except Exception as oex:
+
+			o_traceback=sys.exc_info()[ 2 ]
+			s_err_info=pgut.get_traceback_info_about_offending_code( o_traceback )
+			s_traceback_msg="In PGOpSimupop instance, an exception was raised with message: " \
+							+ str( oex ) + "\nThe error origin info is:\n" + s_err_info
+
 			if self.__guierr is not None:
-				self.__guierr( None, str( oex ) )
+				self.__guierr( None, str( oex ) + " " + s_traceback_msg )
 			#end if using gui messaging
-			raise oex
+
+			raise Exception( "Exception message: " \
+								+ str( oex ) \
+								+ "Traceback: " \
+								+ s_traceback_msg )
 		#end try...except
 
 		return
@@ -615,7 +796,10 @@ class PGOpSimuPop( modop.APGOperation ):
 			if self.__guierr is not None:
 				self.__guierr( None, s_msg )
 			#end if using gui messaging
-			raise oex
+			raise Exception( "Exception raised with message, " \
+												+ str ( oex ) \
+												+ "and traceback: " \
+												+ s_msg )
 		#end try...except
 
 		return
@@ -677,6 +861,61 @@ class PGOpSimuPop( modop.APGOperation ):
 		return
 	#end deliverResults
 
+	def __createGenomeFromUserSuppliedLociInfo( self ):
+
+		'''
+		This def is an alternative to __createGenome
+		2018_05_27.  Currently we always create only
+		biallelic SNPs from the user supplied loci.
+
+		'''
+		
+		FLOAT_TOL=1e-32
+
+		initOps = []
+		preOps = []
+
+		i_num_snps=self.__user_supplied_loci_info.total_loci
+
+		i_snp_count=-1
+
+		lf_random_freqs=None
+
+		'''
+		2018_06_13.  If user specifies 0.0 for SNP het initialization,
+		we don't want to use the random distribution, but rather
+		to simmply init all snps di-alleles at frequencies zero and 1.0:
+		'''
+		if abs( self.input.het_init_snp - 0.0 ) <= FLOAT_TOL:
+			lf_random_freqs=[ 0.0 for idx in range( i_num_snps ) ]
+		else:
+
+			lf_random_freqs=\
+					pgut.get_snp_allele_freqs_from_het_value_using_truncnorm_dist( \
+															f_this_het_value=self.input.het_init_snp,
+															i_num_freqs=i_num_snps,
+															f_tolerance=0.01 )
+
+		#end if user has set init snp freq to zero, else use distribution
+
+		for f_random_freq in lf_random_freqs:		
+
+			i_snp_count+=1
+
+			initOps.append(
+					sp.InitGenotype(
+					#Position 0 is coded as 0, not good for genepop
+					freq=[0.0, f_random_freq, 1 - f_random_freq ],
+					loci=i_snp_count ))
+
+		#end for each snp frequency, initialize a loci
+
+		self.__genInitOps=initOps
+		self.__genPreOps=preOps
+
+		return
+	#end __createGenomeFromUserSuppliedLociInfo
+		
 	def __createGenome( self ):
 
 		size = self.input.popSize
@@ -685,6 +924,8 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		maxAlleleN = 100
 
+		FLOAT_TOL=1e-32
+
 		#print "Mutation model is most probably not correct", numMSats, numSNPs
 		loci = (numMSats + numSNPs) * [1]
 		initOps = []
@@ -692,7 +933,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		2018_02_18.  We are adding a new parameter "het_init_msat",
 		which allows the user to enter a value in (0.0,0.85]
-		which will be used to compute a set off	allele frequencies 
+		which will be used to compute a set of allele frequencies 
 		totaling the value in startAlleles, and whose expected
 		heterozygosity is within a tolerance (0.001 as of now)
 		of the parameter.
@@ -711,7 +952,8 @@ class PGOpSimuPop( modop.APGOperation ):
 			#diri = numpy.random.mtrand.dirichlet([1.0] * self.input.startAlleles)
 			diri = pgut.get_dirichlet_allele_dist_for_expected_het( \
 														self.input.het_init_msat,
-														self.input.startAlleles )
+														self.input.startAlleles,
+														f_tolerance=MSAT_INIT_HET_PRECISION )
 
 			'''
 			Check added 2018_02_18, to make sure our heurisitic
@@ -737,70 +979,46 @@ class PGOpSimuPop( modop.APGOperation ):
 					loci=msat))
 		#end for msat
 
+				
 		'''
-		2018_02_08.  We are adding a new parameter "het_init_snp",
-		which allows the user to enter a value in [0.0,0.5]
-		which will be used to compute a pair of (diallelic)
-		allele frequencies assigned instead of the former 
-		hard-coded 0.5 (which is still the default.)
-		The call to the new pgutilities def get_roots_quadratic,
-		uses coefficients derived from solving for He in the
-		expected Het calculation for a loci:
-			He = 1 - [ freq_allele_1 ^ 2 + freq_allele_2 ^ 2 ]
-		where freq_allele_2 = 1 - freq_allele_1, to get
+		2018_05_24. We now generate a list of allele frequencies 
+		randomly drawn from a truncated ([0.0,1.0]) normal distribution
+		with the mean set to the allele frequency given by our 
+		intial snp expected heterozygosity value. See the pgutilities.py
+		module, defs related to obtaining frequencies using the trunc 
+		normal distribution.
+		'''
+		i_snp_count=-1
 
-		-freq^2 + freq - He/2 = 0
+		lf_random_freqs=None
 
 		'''
-
-		if self.input.het_init_snp < 0.0 or self.input.het_init_snp > 0.5:
-			s_msg="In PGOpSimuPop instance, def __createGenome, " \
-						+ "The value for heterozygosity initialization " \
-						+ "for SNPs is invalid at " \
-						+ str( self.input.het_init_snp )  \
-						+ ".  Values are valid in [0.0,0.5]"
-			
-			raise Exception ( s_msg )
-		#end if invalid snp het init value
-
-		lf_roots=pgut.get_roots_quadratic( -1, 1, -1*(self.input.het_init_snp)/2 )
-
-		f_init_snp_freq=None
-		
+		2018_06_13.  We do not use the random number gen if the
+		client wants an init het value of 0.0, but instead initialize
+		all SNPs ad di-allele frequencies zero and 1.1
 		'''
-		We can use either root, since 
-		one root gives the freq for one
-		allele, whose diallelic partner
-		will be the 2nd root and their sum
-		will be one.  (Note that for the special
-		case of He=0.5, then we'll have one root
-		equal to -0.5 and the other to 0.5.  Hence
-		we test for a positive root.
-		'''
-		for f_root in lf_roots:
-			if f_root >= 0.0 and f_root <= 0.5:
-				f_init_snp_freq=f_root
-				break
-			#end if positive root
-		#end for each root	
+		if abs( self.input.het_init_snp - 0.0 ) <= FLOAT_TOL:
+			lf_random_freqs=[ 0.0 for idx in range( self.input.numSNPs ) ]	
+		else:
 
-		if f_init_snp_freq is None:
-			s_msg="In pgOpSimuPop instance, def __createGenome, " \
-					+ "the program failed to get an initial allele " \
-					+ "frequence for the initial expected heterozygosity " \
-					+ "value set at, " + str ( self.input.het_init_snp ) + "."
+			lf_random_freqs=\
+					pgut.get_snp_allele_freqs_from_het_value_using_truncnorm_dist( \
+														f_this_het_value=self.input.het_init_snp,
+														i_num_freqs=self.input.numSNPs,
+														f_tolerance=SNP_INIT_HET_PRECISION )
+		#end if user wants 0.0 as init freq, else use distribution
 
-			raise Exception( s_msg )
-		#end if no init frequency
+		for f_random_freq in lf_random_freqs:		
 
-		for snp in range(numSNPs):
-			freq = f_init_snp_freq
+			i_snp_count+=1
+
 			initOps.append(
 					sp.InitGenotype(
 					#Position 0 is coded as 0, not good for genepop
-					freq=[0.0, freq, 1 - freq],
-					loci=numMSats + snp))
-		#end for snp
+					freq=[0.0, f_random_freq, 1 - f_random_freq ],
+					loci=numMSats + i_snp_count))
+
+		#end for each snp frequency, initialize a loci
 
 		preOps = []
 
@@ -816,7 +1034,237 @@ class PGOpSimuPop( modop.APGOperation ):
 		return
 	#end __createGenome
 
+	def __get_dict_chromosome_number_by_loci_number_evenly_distributed ( self,
+																			i_number_of_loci, 
+																			i_number_of_chromosomes ):
+
+		'''
+		2018_04_18. We're adding chromosome/loci
+		associations in order to leverage LDNe2's
+		feature that computes Ne using chromosome/loci
+		information.  Note that the easy, default way
+		to get simupop to evenly  assign, say, 30 loci 
+		to 5 chromosomes, "loci=[10,10,10],
+		chromtypes=[Autosome]*5", means that if our user
+		is using both q Msats and r snps, and since we always
+		assign the first q loci to be msats and the last r
+		to be snps, the default chrom assignments will tend to
+		bunch the msats together on the same (few) first 
+		chromosomes and the snps on the last.  We thus
+		will distribute them using the addLoci and addChrom
+		methods of the pop struct (see __createSinglePop).
+		In order to hold these assignments
+		steady among replicates, we, rather than using any 
+		random assignment, we assign N loci 0,1,2...N-1 to 
+		M chromosomes 0,1,2...M-1, in order, i=1,2,3...N, 
+		assigning loci i to chromsome i mod M, which puts 
+		an additional loci on each of the first T chromosomes 
+		where T = N mod M. 
+
+		Note: if the number of chromosomes exceeds the number
+		of loci, we trim the number of chromosomes to equal
+		the number of loci.
+
+		2018_05_22.  Testing using Genepop's linkage diseq 
+		test shows that despite assigning loci using the 
+		alternating-chromosome method described above, alleles 
+		are treated as physically linked according
+		to the scheme, for N loci and M chromosomes, that the first
+		N/M loci are assigned to a single chromosome, the second
+		N/M loci assigned to another, etc.  Therefor we change the
+		loci assignment scheme so that the program will output
+		a chromsome/loci file that agrees with the way alleles
+		are linked in the program.
+		'''
+
+		di_chromosome_number_by_loci_number={}
+
+		if i_number_of_loci < i_number_of_chromosomes:
+			i_number_of_chromosomes=i_number_of_loci
+		#end if more chromosomes thatn loci, get rid of excess
+		#chromosomes
+
+		i_partition_size=int( i_number_of_loci / i_number_of_chromosomes )
+
+		i_remainder=i_number_of_loci % i_number_of_chromosomes
+
+		i_loci_count=0
+
+		for i_chr in range( i_number_of_chromosomes ):
+			for i_part_idx in range( i_partition_size ):
+				di_chromosome_number_by_loci_number[ i_loci_count ]=i_chr
+				i_loci_count += 1
+			#end for each partition index
+
+			#If we have remainder, add one loci to the current chromosome
+			if i_remainder > 0:
+				di_chromosome_number_by_loci_number[ i_loci_count ]=i_chr
+				i_loci_count += 1
+				i_remainder-=1
+			#end if remainder, add loci
+		#end for each chrom
+
+		return di_chromosome_number_by_loci_number
+	#end __get_dict_chromosome_number_by_loci_number_evenly_distributed
+
+	def __get_loci_positions_by_loci_number( self, di_chromosome_number_by_loci_number ):
+
+		'''
+		2018_04_18.  This def is added to assist in assigning chromosomes
+		to loci. The loci position on the chrom, per simuPOP, is a unitless
+		value, left to the user's discretion and use.  For now we simply
+		use floats between 0 and 1.0, and space the loci evenly across the
+		chromosome.
+
+		This def assumes that the lists given by list( mydict.keys() ) and 
+		list( mydict.values() ) have indices such that mydict.values()[i] 
+		always equals mydict[ mydict.keys()[i] ].
+
+		2018_05_22. We've changed the position scheme to place loci evenly
+		across chromosome with 100 units istead of 1.0.  This is meant to
+		emulate cM units along a 100 cM chromosome.
+		'''
+
+		di_loci_position_by_loci_number={}
+		
+		li_loci_numbers=list( di_chromosome_number_by_loci_number.keys() )
+		li_chromosome_numbers=list( di_chromosome_number_by_loci_number.values() )
+
+		set_chromosome_numbers=set( li_chromosome_numbers )
+
+		array_chromosome_numbers=numpy.array( li_chromosome_numbers )
+
+		for i_chromosome_number in set_chromosome_numbers:
+
+			array_idx_this_chrom_number=\
+					( numpy.where( array_chromosome_numbers == i_chromosome_number ) )[0]
+
+			i_total_loci_on_this_chrom=len( array_idx_this_chrom_number )
+
+			'''
+			2018_05_22. We change the position values to mimic loci
+			evenly spaced over a 100 cM chromosome.
+			'''
+			
+			f_position_increment=100.0/float( i_total_loci_on_this_chrom )
+			
+			f_current_position=0.0
+
+			for idx in array_idx_this_chrom_number: 	
+
+					di_loci_position_by_loci_number[ li_loci_numbers[ idx ] ]=f_current_position
+
+					f_current_position+=f_position_increment
+			#end for each index in the chrom number list
+		#end for each i_chromosome_number
+
+		return di_loci_position_by_loci_number
+
+	#end __get_loci_positions_by_loci_number
+
+	def __add_loci_and_chromosomes_to_pop( self, 
+											pop, 
+											i_number_of_loci, 
+											i_number_of_chromosomes, 
+											li_chrom_type_list  ):
+		'''
+		2018_04_18. We now associate a chromosome with each loci.
+		For more details, see comments heading def,  
+		__get_dict_chromosome_number_by_loci_number_evenly_distributed, 
+		and the simuPOP manual page at 
+		http://simupop.sourceforge.net/manual_svn/build/userGuide_ch4_sec3.html
+		'''
+		di_chromosome_number_by_loci_number=\
+					self.__get_dict_chromosome_number_by_loci_number_evenly_distributed( \
+																		i_number_of_loci,
+																		i_number_of_chromosomes )
+	
+		'''
+		One chromosome already exists?
+		'''
+		i_tot_chroms_already_created=1
+
+		'''
+		These position floats, for no particular reason
+		representing N even pieces of each chrom as proportion of
+		[0.0,1.0], with N = max(number-of-loci).  These parameters
+		are required when using the addLoci and addChrom methods
+		of the Population object. Further, one can't assign the same
+		postiion to two loci,  Even further, we may in the future want 
+		to use loci positional information within chromosomes
+		
+		2018_05_22.  Note that our positions are now given as proportions
+		of a chrom [0.0, 100.0], to better mimic cM units. Note, too
+		that testing shows that simuPOP will disallow any two positions
+		that differ by less than 1e-13.
+
+		'''
+
+		di_loci_position_by_loci_number= \
+				self.__get_loci_positions_by_loci_number( \
+										di_chromosome_number_by_loci_number )
+		
+		li_sorted_loci_numbers=sorted( list( di_chromosome_number_by_loci_number.keys() ) )
+
+		for i_loci_number in li_sorted_loci_numbers:
+
+			i_chromosome_number=di_chromosome_number_by_loci_number[ i_loci_number ] 
+			
+			'''
+			Zero indexing of chrom numbers means if we've created N chromosomes,
+			then the last chrom created was number N-1
+
+			'''
+			if i_chromosome_number >= i_tot_chroms_already_created:
+
+				##### temp
+#				print( "chrom num by loci num: " + str( di_chromosome_number_by_loci_number ) )
+#				print( "loci pos by num: " + str( di_loci_position_by_loci_number ) )
+#				print( "chrom types: " + str( li_chrom_type_list ) )
+				#####
+
+				'''
+				Chromomsome not yet created, create.
+				'''	
+				pop.addChrom( lociPos=[], chromType=li_chrom_type_list[ i_chromosome_number ]  )
+
+				i_tot_chroms_already_created+=1
+
+			#end if chromosome not yet created
+			
+			'''
+			Note we name the N loci using l0, l1, l2...l(N-1). They will then 
+			correctly correspond to the current Genpopfile Header loci names, 
+			as written in the pgooutputsimupop.py 
+			def writeGenepopFileHeaderAndLociList.
+			'''
+			pop.addLoci( i_chromosome_number, 
+							pos=di_loci_position_by_loci_number[ i_loci_number ],
+							lociNames= "l" + str( i_loci_number ))
+
+		#end for each loci number
+
+		return
+	#end __add_loci_and_chromosomes_to_pop
+
+	def __write_chromosome_loci_table( self, o_simupop_population ):
+		'''
+		2018_05_09.  As currently coded, for any set of replicates
+		the loci/chromosome assignments are identical.  Hence, to 
+		avoid potential output file clutter, we only write the
+		chrom/loci file for replicate one only (as determined by
+		the client's use of param b_write_the_once_only_files in
+		the __init__ def.  This is the same policy used for the 
+		age-class and pwop nb file:
+		'''
+		if self.__write_once_only_files:
+			self.output.writeLociChromTable( o_simupop_population )
+		#end if we'er writing the age count and nb files, write the chrom file too
+		return
+	#end __write_chromosome_loci_table
+
 	def __createSinglePop( self ):
+
 		popSize=self.input.popSize
 		nLoci=self.input.numMSats + self.input.numSNPs
 		startLambda=self.input.startLambda
@@ -833,6 +1281,10 @@ class PGOpSimuPop( modop.APGOperation ):
 		file param "maleProb" is accessed (its value also may have been 
 		reset in the interface), and the sex ratio is determined using 
 		Tiago's original assignment, "maleFreq=input.maleProb".
+
+		Note that as of 2018_05_07, our actual name for the cull method
+		formerly called "equal_sex_ratio" is now "maintain_distribution"
+		We leave the constants and variable names unchanged.
 		'''
 		if self.input.cull_method == \
 					pgin.PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS:
@@ -893,12 +1345,107 @@ class PGOpSimuPop( modop.APGOperation ):
 		#end if lambda < VALUE_NO_LAMBA
 
 		postOps = []
+		
+		'''
+		2018_04_19. We now assign loci to chromosomes, and, in 
+		order not to put all M mstats (always the first M loci)
+		on just a few chromosomes, and similarly with S SNPs (the
+		last S loci created, we're creating chromosomes and loci
+		using the simuPOP.addChrom and simuPOP.addLoci (see def
+		__add_loci_and_chromosome_to_pop.  We rem out the original
+		pop creation, and replace with stripped down initialization,
+		then assign loci and chroms after:
+		
+		2018_04_27.  Revise the chrom-total handlingrevert to 
+		the original pop creation statement when number of chromsomes 
+		is zero.  Note, too, that when this total is zero, we will 
+		not write a chrom/loci table.
 
-		pop = sp.Population(popSize, ploidy=2, loci=[1] * nLoci,
-					chromTypes=[sp.AUTOSOME] * nLoci,
-					infoFields=["ind_id", "father_id", "mother_id",
-					"age", "breed", "rep_succ",
-					"mate", "force_skip"])
+		2018_05_27.  We have added the ability of the user to supply
+		loci info (read in from a file), and so we now intialize 
+		the Population by testing first to see if the PGSimupopLociInfo
+		(as created in prepareOp, when a valid file name is supplied),
+		exists.  If so we init the Pop using its loci quants, else
+		we initialize as before (testing whether we have > 0 chroms
+		in our input chrom total, and using out numMSats and numSNPs
+		totals).
+
+		"pop" to be assigned according to method:
+		'''
+		pop=None
+
+		if self.__user_supplied_loci_info is not None:
+			dsi_loci_totals_by_chrom= \
+					self.__user_supplied_loci_info.loci_totals_by_chromosome
+			'''
+			This call gets the list of postions by chromosome,
+			and solves the problem of loci at identical postions
+			by incrementing one of such a pair by the minimum
+			"postion" value (currently trials show 1e-15), 
+			to which simupop is sensitive, and will allow the 
+			pair to be intialized as different loci.  
+			'''
+			dsf_loci_pos_by_chrom= \
+					self.__user_supplied_loci_info\
+								.getPositionsUsingSmallOffsetForNonUniquePositions()
+
+			ls_sorted_chrom_names=list( dsi_loci_totals_by_chrom.keys() )
+			ls_sorted_chrom_names.sort()
+			li_loci_totals=[]
+			lf_positions=[]
+			ls_loci_names=[ "l" + str(idx) for idx in range( self.__user_supplied_loci_info.total_loci )]
+
+			for s_chrom in ls_sorted_chrom_names:
+				lf_positions+=dsf_loci_pos_by_chrom[ s_chrom ]
+				li_loci_totals.append( dsi_loci_totals_by_chrom[ s_chrom ] )
+			#end for each chrom	
+
+
+#			##### temp
+#			print( "loci totals: "  )
+#			ls_chrs=list( dsi_loci_totals_by_chrom.keys() )
+#			li_chrs_sorted= [ int( s_chr ) for s_chr in ls_chrs ]
+#			li_chrs_sorted.sort()
+#
+#			for i_chr in li_chrs_sorted:
+#				s_chr=str( i_chr )
+#				print ( s_chr + "\t" + str( dsi_loci_totals_by_chrom[ s_chr ] ) )
+#			#end for each chromosome
+#
+#			print( "positions: " + str( lf_positions ) )
+#			print ( "initing pop with locinames: " + str( ls_loci_names ) )		
+#			#####
+
+
+			pop=sp.Population(popSize, ploidy=2, loci=li_loci_totals,
+						lociPos=lf_positions, lociNames=ls_loci_names,
+						chromTypes=[sp.AUTOSOME] * len( li_loci_totals ),
+						infoFields=["ind_id", "father_id", "mother_id",
+						"age", "breed", "rep_succ",
+						"mate", "force_skip"])
+
+		else:
+
+			if self.input.numChroms==0:
+				pop = sp.Population(popSize, ploidy=2, loci=[1] * nLoci,
+							chromTypes=[sp.AUTOSOME] * nLoci,
+							infoFields=["ind_id", "father_id", "mother_id",
+							"age", "breed", "rep_succ",
+							"mate", "force_skip"])
+			else:
+
+				pop = sp.Population( popSize, ploidy=2, 					
+										infoFields=["ind_id", "father_id", "mother_id",
+															"age", "breed", "rep_succ",
+																	"mate", "force_skip"])
+				
+				li_chrom_types=[ sp.AUTOSOME for i in range( self.input.numChroms ) ]
+
+				self.__add_loci_and_chromosomes_to_pop( pop, nLoci, 
+														self.input.numChroms, 
+																	li_chrom_types  )
+			#end if user specifies zero chroms, else divvy up loci among some N>0 chromosomes
+		#end if the user supplied loci info, else we use our chrom/snp/msat totals
 
 		for ind in pop.individuals():
 			ind.breed = -1000
@@ -1220,7 +1767,6 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __litterSkipGenerator
 
 	def __calcNb( self, pop, pair ):
-
 		
 		'''
 		2017_03_02 This float tolerance is added
@@ -1293,13 +1839,11 @@ class PGOpSimuPop( modop.APGOperation ):
 			print( "in restrictedGenerator with target: " + str( self.__targetNb ) )
 			print( "in restrictedGenerator with tolerance " + str( self.__toleranceNb ) )
 		#end if very verbose
-			
 
 		"""No monogamy, skip or litter"""
 		nbOK = False
 		nb = None
 		attempts = 0
-
 		
 		if VERY_VERBOSE:
 
@@ -1396,11 +1940,11 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			#end for abs( nb ... else not
 
-			if attempts > PGOpSimuPop.MAX_TRIES_AT_NB:
+			if attempts > self.__max_tries_at_tolerance:
 				s_msg="In PGOpSimuPop instance, " \
 							+ "def __restrictedGenerator, " \
 							+ "for generation, " + str( pop.dvars().gen ) \
-							+ ", after " + str( PGOpSimuPop.MAX_TRIES_AT_NB ) \
+							+ ", after " + str( self.__max_tries_at_tolerance ) \
 							+ " tries, the simulation did not generate a " \
 							+ "population with an Nb value inside " \
 							+ "the tolerance.  Target Nb: " \
@@ -1434,7 +1978,7 @@ class PGOpSimuPop( modop.APGOperation ):
 				#print( "out", pop.dvars().gen )
 				#sys.exit(-1)
 
-			#end if attempts > MAX_TRIES_AT_NB
+			#end if attempts > self.__max_tries_at_tolerance
 
 		#end while not nbOK
 
@@ -1444,7 +1988,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		to those created downstream by NeEstimator.
 
 		Note 2018_04_01.  The if block that was here and
-		tested the __write_nb_and_age_count_files flag, 
+		tested the __write_once_only_files flag, 
 		and if true writes the pwop nb to file has been 
 		moved to __outputAge, so now we simply record it:
 		The move reduced the number of these values written
@@ -1459,7 +2003,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		write it here.
 		'''	
 
-		if self.__write_nb_and_age_count_files:
+		if self.__write_once_only_files:
 
 			'''
 			2018_04_16.  To make output consistent
@@ -1971,6 +2515,14 @@ class PGOpSimuPop( modop.APGOperation ):
 			
 			gen = pop.dvars().gen
 
+			if DUMP_POPS==True:
+				print ("-----------------")
+				print ("for run with basename: " + self.output.basename )
+				print ("pop dump for cycle " + str( gen ) )
+				sp.dump( pop )
+			#end if DUMP_POPS
+
+
 			'''
 			2017_04_05.  Now using startSave, which was
 			formerly suppressed and always set to zero.
@@ -1996,8 +2548,11 @@ class PGOpSimuPop( modop.APGOperation ):
 			totals_by_age={}
 
 			if self.__output_mode==PGOpSimuPop.OUTPUT_GENEPOP_ONLY:
+
 				if self.input.do_het_filter == False:
+
 					self.output.genepop.write( "pop\n" )
+
 				else:
 
 					f_mean_het=self.__get_mean_heterozygosity_over_all_loci( pop )
@@ -2030,7 +2585,6 @@ class PGOpSimuPop( modop.APGOperation ):
 					#end if het in range, else if pop's het less than filter's min, else return.
 				#end if not het filter in effect, else test
 			#end if output mode is genepop only, check whether het filter
-
 
 			for i in pop.individuals():
 				'''
@@ -2132,7 +2686,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			'''
 			2017_02_07.  To record age structure per gen.
 			'''
-			if self.__write_nb_and_age_count_files:
+			if self.__write_once_only_files:
 				'''
 				2018_04_16. For consistency with user
 				pop (cycle) range entries in the GUI,
@@ -2159,6 +2713,26 @@ class PGOpSimuPop( modop.APGOperation ):
 
 				self.__file_for_age_counts.write(  s_entry + "\n" )
 			#end if we are to write the age counts file
+
+			'''
+			2018_06_08. We add the ability to sample LD values
+			if the flags are set as indicated (see beginning of
+			Module for constant settings).
+			'''
+			if LD_WRITE_SAMPLE==True:
+				if len( LD_CYCLES_LIST ) == 0 \
+							or ( gen+1 ) in LD_CYCLES_LIST:
+
+					self.__write_ld_on_sample( pop, gen+1, 
+								i_num_loci_pairs_to_sample=LD_NUM_PAIRS,
+								s_outfile=self.output.basename + ".ld.sample",
+								b_sample_linked=LD_SAMPLE_LOCI_LINKED, 
+								b_sample_unlinked=LD_SAMPLE_LOCI_UNLINKED,
+								s_method=LD_METHOD )
+
+				#end if this cycle should be sampled of LD
+			#end if we are to sample LD
+
 		except  Exception as oex:
 			raise oex
 		#end try...except
@@ -2264,13 +2838,15 @@ class PGOpSimuPop( modop.APGOperation ):
 					sp.PyOperator(func=self.__setAge, at=[0]),
 					]
 
+		
+
 		agePreOps = [
 					sp.InfoExec("age += 1"),
 					sp.InfoExec("mate = -1"),
 					sp.InfoExec("force_skip = 0"),
 					sp.PyOperator(func=self.__outputAge),
 					]
-
+		
 		mySubPops = []
 
 		for age in range(self.input.ages - 2):
@@ -2337,15 +2913,37 @@ class PGOpSimuPop( modop.APGOperation ):
 		else:
 			self.__selected_generator = self.__litterSkipGenerator 
 		#end if we want fitness gen,else restricted, else litter skip
+		
+		'''
+		2018_05_17. We add the ability of users to input a recombination intensity.
+		So we now create the op list outside the call to HeteroMating, so we can
+		add the Recombinator if the user has input a non-zero value. Note that
+		the simuPOP docs say:
+			"The generic genotype transmitters do not handle genetic recombination. 
+			A genotype transmitter Recombinator is provided for such purposes, and 
+			can be used with RandomMating and SelfMating (replace 
+			MendelianGenoTransmitter and SelfingGenoTransmitter used in these 
+			mating schemes)"
+		'''
+
+		lo_offspring_generator_ops=None
+
+		if self.input.recombination_intensity > 0.0:
+			lo_offspring_generator_ops=[ sp.Recombinator( intensity=self.input.recombination_intensity ), 
+											sp.IdTagger(),
+											sp.PedigreeTagger()]
+		else:
+			lo_offspring_generator_ops=[ sp.MendelianGenoTransmitter(), sp.IdTagger(),
+											sp.PedigreeTagger()]
+		#end if we have a recombination intensity, else not	
 
 		mateOp = sp.HeteroMating( [ sp.HomoMating(
 									sp.PyParentsChooser( self.__selected_generator ),
 									sp.OffspringGenerator(numOffspring=1, 
-									ops=[ sp.MendelianGenoTransmitter(), sp.IdTagger(),
-										sp.PedigreeTagger()],
+									ops=lo_offspring_generator_ops,
 									sexMode=(sp.PROB_OF_MALES, self.input.maleProb)), weight=1),
 									sp.CloneMating(subPops=mySubPops, weight=-1) ],
-								subPopSize=self.__calcDemo )
+									subPopSize=self.__calcDemo )
 
 		##### Code Remm'd out
 		'''
@@ -2501,6 +3099,86 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		return
 	#end __cleanup_on_failure
+
+	def __write_ld_on_sample( self, o_pop, 
+								i_cycle_number, 
+								i_num_loci_pairs_to_sample, 
+								s_outfile, 
+								b_sample_linked, 
+								b_sample_unlinked,
+								s_method ):
+		'''
+		2018_06_08. Currently only for testing, as the file written is not
+		part of the cleanup routine, nor managed as a member of this class
+
+		If, after filtering linked or unlinked, loci pairs total less than
+		the value for i_num_loci_pairs_to_sample, the def samples all available.
+		'''
+		import itertools
+
+		i_num_loci=len( o_pop.lociNames() )
+
+		ltup_all_pairs=list( itertools.combinations( range( i_num_loci ), 2 ) )
+
+		i_total_pairs_available=len( ltup_all_pairs )
+
+		if i_total_pairs_available < i_num_loci_pairs_to_sample:
+
+			i_num_loci_pairs_to_sample=i_total_pairs_available		
+
+		#end if sample size < population
+
+		ltup_sampled_loci_pairs=random.sample( ltup_all_pairs, i_num_loci_pairs_to_sample )
+
+		lli_sampled_loci_pairs=[ list( thistup ) for thistup in ltup_sampled_loci_pairs ]
+
+		sp.stat( o_pop, LD=lli_sampled_loci_pairs, vars=[ s_method ] )
+
+		o_file=open( s_outfile, 'a' )
+	
+		ddd_allvars=o_pop.vars()
+
+		dd_ldvals=ddd_allvars[ s_method ]
+
+		for i_first_loci in dd_ldvals:
+
+			for i_second_loci in dd_ldvals[ i_first_loci ]:
+
+				f_ld_value=dd_ldvals[ i_first_loci ][ i_second_loci ]
+
+				i_pos_1=o_pop.locusPos( i_first_loci )
+				i_pos_2=o_pop.locusPos( i_second_loci )
+
+				i_chrom_loc_1=o_pop.chromLocusPair( i_first_loci )[0]
+				i_chrom_loc_2=o_pop.chromLocusPair( i_second_loci )[0]
+
+				f_distance="inf"
+
+				if i_chrom_loc_1==i_chrom_loc_2:
+					f_distance = abs( i_pos_2 - i_pos_1 )
+				#end if same chrom
+
+				o_file.write( str( i_cycle_number ) \
+						+ "\t" \
+						+ "l"  \
+						+ str( i_first_loci ) \
+						+  "\t" \
+						+ "l" \
+						+ str( i_second_loci ) \
+						+ "\t"  \
+						+ str( f_distance ) \
+						+ "\t" \
+						+ str( f_ld_value ) \
+						+ "\n" )
+
+			#end for each second loci
+		#end for each first loci	
+
+		o_file.close()
+		
+		return
+	#end __write_ld_on_sample
+
 #end class PGOpSimuPop
 
 if __name__ == "__main__":
