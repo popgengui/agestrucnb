@@ -33,8 +33,8 @@ params to def __write_ld_on_sample:
 '''
 LD_WRITE_SAMPLE=False
 LD_SAMPLE_LOCI_LINKED=True
-LD_SAMPLE_LOCI_UNLINKED=False
-LD_NUM_PAIRS=200000
+LD_SAMPLE_LOCI_UNLINKED=True
+LD_NUM_PAIRS=10000
 
 '''
 simuPOP offers these lD metrics (see
@@ -3117,6 +3117,16 @@ class PGOpSimuPop( modop.APGOperation ):
 		import itertools
 
 		i_num_loci=len( o_pop.lociNames() )
+
+		ltup_all_pairs=None
+
+		if not( b_sample_linked and b_sample_unlinked ):
+			print( "In pgopsimupop instance, def __write_ld_on_sample, " \
+						+ "warning, the LD report filter flags, b_sample_linked " \
+						+ "and b_sample_unlinked are not yet implemented. "\
+						+ "the sampled pairs will be selected without regard to " \
+						+ "physical linkage." )
+		#end if user has set b_sample_linked or b_sample_unlinked
 
 		ltup_all_pairs=list( itertools.combinations( range( i_num_loci ), 2 ) )
 
