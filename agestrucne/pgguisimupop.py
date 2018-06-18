@@ -92,7 +92,7 @@ CBOX_SURVIVAL_RATE_TEXT=pgin.PGInputSimuPop.CONST_CULL_METHOD_SURVIVIAL_RATES
 that signifies no file name.  We need to test for this value and so
 we import the module's constant that sets this string:
 '''
-from pgsimupoplociinfo import NO_LOCI_FILE
+from agestrucne.pgsimupoplociinfo import NO_LOCI_FILE
 
 
 '''
