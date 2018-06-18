@@ -66,7 +66,7 @@ to our new parameter loci_file_name, when
 it is not present in a config file being
 read in:
 '''
-import pgsimupoplociinfo as simloci
+import agestrucne.pgsimupoplociinfo as simloci
 NO_LOCI_FILE=simloci.NO_LOCI_FILE
 
 class PGInputSimuPop( object ):

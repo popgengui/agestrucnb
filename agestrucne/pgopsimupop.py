@@ -90,7 +90,7 @@ the simulated genome. The module also provides
 the constant given the string ("None") designating
 no loci file is to be used.
 '''
-import pgsimupoplociinfo as pgsimloci
+import agestrucne.pgsimupoplociinfo as pgsimloci
 NO_LOCI_FILE=pgsimloci.NO_LOCI_FILE
 
 '''
@@ -3196,7 +3196,7 @@ if __name__ == "__main__":
 		import agestrucne.pgoutputsimupop as pgout
 		import agestrucne.pgsimupopresources as pgrec
 		import agestrucne.pgparamset as pgps
-		import pgutilities	 as pgut
+		import agestucne.pgutilities as pgut
 	#end try to get pgmods
 
 	import time
