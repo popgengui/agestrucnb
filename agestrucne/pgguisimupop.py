@@ -990,6 +990,11 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		will be set to 50/50 (i.e. the call
 		to InitSex in the simulation will be
 		maleProb=0.5).
+
+		2018_06_24. Note that "equal_sex_ratio"
+		has been changed to "maintain_distribution," but
+		we're using a constant that is set in the pginputsimupop
+		module, so we pick up the change automatically.
 		'''
 		f_reltol = 1e-99	
 
