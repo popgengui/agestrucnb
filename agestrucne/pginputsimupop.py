@@ -778,6 +778,12 @@ class PGInputSimuPop( object ):
 		(i.e. startLambda) parameter, but this call was resetting it to
 		the number of age classes.  We revise it now to only set it to
 		the number of age classes if its current value is None.
+
+		2018_06_28. At Gordon's request, we increase the default value
+		for the startLambda (burn-in cycles) parameter, to 2 times the
+		number of ages.  He suggested it would better ensure that naive
+		users would be recording the desired output.	
+		
 		'''
 
 		if self.startLambda is None:
@@ -786,9 +792,12 @@ class PGInputSimuPop( object ):
 							+ "a reset of the start lambda (burn-in setting) " \
 							+ "failed.  No \"ages\" parameter was found."
 			assert self.ages, s_errmsg 
-
-			self.startLambda=self.ages
-		#end if no startLambda, set it to total ages
+			'''
+			2018_06_28. Now multiplying the ages by 2 for a default
+			value for burn in.
+			'''
+			self.startLambda=( self.ages * 2 )
+		#end if no startLambda, set it to total ages X 2
 				 
 		return
 	#end __reset_start_lambda_using_ages
