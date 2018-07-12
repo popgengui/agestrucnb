@@ -81,6 +81,7 @@ class PGSimupopLociInfoFileManager( object ):
 
 		myclass=PGSimupopLociInfoFileManager
 		o_file=None
+		ds_loci_names={}
 		try:
 			o_file=open( s_file_name )
 		except IOError as ioe:
@@ -141,6 +142,27 @@ class PGSimupopLociInfoFileManager( object ):
 
 				raise Exception( s_msg )
 			#end try...except
+
+			s_loci_name=ls_fields[ myclass.IDX_LOCUS_NAME ]
+
+			if s_loci_name in ds_loci_names:
+
+				s_msg="In PGSimupopLociInfoFileManager, " \
+						+ "def validateFile, " \
+						+ "instance, the loci name " \
+						+ s_loci_name \
+						+ ", is not unique to the loci names " \
+						+ "in the file.  The program requires " \
+						+ "that each loci name in a loci,chrom,position " \
+						+ "file occur only once in the file."
+				raise Exception( s_msg )
+			else:
+				ds_loci_names[ s_loci_name ]=1
+			#end if non unique loci name, else record name
+		#end for each line in file
+
+		o_file.close()
+
 		return
 	#end validateFile
 
@@ -279,16 +301,28 @@ class PGSimupopLociInfo( object ):
 		This def solves the problem of 2 loci on the same chrom,
 		with the same position, which can't be both intitialized
 		in simupop, unless the distance between them is increased
-		to at least the small value of 1e-15 (as assigned to our
+		to at least the small value of 1e-13 (as assigned to our
 		class constant).
 		'''
 		MYJIGGLE=PGSimupopLociInfo.SIMUPOP_MIN_POSITION_DIFFERENCE
 
 		dsf_positions_by_chrom={}
 
+		'''
+		2018_07_03. We are also returning a list of loci names
+		corresponding to the (sometimees jiggled) positions,
+		so that the user supplied loci names can be used by
+		pgopsimupop.py and pgoutputsimupop.py to write the
+		user's loci names to the simulation-output genepop
+		file.
+		'''
+		dsf_loci_names_by_chrom={}
+
 		for s_chrom in self.__loci_names_by_chrom_and_pos:
+
 			if s_chrom not in dsf_positions_by_chrom:
 				dsf_positions_by_chrom[ s_chrom ]= []
+				dsf_loci_names_by_chrom[ s_chrom ]=[]
 			#end if
 
 			lf_positions=list( self.__loci_names_by_chrom_and_pos[ s_chrom ].keys() )
@@ -301,17 +335,18 @@ class PGSimupopLociInfo( object ):
 
 				i_jiggle_count=0
 
-				for loci_name in self.__loci_names_by_chrom_and_pos[ s_chrom ][ f_position ]:
+				for s_loci_name in self.__loci_names_by_chrom_and_pos[ s_chrom ][ f_position ]:
 					#this should only append the jiggle amount if there is more than one loci name
 					#at the current position -- and increment the jiggle units as we see > 2 loci names:
 					f_this_jiggle_amount = MYJIGGLE * i_jiggle_count
 					dsf_positions_by_chrom[ s_chrom ].append( f_position + f_this_jiggle_amount )
+					dsf_loci_names_by_chrom[ s_chrom ].append( s_loci_name )
 					i_jiggle_count+=1
 				#end for each loci name
 			#end for each position on this chrom
 		#end for each chrom
 
-		return dsf_positions_by_chrom
+		return dsf_positions_by_chrom, dsf_loci_names_by_chrom
 	#end def  getPositionsUsingSmallOffsetForNonUniquePositions
 
 	@property
@@ -333,26 +368,26 @@ class PGSimupopLociInfo( object ):
 
 if __name__ == "__main__":
 	
-	s_file="/home/ted/documents/negui_project/from_sarah_lehnert/map_position.csv"
+	s_file="/home/ted/documents/negui_project/from_sarah_lehnert/map_position.csv.unix"
 
-	o_fm=PGSimupopLociInfoFileManager( s_file )
-	d_info=o_fm.dictLociByPosByChrom
-	ls_chroms=list( d_info.keys() )
-	li_chroms_sorted=[ int( s_chrom ) for s_chrom in ls_chroms ]
-	li_chroms_sorted.sort()
+	o_li=PGSimupopLociInfo( s_file )
 
-	for i_chrom in li_chroms_sorted:
-		s_chrom=str( i_chrom )
-		lf_sorted_pos=list( d_info[ s_chrom ].keys() )
-		lf_sorted_pos.sort()
-		for f_pos in lf_sorted_pos:
-			s_pos=str( f_pos ) if f_pos>0 else "0"
-			for s_name in d_info[ s_chrom ][ f_pos ]:
-				print(  ",".join( [ s_name, s_chrom, s_pos ] ) )
-			#end for name
-		#end for pos
-	#end for chrom
+	dsf_posbychrom, dsf_locibychrom=o_li.getPositionsUsingSmallOffsetForNonUniquePositions()
+	
+	ls_chroms=list( dsf_posbychrom.keys() )
+	li_chroms=[ int( s_c ) for s_c in ls_chroms ]
+	li_chroms.sort()
+	for i_chrom in li_chroms:
+		chrom=str( i_chrom )
+		ls_names=dsf_locibychrom[ chrom ]
+		lf_pos=dsf_posbychrom[ chrom ]
+		
+		i_count_pos=0
+		for s_name in ls_names:
+			print( "\t".join( [ s_name, chrom, str( lf_pos[ i_count_pos]  ) ] ) )
+			i_count_pos+=1
+		#end for s_name
+	#end for each chromosome
 
-	pass
 #end if main
 

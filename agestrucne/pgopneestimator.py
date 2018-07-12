@@ -295,7 +295,7 @@ class PGOpNeEstimator( APGOperation ):
 			print( "in __is_windows_filecount_anomaly, with 4th file existing, with contents: " )
 			of=open( s_tmpfilename)
 			print( str( of.readlines() ) )
-		#end temp
+		##### end temp
 
 		return b_is_anomaly
 	#end __is_windows_filecount_anomaly
