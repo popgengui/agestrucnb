@@ -77,6 +77,12 @@ import scipy.stats as scistats
 from numpy import searchsorted
 
 '''
+2018_07_09.  For sampling from a random 
+uniform distribution.
+'''
+import random
+
+'''
 2017_04_27
 For python 2 and 3 compatibility,
 for users who have both versions
@@ -1749,9 +1755,10 @@ def get_binomial_dist_values_with_mean_within_tolerance( i_trials,
 	return li_binomial_dist_values
 #end get_binomial_dist_with_mean_value_within_tolerance 
 
-def get_snp_allele_freqs_from_het_value_using_truncnorm_dist( f_this_het_value,
-																		i_num_freqs,
-																		f_tolerance=0.01 ):
+def get_snp_allele_freqs_from_het_value_using_random_dist( f_this_het_value,
+														i_num_freqs,
+														lf_tolerances=[ 0.01 ],
+														s_distribution="truncnorm" ):
 
 		'''
 		2018_05_24.  This def is created in order
@@ -1789,11 +1796,23 @@ def get_snp_allele_freqs_from_het_value_using_truncnorm_dist( f_this_het_value,
 		from the def __createGenome in pgopsimupop.py, in order 
 		to implement the scheme that provides a non-identical 
 		set of initial SNP allele frequencies.
-		
+
+
+		2018_07_09. We generalize this def to get the 
+		biallelic snp freqs f, f-1, analytically derived from
+		the passeed het value, and then use a caller-
+		specified distribution to decide which def
+		to call to get a set of snp allele frequencies.
+	
+		2018_07_11.  We change the param f_tolerance to
+		a list of tolerances lf_tolerances, to allow
+		tries as increasing tolerances (see def 
+		get_sample_trunc_normal_allele_frequencies).
 		'''
 
 		if f_this_het_value < 0.0 or f_this_het_value > 0.5:
-			s_msg="In pgutilities, def __get_snp_allele_frequenciesuencies, " \
+			s_msg="In pgutilities, def get_snp_allele_freqs_" \
+						+ "from_het_value_using_random_dist, " \
 						+ "The value for heterozygosity initialization " \
 						+ "for SNPs is invalid at " \
 						+ str( f_this_het_value )  \
@@ -1823,20 +1842,39 @@ def get_snp_allele_freqs_from_het_value_using_truncnorm_dist( f_this_het_value,
 			#end if positive root
 		#end for each root	
 
-		lf_frequencies=get_sample_trunc_normal_allele_frequencies( \
+		lf_frequencies=None
+
+		if s_distribution == "truncnorm":
+
+			lf_frequencies=get_sample_trunc_normal_allele_frequencies( \
 												f_mean_allele_freq=f_init_snp_freq,
 												f_target_het_value=f_this_het_value,
 												i_num_freqs=i_num_freqs,
-												f_tolerance=f_tolerance )
-		
+												lf_tolerances=lf_tolerances )
+		elif s_distribution == "uniform":
+
+			lf_frequencies=get_sample_uniform_random_allele_frequencies( \
+														f_mean_allele_freq=f_init_snp_freq,
+														f_target_het_value=f_this_het_value,
+														i_num_freqs=i_num_freqs,
+														lf_tolerances=lf_tolerances )
+
+		else:
+			s_msg = "In module pgutilities.py, " \
+								+ "def get_snp_allele_freqs_from_het_value_using_random_dist," \
+								+ " the specified distribution, " \
+								+ s_distribution \
+								+ " is not recognized."
+			raise Exception( s_msg )
+		#end if distribution is truncnorm, else uniform, else ....	
 		return lf_frequencies
 
-#end get_snp_allele_freqs_from_het_value_using_truncnorm_dist
+#end get_snp_allele_freqs_from_het_value_using_rand_dist
 
 def get_sample_trunc_normal_allele_frequencies( f_mean_allele_freq,
 													f_target_het_value,
 													i_num_freqs,
-													f_tolerance ):
+													lf_tolerances ):
 		'''
 		These are target (allele frequencies) values derived
 		from a series of increasing expected het values 
@@ -1846,7 +1884,16 @@ def get_sample_trunc_normal_allele_frequencies( f_mean_allele_freq,
 		of 100 SNPs whose allele freqs gave a mean expected het
 		within 0.01 of the target het value.
 
+
+		2018_07_11.  Changing the f_tolerance param to be a list
+		of tolerances, so that we can move from low to higher if
+		the "best" tolerance is too low.  This because I found
+		a bug such that all het values were getting through
+		even under tolerance failure at 0.01.  After fixing the bug
+		trials showed that 0.02 would suffice for values failing
+		at 0.01.
 		'''
+
 		NUM_TRIES=int( 1e4 )
 		MIN_RANGE=0.0
 		MAX_RANGE=1.0
@@ -1860,6 +1907,7 @@ def get_sample_trunc_normal_allele_frequencies( f_mean_allele_freq,
 
 		FREQ_VALUE_SDEV_BOUNDARIES=[ 0.0, 0.005, 0.025, 0.052, 0.081, 0.11, 0.34, 0.37 ]
 		SDEV_BY_BOUNDARY={ 1:0.005, 2:0.01, 3:0.02, 4:0.05, 5:0.07, 6:0.01, 7:0.1, 8:0.07  }
+
 		lf_random_freqs=None
 
 		i_boundry_this_freq=searchsorted( FREQ_VALUE_SDEV_BOUNDARIES, f_mean_allele_freq, side='right' )
@@ -1877,17 +1925,29 @@ def get_sample_trunc_normal_allele_frequencies( f_mean_allele_freq,
 		o_generator=get_sample_trunc_normal_distribution_generator( f_mean_allele_freq, 
 																				f_std_dev, 
 																				MIN_RANGE,
-																				MAX_RANGE )
-		for idx in range( NUM_TRIES ):
+																					MAX_RANGE )
+		#We want to start with the lowest, 
+		#move low to high:
+		lf_tolerances.sort()	
 
-			lf_random_freqs=o_generator.rvs( i_num_freqs ) 
+		for f_tolerance in lf_tolerances:
 
-			f_mean_expected_het=get_mean_expected_het_for_set_of_biallelic_freqs( lf_random_freqs )
-
-			if abs( f_mean_expected_het - f_target_het_value ) <= f_tolerance:
+			if lf_random_freqs is not None:
 				break
-			#end if within tolerance
-		#end for each try
+			#end if we've found a set of freqs, break
+
+			for idx in range( NUM_TRIES ):
+
+				lf_these_freqs=o_generator.rvs( i_num_freqs ) 
+
+				f_mean_expected_het=get_mean_expected_het_for_set_of_biallelic_freqs( lf_these_freqs )
+						
+				if abs( f_mean_expected_het - f_target_het_value ) <= f_tolerance:
+					lf_random_freqs=lf_these_freqs
+					break
+				#end if within tolerance
+			#end for each try
+		#end for each tolerance value
 
 		if lf_random_freqs is None:
 
@@ -1912,7 +1972,7 @@ def get_sample_trunc_normal_distribution_generator( f_mean,
 												f_distribution_max_value ):
 		'''
 		2018_05_24.  This def is created to be called 
-		by pgopsimupop.py def __get_snp_allele_frequencies,
+		by pgopsimupop.py def get_sample_trunc_normal_allele_frequencies,
 		It supplies a generator from which the caller can 
 		draw samples from a truncated normal 
 		distribution. 
@@ -1972,6 +2032,58 @@ def get_roots_quadratic( f_a, f_b, f_c ):
 	return lf_roots
 
 #end get_roots_quadratic
+
+def get_sample_uniform_random_allele_frequencies( f_mean_allele_freq, 
+													f_target_het_value, 
+													i_num_freqs, 
+													lf_tolerances ):
+
+		NUM_TRIES=int( 1e4 )
+		MIN_RANGE=0.0
+		MAX_RANGE=1.0
+
+		lf_random_freqs=None
+
+		i_count_tries=0
+
+		for f_tolerance in lf_tolerances:
+
+			if lf_random_freqs is not None:
+				break
+			#end if we have found a set of freqs, break
+
+			for idx in range( NUM_TRIES ):
+
+				i_count_tries+=1
+
+				lf_these_freqs=[ random.uniform( MIN_RANGE, MAX_RANGE ) for idx in range( i_num_freqs ) ] 
+
+				f_mean_expected_het=get_mean_expected_het_for_set_of_biallelic_freqs( lf_these_freqs )
+
+				if abs( f_mean_expected_het - f_target_het_value ) <= f_tolerance:
+					lf_random_freqs=lf_these_freqs
+					break
+				#end if within tolerance
+			#end for each try
+		#end for each tolerance value
+
+		if lf_random_freqs is None:
+
+			s_msg = "In pgutilities, def get_sample_uniform_random_allele_frequencies, " \
+						+ "the program could not get a list of frequencies with mean " \
+						+ "expected het, " \
+						+ "targeted at " \
+						+ str( f_target_het_value ) \
+						+ " and tolerance set at " \
+						+ str( f_tolerance ) \
+						+ " in " + str( NUM_TRIES ) + " tries."
+
+
+			raise Exception( s_msg )
+		#end if no freq list was within tolerance
+
+		return lf_random_freqs		
+#end def get_sample_uniform_random_allele_frequencies
 
 def get_dirichlet_allele_dist_for_expected_het( f_expected_het,  
 													i_num_alleles, 
@@ -2039,10 +2151,53 @@ def get_dirichlet_allele_dist_for_expected_het( f_expected_het,
 #end get_dirichlet_allele_dist_for_expected_het
 
 if __name__ == "__main__":
-	for het in  [ 0.001, 0.003, 0.2, 0.3, 0.45, 0.55, 0.65, 0.85 ]:
-		print( str(het) + ":--------------" )	
-		dl= get_dirichlet_allele_dist_for_expected_het( het, 10 ) 
-		print( "calc het: " + str( 1 - sum( [ x*x for x in dl ] ) ) )
+
+	import matplotlib.pyplot as pt
+	import numpy as np
+
+	DIST="uniform"
+	SHOWPLOTS=False
+	NUMSNPS=1265
+	TOL=1.15
+	
+	hetlist=np.linspace( 0.0, 0.5, 11 )
+
+#	hetlist=[ 0.45 for idx in range( 30 ) ]
+
+	for het in  hetlist:
+
+#		lf_freqs=get_sample_uniform_random_allele_frequencies( f_mean_allele_freq=None, 
+#														f_target_het_value=het, 
+#														i_num_freqs=100, 
+#														f_tolerance=0.001 )
+		
+		lf_freqs=get_snp_allele_freqs_from_het_value_using_random_dist(  f_this_het_value=het,
+																			i_num_freqs=NUMSNPS,
+																			f_tolerance=TOL,
+																			s_distribution=DIST )
+		lf_hets=[]
+
+		for f_freq in lf_freqs:	
+
+			f_het= 1 - sum( [ f_freq*f_freq, (1-f_freq)*(1-f_freq ) ] ) 
+
+			lf_hets.append( f_het )
+
+		#end for each freq
+
+		f_mean_het = np.mean( lf_hets )
+
+		print( "----------------------" )
+		print( "for het value: " \
+					+ str( het ) + \
+					", mean of freqs: " \
+					+ str( np.mean( lf_freqs ) ) \
+					+ ", mean het: " \
+					+ str( f_mean_het ) )
+		if SHOWPLOTS:
+			pt.hist( lf_freqs )
+			pt.show()
+		#end if show plot
 	#end for each het
 #end if main
 

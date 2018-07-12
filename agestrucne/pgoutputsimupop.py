@@ -282,11 +282,17 @@ class PGOutputSimuPop( object ):
 		#end for each file
 	#end bz2CompressAllFiles
 
+	'''
+	2018_07_03. We add parameter o_simupop_population, so that
+	we can call this def (from pgopsimupop.py) and, by supplying
+	a simupop pop object, use loci names as set in the pop object.
+	'''
 	def writeGenepopFileHeaderAndLociList( self, 
 								o_genepopfile,
 								i_num_loci,
 								f_nbne_ratio = None, 
-								b_do_compress=False ):
+								b_do_compress=False,
+								o_simupop_population=None ):
 	
 		'''
 		2017_08_04. Code to write the genpop file header
@@ -312,20 +318,47 @@ class PGOutputSimuPop( object ):
 
 		o_genepopfile.write(  s_header_line )
 
+		'''
+		2018_07_03.  We revise code to write loci names, so that, 
+		If the caller has supplied a population object, we use its 
+		list of loci names instead of our default use of "l<num>":
+		'''
+		ls_loci_names=None
 
+		if o_simupop_population is None:
+			ls_loci_names=[ "l" + str( i_locus ) + "\n" for i_locus in range( i_num_loci ) ]
+		else:
+			tup_loci_names=o_simupop_population.lociNames()
+
+			if len( tup_loci_names ) != i_num_loci:
+				s_msg="In PGOutputSimuPop instance, " \
+							+ "def writeGenepopFileHeaderAndLociList, " \
+							+ "value for total loci, " \
+							+ str( i_num_loci ) \
+							+ ", is not equal to the length " \
+							+ "of the loci name list provided " \
+							+ "by the simupop pop object."
+
+				raise Exception( s_msg )
+			#end if unequal loci and names totals
+
+			ls_loci_names=[ s_name + "\n"  for s_name in tup_loci_names ]
+
+		#end if no pop object, else have pop object
+	
 		for i_locus in range( i_num_loci ):
-			s_locus_name="l" + str(i_locus) + "\n" 
+			s_locus_name=ls_loci_names[ i_locus ]
 
 			if b_do_compress:
 				s_locus_name=s_locus_name.encode( SYSDEFAULTENCODING )
 			#end if do compress	
 
 			o_genepopfile.write(s_locus_name )
-
 		#end for each loci number
 
+
 		return
-	#end writeGenepopFileHeaderAndLociList
+	#end def writeGenepopFileHeaderAndLociList
 
 	#derived from Tiao's code in ne2.py:
 	def gen2Genepop( self, idx_allele_start, idx_allele_stop, 

@@ -7,6 +7,7 @@ from __future__ import division
 from __future__ import print_function
 from builtins import range
 from past.utils import old_div
+
 __filename__ = "pgopsimupop.py"
 __date__ = "20160126"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
@@ -15,6 +16,7 @@ VERBOSE=False
 VERY_VERBOSE=False
 VERY_VERY_VERBOSE=False
 PRINT_CULL_TOTALS=False
+
 '''
 2018_05_16. When set to True,
 call simupops "dump(pop)"
@@ -82,6 +84,15 @@ import copy
 import os
 
 '''
+2018_07_05. We use the natsort "realsorted"
+sort to sort the chromosomes as input by
+a loci,chrom,position file, and delivered
+to this module by the pgsimupoplociinfo 
+object.  See the __createSinglePop def.
+'''
+import natsort
+
+'''
 2018_05_27. This new object manages extracting
 the information from a loci table file that
 lists loci_name, chromosome, and position. If
@@ -101,7 +112,23 @@ frequencies, according to their
 respective initial mean heterozygosity values.
 '''
 MSAT_INIT_HET_PRECISION=0.001
-SNP_INIT_HET_PRECISION=0.01
+'''
+2018_07_11. Changed the call to pgutilities.py
+def get_snp_allele_freqs_from_het_value_using_random_dist
+so that it now expects a list of tolerances. This
+was a response to a bug fix, showing that some of 
+the SNP allele freq. sets that got through were actually
+outside the 0.01, with trials showing that 0.02 would work
+for the failing het values.
+'''
+SNP_HET_INIT_TOLERANCES=[ 0.01, 0.02 ]
+'''
+2018_07_09.  The call to pgutilities.py
+def get_snp_allele_freqs_from_het_value_using_random_dist
+(formerly called get_snp..."truncnorm_dist"), now
+requries that the caller specifies a distribution.
+'''
+SNP_ALLELE_FREQ_DISTRIBUTION="truncnorm"
 
 '''
 2017_03_26. This mod-level def
@@ -460,22 +487,36 @@ class PGOpSimuPop( modop.APGOperation ):
 		We now get total depending on the 
 		way the genome was intitialized:
 		'''
-
 		i_total_loci = None
+
+		'''
+		2018_07_03. In cases in which our loci
+		were provided by a user supplied loci
+		info file, we now pass a reference of
+		the simupop pop object into the call
+		to writeGenepopFileHeaderAndLociList,
+		which has now been revised to get loci
+		names from the pop object when a (non-None)
+		reference to the population is passed to it.
+		'''
+
+		o_reference_to_pop=None
 
 		if self.__user_supplied_loci_info is None:
 
 			i_total_loci=self.input.numMSats + self.input.numSNPs
 		else:
 			i_total_loci=self.__user_supplied_loci_info.total_loci
+			o_reference_to_pop=self.__pop
 		#end if genome intitialized using totals, else user
 		#supplied per-loci info.
 
 		self.output.writeGenepopFileHeaderAndLociList( \
-												self.output.genepop,
-												i_total_loci,
-												f_this_nbne,
-												b_do_compress=False )
+											self.output.genepop,
+											i_total_loci,
+											f_this_nbne,
+											b_do_compress=False,
+											o_simupop_population=o_reference_to_pop )
 		return
 	#end __setup_genepop_file
 
@@ -558,7 +599,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			instead of the original def __createGenome.
 			
 			2018_06_04.  Bugfix, by adding the use_loci_file flag to the test as to whether 
-			we sould create aa PGSimupopLociInfo object.  Note that after that object is 
+			we should create a PGSimupopLociInfo object.  Note that after that object is 
 			made, then the test as to whether we initialize a genome using a loci file 
 			is to test that this PGOpSimuPop's attribute __user_supplied_loci_info is 
 			not None.
@@ -867,7 +908,6 @@ class PGOpSimuPop( modop.APGOperation ):
 		This def is an alternative to __createGenome
 		2018_05_27.  Currently we always create only
 		biallelic SNPs from the user supplied loci.
-
 		'''
 		
 		FLOAT_TOL=1e-32
@@ -890,11 +930,17 @@ class PGOpSimuPop( modop.APGOperation ):
 			lf_random_freqs=[ 0.0 for idx in range( i_num_snps ) ]
 		else:
 
+			'''
+			2018_07_09. Revised the def in pgutilitities to allow caller to specify
+			a distribution, so, for now, as we search for a better solution, we
+			specity the truncnorm, which looks to have to narrow a distribution.
+			'''
 			lf_random_freqs=\
-					pgut.get_snp_allele_freqs_from_het_value_using_truncnorm_dist( \
+					pgut.get_snp_allele_freqs_from_het_value_using_random_dist( \
 															f_this_het_value=self.input.het_init_snp,
 															i_num_freqs=i_num_snps,
-															f_tolerance=0.01 )
+															lf_tolerances=SNP_HET_INIT_TOLERANCES,
+															s_distribution=SNP_ALLELE_FREQ_DISTRIBUTION )
 
 		#end if user has set init snp freq to zero, else use distribution
 
@@ -1002,10 +1048,11 @@ class PGOpSimuPop( modop.APGOperation ):
 		else:
 
 			lf_random_freqs=\
-					pgut.get_snp_allele_freqs_from_het_value_using_truncnorm_dist( \
+					pgut.get_snp_allele_freqs_from_het_value_using_random_dist( \
 														f_this_het_value=self.input.het_init_snp,
 														i_num_freqs=self.input.numSNPs,
-														f_tolerance=SNP_INIT_HET_PRECISION )
+														lf_tolerances=SNP_HET_INIT_TOLERANCES,
+														s_distribution=SNP_ALLELE_FREQ_DISTRIBUTION )
 		#end if user wants 0.0 as init freq, else use distribution
 
 		for f_random_freq in lf_random_freqs:		
@@ -1379,27 +1426,51 @@ class PGOpSimuPop( modop.APGOperation ):
 					self.__user_supplied_loci_info.loci_totals_by_chromosome
 			'''
 			This call gets the list of postions by chromosome,
-			and solves the problem of loci at identical postions
+			and solves the problem of loci at identical positions
 			by incrementing one of such a pair by the minimum
-			"postion" value (currently trials show 1e-15), 
+			"postion" value (currently trials show 1e-13), 
 			to which simupop is sensitive, and will allow the 
 			pair to be intialized as different loci.  
+
+			Note that now (2018_07_03) this call returns,
+			in addition to the dict of position lists by chrom,
+			a per-chrom list of loci names whose names match
+			the positions read in from the loci file, as
+			given by the loc_pos_by_chrom dict.  Loci with 
+			"jiggled" positions will be listed in the order 
+			in which they were given in the input loci,chrom,pos
+			file.
 			'''
-			dsf_loci_pos_by_chrom= \
+			dsf_loci_pos_by_chrom, dsf_loci_names_by_chrom = \
 					self.__user_supplied_loci_info\
 								.getPositionsUsingSmallOffsetForNonUniquePositions()
 
-			ls_sorted_chrom_names=list( dsi_loci_totals_by_chrom.keys() )
-			ls_sorted_chrom_names.sort()
+			ls_chrom_names=list( dsi_loci_totals_by_chrom.keys() )
+
+			'''
+			2018_07_05. Decided to use natsort, since often chromosome
+			names are either numbers or a combination of alpha and number:
+			'''
+			ls_sorted_chrom_names = natsort.realsorted( ls_chrom_names )
+
+
 			li_loci_totals=[]
 			lf_positions=[]
-			ls_loci_names=[ "l" + str(idx) for idx in range( self.__user_supplied_loci_info.total_loci )]
+
+			'''
+			2018_07_03. In order to use the user supplied loci names,
+			we now get them from our loci info object, instead of
+			using out default "l<num>" naming convention.
+			'''
+			ls_loci_names=[]
+
+		#	ls_loci_names=[ "l" + str(idx) for idx in range( self.__user_supplied_loci_info.total_loci )]
 
 			for s_chrom in ls_sorted_chrom_names:
 				lf_positions+=dsf_loci_pos_by_chrom[ s_chrom ]
 				li_loci_totals.append( dsi_loci_totals_by_chrom[ s_chrom ] )
+				ls_loci_names+=dsf_loci_names_by_chrom[ s_chrom ]
 			#end for each chrom	
-
 
 #			##### temp
 #			print( "loci totals: "  )
@@ -1415,7 +1486,6 @@ class PGOpSimuPop( modop.APGOperation ):
 #			print( "positions: " + str( lf_positions ) )
 #			print ( "initing pop with locinames: " + str( ls_loci_names ) )		
 #			#####
-
 
 			pop=sp.Population(popSize, ploidy=2, loci=li_loci_totals,
 						lociPos=lf_positions, lociNames=ls_loci_names,
@@ -3276,5 +3346,6 @@ if __name__ == "__main__":
 
 	o_op.prepareOp()
 	o_op.doOp()
+
 #end if
 

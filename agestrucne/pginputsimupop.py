@@ -1,8 +1,6 @@
 '''
 Description
-
 Retrieves and prepares data needed to run simuPop.  See class description.
-
 '''
 from __future__ import division
 from __future__ import print_function
@@ -24,9 +22,10 @@ DEFAULT_MSAT_HET_INIT=0.8
 '''
 2018_04_18.  Adding new parameter
 that allows users to simulate
-loci distributed over >1 chromosome.
+loci distributed over a variable number
+of chromosomes.
 The default value of zero results in
-all loci being "placed" on different
+all loci being placed on different
 chromsomes.
 '''
 DEFAULT_NUM_CHROMS=0
