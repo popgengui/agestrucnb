@@ -1025,47 +1025,49 @@ class PGOpSimuPop( modop.APGOperation ):
 					loci=msat))
 		#end for msat
 
-				
-		'''
-		2018_05_24. We now generate a list of allele frequencies 
-		randomly drawn from a truncated ([0.0,1.0]) normal distribution
-		with the mean set to the allele frequency given by our 
-		intial snp expected heterozygosity value. See the pgutilities.py
-		module, defs related to obtaining frequencies using the trunc 
-		normal distribution.
-		'''
-		i_snp_count=-1
+	
+		if numSNPs > 0:
+			'''
+			2018_05_24. We now generate a list of allele frequencies 
+			randomly drawn from a truncated ([0.0,1.0]) normal distribution
+			with the mean set to the allele frequency given by our 
+			intial snp expected heterozygosity value. See the pgutilities.py
+			module, defs related to obtaining frequencies using the trunc 
+			normal distribution.
+			'''
+			i_snp_count=-1
 
-		lf_random_freqs=None
+			lf_random_freqs=None
 
-		'''
-		2018_06_13.  We do not use the random number gen if the
-		client wants an init het value of 0.0, but instead initialize
-		all SNPs ad di-allele frequencies zero and 1.1
-		'''
-		if abs( self.input.het_init_snp - 0.0 ) <= FLOAT_TOL:
-			lf_random_freqs=[ 0.0 for idx in range( self.input.numSNPs ) ]	
-		else:
+			'''
+			2018_06_13.  We do not use the random number gen if the
+			client wants an init het value of 0.0, but instead initialize
+			all SNPs ad di-allele frequencies zero and 1.1
+			'''
+			if abs( self.input.het_init_snp - 0.0 ) <= FLOAT_TOL:
+				lf_random_freqs=[ 0.0 for idx in range( self.input.numSNPs ) ]	
+			else:
 
-			lf_random_freqs=\
-					pgut.get_snp_allele_freqs_from_het_value_using_random_dist( \
-														f_this_het_value=self.input.het_init_snp,
-														i_num_freqs=self.input.numSNPs,
-														lf_tolerances=SNP_HET_INIT_TOLERANCES,
-														s_distribution=SNP_ALLELE_FREQ_DISTRIBUTION )
-		#end if user wants 0.0 as init freq, else use distribution
+				lf_random_freqs=\
+						pgut.get_snp_allele_freqs_from_het_value_using_random_dist( \
+															f_this_het_value=self.input.het_init_snp,
+															i_num_freqs=self.input.numSNPs,
+															lf_tolerances=SNP_HET_INIT_TOLERANCES,
+															s_distribution=SNP_ALLELE_FREQ_DISTRIBUTION )
+			#end if user wants 0.0 as init freq, else use distribution
 
-		for f_random_freq in lf_random_freqs:		
+			for f_random_freq in lf_random_freqs:		
 
-			i_snp_count+=1
+				i_snp_count+=1
 
-			initOps.append(
-					sp.InitGenotype(
-					#Position 0 is coded as 0, not good for genepop
-					freq=[0.0, f_random_freq, 1 - f_random_freq ],
-					loci=numMSats + i_snp_count))
+				initOps.append(
+						sp.InitGenotype(
+						#Position 0 is coded as 0, not good for genepop
+						freq=[0.0, f_random_freq, 1 - f_random_freq ],
+						loci=numMSats + i_snp_count))
 
-		#end for each snp frequency, initialize a loci
+			#end for each snp frequency, initialize a loci
+		#end if we want at least one SNP
 
 		preOps = []
 
