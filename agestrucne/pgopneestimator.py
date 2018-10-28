@@ -465,7 +465,7 @@ class PGOpNeEstimator( APGOperation ):
 
 		ls_columnar_files=glob.glob( \
 				"*" + LDNE_COLUMN_FILE_EXT )
-		
+				
 		if len( ls_columnar_files ) != 1:
 			s_msg="In PGOpNeEstimator instance, " \
 						+ "def correct_and_add_columnar_output_file_if_not_present, " \

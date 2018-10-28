@@ -180,6 +180,16 @@ class KeyListComboFrame( PGKeyControlFrame ):
 		new PGKeyControlFrame parent class.
 		'''
 		self.label=o_label
+
+
+		'''
+		2018_10_23
+		Adding the tooltip text to the label.  Formerly
+		it was only applied to the editable control(s).
+		'''
+		s_tooltip=ctt.insertNewlines( self.__tooltip )
+		o_tooltip=ctt.CreateToolTip( o_label,  s_tooltip )
+
 	#end __setup_label
 
 	def __setup_combobox( self ):

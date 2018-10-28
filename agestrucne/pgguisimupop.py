@@ -46,7 +46,12 @@ from agestrucne.pgutilityclasses import ValueValidator
 
 import agestrucne.pgutilities as pgut
 import agestrucne.pgparallelopmanager as pgpar
-
+'''
+2018_07_27.  We use a static method in this class
+to check whether a user-supplied loci info file
+has allele frequencies or not:
+'''
+import agestrucne.pgsimupoplociinfo as pgsli
 
 import sys
 import os
@@ -101,6 +106,14 @@ as a fucntion of the state of the new parameter use_loci_file flag,
 which, when true, makes these parameters irrelevant:
 '''
 LOCI_RELATED_TOTALS_CONTROLS=[ "numSNPs", "numMSats", "numChroms", "startAlleles" ]
+
+'''
+2018_07_27. Having added an option for users to add a 4th column
+in a loci info file, giving allele frequencies, we now need
+to manage the state of the het init controls, which will be
+disabled when the user wants to use their provided frequencies.
+'''
+ALLELE_FREQ_INIT_RELATED_CONTROLS=[ "het_init_snp", "het_init_msat" ]
 
 class PGGuiSimuPop( pgg.PGGuiApp ):
 
@@ -503,6 +516,131 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#end for each catgory frame
 	#end __place_category_frames
 
+	def __is_param_that_needs_a_control( self, s_param, v_val ):
+		'''
+		2018_10_23.  This code was extracted from def __load_values_into_interface
+		so that we can call it from def __get_sorted_list_of_params_that_need_controls,
+		and deliver back to __load_values_into_interface a list both filtered to only
+		relevant controls as well as sorted into a proper order of addition into the
+		interface.
+		'''
+
+		b_needs_a_control=True
+
+		#we don't display this if its a def
+		#or a function (and so not a parameter)
+		if inspect.isroutine( v_val ):
+			b_needs_a_control=False
+		#end if def or function
+
+		if  type( v_val ) == str:
+			if v_val.startswith( "<bound method" ):
+				b_needs_a_controls= False
+			#end if method, skip
+		#end if the value is a string
+
+		#if not a routine or bound method, 
+		#check to make sure it is a valid param:
+
+		if b_needs_a_control==True:
+			if self.__input.param_names is None:
+				s_msg=" In PGGuiSimuPop instance, " \
+						+ "def __is_param_that_needs_a_control, " \
+						+ "member __input has missing PGParamset " \
+						+ "instance."
+				raise Exception( s_msg )
+			#end of no param_set object
+
+			if not( self.__input.param_names.isInSet( s_param ) ):
+					s_msg=" In PGGuiSimuPop instance, " \
+						+ "def __is_param_that_needs_a_control, " \
+						+ "member __input members PGParamset " \
+						+ "instance has no param, " + s_param + "."
+					raise Exception( s_msg )
+			#end if param not in param_names objectd
+		#end if looks like param, validate
+
+		return b_needs_a_control
+	#end __is_param_that_needs_a_control
+
+	def __get_sorted_list_of_params_that_need_controls( self, ls_input_params ):
+		'''
+		2018_10_23. Added this call as preprocessing of the param list to
+		order controls within subframes by delivering a list such that
+		the iterative creation of controls in def __load_values_into_interface
+		will order the controls in accordance with the row order as entered
+		in the simupop_param_names file.
+		'''
+		ls_sorted_param_list=[]
+
+		i_param_count=0
+
+		dds_params_by_section_by_row_position={}
+
+		for s_param in ls_input_params:
+
+			v_val=getattr( self.__input, s_param )
+
+			if ( self.__is_param_that_needs_a_control( s_param, v_val ) ):
+
+				i_param_count+=1
+
+				( s_longname,
+					s_section_name,
+					i_param_section_order_number,
+					i_param_column_number,
+					i_param_position_in_order,
+					v_default_value,
+					o_param_type,
+					v_min_value,
+					v_max_value,
+					s_tooltip,
+					s_param_control_type,
+					s_param_control_list,
+					s_param_validity_expression,
+					s_param_assoc_def,
+					s_param_control_state,
+					s_def_on_loading ) = \
+							self.__input.param_names.getAllParamSettings( s_param )
+			
+		
+				if s_section_name not in dds_params_by_section_by_row_position:
+					dds_params_by_section_by_row_position[ s_section_name ]=\
+											{ i_param_position_in_order:s_param }
+				else:
+
+					#each param position number should be unique within a section:
+					if i_param_position_in_order in dds_params_by_section_by_row_position[ s_section_name ]:
+						s_msg="In PGGuiSimuPop instance, def __get_sorted_list_of_params_that_need_controls, " \
+								+ "The program found at least two params in section " + s_section_name \
+								+ ", at position " + str( i_param_position_in_order ) + "." 
+						raise Exception( s_msg )
+					#end if we've already seen this section/postion combo, then non-unique placement error
+
+					dds_params_by_section_by_row_position[ s_section_name][ \
+											i_param_position_in_order ] = s_param 
+				#end if new section else not
+
+			#end if control is needed, add param to dict
+
+		#end for each param
+
+		#how we put each param in a list, so that it will be created
+		#by def __load_values_into_interface in the correct order
+		#within its subframe (exs: Genome, Population).
+
+		for s_section in dds_params_by_section_by_row_position:
+			ds_param_by_position=dds_params_by_section_by_row_position[ s_section ]
+			li_sorted_postion_numbers=list( ds_param_by_position.keys() )
+			li_sorted_postion_numbers.sort()
+			for i_postion_number in li_sorted_postion_numbers:
+				ls_sorted_param_list.append( \
+						ds_param_by_position[ i_postion_number ] )
+			#end for each postion	
+		#end for each section
+		return ls_sorted_param_list 
+	#end __get_sorted_list_of_params_that_need_controls
+
 	def __load_values_into_interface( self, b_force_disable=False ):
 
 		'''
@@ -568,8 +706,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 
 		o_input=self.__input
 		
-		ls_input_params=[ s_param for s_param in dir( o_input ) if not( s_param.startswith( "_" ) ) \
-											and not( s_param.startswith( PREFIX_FOR_INPUT_CONSTANTS ) )  ]
+		ls_input_params=[ s_param for s_param in dir( o_input ) \
+								if not( s_param.startswith( "_" ) ) \
+									and not( s_param.startswith( PREFIX_FOR_INPUT_CONSTANTS ) )  ]
+
 		ls_tags=o_input.param_names.tags
 
 		ls_sections=[  o_input.param_names\
@@ -584,8 +724,10 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		self.__category_frames=self.__make_category_subframes( \
 				set( ls_sections ) )	
 
-		
-		for s_param in ls_input_params:
+		ls_input_params_that_need_controls=\
+				self.__get_sorted_list_of_params_that_need_controls( ls_input_params )
+
+		for s_param in ls_input_params_that_need_controls:
 			
 			PADPIX=0
 
@@ -598,36 +740,7 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			#end if VERBOSE
 
 			v_val=getattr( o_input, s_param )
-			
-			#we don't display this if its a def
-			#or a function (and so not a parameter)
-			if inspect.isroutine( v_val ):
-				continue
-			#end if def or function
-
-			if  type( v_val ) == str:
-				if v_val.startswith( "<bound method" ):
-					continue
-				#end if method, skip
-			#end if the value is a string
-
-			if o_input.param_names is None:
-				s_msg=" In PGGuiSimuPop instance, " \
-						+ "def __load_values_into_interface, " \
-						+ "member __input has missing PGParamset " \
-						+ "instance."
-				raise Exception( s_msg )
-			#end of no param_set object
-
-			if not( o_input.param_names.isInSet( s_param ) ):
-					s_msg=" In PGGuiSimuPop instance, " \
-						+ "def __load_values_into_interface, " \
-						+ "member __input members PGParamset " \
-						+ "instance has no param, " + s_param + "."
-					raise Exception( s_msg )
-			#end if param not in param_names objectd
-
-			b_param_is_in_param_set=True
+		
 			
 			'''
 			This call requires we get all
@@ -1915,7 +2028,6 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		'''
 		s_param_name="loci_file_name"
 
-
 		if s_param_name not in self.__param_key_value_frames:
 			s_msg="In PGGuiSimuPop instance, def __on_change_in_use_loci_file_flag, " \
 						+ "the program cannot find a key value frame associated " \
@@ -1929,9 +2041,22 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		if self.__input.use_loci_file == False:
 			self.__disable_loci_file_controls( o_loci_file_control )
 			self.__set_state_of_loci_related_totals_controls( "enabled" )
+			'''
+			2018_07_27.  We add controls to manage new option of including
+			allele frequencies in a user supplied loci info file.
+			'''
+			self.__set_state_of_allele_frequency_init_controls( "enabled" )
+			#end if we have user-supplied allele freqs
 		else:
 			self.__enable_loci_file_controls( o_loci_file_control )
+
 			self.__set_state_of_loci_related_totals_controls( "disabled" )
+
+			if self.__user_loci_file_has_allele_frequencies():
+
+				self.__set_state_of_allele_frequency_init_controls( "disabled" )
+
+			#end if we have user-supplied allele freqs
 		#end if we are not using the chrom loci file, else we are 
 
 		return
@@ -1957,7 +2082,30 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		#end for each loci total control	
 
 		return
-	#end __change_state_of_loci_related_totals_controls
+	#end __set_state_of_loci_related_totals_controls
+
+	def __set_state_of_allele_frequency_init_controls( self, s_state ):
+
+		lo_allele_freq_init_related_controls=[]
+
+		for s_param in ALLELE_FREQ_INIT_RELATED_CONTROLS:
+			if s_param in self.__param_key_value_frames:
+				lo_allele_freq_init_related_controls.append( \
+								self.__param_key_value_frames[ s_param ] )
+			#end if we have a control for the param
+		#end for each param
+
+		s_entry_font_color="black" if s_state=="enabled" else "gray"
+
+		for o_control in lo_allele_freq_init_related_controls:
+				o_control.setStateControls( s_state )
+				o_control.setEntryFontColor( s_entry_font_color )
+				o_control.setLabelState( s_state )
+		#end for each loci total control	
+
+		return
+	#end __set_state_of_loci_related_totals_controls
+
 
 	def __on_button_press_load_loci_file( self ):
 		'''
@@ -1981,6 +2129,12 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 			
 			self.__param_key_value_frames[ "loci_file_name" \
 								].manuallyUpdateValue( s_loci_file_name ) 
+			
+			'''
+			This was added 2018_07_28 to add a check for allele frequencies
+			in a loaded loci file.
+			'''
+			self.__on_loading_user_loci_file()
 
 		except Exception as oex:
 			o_traceback=sys.exc_info()[ 2 ]
@@ -2095,19 +2249,32 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				if self.__input.use_loci_file and not( b_force_disable ):
 					self.__enable_loci_file_controls( o_this_keyval )
 					self.__set_state_of_loci_related_totals_controls( "disabled" )
+					'''
+					2018_07_28. We now, if the loci file exists, also check to see
+					if it includes allele freqs, and, if so, we disable the het init
+					frequency controls for allele freq initialization:
+					'''
+					if self.__user_loci_file_has_allele_frequencies():
+						self.__set_state_of_allele_frequency_init_controls( "disabled" )
+					#end if we have user-suppied allele frequencies			 
 				else:
 					self.__disable_loci_file_controls( o_this_keyval )
 					if not( b_force_disable ):
 						self.__set_state_of_loci_related_totals_controls( "enabled" )
+						self.__set_state_of_allele_frequency_init_controls( "enabled" )
 				#end if flag true, else false
 
 			elif b_enable_if_no_flag_attribute:
 				self.__enable_loci_file_controls( o_this_keyval )
 				self.__set_state_of_loci_related_totals_controls( "disabled" )
+				if self.__user_loci_file_has_allele_frequencies():
+					self.__set_state_of_allele_frequency_init_controls( "disabled" )
+				#end if user loci file has allele freqs
 			else:
 				self.__disable_loci_file_controls( o_this_keyval )
 				if not(b_force_disable):
 					self.__set_state_of_loci_related_totals_controls( "enabled" )
+					self.__set_state_of_allele_frequency_init_controls( "enabled" )
 			#end if b_have_flag_attribute
 
 		return o_this_keyval
@@ -2136,11 +2303,57 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		if hasattr( self.__input, "use_loci_file" ):
 			if self.__input.use_loci_file == True:
 				self.__set_state_of_loci_related_totals_controls( "disabled" )
+				'''
+				2018_07_27. When the user loci file also contains allele
+				frequencies, we disable the het-init controls.
+				'''
+				if self.__user_loci_file_has_allele_frequencies():
+					self.__set_state_of_allele_frequency_init_controls( "disabled" )
+				#end if the user is supplying allele freqs
 			else:
 				self.__set_state_of_loci_related_totals_controls( "enabled" )
+				self.__set_state_of_allele_frequency_init_controls( "enabled" )
 			#end if we are using a loci file
 		#end if we have the flag telling whether we use a loci file
 		return
 	#end __initialize_state_of_loci_related_totals_controls
+
+	'''
+	2018_07_27. We're adding an option to supply allele frequencies as a 
+	4th field in a loci,chrom,postiion[,frequency] file. This gui class
+	needs to know if they are supplied in order to properly disable
+	allele-frequency controls that will be unused due to the freqs
+	being already supplied
+	'''
+	def __user_loci_file_has_allele_frequencies( self ):
+
+		if self.__input.loci_file_name == NO_LOCI_FILE:
+			return False
+		#end if no file, then no frequencies
+
+		b_user_does_supply_allele_freqs= \
+				pgsli.PGSimupopLociInfoFileManager.\
+					quickCheckShowsFrequencyData( self.__input.loci_file_name )
+
+		return b_user_does_supply_allele_freqs
+	#end def __user_loci_file_has_allele_frequencies
+
+	'''
+	Now that the user_loci_file may or may not include allele frequencies, we need to check
+	each time a loci file is loaded, and, if allele frequencies are found, we disable the 
+	controls that take het values for automatic inititalization of allele frequencies:
+	'''
+
+	def __on_loading_user_loci_file( self ):
+
+		if self.__user_loci_file_has_allele_frequencies():
+			self.__set_state_of_allele_frequency_init_controls( "disabled" )
+
+		else:
+			self.__set_state_of_allele_frequency_init_controls( "enabled" )
+		#end if the user loci file has allele frequencies
+		
+		return
+	#end __on_loading_user_loci_file
 
 #end class PGGuiSimuPop

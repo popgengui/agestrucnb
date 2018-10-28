@@ -88,7 +88,9 @@ def confirm_resources( s_life_table_glob, s_menu_config, s_param_name_file_dir )
 #end confirm_resources
 
 def get_title( s_startup_info_file ):
-	s_title="Age Structure Ne"
+	s_progname="Age Structure Ne"
+	s_version="unspecified"
+	s_python_version=pgut.get_python_version()
 	
 	b_have_info_file=os.path.exists( s_startup_info_file)
 
@@ -100,14 +102,16 @@ def get_title( s_startup_info_file ):
 		o_file=open( s_startup_info_file )
 		for s_line in o_file:
 			if s_line.startswith( VERSIONPARAM ):
-				s_version=s_line.strip().split( PARAM_VAL_DELIMIT )[ IDX_VAL ]
-				if s_version != "":
-					s_title += " (v. "  + s_version + ")"
+				s_version_as_listed=s_line.strip().split( PARAM_VAL_DELIMIT )[ IDX_VAL ]
+				if s_version_as_listed != "":
+					s_version=s_version_as_listed
 				#end if we have a version string
 			#end if we have a version entry
 		#end for each line
 		o_file.close()
 	#end if we have a startup info file
+
+	s_title = "%s (v. %s on python %s)" % ( s_progname, s_version, s_python_version )
 
 	return s_title
 #end

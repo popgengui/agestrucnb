@@ -1509,7 +1509,7 @@ def do_estimate(xxx_todo_changeme ):
 					i_pop_number=int( s_population_number ), 
 					s_indiv_subsample_tag = s_subsample_tag )	
 		#end if return list indiv
-		
+
 		if not( o_debug_mode.isSet( DebugMode.KEEP_ESTIMATOR_FILES) ):
 			if os.path.exists( o_ne_estimator.output.run_output_file ):
 				os.remove( o_ne_estimator.output.run_output_file )
@@ -2242,7 +2242,6 @@ def do_sample_loci( o_genepopfile,
 			followed by "_l_t_v_r" where t gives the scheme type, v gives
 			the salient param value for the scheme, and r gives the replicate.
 
-			
 			2017_05_24. Bug fix.  The subsampling for this scheme was being
 			done in a loop, for idx in range( i_replicates), but the
 			i_replicates parameter in the sampler was hard-coded to 1.
@@ -2399,13 +2398,19 @@ def get_subsample_genepop_file_name( s_original_genepop_file_name,
 
 def make_subsample_genepop_file_name( s_original_genepop_file,
 											s_temporary_directory, 
-													i_genepop_file_count, 
-														i_indiv_sample_count,
-														i_loci_subsample_count ):
+											i_genepop_file_count, 
+											i_indiv_sample_count,
+											i_loci_subsample_count,
+											i_population_number ):
 		'''
 		2017_04_03.  This def replaces def get_subsample_genepop_file_name,
 		in order to shorten the intermediate genepop file names, to address
 		the path length limitations of Windows.
+
+		2018_07_23. We add param i_population_number, to accomodate testing
+		the updated loci subsampling scheme, whereby, in a addition to the per-indiv tag
+		and loci param value and loci replicate number, we also sample anew
+		for each population.
 		'''
 		s_parent_dir=None
 
@@ -2418,7 +2423,8 @@ def make_subsample_genepop_file_name( s_original_genepop_file,
 
 		s_file_name="f" + str( i_genepop_file_count ) \
 					+ "i" + str( i_indiv_sample_count ) \
-					+ "l" + str( i_loci_subsample_count )
+					+ "l" + str( i_loci_subsample_count ) \
+					+ "p" + str( i_population_number )
 
 		s_subsample_genepop_file=os.path.join( s_parent_dir, s_file_name )
 		
@@ -2521,6 +2527,8 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 	
 		i_loci_subsample_count=0
 
+
+
 		for s_loci_subsample_tag in ls_loci_subsample_tags_associated_with_this_indiv_sample:
 
 			'''
@@ -2528,162 +2536,185 @@ def add_to_set_of_calls_to_do_estimate( o_genepopfile,
 			processes a single file with many populations, we do an
 			estimate on each pop in the file separately, and divvy
 			the pops up among processes:
+
+			2018_07_23. The GenepopFileSamplerLoci(etc) object now does a separate loci subsampling 
+			for each population (still, of course, also, for each loci subsample param value and loci 
+			subsample replicate). Whereas before, in order to get a single-pop sampled file,
+			we had to loop over the population numbers with this loop header placed here in this def:
+				"for i_population_number in li_population_numbers:"
+			and by the old scheme use the same loci subsaple for each, we now can simply iterate over 
+			the loci subsample tags and extract the population number which is now (a new) part of 
+			the loci subsample tag (as the last field).
 			'''
-			for i_population_number in li_population_numbers:
 
-				i_loci_subsample_count+=1
+			i_population_number=get_population_number_from_loci_subsample_tag( s_loci_subsample_tag )
+		
+			i_loci_subsample_count+=1
 
-				if i_population_number in li_pops_with_invalid_size:
-					s_msg= "In pgdriveneestimator.py, def add_to_set_of_calls_to_do_estimate, " \
-									+ " in file, " + o_genepopfile.original_file_name \
-									+ ", skipping pop number, "  + str( i_population_number ) \
-									+ ".  It has an indiv count outside of valid " \
-									+ "range, " + str( i_min_pop_size ) \
-									+ " - " + str( i_max_pop_size ) + "."
-					o_secondary_outfile.write( s_msg + "\n" )
-					continue
-				#end if i_population_number is
+			if i_population_number in li_pops_with_invalid_size:
+				s_msg= "In pgdriveneestimator.py, def add_to_set_of_calls_to_do_estimate, " \
+								+ " in file, " + o_genepopfile.original_file_name \
+								+ ", skipping pop number, "  + str( i_population_number ) \
+								+ ".  It has an indiv count outside of valid " \
+								+ "range, " + str( i_min_pop_size ) \
+								+ " - " + str( i_max_pop_size ) + "."
+				o_secondary_outfile.write( s_msg + "\n" )
+				continue
+			#end if i_population_number is in the list of invalids
 
-				'''
-				We send to def do_estimate the genepop file object, o_genepopfile, and the subsample tag
-				that identifies the correct subsample calculated and stored in the object, so we can write
-				each subsample genepop file in the same process that will use it as input to the the estimator.
-				This should limit the number of input files existing concurrenty in the directory to the 
-				number of processes in use.  We also send allele freq, and the original genepop file name 
-				inside the genepop file manager object):
-				'''
-				s_sample_value, s_replicate_number = \
-						get_sample_val_and_rep_number_from_sample_name( s_indiv_sample, s_sample_scheme )
+			'''
+			We send to def do_estimate the genepop file object, o_genepopfile, and the subsample tag
+			that identifies the correct subsample calculated and stored in the object, so we can write
+			each subsample genepop file in the same process that will use it as input to the the estimator.
+			This should limit the number of input files existing concurrenty in the directory to the 
+			number of processes in use.  We also send allele freq, and the original genepop file name 
+			inside the genepop file manager object):
+			'''
+			s_sample_value, s_replicate_number = \
+					get_sample_val_and_rep_number_from_sample_name( s_indiv_sample, s_sample_scheme )
 
-				s_loci_sample_value, s_loci_replicate_number = \
-						get_loci_sample_val_and_rep_number_from_loci_sample_tag( s_loci_subsample_tag )
-				
+			s_loci_sample_value, s_loci_replicate_number = \
+					get_loci_sample_val_and_rep_number_from_loci_sample_tag( s_loci_subsample_tag )
+			
 
-				i_tot_indivs_this_subsample=o_genepopfile.getIndividualCount( i_population_number, 
-																						s_indiv_sample )
+			i_tot_indivs_this_subsample=o_genepopfile.getIndividualCount( i_population_number, 
+																					s_indiv_sample )
 
-				if i_tot_indivs_this_subsample == 0:
+			if i_tot_indivs_this_subsample == 0:
 
-					s_msg= "In pgdriveneestimator.py, def add_to_set_of_calls_to_do_estimate, " \
-									+ " no estimation was done on pop section number "  \
-									+ str( i_population_number ) \
-									+ " in file, " + o_genepopfile.original_file_name \
-									+ ".  The parameters for population or loci " \
-									+ "resulted in no individuals being sampled."
+				s_msg= "In pgdriveneestimator.py, def add_to_set_of_calls_to_do_estimate, " \
+								+ " no estimation was done on pop section number "  \
+								+ str( i_population_number ) \
+								+ " in file, " + o_genepopfile.original_file_name \
+								+ ".  The parameters for population or loci " \
+								+ "resulted in no individuals being sampled."
 
-					o_secondary_outfile.write( s_msg + "\n" )
-					continue
-				# end if this sample for this pop has zero individuals
+				o_secondary_outfile.write( s_msg + "\n" )
+				continue
+			# end if this sample for this pop has zero individuals
 
-				#for downstream analysis, we get the census of total indiv
-				#non-sampled, for this pop section:
-				s_census=str( o_genepopfile.getIndividualCount( i_population_number ) )
+			#for downstream analysis, we get the census of total indiv
+			#non-sampled, for this pop section:
+			s_census=str( o_genepopfile.getIndividualCount( i_population_number ) )
 
-				#we make population subsample list consisting of only this populations number:
-				s_this_pop_number=str( i_population_number ) 
+			#we make population subsample list consisting of only this populations number:
+			s_this_pop_number=str( i_population_number ) 
 
-				o_genepopfile.subsamplePopulationsByList( [ i_population_number ], s_this_pop_number )
+			o_genepopfile.subsamplePopulationsByList( [ i_population_number ], s_this_pop_number )
 
-				if o_debug_mode.isSet( DebugMode.PRINT_REPLICATE_SELECTIONS ):
-					print_test_list_replicate_selection_indices( o_genepopfile, 
-											s_sample_scheme,	
-											s_indiv_sample, 
-											s_loci_sample_value,
-											s_loci_replicate_number,
-											o_secondary_outfile, 
-											s_population_subsample_tag=s_this_pop_number )
-				#end if we're testing, print 
+			if o_debug_mode.isSet( DebugMode.PRINT_REPLICATE_SELECTIONS ):
+				print_test_list_replicate_selection_indices( o_genepopfile, 
+										s_sample_scheme,	
+										s_indiv_sample, 
+										s_loci_sample_value,
+										s_loci_replicate_number,
+										o_secondary_outfile, 
+										s_population_subsample_tag=s_this_pop_number )
+			#end if we're testing, print 
 
-				'''
-				2017_04_03.  A Windows limit on path length motivates new, shorter names
-				for the intermediate genepop files.  Now we simply use the i_genepop_file_count
-				number passed to this def from def drive_estimator, and the subsample count
-				to get a uniq identifier for this genepop file vs. all others in this run.
-				For now we retain the original code remm'd out, and construct the shorter
-				name in a new def:
-				'''
-				#in naming a the genepop file for the subsampled pop,
-				#some processing is needed to avoid NeEstimator file naming errors, and
-				#path mangling, so we made a separate def:
+			'''
+			2017_04_03.  A Windows limit on path length motivates new, shorter names
+			for the intermediate genepop files.  Now we simply use the i_genepop_file_count
+			number passed to this def from def drive_estimator, and the subsample count
+			to get a uniq identifier for this genepop file vs. all others in this run.
+			For now we retain the original code remm'd out, and construct the shorter
+			name in a new def:
+			'''
+			#in naming a the genepop file for the subsampled pop,
+			#some processing is needed to avoid NeEstimator file naming errors, and
+			#path mangling, so we made a separate def:
 #				s_genepop_file_subsample=get_subsample_genepop_file_name( o_genepopfile.original_file_name, 
 #														s_loci_subsample_tag, 
 #														s_this_pop_number,
 #														s_temporary_directory )
-				
-				s_genepop_file_subsample=make_subsample_genepop_file_name( o_genepopfile.original_file_name,
-																							s_temporary_directory, 
-																								i_genepop_file_count, 
-																									i_individ_sample_count,
-																										i_loci_subsample_count )
+			
+			'''
+			2018_07_23.  To allow for testing the new loci sampling scheme (we've added 
+			per-pop subsampling), we add the population number to the temp file name, while
+			retaining the loci subsample count, in order to keep the temp file names unique.
+			This allows us to know which population in the original genepop file is associated
+			with each intermediate genepop file used for the LDNe estimates.
+			'''
+			s_genepop_file_subsample=make_subsample_genepop_file_name( o_genepopfile.original_file_name,
+																					s_temporary_directory, 
+																					i_genepop_file_count, 
+																					i_individ_sample_count,
+																					i_loci_subsample_count,
+																					i_population_number )
 
-				s_run_output_file=s_genepop_file_subsample + "_ne_run.txt"
+			s_run_output_file=s_genepop_file_subsample + "_ne_run.txt"
 
-				o_neinput=pgin.PGInputNeEstimator( s_genepop_file_subsample )
-				
-				'''
-				2018_03_15.  Note that we have added a  new parameter "monogamy", to 
-				be passed to LDNe2 (see pginputneestimator class ).
-				'''
-				o_neinput.run_params={ "crits":[ f_min_allele_freq ] , "monogamy": b_monogamy }
+			o_neinput=pgin.PGInputNeEstimator( s_genepop_file_subsample )
+			
+			'''
+			2018_03_15.  Note that we have added a  new parameter "monogamy", to 
+			be passed to LDNe2 (see pginputneestimator class ).
+			'''
+			o_neinput.run_params={ "crits":[ f_min_allele_freq ] , "monogamy": b_monogamy }
 
-				'''
-				2018_04_28.  New parameter used by LDNe2.
-				'''
-				if ESTIMATOR_TO_USE==LDNE2:
-					o_neinput.ldne2_only_params= {"chromlocifile":s_chromlocifile, 
-											"allele_pairing_scheme":i_allele_pairing_scheme }
-				#end if we're using ldne2, add the chromlocifile value
+			'''
+			2018_04_28.  New parameter used by LDNe2.
+			'''
+			if ESTIMATOR_TO_USE==LDNE2:
+				o_neinput.ldne2_only_params= {"chromlocifile":s_chromlocifile, 
+										"allele_pairing_scheme":i_allele_pairing_scheme }
+			#end if we're using ldne2, add the chromlocifile value
 
-				o_neoutput=pgout.PGOutputNeEstimator( s_genepop_file_subsample, 
-														s_run_output_file, 
-														s_estimator_to_use=ESTIMATOR_TO_USE )	
-				
-				o_ne_estimator=pgne.PGOpNeEstimator( o_neinput, 
-														o_neoutput, 
-														s_estimator_name=ESTIMATOR_TO_USE,
-														s_parent_dir_for_workspace=s_temporary_directory ) 
-				
-				if ESTIMATOR_TO_USE == LDNE2 and PATH_TO_LDNE2 is not None:
-					o_ne_estimator.ldne_path=PATH_TO_LDNE2
-				#end if we are using LDNe2 and we have a path to the executable
+			o_neoutput=pgout.PGOutputNeEstimator( s_genepop_file_subsample, 
+													s_run_output_file, 
+													s_estimator_to_use=ESTIMATOR_TO_USE )	
+			
+			o_ne_estimator=pgne.PGOpNeEstimator( o_neinput, 
+													o_neoutput, 
+													s_estimator_name=ESTIMATOR_TO_USE,
+													s_parent_dir_for_workspace=s_temporary_directory ) 
+			
+			if ESTIMATOR_TO_USE == LDNE2 and PATH_TO_LDNE2 is not None:
+				o_ne_estimator.ldne_path=PATH_TO_LDNE2
+			#end if we are using LDNe2 and we have a path to the executable
 
-				lv_these_args = [ o_genepopfile,  
-									o_ne_estimator, 
-									s_sample_value, 
-									s_loci_sample_value,
-									f_min_allele_freq, 
-									b_monogamy,
-									s_indiv_sample, 
-									s_loci_subsample_tag,
-									s_this_pop_number, 
-									s_census,
-									s_replicate_number, 
-									s_loci_replicate_number,
-									o_debug_mode,
-									IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
-									f_nbne_ratio,
-									i_min_loci_position,
-									i_max_loci_position ]
+			lv_these_args = [ o_genepopfile,  
+								o_ne_estimator, 
+								s_sample_value, 
+								s_loci_sample_value,
+								f_min_allele_freq, 
+								b_monogamy,
+								s_indiv_sample, 
+								s_loci_subsample_tag,
+								s_this_pop_number, 
+								s_census,
+								s_replicate_number, 
+								s_loci_replicate_number,
+								o_debug_mode,
+								IDX_NE_ESTIMATOR_OUTPUT_FIELDS_TO_SKIP,
+								f_nbne_ratio,
+								i_min_loci_position,
+								i_max_loci_position ]
 
-				llv_args_each_process.append( lv_these_args )
-			#end for each population
+			llv_args_each_process.append( lv_these_args )
 		#end for each loci sample name assoc with this indiv sample name
 	#end for each indiv sample name
 	return
 #end add_to_set_of_calls_to_do_estimate
 
-def get_loci_sample_val_and_rep_number_from_loci_sample_tag( s_loci_subsample_tag ):
+def get_loci_sample_val_and_rep_number_from_loci_sample_tag( s_loci_subsample_tag, b_tag_has_postfix=False ):
 	'''
 	The loci info in the tag follows an indiv tag prefix,
 	and has form "_l_t_v_r", with t giving the scheme,
 	v giving the scheme salient param value (ex percent val),
 	and r giving the replicate number.
+
+	2018_07_23. We've changed the loci subsampling scheme to iterate over
+	population numbers.  This also meant adding a pop number to the end 
+	of the loci subsample tag. Hence the sample value and the loci replicate
+	number have moved left by one positiion in the tag fields, relative to
+	the last value (which is now the last value)
 	'''
-	#Sample param val is 2nd to last item
+	#Sample param val is 3rd to last item
 	#in the tag fields, while the replicate
-	#number is the last:
-	IDX_LOCI_SAMPLE_VAL=-2
-	IDX_LOCI_REP=-1
+	#number is the second to the last:
+	IDX_LOCI_SAMPLE_VAL=-3
+	IDX_LOCI_REP=-2
 
 	s_sample_val=None
 	s_replicate_number=None
@@ -2712,6 +2743,47 @@ def get_loci_subsample_tags_for_this_indiv_subsample( o_genepopfile,  s_indiv_sa
 
 	return ls_loci_tags_assoc_with_indiv_subsample
 #end get_loci_subsample_tags_for_this_indiv_subsample
+
+'''
+2018_07_23.  This def is added to facilitate a change in our loci
+subsampling scheme, such that now we subsample anew (for however
+many loci sampling param values and loci replicate values),
+for each population.  Before we were only subsampling once per
+individual subsample tag.
+'''
+def get_population_number_from_loci_subsample_tag( s_loci_subsample_tag ):
+	'''
+	This def assumes that the population number is
+	an integer coded as a string and is the last item
+	in the fields of the tag.
+	'''
+	s_tag_delimiter=gps.TAG_DELIMITER
+
+	INDEX_TO_POP_NUM=-1
+
+	ls_tag_fields=s_loci_subsample_tag.split( s_tag_delimiter )
+
+	s_pop_num_as_string=ls_tag_fields[ INDEX_TO_POP_NUM ]
+
+	i_pop_number=None
+
+	try:
+		i_pop_number=int( s_pop_num_as_string )
+
+	except ValueError as ote:
+
+		s_msg="In module pgdriveneestimator.py, def " \
+					+ "get_population_number_from_loci_subsample_tag, " \
+					+ "the last field in the loci subsample tag, " \
+					+ s_loci_subsample_tag \
+					+ ", could not be converted into an integer."
+
+		raise Exception( s_msg )
+
+	#end try...except
+
+	return i_pop_number
+#end def get_population_number_from_loci_subsample_tag
 
 def write_result_sets( lds_results, lv_sample_values, o_debug_mode, o_main_outfile, o_secondary_outfile ):
 
