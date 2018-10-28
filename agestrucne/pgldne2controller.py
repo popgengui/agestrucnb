@@ -260,6 +260,19 @@ class PGLDNe2Controller( object ):
 
 		o_file.close()
 
+		'''
+		##### temp 
+#		2018_10_24.  When user has directed output for whith the
+#		absolute path has dir names with spaces, LDNe2 wont find the 
+#		config file if we use the absolute path names.  We can use relative if we are
+		#in the correct path:
+		'''
+		if os.path.abspath( os.curdir ) == os.path.dirname( s_filename ):
+			s_filename=os.path.basename( s_filename )
+		#end if config file is in curdir, use the  filename only
+
+		##### end temp
+
 		return s_filename
 	#end __get_temp_config_file
 
@@ -287,11 +300,11 @@ class PGLDNe2Controller( object ):
 
 	#end __common_values_look_valid									
 
-	def __get_file_name_from_dir_and_path( self, s_in_dir, s_file ):
+	def __get_file_name_from_dir_and_path( self, s_dir, s_file ):
 
 		s_path_and_name=None
-		
-		s_path_and_name=s_in_dir + os.path.sep + s_file 
+
+		s_path_and_name=s_dir + os.path.sep + s_file 
 
 		return s_path_and_name
 	#end __get_input_file_name

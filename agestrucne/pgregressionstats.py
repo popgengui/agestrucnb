@@ -296,7 +296,6 @@ class PGRegressionStats( object ):
 #						zeroCount+=1
 					#end if val>0 else less else
 				#end for alpha val
-
 				
 				s_stats_string = "Max Regression Slope: "+str( round( maxSlope, PRECISION ) )+"\n"
 				s_stats_string +="Min Regression Slope: "+str( round( minSlope, PRECISION ) )+"\n"

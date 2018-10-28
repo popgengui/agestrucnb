@@ -69,6 +69,8 @@ class CreateToolTip(object):
 		permanently.
 		'''
 		self.widget.bind( "<FocusOut>", self.close)
+
+
 		self.font_size=i_font_size
 		self.using_osx=False
 
@@ -83,7 +85,6 @@ class CreateToolTip(object):
 	#end __init__
 
 	def enter(self, event=None):
-
 		'''
 		Code added 2016_10_31, setting the tw member 
 		to None in __init__ (see above), then always 

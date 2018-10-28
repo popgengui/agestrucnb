@@ -51,8 +51,12 @@ DEFAULT_TOLERANCE_TRIES="1000"
 Recombinators "intensity" parameter.  We default to
 0.0, in which case the recombinator will not be used
 (see def __createAge in module pgopsimupop.py).
+
+2018_08_16. We now deactivate the recomination
+option by forcing to zero.
 '''
-DEFAULT_RECOMBINATION_INTENSITY=0.0
+RECOMBINATION_NOW_DEACTIVATED=0.0
+
 
 import sys
 import os
@@ -494,15 +498,25 @@ class PGInputSimuPop( object ):
 		2018_05_17. New parameter gives a recomination "intensity", as used by simuPOP's
 		Recombinator object -- see 
 		http://simupop.sourceforge.net/manual_svn/build/userGuide_ch5_sec5.html
+
+		2018_08_16. On Brian's request we now force out recomination by overriding
+		any non-zero value to zero:
 		'''
 		if config.has_option( "genome", "recombination_intensity" ):
-			self.recombination_intensity = config.getfloat("genome", "recombination_intensity")
-		else:
-			self.recombination_intensity=DEFAULT_RECOMBINATION_INTENSITY
-		#end if config file has a recombination_intensity, else use default	
+			f_requested_value=config.getfloat("genome", "recombination_intensity")
+			if f_requested_value != 0.0:
+				
+				sys.stderr.write( "Warning:  the program no longer offers recombination. " \
+								+ "The recombination_intensity value in the configuration file, " \
+								+ str( f_requested_value ) \
+								+ "will be reset to zero." )
+				 
+			#end warn if our force-to-zero contradicts the conf file
+		#end if config file has a value, if its non-zero, warn
 
+		#Force recomb to zero, per our new deactivation (see directly above):
+		self.recombination_intensity=RECOMBINATION_NOW_DEACTIVATED
 		self.__update_attribute_config_file_info( "recombination_intensity", "genome", "recombination_intensity" )
-
 
 		self.numMSats = config.getint("genome", "numMSats")
 		self.__update_attribute_config_file_info( "numMSats", "genome", "numMSats" )

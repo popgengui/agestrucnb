@@ -296,10 +296,9 @@ def do_shutil_rmtree( s_path, b_ignore_errors=False ):
 	if is_windows_platform():
 		if len( s_path ) > WINDOWS_PATH_LENGTH_LIMIT:
 			s_msg="In module pgutilities.py, def do_shutil_copy, " \
-					+ "The program is unable to remove the directory tree from, " \
-					+ s_source + " to " + s_destination + ".\n" \
-					+ "The path of the source and/or destination " \
-					+ "exceed(s) the " \
+					+ "The program is unable to call shutil.rmtree, " \
+					+ "on path, " + s_path + ".\n" \
+					+ "The path   exceed(s) the " \
 					+ str( WINDOWS_PATH_LENGTH_LIMIT )  \
 					+ " character limit that causes " \
 					+ "a failure in Windows."  
@@ -741,11 +740,16 @@ def dialog_returns_nothing( v_return_value ):
 
 	o_return_type=type( v_return_value )
 
+	'''
+	Note the test below for the unicode type
+	is guarded by a test for python2, since
+	unicode is a defined type only in python2
+	'''
 	if o_return_type == tuple:
 		b_is_nothing = ( len( v_return_value ) == 0 )
 	elif o_return_type == str:
 		b_is_nothing = ( v_return_value == "" )
-	elif o_return_type == unicode:
+	elif sys.version_info.major==2 and o_return_type == unicode:
 		b_is_nothing = ( v_return_value == "" )
 	else:
 		s_msg = "In pgutilities, def dialog_returns_nothing(), " \
@@ -1707,6 +1711,13 @@ def get_current_python_executable():
 	return s_path
 #end get_current_python_executable
 
+def get_python_version():
+	o_version=sys.version_info
+	ls_version_parts=[ str( i_part ) for i_part \
+			in [ o_version.major, o_version.minor, o_version.micro ] ]
+	return ".".join( ls_version_parts )
+#end get_python_version
+
 def get_memory_virtual_available():
 	tup_meminfo=psutil.virtual_memory()
 	return tup_meminfo.available
@@ -1754,6 +1765,33 @@ def get_binomial_dist_values_with_mean_within_tolerance( i_trials,
 
 	return li_binomial_dist_values
 #end get_binomial_dist_with_mean_value_within_tolerance 
+
+def get_allele_freq_from_quadratic_root_of_het_value( f_this_het_value ):
+
+		lf_roots=get_roots_quadratic( -1, 1, -1*(f_this_het_value)/2 )
+
+		f_allele_freq=None
+		
+		'''
+		We can use either root, since 
+		one root gives the freq for one
+		allele, whose diallelic partner
+		will be the 2nd root and their sum
+		will be one.  (Note that for the special
+		case of He=0.5, then we'll have one root
+		equal to -0.5 and the other to 0.5.  Hence
+		we test for a positive root.
+		'''
+		for f_root in lf_roots:
+			if f_root >= 0.0 and f_root <= 0.5:
+				f_allele_freq=f_root
+				break
+			#end if positive root
+		#end for each root	
+
+		return f_allele_freq
+
+#end get_allele_freq_from_quadratic_root_of_het_value
 
 def get_snp_allele_freqs_from_het_value_using_random_dist( f_this_het_value,
 														i_num_freqs,
@@ -1821,26 +1859,8 @@ def get_snp_allele_freqs_from_het_value_using_random_dist( f_this_het_value,
 			raise Exception ( s_msg )
 		#end if invalid snp het init value
 
-		lf_roots=get_roots_quadratic( -1, 1, -1*(f_this_het_value)/2 )
-
-		f_init_snp_freq=None
-		
-		'''
-		We can use either root, since 
-		one root gives the freq for one
-		allele, whose diallelic partner
-		will be the 2nd root and their sum
-		will be one.  (Note that for the special
-		case of He=0.5, then we'll have one root
-		equal to -0.5 and the other to 0.5.  Hence
-		we test for a positive root.
-		'''
-		for f_root in lf_roots:
-			if f_root >= 0.0 and f_root <= 0.5:
-				f_init_snp_freq=f_root
-				break
-			#end if positive root
-		#end for each root	
+		f_init_snp_freq=get_allele_freq_from_quadratic_root_of_het_value( \
+															f_this_het_value )
 
 		lf_frequencies=None
 
@@ -2173,7 +2193,7 @@ if __name__ == "__main__":
 		
 		lf_freqs=get_snp_allele_freqs_from_het_value_using_random_dist(  f_this_het_value=het,
 																			i_num_freqs=NUMSNPS,
-																			f_tolerance=TOL,
+																			lf_tolerances=[ TOL ],
 																			s_distribution=DIST )
 		lf_hets=[]
 

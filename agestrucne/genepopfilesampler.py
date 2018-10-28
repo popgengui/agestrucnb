@@ -73,8 +73,13 @@ class CohortSamplingValue( object ):
 	#end def __init
 #end class CohortSamplingValue
 
-
-def make_subsample_tag( v_value, i_replicate_number, s_scheme, s_prefix = None ):
+'''
+2018_07_23.  We add parameter s_postfix to accommodate a change
+in loci subsampling such that we now subsample for each population
+(in addition to subsampleing for each indiv subsample tag and loci
+param and replicate).
+'''
+def make_subsample_tag( v_value, i_replicate_number, s_scheme, s_prefix = None, s_postfix = None ):
 	
 	ls_return_vals = []
 
@@ -123,6 +128,10 @@ def make_subsample_tag( v_value, i_replicate_number, s_scheme, s_prefix = None )
 #	#end if orig is float, omit dot from string version
 
 	ls_return_vals += [ s_val_initial, s_value, str( i_replicate_number ) ]
+
+	if s_postfix is not None:
+		ls_return_vals.append( s_postfix )
+	#end if postfix present
 
 	return TAG_DELIMITER.join( ls_return_vals )
 #end make_subsample_tag
@@ -1736,22 +1745,31 @@ class GenepopFileSamplerLociByRangeAndTotal( GenepopFileSampler ):
 
 	def doSample( self ):
 
-		for i_replicate_number in range( self.sampleparams.replicates ):
+		'''
+		2018_07_23.  We now use the pop list and subsample once for each
+		population (formerly only once for each loci rep and param value).
+		Note that we add the pop number to the loci subsample tag.
+		'''
+		for i_this_pop_number in self.sampleparams.population_numbers:
 
-			s_loci_subsample_tag=make_subsample_tag( 
-					self.sampleparams.sample_param_value,
-					i_replicate_number,
-					SCHEME_LOCI_MAX_AND_RANGE,
-					self.sampleparams.sample_tag_base )
+			for i_replicate_number in range( self.sampleparams.replicates ):
 
-			self.filemanager.subsampleLociByRangeAndMax( \
-							self.sampleparams.min_loci_position,
-							self.sampleparams.max_loci_position,
-							s_loci_subsample_tag,
-							self.sampleparams.min_total_loci,
-							self.sampleparams.max_total_loci )
-		#end for each replicate
+				s_loci_subsample_tag=make_subsample_tag( 
+						self.sampleparams.sample_param_value,
+						i_replicate_number,
+						SCHEME_LOCI_MAX_AND_RANGE,
+						self.sampleparams.sample_tag_base,
+						s_postfix=str( i_this_pop_number ) )
 
+				self.filemanager.subsampleLociByRangeAndMax( \
+								self.sampleparams.min_loci_position,
+								self.sampleparams.max_loci_position,
+								s_loci_subsample_tag,
+								self.sampleparams.min_total_loci,
+								self.sampleparams.max_total_loci )
+
+			#end for each replicate
+		#end for each population number
 		return
 	#end doSample
 #end class GenepopFileSamplerLociByRangeAndTotal
@@ -1770,22 +1788,31 @@ class GenepopFileSamplerLociByRangeAndPercentage( GenepopFileSampler ):
 
 	def doSample( self ):
 
-		for f_proportion in self.sampleparams.proportions:
-			for i_replicate_number in range( self.sampleparams.replicates ):
-				s_loci_subsample_tag=make_subsample_tag( \
-						f_proportion,
-						i_replicate_number,
-						SCHEME_LOCI_PERC_AND_RANGE,
-						self.sampleparams.sample_tag_base )
+		'''
+		2018_07_23.  We now use the pop list and subsample once for each
+		population (formerly only once for each loci rep and param value).
+		Note that we add the po number to the subsample tag
+		'''
+		for i_this_pop_number in self.sampleparams.population_numbers:
 
-				self.filemanager.subsampleLociByRangeAndProportion( \
-						self.sampleparams.min_loci_position,
-						self.sampleparams.max_loci_position,
-						s_loci_subsample_tag,
-						f_proportion,
-						i_min_total_loci=self.sampleparams.min_total_loci )
-			#end for each replicate
-		#end for each proportion
+			for f_proportion in self.sampleparams.proportions:
+				for i_replicate_number in range( self.sampleparams.replicates ):
+					s_loci_subsample_tag=make_subsample_tag( \
+							f_proportion,
+							i_replicate_number,
+							SCHEME_LOCI_PERC_AND_RANGE,
+							self.sampleparams.sample_tag_base,
+							s_postfix=str( i_this_pop_number ) )
+
+					self.filemanager.subsampleLociByRangeAndProportion( \
+							self.sampleparams.min_loci_position,
+							self.sampleparams.max_loci_position,
+							s_loci_subsample_tag,
+							f_proportion,
+							i_min_total_loci=self.sampleparams.min_total_loci )
+				#end for each replicate
+			#end for each proportion
+		#end for each population
 		return
 	#end doSample
 #end class GenepopFileSamplerLociByRangeAndPercentage
@@ -1803,28 +1830,35 @@ class GenepopFileSamplerLociByRangeAndSampleTotalList( GenepopFileSampler ):
 	#end __init__
 
 	def doSample( self ):
+		'''
+		2018_07_23.  We now use the pop list and subsample once for each
+		population (formerly only once for each loci rep and param value).
+		Note that we add the pop number to the loci subsample tag.
+		'''
+		for i_this_pop_number in self.sampleparams.population_numbers:
 
-		for i_total in self.sampleparams.sample_totals:
-			for i_replicate_number in range( self.sampleparams.replicates ):
+			for i_total in self.sampleparams.sample_totals:
+				for i_replicate_number in range( self.sampleparams.replicates ):
 
-				s_loci_subsample_tag=make_subsample_tag( 
-						str( i_total ),
-						i_replicate_number,
-						SCHEME_LOCI_TOTALS_AND_RANGE,
-						self.sampleparams.sample_tag_base )
-				
-				#We call the genepop file managers range and max
-				#sampler, and give our current total as both min
-				#and max:
-				self.filemanager.subsampleLociByRangeAndMax( \
-								self.sampleparams.min_loci_position,
-								self.sampleparams.max_loci_position,
-								s_loci_subsample_tag,
-								i_total,
-								i_total )
-			#end for each replicate
-		#end for each sample total
-
+					s_loci_subsample_tag=make_subsample_tag( 
+							str( i_total ),
+							i_replicate_number,
+							SCHEME_LOCI_TOTALS_AND_RANGE,
+							self.sampleparams.sample_tag_base,
+							s_postfix=str( i_this_pop_number ) )
+					
+					#We call the genepop file managers range and max
+					#sampler, and give our current total as both min
+					#and max:
+					self.filemanager.subsampleLociByRangeAndMax( \
+									self.sampleparams.min_loci_position,
+									self.sampleparams.max_loci_position,
+									s_loci_subsample_tag,
+									i_total,
+									i_total )
+				#end for each replicate
+			#end for each sample total
+		#end for each pop number
 		return
 	#end doSample
 #end class GenepopFileSamplerLociByRangeAndTotal

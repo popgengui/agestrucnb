@@ -128,7 +128,20 @@ def get_snp_allele_freqs_from_het_value_using_random_dist
 (formerly called get_snp..."truncnorm_dist"), now
 requries that the caller specifies a distribution.
 '''
+##### temp rem out:
+'''
+For testing allele frequency distributions,
+I've created code to easily switch back to
+the fixed-uniform method of deriving a single
+allele_freqency using the quad roots, and 
+a target het. 
+
+2018_10_24. Moving back from fixed uniform
+to truncnorm.
+'''
 SNP_ALLELE_FREQ_DISTRIBUTION="truncnorm"
+#SNP_ALLELE_FREQ_DISTRIBUTION="fixed_uniform"
+
 
 '''
 2017_03_26. This mod-level def
@@ -446,6 +459,19 @@ class PGOpSimuPop( modop.APGOperation ):
 		'''
 		self.__user_supplied_loci_info=None
 
+		'''
+		2018_07_27.  We add the ability to use
+		user supplied SNP allele frequencies.
+		In such a case the following member gets
+		assigned a list of frequencies in order
+		matching that of the loci order as assigned
+		in __createSinglePop.  This list is then
+		used in a new def that assigns them, analogous
+		to the assignments in __createGenomeFromSNPAndMSatTotals,
+		and __createGenomeFromLociFile
+		'''
+		self.__user_supplied_allele_frequencies=None
+		
 		
 		return
 	#end __init__
@@ -596,7 +622,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			lines that give 3 comma-delimited fields, loci_name, chromosome, position.
 			Here we check whether a file name is present,  If present, we validate the file
 			and set the flag that tells this def to use the __createGenomeFromLociFile 
-			instead of the original def __createGenome.
+			instead of the original def __createGenomeFromSNPAndMSatTotals.
 			
 			2018_06_04.  Bugfix, by adding the use_loci_file flag to the test as to whether 
 			we should create a PGSimupopLociInfo object.  Note that after that object is 
@@ -623,9 +649,22 @@ class PGOpSimuPop( modop.APGOperation ):
 			self.__createSinglePop()
 
 			if self.__user_supplied_loci_info is not None:
-				self.__createGenomeFromUserSuppliedLociInfo()
+				'''
+				2018_07_27. With the addition of an option to add
+				per-loci allele frequencies to the user-supplied loci info file,
+				we now intialize the genome differently, depending on whether
+				or not the user-supplied file info includes allele frequencies. 
+				Note that we know there are user-supplied loci if the
+				new data member of this class __user_supplied_allele_frequencies,
+				is non-None, as created and assigned in the def __createSinglePop
+				'''
+				if self.__user_supplied_allele_frequencies is None:
+					self.__createGenomeFromUserSuppliedLociInfo()
+				else:
+					self.__createGenomeFromUserSuppliedLociInfoWithAlleleFrequencies()
+				#end if no user-supplied allele frequencies, else use them
 			else:
-				self.__createGenome()
+				self.__createGenomeFromSNPAndMSatTotals()
 			#end if we are using a loci info file,
 			#else no such file
 
@@ -645,8 +684,8 @@ class PGOpSimuPop( modop.APGOperation ):
 			the replicate number.  Formerly, because these files were meant only to be
 			recorded on replicate 1, we put no replicate number in their names.  Now,
 			in case we want to write these for each replicate, we want to name and 
-			open then after having appended the replicate s_tag_out to the bsic
-			output file base name.
+			open them after having appended the replicate s_tag_out to the output file 
+			base name.
 			'''
 			if self.__write_once_only_files:
 				s_nb_values_ext=pgout.PGOutputSimuPop.DICT_OUTPUT_FILE_EXTENSIONS[ "sim_nb_estimates" ]
@@ -848,53 +887,79 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __write_genepop_file( self ):
 
-		if self.__output_mode == PGOpSimuPop.OUTPUT_ORIG:
-			i_num_msats=0
-			i_num_snps=0
-			
-			if hasattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS ):
-				i_num_msats=getattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS )
-			#end if input has num msats
 
-			if hasattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_SNPS ):
-				i_num_snps=getattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_SNPS )
-			#end if input has number of snps
+		'''
+		2018_07_30.
+		With the addition of an option for users to supply loci information 
+		in a file, we for now deprecate this def, which was created to leave
+		open the option to output the pops in the original format used by
+		Tiago Anteo in the AgeStructureNe code.  Because we have been, and
+		expect all future users to, use the GENEPOP output, we'll disable
+		this, instead of updating the way it fetches loci and loci totals:
+		'''
 
-			i_total_loci=i_num_msats+i_num_snps
+		s_msg = "In PGOpSimuPop instance, def __write_genepopfile, " \
+					+ "this def has been deprecated in favor of the " \
+					+ "standard GENEPOP output format writer.  Please " \
+					+ "set the pgopsimupop.py module __output_mode member " \
+					+ "to its constant, mod-level value, \"OUTPUT_GENEPOP_ONLY\"" 
+		
+		raise Exception( s_msg )
 
-			if i_total_loci == 0:
-				s_msg= "In %s instance, cannot write genepop file.  MSats and SNPs total zero."  \
-						% type( self ).__name__ 
-				sys.stderr.write( s_msg + "\n" )
-			else:
-				#writes all loci values 
-				'''
-				2017_05_30.  To accomodate new module pgdrivesimulation.py, which
-				reads in a conf and does not require a life table, we default an
-				NbNe value to zero if the conf file does not supply it.  Note that
-				this parameter (Nb/Ne ratio) is not (currently) required for the 
-				simulation, but is passed along in the genepop file header to allow 
-				for an Nb bias adjustment as read-in and calculated by the 
-				pgdriveneestimator.py module.
-				'''
-				f_this_nbne=0.0
-
-				if hasattr( self.input, "NbNe" ):
-					f_this_nbne=self.input.NbNe
-				#end if we have an NbNe value, use it.
-
-				self.output.gen2Genepop( 1, 
-							i_total_loci, 
-							b_pop_per_gen=True,
-							b_do_compress=False,
-							f_nbne_ratio=f_this_nbne )
-			#end if no loci reported
-		else:
-			s_msg="In PGOpSimuPop instance, def __write_genepop_file, " \
-						+ "this def was called but he output mode was " \
-						+ "not for the original mode."
-			raise Exception( s_msg )
-		#end if output mode is orig else not
+#		if self.__output_mode == PGOpSimuPop.OUTPUT_ORIG:
+#			i_num_msats=0
+#			i_num_snps=0
+#			
+#			if hasattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS ):
+#				i_num_msats=getattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_MICROSATS )
+#			#end if input has num msats
+#
+#			if hasattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_SNPS ):
+#				i_num_snps=getattr( self.input, PGOpSimuPop.INPUT_ATTRIBUTE_NUMBER_OF_SNPS )
+#			#end if input has number of snps
+#
+#			i_total_loci=None 
+#
+#			if self.__user_supplied_loci_info is None
+#
+#				i_total_loci=i_num_msats+i_num_snps
+#			else:
+#				i_total_loci=self.__user_supplied_loci_info.total_loci
+#			#####
+#
+#			if i_total_loci == 0:
+#				s_msg= "In %s instance, cannot write genepop file.  MSats and SNPs total zero."  \
+#						% type( self ).__name__ 
+#				sys.stderr.write( s_msg + "\n" )
+#			else:
+#				#writes all loci values 
+#				'''
+#				2017_05_30.  To accomodate new module pgdrivesimulation.py, which
+#				reads in a conf and does not require a life table, we default an
+#				NbNe value to zero if the conf file does not supply it.  Note that
+#				this parameter (Nb/Ne ratio) is not (currently) required for the 
+#				simulation, but is passed along in the genepop file header to allow 
+#				for an Nb bias adjustment as read-in and calculated by the 
+#				pgdriveneestimator.py module.
+#				'''
+#				f_this_nbne=0.0
+#
+#				if hasattr( self.input, "NbNe" ):
+#					f_this_nbne=self.input.NbNe
+#				#end if we have an NbNe value, use it.
+#
+#				self.output.gen2Genepop( 1, 
+#							i_total_loci, 
+#							b_pop_per_gen=True,
+#							b_do_compress=False,
+#							f_nbne_ratio=f_this_nbne )
+#			#end if no loci reported
+#		else:
+#			s_msg="In PGOpSimuPop instance, def __write_genepop_file, " \
+#						+ "this def was called but he output mode was " \
+#						+ "not for the original mode."
+#			raise Exception( s_msg )
+#		#end if output mode is orig else not
 		return
 	#end __write_genepop_file
 
@@ -905,7 +970,7 @@ class PGOpSimuPop( modop.APGOperation ):
 	def __createGenomeFromUserSuppliedLociInfo( self ):
 
 		'''
-		This def is an alternative to __createGenome
+		This def is an alternative to __createGenomeFromSNPAndMSatTotals
 		2018_05_27.  Currently we always create only
 		biallelic SNPs from the user supplied loci.
 		'''
@@ -930,17 +995,25 @@ class PGOpSimuPop( modop.APGOperation ):
 			lf_random_freqs=[ 0.0 for idx in range( i_num_snps ) ]
 		else:
 
-			'''
-			2018_07_09. Revised the def in pgutilitities to allow caller to specify
-			a distribution, so, for now, as we search for a better solution, we
-			specity the truncnorm, which looks to have to narrow a distribution.
-			'''
-			lf_random_freqs=\
-					pgut.get_snp_allele_freqs_from_het_value_using_random_dist( \
-															f_this_het_value=self.input.het_init_snp,
-															i_num_freqs=i_num_snps,
-															lf_tolerances=SNP_HET_INIT_TOLERANCES,
-															s_distribution=SNP_ALLELE_FREQ_DISTRIBUTION )
+			if SNP_ALLELE_FREQ_DISTRIBUTION=="fixed_uniform":
+					f_allele_frequency= \
+								pgut.get_allele_freq_from_quadratic_root_of_het_value( \
+																	self.input.het_init_snp )
+					lf_random_freqs=[ f_allele_frequency for idx in range( i_num_snps ) ]	
+			else:
+
+				'''
+				2018_07_09. Revised the def in pgutilitities to allow caller to specify
+				a distribution, so, for now, as we search for a better solution, we
+				specity the truncnorm, which looks to have to narrow a distribution.
+				'''
+				lf_random_freqs=\
+						pgut.get_snp_allele_freqs_from_het_value_using_random_dist( \
+																f_this_het_value=self.input.het_init_snp,
+																i_num_freqs=i_num_snps,
+																lf_tolerances=SNP_HET_INIT_TOLERANCES,
+																s_distribution=SNP_ALLELE_FREQ_DISTRIBUTION )
+			#end fi uniform else use random distribution
 
 		#end if user has set init snp freq to zero, else use distribution
 
@@ -961,8 +1034,58 @@ class PGOpSimuPop( modop.APGOperation ):
 
 		return
 	#end __createGenomeFromUserSuppliedLociInfo
+
+	'''
+	2018_07_27
+	This is a new method created when we added the option
+	for users to supply allele frequencies when they have
+	a loci/chrom/pos file.
+
+	'''
+	def __createGenomeFromUserSuppliedLociInfoWithAlleleFrequencies( self ):
+
+		'''
+		This def expects a list of floats assigned to member 
+		self.__user_supplied_allele_frequencies, in the order
+		such that the ith of the freqs corresponds to the ith
+		loci as entered into the initializatioin in def __createSinglePop.
+		'''
 		
-	def __createGenome( self ):
+
+		initOps = []
+		preOps = []
+
+		i_num_snps=self.__user_supplied_loci_info.total_loci
+
+		assert i_num_snps == len( self.__user_supplied_allele_frequencies )
+
+		i_snp_count=-1
+	
+		
+		for f_freq in self.__user_supplied_allele_frequencies:		
+
+			i_snp_count+=1
+
+			initOps.append(
+					sp.InitGenotype(
+					#Position 0 is coded as 0, not good for genepop
+					freq=[0.0, f_freq, 1 - f_freq ],
+					loci=i_snp_count ))
+
+		#end for each snp frequency, initialize a loci
+
+		self.__genInitOps=initOps
+		self.__genPreOps=preOps
+
+
+		return
+	#end __createGenomeFromUserSuppliedLociInfoWithAlleleFrequencies
+
+	'''
+	2018_07_30.  We rename this def from __createGenome to
+	__createGenomeFromSNPAndMSatTotals
+	'''
+	def __createGenomeFromSNPAndMSatTotals( self ):
 
 		size = self.input.popSize
 		numMSats = self.input.numMSats
@@ -1006,7 +1129,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			returned a set of allele freqs:
 			'''
 			if diri is None:
-				s_msg="In PGOpSimuPop instance, def __createGenome, " \
+				s_msg="In PGOpSimuPop instance, def __createGenomeFromSNPAndMSatTotals, " \
 							+ "The program did not produce a set of allele frequencies " \
 							+ "for thecould"
 				raise Exception( s_msg )
@@ -1048,13 +1171,22 @@ class PGOpSimuPop( modop.APGOperation ):
 				lf_random_freqs=[ 0.0 for idx in range( self.input.numSNPs ) ]	
 			else:
 
-				lf_random_freqs=\
-						pgut.get_snp_allele_freqs_from_het_value_using_random_dist( \
-															f_this_het_value=self.input.het_init_snp,
-															i_num_freqs=self.input.numSNPs,
-															lf_tolerances=SNP_HET_INIT_TOLERANCES,
-															s_distribution=SNP_ALLELE_FREQ_DISTRIBUTION )
-			#end if user wants 0.0 as init freq, else use distribution
+				if SNP_ALLELE_FREQ_DISTRIBUTION == "fixed_uniform":
+					f_allele_frequency=\
+							pgut.get_allele_freq_from_quadratic_root_of_het_value( \
+																self.input.het_init_snp )				
+
+					lf_random_freqs=[ f_allele_frequency for idx in range( self.input.numSNPs ) ]
+				else:
+
+					lf_random_freqs=\
+							pgut.get_snp_allele_freqs_from_het_value_using_random_dist( \
+																f_this_het_value=self.input.het_init_snp,
+																i_num_freqs=self.input.numSNPs,
+																lf_tolerances=SNP_HET_INIT_TOLERANCES,
+																s_distribution=SNP_ALLELE_FREQ_DISTRIBUTION )
+				#end if user wants 0.0 as init freq, else fixed uniform, else use random distribution
+				#named in SNP_ALLELE_FREQ_DISTRIBUTION
 
 			for f_random_freq in lf_random_freqs:		
 
@@ -1081,7 +1213,7 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__genPreOps=preOps
 
 		return
-	#end __createGenome
+	#end __createGenomeFromSNPAndMSatTotals
 
 	def __get_dict_chromosome_number_by_loci_number_evenly_distributed ( self,
 																			i_number_of_loci, 
@@ -1265,12 +1397,6 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			'''
 			if i_chromosome_number >= i_tot_chroms_already_created:
-
-				##### temp
-#				print( "chrom num by loci num: " + str( di_chromosome_number_by_loci_number ) )
-#				print( "loci pos by num: " + str( di_loci_position_by_loci_number ) )
-#				print( "chrom types: " + str( li_chrom_type_list ) )
-				#####
 
 				'''
 				Chromomsome not yet created, create.
@@ -1466,28 +1592,34 @@ class PGOpSimuPop( modop.APGOperation ):
 			'''
 			ls_loci_names=[]
 
-		#	ls_loci_names=[ "l" + str(idx) for idx in range( self.__user_supplied_loci_info.total_loci )]
+			'''
+			2018_07_27. We now give the user the option to provide
+			allele frequencies in a 4th column of a loci, chrom, postion, freq
+			file.  We also retain the former format, loci, chrom, postiion
+			as valid
+			'''
+			b_have_user_supplied_allele_frequencies=\
+					self.__user_supplied_loci_info\
+						.allele_frequenies_by_chrom_and_locus_name is not None
+
+			lf_loci_allele_frequencies=[] if b_have_user_supplied_allele_frequencies else None
 
 			for s_chrom in ls_sorted_chrom_names:
+
 				lf_positions+=dsf_loci_pos_by_chrom[ s_chrom ]
 				li_loci_totals.append( dsi_loci_totals_by_chrom[ s_chrom ] )
 				ls_loci_names+=dsf_loci_names_by_chrom[ s_chrom ]
+			
+				if b_have_user_supplied_allele_frequencies:
+					df_allele_frequencies_by_loci_name=\
+							self.__user_supplied_loci_info.allele_frequenies_by_chrom_and_locus_name[ s_chrom ]
+					
+			
+					
+					lf_loci_allele_frequencies+=[ df_allele_frequencies_by_loci_name[ s_name ] \
+											for s_name in dsf_loci_names_by_chrom[ s_chrom ] ]
+				#end if
 			#end for each chrom	
-
-#			##### temp
-#			print( "loci totals: "  )
-#			ls_chrs=list( dsi_loci_totals_by_chrom.keys() )
-#			li_chrs_sorted= [ int( s_chr ) for s_chr in ls_chrs ]
-#			li_chrs_sorted.sort()
-#
-#			for i_chr in li_chrs_sorted:
-#				s_chr=str( i_chr )
-#				print ( s_chr + "\t" + str( dsi_loci_totals_by_chrom[ s_chr ] ) )
-#			#end for each chromosome
-#
-#			print( "positions: " + str( lf_positions ) )
-#			print ( "initing pop with locinames: " + str( ls_loci_names ) )		
-#			#####
 
 			pop=sp.Population(popSize, ploidy=2, loci=li_loci_totals,
 						lociPos=lf_positions, lociNames=ls_loci_names,
@@ -1496,14 +1628,26 @@ class PGOpSimuPop( modop.APGOperation ):
 						"age", "breed", "rep_succ",
 						"mate", "force_skip"])
 
+			if b_have_user_supplied_allele_frequencies:
+				self.__user_supplied_allele_frequencies=lf_loci_allele_frequencies
+			#end if the user also supplied alelle frequencies.
+
 		else:
 
 			if self.input.numChroms==0:
-				pop = sp.Population(popSize, ploidy=2, loci=[1] * nLoci,
-							chromTypes=[sp.AUTOSOME] * nLoci,
+				'''
+				So that we can access total loci using the lociNames pop attribute, even
+				when we've used our generic, automated loci inititalization. In cases
+				in which the user supplies a loci/chrom file, or sets numChroms to 
+				non-zero, the loci names are incorporated durint the pop init.
+				'''
+				ls_loci_names=[ "l" + str( idx ) for idx in range( nLoci ) ]
+
+				pop = sp.Population( popSize, ploidy=2, loci=[1] * nLoci,
+							lociNames=ls_loci_names, chromTypes=[sp.AUTOSOME] * nLoci,
 							infoFields=["ind_id", "father_id", "mother_id",
 							"age", "breed", "rep_succ",
-							"mate", "force_skip"])
+							"mate", "force_skip"] )
 			else:
 
 				pop = sp.Population( popSize, ploidy=2, 					
@@ -1514,8 +1658,8 @@ class PGOpSimuPop( modop.APGOperation ):
 				li_chrom_types=[ sp.AUTOSOME for i in range( self.input.numChroms ) ]
 
 				self.__add_loci_and_chromosomes_to_pop( pop, nLoci, 
-														self.input.numChroms, 
-																	li_chrom_types  )
+															self.input.numChroms, 
+															li_chrom_types  )
 			#end if user specifies zero chroms, else divvy up loci among some N>0 chromosomes
 		#end if the user supplied loci info, else we use our chrom/snp/msat totals
 
@@ -2573,10 +2717,19 @@ class PGOpSimuPop( modop.APGOperation ):
 	#end __zeroC
 
 	def __get_mean_heterozygosity_over_all_loci( self, pop ):
+
 		lf_hetvals=[]
-		for idx in range( self.input.numSNPs + self.input.numMSats ):
+
+		tup_loci_names=pop.lociNames()
+
+		i_num_loci=len( tup_loci_names )
+
+		for idx in range( i_num_loci ):
+
 			sp.stat(pop, alleleFreq=[idx])
+
 			lf_hetvals.append( 1 - sum([x*x for x in pop.dvars().alleleFreq[idx].values()]) )
+
 		#end for each loci
 
 		return numpy.mean( lf_hetvals )
@@ -2584,7 +2737,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 	def __outputAge( self, pop ):
 		try:
-			
+
 			gen = pop.dvars().gen
 
 			if DUMP_POPS==True:
@@ -2996,15 +3149,34 @@ class PGOpSimuPop( modop.APGOperation ):
 			can be used with RandomMating and SelfMating (replace 
 			MendelianGenoTransmitter and SelfingGenoTransmitter used in these 
 			mating schemes)"
+		
+		2018_08_16.  Note that we have suppressed the recombination controls in the GUI, and
+		now run only the recomb. intensity set to zero, i.e. running the MendelianGenoTransmitter
+		as the only inheritance simulator, as was the original call used by Tiago.
 		'''
 
 		lo_offspring_generator_ops=None
 
 		if self.input.recombination_intensity > 0.0:
-			lo_offspring_generator_ops=[ sp.Recombinator( intensity=self.input.recombination_intensity ), 
-											sp.IdTagger(),
-											sp.PedigreeTagger()]
+
+			'''
+			2018_08_16. A guard against an unforseen execution path to this option, 
+			since we want to deactivate recombination.
+			'''
+
+			s_msg="Error in initializing the mating scheme mechanism. " \
+					+ "The program should not see a non-zero recombination " \
+					+ "intensity, but the current value is, " \
+					+ str( self.input.recombination_intensity ) \
+					+ "." 
+			
+			raise Exception( s_msg )
+			##### rem out, as part of the deactivation of recombination 
+#			lo_offspring_generator_ops=[ sp.Recombinator( intensity=self.input.recombination_intensity ), 
+#											sp.IdTagger(),
+#											sp.PedigreeTagger()]
 		else:
+
 			lo_offspring_generator_ops=[ sp.MendelianGenoTransmitter(), sp.IdTagger(),
 											sp.PedigreeTagger()]
 		#end if we have a recombination intensity, else not	

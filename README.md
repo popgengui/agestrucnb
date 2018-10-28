@@ -1,18 +1,17 @@
 overview
 --------
     For more details about the program, see the manual.pdf file distributed
-    with the program. Briefly, our program is a front end that incorporates the
+    with the program. Briefly, our program is a GUI front end that incorporates the
     simulation and LDNe based population genetics functions provided by Tiago
     Antao's python program at https://github.com/tiagoantao/agestructurene.git,
     enhanced by multiple methods for population and loci subsampling when performing
-    LD-based Ne and Nb estimations from genepop file inputs, and plotting facilities
-    to show estimate distributions and regression lines.  We have implemented all of
-    the the functionality in GUI interfaces.
+    LD-based Ne and Nb estimations from genepop file inputs. It also provides
+    and plotting facilities to show estimate distributions and regression lines.
 
     The program uses multi-processing to allow an arbitrary number of
-    simultaneous simulation, LD-based Nb and Ne estimations, and plotting
+    simultaneous simulations, LD-based Nb and Ne estimations, and plotting
     interfaces.  Further, within simulations, it can run simulation replicates
-    simultaneously, and, within ne or nb estimation sessions, it allows
+    simultaneously, and, within Ne or Nb estimation sessions, it allows
     simultaneously running genepop-file population sections. 
 
     The core functionality for simulation is provided by the python simuPOP
@@ -67,8 +66,16 @@ dependencies
         for recommendations on aquiring this package. As we note below, the
         easiest way to install simuPOP is through the 64-bit, Anaconda3 python3
         distribution. See the installation section below.    
-    
-    3. Other python packages, which should be automatically installed when
+
+    3.  matplotlib, a set of python graphical plotting tools, included by default in the
+        recommended Anaconda python release.  We have seen that the "pip" installer
+        and the "setup.py" installation procedure installs a matplotlib that is missing
+        a module needed by our program.  Ubuntu Linux has a deb package "python3-matplotlib"
+        that we find has the required module, as does the Anaconda version that is part of
+        the standard Anaconda distribution.  Unfortunately we are not sure how to
+        get a compatible version of matplolib outside of Anaconda or the Linux deb package. 
+ 
+    4. Other python packages, which should be automatically installed when
        you use the pip installer, or the "setup.py install" command (see
        Installation, below), can also be installed one at a time through pip with the
        command "pip install <package>", or, if you use the Anaconda distribution of
@@ -122,7 +129,7 @@ installation
 
             iii. Open the Anaconda Prompt window, and use "cd" to move 
                  to the "agestrucne" directory containing the unzipped files, 
-                 in particular look for the "setup.py" file.  Type the following command:
+                 in particular looking for the "setup.py" file.  Type the following command:
                 
                 python setup.py install
 
@@ -136,8 +143,8 @@ installation
 
                     /Users/[my-user-name]/Anaconda3/Scripts/[console-script]
 
-                For which you should substitute the name of your home directory under 
-                the Users directory, and one of the two script names noted above.
+                Substitute the name of your home directory under the Users directory, 
+                and one of the two script names noted above.
 
         C. OS X, Anaconda3 python installation, 
 

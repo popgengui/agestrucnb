@@ -402,6 +402,14 @@ class KeyValFrame( PGKeyControlFrame ):
 		o_label=Label( self.__subframe, text=self.__label_name, 
 										justify=self.__labeljustify, 
 														state=s_state )
+		'''
+		2018_10_23
+		Adding the tooltip text to the label.  Formerly
+		it was only applied to the entry box.
+		'''
+		s_tooltip=ctt.insertNewlines( self.__tooltip )
+		o_tooltip=ctt.CreateToolTip( o_label,  s_tooltip )
+
 		o_label.config( width=self.__lablewidth )
 		o_label.grid( row=self.__label_row, column=self.__label_col )
 		'''

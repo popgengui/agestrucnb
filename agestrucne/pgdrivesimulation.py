@@ -51,7 +51,7 @@ class SimInputParamValueHolder(object):
 					gammaAFemale=None,
 					gammaBFemale=None,
 					doNegBinom=None,
-					survivalMle=None,
+					survivalMale=None,
 					survivalFemale=None,
 					fecundityMale=None,
 					startLambda=None,
@@ -73,7 +73,8 @@ class SimInputParamValueHolder(object):
 					do_het_filter=None,
 					het_init_snp=None,
 					het_init_msat=None,
-					numChroms=None ):
+					numChroms=None,
+					recombination_intensity=None ):
 
 		self.__values_by_param_name={ "model_name":model_name, 
 									"popSize":popSize, 
@@ -88,7 +89,7 @@ class SimInputParamValueHolder(object):
 									"gammaAFemale":gammaAFemale,
 									"gammaBFemale":gammaBFemale,
 									"doNegBinom":doNegBinom,
-									"survivalMle":survivalMle,
+									"survivalMale":survivalMale,
 									"survivalFemale":survivalFemale,
 									"fecundityMale":fecundityMale,
 									"startLambda":startLambda,
@@ -109,7 +110,8 @@ class SimInputParamValueHolder(object):
 									"do_het_filter":do_het_filter,
 									"het_init_snp":het_init_snp,
 									"het_init_msat":het_init_msat,
-									"numChroms":numChroms }
+									"numChroms":numChroms,
+									"recombination_intensity":recombination_intensity }
 							
 		return
 	#end __init__
@@ -231,7 +233,8 @@ def get_input_object( s_config_file,
 						f_het_init_snp,
 						i_num_msats,
 						f_het_init_msat,
-						i_num_chroms ):
+						i_num_chroms,
+						f_recombination_intensity ):
 
 	o_paramInfo=pgparams.PGParamSet( s_param_names_file )
 
@@ -268,7 +271,8 @@ def get_input_object( s_config_file,
 										het_init_snp=f_het_init_snp,
 										numMSats=i_num_msats,
 										het_init_msat = f_het_init_msat,
-										numChroms=i_num_chroms )
+										numChroms=i_num_chroms,
+										recombination_intensity=f_recombination_intensity )
 
 
 	o_input_manager = SimInputParamResetManager( o_simInput, o_value_holder )
@@ -300,7 +304,8 @@ def drive_sims( s_config_file,
 					f_het_init_snp,
 					i_num_msats,
 					f_het_init_msat,
-					i_num_chroms ):
+					i_num_chroms,
+					f_recombination_intensity ):
 
 	check_for_existing_output_files( s_output_base )
 
@@ -345,7 +350,8 @@ def drive_sims( s_config_file,
 						f_het_init_snp=f_het_init_snp,
 						i_num_msats=i_num_msats,
 						f_het_init_msat=f_het_init_msat,
-						i_num_chroms=i_num_chroms )
+						i_num_chroms=i_num_chroms,
+						f_recombination_intensity=f_recombination_intensity )
 
 
 	print( "Writing a temp configuration file for the simulation..." )
@@ -510,6 +516,14 @@ if __name__ == "__main__":
 	'''
 	i_num_chroms=None
 
+	'''
+	2018_08_18. This script seemingly worked after adding 
+	recomb to pginputsimupop and pgopsimupop but not adding
+	it to this script, but now am getting an error and my addition
+	here is part of testing:	
+	'''
+	f_recombination_intensity=None
+
 	REQUIRED_HELP=[ s_chelp, s_lhelp, s_ohelp ]
 
 	OPT_HELP=[ s_bhelp, s_nhelp, s_thelp, s_rhelp, 
@@ -632,7 +646,8 @@ if __name__ == "__main__":
 				f_het_init_snp=f_het_init_snp,
 				i_num_msats=i_num_msats,
 				f_het_init_msat=f_het_init_msat,
-				i_num_chroms=i_num_chroms )
+				i_num_chroms=i_num_chroms,
+				f_recombination_intensity=f_recombination_intensity )
 
 			
 

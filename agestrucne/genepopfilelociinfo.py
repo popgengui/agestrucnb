@@ -73,6 +73,7 @@ class GenepopFileLociInfo( object ):
 			dddf_allele_frequencies[ i_pop_number ]={}
 
 			for i_loci_number in dddf_allele_counts[ i_pop_number ]:
+
 				di_allele_counts=dddf_allele_counts[ i_pop_number ] [ i_loci_number ]
 
 				i_total_allele_instances=sum( di_allele_counts.values() )
@@ -95,15 +96,21 @@ class GenepopFileLociInfo( object ):
 					continue
 				#end if no allele instances, skip this loci
 			
-				di_allele_freqs={}
+				df_allele_freqs={}
 
 				for i_this_allele in di_allele_counts:
 					i_this_count=di_allele_counts[ i_this_allele ]
 					f_this_freq=old_div(float( i_this_count ), float( i_total_allele_instances )) 
-					di_allele_freqs[ i_this_allele ] = f_this_freq
+					df_allele_freqs[ i_this_allele ] = f_this_freq
+#					##### temp
+#					print( "for loci number %i, total allele instance: %i" %  ( i_loci_number, i_total_allele_instances ) )
+#					print( "counts per allele: %s" % str( di_allele_counts ) )
+#					print( "freqs per allele: %s" % str( df_allele_freqs ) )
+#					#####
+
 				#end for each allele
 
-				dddf_allele_frequencies[ i_pop_number ] [ i_loci_number ] = di_allele_freqs 
+				dddf_allele_frequencies[ i_pop_number ] [ i_loci_number ] = df_allele_freqs 
 
 			#end for each loci
 		#end for each pop
