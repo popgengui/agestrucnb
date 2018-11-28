@@ -42,7 +42,7 @@ we now use this class to get an object
 with the needed values for a slope comparison
 see def __get_stats_as_string:
 '''
-from pglinearregressionmanager import PGLinearRegressionManager
+from agestrucne.pglinearregressionmanager import PGLinearRegressionManager
 
 class PGRegressionStats( object ):
 	'''
