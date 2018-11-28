@@ -128,7 +128,7 @@ def get_snp_allele_freqs_from_het_value_using_random_dist
 (formerly called get_snp..."truncnorm_dist"), now
 requries that the caller specifies a distribution.
 '''
-##### temp rem out:
+
 '''
 For testing allele frequency distributions,
 I've created code to easily switch back to

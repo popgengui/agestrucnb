@@ -5,7 +5,6 @@ from __future__ import print_function
 #neGrapher is primary interface for graphing data
 #neStats is primary interface for creating statistics output file for a dataset
 
-
 from future import standard_library
 standard_library.install_aliases()
 from builtins import range
@@ -221,7 +220,12 @@ def calculate_s_score(linePoints):
 #alpha: desired probability
 #linePoints: list of touples defining the x and y coordinates of a point
 #returns 3 variables, the slope of the regression, the intercept of the regression, and a touple containing the upper and lower bounds of the confidence interval of the slope
-def slope_confidence(alpha, line_points):
+'''
+2018_11_18. Ted added the arg with default false, so that the PGRegressionStats
+instance can call with this set to True and so add the "std_err" value returned
+by the linregress call, to the default return tuple
+'''
+def slope_confidence(alpha, line_points, b_return_slope_standared_error=False ):
     if len(line_points)<=2:
         return "Error: not enough points for calculation"
     #if len(linePoints)==2:
@@ -238,7 +242,18 @@ def slope_confidence(alpha, line_points):
     s_val = calculate_s_score(line_points)
     deltaConfidence = t_score*s_val
     confidence_interval = (regression["slope"]-deltaConfidence,regression["slope"]+deltaConfidence)
-    return regression["slope"], regression["intercept"], confidence_interval
+    '''
+    2018_11_11.  Ted adds the regression standard error to the return values, so that
+    the PGRegressionStats instances that call this def can use the std error to compute
+    a p-value for this regression vs a regression that gives an "expected" line.
+    '''
+    tup_return=( regression["slope"], regression["intercept"], confidence_interval )
+
+    if b_return_slope_standared_error:
+    	tup_return+=(  regression[ "std_err" ], )
+     #end if caller wants the slope std err
+
+    return  tup_return 
 
     #confidence test for null hypothesis **only works for 0 right now**
 #alpha: desired probability

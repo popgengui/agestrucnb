@@ -67,13 +67,21 @@ dependencies
         easiest way to install simuPOP is through the 64-bit, Anaconda3 python3
         distribution. See the installation section below.    
 
-    3.  matplotlib, a set of python graphical plotting tools, included by default in the
-        recommended Anaconda python release.  We have seen that the "pip" installer
-        and the "setup.py" installation procedure installs a matplotlib that is missing
-        a module needed by our program.  Ubuntu Linux has a deb package "python3-matplotlib"
-        that we find has the required module, as does the Anaconda version that is part of
-        the standard Anaconda distribution.  Unfortunately we are not sure how to
-        get a compatible version of matplolib outside of Anaconda or the Linux deb package. 
+    3.  matplotlib, a set of python graphical plotting tools, included by
+        default in the recommended Anaconda python release.  We have seen that
+        the "pip" installer and the "setup.py" installation procedure installs a
+        matplotlib that is missing a module needed by our program, resulting 
+        in the ImportError: "cannot import name 'NavigationToolbar2TkAgg' 
+        from 'matplotlib.backends.backend_tkagg'".  
+
+        As of mid-2018, Ubuntu Linux has a deb package "python3-matplotlib" that 
+        we found has the required module, as does the Anaconda version that is 
+        part of the standard Anaconda distribution.  We have found that, when 
+        a matplotlib upgrade caused the above error, we were able to replace 
+        it with an older version of matplotlib, compatible with our program, 
+        with the command:
+
+        pip install matplotlib==2.2.3
  
     4. Other python packages, which should be automatically installed when
        you use the pip installer, or the "setup.py install" command (see

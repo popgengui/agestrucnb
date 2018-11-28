@@ -25,7 +25,6 @@ sizes for axis and tic labels.
 MINFONTSIZE=8
 MAXFONTSIZE=40
 
-
 '''
 We need the tkinter.Scale widget,
 not the ttk.Scale, so we need the
@@ -132,8 +131,6 @@ class PGNeEstimationBoxplotInterface( object ):
 	COLNUM_SUBFRAME_GROUPBY=0
 	COLNUM_SUBFRAME_SAVE_PLOT=1
 
-	COLNUM_YVAL_LOWER_SCALE_LABEL=1
-	COLNUM_YVAL_UPPER_SCALE_LABEL=2
 	COLNUM_YVAL_LOWER_SCALE=1
 	COLNUM_YVAL_UPPER_SCALE=2
 	'''

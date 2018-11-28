@@ -59,7 +59,7 @@ class PGSimupopLociInfoFileManager( object ):
 	'''
 
 	@staticmethod
-	def getDelimiter( s_file_line ):
+	def getDelimiter( s_file_line, s_filename=None ):
 
 		myclass=PGSimupopLociInfoFileManager
 		s_delimiter=None
@@ -74,12 +74,19 @@ class PGSimupopLociInfoFileManager( object ):
 		#end for each delimiter
 
 		if s_delimiter is None:
+
+			s_file_name_for_msg="loci file"
+
+			if s_filename is not None:
+				s_file_name_for_msg=s_filename
+			#end if file name is not none
+				
 			s_line_no_newline=s_file_line.strip()
 			s_msg="In PGSimupopLociInfoFileManager instance, "  \
 					+ "def getDelimiter, " \
-					+ "in file, " \
-					+ self.__filename \
-					+ "the program could not find " \
+					+ "trying to parse " \
+					+ s_file_name_for_msg \
+					+ ", the program could not find " \
 					+ "a separator that split the line, " \
 					+ s_line_no_newline \
 					+ ", into a correct number of fields.  " \
@@ -126,8 +133,7 @@ class PGSimupopLociInfoFileManager( object ):
 
 			if i_line_count==1:
 
-
-				s_delimiter=myclass.getDelimiter( s_line )
+				s_delimiter=myclass.getDelimiter( s_line, s_file_name )
 
 				ls_fields=s_line.split( s_delimiter )
 
@@ -150,7 +156,6 @@ class PGSimupopLociInfoFileManager( object ):
 				ls_fields=s_line.split( s_delimiter )
 
 			#end if first line
-
 
 			if len( ls_fields ) not in myclass.TOTAL_FIELDS_EXPECTED \
 									or len( ls_fields ) != i_number_of_fields_in_first_line:
@@ -262,7 +267,7 @@ class PGSimupopLociInfoFileManager( object ):
 
 		s_line_stripped=s_line.strip()
 
-		s_delimiter=myc.getDelimiter( s_line_stripped )
+		s_delimiter=myc.getDelimiter( s_line_stripped, s_file_name )
 
 		i_num_fields=len( s_line_stripped.split( s_delimiter ) )
 

@@ -50,7 +50,6 @@ from agestrucne.pgregresser import PGRegresser
 #For initializing boxplots when no data is available.
 NO_BOXPLOT_DATA={ 'labels':["no_data"], 'value_lists':[[0]] }
 
-
 #For using more readable aliases in place of tsv file col names:
 COLNAME_ALIASES=\
 		NeEstimationTableFileManager.COLUMN_NAME_ALIASES_BY_COLUMN_NAME
@@ -102,8 +101,6 @@ class PGPlottingFrame( Frame ):
 
 		self.__make_figure()
 		self.__add_plotting_canvas()
-
-		
 
 		return
 	#end __init__
@@ -344,6 +341,7 @@ class PGPlottingFrame2DLines( PGPlottingFrame ):
 		self.__col_num_y_vals=i_col_num_y_values
 		self.__data_file_col_delimiter="\t"
 
+		
 		return
 
 	#end __init__
@@ -358,18 +356,48 @@ class PGPlottingFrame2DLines( PGPlottingFrame ):
 		self.set_tic_lable_size()
 		self._PGPlottingFrame__figure.subplots_adjust(bottom=MARGIN_ADJUST)
 
+		'''
+		2018_11_05.
+		Unless specified in our new member expected_line_manager,
+		we draw from the matplotlib rainbow set with evenly spaced rbg values (this is from
+		https://stackoverflow.com/questions/12236566/setting-different-color-for-each-
+		series-in-scatter-plot-on-matplotlib):
+		'''
+		ar_colors = matplotlib.cm.rainbow(np.linspace(0, 1, len(self.current_data)))
+		i_color_count=-1
+
 		for s_line_name in self.current_data:
+
+			i_color_count+=1
 
 			lv_xvals=self.current_data[ s_line_name ][ "x" ]
 			lv_yvals=self.current_data[ s_line_name ][ "y" ]
 
+			s_my_linestyle='dashed'
+			v_my_color=ar_colors[ i_color_count ]
+			f_my_line_width=self.__plot_line_width
+			s_my_marker='o'
+
+			if self.expected_line_manager is not None:
+				if s_line_name == self.expected_line_manager.line_name:
+					v_my_color=self.expected_line_manager.line_color
+					f_my_line_width+=self.expected_line_manager.line_width_adjust
+					s_my_linestyle=self.expected_line_manager.line_style
+				elif s_line_name == self.expected_line_manager.orig_values_line_name:				
+					v_my_color=self.expected_line_manager.line_color
+					f_my_line_width+=self.expected_line_manager.line_width_adjust
+					s_my_linestyle=self.expected_line_manager.orig_values_line_style
+				#end if this line is the line plotted as the expected 
+			#end if we have an expected_line_manager
+
 			self.subplot.plot( self.current_data[s_line_name ][ "x" ],
 										self.current_data[ s_line_name ][ "y" ], 
-										linewidth=self.__plot_line_width,
+										linewidth=f_my_line_width,
 										markersize=self.__plot_line_width \
 												+ PGPlottingFrame2DLines.MARKER_SIZE_PAD,
-										linestyle='dashed', 
-										marker='o'	)
+										linestyle=s_my_linestyle, 
+										color=v_my_color,
+										marker=s_my_marker)
 
 			if "x_labels" in self.current_data[ s_line_name ]:
 				self.set_x_axis_margin_and_xtick_rotation( \
@@ -498,7 +526,8 @@ class PGPlottingFrame2DLinesFromFileManager( PGPlottingFrame2DLines ):
 					s_data_file=None,
 					i_col_num_x_values=1,
 					i_col_num_y_values=2,
-					s_file_col_delimiter="\t" ):
+					s_file_col_delimiter="\t",
+					o_expected_line_manager=None ):
 
 		'''
 		Note that we don't use the s_data_file string,
@@ -543,6 +572,26 @@ class PGPlottingFrame2DLinesFromFileManager( PGPlottingFrame2DLines ):
 		value in col 2, and then can convert the file name into a label.
 		'''
 		self.__def_to_get_x_labels_for_x_vals=def_to_get_labels_for_x_vals
+
+		'''
+		2018_11_05.  This new member object of type PGExpectedLineManager
+		is added as an __init__ param so that the user can supply plot an 
+		"expected" line along with the regressions as a comparison.  
+		When the user supplies the info (see def addLineUsingSlopeAndInitYVal), 
+		then after updating the regression x,y data in def 
+		__update_regression_data_from_file, that def can call 
+		__add_expected_line_to_current_data.  This ensures that the expected 
+		line will be constructed using the correct, current x values.
+
+		2018_11_12
+		We also add a flag that tells the def updateData(), in
+		child class PGPlottingFrameRegressionLinesFromFileManager, 
+		to skip the call to update from the file, but simply update the
+		expected line and redraw.
+		'''
+		self.expected_line_manager=o_expected_line_manager
+		self.draw_expected_line=False
+		self.update_without_recalc=False
 
 		return
 	#end __init__
@@ -646,6 +695,35 @@ class PGPlottingFrame2DLinesFromFileManager( PGPlottingFrame2DLines ):
 		return self.__y_val_column_name
 	#end setXValueColumnNam
 
+	'''
+	2018_11_11. Added to activate/deactivate plotting of an expected line.
+	'''
+	def setFlagDrawExpectedLine( self, b_do_draw=False ):
+		self.draw_expected_line=b_do_draw
+	#end drawExpectedLine
+
+	def setFlagUpdateWithoutRecalc(self,  b_update_without_recalc=False ):
+		self.update_without_recalc=b_update_without_recalc
+	#end setFlagUpdateWithoutRecalc
+
+	def removeExpectedLineFromCurrentData( self ):
+		if self.expected_line_manager is not None:
+			'''
+			2018_11_23. Revised to also remove the curve for
+			expected line original values, if also included
+			in the plotting frame's current data:
+			'''
+			s_line_name=self.expected_line_manager.line_name
+			s_raw_values_curve_name=self.expected_line_manager.orig_values_line_name
+			for s_name in [ s_line_name, s_raw_values_curve_name ]:
+				if s_name in self.current_data:
+					self.current_data.pop( s_name )
+				#end if line name is in the current data dict
+			#end for each of the two possible expected line names
+		#end if we have an expected line manager
+		return
+	#end  removeExpectedLineFromCurrentData
+
 #end class PGPlottingFrame2DLinesFromFileManager	
 
 class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromFileManager ):
@@ -691,7 +769,8 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 					i_col_num_x_values=1,
 					i_col_num_y_values=2,
 					s_file_col_delimiter="\t",
-					s_expected_slope = "auto" ):
+					s_expected_slope = "auto",
+					o_expected_line_manager=None ):
 
 		'''
 		Note that we don't use the s_data_file string,
@@ -722,7 +801,8 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 									s_data_file=None,
 									i_col_num_x_values=i_col_num_x_values,
 									i_col_num_y_values=i_col_num_y_values,
-									s_file_col_delimiter=s_file_col_delimiter )
+									s_file_col_delimiter=s_file_col_delimiter,
+									o_expected_line_manager=o_expected_line_manager )
 
 		self.__mangledname="_PGPlottingFrame2DLinesFromFileManager__"
 		self.__expected_slope=s_expected_slope
@@ -794,7 +874,7 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 
 		if def_to_convert_x_vals is not None:
 			def_to_convert_x_vals( self.current_data )
-		#end if the client passed a converstion def for x values
+		#end if the client passed a conversion def for x values
 		
 		if b_do_regression==True:
 			self.__convert_tsv_line_data_to_regression_data()	
@@ -802,6 +882,15 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 			if def_to_get_x_labels is not None:
 				def_to_get_x_labels( self.current_data )
 			#end if the client wants labels for the x values
+
+			'''
+			Added 2018_11_05.  This def will return without adding
+			a new x,y set if no expected line info is available.
+			'''
+			if self.draw_expected_line:
+				self.__add_expected_line_to_current_data()
+			#end if we should draw an expected line
+
 		else:
 			self.current_data=INSUFFDATA
 		#end if we have enough data to regress, else not
@@ -831,7 +920,7 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 		#end if no single point lines
 
 		return b_all_data_has_at_least_two_points
-	#end __current_data_has_at_least_two_data_points
+	#end __current_data_has_two_or_more_points_per_line_name
 
 	def __sort_current_data( self ):
 
@@ -952,12 +1041,64 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 	#end __convert_tsv_line_data_to_regression_data
 
 	def updateData( self ):
-		o_tsv_file_manager=getattr( self, self.__mangledname + "tsv_file_manager" )
-		if o_tsv_file_manager is not None:
-			self.__update_regression_data_from_file()
-		#end if file manager is not none
+
+		if self.update_without_recalc == False:	 
+			o_tsv_file_manager=getattr( self, self.__mangledname + "tsv_file_manager" )
+			if o_tsv_file_manager is not None:
+				self.__update_regression_data_from_file()
+			#end if file manager is not none
+		else:
+			if self.draw_expected_line == True:
+				self.__add_expected_line_to_current_data()
+			#end if we are to draw an expected line
 		return
 	#end updateData
+
+	def __add_expected_line_to_current_data( self ):
+		'''
+		Note that we expect the first set of data in the current_data
+		member to have the correct set of x values for which to 
+		regress to get an expected line (see class PGExpectedLineManager).
+		'''
+
+		if self.expected_line_manager is not None:
+
+			lv_x_values=list(  self.current_data.values() )[ 0 ][ "x" ] 
+
+			if len (lv_x_values) > 1:
+
+				self.expected_line_manager.x_values=lv_x_values
+
+				self.expected_line_manager.doRegression()
+				s_expected_line_name=self.expected_line_manager.line_name
+				dlf_xy=self.expected_line_manager.getDictRegressedXYValues()
+				self.current_data[ s_expected_line_name ] = \
+											dlf_xy[ s_expected_line_name ]
+				
+				'''
+				2018_11_23.  We now also plot the original x,y pairs on which
+				the expected line is regressed:L
+				'''
+				dlf_xy_raw=self.expected_line_manager.getDictOriginalXYValues()
+				s_raw_curve_line_name=self.expected_line_manager.orig_values_line_name
+				self.current_data[ s_raw_curve_line_name ] = \
+											dlf_xy_raw[ s_raw_curve_line_name ]
+
+			#end if we have at least 2 x values
+		#end if we have an expected line manager
+		return
+	#end __add_expected_line_to_current_data
+
+	def plottingFrameHasRegressionData( self ):
+		'''
+		2018_11_05.  This added so clients can check 
+		for data before calling addLineUsingSlopeAndInitYVal,
+		which is not appropriate without a line already
+		in the plot.
+		'''
+		return ( self.__current_data_has_two_or_more_points_per_line_name() )	
+	#end def plottingFrameHasRegressionData
+
 #end class PGPlottingFrameRegressionLinesFromFileManager
 
 class PGPlottingFrameBoxplot( PGPlottingFrame ):
@@ -1017,6 +1158,7 @@ class PGPlottingFrameBoxplot( PGPlottingFrame ):
 		animation.
 		'''
 		self.__figure.clf()
+
 		self.updateData()
 
 		self.subplot.clear()

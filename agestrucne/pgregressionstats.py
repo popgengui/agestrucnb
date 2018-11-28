@@ -36,18 +36,112 @@ from agestrucne.asnviz.LineRegress import slope_confidence, alpha_test, calculat
 
 from agestrucne.pgneestimationtablefilemanager import NeEstimationTableFileManager
 
-class PGRegressionStats( object ):
+'''
+For an expected line regression comparison, 
+we now use this class to get an object
+with the needed values for a slope comparison
+see def __get_stats_as_string:
+'''
+from pglinearregressionmanager import PGLinearRegressionManager
 
+class PGRegressionStats( object ):
+	'''
+	2018_11_04.  Revising the code to compute a sig. value for the
+	slopes of the regression lines, given a non-zero expected slope.
+	This is so that users can see whether the Nb estimates generated
+	a regression, for example, whose slope is significantly different
+	from a simulated Nb deline at some rate r.  Our null hypothesis,
+	then for testing the slope of such a regression is the the slope=r.
+	'''
 	def __init__( self, 
 					dltup_table=None,
 					f_confidence_alpha=0.05,
-					v_significant_value=0 ):
-
+					v_significant_value=0,
+					f_expected_slope=0.0,
+					o_expected_line_manager=None ):
+		'''
+		2018_11_11.  we add the o_expetced_line_manager
+		parameter, so that we can add to the stats
+		a new per-regression p-value based on comparing 
+		the slope of a given regression line to the slope
+		of a line computed by the expected_line_manager
+		object. 
+		'''
 		self.__data_table=dltup_table
 		self.__confidence_alpha=f_confidence_alpha
 		self.__significant_value=v_significant_value
+		self.__expected_line_manager=o_expected_line_manager
 		return
 	#end __init__
+
+	def __get_printable_value_none_or_float( self, v_value, f_precision ):
+		'''
+		Allows rounding a float for printing, but
+		returning None if the arg is not a roundable
+		object.
+		'''
+		v_rounded=None
+		try:
+			v_rounded=round( v_value, f_precision )
+		except ValueError as ove: 
+			pass
+		except TypeError as ote:
+			pass
+		#end try...except
+
+		return v_rounded
+	#end __get_printable_value_none_or_float
+
+	def __get_y_values_for_a_zero_slope_null_hypo( self, ltup_x_and_y_values ):
+		'''
+		this will be an indirect way of essentially adjusting the
+		regression to accomodate an H_0 of b=0 when we have a non-
+		zero expected slope.  When the expected slope is zero we
+		just return a copy of thej x and y values.  However,
+		when non-zero we make an algebraic
+		transformation to restate a non-zero hypo
+		as a zero:
+			let b=r, 
+			r=any expected slope (non-zero for the non-trivial
+			example):
+				y=bx+c=>y-rx=(b-r)x+c
+				so we can check for H0: b'= 0 using
+				y'= b'x + c, with y'=y-rx
+		See http://www.real-statistics.com/regression/
+		hypothesis-testing-significance-regression-line-slope/
+		'''
+
+		IDX_X=0
+		IDX_Y=1
+
+		if len( x_values ) != len( y_values ):
+			s_msg="In PGRegressionStats, def " \
+					+ "__get_y_values_for_a_zero_slope_null_hypo "
+		FLOAT_PRECISE=float( 1e-32 )
+
+		ltup_x_and_recomputed_y_values=[]
+
+		if abs( self.__expected_slope - 0.0 ) > FLOAT_PRECISE:
+			ltup_x_and_recomputed_y_values=y_values
+		else:
+			
+			for  tup_x_and_y in ltup_x_and_y_values:
+				'''
+				new y value, y'=y-rx, where r is our expected slope.
+				'''
+				f_new_y_value=\
+						tup_x_and_y[IDX_Y] \
+						- self.__expected_slope* tup_x_and_y[ IDX_X ]
+
+				tup_new_xy=( tup_x_and_y[ IDX_X ], f_new_y_value )
+
+				ltup_x_and_recomputed_y_values.append( tup_new_xy )
+			#end for each x,y tuple
+
+		#end if expected slope zero, no transformation needed, else transform
+		
+		return ltup_x_and_recomputed_y_values
+	#end __get_y_values_for_a_zero_slope_null_hypo
 
 	def __get_source_file_name_from_file_manager_key( self, s_field_values ):
 		'''
@@ -92,6 +186,31 @@ class PGRegressionStats( object ):
 
 		return b_return_value
 	#end __data_is_sufficient_for_regression
+
+	def __get_expected_line_slope_comparison_info( self, ltup_xy ):
+
+		lf_xvals=[ tup_record[0] for tup_record in ltup_xy ]
+		lf_yvals=[ tup_record[1] for tup_record in ltup_xy ]
+
+		o_my_regress=PGLinearRegressionManager( s_line_name="regression",
+												lv_x_values=lf_xvals,
+												lv_y_values=lf_yvals,
+												s_line_style="solid", 
+												s_line_color="black",
+												f_line_width_adjust=1.0  )
+		o_my_regress.doRegression()
+
+		f_p_value=self.__expected_line_manager.getPValueComarisonOfSlopes( \
+									f_other_slope=o_my_regress.slope,
+									f_other_intercept=o_my_regress.intercept,
+									f_other_slope_standard_error=o_my_regress.slope_std_error, 
+									lf_other_x_values=o_my_regress.x_values,
+									f_other_residual_se=o_my_regress.residual_standard_error )
+
+		
+
+		return f_p_value
+	#end __get_expected_line_slope
 		
 	def __get_stats_as_string( self, b_use_file_name_only_for_column_1=True ):
 		'''
@@ -130,7 +249,8 @@ class PGRegressionStats( object ):
 													"Slope",
 													"Intercept" ,
 													"CI("+str(confPercent)+"%)", 
-													"P value",
+													"P-value",
+													"P-value-expected-slope",
 													"\n" ] )
 			slopeVctr = []
 			confidenceVctr = []
@@ -151,28 +271,42 @@ class PGRegressionStats( object ):
 
 			ls_keys_sorted=sorted( list(table.keys()) )
 
+			i_sum_slope_comparison_reject_null=0
+			i_sum_slope_comparisons=0
+
 			for recordKey in ls_keys_sorted:
+				#Reminder:  "record" is a list of (x,y) duples.
 
 				record = table[recordKey]
+
 
 				s_file_name=recordKey
 				
 				if b_use_file_name_only_for_column_1:
 					s_file_name=self.__get_source_file_name_from_file_manager_key( recordKey )
 				#end if not b_use_all_key_fields
-				
-				v_return_slope_conf=slope_confidence( self.__confidence_alpha,record)
 
-				
+				'''
+				2018_11_18.  I added the flag for returning standard error to the
+				def in asnviz/LineRegress.py:
+				'''
+				v_return_slope_conf=slope_confidence( self.__confidence_alpha,
+															record, 
+															b_return_slope_standared_error=True)
 
-				slope=None; intercept=None; confidence=None
+				'''
+				2018_11_11. I add f_std_err, for expected line manager -- see also
+				my addition of the std err value to the return tuple in the LineRegress.py mod,
+				def slope_confidence.
+				'''
+				slope=None; intercept=None; confidence=None; f_std_err=None
+
 				ls_vals_for_table=None
 
 				if type( v_return_slope_conf ) == tuple:
 					#We assume we got numbers if a tuple was returned.
-					slope, intercept, confidence  = v_return_slope_conf 
+					slope, intercept, confidence, f_std_err  = v_return_slope_conf 
 					'''
-
 					2018_03_17.  New code from Brian T's 
 					latest _neStatsHelper
 					'''
@@ -221,11 +355,67 @@ class PGRegressionStats( object ):
 
 					s_rounded_confidence="(" +  s_rounded_confidence + ")"
 
+					'''
+					2018_11_11.  We add a p-value for the comparison
+					of the slope of current line to an expected slope.
+					'''
+					f_p_value_slope_comparison=None
+
+					if self.__expected_line_manager is not None:
+
+						if self.__expected_line_manager.hasRegressionInfo():
+
+							'''
+							Default values loaded into interface give zero rate and zero
+							initial y value, for which regression we will not do a slope comparison.
+							'''
+							lb_all_zeros=[ f_val<=PRECISION for f_val in self.__expected_line_manager.y_values ]
+
+							if sum( lb_all_zeros ) != len ( lb_all_zeros ):
+
+								f_p_value_slope_comparison=self.__get_expected_line_slope_comparison_info( record )
+
+								i_sum_slope_comparisons+=1
+
+								'''
+								2018_11_24. We'll use the same threshold (user settable in the 
+								PGNeEstimationRegressplotInterface instances) for CI intervals in
+								Brian's CI calc, as the p-value threshold.
+								'''
+								if f_p_value_slope_comparison <= self.__confidence_alpha:
+									i_sum_slope_comparison_reject_null += 1
+								#end if sig value
+
+								
+							else:
+								##### temp
+								#print( "Skipping slope comparison p-value:  all expected line y-values are zeros" )
+								#####
+								pass
+							#end if we have fit regression info  for the expected line, else skip slope comapare
+							
+						else:
+							##### tempo
+							#print( "Skipping slope comparison p-value, with no expected line fit y values" )
+							#####
+							pass
+						#end if the expected line values are not all zeros, else skip slope compare
+					else:
+						##### temp
+						#print( "Skipping slope comparison p-value because expected line manager is None" )
+						pass
+					#end if we have an expected line manager, else skip slope compare
+
+					f_printable_pval_expected_line_slope_comaparison=\
+										self.__get_printable_value_none_or_float( \
+															f_p_value_slope_comparison, PRECISION )
+
 					ls_vals_for_table=[ s_file_name,
 											str( round( slope, PRECISION ) ),  
 											str( round( intercept, PRECISION ) ) ,  
 											s_rounded_confidence, 
 											str( round( p_score, PRECISION) ),
+											str( f_printable_pval_expected_line_slope_comaparison ),
 											"\n" ]
 					if isnan(slope):
 						Uncountable +=1
@@ -296,6 +486,13 @@ class PGRegressionStats( object ):
 #						zeroCount+=1
 					#end if val>0 else less else
 				#end for alpha val
+
+				f_slope_expected_slope=self.__get_printable_value_none_or_float( \
+																self.__expected_line_manager.slope, PRECISION )
+				f_confidence_alpha=self.__get_printable_value_none_or_float( self.__confidence_alpha, PRECISION )
+				f_intercept_expected_slope=self.__get_printable_value_none_or_float( \
+																self.__expected_line_manager.intercept, PRECISION )
+				
 				
 				s_stats_string = "Max Regression Slope: "+str( round( maxSlope, PRECISION ) )+"\n"
 				s_stats_string +="Min Regression Slope: "+str( round( minSlope, PRECISION ) )+"\n"
@@ -315,6 +512,18 @@ class PGRegressionStats( object ):
 								+ "Negative Slopes: "+str( round( negativeCount, PRECISION ) ) \
 								+ "\n" + BULLET_INDENTED \
 								+ "Non-Number Slopes: "+str( round( Uncountable, PRECISION ) )
+				s_stats_string+="\n\n"
+				s_stats_string+="Test equality of slopes with regression on expected line " \
+						+ "\nwith a slope " \
+						+ str( f_slope_expected_slope ) \
+						+ ", and intercept, " \
+						+ str( f_intercept_expected_slope ) \
+						+ "\nand significance threshold at " \
+						+ str( f_confidence_alpha ) + "\n" 
+				s_stats_string += BULLET_INDENTED \
+								+ "Total lines rejecting: " + str( i_sum_slope_comparison_reject_null ) \
+								+ "\n" + BULLET_INDENTED \
+								+ "Total lines accepting: " + str( i_sum_slope_comparisons - i_sum_slope_comparison_reject_null ) 
 				s_stats_string +="\n\n"
 				s_stats_string +=tableString
 
@@ -379,7 +588,6 @@ class PGRegressionStats( object ):
 	want to be able to update this class attribute when the user
 	changes the alpha value.
 	'''
-
 	@property 
 	def confidence_alpha( self ):
 		return self.__confidence_alpha

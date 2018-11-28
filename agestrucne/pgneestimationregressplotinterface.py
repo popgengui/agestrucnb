@@ -24,7 +24,6 @@ sizes for axis and tic labels.
 MINFONTSIZE=8
 MAXFONTSIZE=40
 
-
 '''
 We need the tkinter.Scale widget,
 not the ttk.Scale, so we need the
@@ -54,6 +53,10 @@ from agestrucne.pgneestimationtablefilemanager import NeEstimationTableFileManag
 from agestrucne.pgneestimationtableselectioncombo import PGNeEstTableColumnSelectionCombo
 from agestrucne.pgneestimationtableselectioncombo import PGNeEstTableValueSelectionCombo
 from agestrucne.pgkeyvalueframe import KeyValFrame
+'''
+2018_11_11.  Adding checkbox for drawing an expected line:
+'''
+from agestrucne.pgkeycheckboxvalueframe import KeyCheckboxValueFrame
 from agestrucne.pgregresstabletextframe import PGRegressTableTextFrame
 from agestrucne.pgregressionstats import PGRegressionStats
 from agestrucne.pgscalewithentry import PGScaleWithEntry
@@ -63,6 +66,12 @@ new text boxes for user-setting of min and max cycle number,
 and alpha value.
 '''
 from agestrucne.pgutilityclasses import ValueValidator
+
+'''
+2018_11_05.  Adding ability to plot an "expected" line
+along with the regression lines.
+'''
+from agestrucne.pglinearregressionmanager import PGExpectedLineManager
 
 '''
 See def __destroy_all_widgets.  Tkinter apparently
@@ -109,8 +118,7 @@ class PGNeEstimationRegressplotInterface( object ):
 	ROW_NUM_SUBFRAME_TSV_FILE_LOADER=0
 	ROW_NUM_SUBFRAME_GROUPBY=1
 	ROW_NUM_SUBFRAME_FILTER=2
-	ROW_NUM_SUBFRAME_Y_VALUE=0
-	ROW_NUM_SUBFRAME_X_VALUE=0
+	ROW_NUM_SUBFRAME_PLOT_AND_STATS_PARAMS=0
 	ROW_NUM_SUBFRAME_PLOT=4 
 	ROW_NUM_SUBFRAME_STATS_TEXT=4
 	'''
@@ -128,19 +136,36 @@ class PGNeEstimationRegressplotInterface( object ):
 	ROW_NUM_GROUPBY_COMBOS=1
 	ROW_NUM_FILTER_LABELS=0
 	ROW_NUM_FILTER_COMBOS=1
-	ROW_NUM_X_VALUE_LABEL=0
 	ROW_NUM_MIN_CYCLE_TEXT_BOX=0
 	ROW_NUM_MAX_CYCLE_TEXT_BOX=1
 	ROW_NUM_ALPHA_TEXT_BOX=2
-	ROW_NUM_YVAL_LABEL=0
+	'''
+	2018_11_04. New text boxes for
+	initial-nb and rate of expected slope
+	(i.e. the slope as a proportion of the
+	initial y value, in our case the user
+	entered target Nb/Ne 
+	(see class PGExpectedLineManager):
+
+	2018_11_11. Also add checkbox to enable
+	or disable drawing of line.
+	'''
+	ROW_NUM_DRAW_EXPECTED_LINE_CHEKBOX=0
+	ROW_NUM_RATE_CHANGE_EXPECTED_LINE_TEXT_BOX=1
+	ROW_NUM_INITIAL_VALUE_EXPECTED_LINE_TEXT_BOX=2
+
+	ROW_NUM_Y_VALUE_LABEL=0
+	ROW_NUM_X_VALUE_LABEL=2
 	ROW_NUM_YVAL_LOWER_SCALE_LABEL=0
 	ROW_NUM_YVAL_UPPER_SCALE_LABEL=0
 	ROW_NUM_YVAL_COMBO=1
+	ROW_NUM_XVAL_COMBO=3
 	ROW_NUM_YVAL_UPPER_SCALE=1
 	ROW_NUM_YVAL_LOWER_SCALE=1
 	ROW_NUM_SAVE_PLOT_BUTTON=1
 	ROW_NUM_PLOT=0
 	ROW_NUM_STATS_TEXT=0
+
 	'''
 	2018_05_04. New scales to change font size
 	of labels:
@@ -152,8 +177,7 @@ class PGNeEstimationRegressplotInterface( object ):
 	NUM_VALS_IN_SCALE=int( 1e10 )
 
 	COLNUM_SUBFRAME_TSV_LOADER=0
-	COLNUM_SUBFRAME_Y_VALUE=0
-	COLNUM_SUBFRAME_X_VALUE=2
+	COLNUM_SUBFRAME_PLOT_AND_STATS_PARAMS=0
 	COLNUM_SUBFRAME_FILTER=0
 	COLNUM_SUBFRAME_GROUPBY=0
 	COLNUM_SUBFRAME_PLOT=0
@@ -174,12 +198,25 @@ class PGNeEstimationRegressplotInterface( object ):
 	COLNUM_YVAL_UPPER_SCALE_LABEL=2
 	COLNUM_YVAL_LOWER_SCALE=1
 	COLNUM_YVAL_UPPER_SCALE=2
+	COLNUM_YVAL_COMBO=0
+	COLNUM_XVAL_COMBO=0
 	COLNUM_SAVE_PLOT_BUTTON=0
 	COLNUM_PLOT=0
 	COLNUM_STATS_TEXT=0
-	COLNUM_MIN_CYCLE_TEXT_BOX=1
-	COLNUM_MAX_CYCLE_TEXT_BOX=1
-	COLNUM_ALPHA_TEXT_BOX=1
+	COLNUM_MIN_CYCLE_TEXT_BOX=2
+	COLNUM_MAX_CYCLE_TEXT_BOX=2
+	COLNUM_ALPHA_TEXT_BOX=2
+	'''
+	2018_11_04. New text boxes:
+	'''
+	COLNUM_RATE_CHANGE_EXPECTED_LINE_TEXT_BOX=3
+	COLNUM_INITIAL_VALUE_EXPECTED_LINE_TEXT_BOX=3
+	'''
+	2018_11_11. New checkbox to enable/disable
+	drawing expected line:
+	'''
+	COLNUM_DRAW_EXPECTED_LINE_CHECKBOX=3
+
 	'''
 	2018_05_04. New scalsed for setting font sizes:
 	'''
@@ -188,14 +225,16 @@ class PGNeEstimationRegressplotInterface( object ):
 
 	COLSPAN_SUBFRAME_TSV_LOADER=30
 	COLSPAN_SUBFRAME_FILTER=30
-	COLSPAN_SUBFRAME_Y_VALUE=2
-	COLSPAN_SUBFRAME_X_VALUE=1
+	COLSPAN_SUBFRAME_PLOT_AND_STATS_PARAMS=3
 	COLSPAN_SUBFRAME_PLOT=4
 	COLSPAN_SUBFRAME_STATS_TEXT=30
 	COLSPAN_SUBFRAME_PLOT_APPEARANCE=30
 	'''
 	2018_05_05. New subframe to contain the
 	3 subframes y_value, x_value, and plot_appearance.
+
+	2018_11_04. New boxes for expected slope rate and
+	initial-nb.
 	'''
 	COLSPAN_SUBFRAME_ROW_3_SUBFRAME=30
 
@@ -216,8 +255,21 @@ class PGNeEstimationRegressplotInterface( object ):
 			i_plot_width=None,
 			i_plot_height=None,
 			f_alpha=0.05,
-			s_expected_slope="auto",
-			f_significant_slope=0.0 ):
+			f_rate_change_expected_line=0.0,
+			f_significant_slope=0.0,
+			
+			f_inital_value_expected_line=0.0 ):
+
+		'''
+		2018_11_04. For new functionality to viz and test
+		regressions against non-zero expected lines, 
+		made the following revisions:
+		1. changed param expected slope to rate_change_expected_line
+		    (value until was not used and was set to
+		    "auto".  Now we set to type float and with a
+		    default value of zero:
+		2.  Adding new member inital_value_expected_line.
+		'''
 
 		self.__master_frame=o_master_frame
 		self.__tsv_file_name=s_tsv_file_name
@@ -230,8 +282,9 @@ class PGNeEstimationRegressplotInterface( object ):
 		self.__plotframe=None
 		self.__statstext=None
 		self.__alpha=f_alpha
-		self.__expected_slope=s_expected_slope
+		self.__rate_change_expected_line=f_rate_change_expected_line
 		self.__significant_slope=f_significant_slope
+		self.__inital_value_expected_line=f_inital_value_expected_line
 
 		'''
 		2018_04_13. We add these for new 
@@ -254,6 +307,10 @@ class PGNeEstimationRegressplotInterface( object ):
 		2018_04_13. Adding text boxes
 		to allow user entry of cycle ranges
 		and and alpha value.
+
+		2018_11_04. Adding more text boxes
+		to allow user entry of expected
+		slope and initial-nb
 		'''
 		self.__text_boxes=None
 
@@ -274,6 +331,23 @@ class PGNeEstimationRegressplotInterface( object ):
 		this is not yet in use.
 		'''
 		self.__update_in_progress=False
+
+		'''
+		2018_11_11.  We add a checkbox to active
+		parameters for and the showing of a line
+		given by an expected rate of Nb/Ne change
+		and an initial Nb.
+		'''
+		self.__checkboxes=None
+		self.__draw_expected_line=False
+
+		'''
+		2018_11_12.  We call this before
+		the plotframe and regression stats
+		objects are created, as they need
+		this object as a member.
+		'''
+		self.__make_expected_line_manager()	
 
 		if self.__plot_width is None \
 					or self.__plot_height is None:
@@ -304,6 +378,16 @@ class PGNeEstimationRegressplotInterface( object ):
 
 		return
 	#end __init__
+
+	def __make_expected_line_manager( self ):
+		'''
+		2018_11_05. New object to allow user to plot expected line along with the regression
+		lines:
+		'''
+		self.__expected_line_manager=PGExpectedLineManager( f_rate=self.__rate_change_expected_line,
+										f_initial_y_value=self.__inital_value_expected_line )
+		return
+	#end __make_expected_line_manager
 
 	def __setup_tsv_file_loader( self ):
 
@@ -536,6 +620,13 @@ class PGNeEstimationRegressplotInterface( object ):
 
 		self.__make_subframes()
 		self.__make_labels()
+		'''
+		2018_11_11. New checkbox to activate
+		new interface to draw an expected line
+		on the plot, for comparison to regression
+		lines.
+		'''
+		self.__make_checkboxes()
 		self.__make_combos()
 		self.__make_entries()
 		'''
@@ -580,8 +671,13 @@ class PGNeEstimationRegressplotInterface( object ):
 		FRAME_STYLE=o_myc.SUBFRAME_STYLE
 		GROUPBY_FRAME_LABEL="Group Data"
 		GROUPBY_FILTER_FRAME_LABEL="Data Filters"
-		X_VALUE_FRAME_LABEL="X-axis Data"
-		Y_VALUE_FRAME_LABEL="Y-axis Data"
+		'''
+		2018_11_04. With addition of expected
+		slope and initial-nb text boxes,
+		we combine the X- and Y- Data subframes
+		into one frame.
+		'''
+		PLOT_AND_STATS_PARAMS_LABEL="Plot and Stats Adjust"
 		STATS_TEXT_FRAME_LABEL="Regression Stats"
 		PLOT_FRAME_LABEL="Plot"
 		PLOT_APPEARANCE_FRAME_LABEL="Other settings"
@@ -607,15 +703,14 @@ class PGNeEstimationRegressplotInterface( object ):
 				relief=FRAME_STYLE,
 				text=GROUPBY_FILTER_FRAME_LABEL )
 
-		self.__subframes[ 'y_value' ]=LabelFrame( o_row_3_subframe,
+		'''
+		2018_11_04. We now combine the 'y_value' and 'x_value' subframes
+		into a single 'plot_and_stats_params' subframe
+		'''
+		self.__subframes[ 'plot_and_stats_params' ]=LabelFrame( o_row_3_subframe,
 				padding=FRAME_PADDING,
 				relief=FRAME_STYLE,
-				text=Y_VALUE_FRAME_LABEL )
-
-		self.__subframes[ 'x_value' ]=LabelFrame( o_row_3_subframe,
-				padding=FRAME_PADDING,
-				relief=FRAME_STYLE,
-				text=X_VALUE_FRAME_LABEL )
+				text=PLOT_AND_STATS_PARAMS_LABEL )
 
 		self.__subframes[ 'plot' ]=LabelFrame( self.__master_frame,
 				padding=FRAME_PADDING,
@@ -649,15 +744,12 @@ class PGNeEstimationRegressplotInterface( object ):
 														columnspan=o_myc.COLSPAN_SUBFRAME_FILTER, 
 														sticky=(N,W) )
 
-		self.__subframes[ 'y_value' ].grid( row=o_myc.ROW_NUM_SUBFRAME_Y_VALUE, 
-													column=o_myc.COLNUM_SUBFRAME_Y_VALUE, 
-													columnspan=o_myc.COLSPAN_SUBFRAME_Y_VALUE, 
-													sticky=(N,W) )
+	
+		self.__subframes[ 'plot_and_stats_params' ].grid( row=o_myc.ROW_NUM_SUBFRAME_PLOT_AND_STATS_PARAMS, 
+																	column=o_myc.COLNUM_SUBFRAME_PLOT_AND_STATS_PARAMS, 
+																	columnspan=o_myc.COLSPAN_SUBFRAME_PLOT_AND_STATS_PARAMS, 
+																									sticky=(N,W) )
 
-		self.__subframes[ 'x_value' ].grid( row=o_myc.ROW_NUM_SUBFRAME_X_VALUE, 
-													column=o_myc.COLNUM_SUBFRAME_X_VALUE, 
-													columnspan=o_myc.COLSPAN_SUBFRAME_X_VALUE, 
-													sticky=(N,W) )
 
 		self.__subframes[ 'plot' ].grid( row=o_myc.ROW_NUM_SUBFRAME_PLOT, 
 													column=o_myc.COLNUM_SUBFRAME_PLOT, 
@@ -685,7 +777,7 @@ class PGNeEstimationRegressplotInterface( object ):
 
 		o_myc=PGNeEstimationRegressplotInterface
 
-		self.__labels[ 'x_value' ]= Label( self.__subframes[ 'x_value' ], 
+		self.__labels[ 'x_value' ]= Label( self.__subframes[ 'plot_and_stats_params' ], 
 									text="X axis variable", padding=o_myc.LABEL_PADDING )
 
 		self.__labels[ 'x_value' ].grid( row = o_myc.ROW_NUM_X_VALUE_LABEL, column = 0, sticky=( N,W ) )
@@ -717,14 +809,43 @@ class PGNeEstimationRegressplotInterface( object ):
 			i_colnum_val_filt_labels += 1
 		#end for each value filterable column
 
-		self.__labels[ 'select_y_variable' ] = Label( self.__subframes[ 'y_value' ], 
+		self.__labels[ 'select_y_variable' ] = Label( self.__subframes[ 'plot_and_stats_params' ], 
 															text= "Y axis value" , 
 															padding=o_myc.LABEL_PADDING)
 	
-		self.__labels[ 'select_y_variable' ].grid( row = o_myc.ROW_NUM_YVAL_LABEL, 
+		self.__labels[ 'select_y_variable' ].grid( row = o_myc.ROW_NUM_Y_VALUE_LABEL, 
 																column=0, sticky=( N,W ) )
 		return
 	#end __make labels
+
+	def __make_checkboxes( self ):
+
+		self.__checkboxes={}
+
+		o_myc=PGNeEstimationRegressplotInterface
+
+		s_demangler="_PGNeEstimationRegressplotInterface__"
+
+		self.__checkboxes[ 'draw_expected_line' ]=KeyCheckboxValueFrame( s_name="draw expected line",
+															v_value=self.__draw_expected_line,
+															o_master=self.__subframes[ 'plot_and_stats_params' ], 
+															s_associated_attribute=s_demangler + "draw_expected_line",
+															o_associated_attribute_object=self,
+															def_on_button_change=self.__on_draw_expected_line_checkbox_change,
+															i_labelwidth=15,
+															b_is_enabled=True,
+															s_label_justify='right',
+															s_label_name=None,
+															b_force_disable=False,
+															s_tooltip = "Enable or disable plotting an expected line given the " \
+																		+ "rate and initial value below." )
+
+		self.__checkboxes[ 'draw_expected_line' ].grid( row = o_myc.ROW_NUM_DRAW_EXPECTED_LINE_CHEKBOX,
+															column=o_myc.COLNUM_DRAW_EXPECTED_LINE_CHECKBOX,
+															sticky=( S,W ) )
+
+		return
+	#end __make_checkboxes
 
 	def __make_combos( self ):
 
@@ -733,7 +854,7 @@ class PGNeEstimationRegressplotInterface( object ):
 		o_myc=PGNeEstimationRegressplotInterface
 
 		self.__comboboxes[ 'x_value' ] = PGNeEstTableColumnSelectionCombo( \
-													o_master=self.__subframes[ 'x_value' ], 
+													o_master=self.__subframes[ 'plot_and_stats_params' ], 
 													o_tsv_file_manager=self.__tsv_file_manager, 
 													def_to_call_on_selection_change=\
 																	self.__on_x_value_selection_change,
@@ -747,7 +868,7 @@ class PGNeEstimationRegressplotInterface( object ):
 			self.__comboboxes[ 'x_value' ].resetCurrentValue('pop')
 		#end if 'pop' is an available x field, we set it as the initial value
 
-		self.__comboboxes[ 'x_value' ].grid( row=1, column=0, sticky=( N,W ) )
+		self.__comboboxes[ 'x_value' ].grid( row=o_myc.ROW_NUM_XVAL_COMBO, column=o_myc.COLNUM_XVAL_COMBO, sticky=( N,W ) )
 
 		i_column_count=0
 
@@ -774,14 +895,14 @@ class PGNeEstimationRegressplotInterface( object ):
 		ls_y_variable_column=PGNeEstimationRegressplotInterface.Y_AXIS_VALUE_COLUMNS
 
 		self.__comboboxes[ 'select_y_variable' ]=PGNeEstTableColumnSelectionCombo( \
-													o_master=self.__subframes[ 'y_value' ], 
-													o_tsv_file_manager=self.__tsv_file_manager, 
-													def_to_call_on_selection_change=self.__on_y_variable_selection_change,
-													ls_column_names_to_show_excluding_others=ls_y_variable_column,
-													b_add_none_selection=False )
+										o_master=self.__subframes[ 'plot_and_stats_params' ], 
+										o_tsv_file_manager=self.__tsv_file_manager, 
+										def_to_call_on_selection_change=self.__on_y_variable_selection_change,
+										ls_column_names_to_show_excluding_others=ls_y_variable_column,
+										b_add_none_selection=False )
 
 		self.__comboboxes[ 'select_y_variable' ].grid( row=o_myc.ROW_NUM_YVAL_COMBO, 
-																column=0, sticky=( N,W ) )
+												column=o_myc.COLNUM_YVAL_COMBO, sticky=( N,W ) )
 
 		return
 	#end __make_combos
@@ -795,13 +916,25 @@ class PGNeEstimationRegressplotInterface( object ):
 		Added 20180413 to allow user
 		setting a range of cycles over which
 		to regress, and to set the alpha value.
+
+		2018_11_04. Adding new text boxes for expected slope
+		and initial-nb
 		'''
 
 		MIN_ALPHA=0.0
 		MAX_ALPHA=1.0
 
-		CYCLE_BOX_LABEL_WIDTH=8
-		ALPHA_BOX_LABEL_WIDTH=8
+		MIN_RATE_CHANGE_EXPECTED_LINE=-1.0
+		MAX_RATE_CHANGE_EXPECTED_LINE=1.0
+
+		MIN_INITIAL_VALUE_EXPECTED_LINE=-1e32
+		MAX_INITIAL_VALUE_EXPECTED_LINE=1e32
+
+		CYCLE_BOX_LABEL_WIDTH=10
+		ALPHA_BOX_LABEL_WIDTH=10
+
+		RATE_CHANGE_EXPECTED_LINE_LABEL_WIDTH=13
+		INITIAL_VALUE_EXPECTED_LINE_LABEL_WIDTH=11
 
 		KEYVAL_SUBFRAME_PADDING=10
 
@@ -829,15 +962,21 @@ class PGNeEstimationRegressplotInterface( object ):
 									+	" and x<= " + str( self.__max_cycle_number ) 
 
 		s_valid_alpha="x >= " + str( MIN_ALPHA ) + " and x <= " + str( MAX_ALPHA )
+
+		s_valid_rate_change_expected_line="x >= " + str( MIN_RATE_CHANGE_EXPECTED_LINE ) + " and x <= " + str( MAX_RATE_CHANGE_EXPECTED_LINE )
+
+		s_valid_inital_value_expected_line="x >= " + str( MIN_INITIAL_VALUE_EXPECTED_LINE ) + " and x <= " + str( MAX_INITIAL_VALUE_EXPECTED_LINE )
 			
 		o_validity_test_for_cycle_range=ValueValidator( s_cycle_range_lambda )
 		o_validity_test_for_alpha=ValueValidator( s_valid_alpha ) 
+		o_validity_test_for_rate_change_expected_line=ValueValidator( s_valid_rate_change_expected_line )
+		o_validity_test_for_inital_value_expected_line=ValueValidator( s_valid_inital_value_expected_line )
 
 		self.__text_boxes[ 'min_cycle' ]=KeyValFrame( s_name="min_cycle", 
 						v_value=self.__min_cycle_number,
 						o_type=int,
 						v_default_value="1",
-						o_master=self.__subframes[ 'x_value' ],
+						o_master=self.__subframes[ 'plot_and_stats_params' ],
 						o_associated_attribute_object=self,
 						s_associated_attribute=s_demangler+"min_cycle_number",
 						b_is_enabled=True,
@@ -855,7 +994,7 @@ class PGNeEstimationRegressplotInterface( object ):
 						v_value=self.__max_cycle_number,
 						o_type=int,
 						v_default_value="1",
-						o_master=self.__subframes[ 'x_value' ],
+						o_master=self.__subframes[ 'plot_and_stats_params' ],
 						o_associated_attribute_object=self,
 						s_associated_attribute=s_demangler+"max_cycle_number",
 						b_is_enabled=True,
@@ -873,7 +1012,7 @@ class PGNeEstimationRegressplotInterface( object ):
 								v_value=self.__alpha,
 								o_type=float,
 								v_default_value=self.__alpha,
-								o_master=self.__subframes[ 'x_value' ],
+								o_master=self.__subframes[ 'plot_and_stats_params' ],
 								o_associated_attribute_object=self,
 								s_associated_attribute=s_demangler+"alpha",
 								b_is_enabled=True,
@@ -883,10 +1022,52 @@ class PGNeEstimationRegressplotInterface( object ):
 								s_tooltip = "Use this as the alpha value for the regression.",
 								i_labelwidth=ALPHA_BOX_LABEL_WIDTH,
 								i_subframe_padding=KEYVAL_SUBFRAME_PADDING )
-
 		
 		self.__text_boxes[ 'alpha' ].grid( row = o_myc.ROW_NUM_ALPHA_TEXT_BOX, 
 								column = o_myc.COLNUM_ALPHA_TEXT_BOX, sticky=( N,W ) )
+
+		self.__text_boxes[ 'rate_change_expected_line' ]=KeyValFrame( s_name="rate change", 
+								v_value=self.__rate_change_expected_line,
+								o_type=float,
+								v_default_value=self.__rate_change_expected_line,
+								o_master=self.__subframes[ 'plot_and_stats_params' ],
+								o_associated_attribute_object=self,
+								s_associated_attribute=s_demangler+"rate_change_expected_line",
+								b_is_enabled=True,
+								b_force_disable=False,
+								def_entry_change_command=self.__on_rate_change_expected_line_change,
+								o_validity_tester=o_validity_test_for_rate_change_expected_line,
+								s_tooltip = "Use this as a rate of increase (positive) or decrease (negative) value" \
+													+ "~~between zero and one, per cycle, to make a an x,y set " \
+													+ "on which to do a linearlinear regression,~~the resulting line" \
+													+ "plotted in black",
+
+								i_labelwidth=RATE_CHANGE_EXPECTED_LINE_LABEL_WIDTH,
+								i_subframe_padding=KEYVAL_SUBFRAME_PADDING )
+		
+		self.__text_boxes[ 'rate_change_expected_line' ].grid( row = o_myc.ROW_NUM_RATE_CHANGE_EXPECTED_LINE_TEXT_BOX, 
+								column = o_myc.COLNUM_RATE_CHANGE_EXPECTED_LINE_TEXT_BOX, sticky=( N,W ) )
+
+		self.__text_boxes[ 'inital_value_expected_line' ]=KeyValFrame( s_name="initial y value",
+								v_value=self.__inital_value_expected_line,
+								o_type=float,
+								v_default_value=self.__inital_value_expected_line,
+								o_master=self.__subframes[ 'plot_and_stats_params' ],
+								o_associated_attribute_object=self,
+								s_associated_attribute=s_demangler+"inital_value_expected_line",
+								b_is_enabled=True,
+								b_force_disable=False,
+								def_entry_change_command=self.__on_inital_value_expected_line_change,
+								o_validity_tester=o_validity_test_for_inital_value_expected_line,
+								s_tooltip = "Use this as the initial y value,  to use along with the rate (set above)" \
+													+ "~~to make a an x,y set on which to do a linear regression," \
+													+ "~~the resulting line will be  plotted in black",
+								i_labelwidth=max( INITIAL_VALUE_EXPECTED_LINE_LABEL_WIDTH, RATE_CHANGE_EXPECTED_LINE_LABEL_WIDTH ),
+								i_subframe_padding=KEYVAL_SUBFRAME_PADDING )
+		
+		self.__text_boxes[ 'inital_value_expected_line' ].grid( row = o_myc.ROW_NUM_INITIAL_VALUE_EXPECTED_LINE_TEXT_BOX, 
+								column = o_myc.COLNUM_INITIAL_VALUE_EXPECTED_LINE_TEXT_BOX, sticky=( N,W ) )
+
 		return
 	#end __make_text_boxes
 	
@@ -934,6 +1115,43 @@ class PGNeEstimationRegressplotInterface( object ):
 		self.__update_plot_and_stats_text()
 		return
 	#end __on_alpha_change
+
+	def __update_expected_line( self ):
+		if self.__draw_expected_line==True:
+			self.__plotframe.setFlagDrawExpectedLine(True)
+			'''
+			This call removes the expected line from the 
+			current_data of the plotting frame, iff the
+			line is present.
+			'''
+			self.__plotframe.removeExpectedLineFromCurrentData()
+			self.__plotframe.setFlagUpdateWithoutRecalc(True)
+			'''
+			The animate call in this mod's def __do_results_date()
+			will check the flag to add the expected line 
+			(before plotting it will also recalc it according to
+			the current state of the expected_line_manager:
+			'''
+			self.__do_results_update()
+			'''
+			We always reset this flag so that calls to animate()
+			that are not resulting from this checkbox, will always
+			recalculate the regression data:
+			'''
+			self.__plotframe.setFlagUpdateWithoutRecalc(False)
+		else:
+			self.__plotframe.setFlagDrawExpectedLine(False)
+			self.__plotframe.removeExpectedLineFromCurrentData()
+			self.__plotframe.setFlagUpdateWithoutRecalc(True)
+			self.__do_results_update()
+			self.__plotframe.setFlagUpdateWithoutRecalc(False)
+		#end if we are to draw, else remove
+	#end __update_expected_line
+
+	def __on_draw_expected_line_checkbox_change( self ):
+		self.__update_expected_line()
+		return
+	#end __on_draw_expected_line_checkbox_change
 
 	def __get_x_label( self ):
 		s_x_label=None
@@ -1059,15 +1277,13 @@ class PGNeEstimationRegressplotInterface( object ):
 
 		o_tic_label_font_size_scale.grid( row=o_myclass.ROW_NUM_SET_FONT_SIZE_TIC_LABEL_SCALE, 
 											column=o_myclass.COLNUM_SET_FONT_SIZE_TIC_LABEL_SCALE, 
-																			sticky=( N,W ) )
+																					sticky=( N,W ) )
+
 		self.__scales[ 'font_size_labels_tic' ] = o_tic_label_font_size_scale
-
-
 
 		return
 
 	#end __make_scales
-
 
 	def __on_font_size_axis_label_change( self, o_event=None ):
 		if self.__plotframe is not None:
@@ -1190,6 +1406,8 @@ class PGNeEstimationRegressplotInterface( object ):
 		'''
 		self.__tsv_file_manager.setFilter( self.__comboboxes[ 'select_y_variable' ].current_value, 
 																					lambda x : x != "NA" )	
+
+		
 		self.__plotframe=\
 				PGPlottingFrameRegressionLinesFromFileManager( o_master_frame=self.__subframes[ 'plot' ],
 											o_tsv_file_manager=self.__tsv_file_manager,
@@ -1212,8 +1430,9 @@ class PGNeEstimationRegressplotInterface( object ):
 											f_figure_width=self.__plot_width,
 											f_figure_height=self.__plot_height,
 											i_labelfontsize=PLOTLABELFONTSIZE,
-											i_ticklabelsize=TICKLABELFONTSIZE )
-		
+											i_ticklabelsize=TICKLABELFONTSIZE,
+											o_expected_line_manager=self.__expected_line_manager )
+
 		self.__plotframe.grid( \
 					row=o_myc.ROW_NUM_PLOT, 
 					column=o_myc.COLNUM_PLOT, 
@@ -1235,7 +1454,8 @@ class PGNeEstimationRegressplotInterface( object ):
 
 		self.__regress_stats_maker=PGRegressionStats( dltup_table=None,
 															f_confidence_alpha=self.__alpha,
-															v_significant_value=self.__significant_slope )
+															v_significant_value=self.__significant_slope,
+															o_expected_line_manager=self.__expected_line_manager )
 
 		self.__statstext=\
 				PGRegressTableTextFrame( o_master=self.__subframes[ 'stats_text' ], 
@@ -1463,6 +1683,20 @@ class PGNeEstimationRegressplotInterface( object ):
 		return		
 	#end __on_y_scale_change
 
+	def __on_rate_change_expected_line_change( self ):
+		self.__expected_line_manager.rate=self.__rate_change_expected_line
+		self.__update_expected_line()
+		return
+	#end __on_rate_change_expected_line_change
+
+	def __on_inital_value_expected_line_change( self ):
+		self.__expected_line_manager.initial_y_value = \
+					self.__inital_value_expected_line
+		self.__update_expected_line()
+		return
+	#end __on_inital_value_expected_line_change
+	
+
 	def __convert_labels( self, ls_labels, ls_field_list ):
 
 		MAX_LABEL_LEN=25
@@ -1613,6 +1847,7 @@ class PGNeEstimationRegressplotInterface( object ):
 	#end __get_file_name_from_number
 
 	def __get_x_labels_for_numeric_values_representing_file_names( self, dict_data ):
+
 		'''
 		This def should be called by an instance of 
 		PGPlottingFrameRegressionLinesFromFileManager
@@ -1626,8 +1861,8 @@ class PGNeEstimationRegressplotInterface( object ):
 		this inner dict, and will make a for each numeric x value,
 		which is assumed to be a number associated with a file name
 		as given in the self.__file_name_numeric_value_table. 
-
 		'''
+
 		if self.__x_value_field_name == 'original_file':
 			
 			MAX_LABEL_LEN=15
