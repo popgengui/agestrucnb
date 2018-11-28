@@ -176,9 +176,8 @@ class PGLinearRegressionManager( object ):
 
 		f_cdf_f_value = stats.f.cdf( f_f_value, f_df_numerator, f_df_denominator )
 		
-		f_min_extreme_value=f_cdf_t_value if f_cdf_f_value < 0.5 \
+		f_min_extreme_value=f_cdf_value if f_cdf_f_value < 0.5 \
 												else 1-f_cdf_f_value
-
 
 		f_p_value=2*f_min_extreme_value
 
