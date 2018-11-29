@@ -363,7 +363,7 @@ class PGPlottingFrame2DLines( PGPlottingFrame ):
 		https://stackoverflow.com/questions/12236566/setting-different-color-for-each-
 		series-in-scatter-plot-on-matplotlib):
 		'''
-		ar_colors = matplotlib.cm.rainbow(np.linspace(0, 1, len(self.current_data)))
+		ar_colors = matplotlib.cm.rainbow( np.linspace(0, 1, len(self.current_data) ) )
 		i_color_count=-1
 
 		for s_line_name in self.current_data:

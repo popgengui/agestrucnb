@@ -13,6 +13,21 @@ import scipy.stats as stats
 
 FLOAT_PRECISION=1e-64
 
+'''
+When the expected line data has uniform y values, 
+from a zero slope and non-zero initial y value,
+we get zero for residual standard error, and 
+do not wasnt to do an F-test, nor do we want
+to generate a slope comparison in such a case.
+This Exception child class allows caller to
+detect such a case and ignore its own call
+to get a slope comparison (i.e. see class
+PGRegressionStats).
+'''
+class FTestInputError( Exception ):
+	pass
+#end class FTestInputError
+
 class PGLinearRegressionManager( object ):
 	'''
 	Description
@@ -188,7 +203,6 @@ class PGLinearRegressionManager( object ):
 	def __do_welchs_t_test( self, f_other_slope, 
 								f_other_slope_se, 
 								f_other_sample_size ):
-
 		f_t_estimate=None
 
 		f_my_sample_size=float( len( self.__x_values ) )
@@ -339,7 +353,18 @@ class PGLinearRegressionManager( object ):
 			f_squared_se_denominator=f_my_squared_se
 			f_sample_size_numerator=f_other_sample_size
 			f_sample_size_denominator=f_my_sample_size 
-		#end if
+		#end if my squared residuals larger than other, else not
+
+		if f_squared_se_numerator <= FLOAT_PRECISION \
+					or f_squared_se_denominator <= FLOAT_PRECISION:
+
+			raise FTestInputError( "F test (and its following slope comparison) " \
+										+ "will not be performed, " \
+										+ "because one of the two " \
+										+ "regressions has zero " \
+										+ "value for residual standard " \
+										+ "error, indicating an essentially perfect fit." )
+		#end if zero residual se in either term
 
 		f_pval_f_test=self.__do_f_test( f_squared_se_numerator, 
 											f_squared_se_denominator,
@@ -373,7 +398,6 @@ class PGLinearRegressionManager( object ):
 
 		f_prob_values_larger_mag=f_cdf_t_value if f_cdf_t_value < 0.5 \
 													else  1 - f_cdf_t_value 
-
 			
 		f_2tail_pval=2*f_prob_values_larger_mag
 

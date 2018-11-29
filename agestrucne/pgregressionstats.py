@@ -22,6 +22,7 @@ __date__ = "20171016"
 __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 
 import os
+import sys
 
 from numpy import mean, median, isnan
 from scipy import stats
@@ -43,6 +44,7 @@ with the needed values for a slope comparison
 see def __get_stats_as_string:
 '''
 from agestrucne.pglinearregressionmanager import PGLinearRegressionManager
+from agestrucne.pglinearregressionmanager import FTestInputError
 
 class PGRegressionStats( object ):
 	'''
@@ -373,18 +375,27 @@ class PGRegressionStats( object ):
 
 							if sum( lb_all_zeros ) != len ( lb_all_zeros ):
 
-								f_p_value_slope_comparison=self.__get_expected_line_slope_comparison_info( record )
+								try:
+									f_p_value_slope_comparison=self.__get_expected_line_slope_comparison_info( record )
+								except FTestInputError as fte:
 
-								i_sum_slope_comparisons+=1
+									sys.stderr.write( "The program is skipping the regression slope comparison " \
+														 + "due to a problem with the statistical tests: " \
+														 + str( fte ) + "\n" )
+								#end try ... except
 
-								'''
-								2018_11_24. We'll use the same threshold (user settable in the 
-								PGNeEstimationRegressplotInterface instances) for CI intervals in
-								Brian's CI calc, as the p-value threshold.
-								'''
-								if f_p_value_slope_comparison <= self.__confidence_alpha:
-									i_sum_slope_comparison_reject_null += 1
-								#end if sig value
+								if f_p_value_slope_comparison is not None:
+									i_sum_slope_comparisons+=1
+
+									'''
+									2018_11_24. We'll use the same threshold (user settable in the 
+									PGNeEstimationRegressplotInterface instances) for CI intervals in
+									Brian's CI calc, as the p-value threshold.
+									'''
+									if f_p_value_slope_comparison <= self.__confidence_alpha:
+										i_sum_slope_comparison_reject_null += 1
+									#end if sig value
+								#end if we got a non-None return p-value
 
 								
 							else:
@@ -393,7 +404,6 @@ class PGRegressionStats( object ):
 								#####
 								pass
 							#end if we have fit regression info  for the expected line, else skip slope comapare
-							
 						else:
 							##### tempo
 							#print( "Skipping slope comparison p-value, with no expected line fit y values" )
@@ -403,6 +413,7 @@ class PGRegressionStats( object ):
 					else:
 						##### temp
 						#print( "Skipping slope comparison p-value because expected line manager is None" )
+						#####
 						pass
 					#end if we have an expected line manager, else skip slope compare
 
