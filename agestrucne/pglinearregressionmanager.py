@@ -255,6 +255,29 @@ class PGLinearRegressionManager( object ):
 		return f_resid_std_err
 
 	#end __get_residual_standard_error
+	
+	def __compute_t_value_on_null_hypo( self, f_null_hypo_value ):
+		
+		if self.__slope is None or self.__slope_std_error is None:
+			raise Exception( "In PGLinearRegressionManager instance, " \
+						+ "def __compute_t_value_on_null_hypo, " \
+						+ "the program cannot compute a t value " \
+						+ "because this instance  has no slope " \
+						+ "or no slope standard error." )
+		f_t_value=None
+		'''
+		2019_01_15.  This computation is from answer 15 at:
+		https://stats.stackexchange.com/questions
+		/111559/test-model-coefficient-regression-slope
+		-against-some-value
+		
+		'''
+		f_diff_from_hypo=self.__slope - f_null_hypo_value 
+		
+		f_t_value=f_diff_from_hypo/self.__slope_std_error
+		
+		return f_t_value
+	#end def __compute_t_value_on_null_hypo
 
 	def __do_standard_t_test( self, 
 						f_other_slope,
@@ -278,7 +301,6 @@ class PGLinearRegressionManager( object ):
 
 		f_squared_deviation_other_x_values=\
 				self.__get_squared_deviation_from_mean( lf_other_x_values )
-
 
 		f_pooled_error_numerator=( f_my_sample_size - 2 ) * f_my_residual_se_regress**2 \
 									+ ( f_other_sample_size -1 ) * f_other_residual_se_regress **2
@@ -393,7 +415,6 @@ class PGLinearRegressionManager( object ):
 
 		#end if we have needed data, else warning
 		
-
 		f_cdf_t_value=stats.t.cdf( f_t_value, f_dof )
 
 		f_prob_values_larger_mag=f_cdf_t_value if f_cdf_t_value < 0.5 \
@@ -404,6 +425,25 @@ class PGLinearRegressionManager( object ):
 		return f_2tail_pval
 
 	#end getPValueComarisonOfSlopes
+	
+	def getPValueNullHypoExpectedSlope( self, f_slope_null_hypo ):
+		
+		f_2tail_pval=None
+		
+		f_t_value=self.__compute_t_value_on_null_hypo( f_slope_null_hypo )
+		
+		f_dof=len( self.x_values ) - 2
+		
+		f_cdf_t_value=stats.t.cdf( f_t_value, f_dof )
+
+		f_prob_values_larger_mag=f_cdf_t_value if f_cdf_t_value < 0.5 \
+													else  1 - f_cdf_t_value 
+			
+		f_2tail_pval=2*f_prob_values_larger_mag
+
+		return f_2tail_pval
+	
+	#end getPValueNullHypoExpectedSlope
 
 	def hasRegressionInfo( self ):
 		b_info_complete=True
@@ -440,13 +480,13 @@ class PGLinearRegressionManager( object ):
 	@property
 	def y_values( self ):
 		return self.__y_values
-	#end property x_values
+	#end property y_values
 
 	@y_values.setter
 	def y_values( self, lv_values ):
 		self.__y_values=self.__copy_values( lv_values )	
 		return
-	#end setter x_values
+	#end setter y_values
 
 	@property
 	def fit_y_values( self ):
@@ -572,6 +612,12 @@ class PGExpectedLineManager( PGLinearRegressionManager ):
 	of 1,2,3...n.  But it applies the rate on a per cycle
 	basis, sto that if x_1=3 and x_2=5, then y_2 will be
 	y_1*rate*2.
+		
+	2019_01_15.  We've changed the expected line plot, such that the above
+	rate computation is not used, although we keep the method that computes
+	it (as called from doRegression), to retain the functionality.  
+	We now have a new member method makeLinearYValuesUsingRateAndInitY, 
+	in which the "rate" is now the slope "m" in a line y=mx+b. 
 	'''
 
 	def __init__(self,
@@ -587,35 +633,35 @@ class PGExpectedLineManager( PGLinearRegressionManager ):
 		'''
 		Args:
 		f_rate: rate of decline (neg rate) or increase (pos rate) per x unit 
-		the x_values (cycles ) proportion of an initial Nb value that gives the 
+		the x_values (cycles ) proportion of an initial Nb value.  2019_01_15, the 
+		rate is now also used as slope to compute a line with init-y as the first y-value .
 		f_initial_y_value:  the initial y-value that will be adjusted up or down by rate
 		See parent class PGLinearRegressionManager for details about other args.
 		'''
 
 		PGLinearRegressionManager.__init__( self,
-												s_line_name=s_line_name,
-												lv_x_values=lv_x_values,
-												lv_y_values=lv_y_values,
-												s_line_style=s_line_style,
-												s_line_color=s_line_color,
-												f_line_width_adjust=f_line_width_adjust,
-												s_orig_values_line_style=s_orig_values_line_style )
+									s_line_name=s_line_name,
+									lv_x_values=lv_x_values,
+									lv_y_values=lv_y_values,
+									s_line_style=s_line_style,
+									s_line_color=s_line_color,
+									f_line_width_adjust=f_line_width_adjust,
+									s_orig_values_line_style=s_orig_values_line_style )
 
 		self.__rate=f_rate
 		self.__initial_y_value=f_initial_y_value
 		return
 	#end def __init__
 	
-	def __make_y_values_for_regression( self ):
+	def __make_y_values_using_rate_and_init_y( self ):
 		'''
 		Use the rate and initiabl nb value to
-		compute a y val (non-linear for nonzero rate)
+		compute a (non-linear for nonzero rate)
 		series of y values.  These will be used for the
 		linear regression.
 		'''
-
 		lv_y_values=[]
-
+		
 		i_num_x_values=len( self.x_values )
 
 		for idx in range( i_num_x_values ):
@@ -623,15 +669,12 @@ class PGExpectedLineManager( PGLinearRegressionManager ):
 				lv_y_values.append( self.__initial_y_value )
 			else:
 				i_x_interval=self.x_values[ idx ] - self.x_values[ idx - 1 ]
-
 				f_delta=lv_y_values[ idx - 1 ] * self.__rate
-
 				lv_y_values.append( lv_y_values[ idx - 1 ] + f_delta )
-
 			#end if first y value else not
 		#end for each x value			
 		return lv_y_values
-	#end __make_y_values_for_regression
+	#end __make_y_values_using_rate_and_init_y
 
 	def doRegression( self ):
 		'''
@@ -640,11 +683,45 @@ class PGExpectedLineManager( PGLinearRegressionManager ):
 		a regression is possible.  We call the parent
 		version of this method after we get y values
 		'''
-		lv_y_values=self.__make_y_values_for_regression()
+		lv_y_values=self.__make_y_values_using_rate_and_init_y()
 		self.y_values=lv_y_values
 		PGLinearRegressionManager.doRegression( self )
-
 	#end def do_regression
+	
+	def makeLinearYValuesUsingRateAndInitY( self ):
+		'''
+		2019_01_15.  This method is added because we decided
+		to skip regressing on the y values derived from init-y
+		and a non-linear rate (given a set of x values).  
+		Instead we are now calculating a p-value for 
+		each ldne-based regressed line using the "rate" of 
+		our expected line as the (null) hypothesized
+		slope.
+		'''
+		
+		if self.x_values is None:
+			raise Exception( "In PGExpectedLineManager instance, " \
+								+ "method makeLinearYValuesUsingRateAndInitY, " \
+								+ "there are no x_values (x_values are None)." )
+		#end if no x_values
+		
+		lv_y_values=[]
+		
+		#We shift the x values so that x_1=0 (which makes our initial y value
+		#the first:
+		v_x0=self.x_values[0]
+		
+		lv_shifted_x_values=[ v_this_x - v_x0 for v_this_x in self.x_values ]
+		
+		for f_x in lv_shifted_x_values:
+			lv_y_values.append( ( f_x * self.__rate ) \
+										+ self.__initial_y_value )
+		#end for each shifted x value
+		
+		self.y_values=lv_y_values
+		
+		return 
+	#end makeLinearYValuesUsingRateAndInitY
 
 	@property
 	def rate( self ):
@@ -667,6 +744,8 @@ class PGExpectedLineManager( PGLinearRegressionManager ):
 		self.__initial_y_value=f_val
 		return
 	#end setter initial_y_value
+	
+#end class PGExpectedLineManager
 
 if __name__ == "__main__":
 	pass

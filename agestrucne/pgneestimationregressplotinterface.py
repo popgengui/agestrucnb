@@ -269,6 +269,14 @@ class PGNeEstimationRegressplotInterface( object ):
 		    "auto".  Now we set to type float and with a
 		    default value of zero:
 		2.  Adding new member inital_value_expected_line.
+		
+		2019_01_15. We are reverting back to using an expected
+		slope value and computing a line using it as the slope
+		(m) and an initia value (b) in the typical y=mx+b.  However,
+		since this computatioin is interior to the PGExpectedLineManager
+		object, we'll keep "rate_change_expected_line" as the
+		variable member name, and change only the label used in
+		the interface from "rate" to "slope"
 		'''
 
 		self.__master_frame=o_master_frame
@@ -384,8 +392,9 @@ class PGNeEstimationRegressplotInterface( object ):
 		2018_11_05. New object to allow user to plot expected line along with the regression
 		lines:
 		'''
-		self.__expected_line_manager=PGExpectedLineManager( f_rate=self.__rate_change_expected_line,
-										f_initial_y_value=self.__inital_value_expected_line )
+		self.__expected_line_manager=PGExpectedLineManager( \
+				f_rate=self.__rate_change_expected_line,
+				f_initial_y_value=self.__inital_value_expected_line )
 		return
 	#end __make_expected_line_manager
 
@@ -924,8 +933,15 @@ class PGNeEstimationRegressplotInterface( object ):
 		MIN_ALPHA=0.0
 		MAX_ALPHA=1.0
 
-		MIN_RATE_CHANGE_EXPECTED_LINE=-1.0
-		MAX_RATE_CHANGE_EXPECTED_LINE=1.0
+		'''
+		2019_01_15. We've revised the calculation on the 
+		expected line in the PGExpectedLineManager
+		object, to use the rate as a "slope" proper,
+		so that the range is now extended from -1<=m<=1,
+		to effectively any value:
+		'''
+		MIN_RATE_CHANGE_EXPECTED_LINE=-1e100
+		MAX_RATE_CHANGE_EXPECTED_LINE=+1e100
 
 		MIN_INITIAL_VALUE_EXPECTED_LINE=-1e32
 		MAX_INITIAL_VALUE_EXPECTED_LINE=1e32
@@ -1025,8 +1041,15 @@ class PGNeEstimationRegressplotInterface( object ):
 		
 		self.__text_boxes[ 'alpha' ].grid( row = o_myc.ROW_NUM_ALPHA_TEXT_BOX, 
 								column = o_myc.COLNUM_ALPHA_TEXT_BOX, sticky=( N,W ) )
+		
+		'''
+		2019_01_15.  Note that we've changed the label and tooltips for the rate change
+		and the initial-y value text boxes, to reflect our latest revision, which allows
+		the user to plot a line y=mx+b, with m=rate_change_expected_line, and b=initial_y_value
+		(see changes in code for class PGExpectedLineManager).
+		'''
 
-		self.__text_boxes[ 'rate_change_expected_line' ]=KeyValFrame( s_name="rate change", 
+		self.__text_boxes[ 'rate_change_expected_line' ]=KeyValFrame( s_name="expected slope", 
 								v_value=self.__rate_change_expected_line,
 								o_type=float,
 								v_default_value=self.__rate_change_expected_line,
@@ -1037,15 +1060,14 @@ class PGNeEstimationRegressplotInterface( object ):
 								b_force_disable=False,
 								def_entry_change_command=self.__on_rate_change_expected_line_change,
 								o_validity_tester=o_validity_test_for_rate_change_expected_line,
-								s_tooltip = "Use this as a rate of increase (positive) or decrease (negative) value" \
-													+ "~~between zero and one, per cycle, to make a an x,y set " \
-													+ "on which to do a linearlinear regression,~~the resulting line" \
-													+ "plotted in black",
-
+								s_tooltip = "Use this as a slope (and the initial y value) " \
+													+ "to plot a line (in black),~~for comparison " \
+													+ "with the regression lines.", 
 								i_labelwidth=RATE_CHANGE_EXPECTED_LINE_LABEL_WIDTH,
 								i_subframe_padding=KEYVAL_SUBFRAME_PADDING )
 		
-		self.__text_boxes[ 'rate_change_expected_line' ].grid( row = o_myc.ROW_NUM_RATE_CHANGE_EXPECTED_LINE_TEXT_BOX, 
+		self.__text_boxes[ 'rate_change_expected_line' ].grid( \
+								row = o_myc.ROW_NUM_RATE_CHANGE_EXPECTED_LINE_TEXT_BOX, 
 								column = o_myc.COLNUM_RATE_CHANGE_EXPECTED_LINE_TEXT_BOX, sticky=( N,W ) )
 
 		self.__text_boxes[ 'inital_value_expected_line' ]=KeyValFrame( s_name="initial y value",
@@ -1059,9 +1081,9 @@ class PGNeEstimationRegressplotInterface( object ):
 								b_force_disable=False,
 								def_entry_change_command=self.__on_inital_value_expected_line_change,
 								o_validity_tester=o_validity_test_for_inital_value_expected_line,
-								s_tooltip = "Use this as the initial y value,  to use along with the rate (set above)" \
-													+ "~~to make a an x,y set on which to do a linear regression," \
-													+ "~~the resulting line will be  plotted in black",
+								s_tooltip = "Use this as the initial y value,  " \
+												+ "to use along with the slope (set above)" \
+												+ "~~to plot an \"expected\" line (in black).",
 								i_labelwidth=max( INITIAL_VALUE_EXPECTED_LINE_LABEL_WIDTH, RATE_CHANGE_EXPECTED_LINE_LABEL_WIDTH ),
 								i_subframe_padding=KEYVAL_SUBFRAME_PADDING )
 		

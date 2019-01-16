@@ -146,6 +146,7 @@ class PGRegressionStats( object ):
 	#end __get_y_values_for_a_zero_slope_null_hypo
 
 	def __get_source_file_name_from_file_manager_key( self, s_field_values ):
+		
 		'''
 		This def assumes that the first field,
 		as delimited by the concatenated field 
@@ -201,18 +202,31 @@ class PGRegressionStats( object ):
 												s_line_color="black",
 												f_line_width_adjust=1.0  )
 		o_my_regress.doRegression()
-
+		
+		'''
+		2019_01_15. Instead of doing the 2-regression comparison, we now simply get 
+		a p-value computed on the null hypothesis that the true slope is that as
+		given by the rate used to compute the expected line.  Hence, instead of 
+		using the regression of the expected line manager, and our regression
+		info as the passed-in data, we now use the rate value, now in the interface
+		labelled "expected slope" and stored in the expected line
+		manager, and pass it into our RegressionManager for our own regression:
+		'''
+		'''
+		Remm'd out 2019_01_15.
 		f_p_value=self.__expected_line_manager.getPValueComarisonOfSlopes( \
 									f_other_slope=o_my_regress.slope,
 									f_other_intercept=o_my_regress.intercept,
 									f_other_slope_standard_error=o_my_regress.slope_std_error, 
 									lf_other_x_values=o_my_regress.x_values,
 									f_other_residual_se=o_my_regress.residual_standard_error )
-
+		'''
+		f_rate=self.__expected_line_manager.rate
 		
-
+		f_p_value=o_my_regress.getPValueNullHypoExpectedSlope( f_rate )
+		
 		return f_p_value
-	#end __get_expected_line_slope
+	#end __get_expected_line_slope_comparison_info
 		
 	def __get_stats_as_string( self, b_use_file_name_only_for_column_1=True ):
 		'''
@@ -248,12 +262,13 @@ class PGRegressionStats( object ):
 			his revisions.
 			'''
 			tableString+=STATS_TABLE_DELIM.join( [ "Source",
-													"Slope",
-													"Intercept" ,
-													"CI("+str(confPercent)+"%)", 
-													"P-value",
-													"P-value-expected-slope",
-													"\n" ] )
+												"Slope",
+												"Intercept" ,
+												"CI("+str(confPercent)+"%)", 
+												"P-value",
+												"P-value-rejecting-expected-slope",
+												"\n" ] )
+			
 			slopeVctr = []
 			confidenceVctr = []
 			alpha_vctr=[]
@@ -333,7 +348,9 @@ class PGRegressionStats( object ):
 					posted to master repository today or yesterday.
 					'''
 					#calculate significant from CDF(p-value)
+					
 					alpha_check = 1-(abs(p_score-0.5)*2)
+					
 					if self.__confidence_alpha > alpha_check:
 						if slope > 0:
 							positiveCount+=1
@@ -364,52 +381,33 @@ class PGRegressionStats( object ):
 					f_p_value_slope_comparison=None
 
 					if self.__expected_line_manager is not None:
+						'''
+						2019_01_15.  We are now plotting a line using a slope and initial y value,
+						and no longer doing a regression on the non-linear curve that we were computing using a "rate" (now simply a slope of the expected line), an init y, and the x values.  This means we can now simply get the current "rate" value in the expected line manager, instead of querying it for regression info.  Hence we no longer gate the computation with the check for anything but an existing expected line manager,
+						and use whatever current value it has for its "rate" member. This means, of course, that we assume the rate number agrees with whatever value in is the rate text box (now labeled "expected slope"). The effect on this code is to get rid of conditionals that check for regression info on the expected line, and for a non-all-zero y series
+						'''
 
-						if self.__expected_line_manager.hasRegressionInfo():
+						try:
+							f_p_value_slope_comparison=self.__get_expected_line_slope_comparison_info( record )
+						except FTestInputError as fte:
+
+							sys.stderr.write( "The program is skipping the regression slope comparison " \
+													+ "due to a problem with the statistical tests: " \
+													+ str( fte ) + "\n" )
+						#end try ... except
+
+						if f_p_value_slope_comparison is not None:
+							i_sum_slope_comparisons+=1
 
 							'''
-							Default values loaded into interface give zero rate and zero
-							initial y value, for which regression we will not do a slope comparison.
+							2018_11_24. We'll use the same threshold (user settable in the 
+							PGNeEstimationRegressplotInterface instances) for CI intervals in
+							Brian's CI calc, as the p-value threshold.
 							'''
-							lb_all_zeros=[ f_val<=PRECISION for f_val in self.__expected_line_manager.y_values ]
-
-							if sum( lb_all_zeros ) != len ( lb_all_zeros ):
-
-								try:
-									f_p_value_slope_comparison=self.__get_expected_line_slope_comparison_info( record )
-								except FTestInputError as fte:
-
-									sys.stderr.write( "The program is skipping the regression slope comparison " \
-														 + "due to a problem with the statistical tests: " \
-														 + str( fte ) + "\n" )
-								#end try ... except
-
-								if f_p_value_slope_comparison is not None:
-									i_sum_slope_comparisons+=1
-
-									'''
-									2018_11_24. We'll use the same threshold (user settable in the 
-									PGNeEstimationRegressplotInterface instances) for CI intervals in
-									Brian's CI calc, as the p-value threshold.
-									'''
-									if f_p_value_slope_comparison <= self.__confidence_alpha:
-										i_sum_slope_comparison_reject_null += 1
-									#end if sig value
-								#end if we got a non-None return p-value
-
-								
-							else:
-								##### temp
-								#print( "Skipping slope comparison p-value:  all expected line y-values are zeros" )
-								#####
-								pass
-							#end if we have fit regression info  for the expected line, else skip slope comapare
-						else:
-							##### tempo
-							#print( "Skipping slope comparison p-value, with no expected line fit y values" )
-							#####
-							pass
-						#end if the expected line values are not all zeros, else skip slope compare
+							if f_p_value_slope_comparison <= self.__confidence_alpha:
+								i_sum_slope_comparison_reject_null += 1
+							#end if sig value
+						#end if we got a non-None return p-value
 					else:
 						##### temp
 						#print( "Skipping slope comparison p-value because expected line manager is None" )
@@ -498,12 +496,27 @@ class PGRegressionStats( object ):
 					#end if val>0 else less else
 				#end for alpha val
 
+				'''
+				2019_01_15.  We now use the "rate" the user has entered (now labeled "expected slope"
+				in the plotting interface) as a hypothesized true slope, as we have changed the statistical
+				test to that of using this rate as the slope b_hat0 in the null hyphothesis H0: b_hat=b_hat0,
+				for a given regression's slope estimate.
+				'''
 				f_slope_expected_slope=self.__get_printable_value_none_or_float( \
-																self.__expected_line_manager.slope, PRECISION )
-				f_confidence_alpha=self.__get_printable_value_none_or_float( self.__confidence_alpha, PRECISION )
-				f_intercept_expected_slope=self.__get_printable_value_none_or_float( \
-																self.__expected_line_manager.intercept, PRECISION )
+													self.__expected_line_manager.rate, PRECISION )
 				
+				f_confidence_alpha=self.__get_printable_value_none_or_float( \
+													self.__confidence_alpha, PRECISION )
+				'''
+				2019_01_15.  This "intercept" value is no longer used in the statisical test,
+				and so is no longer reported in the stats text box:
+				'''
+				'''
+				2019_01_15. Rem'd out.
+				f_intercept_expected_slope=self.__get_printable_value_none_or_float( \
+														self.__expected_line_manager.intercept, 
+														PRECISION )
+				'''
 				
 				s_stats_string = "Max Regression Slope: "+str( round( maxSlope, PRECISION ) )+"\n"
 				s_stats_string +="Min Regression Slope: "+str( round( minSlope, PRECISION ) )+"\n"
@@ -512,7 +525,8 @@ class PGRegressionStats( object ):
 				s_stats_string += "Mean Variance Estimate:"+str( round( averageSscore) ) +"\n" 
 
 				s_stats_string +="\n"
-				s_stats_string +="Comparison to a slope of "+str( round( self.__significant_value, PRECISION ) ) \
+				s_stats_string +="Comparison to a slope of " \
+						+str( round( self.__significant_value, PRECISION ) ) \
 						+ " at alpha =  " \
 						+ str( round( self.__confidence_alpha, PRECISION ) )+"\n"
 				s_stats_string +=BULLET_INDENTED \
@@ -523,18 +537,14 @@ class PGRegressionStats( object ):
 								+ "Negative Slopes: "+str( round( negativeCount, PRECISION ) ) \
 								+ "\n" + BULLET_INDENTED \
 								+ "Non-Number Slopes: "+str( round( Uncountable, PRECISION ) )
-				s_stats_string+="\n\n"
-				s_stats_string+="Test equality of slopes with regression on expected line " \
-						+ "\nwith a slope " \
-						+ str( f_slope_expected_slope ) \
-						+ ", and intercept, " \
-						+ str( f_intercept_expected_slope ) \
-						+ "\nand significance threshold at " \
-						+ str( f_confidence_alpha ) + "\n" 
-				s_stats_string += BULLET_INDENTED \
-								+ "Total lines rejecting: " + str( i_sum_slope_comparison_reject_null ) \
-								+ "\n" + BULLET_INDENTED \
-								+ "Total lines accepting: " + str( i_sum_slope_comparisons - i_sum_slope_comparison_reject_null ) 
+				s_stats_string+="\n\n" \
+								+ "Total rejecting (at p <= " \
+								+ str( f_confidence_alpha ) \
+								+ ") that slope = " \
+								+ str( f_slope_expected_slope ) \
+								+ ": " \
+								+ str( i_sum_slope_comparison_reject_null ) \
+								+ " of " + str( i_sum_slope_comparisons ) 
 				s_stats_string +="\n\n"
 				s_stats_string +=tableString
 
@@ -615,4 +625,3 @@ class PGRegressionStats( object ):
 if __name__ == "__main__":
 	pass
 #end if main
-

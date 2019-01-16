@@ -1066,7 +1066,15 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 			lv_x_values=list(  self.current_data.values() )[ 0 ][ "x" ] 
 
 			if len (lv_x_values) > 1:
-
+				'''
+				2019_01_15.  We no longer regress on the x,y values given
+				by computing y given x vals, a fixed rate, and an init y. 
+				Instead of plotting a regression on those values, we now
+				just plotting the original y-values.
+				'''
+				
+				'''
+				2019_01_15.  Rem out
 				self.expected_line_manager.x_values=lv_x_values
 
 				self.expected_line_manager.doRegression()
@@ -1074,13 +1082,24 @@ class PGPlottingFrameRegressionLinesFromFileManager( PGPlottingFrame2DLinesFromF
 				dlf_xy=self.expected_line_manager.getDictRegressedXYValues()
 				self.current_data[ s_expected_line_name ] = \
 											dlf_xy[ s_expected_line_name ]
+				'''
 				
 				'''
 				2018_11_23.  We now also plot the original x,y pairs on which
-				the expected line is regressed:L
+				the expected line is regressed:
+				2019_01_15.  Because we now skip regressing on the rate + init-y
+				derived y values, we have added a method in the PGExpectedLineManager
+				object to calculate the y-values given x_values.  Note that, as seen
+				in the remm'd out code above, that this calculation was intitially done
+				via the call to self.expected_line_manager.doRegression
 				'''
+				self.expected_line_manager.x_values=lv_x_values
+				self.expected_line_manager.makeLinearYValuesUsingRateAndInitY()
+		
 				dlf_xy_raw=self.expected_line_manager.getDictOriginalXYValues()
+				
 				s_raw_curve_line_name=self.expected_line_manager.orig_values_line_name
+				
 				self.current_data[ s_raw_curve_line_name ] = \
 											dlf_xy_raw[ s_raw_curve_line_name ]
 
