@@ -2434,7 +2434,13 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 	
 	def onChangeInCycleFilter( self ):
 		'''
-		2019_01_22.  Currently no actions taken on change in string.
+		2019_01_22.  Currently no actions taken on change in string. Note that
+		when the user changes and hits enter in the textbox, 
+		the KeyVal object associated with the "cycle_filter" parameter automatically
+		updates the param to the current string value, and the string itself is processed
+		(when flag do_cycle_filter is True) by the pgopsimupop instance doing the simulation 
+		(also, on change the new string is processed by the validation def, which the KeyVal 
+		also calls on change in the string).
 		'''
 		return 
 	#end onChangeInCycleFilter

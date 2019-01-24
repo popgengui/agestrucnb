@@ -11,7 +11,7 @@ VERY_VERBOSE=False
 
 import sys
 #For validating a cycle range filter:
-import pgintrangetools as pgrange
+import agestrucne.pgintrangetools as pgrange
 
 def validateNbAdjustment( s_adjustment, i_highest_cycle_number=1e20 ):
 	'''
