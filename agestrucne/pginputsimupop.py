@@ -18,6 +18,7 @@ LAMBDA_IGNORE=1.0
 DEFAULT_NB_VAR=0.05
 DEFAULT_SNP_HET_INIT=0.5
 DEFAULT_MSAT_HET_INIT=0.8
+DEFAULT_CYCLE_FILTER="1-99999"
 
 '''
 2018_04_18.  Adding new parameter
@@ -731,6 +732,31 @@ class PGInputSimuPop( object ):
 		#end if config has genome, loci_file_name
 
 		self.__update_attribute_config_file_info( "loci_file_name", "genome", "loci_file_name" )
+		
+		
+		'''
+		2019_01_20.  We add two new controls, a flag(checkbox in the gui) and a string (textbox
+		in the gui).  The flag value will activate and deactivate the use of the string's series
+		of cycle ranges.  The string will be of form "m-n,m_1-n_1,m_2-n_2..." such that any simulation
+		cycle of number i will only be recorded if for one of the m_j-n_j, m_j<=i<=n_j.  See the
+		pgopsimupop instance, which uses utility classes to parse the string and apply the filter.
+		'''
+		
+		if config.has_option( "sim", "do_cycle_filter" ):
+			self.do_cycle_filter=config.getboolean( "sim", "do_cycle_filter" )
+		else:
+			self.do_cycle_filter=False
+		#end if config has sim, do_cycle_filter
+		
+		self.__update_attribute_config_file_info( "do_cycle_filter", "sim", "do_cycle_filter" )
+		
+		if config.has_option( "sim", "cycle_filter" ):
+			self.cycle_filter=config.get( "sim", "cycle_filter" )
+		else:
+			self.cycle_filter=DEFAULT_CYCLE_FILTER
+		#end if we have a cycle_filter, else use default
+		
+		self.__update_attribute_config_file_info( "cycle_filter", "sim", "cycle_filter" )
 
 		return
 
@@ -1505,6 +1531,7 @@ class PGInputSimuPop( object ):
 #end class PGInputSimuPop
 
 if __name__ == "__main__":
+	
 	import agestrucne.pgutilities as pgut
 	import agestrucne.pgparamset as pgps
 	import agestrucne.pgsimupopresources as pgsr	

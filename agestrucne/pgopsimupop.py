@@ -66,6 +66,23 @@ if DO_PUDB:
 import agestrucne.apgoperation as modop
 import agestrucne.pgutilities as pgut
 
+'''
+2019_01_21.  We have a new control 
+(simulation config parameter) that
+allows users to filter which pops
+(cycles) are written to output.
+this PGOpSimuPop class object now
+uses new classes in pgutilityclasses.py
+to convert the param, delivered to this
+class by the pginputsimupop member instance,
+as a string.  This class then converts the
+string into an instance of class CycleRanges,
+which then can be accessed by the output
+writer def here, to decide whether a given 
+pop should be written.
+'''
+import agestrucne.pgintrangetools as pgrt
+
 #for the lambda-ignore constant:
 import agestrucne.pginputsimupop as pgin
 
@@ -473,6 +490,15 @@ class PGOpSimuPop( modop.APGOperation ):
 		self.__user_supplied_allele_frequencies=None
 		
 		
+		'''
+		2019_01_21.  We add a new member object
+		that manages the new parameter cycle_ranges,
+		that allows users to filter out which pops
+		are written to output.
+		'''
+		self.__cycle_range_filter=None
+		
+		
 		return
 	#end __init__
 
@@ -613,8 +639,15 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			self.__nb_and_census_adjustment_by_cycle=self.input.makePerCycleNbAdjustmentList()
 
-
-
+			'''
+			2019_01_21.  We have  new parameters "cycle_filter" and its
+			activator flag "do_cycle_filter", and here we check the flag
+			and if true creatE the CycleRanges instance as assigned to
+			our new member self.__cycle_range_filter 
+			'''
+			if self.input.do_cycle_filter == True:
+				self.__cycle_range_filter=pgrt.CycleRanges( self.input.cycle_filter, b_using_hyphen=True  )
+			#end if we have a cycle (pop) filter
 
 			'''
 			2018_05_27.  We have added a new input parameter, loci_file_name, which
@@ -2764,6 +2797,31 @@ class PGOpSimuPop( modop.APGOperation ):
 			if i_one_indexed_gen < ( self.input.startSave ):
 				return True
 			#end if gen < startSave
+			
+			'''
+			2019_01_21.  We have a new pop (gen, cycle) filter
+			that will supercede any het filter below, in which
+			the the user has supplied us with one or more ranges,
+			m-n, m<=n, such that if our (one-indexed) gen number
+			does not meet at least one range such that 
+			m<=gen<=n, we do not write the pop to file. Note that
+			as of today, at least, we skip all het-testing, so that
+			even if the gen meeds the het filter, we do not consider
+			it for the count of requested within-het cycles.
+			'''
+			if self.__cycle_range_filter is not None:
+				b_gen_is_within_range=\
+					self.__cycle_range_filter.isInsideARange( \
+												i_one_indexed_gen )
+				if not b_gen_is_within_range:
+					return True
+				else:
+					'''
+					Use this case as needed to debug filter with print statement"
+					'''
+					pass
+				#end if this gen number is out of range
+			#end if we have a cycle (pop, gen) filter, check if gen is in a range.	
 
 			rep = pop.dvars().rep
 
@@ -2771,7 +2829,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			Testing age counts per gen
 			'''
 			totals_by_age={}
-
+			
 			if self.__output_mode==PGOpSimuPop.OUTPUT_GENEPOP_ONLY:
 
 				if self.input.do_het_filter == False:
@@ -2790,7 +2848,7 @@ class PGOpSimuPop( modop.APGOperation ):
 						2018_04_16.  We now increment the pop number,
 						to make all output pop-number records consistent
 						with 1-indexed series, instead of simuPOP's zero
-						indexed pop numbers:L
+						indexed pop numbers:
 						'''
 						i_one_indexed_pop_number=gen+1
 						self.__file_for_het_filter.write( str( i_one_indexed_pop_number ) + "\t" \

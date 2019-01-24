@@ -699,6 +699,11 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		our interface.
 		'''
 		LABEL_ALWAYS_ENABLED=True
+		
+		'''
+		2019_01_20.  For new control cycle filter.
+		'''
+		ENTRY_WIDTH_CYCLE_FILTER=25
 
 		self.__param_key_value_frames={}
 
@@ -844,13 +849,23 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 				#instance so it will be the object whose attribute (with name s_param)
 				#is reset when user resets the value in the KeyValFrame:
 				if s_param_control_type == "entry":
-
+					
 					i_entry_width=None
 
 					if type( v_val ) == str:
-						i_entry_width=len( v_val )
+						'''
+						2019_01_20.  New control with string gets 
+						extra-wide box.
+						'''
+						if s_param == "cycle_filter":
+							i_entry_width=ENTRY_WIDTH_CYCLE_FILTER
+						else:
+							i_entry_width=len( v_val )
+						#end if cycle_filter box, else standard width for str
 					elif s_param == "nbadjustment":
 						i_entry_width=len( v_val ) + 10
+					elif s_param == "cycle_filter":
+						i_entry_width=ENTRY_WIDTH_CYCLE_FILTER
 					else:
 						i_entry_width=7
 					#end if string param type, else nbadjustment list, else other
@@ -2355,5 +2370,77 @@ class PGGuiSimuPop( pgg.PGGuiApp ):
 		
 		return
 	#end __on_loading_user_loci_file
+	
+	'''
+	2019_01_20.  We have two new controls, a checkbox and a textbox, in the Simulation
+	section.  The checkbox activates/deactivates use of the string in the test box
+	as a cycle filter such that pop number i will be written to output only if 
+	m_j<=i<=n_j, where m_j-n_j  is one of a series of comma-separated ranges in 
+	the string ( "m_1-n_1,m_2-n_2....").
+	'''
+	
+	def onChangeInDoCycleFilter( self ):
+
+		s_cycle_filter_attribute_name="cycle_filter"
+
+		if s_cycle_filter_attribute_name not in self.__param_key_value_frames:
+			s_msg="In PGGuiSimuPop instance, def onChangeInDoCycleFilter, " \
+						+ "the program cannot find a key value frame associated " \
+						+ "with the attribute name: " + s_cycle_filter_attribute_name + "."
+			PGGUIErrorMessage( self, s_msg )
+			raise Exception( s_msg )
+		#end if no key val frame for the cycle filter ratio param
+
+		o_keyvalueframe=self.__param_key_value_frames[ s_cycle_filter_attribute_name ]
+
+		if self.__input.do_cycle_filter == False or self.__simulation_is_in_progress:
+			o_keyvalueframe.setStateControls( "disabled" )
+			o_keyvalueframe.setLabelState( "disabled" )
+			o_keyvalueframe.setEntryFontColor( "gray" )
+		else:
+			o_keyvalueframe.setStateControls( "enabled" )
+			o_keyvalueframe.setLabelState( "enabled" )
+			o_keyvalueframe.setEntryFontColor( "black" )
+		#end if we are not filtering cycle ranges else we are 
+
+		return
+	#end onChangeInDoCycleFilter
+	
+	def onLoadingCycleFilter( self ):
+		'''
+		If the bool checkbox-based do_cycle_filter
+		param has been loaded we set the state of 
+		our filter control accordingly.
+		'''
+		if hasattr( self.__input, 'do_cycle_filter' ):
+			self.onChangeInDoCycleFilter()
+		#end if we have the flag
+		return
+	#end onLoadingCycleFilter
+	
+	def onLoadingDoCycleFilter( self ):
+		'''
+		Called when the checkbox-based param do_cycle_filter
+		is loaded -- we coordinate the state of the filter
+		control based on its value (if the filter control
+		exists).
+		'''
+		s_cycle_filter_attribute_name="cycle_filter"
+		if s_cycle_filter_attribute_name in self.__param_key_value_frames:
+			self.onChangeInDoCycleFilter()
+		#end if we have the cycle filter control
+		return
+	#end onLoadingDoCycleFilter
+	
+	def onChangeInCycleFilter( self ):
+		'''
+		2019_01_22.  Currently no actions taken on change in string.
+		'''
+		return 
+	#end onChangeInCycleFilter
+	
+	
+	
+	
 
 #end class PGGuiSimuPop

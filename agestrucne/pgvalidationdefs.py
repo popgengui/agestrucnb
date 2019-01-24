@@ -9,6 +9,10 @@ __author__ = "Ted Cosart<ted.cosart@umontana.edu>"
 VERBOSE=False
 VERY_VERBOSE=False
 
+import sys
+#For validating a cycle range filter:
+import pgintrangetools as pgrange
+
 def validateNbAdjustment( s_adjustment, i_highest_cycle_number=1e20 ):
 	'''
 	2017_03_08. This def is created to handle the PGInputSimuPop
@@ -115,6 +119,7 @@ def validateNbAdjustment( s_adjustment, i_highest_cycle_number=1e20 ):
 #end validateNbAdjustment
 
 def validateStartSave( i_value, i_max_cycle_number=None ):
+	
 	b_return_val=True
 
 	if type( i_value ) != int:
@@ -186,6 +191,23 @@ def validateHetFilter( s_het_filter ):
 	return b_return_value
 #end validateHetFilter
 
+def validateCycleRangeFilter( s_range_string ):
+	
+	b_return_value=True
+	
+	try:
+		o_these_ranges=pgrange.CycleRanges( s_range_string, b_using_hyphen=True )
+	except Exception as oe:
+		sys.stderr.write( "In mod pgvalidationdefs.py, " \
+					+ "def, validateCycleFilter, " \
+					+ "error trying to make ranges object, " \
+					+ "error msg: " + str( oe ) + "\n" )
+		b_return_value=False
+	#end try...except
+	
+	return b_return_value
+
+#end def validateCycleFilter
 
 if __name__ == "__main__":
 	pass

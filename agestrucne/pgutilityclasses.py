@@ -1021,6 +1021,7 @@ class ValueValidator( object ):
 		self.__value=v_value
 		return
 	#end __init__
+	
 	def __callable_after_eval( self, v_bool_expression_or_function_ref ):
 		b_return_value=True
 
@@ -1646,8 +1647,9 @@ if __name__ == "__main__":
 #		print( o.isValid() )
 #		print( o.reportValidity() )
 
-	o_lc=LDNENbBiasCorrector( 200, 0.78 )
-	print( o_lc.corrected_nb )
-
+#	o_lc=LDNENbBiasCorrector( 200, 0.78 )
+#	print( o_lc.corrected_nb )
+	
+	pass
 #end if main
 

@@ -210,7 +210,6 @@ class PGParamSet( object ):
 			ls_vals= s_line.strip().split( "\t" )
 
 			try:
-
 				s_shortname=ls_vals[ PGParamSet.IDX_PARAM_SHORTNAME ]
 
 				self.__set_parameter( s_shortname)
