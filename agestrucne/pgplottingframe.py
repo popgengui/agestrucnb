@@ -32,7 +32,23 @@ matplotlib import, seems to have solved it.
 '''
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+
+'''
+2019_04_12.  With python3.7 via anaconda on mac os, i find an import error
+not finding the package,NavigationToolbar2TkAgg.  The solution as found on line
+is to import instead, NavigationToolbar2Tk, the newer version of the former, now
+not just deprecated but gone. Note that this revision is done to a versio of the
+program that has develop-branch-only features, so I applied the identical revision
+to the this module in a local git master branch in /home/ted/documents/negui_project
+/github_installs/master, and commited it to the master, as well as the pip repository
+as version 0.1.29.
+'''
+try:
+	from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+except ImportError as oie:
+	from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+#end try...except
+
 from matplotlib.figure import Figure
 import matplotlib.animation as animation
 from matplotlib import style
