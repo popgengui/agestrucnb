@@ -32,7 +32,18 @@ matplotlib import, seems to have solved it.
 '''
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+
+'''
+2019_04_11. Trial with anaconda3, python 3.7, on mac os, shows the
+NavigationToolbar2TkAgg is gone, and now you need to import
+NavigationToolbar2Tk instead.
+'''
+try:
+	from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+except ImportError as eie:
+	from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+#end try
+
 from matplotlib.figure import Figure
 import matplotlib.animation as animation
 from matplotlib import style
