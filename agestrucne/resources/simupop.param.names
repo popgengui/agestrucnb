@@ -90,7 +90,7 @@ survivalMale	Male survival;Population;2;0;15;None;listfloat;None;None;Male Survi
 gammaAFemale	Female gamma A;Population;2;0;16;None;listfloat;None;None;Female Gamma A;entry;None;x is None or ( type(x)==float );None;enabled;None
 gammaBFemale	Female gamma B;Population;2;0;17;None;listfloat;None;None;Female Gamma B;entry;None;x is None or ( type(x)==float );None;enabled;None
 gammaAMale	Male gamma A;Population;2;0;18;None;listfloat;None;None;Male Gamma A;entry;None;x is None or ( type(x)==float );None;enabled;None
-gammaBMale	Male gamma B;Population;2;0;19None;listfloat;None;None;Male Gamma B;entry;None;x is None or ( type(x)==float );None;enabled;None
+gammaBMale	Male gamma B;Population;2;0;19;None;listfloat;None;None;Male Gamma B;entry;None;x is None or ( type(x)==float );None;enabled;None
 #this is a dummy entry, for an Nb param value that is assigned, checked and calculated within the input object, and accessed only
 #by the pgopsimupop object:
 Nb_orig_from_pop_section	Nb derived from supplied params, for generator assignment;suppress;0;0;6;0;int;None;None;"";entry;None;type(x)==int;None;enabled;None
