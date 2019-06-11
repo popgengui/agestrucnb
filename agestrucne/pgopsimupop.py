@@ -2081,6 +2081,7 @@ class PGOpSimuPop( modop.APGOperation ):
 
 			'''
 			#gen = self.__litterSkipGenerator(pop, subPop)
+
 			gen=self.__generator_called_by_restricted_generator( pop, subPop )
 
 			#print 1, pop.dvars().gen, nb
@@ -2273,6 +2274,7 @@ class PGOpSimuPop( modop.APGOperation ):
 			if ind.sex() == 1:  # male
 				a = self.input.gammaAMale[int(ind.age) - 1]
 				b = self.input.gammaBMale[int(ind.age) - 1]
+
 				if a:
 					gamma = numpy.random.gamma(a, b)
 					ind.rep_succ = gamma
