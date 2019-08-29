@@ -321,14 +321,14 @@ IX. starting the program
 
     1. If you installed the Anaconda3 python distribution,
        then, at an Anaconda prompt, start the program with the command,
-       "agestrucne."  
+       "agestrucnb"  
 
         A. Note that when you open the program, the current directory of your
            terminal will determine where the file-loading dialog will be initially
            set, as you locate, for example, a configuration file to load into
            the simulation interface.
     
-    2. In addition to "agestrucne,"  there are two python scripts that offer 
+    2. In addition to the "agestrucnb" command, there are two python scripts that offer 
        ways to run simulations and LDNe estimations from a terminal command prompt. 
 
         A. Command "pgdrivesimulation.py" performs simulations from the
