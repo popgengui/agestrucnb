@@ -3,16 +3,16 @@ I. overview
 
     For more details about the program, see the manual.pdf file distributed
     with the program. Briefly, our program is a GUI front end that incorporates the
-    simulation and LDNe based population genetics functions provided by Tiago
+    simulation and LDNe-based population genetics functions provided by Tiago
     Antao's python program at https://github.com/tiagoantao/agestructurene.git,
     enhanced by multiple methods for population and loci subsampling when performing
-    LD-based Ne and Nb estimations from genepop file inputs. It also provides
+    LD-based Nb estimations from genepop file inputs. It also provides
     plotting facilities to show estimate distributions and regression lines.
 
     The program uses multi-processing to allow an arbitrary number of
-    simultaneous simulations, LD-based Nb and Ne estimations, and plotting
+    simultaneous simulations, LD-based Nb estimations, and plotting
     interfaces.  Further, within simulations, it can run simulation replicates
-    simultaneously, and, within Ne or Nb estimation sessions, it allows
+    simultaneously, and, within Nb estimation sessions, it allows
     simultaneously running genepop-file population sections. 
 
     The core functionality for simulation is provided by the python simuPOP
@@ -52,7 +52,7 @@ III. quickest installation procedures
                     python --version
 
                c. if the version is 3.4 or more, you have a version
-                  compatible with agestrucne
+                  compatible with agestrucnb
 
           ii. In Windows, a python distribution is not always accessible
               from a command prompt. If you're not sure whether
@@ -73,7 +73,7 @@ III. quickest installation procedures
 
                conda config --add channels conda-forge
                conda install simupop
-               pip install agestrucne
+               pip install agestrucnb
 
     3. If python 3 (3.5 or greater) is already on your computer
 
@@ -83,12 +83,12 @@ III. quickest installation procedures
              has supplied an alias for pip, "pip3", to distinguish
              it from the pip installed for a python2 distribution):
 
-                 pip3 install agestrucne
+                 pip3 install agestrucnb
 
              a. Note for Linux users:  to install into your default 
                 python location you may need to issue the command as a super user:
 
-                 sudo pip3 install agestrucne
+                 sudo pip3 install agestrucnb
 
                  and supply the sudo password.
 
@@ -120,7 +120,7 @@ IV. Notes about known installation problems
            package took a long time compiling but was successful.
 
         b. Using the Mac OS installation of python3 available at
-           python.org, the pip install agestrucne fails, unless
+           python.org, the pip install agestrucnb fails, unless
            the SSL/TLS cerificate validation command is executed
            after the installation.  Please see the installation
            messages and the notes for Mac users at
@@ -340,7 +340,7 @@ IX. starting the program
 X. using the program    
 ---------------------
 
-    To run a simulation, calculate Nb or Ne estimates, or plot results, load one
+    To run a simulation, calculate Nb estimates, or plot results, load one
     of the three interfaces by clicking "New" on the main menu.
 
     For details about running the different interfaces, see the

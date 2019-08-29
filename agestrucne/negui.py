@@ -88,7 +88,7 @@ def confirm_resources( s_life_table_glob, s_menu_config, s_param_name_file_dir )
 #end confirm_resources
 
 def get_title( s_startup_info_file ):
-	s_progname="Age Structure Ne"
+	s_progname="Age Structure Nb"
 	s_version="unspecified"
 	s_python_version=pgut.get_python_version()
 	

@@ -36,7 +36,7 @@ def get_version():
 #end get_version
 
 setup(
-    name = 'agestrucne',
+    name = 'agestrucnb',
     packages = [ 'agestrucne', 'agestrucne/asnviz' ],
     version = get_version(),     
 	license = 'AGPLv3',
@@ -59,7 +59,7 @@ setup(
 						'pyttk;python_version=="2.7"',
 						'simupop;python_version>="3.0"' ],
 	python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*,<=4',
-	entry_points={ 'console_scripts': [ 'agestrucne=agestrucne.negui:negui_main' ] },
+	entry_points={ 'console_scripts': [ 'agestrucnb=agestrucne.negui:negui_main' ] },
 	scripts=[ 'agestrucne/pgdriveneestimator.py', 'agestrucne/pgdrivesimulation.py' ]
 )
 
