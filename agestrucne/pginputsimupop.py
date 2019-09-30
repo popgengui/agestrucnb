@@ -93,7 +93,15 @@ class PGInputSimuPop( object ):
 	to "maintain_distribution"
 	'''
 #	CONST_CULL_METHOD_EQUAL_SEX_RATIOS="equal_sex_ratio"
-	CONST_CULL_METHOD_EQUAL_SEX_RATIOS="maintain_distribution"
+
+	'''
+	2019_09_29.  Per Gordon we make anotherj revision, changing
+	this cull method's name to "maintain_nb_distribution".   We'll
+	leave the old name in some of the original conf files, and
+	make the change as we load it:
+	'''
+	CONST_CULL_METHOD_EQUAL_SEX_RATIOS_NAME_DEPRECATED="maintain_distribution"
+	CONST_CULL_METHOD_EQUAL_SEX_RATIOS="maintain_nb_distribution"
 
 	def __init__( self, s_config_file = None, o_model_resources = None, o_param_names=None ):
 		'''
@@ -549,12 +557,21 @@ class PGInputSimuPop( object ):
 			2017_04_05.  This is a correction for old configuration
 			files that were using the old default startSave value 
 			of 0 (now default is 1).
+
+			2019_09_24.  Note that for the config files that
+			had the old zero value, we will now use the new
+			default, of using the burn-in cycle number as the
+			first start-save cycle (and, we will reset the orig
+			conf files to set startSave to zero, to enable this
+			test, which will result in this mod calculating the
+			new default):
 			'''
 			if self.startSave==0:
-				self.startSave=1
+				self.__set_start_save_using_start_lambda()
 			#end if startsave is zero
 
 		else:
+
 			'''
 			2017_04_05.  As we re-activate the startSave feature,
 			with a control on the GUI interface, we now use 1-indexed
@@ -563,8 +580,14 @@ class PGInputSimuPop( object ):
 			then test that the current gen is >= startSave.  Thus, the 
 			default startSave, to record all cycles, is now 1 instead 
 			of zero.
+
+			2019_09_24.  Gordon requests we set the default
+			startSave (i.e. first cycle to save to genepop)
+			to equal the burn-in number of cycles, instead of 
+			our former default of 1.
 			'''
-			self.startSave = 1
+			self.__set_start_save_using_start_lambda()
+
 		#end if config has startSave
 
 		self.__update_attribute_config_file_info( "startSave", "sim", "startSave" )
@@ -610,8 +633,15 @@ class PGInputSimuPop( object ):
 			"equal_sex_ratio" to "maintain_distribution"  In order 
 			to avoid a validation error when we load old(er) configuration
 			files, we do the conversion:
+
+			2019_09_29.  We make another revision to the method name,
+			(see CONST declarations above), and so also check for
+			the 2nd name, and if found use the most recent (only valid)
+			name.
 			'''
 			if self.cull_method=="equal_sex_ratio":
+				self.cull_method=PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS
+			elif self.cull_method==PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS_NAME_DEPRECATED:
 				self.cull_method=PGInputSimuPop.CONST_CULL_METHOD_EQUAL_SEX_RATIOS
 			#end if config file has old name for alt cull method
 		else:
@@ -814,6 +844,25 @@ class PGInputSimuPop( object ):
 				 
 		return
 	#end __reset_start_lambda_using_ages
+
+	def __set_start_save_using_start_lambda( self ):
+		'''
+		2019_09_24.  Gordon requests we set the default
+		startSave (i.e. first cycle to save to genepop)
+		to equal the burn-in number of cycles.
+		'''
+		s_errmsg="In PGInputSimuPop instance " \
+						+ "def __set_start_save_using_start_lambda, " \
+						+ "no \"startLambda\" value found.  The program " \
+						+ "needs a startLambda (burn-in) value in order " \
+						+ "to set the startSave value."
+
+		assert self.startLambda 
+
+		self.startSave=self.startLambda
+
+		return
+	#end __set_start_save_using_start_lambda
 
 	def __compute_n0_from_eff_size_info( self ):
 
