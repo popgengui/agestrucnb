@@ -153,10 +153,10 @@ V. getting the manual and the example configuration files
        "cd" into a suitable directory, and clone the data branch with,
        the command:
 
-           git clone -b data https://github.com/popgengui/agestrucne
+           git clone -b data https://github.com/popgengui/agestrucnb
 
     2. Instead of using git, you can download a zip archive of the 
-       files at https://github.com/popgengui/agestrucne/tree/data.  
+       files at https://github.com/popgengui/agestrucnb/tree/data.  
        You will see a green button on the right side of 
        the screen, offering a download.
 
@@ -230,13 +230,13 @@ VIII. alternative installation methods
         A. Installing without the "pip" installer: 
 
             ii. Clone (using the git program) or download the zip archive from 
-                our master repository at, https://github.com/popgengui/agestrucne.
+                our master repository at, https://github.com/popgengui/agestrucnb.
 
             iii. Use the setup.py file.
 
                  a. If under Widows, with an Anaconda3 python distrubution, open 
                     an Anaconda Prompt window, otherwise open a terminal.
-                 b. use the "cd" command to move to the "agestrucne" directory 
+                 b. use the "cd" command to move to the "agestrucnb" directory 
                     containing the unzipped files, in particular looking for the 
                     "setup.py" file.  Type the following command, leading with "sudo"
 
@@ -261,15 +261,15 @@ VIII. alternative installation methods
            ii.  Download the master branch of our github repository.
 
                 a. clone command:
-                   git clone -b master https://github.com/popgengui/agestrucne
+                   git clone -b master https://github.com/popgengui/agestrucnb
 
-                b. Or get the zip archive at https://github.com/popgengui/agestrucne. 
+                b. Or get the zip archive at https://github.com/popgengui/agestrucnb. 
 
            iii. Run the program directly using a terminal from the downloaded directories 
                 using the applicable one of these methods: 
 
                 a. In Windows, with an Anaconda distribution of python, open an 
-                   Anaconda prompt and use cd, to move into the outermost "agestrucne" 
+                   Anaconda prompt and use cd, to move into the outermost "agestrucnb" 
                    folder in the github repository you downloaded.  
                    Then, type these commands:                   
 
@@ -295,7 +295,7 @@ VIII. alternative installation methods
                    it during the installation.    
 
                 c. In linux or OSX, you can open a terminal and cd into the outermost
-                   "agestrucne" directory of the programs github directories.
+                   "agestrucnb" directory of the programs github directories.
                    Then you can type the following command:
                     
                     export PYTHONPATH=$PYTHONPATH:$(pwd); NEPATH=$(pwd)/agestrucne     
@@ -311,7 +311,7 @@ VIII. alternative installation methods
                 d. Using this method PYTHONPATH and NEPATH variables will need to be 
                     set every time you open a new console to run the program. If you 
                     are conversant with setting environmental variables for your user 
-                    environment, you can add the agestrucne path to the PYTHONPATH 
+                    environment, you can add the agestrucnb path to the PYTHONPATH 
                     path, and NEPATH to your
                     environment so that they are available automatically when you open 
                     a console windows.
